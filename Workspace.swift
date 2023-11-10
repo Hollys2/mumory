@@ -4,9 +4,9 @@ let workspace = Workspace(
   name: "MUMORY",
   projects: [
     "Projects/App",
-//    "Projects/Core",
-//    "Projects/Feature",
-//    "Projects/Shared",
+    "Projects/Core",
+    "Projects/Feature",
+    "Projects/Shared",
   ]
 )
 
