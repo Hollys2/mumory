@@ -10,8 +10,9 @@ let project = Project(name: "Shared",
                                        product: .framework,
                                        bundleId: Project.bundleId + ".shared",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
+                                       infoPlist: .default,
                                        sources: ["Sources/**"],
-                                       resources: ["Resources/**"],
+//                                       resources: ["Resources/**"],
                                        dependencies: [
                                        ])
                       ])
