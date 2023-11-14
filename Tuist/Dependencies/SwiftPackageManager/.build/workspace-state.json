@@ -1,0 +1,416 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "packageRef" : {
+          "identity" : "abseil-cpp-binary",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/abseil-cpp-binary.git",
+          "name" : "abseil"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/abseil-cpp-binary/abseil.xcframework",
+        "source" : {
+          "checksum" : "15d896b7fd5dea5982594327bd2759a6ef6863a14d6aa6ffb72957f4064569ba",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/bin/abseil/1.2022062300.0/abseil.zip"
+        },
+        "targetName" : "abseil"
+      },
+      {
+        "packageRef" : {
+          "identity" : "firebase-ios-sdk",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/firebase/firebase-ios-sdk.git",
+          "name" : "Firebase"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/firebase-ios-sdk/FirebaseAnalytics.xcframework",
+        "source" : {
+          "checksum" : "94a559d3801a445802c4bc6e6a50b283eff7dd25f8994e63a06589dbb6c18bdf",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/swiftpm/10.17.0/FirebaseAnalytics.zip"
+        },
+        "targetName" : "FirebaseAnalytics"
+      },
+      {
+        "packageRef" : {
+          "identity" : "firebase-ios-sdk",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/firebase/firebase-ios-sdk.git",
+          "name" : "Firebase"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/firebase-ios-sdk/FirebaseFirestoreInternal.xcframework",
+        "source" : {
+          "checksum" : "9102f56ad70d97c8ad81b1047fc38bbbacde672eb86d861b19c454829210cd55",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/bin/firestore/10.17.0/FirebaseFirestoreInternal.zip"
+        },
+        "targetName" : "FirebaseFirestoreInternal"
+      },
+      {
+        "packageRef" : {
+          "identity" : "googleappmeasurement",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/GoogleAppMeasurement.git",
+          "name" : "GoogleAppMeasurement"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/googleappmeasurement/GoogleAppMeasurementOnDeviceConversion.xcframework",
+        "source" : {
+          "checksum" : "fbd58c6f1f6b48a0a85243193bd6a30e7e6a41c7855d688b3df6807635c0de7b",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/swiftpm/10.17.0/GoogleAppMeasurementOnDeviceConversion.zip"
+        },
+        "targetName" : "GoogleAppMeasurementOnDeviceConversion"
+      },
+      {
+        "packageRef" : {
+          "identity" : "googleappmeasurement",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/GoogleAppMeasurement.git",
+          "name" : "GoogleAppMeasurement"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/googleappmeasurement/GoogleAppMeasurementIdentitySupport.xcframework",
+        "source" : {
+          "checksum" : "b5a02b5484dac5fe495f6a08e263d8b70d8de14dd07e25bb717cd655a6fe4122",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/swiftpm/10.17.0/GoogleAppMeasurementIdentitySupport.zip"
+        },
+        "targetName" : "GoogleAppMeasurementIdentitySupport"
+      },
+      {
+        "packageRef" : {
+          "identity" : "googleappmeasurement",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/GoogleAppMeasurement.git",
+          "name" : "GoogleAppMeasurement"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/googleappmeasurement/GoogleAppMeasurement.xcframework",
+        "source" : {
+          "checksum" : "730604f84d3f775a9b8566109a15b0b4d392cfe5b6e6074f5b1e3076d267f99b",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/swiftpm/10.17.0/GoogleAppMeasurement.zip"
+        },
+        "targetName" : "GoogleAppMeasurement"
+      },
+      {
+        "packageRef" : {
+          "identity" : "grpc-binary",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/grpc-binary.git",
+          "name" : "gRPC"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/grpc-binary/gRPC-C++.xcframework",
+        "source" : {
+          "checksum" : "7c7e3568804b96cef83184f897a1d11fea753818a6644c9704b3b14be44507e2",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/bin/grpc/1.49.1/gRPC-C++.zip"
+        },
+        "targetName" : "gRPC-C++"
+      },
+      {
+        "packageRef" : {
+          "identity" : "grpc-binary",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/grpc-binary.git",
+          "name" : "gRPC"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/grpc-binary/BoringSSL-GRPC.xcframework",
+        "source" : {
+          "checksum" : "7ba45f311a17a8b613f96316595f395c76eb7439117f958eba3735caa55e0fd7",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/bin/grpc/1.44.0/BoringSSL-GRPC.zip"
+        },
+        "targetName" : "BoringSSL-GRPC"
+      },
+      {
+        "packageRef" : {
+          "identity" : "grpc-binary",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/grpc-binary.git",
+          "name" : "gRPC"
+        },
+        "path" : "/Users/solda/Desktop/mumory/Tuist/Dependencies/SwiftPackageManager/.build/artifacts/grpc-binary/gRPC-Core.xcframework",
+        "source" : {
+          "checksum" : "ac70d546ec00500ed62e353623f33f469738826c33c1711127c1ced7ba0a003e",
+          "type" : "remote",
+          "url" : "https://dl.google.com/firebase/ios/bin/grpc/1.49.1/gRPC-Core.zip"
+        },
+        "targetName" : "gRPC-Core"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "abseil-cpp-binary",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/abseil-cpp-binary.git",
+          "name" : "abseil"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "bfc0b6f81adc06ce5121eb23f628473638d67c5c",
+            "version" : "1.2022062300.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "abseil-cpp-binary"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "alamofire",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/Alamofire/Alamofire.git",
+          "name" : "Alamofire"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "3dc6a42c7727c49bf26508e29b0a0b35f9c7e1ad",
+            "version" : "5.8.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "Alamofire"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "firebase-ios-sdk",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/firebase/firebase-ios-sdk.git",
+          "name" : "Firebase"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "8872dbd7d947acf757abab933da10e83c1842280",
+            "version" : "10.17.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "firebase-ios-sdk"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "googleappmeasurement",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/GoogleAppMeasurement.git",
+          "name" : "GoogleAppMeasurement"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "6b332152355c372ace9966d8ee76ed191f97025e",
+            "version" : "10.17.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "GoogleAppMeasurement"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "googledatatransport",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/GoogleDataTransport.git",
+          "name" : "GoogleDataTransport"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "aae45a320fd0d11811820335b1eabc8753902a40",
+            "version" : "9.2.5"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "GoogleDataTransport"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "googleutilities",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/GoogleUtilities.git",
+          "name" : "GoogleUtilities"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "f6532c8d65f8308cfdf2288cbe1971a509822680",
+            "version" : "7.12.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "GoogleUtilities"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "grpc-binary",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/grpc-binary.git",
+          "name" : "gRPC"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "a673bc2937fbe886dd1f99c401b01b6d977a9c98",
+            "version" : "1.49.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "grpc-binary"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "gtm-session-fetcher",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/gtm-session-fetcher.git",
+          "name" : "GTMSessionFetcher"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "d415594121c9e8a4f9d79cecee0965cf35e74dbd",
+            "version" : "3.1.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "gtm-session-fetcher"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "interop-ios-for-google-sdks",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/interop-ios-for-google-sdks.git",
+          "name" : "InteropForGoogle"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "2d12673670417654f08f5f90fdd62926dc3a2648",
+            "version" : "100.0.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "interop-ios-for-google-sdks"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "leveldb",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/firebase/leveldb.git",
+          "name" : "leveldb"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "9d108e9112aa1d65ce508facf804674546116d9c",
+            "version" : "1.22.3"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "leveldb"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "moya",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/Moya/Moya.git",
+          "name" : "Moya"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "c263811c1f3dbf002be9bd83107f7cdc38992b26",
+            "version" : "15.0.3"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "Moya"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "nanopb",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/firebase/nanopb.git",
+          "name" : "nanopb"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "819d0a2173aff699fb8c364b6fb906f7cdb1a692",
+            "version" : "2.30909.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "nanopb"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "promises",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/google/promises.git",
+          "name" : "Promises"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "e70e889c0196c76d22759eb50d6a0270ca9f1d9e",
+            "version" : "2.3.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "promises"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "reactiveswift",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ReactiveCocoa/ReactiveSwift.git",
+          "name" : "ReactiveSwift"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "c43bae3dac73fdd3cb906bd5a1914686ca71ed3c",
+            "version" : "6.7.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "ReactiveSwift"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "rxswift",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ReactiveX/RxSwift.git",
+          "name" : "RxSwift"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "9dcaa4b333db437b0fbfaf453fad29069044a8b4",
+            "version" : "6.6.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "RxSwift"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "swift-protobuf",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/apple/swift-protobuf.git",
+          "name" : "SwiftProtobuf"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "07f7f26ded8df9645c072f220378879c4642e063",
+            "version" : "1.25.1"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "swift-protobuf"
+      }
+    ]
+  },
+  "version" : 5
+}

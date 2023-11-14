@@ -14,5 +14,6 @@ let project = Project(name: "Shared",
                                        sources: ["Sources/**"],
 //                                       resources: ["Resources/**"],
                                        dependencies: [
+                                        
                                        ])
                       ])

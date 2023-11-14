@@ -15,6 +15,6 @@ let project = Project(name: "Feature",
 //                                       resources: ["Resources/**"],
                                        dependencies: [
                                         .project(target: "Core", path: "../Core"),
-                                        .external(name: "FirebaseFirestore")
+                                        .project(target: "Shared", path: "../Shared"),
                                        ])
                       ])

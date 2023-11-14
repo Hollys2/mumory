@@ -8,12 +8,16 @@
 
 
 import SwiftUI
+import MapKit
 import MusicKit
-//import Core
-import FirebaseCore
-import FirebaseFirestore
+import Core
 
 public struct HomeView: View {
+    
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
+    )
     
     public init(){
         
@@ -23,11 +27,12 @@ public struct HomeView: View {
         HStack{
             Text("This is Home")
             Button("Load Songs", action: loadSongs)
+            Map(coordinateRegion: $region)
         }
     }
     
     //    let db = Firestore.firestore()
-    let db = FirestoreManager.shared.db
+    let db = FirebaseManager.shared.db
     
     
     private func saveMusic() {

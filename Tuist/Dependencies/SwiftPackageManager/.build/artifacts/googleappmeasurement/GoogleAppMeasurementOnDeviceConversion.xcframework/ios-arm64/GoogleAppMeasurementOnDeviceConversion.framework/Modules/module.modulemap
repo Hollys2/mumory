@@ -1,0 +1,5 @@
+framework module GoogleAppMeasurementOnDeviceConversion {
+  export *
+  link framework "CoreFoundation"
+  link framework "Foundation"
+}

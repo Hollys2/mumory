@@ -6,15 +6,15 @@
 //  Copyright © 2023 hollys. All rights reserved.
 //
 
+
 import SwiftUI
-//import App
+import Core
 
 public struct AuthView: View {
     
-    let db = FirestoreManager.shared.db
+    let db = FirebaseManager.shared.db
     
     public init() {
-        // Your initializations here
     }
     
     public var body: some View {

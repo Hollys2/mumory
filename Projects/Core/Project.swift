@@ -14,6 +14,8 @@ let project = Project(name: "Core",
                                        sources: ["**/Sources/**"],
 //                                       resources: ["Resources/**"],
                                        dependencies: [
-                                        .external(name: "FirebaseFirestore")
+                                        .external(name: "Moya"),
+                                        .external(name: "FirebaseAuth"),
+                                        .external(name: "FirebaseFirestore"),
                                        ])
                       ])
