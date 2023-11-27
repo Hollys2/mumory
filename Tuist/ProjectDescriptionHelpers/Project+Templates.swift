@@ -79,7 +79,7 @@ extension Project {
     public static let bundleId: String = "com.hollys.mumory"
     public static let appStoreVersion: String = "1.0"
     public static let bundleVersion: String = "1.0.0"
-    public static let iOSTargetVersion: String = "15.0"
+    public static let iOSTargetVersion: String = "16.0"
     
     
     public static func makeConfiguration() -> [Configuration] {

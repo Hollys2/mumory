@@ -1,20 +1,18 @@
 import SwiftUI
 import MusicKit
-
-import Feature
 import Shared
+import Feature
 
 @main
 struct MumoryApp: App {
-    
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    var nowPlaySong = NowPlaySong()
 
     var body: some Scene {
         WindowGroup {
             VStack{
-                AuthView()
-                HomeView()
-                SampleView()
+                LibraryView()
+                    .environmentObject(nowPlaySong)
             }
         }
     }
