@@ -4,7 +4,6 @@ import ProjectDescriptionHelpers
 let project = Project(name: "Shared",
                       organizationName: "hollys",
                       packages: [],
-//                      settings: Settings.settings(configurations: Project.makeConfiguration() ),
                       targets: [Target(name: "Shared",
                                        platform: .iOS,
                                        product: .framework,
@@ -12,7 +11,8 @@ let project = Project(name: "Shared",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .default,
                                        sources: ["Sources/**"],
-//                                       resources: ["Resources/**"],
+                                       resources: ["Resources/**"],
                                        dependencies: [
+                                        
                                        ])
                       ])

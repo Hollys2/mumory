@@ -4,7 +4,6 @@ import ProjectDescriptionHelpers
 let project = Project(name: "Feature",
                       organizationName: "hollys",
                       packages: [],
-//                      settings: Settings.settings(configurations: Project.makeConfiguration() ),
                       targets: [Target(name: "Feature",
                                        platform: .iOS,
                                        product: .framework,
@@ -12,9 +11,10 @@ let project = Project(name: "Feature",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .default,
                                        sources: ["**/Sources/**"],
-//                                       resources: ["Resources/**"],
+//                                       resources: ["**/Resources/**"],
                                        dependencies: [
                                         .project(target: "Core", path: "../Core"),
-                                        .external(name: "FirebaseFirestore")
+                                        .project(target: "Shared", path: "../Shared"),
+                                        
                                        ])
                       ])

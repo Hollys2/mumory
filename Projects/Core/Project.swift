@@ -11,9 +11,11 @@ let project = Project(name: "Core",
                                        bundleId: Project.bundleId + ".core",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .default,
-                                       sources: ["**/Sources/**"],
+                                       sources: ["Sources/**"],
 //                                       resources: ["Resources/**"],
                                        dependencies: [
-                                        .external(name: "FirebaseFirestore")
+                                        .external(name: "Moya"),
+                                        .external(name: "FirebaseAuth"),
+                                        .external(name: "FirebaseFirestore"),
                                        ])
                       ])
