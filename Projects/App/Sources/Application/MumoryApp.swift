@@ -1,11 +1,5 @@
 import SwiftUI
 import Feature
-import Shared
-import MusicKit
-//import Moya
-//import Firebase
-import FirebaseCore
-import FirebaseFirestore
 
 @main
 struct MumoryApp: App {
@@ -14,12 +8,8 @@ struct MumoryApp: App {
     
     var body: some Scene {
         WindowGroup {
-            VStack{
-                AuthView()
-                HomeView()
-            }
+            HomeView()
+//                .ignoresSafeArea()
         }
     }
 }
-
-
