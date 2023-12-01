@@ -20,16 +20,17 @@ public struct RecentMusicItem: View {
             AsyncImage(url: song.artwork?.url(width: 1000, height: 1000), content: { image in
                 image
                     .resizable()
-                    .frame(width: 163, height: 163)
                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
             }, placeholder: {
-                //
+                ProgressView()
             })
+            .frame(width: 105, height: 105)
+
             
                 
             Text(song.title)
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                .frame(width: 163, alignment: .leading)
+                .frame(width: 105, alignment: .leading)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .foregroundStyle(.white)
@@ -37,7 +38,7 @@ public struct RecentMusicItem: View {
             Text(song.artistName)
                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                 .foregroundStyle(LibraryColorSet.lightGrayTitle)
-                .frame(width: 163, alignment: .leading)
+                .frame(width: 105, alignment: .leading)
                 .lineLimit(1)
                 .truncationMode(.tail)
             

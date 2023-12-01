@@ -53,7 +53,6 @@ public struct MyRecentMusicView: View {
                                 }
                         }
                     })
-                    .frame(maxHeight: 210) //iphone15 기준 잘리지 않는 높이
                     .padding(.leading, 20)
                     .padding(.top, 26)
                 }

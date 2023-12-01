@@ -43,7 +43,9 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
         super.viewDidLoad()
         
         scrollView.delegate = self
-                
+        
+//        print("view width: \(view.frame.width), height: \(view.frame.height)")
+        
         self.view.addSubview(self.scrollView)
         self.pinEdges(of: self.scrollView, to: self.view)
 
@@ -52,6 +54,7 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
 
+        hostingController.view.backgroundColor = .purple
     }
 
     func pinEdges(of viewA: UIView, to viewB: UIView) {
@@ -65,15 +68,15 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
     }
     
     //scroll view delegate
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if (scrollView.contentOffset.x.truncatingRemainder(dividingBy: 350)) > (350/2) {
-//            scrollView.contentOffset.x = 0
-        }
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        print("scrollview decelerating")
-    }
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        if (scrollView.contentOffset.x.truncatingRemainder(dividingBy: 350)) > (350/2) {
+////            scrollView.contentOffset.x = 0
+//        }
+//    }
+//    
+//    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+//        print("scrollview decelerating")
+//    }
     
     
 }

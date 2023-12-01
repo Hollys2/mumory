@@ -47,23 +47,24 @@ public struct RecommendationView: View {
                 .padding(20)
                 .padding(.top, 6)
                 
-//                UIScrollViewWrapper { //paging 구현을 위해 uiscrollview 사용. 오류때문에 잠시 스유 스크롤뷰 사용중
+                //최신 곡 순위
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
                             let rank = index + 1
-                            MusicChartItem(rank: rank, song: song)
-                                .frame(width: 330)
+                            MusicChartItem(rank: rank, song: song) //순위 곡 item
+                                .frame(width: 330, alignment: .leading)
                                 .onTapGesture {
                                     nowPlaySong.song = song
                                 }
                         }
                     })
-                    .scrollTargetLayout()
                 }
-                .scrollTargetBehavior(.viewAligned)
-//                }
+                .scrollIndicators(.hidden)
+                
+                
+
                 
                 Spacer()
             })
@@ -75,34 +76,27 @@ public struct RecommendationView: View {
         
     }
     
-    struct ScrollOffsetKey: PreferenceKey {
-        static var defaultValue: CGFloat = .zero
-        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-            value += nextValue()
-        }
-    }
-    
     private func searchChart(offset: Int){
      
         
         //offset: 시작하는 수. 20 입력시 20등부터 40등까지 보여줌(no limit)
         Task {
-//            let authRequest = await MusicAuthorization.request()
-//            
-//            switch(authRequest){
-//            case .authorized:
-//                do{
-//                    print("허락됨")
-//                    let request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-//                    let response = try await request.response()
-//                    print("검색 성공")
-//                }catch{
-//                    print("search error")
-//                }
-//                
-//            default:
-//                print("안됨")
-//            }
+            let authRequest = await MusicAuthorization.request()
+            
+            switch(authRequest){
+            case .authorized:
+                do{
+                    print("허락됨")
+                    let request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
+                    let response = try await request.response()
+                    print("검색 성공")
+                }catch{
+                    print("search error")
+                }
+                
+            default:
+                print("안됨")
+            }
             
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
             request.offset = offset

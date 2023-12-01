@@ -22,7 +22,7 @@ public struct LibraryView: View {
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
             VStack(spacing: 0, content: {
-                ScrollView(.vertical) {
+//                ScrollView(.vertical) {
                     HStack(spacing: 6, content: {
                         Button(action: {
                             isTapMyMusic = true
@@ -60,13 +60,12 @@ public struct LibraryView: View {
     //                FeatureAsset.Asset1.next.swiftUii
                 
                     SwitchView(isMyMusic: isTapMyMusic)
-                        .frame(height: 700)
                         .environmentObject(nowPlaySong)
     
                     
                     
                     Spacer()
-                }
+//                }
                 
             })
             
@@ -106,8 +105,9 @@ struct SwitchView: View{
 
     var body: some View{
         if isMyMusic{
-            MyRecentMusicView()
-                .environmentObject(nowPlaySong)
+//            MyRecentMusicView()
+//                .environmentObject(nowPlaySong)
+            MyPlaylistView()
         }else{
             RecommendationView()
                 .environmentObject(nowPlaySong)
