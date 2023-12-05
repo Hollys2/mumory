@@ -17,6 +17,7 @@ let project = Project(name: "App",
                                        dependencies: [
                                         .project(target: "Feature", path: "../Feature"),
                                         .project(target: "Shared", path: "../Shared"),
+
                                        ])
                       ])
 

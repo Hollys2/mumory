@@ -31,12 +31,14 @@ public struct HomeView: View {
     @State private var isSheetAnimating = false
     
     @StateObject private var viewModel = HomeViewModel()
+
     
     public init(){
         
     }
     
     public var body: some View {
+
         ZStack {
             VStack(spacing: 0) {
                 switch selectedTab {
@@ -139,9 +141,11 @@ public struct HomeView: View {
 //                    isBottomSheetShown = newValue  // isBottomSheetShown 변수 업데이트
 //                }
 
+
         }
     }
 }
+
 
 //        Map(coordinateRegion: $region, showsUserLocation: true, userTrackingMode: )
 //                .onAppear {
@@ -221,3 +225,4 @@ struct HomeView_Previews: PreviewProvider {
         HomeView()
     }
 }
+

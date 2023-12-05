@@ -100,3 +100,4 @@ final class HomeViewModel: NSObject, ObservableObject, CLLocationManagerDelegate
 //        }
 //    }
 }
+

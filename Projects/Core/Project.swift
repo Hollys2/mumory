@@ -1,6 +1,8 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
+
+
 let project = Project(name: "Core",
                       organizationName: "hollys",
                       packages: [],
@@ -12,6 +14,7 @@ let project = Project(name: "Core",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .default,
                                        sources: ["Sources/**"],
+
 //                                       resources: ["Resources/**"],
                                        dependencies: [
                                         .external(name: "Moya"),
