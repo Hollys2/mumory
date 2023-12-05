@@ -48,7 +48,8 @@ public struct RecommendationView: View {
                 .padding(.top, 6)
                 
                 //최신 곡 순위
-                ScrollView(.horizontal) {
+//                UIScrollViewWrapper{
+                    ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
@@ -62,6 +63,11 @@ public struct RecommendationView: View {
                     })
                 }
                 .scrollIndicators(.hidden)
+
+//                .onChange(of: musicChart) { newValue in
+//                    
+//                }
+//                }
                 
                 
 

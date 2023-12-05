@@ -23,7 +23,7 @@ struct PlaylistItem: View {
                 //                    ProgressView()
                 //                }
                 
-                
+//                AsyncDataFetcher()
                 Rectangle()
                     .frame(width: 81, height: 81)
                     .foregroundStyle(.gray)
@@ -67,20 +67,6 @@ struct PlaylistItem: View {
         }
     }
     
-    struct thumbnailImage{
-        var playlist: Playlist = Playlist(name: "", musicList: [])
-        var index = 0
-        var body: some View{
-            Group{
-                if index > playlist.musicList.count{
-                    Rectangle()
-                }else{
-                    Image(systemName: "")
-                }
-            }
-        }
-    }
-    
 //    @ViewBuilder
 //    func getArtWork(index: Int) -> some View {
 //        let listCount = playlist.musicList.count
@@ -118,4 +104,64 @@ struct RoundedCorner: Shape {
     }
 }
 
+//struct Thumbnail: View{
+//    var playlist: Playlist = Playlist(name: "", musicList: [])
+//    var index = 0
+//    var body: some View{
+//        
+//        VStack{
+//            if index > playlist.musicList.count{
+//                Rectangle()
+//            }else{
+//                AsyncImage(url: try await fetchSongInfo(songId: playlist.musicList[index]).artwork?.url(width: 100, height: 100))
+//            }
+//        }
+//    }
+//}
+
+//func fetchSongInfo(songId: String) async throws -> Song {
+//    let musicItemID = MusicItemID(rawValue: songId)
+//    let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+//    let response = try await request.response()
+//    guard let song = response.items.first else {
+//        throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+//    }
+//
+//    let artworkUrl = song.artwork?.url(width: 400, height: 400)
+//    return song
+//}
+
+struct AsyncDataFetcher: View {
+//    @Binding var playlist: Playlist
+//    @Binding var index: Int
+    var completion: (Result<Song, Error>) -> Void
+    init(completion: @escaping (Result<Song, Error>) -> Void) {
+        self.completion = completion
+    }
+
+    var body: some View {
+        // 여기서 비동기 작업을 수행하고 결과를 completion 클로저에 전달
+        Task {
+            do {
+                let result = try await fetchData(songId: "")
+                completion(.success(result))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+
+        // 여기에는 빈 내용을 반환해도 되고, 필요한 경우에는 다른 UI를 표시할 수 있습니다.
+        return EmptyView()
+    }
+
+    func fetchData(songId: String) async throws -> Song {
+        let musicItemID = MusicItemID(rawValue: songId)
+        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        let response = try await request.response()
+        guard let song = response.items.first else {
+            throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+        }
+        return song
+    }
+}
 
