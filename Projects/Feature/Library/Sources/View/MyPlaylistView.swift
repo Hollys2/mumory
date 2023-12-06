@@ -46,6 +46,7 @@ struct MyPlaylistView: View {
                         ForEach(playlistArray, id: \.name) { playlist in
                             PlaylistItem(playlist: playlist)
                                 .frame(minWidth: 163, minHeight: 209)
+                                
                         }
                     })
                     .padding(.leading, 20)
@@ -55,6 +56,8 @@ struct MyPlaylistView: View {
             })
  
             Spacer()
+            
+ 
         }
         .onAppear(perform: {
             getNumberOfPlaylist()
@@ -97,6 +100,8 @@ struct MyPlaylistView: View {
         
     }
 }
+
+
 
 //#Preview {
 //    MyPlaylistView()

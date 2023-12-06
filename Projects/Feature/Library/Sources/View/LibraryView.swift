@@ -11,7 +11,10 @@ import Shared
 import MusicKit
 
 public struct LibraryView: View {
+    @State private var path = NavigationPath()
     @EnvironmentObject var nowPlaySong: NowPlaySong
+//    @EnvironmentObject var setView: SetView
+    @StateObject var setView: SetView = SetView()
     @State var isTapMyMusic: Bool = true
     @State var isPlaying: Bool = true
     
@@ -19,7 +22,7 @@ public struct LibraryView: View {
         
     }
     public var body: some View {
-        NavigationView{
+        NavigationStack{
                 ZStack{
                     LibraryColorSet.background.ignoresSafeArea()
                     VStack(spacing: 0, content: {
@@ -41,6 +44,7 @@ public struct LibraryView: View {
                             
                             Button(action: {
                                 isTapMyMusic = false
+//                                setView.isSearchViewShowing = true
                             }, label: {
                                 Text("추천")
                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
@@ -62,6 +66,7 @@ public struct LibraryView: View {
                         
                         SwitchView(isMyMusic: isTapMyMusic)
                             .environmentObject(nowPlaySong)
+                            .environmentObject(setView)
                             .padding(.top, 40)
                         
                         
@@ -96,15 +101,25 @@ public struct LibraryView: View {
                         }
                     }
                 }
+                .navigationDestination(isPresented: $setView.isSearchViewShowing) {
+                    ArtistView()
+                }
                 
-            }
+                .environmentObject(setView)
+            
         }
+      
+        
+    }
+    
+        
     
     
 }
 
 struct SwitchView: View{
     @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var setView: SetView
     var isMyMusic: Bool = true
 
     var body: some View{
@@ -115,6 +130,7 @@ struct SwitchView: View{
         }else{
             RecommendationView()
                 .environmentObject(nowPlaySong)
+                .environmentObject(setView)
         }
     }
 }

@@ -12,6 +12,10 @@ import MusicKit
 import Core
 
 public struct RecommendationView: View {
+    @State var isShowing: Bool = false
+    @State var isTouch: Bool = false
+    @State private var path = NavigationPath()
+    @EnvironmentObject var setView: SetView
     @EnvironmentObject var nowPlaySong: NowPlaySong
     var rows: [GridItem] = [
         GridItem(.flexible(minimum: 70, maximum: 70)),
@@ -27,58 +31,68 @@ public struct RecommendationView: View {
     }
     
     public var body: some View {
-        ZStack{
-            LibraryColorSet.background.ignoresSafeArea() //임시 배경 색. 나중에 삭제하기
-            Color.clear.ignoresSafeArea()
-            VStack(spacing: 0, content: {
-                HStack(spacing: 0, content: {
-                    Text("최신 인기곡")
-                        .foregroundStyle(.white)
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                    
-                    Spacer()
-                    
-                    NavigationLink {
-                        //
-                    } label: {
-                        SharedAsset.next.swiftUIImage
-                    }
-                })
-                .padding(20)
-                .padding(.top, 6)
-                
-                //최신 곡 순위
-//                UIScrollViewWrapper{
-                    ScrollView(.horizontal) {
-                    LazyHGrid(rows: rows,content: {
-                        ForEach(0 ..< musicChart.count, id: \.self) { index in
-                            let song = musicChart[index]
-                            let rank = index + 1
-                            MusicChartItem(rank: rank, song: song) //순위 곡 item
-                                .frame(width: 330, alignment: .leading)
-                                .onTapGesture {
-                                    nowPlaySong.song = song
-                                }
+            ZStack{
+                LibraryColorSet.background.ignoresSafeArea() //임시 배경 색. 나중에 삭제하기
+                Color.clear.ignoresSafeArea()
+                VStack(spacing: 0, content: {
+                    HStack(spacing: 0, content: {
+                        Text("최신 인기곡")
+                            .foregroundStyle(.white)
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        
+                        Spacer()
+                        
+                        NavigationLink {
+                            //
+                        } label: {
+                            SharedAsset.next.swiftUIImage
                         }
                     })
-                }
-                .scrollIndicators(.hidden)
+                    .padding(20)
+                    .padding(.top, 6)
+                    
+                    //최신 곡 순위
+    //                UIScrollViewWrapper{
+                        ScrollView(.horizontal) {
+                        LazyHGrid(rows: rows,content: {
+                            ForEach(0 ..< musicChart.count, id: \.self) { index in
+                                let song = musicChart[index]
+                                let rank = index + 1
+                                
+                                MusicChartItem(rank: rank, song: song) //순위 곡 item
+                                    .frame(width: 330, alignment: .leading)
+                                    .onTapGesture {
+                                        nowPlaySong.song = song
+                                        isShowing = true
+                                    }
+                                    .sheet(isPresented: $isShowing, content: {
+                                        bottomView(isTouch: $isShowing)
+                                            .presentationDragIndicator(.visible)
+                                            .presentationDetents([.fraction(0.5)])
+                                            .environmentObject(setView)
+    
+                                    })
+                                
+                            }
+                        })
+                    }
+                    .scrollIndicators(.hidden)
 
-//                .onChange(of: musicChart) { newValue in
-//                    
-//                }
-//                }
-                
-                
+    //                .onChange(of: musicChart) { newValue in
+    //
+    //                }
+    //                }
+                    
+                    
 
+                    
+                    Spacer()
+                })
+                .onAppear(perform: {
+                    searchChart(offset: 0)
+                })
                 
-                Spacer()
-            })
-            .onAppear(perform: {
-                searchChart(offset: 0)
-            })
-        }
-        
+            }
         
     }
     
@@ -121,7 +135,26 @@ public struct RecommendationView: View {
     }
 }
 
+struct bottomView: View{
+    @State var height: CGFloat = 300
+    @Binding var isTouch: Bool
+    @EnvironmentObject var setView: SetView
 
+    var body: some View{
+        GeometryReader(content: { geometry in
+            VStack{
+                Text("아티스트페이지로 이동")
+                    .onTapGesture {
+                        setView.isSearchViewShowing = true
+                        isTouch = false
+                        print("tap 탭탭탭")
+                        print("set view isShowing: \(setView.isSearchViewShowing)")
+                    }
+            }
+            .frame(width: geometry.size.width, height: height)
+        })
+    }
+}
 
 //#Preview {
 //    RecommendationView()

@@ -76,7 +76,8 @@ struct SearchView: View {
             }
         }
         .navigationBarBackButtonHidden()
-    }    
+        .background(.black)
+    }
 
     
     private func searchPlaceHolder() -> Text {

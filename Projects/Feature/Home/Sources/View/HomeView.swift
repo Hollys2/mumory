@@ -95,13 +95,13 @@ public struct HomeView: View {
                 case .social:
                     Text("The Second Tab")
                 case .library:
-                    Text("The Third Tab")
+                    LibraryView()
                 case .notification:
                     VStack(spacing: 0){
                         Color.red
                         Color.blue
                     }
-                        .ignoresSafeArea()
+                    .ignoresSafeArea()
                 }
                 Spacer(minLength: 0) // 추후 수정
                 HomeTabView(selectedTab: $selectedTab, isBottomSheetShown: $isBottomSheetShown)
