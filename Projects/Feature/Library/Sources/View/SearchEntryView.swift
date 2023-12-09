@@ -10,6 +10,9 @@ import SwiftUI
 import Shared
 
 struct SearchEntryView: View {
+    @EnvironmentObject var recentSearchObject: RecentSearchObject
+//    @State var recentSearchList: [String] = []
+
     var body: some View {
         ScrollView{
             VStack(spacing: 15){
@@ -43,11 +46,17 @@ struct SearchEntryView: View {
                         Text("전체삭제")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .onTapGesture {
+                                let userDefault = UserDefaults.standard
+                                userDefault.removeObject(forKey: "recentSearchList")
+                                recentSearchObject.recentSearchList = []
+                            }
                     }
                     
                     LazyVStack(content: {
-                        ForEach(1...5, id: \.self) { count in
-                            RecentSearchItem(title: "검색어 \(count)")
+                        ForEach(recentSearchObject.recentSearchList, id: \.self) { string in
+                            RecentSearchItem(title: string)
+                                .environmentObject(recentSearchObject)
                         }
                     })
                     .padding(.top, 25)
@@ -99,9 +108,14 @@ struct SearchEntryView: View {
                 
             }
         }
+        .onAppear(perform: {
+            let userDefault = UserDefaults.standard
+            guard let result = userDefault.value(forKey: "recentSearchList") as? [String] else {print("no recent list");return}
+            recentSearchObject.recentSearchList = result
+        })
     }
 }
 
-#Preview {
-    SearchEntryView()
-}
+//#Preview {
+//    SearchEntryView()
+//}

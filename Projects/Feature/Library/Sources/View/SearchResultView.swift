@@ -11,6 +11,7 @@ import Shared
 import MusicKit
 
 struct SearchResultView: View {
+    @EnvironmentObject var recentSearchObject: RecentSearchObject
     @Binding var term: String
     @State var musicList: MusicItemCollection<Song> = []
     @State var albumList: MusicItemCollection<Album> = []
@@ -35,11 +36,21 @@ struct SearchResultView: View {
                 
                 LazyVStack(content: {
                     ForEach(artistList){ artist in
+                        
                         NavigationLink {
                             //가수 페이지로 넘어가기
                         } label: {
                             SearchArtistItem(artist: artist)
+                                .gesture(TapGesture().onEnded({ void in
+                                    print("tap item")
+                                    let userDefault = UserDefaults.standard
+                                    var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                    recentSearchList.removeAll(where: {$0 == artist.name})
+                                    recentSearchList.insert(artist.name, at: 0)
+                                    userDefault.set(recentSearchList, forKey: "recentSearchList")
+                                }))
                         }
+                        
                     }
                 })
                 
@@ -51,14 +62,24 @@ struct SearchResultView: View {
                 
                 LazyVStack(content: {
                     ForEach(musicList){ music in
-                        NavigationLink {
-                            //곡 눌렀을 때 동작
-                        } label: {
+                        NavigationLink{
+                            
+                        }label: {
                             SearchSongItem(song: music)
                         }
+                        .gesture(TapGesture().onEnded({ void in
+                            print("tap item")
+                            let userDefault = UserDefaults.standard
+                            var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                            recentSearchList.removeAll(where: {$0 == music.title})
+                            recentSearchList.insert(music.title, at: 0)
+                            userDefault.set(recentSearchList, forKey: "recentSearchList")
+                        }))
+                        
                     }
-                    
                 })
+                
+                
             }
         }
     }
@@ -68,7 +89,6 @@ struct SearchResultView: View {
             var request = MusicCatalogSearchRequest(term: term, types: [Song.self, Artist.self])
             request.limit = 20
             let response = try await request.response()
-            
             self.musicList = response.songs
             self.albumList = response.albums
             self.artistList = response.artists

@@ -7,3 +7,8 @@
 //
 
 import Foundation
+
+public class RecentSearchObject: ObservableObject{
+    public init() {}
+    @Published var recentSearchList: [String] = []
+}

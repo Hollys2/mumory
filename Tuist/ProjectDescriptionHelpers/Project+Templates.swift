@@ -101,7 +101,7 @@ extension Project {
             "CFBundleVersion": "\(bundleVersion)",
             "CFBundleShortVersionString": "\(appStoreVersion)",
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
-            "NSLocationWhenInUseUsageDescription": "지도를 주세요."
+            "NSLocationWhenInUseUsageDescription": "지도를 주세요.",
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in

@@ -101,22 +101,21 @@ public struct RecommendationView: View {
         
         //offset: 시작하는 수. 20 입력시 20등부터 40등까지 보여줌(no limit)
         Task {
-            let authRequest = await MusicAuthorization.request()
             
-            switch(authRequest){
-            case .authorized:
-                do{
-                    print("허락됨")
-                    let request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-                    let response = try await request.response()
-                    print("검색 성공")
-                }catch{
-                    print("search error")
-                }
-                
-            default:
-                print("안됨")
-            }
+//            switch(authRequest){
+//            case .authorized:
+//                do{
+//                    print("허락됨")
+//                    let request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
+//                    let response = try await request.response()
+//                    print("검색 성공")
+//                }catch{
+//                    print("search error")
+//                }
+//                
+//            default:
+//                print("안됨")
+//            }
             
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
             request.offset = offset

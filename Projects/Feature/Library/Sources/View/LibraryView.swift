@@ -9,10 +9,12 @@
 import SwiftUI
 import Shared
 import MusicKit
+import Core
 
 public struct LibraryView: View {
     @State private var path = NavigationPath()
     @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var recentSearchObject: RecentSearchObject
 //    @EnvironmentObject var setView: SetView
     @StateObject var setView: SetView = SetView()
     @State var isTapMyMusic: Bool = true
@@ -104,8 +106,12 @@ public struct LibraryView: View {
                 .navigationDestination(isPresented: $setView.isSearchViewShowing) {
                     ArtistView()
                 }
-                
                 .environmentObject(setView)
+                .onAppear(perform: {
+                    Task{
+                        let authRequest = await MusicAuthorization.request() //음악 사용 동의 창-앱 시작할 때
+                    }
+                })
             
         }
       
