@@ -46,12 +46,12 @@ struct ContentView: View {
                         isFocusedTextField = true
                     }
                 
-                List(self.viewModel.results) { address in
-                    AddressRow(address: address)
-                        .listRowBackground(backgroundColor)
-                }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
+//                List(self.viewModel.results) { address in
+//                    AddressRow(address: address)
+//                        .listRowBackground(backgroundColor)
+//                }
+//                .listStyle(.plain)
+//                .scrollContentBackground(.hidden)
             }
             .background(backgroundColor)
             .edgesIgnoringSafeArea(.bottom)
@@ -85,30 +85,30 @@ struct ClearButton: View {
     }
 }
 
-struct MapView: View {
-    
-    @StateObject private var viewModel = MapViewModel()
-    
-    private let address: AddressResult
-    
-    init(address: AddressResult) {
-        self.address = address
-    }
-    
-    var body: some View {
-        Map(
-            coordinateRegion: $viewModel.region,
-            annotationItems: viewModel.annotationItems,
-            annotationContent: { item in
-                MapMarker(coordinate: item.coordinate)
-            }
-        )
-        .onAppear {
-            self.viewModel.getPlace(from: address)
-        }
-        .edgesIgnoringSafeArea(.bottom)
-    }
-}
+//struct MapView: View {
+//    
+//    @StateObject private var viewModel = MapViewModel()
+//    
+//    private let address: AddressResult
+//    
+//    init(address: AddressResult) {
+//        self.address = address
+//    }
+//    
+//    var body: some View {
+//        Map(
+//            coordinateRegion: $viewModel.region,
+//            annotationItems: viewModel.annotationItems,
+//            annotationContent: { item in
+//                MapMarker(coordinate: item.coordinate)
+//            }
+//        )
+//        .onAppear {
+//            self.viewModel.getPlace(from: address)
+//        }
+//        .edgesIgnoringSafeArea(.bottom)
+//    }
+//}
 
 class SwipeBackHostingController<Content: View>: UIHostingController<Content> {
     override init(rootView: Content) {

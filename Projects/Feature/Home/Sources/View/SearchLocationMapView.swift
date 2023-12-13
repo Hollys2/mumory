@@ -14,21 +14,17 @@ import _MapKit_SwiftUI
 @available(iOS 16.0, *)
 struct SearchLocationMapView: View {
     
-    @State var isShown: Bool = false
-    @State var isActive: Bool = false
+    @State var addressItem: AddressItem
+
     @StateObject private var mapViewModel = MapViewModel()
     
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    
-    @State var address: AddressResult
-    //    @State private var path: [Int] = []
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
+
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                //                HomeMapView(tappedLocation: .constant(nil), isChanging: .constant(false))
                 Map(
                     coordinateRegion: $mapViewModel.region,
                     annotationItems: mapViewModel.annotationItems,
@@ -37,7 +33,7 @@ struct SearchLocationMapView: View {
                     }
                 )
                 .onAppear {
-                    self.mapViewModel.getPlace(from: address)
+//                    self.mapViewModel.getPlace(from: address)
                 }
                 
                 Button(action: {
@@ -59,7 +55,7 @@ struct SearchLocationMapView: View {
             .frame(height: UIScreen.main.bounds.height * 0.94 * 0.72)
             
             VStack(spacing: 0) {
-                Text("\(address.title)")
+                Text("\(addressItem.title)")
                     .font(
                         Font.custom("Pretendard", size: 20)
                             .weight(.bold)
@@ -69,7 +65,7 @@ struct SearchLocationMapView: View {
                     .padding(.horizontal, 30)
                     .padding(.top, 35)
                 
-                Text("\(address.subtitle)")
+                Text("\(addressItem.subTitle)")
                     .font(
                         Font.custom("Pretendard", size: 15)
                             .weight(.medium)
@@ -123,11 +119,11 @@ struct SearchLocationMapView: View {
     }
 }
 
-@available(iOS 16.0, *)
-struct SearchLocationMapVIew_Previews: PreviewProvider {
-    static var previews: some View {
-        let address: AddressResult = AddressResult(title: "타이틀", subtitle: "서브타이틀")
-        SearchLocationMapView(address: address)
-    }
-}
+//@available(iOS 16.0, *)
+//struct SearchLocationMapVIew_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let address: AddressResult = AddressResult(title: "타이틀", subtitle: "서브타이틀")
+//        SearchLocationMapView(address: address)
+//    }
+//}
 

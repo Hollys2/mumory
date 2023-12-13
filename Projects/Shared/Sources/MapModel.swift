@@ -24,17 +24,22 @@ public struct AddressResult: Identifiable, Hashable {
 
 public struct AnnotationItem: Identifiable {
     
-    public init(latitude: Double, longitude: Double) {
-        self.latitude = latitude
-        self.longitude = longitude
-    }
-    
     public let id = UUID()
+    public let title: String
+    public let subTitle: String
     public let latitude: Double
     public let longitude: Double
     public var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
+    
+    public init(title: String, subTitle: String, latitude: Double, longitude: Double) {
+        self.title = title
+        self.subTitle = subTitle
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+    
 }
 
 

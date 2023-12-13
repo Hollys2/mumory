@@ -26,7 +26,7 @@ public struct CreateMumoryBottomSheetView: View {
     @StateObject private var photoPickerViewModel = PhotoPickerViewModel()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @StateObject var locationManager: LocationManager = .init()
+    @EnvironmentObject var locationManager: LocationManager
     @StateObject var mapViewModel: MapViewModel = .init()
     @StateObject var viewModel: ContentViewModel = .init()
     
@@ -183,13 +183,30 @@ public struct CreateMumoryBottomSheetView: View {
                                         .frame(height: 60)
                                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                         .cornerRadius(15)
-                                    
-                                    Text(mapViewModel.address.isEmpty ? "위치 추가하기" : "\(mapViewModel.address)")
-                                        .font(Font.custom("Pretendard", size: 16))
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 20)
+                                    if let location = locationManager.choosedLocation {
+                                        VStack(spacing: 10) {
+                                            Text("\(location.title)")
+                                                .font(Font.custom("Pretendard", size: 15))
+                                                .foregroundColor(.white)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .lineLimit(1)
+                                            
+                                            Text("\(location.subTitle)")
+                                              .font(Font.custom("Pretendard", size: 13))
+                                              .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                              .frame(maxWidth: .infinity, alignment: .leading)
+                                              .lineLimit(1)
+
+                                        }
+                                        .padding(.horizontal, 15)
+                                    } else {
+                                        Text("위치 추가하기")
+                                            .font(Font.custom("Pretendard", size: 16))
+                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .lineLimit(1)
+                                            .padding(.horizontal, 20)
+                                    }
                                 }
                                 .onTapGesture {
                                     appCoordinator.isSearchLocationViewShown = true
@@ -482,6 +499,9 @@ public struct CreateMumoryBottomSheetView: View {
             .padding(.horizontal, 20)
             .background(SharedAsset.backgroundColor.swiftUIColor)
             .ignoresSafeArea()
+            .onDisappear {
+                locationManager.choosedLocation = nil
+            }
 //            .navigationDestination(for: CreateMumoryBottomSheet.self, destination: { sheet in
 //                if sheet.title == "음악 추가" {
 //                    SearchMusicView()

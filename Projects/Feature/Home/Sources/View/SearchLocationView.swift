@@ -12,33 +12,62 @@ import SwiftUI
 import Core
 import Shared
 
+
 @available(iOS 16.0, *)
 struct AddressRow: View {
     
-    let address: AddressResult
+    let result: AnnotationItem
+    
+//    @EnvironmentObject var locationManager: LocationManager
     
     var body: some View {
-        NavigationLink(destination: SearchLocationMapView(address: address)) {
-            HStack(spacing: 11) {
+//        NavigationLink(destination: SearchLocationMapView(addressItem: <#T##AddressItem#>)) {
+            HStack(alignment: .center, spacing: 13) {
                 Image(uiImage: SharedAsset.addressSearchLocation.image)
                     .resizable()
                     .frame(width: 20, height: 23)
-                    .padding(.leading, 15)
                 
-                Text(address.title)
-                    .font(
-                        Font.custom("Apple SD Gothic Neo", size: 15)
-                            .weight(.medium)
-                    )
-                    .foregroundColor(.white)
-                    .frame(alignment: .leading)
-                
-                Spacer()
-            }
-        }
-        .isDetailLink(false)
-        .frame(height: 50)
+                VStack(spacing: 6) {
+                    Text(result.title)
+                        .lineLimit(1)
+                        .font(Font.custom("Pretendard", size: 15).weight(.semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    
+                    Text(result.subTitle)
+                        .lineLimit(1)
+                        .font(Font.custom("Pretendard", size: 13))
+                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } // HStack
+            .frame(maxWidth: .infinity)
+            .frame(height: 70)
+            .padding(.horizontal, 5)
+//        }
     }
+    
+//    func getRegion(title: String) {
+//        let searchRequest = MKLocalSearch.Request()
+//        searchRequest.naturalLanguageQuery = title
+//
+//        let localSearch = MKLocalSearch(request: searchRequest)
+//        localSearch.start { response, error in
+//            guard let response = response, error == nil else {
+//                print("Error searching for places:", error?.localizedDescription ?? "Unknown error")
+//                return
+//            }
+//
+//            if let firstMapItem = response.mapItems.first {
+//                let coordinate = firstMapItem.placemark.coordinate
+//                let latitude = coordinate.latitude
+//                let longitude = coordinate.longitude
+//
+//                locationManager.choosedLocation = AnnotationItem(title: result.title, subTitle: result.subtitle, latitude: latitude, longitude: longitude)
+//            }
+//        }
+//    }
 }
 
 @available(iOS 16.0, *)
@@ -48,10 +77,13 @@ struct SearchLocationView: View {
     @State private var isActive = false
     @FocusState private var isFocusedTextField: Bool
     
-    @ObservedObject var mapViewModel: MapViewModel = .init()
     @StateObject var viewModel: ContentViewModel = .init()
+    @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
+    
+    @ObservedObject var mapViewModel: MapViewModel = .init()
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @StateObject var locationManager = LocationManager()
+    @EnvironmentObject var locationManager: LocationManager
     
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
@@ -73,7 +105,6 @@ struct SearchLocationView: View {
                     DragGesture()
                         .updating($dragAmount) { value, state, _ in
                             if value.translation.height > 0 {
-//                                                        state = value.translation
                                 translation.height = value.translation.height
                             }
                         }
@@ -89,7 +120,7 @@ struct SearchLocationView: View {
             
             HStack {
                 ZStack(alignment: .leading) {
-                    TextField("", text: $viewModel.searchableText,
+                    TextField("", text: $localSearchViewModel.queryFragment,
                               prompt: Text("위치 검색").font(Font.custom("Pretendard", size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .frame(maxWidth: .infinity)
@@ -101,13 +132,6 @@ struct SearchLocationView: View {
                             .fill(Color(red: 0.24, green: 0.24, blue: 0.24))
                     )
                     .foregroundColor(.white)
-                    .onReceive(
-                        viewModel.$searchableText
-                            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main
-                                     )
-                    ) {
-                        viewModel.searchAddress($0)
-                    }
                     
                     Image(systemName: "magnifyingglass")
                         .frame(width: 23, height: 23)
@@ -129,9 +153,8 @@ struct SearchLocationView: View {
                 }
                 
                 Button(action: {
-                    print("FUCK: \(appCoordinator.isSearchLocationViewShown)")
+                    self.presentationMode.wrappedValue.dismiss()
                     appCoordinator.isSearchLocationViewShown = false
-//                                            self.presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("취소")
                         .font(
@@ -145,53 +168,19 @@ struct SearchLocationView: View {
             .frame(maxWidth: .infinity)
             .padding(.bottom, 15)
             
-            if let places = self.locationManager.fetchedPlaces, !places.isEmpty {
-                ScrollView {
-                    VStack {
-                        ForEach(places, id: \.self) { place in
-                            NavigationLink(destination: SearchLocationMapView(address: address)) {
-                                HStack(spacing: 11) {
-                                    Image(uiImage: SharedAsset.addressSearchLocation.image)
-                                        .resizable()
-                                        .frame(width: 20, height: 23)
-                                        .padding(.leading, 15)
-                                    
-                                    Text(place.name ?? "노 네임")
-                                        .font(
-                                            Font.custom("Apple SD Gothic Neo", size: 15)
-                                                .weight(.medium)
-                                        )
-                                        .foregroundColor(.white)
-                                        .frame(alignment: .leading)
-                                    
-                                    Text(place.locality ?? "")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                    Spacer()
-                                }
-                            }
-                            .frame(height: 50)
-                        }
-                    }
-                }
-                
-            }
-            
-            if self.viewModel.results.isEmpty {
+            if self.localSearchViewModel.results.isEmpty {
                 ScrollView {
                     VStack(spacing: 15) {
                         VStack(spacing: 0) {
                             Button(action: {
                                 if let userLocation = locationManager.userLocation {
-                                    let location = CLLocation(latitude: userLocation.latitude, longitude: userLocation.longitude)
-                                    //                                    locationManager.convertLocationToAddress(location: location)
                                     
-                                    locationManager.convertLocationToAddress(location: location)
-                                    
-                                    
+                                    locationManager.convertLocationToAddress(location: userLocation)
                                     
                                     self.presentationMode.wrappedValue.dismiss()
                                     appCoordinator.isSearchLocationViewShown = false
+                                } else {
+                                    print("ERROR: locationManager.userLocation is nil")
                                 }
                             }) {
                                 ZStack {
@@ -317,15 +306,14 @@ struct SearchLocationView: View {
                 .cornerRadius(15)
             } else {
                 ScrollView {
-                    VStack {
-                        ForEach(self.viewModel.results, id: \.self) { address in
-                            AddressRow(address: address)
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                                .frame(height: 50)
+                    VStack(spacing: 0) {
+                        ForEach(self.localSearchViewModel.results, id: \.self) { result in
+//                            AddressRow(result: AnnotationItem(title: result.title, subTitle: result.subtitle, latitude: <#T##Double#>, longitude: <#T##Double#>))
+                                
                         }
-                    }
-                }
+                    } // VStack
+                    .padding(.bottom, 66)
+                } // ScrollView
                 .scrollIndicators(.hidden)
             }
         } // VStack
