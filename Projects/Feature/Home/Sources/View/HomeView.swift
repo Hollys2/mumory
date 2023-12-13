@@ -19,21 +19,10 @@ struct Location: Identifiable {
     let coordinate: CLLocationCoordinate2D
 }
 
-
-enum DragState {
-    case inactive
-    case dragging(translation: CGSize)
-}
-
 @available(iOS 16.4, *)
 public struct HomeView: View {
-    
-    
-    
     //        @State private var tappedLocation: CLLocationCoordinate2D?
     @State private var selectedTab: Tab = .home
-    
-    @State private var isSheetAnimating = false
     
     @StateObject private var viewModel = HomeViewModel()
     
@@ -44,13 +33,15 @@ public struct HomeView: View {
     
     let address: AddressResult = AddressResult(title: "타이틀2", subtitle: "서브타이틀2")
     
+//    @StateObject var locationManager = LocationManager()
+    
     public init() {
     }
     
     public var body: some View {
         if appCoordinator.isNavigationStackShown {
             NavigationStack {
-                homeView
+                main
             }
             //                .sheet(isPresented: $appCoordinator.isCreateMumorySheetShown) {
             //                    NavigationView {
@@ -61,64 +52,16 @@ public struct HomeView: View {
             //                    //            .interactiveDismissDisabled()
             
         } else {
-            homeView
+            main
         }
     }
     
-    var homeView: some View {
+    var main: some View {
         ZStack {
             VStack(spacing: 0) {
                 switch selectedTab {
                 case .home:
-                    ZStack {
-                        HomeMapView(tappedLocation: .constant(nil), isChanging: .constant(false))
-                            .ignoresSafeArea()
-                        
-                        VStack {
-                            Rectangle()
-                                .foregroundColor(.clear)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 95)
-                                .background(
-                                    LinearGradient(
-                                        stops: [
-                                            Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.6), location: 0.08),
-                                            Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
-                                        ],
-                                        startPoint: UnitPoint(x: 0.5, y: 0),
-                                        endPoint: UnitPoint(x: 0.5, y: 1)
-                                    )
-                                )
-                                .allowsHitTesting(false)
-                            Spacer()
-                        }
-                        
-                        VStack {
-                            Spacer()
-                            Rectangle()
-                                .foregroundColor(.clear)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 159.99997)
-                                .background(
-                                    LinearGradient(
-                                        stops: [
-                                            Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
-                                            Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
-                                        ],
-                                        startPoint: UnitPoint(x: 0.5, y: 1),
-                                        endPoint: UnitPoint(x: 0.5, y: 0)
-                                    )
-                                )
-                                .offset(y: 90)
-                                .allowsHitTesting(false)
-                        }
-                        
-                        VStack {
-                            PlayingMusicBarView() // 추후 HomeMapView의 MapCoordinator에서 작성할 것
-                                .offset(y: 16)
-                            Spacer()
-                        }
-                    }
+                    homeView
                 case .social:
                     Text("The Second Tab")
                 case .library:
@@ -130,7 +73,6 @@ public struct HomeView: View {
                     }
                     .ignoresSafeArea()
                 }
-                Spacer(minLength: 0) // 추후 수정
                 HomeTabView(selectedTab: $selectedTab)
                     .frame(height: 89)
             }
@@ -138,17 +80,77 @@ public struct HomeView: View {
             if appCoordinator.isCreateMumorySheetShown {
                 Color.black.opacity(0.3).ignoresSafeArea()
                     .onTapGesture {
-                        withAnimation {
+                        withAnimation(Animation.easeOut(duration: 0.2)) {
                             appCoordinator.isCreateMumorySheetShown = false
                         }
                     }
-                
                 CreateMumoryBottomSheetView()
                     .transition(.move(edge: .bottom))
                     .zIndex(1) // 추가해서 사라질 때 에니메이션 적용됨
-                
             }
-        } // ZStack
+        }
+    }
+    
+    var homeView: some View {
+        ZStack {
+            HomeMapViewRepresentable()
+                .ignoresSafeArea()
+            
+//            Map(coordinateRegion: .constant(MKCoordinateRegion(
+//                center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
+//                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+//            )), interactionModes: .all)
+//            .ignoresSafeArea()
+//            .onAppear {
+//                MKMapView.appearance().mapType = .mutedStandard
+//                MKMapView.appearance().isPitchEnabled = true
+//            }
+            
+            VStack {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 95)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.6), location: 0.08),
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 0),
+                            endPoint: UnitPoint(x: 0.5, y: 1)
+                        )
+                    )
+                    .allowsHitTesting(false)
+                Spacer()
+            }
+            
+            VStack {
+                Spacer()
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 159.99997)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 1),
+                            endPoint: UnitPoint(x: 0.5, y: 0)
+                        )
+                    )
+                    .offset(y: 90)
+                    .allowsHitTesting(false)
+            }
+            
+            VStack {
+                PlayingMusicBarView() // 추후 HomeMapView의 MapCoordinator에서 작성할 것
+                    .offset(y: 16)
+                Spacer()
+            }
+        }
     }
 }
 
@@ -231,4 +233,8 @@ struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView()
     }
+}
+
+extension MKMapView {
+    
 }

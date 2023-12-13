@@ -19,4 +19,6 @@ public class AppCoordinator: ObservableObject {
     @Published public var isSearchLocationMapViewShown = false
     
     @Published public var isNavigationStackShown = false
+    
+    @Published public var translation: CGSize = CGSize(width: 0, height: 0)
 }

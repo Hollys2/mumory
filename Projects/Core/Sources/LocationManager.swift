@@ -9,111 +9,244 @@
 
 import CoreLocation
 import MapKit
+import Combine
 import Shared
 
 final public class LocationManager: NSObject, ObservableObject {
-    private let locationManager = CLLocationManager()
     
+//    var mapView: MKMapView?
     var startPlace: String = ""
+    
+    @Published public var mapView: MKMapView = .init()
+    @Published public var locationManager: CLLocationManager = .init()
+    
+    @Published public var searchLocationText: String = ""
+    
+    var cancellable: AnyCancellable?
+    @Published public var fetchedPlaces: [CLPlacemark]?
+    
+    @Published public var choosedLocation: CLLocation?
+    @Published public var choosedPlaceMark: CLPlacemark?
+
     @Published public var userLocation: CLLocationCoordinate2D?
-    var mapView: MKMapView?
-    @Published var isChanging: Bool = false // 지도의 움직임 여부를 저장하는 프로퍼티
+    @Published public var userLocation2: CLLocation?
+    @Published public var address: String = ""
+    @Published public var tappedLocation: CLLocationCoordinate2D?
+    
+    @Published public var isChanging: Bool = false // 지도의 움직임 여부를 저장하는 프로퍼티
     @Published var currentPlace: String = "" // 현재 위치의 도로명 주소를 저장하는 프로퍼티
+    
+    @Published public var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37, longitude: -121), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
     
     override public init() {
         //        print("override public init in LocationManager")
         super.init()
         
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
+        mapView.delegate = self
         locationManager.delegate = self
         
-        //        self.configureLocationManager()
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+//        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+        
+//                self.configureLocationManager()
+        
+        cancellable = $searchLocationText
+            .debounce(for: .seconds(0.5), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .sink(receiveValue: { value in
+                if value.isEmpty {
+                    self.fetchedPlaces = nil
+                } else {
+                    self.fetchPlaces(value: value)
+                }
+            })
     }
     
-    public func setMapView(_ mapView: MKMapView) {
-        self.mapView = mapView
-        self.mapView?.delegate = self // delegate 설정
-        //       configureLocationManager()
+    func fetchPlaces(value: String) {
+        //        print("fetchLocations: \(value)")
+        Task {
+            do {
+                let request = MKLocalSearch.Request()
+                request.naturalLanguageQuery = value.lowercased()
+                
+                let response = try await MKLocalSearch(request: request).start()
+                await MainActor.run(body: {
+                    self.fetchedPlaces = response.mapItems.compactMap({ item -> CLPlacemark? in
+                        print("item.placemark: \(item.placemark)")
+                        return item.placemark
+                    })
+                })
+            } catch {
+                
+            }
+        }
+    }
+    
+    public func checkLocationServices() {
+//        if CLLocationManager.locationServicesEnabled() {
+////            locationManager.delegate = self
+//        } else {
+//            print("CLLocationManager.locationServicesEnabled() is false")
+//        }
+    }
+    
+    func checkLocationAuthorization() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            print(".notDetermined")
+            locationManager.requestWhenInUseAuthorization()
+        case .restricted:
+            print(".restricted")
+        case .denied:
+            print(".denied")
+        case .authorizedAlways:
+            print(".authorizedAlways")
+//            locationManager.startUpdatingLocation()
+        case .authorizedWhenInUse:
+            print(".authorizedWhenInUse")
+//            locationManager.startUpdatingLocation()
+            region = MKCoordinateRegion(center: locationManager.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+            break
+        @unknown default:
+            break
+        }
     }
 }
 
 extension LocationManager: CLLocationManagerDelegate {
     
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if userLocation != nil { return }
+//        if userLocation != nil { return }
         guard let location = locations.last else { return }
         
-        userLocation = location.coordinate
+        self.userLocation = location.coordinate
+        self.userLocation2 = location
+        
         //        print("locationManager didUpdateLocations: \(location)")
     }
     
-    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
-            // 위치 서비스 권한이 허용된 경우 위치 업데이트 시작
-            locationManager.startUpdatingLocation()
-            
-            
-        } else if manager.authorizationStatus == .notDetermined {
-            // 위치 서비스 권한 상태가 결정되지 않은 경우 권한 요청
-            locationManager.requestWhenInUseAuthorization()
-        }
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        
     }
     
+    
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuthorization()
+    }
+    
+    func handleLocationManagerDidChangeAuthorizationError() {
+        
+    }
 }
 
 extension LocationManager: MKMapViewDelegate {
     
-    
+    public func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+        print("didUpdate in MKMapViewDelegate")
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+        
+        self.mapView.setRegion(region, animated: true)
+    }
+
     public func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
         //        print("regionWillChangeAnimated in MKMapViewDelegate")
     }
     
     public func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
-        //                print("mapViewDidChangeVisibleRegion in MKMapViewDelegate")
+//        print("mapViewDidChangeVisibleRegion in MKMapViewDelegate")
         DispatchQueue.main.async {
             self.isChanging = true
+            self.objectWillChange.send()
+            print("self.isChanging: \(self.isChanging)")
         }
+        
+        let imageSize: CGFloat = 50 // 이미지의 크기
+        let imageOriginX = (mapView.bounds.width - imageSize) / 2 // 이미지의 x 축 위치
+        let imageOriginY = (mapView.bounds.height - imageSize) / 2 // 이미지의 y 축 위치
+        let imageView = UIImageView(frame: CGRect(x: imageOriginX,
+                                                  y: imageOriginY,
+                                                  width: imageSize,
+                                                  height: imageSize))
+
+        imageView.image = SharedAsset.addressSearchLocation.image
+        mapView.addSubview(imageView) // 맵뷰에 이미지 뷰를 추가합니다
     }
     
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let location: CLLocation = CLLocation(latitude: mapView.centerCoordinate.latitude, longitude: mapView.centerCoordinate.longitude)
-        //        print("regionDidChangeAnimated in MKMapViewDelegate: \(location)")
         
         self.convertLocationToAddress(location: location)
-        print("self.startPlace: \(self.startPlace)")
+        //        print("self.startPlace: \(self.startPlace)")
         
         DispatchQueue.main.async {
             self.isChanging = false
+            self.objectWillChange.send()
+            print("self.isChanging: \(self.isChanging)")
         }
+        
+        let centerCoordinate = mapView.centerCoordinate
+        
+        // 이미지 뷰를 생성합니다.
+        let imageSize: CGFloat = 50 // 이미지의 크기
+        let imageOriginX = (mapView.bounds.width - imageSize) / 2 // 이미지의 x 축 위치
+        let imageOriginY = (mapView.bounds.height - imageSize) / 2 // 이미지의 y 축 위치
+        let imageView = UIImageView(frame: CGRect(x: imageOriginX,
+                                                  y: imageOriginY,
+                                                  width: imageSize,
+                                                  height: imageSize))
+        
+//        imageView.image = SharedAsset.chooseSearchLocation.image // 이미지 뷰에 이미지를 설정합니다.
+        
+        if isChanging {
+                  imageView.image = SharedAsset.chooseSearchLocation.image
+              } else {
+                  imageView.image = SharedAsset.addressSearchLocation.image
+              }
+        mapView.addSubview(imageView) // 맵뷰에 이미지 뷰를 추가합니다
     }
     
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        if annotation is MKUserLocation {
-            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
-            let image = SharedAsset.userLocation.image.resized(to: CGSize(width: 45, height: 45))
-            annotationView.image = image
-            return annotationView
-        }
-        return nil
+        
+//        let identifier = "CustomPinAnnotationView"
+//        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: identifier) as? MKAnnotationView
+//
+//        if annotationView == nil {
+//            annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+//        } else {
+//            annotationView?.annotation = annotation
+//        }
+//
+//        // Set your custom image for the annotation view
+//        annotationView?.image = SharedAsset.chooseSearchLocation.image
+//        annotationView?.centerOffset = CGPoint(x: 0, y: -annotationView!.frame.size.height / 2)
+//
+//        return annotationView
+//
+//        if annotation is MKUserLocation {
+//            let annotationView = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
+//            let image = SharedAsset.userLocation.image.resized(to: CGSize(width: 45, height: 45))
+//            annotationView.image = image
+//            return annotationView
+//        }
+                return nil
     }
     
-//    func configureLocationManager() {
-//        mapView?.delegate = self
-//        locationManager.delegate = self
-//
-//        let status = locationManager.authorizationStatus
-//
-//        if status == .notDetermined {
-//            locationManager.requestAlwaysAuthorization()
-//        } else if status == .authorizedAlways || status == .authorizedWhenInUse {
-//            mapView?.showsUserLocation = true // 사용자의 현재 위치를 확인할 수 있도록
-//        }
-//    }
+    //    func configureLocationManager() {
+    //        mapView?.delegate = self
+    //        locationManager.delegate = self
+    //
+    //        let status = locationManager.authorizationStatus
+    //
+    //        if status == .notDetermined {
+    //            locationManager.requestAlwaysAuthorization()
+    //        } else if status == .authorizedAlways || status == .authorizedWhenInUse {
+    //            mapView?.showsUserLocation = true // 사용자의 현재 위치를 확인할 수 있도록
+    //        }
+    //    }
     
     
-    func convertLocationToAddress(location: CLLocation) {
+    public func convertLocationToAddress(location: CLLocation) {
         let geocoder = CLGeocoder()
         
         geocoder.reverseGeocodeLocation(location) { placemarks, error in
@@ -121,8 +254,38 @@ extension LocationManager: MKMapViewDelegate {
                 return
             }
             
-            guard let placemark = placemarks?.first else { return }
-            self.startPlace = "\(placemark.locality ?? "") \(placemark.name ?? "")"
+            guard let placemark = placemarks?.last else { return }
+            self.startPlace = "\(placemark.locality ?? "") \(placemark.name ?? "") \(placemark.thoroughfare)"
+            self.address = "\(placemark.locality ?? "") \(placemark.name ?? "")"
+            
+//            print("name: \(placemark.name)")
+//            print("thoroughfare: \(placemark.thoroughfare)")
+//            print("subThoroughfare: \(placemark.subThoroughfare)")
+//            print("locality: \(placemark.locality)")
+//            print("subLocality: \(placemark.subLocality)")
+//            print("administrativeArea: \(placemark.administrativeArea)")
+            
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = placemark.name
+            let search = MKLocalSearch(request: request)
+                search.start { response, error in
+                    guard let response = response, error == nil else {
+                        print("Error searching for places at this address:", error?.localizedDescription ?? "Unknown error")
+                        return
+                        return
+                    }
+                    
+                    // Handle the search results
+                    for item in response.mapItems {
+                        print("Place Name:", item.name ?? "")
+                        print("Place Address:", item.placemark.title ?? "")
+                        print("Place item.placemark:", item.placemark ?? "")
+                        print("Place Coordinate:", item.placemark.coordinate.latitude, item.placemark.coordinate.longitude)
+                        // Access more details or properties of the found places as needed
+                        self.address = item.placemark.title ?? ""
+                    }
+                    
+                }
         }
     }
 }

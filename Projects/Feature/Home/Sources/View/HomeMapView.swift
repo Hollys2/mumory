@@ -12,48 +12,29 @@ import MapKit
 import Core
 import Shared
 
-struct HomeMapView: UIViewRepresentable {
+struct HomeMapViewRepresentable: UIViewRepresentable {
     
     typealias UIViewType = MKMapView
     
-    @Binding var tappedLocation: CLLocationCoordinate2D?
-    @Binding var isChanging: Bool?
-    @ObservedObject var locationManager: LocationManager = .init()
-    
-    private let defaultRegion = MKCoordinateRegion(center: MapConstant.startingLocation, span: MapConstant.defaultSpan)
-    
+    @ObservedObject var locationManager: LocationManager2 = .init()
     
     func makeUIView(context: Context) -> UIViewType {
         print("@@makeUIView")
+
         let mapView: MKMapView = .init()
-        
-        if #available(iOS 16.0, *) {
-            mapView.preferredConfiguration = MKStandardMapConfiguration(elevationStyle: .flat, emphasisStyle: .muted)
-        } else {
-            mapView.isPitchEnabled = false
-            mapView.mapType = .mutedStandard
-        }
-        mapView.setRegion(defaultRegion, animated: true)
-//        mapView.delegate = context.coordinator
+
+        mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
+        mapView.isPitchEnabled = false
+        mapView.userTrackingMode = .follow
+        mapView.setRegion(MKCoordinateRegion(center: MapConstant.startingLocation, span: MapConstant.defaultSpan), animated: true)
         
-        locationManager.setMapView(mapView)
-
-        let compassButton = MKCompassButton(mapView: mapView)
-        compassButton.compassVisibility = .adaptive
-        compassButton.frame = CGRect(x: 10, y: mapView.bounds.height - compassButton.bounds.height - 30,
-                                     width: compassButton.bounds.width, height: compassButton.bounds.height)
-        compassButton.autoresizingMask = [.flexibleRightMargin, .flexibleTopMargin] // 오른쪽과 위쪽 여백 유지
-        mapView.addSubview(compassButton)
-        
-        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(MapViewCoordinator.tappedOnMap(_:)))
-        mapView.addGestureRecognizer(tapGesture)
-
         context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
+        context.coordinator.setCompassButton()
         
-//        context.coordinator.moveFocusOnUserLocation()
+        mapView.delegate = context.coordinator
         
         return mapView
     }
@@ -63,24 +44,20 @@ struct HomeMapView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> MapViewCoordinator {
-        MapViewCoordinator(parent: self, tappedLocation: $tappedLocation, isChanging: $isChanging)
+        MapViewCoordinator(parent: self)
     }
 }
 
-extension HomeMapView {
+extension HomeMapViewRepresentable {
     
     class MapViewCoordinator: NSObject {
-        let parent: HomeMapView
-        var mapView: MKMapView?
-        @Binding var tappedLocation: CLLocationCoordinate2D?
-        @Binding var isChanging: Bool?
-        var startPlace: String
         
-        init(parent: HomeMapView, tappedLocation: Binding<CLLocationCoordinate2D?>, isChanging: Binding<Bool?>) {
+        let parent: HomeMapViewRepresentable
+        var mapView: MKMapView?
+        var startPlace: String = ""
+        
+        init(parent: HomeMapViewRepresentable) {
             self.parent = parent
-            self._tappedLocation = tappedLocation
-            self._isChanging = isChanging
-            self.startPlace = ""
         }
         
         func setGPSButton() {
@@ -89,11 +66,21 @@ extension HomeMapView {
             let button = UIButton(type: .custom)
             button.frame = CGRect(x: mapView.bounds.width - 48 - 22, y: mapView.bounds.height - 48 - 24, width: 48, height: 48)
             button.autoresizingMask = [.flexibleTopMargin, .flexibleLeftMargin]
-//            button.setImage(UIImage(named: "gps"), for: .normal)
             button.setImage(SharedAsset.gps.image, for: .normal)
             button.addTarget(self, action:#selector(self.tappedGPSButton), for:.touchUpInside)
             
             mapView.addSubview(button)
+        }
+        
+        func setCompassButton() {
+            guard let mapView = self.mapView else { return }
+            
+            let compassButton = MKCompassButton(mapView: mapView)
+            compassButton.compassVisibility = .adaptive
+            compassButton.frame = CGRect(x: mapView.bounds.width - compassButton.bounds.width - 22, y: mapView.bounds.height - compassButton.bounds.height - 87, width: 48, height: 48)
+            compassButton.autoresizingMask = [.flexibleTopMargin, .flexibleLeftMargin]
+            
+            mapView.addSubview(compassButton)
         }
         
         func setPlayingMusicBar() {
@@ -102,29 +89,45 @@ extension HomeMapView {
         
         @objc private func tappedGPSButton() {
             guard let mapView = mapView, let userLocation = mapView.userLocation.location else { return }
-
-            let regionRadius : CLLocationDistance = 1000
+            
+            let regionRadius: CLLocationDistance = 1000
             let region = MKCoordinateRegion(center: userLocation.coordinate,
                                             latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
             mapView.setRegion(region, animated: true)
         }
         
-        @objc func tappedOnMap(_ sender: UITapGestureRecognizer) {
-            guard let mapView = sender.view as? MKMapView else { return }
+        func getAddressFromLocation(latitude: Double, longitude: Double) {
+            let location = CLLocation(latitude: latitude, longitude: longitude)
+            let geocoder = CLGeocoder()
             
-            print("tappedOnMap")
-            
-            let touchLocation = sender.location(in: sender.view)
-            
-            let locationCoordiate = mapView.convert(touchLocation, toCoordinateFrom: sender.view)
-            
-            let annotation = MKPointAnnotation()
-//            annotation.coordinate = .init(latitude: locationCoordiate.latitude, longitude: locationCoordiate.longitude)
-            annotation.coordinate = locationCoordiate
-            self.tappedLocation = locationCoordiate
-            
-            mapView.removeAnnotations(mapView.annotations)
-            mapView.addAnnotation(annotation)
+            geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                guard let placemark = placemarks?.first, error == nil else {
+                    print("Error retrieving location information:", error?.localizedDescription ?? "Unknown error")
+                    return
+                }
+                
+                // Access various properties of the placemark
+                if let name = placemark.name {
+                    print("Name:", name)
+                }
+                
+                if let thoroughfare = placemark.thoroughfare {
+                    print("Thoroughfare:", thoroughfare)
+                }
+                
+                if let subThoroughfare = placemark.subThoroughfare {
+                    print("SubThoroughfare:", subThoroughfare)
+                }
+                
+                if let locality = placemark.locality {
+                    print("Locality:", locality)
+                }
+                
+                // Access more properties as needed
+                // For a full address, use placemark's properties such as thoroughfare, subThoroughfare, locality, administrativeArea, etc.
+                let address = "\(placemark.thoroughfare ?? ""), \(placemark.subThoroughfare ?? ""), \(placemark.locality ?? ""), \(placemark.administrativeArea ?? ""), \(placemark.country ?? "")"
+                print("Address:", address)
+            }
         }
         
         func convertLocationToAddress(location: CLLocation) {
@@ -151,8 +154,15 @@ extension HomeMapView {
     }
 }
 
-//extension HomeMapView.MapViewCoordinator: MKMapViewDelegate {
-//
+extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
+    
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
+        print("didUpdate in MKMapViewDelegate")
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+
+        mapView.setRegion(region, animated: true)
+    }
+}
 //
 //    func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
 ////        print("regionWillChangeAnimated in MKMapViewDelegate")
@@ -189,3 +199,27 @@ extension HomeMapView {
 //    }
 //}
 
+
+class LocationManager2: NSObject, ObservableObject {
+    
+    private let locationManager: CLLocationManager = .init()
+    
+    override init() {
+        super.init()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+    }
+    
+}
+
+extension LocationManager2: CLLocationManagerDelegate {
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        print("didUpdateLocations in CLLocationManagerDelegate")
+//        guard !locations.isEmpty else { return }
+//        print("didUpdateLocations : \(locations.first)")
+//        locationManager.stopUpdatingLocation()
+//    }
+}

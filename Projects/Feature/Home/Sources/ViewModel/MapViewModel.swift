@@ -46,8 +46,15 @@ extension ContentViewModel: MKLocalSearchCompleterDelegate {
 
 class MapViewModel: ObservableObject {
 
+    @Published var address: String = ""
     @Published var region = MKCoordinateRegion()
     @Published private(set) var annotationItems: [AnnotationItem] = []
+    
+    init() {
+//        self.address = address
+//        self.region = region
+//        self.annotationItems = annotationItems
+    }
     
     func getPlace(from address: AddressResult) {
         let request = MKLocalSearch.Request()
