@@ -17,6 +17,7 @@ enum Tab {
     case notification
 }
 
+@available(iOS 16.0, *)
 struct HomeTabView: View {
 
     @Binding var selectedTab: Tab

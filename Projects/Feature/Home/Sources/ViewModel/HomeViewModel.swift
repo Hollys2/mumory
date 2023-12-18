@@ -19,7 +19,7 @@ import Shared
 final class HomeViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     @Published var region = MKCoordinateRegion(
-        center: MapConstant.startingLocation,
+        center: MapConstant.defaultCoordinate2D,
         span: MapConstant.defaultSpan
     )
     

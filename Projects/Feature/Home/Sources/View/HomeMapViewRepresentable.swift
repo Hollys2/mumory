@@ -16,6 +16,8 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     
     typealias UIViewType = MKMapView
     
+//    @Binding var annotationItems: [AnnotationItem]
+    
     @ObservedObject var locationManager: LocationManager2 = .init()
     
     func makeUIView(context: Context) -> UIViewType {
@@ -27,8 +29,8 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
         mapView.showsUserLocation = true
         mapView.showsCompass = false
         mapView.isPitchEnabled = false
-        mapView.userTrackingMode = .follow
-        mapView.setRegion(MKCoordinateRegion(center: MapConstant.startingLocation, span: MapConstant.defaultSpan), animated: true)
+//        mapView.userTrackingMode = .follow 권한 동의 후에
+        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan), animated: true)
         
         context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
@@ -40,7 +42,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-//        print("@@updateUIView")
+        //        print("@@updateUIView")
     }
     
     func makeCoordinator() -> MapViewCoordinator {
@@ -55,9 +57,14 @@ extension HomeMapViewRepresentable {
         let parent: HomeMapViewRepresentable
         var mapView: MKMapView?
         var startPlace: String = ""
+        private let completer = MKLocalSearchCompleter()
+        var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
+        var annotationItem: AnnotationItem?
         
         init(parent: HomeMapViewRepresentable) {
             self.parent = parent
+            super.init()
+//            completer.delegate = self
         }
         
         func setGPSButton() {
@@ -156,11 +163,97 @@ extension HomeMapViewRepresentable {
 
 extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
     
+    func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
+    }
+    
+    // 사용자의 현재 위치가 변할 때
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
         print("didUpdate in MKMapViewDelegate")
+        
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
 
-        mapView.setRegion(region, animated: true)
+//        mapView.setRegion(region, animated: true)
+    }
+    
+    // 사용자가 지도를 움직일 때
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        print("regionDidChangeAnimated in MKMapViewDelegate")
+        
+        let geocoder = CLGeocoder()
+        let centerCoordinate = mapView.centerCoordinate
+        let location = CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude)
+        
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if error != nil {
+                return
+            }
+            
+            guard let placemark = placemarks?.first else { return }
+            
+//            print("addressDictionary: \(placemark.addressDictionary)")
+            
+            self.annotationItem = AnnotationItem(title: "타이틀없음", subTitle: (placemark.locality ?? "로컬티없음") + " " + (placemark.name ?? "이름없음"), latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude)
+        }
+    }
+
+    func searchNearbyPlaces(at coordinate: CLLocationCoordinate2D) {
+        let request = MKLocalSearch.Request()
+        request.region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
+        request.naturalLanguageQuery = "할리스"
+        Task {
+            let response = try await MKLocalSearch(request: request).start()
+            await MainActor.run {
+                response.mapItems.map {
+                    print("searchNearbyPlaces: \($0)")
+                    //                    AnnotationItem(
+                    //                        latitude: $0.placemark.coordinate.latitude,
+                    //                        longitude: $0.placemark.coordinate.longitude
+                    //                    )
+                }
+            }
+        }
+//        Task {
+//            do {
+//                let response = try await MKLocalSearch(request: request).start()
+//                let name = response.mapItems.first?.placemark.name
+//                let title = response.mapItems.first?.placemark.title
+//                let coordinate = response.mapItems.first?.placemark.coordinate
+//                print("name: \(name)")
+//                print("title: \(title)")
+//                print("coordinate: \(coordinate)")
+//
+//            } catch {
+//                print("Error getting region:", error.localizedDescription)
+//
+//            }
+//        }
+        
+//        let search = MKLocalSearch(request: request)
+//        search.start { response, error in
+//            guard error == nil else {
+//                print("Error searching: \(error!.localizedDescription)")
+//                return
+//            }
+//
+//            guard let mapItems = response?.mapItems else {
+//                print("No results found.")
+//                return
+//            }
+//
+//            // 검색 결과 처리
+//            for item in mapItems {
+//                print("Place: \(item.name ?? ""), Location: \(item.placemark.coordinate.latitude), \(item.placemark.coordinate.longitude)")
+//                // 여기서 가져온 정보를 원하는 방식으로 활용할 수 있습니다.
+//            }
+//        }
+    }
+
+}
+
+extension HomeMapViewRepresentable.MapViewCoordinator: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        print("completerDidUpdateResults in MKLocalSearchCompleterDelegate, HomeMapViewRepresentable.MapViewCoordinator")
+        self.results = completer.results
     }
 }
 //

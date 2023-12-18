@@ -131,6 +131,7 @@ class SwipeBackHostingController<Content: View>: UIHostingController<Content> {
 }
 
 
+@available(iOS 16.0, *)
 public struct TestView: View {
     
     @Binding var isShown: Bool
@@ -251,6 +252,7 @@ struct RoundedCorner: Shape {
 //        .tabViewStyle(.page)
 //        HomeMapView(tappedLocation: .constant(nil), isChanging: .constant(false))
 
+@available(iOS 16.0, *)
 struct ParentView: View {
     @State private var isShown = true
     
@@ -259,8 +261,3 @@ struct ParentView: View {
     }
 }
 
-struct TestView_Previews: PreviewProvider {
-    static var previews: some View {
-        ParentView()
-    }
-}

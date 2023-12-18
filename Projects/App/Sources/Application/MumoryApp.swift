@@ -10,8 +10,8 @@ import Shared
 struct MumoryApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject var appCoordinator: AppCoordinator = .init()
-    @StateObject var locationManager: LocationManager = .init()
+    @ObservedObject var appCoordinator: AppCoordinator = .init()
+    @ObservedObject var locationManager: LocationManager = .init()
 
     var body: some Scene {
         WindowGroup {

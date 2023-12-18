@@ -46,16 +46,38 @@ extension ContentViewModel: MKLocalSearchCompleterDelegate {
 
 class MapViewModel: ObservableObject {
 
-//    @Published var address: String = ""
+    @Published var address: String = ""
     @Published var region = MKCoordinateRegion()
-    @Published private(set) var addressItem: AddressItem
+    @Published private(set) var annotationItems: [AnnotationItem] = []
     
-    init(addressItem: AddressItem) {
-        self.addressItem = addressItem
+    init() {
+//        self.address = address
+//        self.region = region
+//        self.annotationItems = annotationItems
     }
     
-    func getAddressItem() {
+    func getRegion(localSearchCompletion: MKLocalSearchCompletion) {
+        let request = MKLocalSearch.Request()
+        let title = localSearchCompletion.title
+        let subTitle = localSearchCompletion.subtitle
+            
+        request.naturalLanguageQuery = subTitle.contains(title) ? subTitle : title + ", " + subTitle
         
+        print("getRegion: \(String(describing: request.naturalLanguageQuery))")
+        
+        Task {
+            let response = try await MKLocalSearch(request: request).start()
+            await MainActor.run {
+//                self.annotationItems = response.mapItems.map {
+//                    AnnotationItem(
+//                        latitude: $0.placemark.coordinate.latitude,
+//                        longitude: $0.placemark.coordinate.longitude
+//                    )
+//                }
+                
+                self.region = response.boundingRegion
+            }
+        }
     }
     
     func getPlace(from address: AddressResult) {

@@ -24,7 +24,7 @@ public struct HomeView: View {
     //        @State private var tappedLocation: CLLocationCoordinate2D?
     @State private var selectedTab: Tab = .home
     
-    @StateObject private var viewModel = HomeViewModel()
+//    @StateObject private var viewModel = HomeViewModel()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     
@@ -82,6 +82,9 @@ public struct HomeView: View {
                     .onTapGesture {
                         withAnimation(Animation.easeOut(duration: 0.2)) {
                             appCoordinator.isCreateMumorySheetShown = false
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                appCoordinator.path.removeLast(appCoordinator.path.count)
+                            }
                         }
                     }
                 CreateMumoryBottomSheetView()

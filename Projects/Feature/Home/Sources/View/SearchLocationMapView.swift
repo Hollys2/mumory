@@ -14,9 +14,16 @@ import _MapKit_SwiftUI
 @available(iOS 16.0, *)
 struct SearchLocationMapView: View {
     
-    @State var addressItem: AddressItem
+    @State var result: MKLocalSearchCompletion = MKLocalSearchCompletion()
+//    @State var annotationItem: AnnotationItem = AnnotationItem(title: "지도에서 선택하기", subTitle: "지도를 움직여보세요.", latitude: MapConstant.defaultCoordinate2D.latitude, longitude: MapConstant.defaultCoordinate2D.longitude)
+    @State var annotationItem: AnnotationItem?
+//        @Binding var result: MKLocalSearchCompletion
+//    @Binding var annotationItem: AnnotationItem
+    
+//    @State var region: MKCoordinateRegion = MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan)
 
-    @StateObject private var mapViewModel = MapViewModel()
+//    @StateObject private var mapViewModel = MapViewModel()
+    @StateObject private var localSearchViewModel = LocalSearchViewModel()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
 
@@ -25,37 +32,49 @@ struct SearchLocationMapView: View {
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                Map(
-                    coordinateRegion: $mapViewModel.region,
-                    annotationItems: mapViewModel.annotationItems,
-                    annotationContent: { item in
-                        MapMarker(coordinate: item.coordinate)
-                    }
-                )
-                .onAppear {
-//                    self.mapViewModel.getPlace(from: address)
-                }
+                SearchLocationMapViewRepresentable(annotationItem: $annotationItem)
+//                Map(
+//                    coordinateRegion: $localSearchViewModel.region
+////                    annotationItems: localSearchViewModel.annotationItems,
+////                    annotationContent: { item in
+////                        MapMarker(coordinate: item.coordinate)
+////                    }
+//                )
+//                .onAppear {
+//                    localSearchViewModel.getRegion(localSearchCompletion: result) { coordinate in
+//                        if let coordinate = coordinate {
+//                            print("장소의 위도: \(coordinate.latitude), 경도: \(coordinate.longitude)")
+//                            // 여기에 가져온 좌표를 사용하는 로직을 추가할 수 있습니다.
+//                        } else {
+//                            print("장소의 좌표를 찾을 수 없습니다.")
+//                        }
+//                    }
+////                    self.mapViewModel.getPlace(from: address)
+//                }
                 
                 Button(action: {
                     withAnimation {
-                        self.presentationMode.wrappedValue.dismiss()
                         appCoordinator.isSearchLocationMapViewShown = false
+                        appCoordinator.path.removeLast()
                     }
-                    //                            appCoordinator.isCreateMumorySheetShown = true
-                    //                            appCoordinator.isSearchLocationViewShown = true
                 }) {
                     Image(uiImage: SharedAsset.backSearchLocation.image)
                         .resizable()
                         .frame(width: 30, height: 30)
-                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
+//                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
                         .background(Color.red)
+                        
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(.top, 31)
+                .padding(.leading, 20)
+                
+
             }
             .frame(height: UIScreen.main.bounds.height * 0.94 * 0.72)
             
             VStack(spacing: 0) {
-                Text("\(addressItem.title)")
+                Text("\(annotationItem?.title ?? "타이틀없음!")")
                     .font(
                         Font.custom("Pretendard", size: 20)
                             .weight(.bold)
@@ -63,9 +82,9 @@ struct SearchLocationMapView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 30)
-                    .padding(.top, 35)
+//                    .padding(.top, 35)
                 
-                Text("\(addressItem.subTitle)")
+                Text("\(annotationItem?.subTitle ?? "서브타이틀없음")")
                     .font(
                         Font.custom("Pretendard", size: 15)
                             .weight(.medium)
@@ -75,21 +94,10 @@ struct SearchLocationMapView: View {
                     .padding(.horizontal, 30)
                     .padding(.top, 14)
                 
-                
-                //                        NavigationLink(destination: MakeMumoryView(isShown: $isShown).environmentObject(appState)
-                //                            .toolbar(.hidden), isActive: $isActive) {
-                //                            EmptyView()
-                //                        }
-                //                        .hidden()
-                
-                
+                // Navaigation Stack pop to root
                 Button(action: {
-                    self.presentationMode.wrappedValue.dismiss()
-                    //                        self.appCoordinator.isSearchLocationMapViewShown = false
-                    //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    //                            self.appCoordinator.isCreateMumorySheetShown = true
-                    //                            self.appCoordinator.isSearchLocationViewShown = false
-                    //                        }
+                    
+                    appCoordinator.path.removeLast(appCoordinator.path.count)
                 }) {
                     Rectangle()
                         .foregroundColor(.clear)
@@ -108,13 +116,15 @@ struct SearchLocationMapView: View {
                         .padding(.horizontal, 20)
                         .padding(.top, 38)
                 }
-                Spacer()
+//                Spacer()
             } // VStack
             .frame(height: UIScreen.main.bounds.height * 0.94 * 0.28)
             Spacer()
         } // VStack
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)
+//        .padding(.horizontal, 21)
+        .frame(width: UIScreen.main.bounds.width + 1)
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .ignoresSafeArea()
     }
 }

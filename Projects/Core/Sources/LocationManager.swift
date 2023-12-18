@@ -11,7 +11,7 @@ import CoreLocation
 import MapKit
 import Combine
 import Shared
-import Core
+
 
 final public class LocationManager: NSObject, ObservableObject {
     
@@ -33,7 +33,7 @@ final public class LocationManager: NSObject, ObservableObject {
     @Published public var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37, longitude: -121), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
     
     override public init() {
-        //        print("override public init in LocationManager")
+        print("override public init in LocationManager")
         super.init()
         
         locationManager.delegate = self
@@ -67,6 +67,7 @@ final public class LocationManager: NSObject, ObservableObject {
             print(".authorizedWhenInUse")
             //            locationManager.startUpdatingLocation()
             region = MKCoordinateRegion(center: locationManager.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+            
             break
         @unknown default:
             break

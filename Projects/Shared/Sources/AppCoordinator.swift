@@ -7,12 +7,17 @@
 //
 
 
+import SwiftUI
 import Foundation
 
+@available(iOS 16.0, *)
 public class AppCoordinator: ObservableObject {
     
-    public init () {}
+    public init () {
+        self.path = NavigationPath()
+    }
 
+    @Published public var path: NavigationPath
     
     @Published public var isCreateMumorySheetShown = false
     @Published public var isSearchLocationViewShown = false

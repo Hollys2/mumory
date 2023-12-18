@@ -11,43 +11,31 @@ import SwiftUI
 import PhotosUI
 import Core
 import Shared
+import MapKit
 
-struct CreateMumoryBottomSheet: Hashable {
-    let title: String
-}
 
 @available(iOS 16.0, *)
 public struct CreateMumoryBottomSheetView: View {
     
-//    @State private var translation: CGSize = CGSize(width: 0, height: 0)
     @State private var contentText: String = ""
     @State private var isPublic: Bool = true
     
+    @StateObject var mapViewModel: MapViewModel = .init()
+    @StateObject var viewModel: ContentViewModel = .init()
     @StateObject private var photoPickerViewModel = PhotoPickerViewModel()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var locationManager: LocationManager
-    @StateObject var mapViewModel: MapViewModel = .init()
-    @StateObject var viewModel: ContentViewModel = .init()
-    
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    
-    let address: AddressResult = AddressResult(title: "타이틀2", subtitle: "서브타이틀2")
     
     @GestureState var dragAmount = CGSize.zero
     @State private var translation: CGSize = .zero
     
-    @State private var path: NavigationPath = NavigationPath()
+    @State var annotationItem: AnnotationItem?
     
-    
-    var createMumoryBottomSheets: [CreateMumoryBottomSheet] = [.init(title: "음악 추가"),
-                                                               .init(title: "위치 추가")]
-    
-    public init() {
-    }
+    public init() {}
     
     public var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: self.$appCoordinator.path) {
             ZStack {
                 SharedAsset.backgroundColor.swiftUIColor
                 
@@ -133,7 +121,7 @@ public struct CreateMumoryBottomSheetView: View {
                     ScrollView {
                         VStack(spacing: 0) {
                             // MARK: -Search Music
-                            NavigationLink(value: createMumoryBottomSheets[0]) {
+                            NavigationLink(value: 0) {
                                 HStack(spacing: 16) {
                                     Image(uiImage: SharedAsset.musicCreateMumory.image)
                                         .resizable()
@@ -164,52 +152,47 @@ public struct CreateMumoryBottomSheetView: View {
                                 .padding(.top, 16)
                             
                             // MARK: -Search location
-                            NavigationLink(isActive: $appCoordinator.isSearchLocationViewShown, destination: { SearchLocationView(translation: $translation) }, label: {
-                                EmptyView()
-                            })
-                            
                             HStack(spacing: 16) {
-                                Image(uiImage: SharedAsset.locationCreateMumory.image)
-                                    .resizable()
-                                    .frame(width: 60, height: 60)
-                                    .onTapGesture {
-                                        appCoordinator.isSearchLocationViewShown = true
-                                    }
+                                NavigationLink(value: 1) {
+                                    Image(uiImage: SharedAsset.locationCreateMumory.image)
+                                        .resizable()
+                                        .frame(width: 60, height: 60)
+                                }
                                 
-                                ZStack {
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 60)
-                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                        .cornerRadius(15)
-                                    if let location = locationManager.choosedLocation {
-                                        VStack(spacing: 10) {
-                                            Text("\(location.title)")
-                                                .font(Font.custom("Pretendard", size: 15))
-                                                .foregroundColor(.white)
+                                NavigationLink(value: 1) {
+                                    ZStack {
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 60)
+                                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                            .cornerRadius(15)
+                                        if let location = locationManager.choosedLocation {
+                                            VStack(spacing: 10) {
+                                                Text("\(location.title)")
+                                                    .font(Font.custom("Pretendard", size: 15))
+                                                    .foregroundColor(.white)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .lineLimit(1)
+                                                
+                                                Text("\(location.subTitle)")
+                                                    .font(Font.custom("Pretendard", size: 13))
+                                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .lineLimit(1)
+                                                
+                                            }
+                                            .padding(.horizontal, 15)
+                                        } else {
+                                            Text("위치 추가하기")
+                                                .font(Font.custom("Pretendard", size: 16))
+                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                                 .lineLimit(1)
-                                            
-                                            Text("\(location.subTitle)")
-                                              .font(Font.custom("Pretendard", size: 13))
-                                              .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                              .frame(maxWidth: .infinity, alignment: .leading)
-                                              .lineLimit(1)
-
+                                                .padding(.horizontal, 20)
                                         }
-                                        .padding(.horizontal, 15)
-                                    } else {
-                                        Text("위치 추가하기")
-                                            .font(Font.custom("Pretendard", size: 16))
-                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .lineLimit(1)
-                                            .padding(.horizontal, 20)
+                                        
                                     }
-                                }
-                                .onTapGesture {
-                                    appCoordinator.isSearchLocationViewShown = true
                                 }
                             }
                             .padding(.top, 14)
@@ -346,8 +329,6 @@ public struct CreateMumoryBottomSheetView: View {
                                                     .resizable()
                                                     .scaledToFit()
                                                     .frame(width: 23.5, height: 23.5)
-                                                //                                    .offset(y: -(75 - 23.5) / 2 + 15.25)
-                                                //                                .padding(.bottom, 36.25)
                                                 
                                                 HStack(spacing: 0) {
                                                     Text("\(photoPickerViewModel.imageSelectionCount)")
@@ -400,6 +381,7 @@ public struct CreateMumoryBottomSheetView: View {
                         } // VStack
                         .padding(.top, 25)
                         .padding(.bottom, 50)
+                        
                     } // ScrollView
                     .scrollIndicators(.hidden)
                     .padding(.top, 11)
@@ -448,13 +430,7 @@ public struct CreateMumoryBottomSheetView: View {
                             Spacer()
                         }
                         .padding(.bottom, 100 - 19 - 19 - 18)
-                        //                        .padding(.horizontal, -20 + 25)
                     }
-                    //                    Button("Close Sheet") {
-                    //                        withAnimation(Animation.easeInOut(duration: 0.3)) {
-                    //                            appCoordinator.isCreateMumorySheetShown = false
-                    //                        }
-                    //                    }
                     //
                     //                    Button("SearchLocationView") {
                     //                        appCoordinator.isNavigationStackShown = false
@@ -478,23 +454,6 @@ public struct CreateMumoryBottomSheetView: View {
                     //                    }
                     
                 } // VStack
-                
-                //                NavigationLink(destination: SearchLocationView(), isActive: $appCoordinator.isSearchLocationViewShown) {
-                //                    EmptyView()
-                //                }
-                
-                //                NavigationLink(destination: SearchLocationMapView(address: address), isActive: $appCoordinator.isSearchLocationMapViewShown) {
-                //                    EmptyView()
-                //                }
-                
-                //                NavigationLink(value: <#T##(Decodable & Encodable & Hashable)?#>, label: <#T##() -> _#>)
-                //                Button(action: {
-                //                    path.append("1")
-                //                }, label: {
-                //                    Rectangle()
-                //                        .frame(width: 200, height: 50)
-                //                        .foregroundColor(.orange)
-                //                })
             } // ZStack
             .padding(.horizontal, 20)
             .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -502,21 +461,19 @@ public struct CreateMumoryBottomSheetView: View {
             .onDisappear {
                 locationManager.choosedLocation = nil
             }
-//            .navigationDestination(for: CreateMumoryBottomSheet.self, destination: { sheet in
-//                if sheet.title == "음악 추가" {
-//                    SearchMusicView()
-//                } else {
-//                    SearchLocationView(mapViewModel: mapViewModel)
-//                }
-//            })
-            
-            
+            .navigationDestination(for: Int.self, destination: { i in // NavigationStack 안에 있어야 동작함
+                if i == 0 {
+                    SearchMusicView()
+                } else if i == 1 {
+                    SearchLocationView(translation: $translation)
+                } else if i == 2 {
+//                    SearchLocationMapViewRepresentable(annotationItem: )
+                }
+            })
         } // NavigationStack
         .cornerRadius(23, corners: [.topLeft, .topRight])
         .offset(y: translation.height + 36) // withAnimation과 연관 있음
-//        .offset(y: appCoordinator.isCreateMumorySheetShown ? 36 + dragAmount.height : UIScreen.main.bounds.height) // withAnimation과 연관 있음
         .ignoresSafeArea()
-        .navigationDestination(isPresented: $appCoordinator.isSearchLocationMapViewShown, destination: {SearchLocationMapView(address: address)})
     }
 }
 
