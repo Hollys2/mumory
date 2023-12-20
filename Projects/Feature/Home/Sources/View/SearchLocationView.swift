@@ -17,12 +17,26 @@ import Shared
 struct AddressRow: View {
     
     @State var result: MKLocalSearchCompletion
-    @State var annotationItem: AnnotationItem?
+    
+    @ObservedObject var localSearchViewModel: LocalSearchViewModel = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var locationViewModel: LocationViewModel
     
     var body: some View {
-        NavigationLink(value: 2) {
+        Button(action: {
+            localSearchViewModel.getRegion(localSearchCompletion: result) { region in
+                if let region = region {
+                    DispatchQueue.main.async {
+                        let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
+                        locationViewModel.choosedMumoryModel = MumoryModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
+                    }
+                } else {
+                    print("ERROR: 해당하는 주소가 없습니다.")
+                }
+            }
+            appCoordinator.path.removeLast()
+        }) {
             HStack(alignment: .center, spacing: 13) {
                 Image(uiImage: SharedAsset.addressSearchLocation.image)
                     .resizable()
@@ -47,19 +61,7 @@ struct AddressRow: View {
             .padding(.horizontal, 5)
         }
     }
-    
-//        .navigationDestination(for: Int.self, destination: { i in // NavigationStack 안에 있어야 동작함
-//            if i == 0 {
-//                SearchMusicView()
-//            } else if i == 1 {
-//                SearchLocationView(translation: $translation)
-//            } else if i == 2 {
-////                    SearchLocationMapView()
-//                    SearchLocationMapViewRepresentable(annotationItem: $annotationItem)
-//            }
-//        })
 }
-
 
 @available(iOS 16.0, *)
 struct SearchLocationView: View {
@@ -69,14 +71,11 @@ struct SearchLocationView: View {
     @State private var text = ""
     @FocusState private var isFocusedTextField: Bool
     
-    @StateObject var viewModel: ContentViewModel = .init()
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
-    
-    @ObservedObject var mapViewModel: MapViewModel = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var locationManager: LocationManager
-    
+    @EnvironmentObject var mapViewModel : LocationViewModel
     
     @GestureState var dragAmount = CGSize.zero
     
@@ -161,10 +160,8 @@ struct SearchLocationView: View {
                     VStack(spacing: 15) {
                         VStack(spacing: 0) {
                             Button(action: {
-                                if let userLocation = locationManager.userLocation {
-                                    
-                                    locationManager.convertLocationToAddress(location: userLocation)
-                                    
+                                if let currentLocation = locationManager.currentLocation {
+                                    mapViewModel.chooseMumoryModelLocation(location: currentLocation)
                                     appCoordinator.path.removeLast()
                                 } else {
                                     print("ERROR: locationManager.userLocation is nil")
@@ -301,7 +298,7 @@ struct SearchLocationView: View {
                     .padding(.bottom, 66)
                 } // ScrollView
                 .scrollIndicators(.hidden)
-        
+                
             }
             
         } // VStack
@@ -319,7 +316,6 @@ struct SearchLocationView: View {
 //@available(iOS 16.0, *)
 //struct SearchLocationView_Previews: PreviewProvider {
 //    static var previews: some View {
-//        let sampleViewModel = ContentViewModel()
-//        SearchLocationView(viewModel: sampleViewModel)
+//        SearchLocationView()
 //    }
 //}

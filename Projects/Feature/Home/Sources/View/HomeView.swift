@@ -12,31 +12,53 @@ import MusicKit
 import Core
 import Shared
 
-struct Location: Identifiable {
-    //    let id: ObjectIdentifier
-    let id = UUID()
-    let name: String
-    let coordinate: CLLocationCoordinate2D
+struct List: View {
+    
+    @State var annotationModels: [MumoryModel]
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach($annotationModels) { i in
+                
+                GeometryReader { g in
+                    Card(annotationModel: i, width: g.frame(in: .global).width)
+                }
+                
+            }
+        }
+    }
 }
+
+struct Card: View {
+    
+    @Binding var annotationModel: MumoryModel
+
+    var width: CGFloat
+    
+    var body: some View {
+        VStack {
+//            Image
+//            Text(self.annotationModel.location)
+//                .font(.title)
+//                .fontWeight(.bold)
+        }
+    }
+}
+
 
 @available(iOS 16.4, *)
 public struct HomeView: View {
-    //        @State private var tappedLocation: CLLocationCoordinate2D?
+
     @State private var selectedTab: Tab = .home
-    
-//    @StateObject private var viewModel = HomeViewModel()
+    @State private var annotationSelected = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+//    @EnvironmentObject var locationManager: LocationManager
     
     @State private var offset: CGFloat = 16
     @State private var sheetOffset: CGFloat = .zero
-    
-    let address: AddressResult = AddressResult(title: "타이틀2", subtitle: "서브타이틀2")
-    
-//    @StateObject var locationManager = LocationManager()
-    
-    public init() {
-    }
+
+    public init() {}
     
     public var body: some View {
         if appCoordinator.isNavigationStackShown {
@@ -91,12 +113,21 @@ public struct HomeView: View {
                     .transition(.move(edge: .bottom))
                     .zIndex(1) // 추가해서 사라질 때 에니메이션 적용됨
             }
+            
+            if self.annotationSelected {
+                Color.black.opacity(0.3).ignoresSafeArea()
+                    .onTapGesture {
+                        self.annotationSelected.toggle()
+                    }
+                Color.pink
+                    .frame(width: 300, height: 200)
+            }
         }
     }
     
     var homeView: some View {
         ZStack {
-            HomeMapViewRepresentable()
+            HomeMapViewRepresentable(annotationSelected: $annotationSelected)
                 .ignoresSafeArea()
             
 //            Map(coordinateRegion: .constant(MKCoordinateRegion(
@@ -238,6 +269,3 @@ struct HomeView_Previews: PreviewProvider {
     }
 }
 
-extension MKMapView {
-    
-}

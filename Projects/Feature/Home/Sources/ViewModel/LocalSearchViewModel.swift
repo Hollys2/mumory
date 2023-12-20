@@ -16,7 +16,7 @@ import Shared
 class LocalSearchViewModel: NSObject, ObservableObject {
     
     @Published var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
-    @Published var annotationItems: [AnnotationItem] = [AnnotationItem]()
+    @Published var annotationItems: [MumoryModel] = [MumoryModel]()
     @Published var region: MKCoordinateRegion?
     @Published var coordinate2D : CLLocationCoordinate2D = .init()
     
@@ -54,20 +54,22 @@ class LocalSearchViewModel: NSObject, ObservableObject {
         
         let request = MKLocalSearch.Request()
 //        request.naturalLanguageQuery = localSearchCompletion.subtitle
-        
         request.naturalLanguageQuery = localSearchCompletion.subtitle.contains(localSearchCompletion.title) ? localSearchCompletion.subtitle : localSearchCompletion.title + " " + localSearchCompletion.subtitle
         
             Task {
                 do {
-                    let response = try await MKLocalSearch(request: request).start()
-                    let coordinate = response.mapItems.first?.placemark.coordinate
-                    let region = MKCoordinateRegion(center: coordinate ?? CLLocationCoordinate2D(), span: MapConstant.defaultSpan)
-
-                    DispatchQueue.main.async {
-//                        self.region = response.boundingRegion
-//                        self.coordinate2D = coordinate ?? CLLocationCoordinate2D()
+                    let response = try await MKLocalSearch(request: request).start()                    
+//                    print("response.mapItems.placemark: \(response.mapItems.first?.placemark.name)")
+//                    print("response.mapItems.placemark: \(response.mapItems.first?.placemark.title)")
+                    if let coordinate = response.mapItems.first?.placemark.coordinate {
+                        print("response.mapItems.first is not nil")
+                        self.region = MKCoordinateRegion(center: coordinate, span: MapConstant.defaultSpan)
+                    } else {
+                        print("response.mapItems.first is nil")
+                        self.region = response.boundingRegion
                     }
-                    completion(region)
+
+                    completion(self.region)
                 } catch {
                     print("Error getting region:", error.localizedDescription)
                     completion(nil)

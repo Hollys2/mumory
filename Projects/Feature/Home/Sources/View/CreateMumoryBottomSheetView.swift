@@ -20,17 +20,18 @@ public struct CreateMumoryBottomSheetView: View {
     @State private var contentText: String = ""
     @State private var isPublic: Bool = true
     
-    @StateObject var mapViewModel: MapViewModel = .init()
-    @StateObject var viewModel: ContentViewModel = .init()
-    @StateObject private var photoPickerViewModel = PhotoPickerViewModel()
+    @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     
+    @EnvironmentObject private var locationViewModel: LocationViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var mumoryDataModel: MumoryDataViewModel
     
     @GestureState var dragAmount = CGSize.zero
     @State private var translation: CGSize = .zero
     
-    @State var annotationItem: AnnotationItem?
+    @State var annotationItem: MumoryModel?
+    
     
     public init() {}
     
@@ -75,7 +76,16 @@ public struct CreateMumoryBottomSheetView: View {
                             Spacer()
                             
                             Button(action: {
-                                
+                                if let x = locationViewModel.choosedMumoryModel {
+                                    let newMumoryModel = MumoryModel(locationTitle: x.locationTitle, locationSubtitle: x.locationSubtitle, coordinate: x.coordinate)
+                                    print("x: \(x.coordinate)")
+                                    let newMumoryAnnotation = MumoryAnnotation(coordinate: x.coordinate!)
+                                    mumoryDataModel.mumoryAnnotations.append(newMumoryAnnotation)
+                                }
+                             
+                                withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
+                                    appCoordinator.isCreateMumorySheetShown = false
+                                }
                             }) {
                                 Rectangle()
                                     .foregroundColor(.clear)
@@ -143,7 +153,6 @@ public struct CreateMumoryBottomSheetView: View {
                                     }
                                 }
                             }
-                            //                            .navigationDestination(for: CreateMumoryBottomSheet.self, destination: { _ in SearchMusicView()})
                             
                             // MARK: -Underline
                             Divider()
@@ -167,20 +176,19 @@ public struct CreateMumoryBottomSheetView: View {
                                             .frame(height: 60)
                                             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                             .cornerRadius(15)
-                                        if let location = locationManager.choosedLocation {
+                                        if let choosedMumoryModel = locationViewModel.choosedMumoryModel {
                                             VStack(spacing: 10) {
-                                                Text("\(location.title)")
+                                                Text("\(choosedMumoryModel.locationTitle!)")
                                                     .font(Font.custom("Pretendard", size: 15))
                                                     .foregroundColor(.white)
                                                     .frame(maxWidth: .infinity, alignment: .leading)
                                                     .lineLimit(1)
                                                 
-                                                Text("\(location.subTitle)")
+                                                Text("\(choosedMumoryModel.locationSubtitle!)")
                                                     .font(Font.custom("Pretendard", size: 13))
                                                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                                     .frame(maxWidth: .infinity, alignment: .leading)
                                                     .lineLimit(1)
-                                                
                                             }
                                             .padding(.horizontal, 15)
                                         } else {
@@ -431,35 +439,13 @@ public struct CreateMumoryBottomSheetView: View {
                         }
                         .padding(.bottom, 100 - 19 - 19 - 18)
                     }
-                    //
-                    //                    Button("SearchLocationView") {
-                    //                        appCoordinator.isNavigationStackShown = false
-                    //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    //                            appCoordinator.isSearchLocationViewShown = true
-                    //                        }
-                    //                    }
-                    //
-                    //                    Button("SearchLocationMapView") {
-                    //                        appCoordinator.isNavigationStackShown = true
-                    //
-                    //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    //                            withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    //                                appCoordinator.isCreateMumorySheetShown = false
-                    //                            }
-                    //                        }
-                    //
-                    //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    //                            appCoordinator.isSearchLocationMapViewShown = true
-                    //                        }
-                    //                    }
-                    
                 } // VStack
             } // ZStack
             .padding(.horizontal, 20)
             .background(SharedAsset.backgroundColor.swiftUIColor)
             .ignoresSafeArea()
             .onDisappear {
-                locationManager.choosedLocation = nil
+                locationViewModel.choosedMumoryModel = nil
             }
             .navigationDestination(for: Int.self, destination: { i in // NavigationStack 안에 있어야 동작함
                 if i == 0 {
@@ -467,7 +453,7 @@ public struct CreateMumoryBottomSheetView: View {
                 } else if i == 1 {
                     SearchLocationView(translation: $translation)
                 } else if i == 2 {
-//                    SearchLocationMapViewRepresentable(annotationItem: )
+                    SearchLocationMapView()
                 }
             })
         } // NavigationStack
@@ -476,6 +462,28 @@ public struct CreateMumoryBottomSheetView: View {
         .ignoresSafeArea()
     }
 }
+
+
+//Button("SearchLocationView") {
+//    appCoordinator.isNavigationStackShown = false
+//    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//        appCoordinator.isSearchLocationViewShown = true
+//    }
+//}
+//
+//Button("SearchLocationMapView") {
+//    appCoordinator.isNavigationStackShown = true
+//
+//    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//        withAnimation(Animation.easeInOut(duration: 0.2)) {
+//            appCoordinator.isCreateMumorySheetShown = false
+//        }
+//    }
+//
+//    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//        appCoordinator.isSearchLocationMapViewShown = true
+//    }
+//}
 
 //@available(iOS 16.0, *)
 //struct CreateMumoryBottomSheetView_Previews: PreviewProvider {

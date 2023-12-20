@@ -8,6 +8,7 @@
 
 
 import SwiftUI
+import Core
 import Shared
 import _MapKit_SwiftUI
 
@@ -15,24 +16,19 @@ import _MapKit_SwiftUI
 struct SearchLocationMapView: View {
     
     @State var result: MKLocalSearchCompletion = MKLocalSearchCompletion()
-//    @State var annotationItem: AnnotationItem = AnnotationItem(title: "지도에서 선택하기", subTitle: "지도를 움직여보세요.", latitude: MapConstant.defaultCoordinate2D.latitude, longitude: MapConstant.defaultCoordinate2D.longitude)
-    @State var annotationItem: AnnotationItem?
-//        @Binding var result: MKLocalSearchCompletion
-//    @Binding var annotationItem: AnnotationItem
-    
-//    @State var region: MKCoordinateRegion = MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan)
+    @State var mumoryModel: MumoryModel = .init(coordinate: MapConstant.defaultCoordinate2D)
 
-//    @StateObject private var mapViewModel = MapViewModel()
-    @StateObject private var localSearchViewModel = LocalSearchViewModel()
+    @StateObject private var localSearchViewModel: LocalSearchViewModel = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject private var locationViewModel: LocationViewModel
 
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                SearchLocationMapViewRepresentable(annotationItem: $annotationItem)
+                SearchLocationMapViewRepresentable(mumoryModel: $mumoryModel)
 //                Map(
 //                    coordinateRegion: $localSearchViewModel.region
 ////                    annotationItems: localSearchViewModel.annotationItems,
@@ -49,7 +45,6 @@ struct SearchLocationMapView: View {
 //                            print("장소의 좌표를 찾을 수 없습니다.")
 //                        }
 //                    }
-////                    self.mapViewModel.getPlace(from: address)
 //                }
                 
                 Button(action: {
@@ -74,7 +69,7 @@ struct SearchLocationMapView: View {
             .frame(height: UIScreen.main.bounds.height * 0.94 * 0.72)
             
             VStack(spacing: 0) {
-                Text("\(annotationItem?.title ?? "타이틀없음!")")
+                Text("\(mumoryModel.locationTitle ?? "locationTitle")")
                     .font(
                         Font.custom("Pretendard", size: 20)
                             .weight(.bold)
@@ -82,9 +77,9 @@ struct SearchLocationMapView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 30)
-//                    .padding(.top, 35)
+                    .padding(.top, 35)
                 
-                Text("\(annotationItem?.subTitle ?? "서브타이틀없음")")
+                Text("\(mumoryModel.locationSubtitle ?? "locationSubtitle")")
                     .font(
                         Font.custom("Pretendard", size: 15)
                             .weight(.medium)
@@ -94,9 +89,8 @@ struct SearchLocationMapView: View {
                     .padding(.horizontal, 30)
                     .padding(.top, 14)
                 
-                // Navaigation Stack pop to root
                 Button(action: {
-                    
+                    locationViewModel.choosedMumoryModel = mumoryModel
                     appCoordinator.path.removeLast(appCoordinator.path.count)
                 }) {
                     Rectangle()
@@ -116,7 +110,6 @@ struct SearchLocationMapView: View {
                         .padding(.horizontal, 20)
                         .padding(.top, 38)
                 }
-//                Spacer()
             } // VStack
             .frame(height: UIScreen.main.bounds.height * 0.94 * 0.28)
             Spacer()
@@ -132,8 +125,7 @@ struct SearchLocationMapView: View {
 //@available(iOS 16.0, *)
 //struct SearchLocationMapVIew_Previews: PreviewProvider {
 //    static var previews: some View {
-//        let address: AddressResult = AddressResult(title: "타이틀", subtitle: "서브타이틀")
-//        SearchLocationMapView(address: address)
+//        SearchLocationMapView()
 //    }
 //}
 

@@ -9,16 +9,17 @@
 
 import SwiftUI
 import MapKit
+import MusicKit
 import Core
 import Shared
 
 struct HomeMapViewRepresentable: UIViewRepresentable {
     
     typealias UIViewType = MKMapView
+        
+    @Binding var annotationSelected: Bool
     
-//    @Binding var annotationItems: [AnnotationItem]
-    
-    @ObservedObject var locationManager: LocationManager2 = .init()
+    @EnvironmentObject var mumoryViewModel: MumoryDataViewModel
     
     func makeUIView(context: Context) -> UIViewType {
         print("@@makeUIView")
@@ -38,11 +39,19 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
         
         mapView.delegate = context.coordinator
         
+        let tapGesture = UITapGestureRecognizer(target: context.coordinator,
+                                                        action: #selector(Coordinator.tappedMap))
+        mapView.addGestureRecognizer(tapGesture)
+        
         return mapView
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
         //        print("@@updateUIView")
+        
+        for annotation in mumoryViewModel.mumoryAnnotations {
+            uiView.addAnnotation(annotation)
+        }
     }
     
     func makeCoordinator() -> MapViewCoordinator {
@@ -53,18 +62,36 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
 extension HomeMapViewRepresentable {
     
     class MapViewCoordinator: NSObject {
-        
+    
         let parent: HomeMapViewRepresentable
         var mapView: MKMapView?
         var startPlace: String = ""
         private let completer = MKLocalSearchCompleter()
         var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
-        var annotationItem: AnnotationItem?
+        var annotationItem: MumoryModel?
+        
+//        @EnvironmentObject var locationManager: LocationManager
         
         init(parent: HomeMapViewRepresentable) {
             self.parent = parent
+
             super.init()
 //            completer.delegate = self
+        }
+        
+        @objc func tappedMap(sender: UITapGestureRecognizer) {
+            guard let mapView = self.mapView else { return }
+            
+            if !parent.annotationSelected {
+                print("탭맵")
+                if let selectedAnnotation = mapView.selectedAnnotations.first {
+                    mapView.deselectAnnotation(selectedAnnotation, animated: true)
+//                    parent.annotationSelected.toggle()
+//                    print("탭맵")
+                }
+            }
+//            mapView.deselectAnnotation(AnnotationModel, animated: true)
+            // mapView.deselectAnnotation(yourSelectedAnnotation, animated: true)
         }
         
         func setGPSButton() {
@@ -103,54 +130,6 @@ extension HomeMapViewRepresentable {
             mapView.setRegion(region, animated: true)
         }
         
-        func getAddressFromLocation(latitude: Double, longitude: Double) {
-            let location = CLLocation(latitude: latitude, longitude: longitude)
-            let geocoder = CLGeocoder()
-            
-            geocoder.reverseGeocodeLocation(location) { placemarks, error in
-                guard let placemark = placemarks?.first, error == nil else {
-                    print("Error retrieving location information:", error?.localizedDescription ?? "Unknown error")
-                    return
-                }
-                
-                // Access various properties of the placemark
-                if let name = placemark.name {
-                    print("Name:", name)
-                }
-                
-                if let thoroughfare = placemark.thoroughfare {
-                    print("Thoroughfare:", thoroughfare)
-                }
-                
-                if let subThoroughfare = placemark.subThoroughfare {
-                    print("SubThoroughfare:", subThoroughfare)
-                }
-                
-                if let locality = placemark.locality {
-                    print("Locality:", locality)
-                }
-                
-                // Access more properties as needed
-                // For a full address, use placemark's properties such as thoroughfare, subThoroughfare, locality, administrativeArea, etc.
-                let address = "\(placemark.thoroughfare ?? ""), \(placemark.subThoroughfare ?? ""), \(placemark.locality ?? ""), \(placemark.administrativeArea ?? ""), \(placemark.country ?? "")"
-                print("Address:", address)
-            }
-        }
-        
-        func convertLocationToAddress(location: CLLocation) {
-            let geocoder = CLGeocoder()
-            
-            geocoder.reverseGeocodeLocation(location) { placemarks, error in
-                if error != nil {
-                    return
-                }
-                
-                guard let placemark = placemarks?.first else { return }
-                
-                self.startPlace = "\(placemark.country ?? "") \(placemark.locality ?? "") \(placemark.name ?? "")"
-            }
-        }
-        
         func moveFocusOnUserLocation() {
             guard let mapView = self.mapView else { return }
             print("moveFocusOnUserLocation")
@@ -171,83 +150,44 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
         print("didUpdate in MKMapViewDelegate")
         
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-
-//        mapView.setRegion(region, animated: true)
+        
+        mapView.setRegion(region, animated: true)
     }
     
     // 사용자가 지도를 움직일 때
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        print("regionDidChangeAnimated in MKMapViewDelegate")
-        
-        let geocoder = CLGeocoder()
-        let centerCoordinate = mapView.centerCoordinate
-        let location = CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude)
-        
-        geocoder.reverseGeocodeLocation(location) { placemarks, error in
-            if error != nil {
-                return
-            }
-            
-            guard let placemark = placemarks?.first else { return }
-            
-//            print("addressDictionary: \(placemark.addressDictionary)")
-            
-            self.annotationItem = AnnotationItem(title: "타이틀없음", subTitle: (placemark.locality ?? "로컬티없음") + " " + (placemark.name ?? "이름없음"), latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude)
-        }
+//        print("regionDidChangeAnimated in MKMapViewDelegate")
     }
-
-    func searchNearbyPlaces(at coordinate: CLLocationCoordinate2D) {
-        let request = MKLocalSearch.Request()
-        request.region = MKCoordinateRegion(center: coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
-        request.naturalLanguageQuery = "할리스"
-        Task {
-            let response = try await MKLocalSearch(request: request).start()
-            await MainActor.run {
-                response.mapItems.map {
-                    print("searchNearbyPlaces: \($0)")
-                    //                    AnnotationItem(
-                    //                        latitude: $0.placemark.coordinate.latitude,
-                    //                        longitude: $0.placemark.coordinate.longitude
-                    //                    )
-                }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        
+        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "MumoryAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "MumoryAnnotation")
+        
+        if annotation is MumoryAnnotation {
+            annotationView.image = SharedAsset.musicPin.image
+            annotationView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
+        } else {
+            annotationView.image = SharedAsset.userLocation.image
+            if let image = annotationView.image {
+                annotationView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
             }
         }
-//        Task {
-//            do {
-//                let response = try await MKLocalSearch(request: request).start()
-//                let name = response.mapItems.first?.placemark.name
-//                let title = response.mapItems.first?.placemark.title
-//                let coordinate = response.mapItems.first?.placemark.coordinate
-//                print("name: \(name)")
-//                print("title: \(title)")
-//                print("coordinate: \(coordinate)")
-//
-//            } catch {
-//                print("Error getting region:", error.localizedDescription)
-//
-//            }
-//        }
-        
-//        let search = MKLocalSearch(request: request)
-//        search.start { response, error in
-//            guard error == nil else {
-//                print("Error searching: \(error!.localizedDescription)")
-//                return
-//            }
-//
-//            guard let mapItems = response?.mapItems else {
-//                print("No results found.")
-//                return
-//            }
-//
-//            // 검색 결과 처리
-//            for item in mapItems {
-//                print("Place: \(item.name ?? ""), Location: \(item.placemark.coordinate.latitude), \(item.placemark.coordinate.longitude)")
-//                // 여기서 가져온 정보를 원하는 방식으로 활용할 수 있습니다.
-//            }
-//        }
+//        annotationView.canShowCallout = true // 터치
+        return annotationView
     }
-
+    
+    func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
+        print("didSelect")
+        
+        if annotation is MumoryAnnotation {
+            parent.annotationSelected = true
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
+        print("didDeselect")
+        parent.annotationSelected = false
+    }
 }
 
 extension HomeMapViewRepresentable.MapViewCoordinator: MKLocalSearchCompleterDelegate {
@@ -292,27 +232,3 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKLocalSearchCompleterDel
 //    }
 //}
 
-
-class LocationManager2: NSObject, ObservableObject {
-    
-    private let locationManager: CLLocationManager = .init()
-    
-    override init() {
-        super.init()
-        
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
-    }
-    
-}
-
-extension LocationManager2: CLLocationManagerDelegate {
-//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        print("didUpdateLocations in CLLocationManagerDelegate")
-//        guard !locations.isEmpty else { return }
-//        print("didUpdateLocations : \(locations.first)")
-//        locationManager.stopUpdatingLocation()
-//    }
-}

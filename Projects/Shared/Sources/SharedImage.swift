@@ -9,6 +9,7 @@
 
 import SwiftUI
 
+
 public class SharedBundle {
 }
 
@@ -23,3 +24,4 @@ extension UIImage {
         self.init(named: name, in: .shared, compatibleWith: nil)
     }
 }
+

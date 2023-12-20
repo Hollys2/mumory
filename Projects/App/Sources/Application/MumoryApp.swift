@@ -12,13 +12,16 @@ struct MumoryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @ObservedObject var appCoordinator: AppCoordinator = .init()
     @ObservedObject var locationManager: LocationManager = .init()
+    @ObservedObject var locationViewModel: LocationViewModel = .init()
+    @ObservedObject var musicAnnotationData: MumoryDataViewModel = .init()
 
     var body: some Scene {
         WindowGroup {
             HomeView()
                 .environmentObject(appCoordinator)
                 .environmentObject(locationManager)
-//                .ignoresSafeArea()
+                .environmentObject(locationViewModel)
+                .environmentObject(musicAnnotationData)
         }
     }
 }
