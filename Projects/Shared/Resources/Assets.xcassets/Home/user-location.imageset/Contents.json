@@ -1,29 +1,17 @@
 {
   "images" : [
     {
-<<<<<<< HEAD
-      "filename" : "Location_Spot 2.png",
-=======
-      "filename" : "user-location.png",
->>>>>>> 9-feat/create-mumory
+      "filename" : "Image.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-<<<<<<< HEAD
-      "filename" : "Location_Spot 1.png",
-=======
-      "filename" : "user-location@2x.png",
->>>>>>> 9-feat/create-mumory
+      "filename" : "Image@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-<<<<<<< HEAD
-      "filename" : "Location_Spot.png",
-=======
-      "filename" : "user-location@3x.png",
->>>>>>> 9-feat/create-mumory
+      "filename" : "Image@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

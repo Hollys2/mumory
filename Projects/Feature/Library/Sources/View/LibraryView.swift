@@ -80,22 +80,22 @@ public struct LibraryView: View {
                     }
                 }
                 .navigationBarBackButtonHidden()
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Text("라이브러리")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundStyle(.white)
-                    }
-                    
-                    ToolbarItem(placement: .topBarTrailing) {
-                        NavigationLink {
-                            SearchView()
-                        } label: {
-                            SharedAsset.search.swiftUIImage
-                                .frame(width: 30, height: 30)
-                        }
-                    }
-                }
+//                .toolbar {
+//                    ToolbarItem(placement: .topBarLeading) {
+//                        Text("라이브러리")
+//                            .font(.system(size: 24, weight: .bold))
+//                            .foregroundStyle(.white)
+//                    }
+//                    
+//                    ToolbarItem(placement: .topBarTrailing) {
+//                        NavigationLink {
+//                            SearchView()
+//                        } label: {
+//                            SharedAsset.search.swiftUIImage
+//                                .frame(width: 30, height: 30)
+//                        }
+//                    }
+//                }
                 
             }
         }
