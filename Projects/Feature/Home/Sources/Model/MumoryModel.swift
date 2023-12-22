@@ -12,54 +12,41 @@ import MapKit
 import MusicKit
 
 
-public struct MumoryModel: Identifiable {
-    
+public struct MusicModel: Identifiable, Hashable {
+
     public let id = UUID()
 
-    public var date: Date?
-
-    public var songID: MusicItemID?
-    public var title: String?
-    public var artist: String?
+    public var songID: MusicItemID
+    public var title: String
+    public var artist: String
     public var artworkUrl: URL?
-
-    public var locationTitle: String?
-    public var locationSubtitle: String?
-    public var coordinate: CLLocationCoordinate2D?
-
 }
 
-// memberwise initializer도 사용하기 위해
-extension MumoryModel {
+public struct LocationModel: Identifiable {
     
-    // MARK: -Music
-    public init(songID: MusicItemID, title: String, artist: String, artworkUrl: URL) {
-        self.songID = songID
-        self.title = title
-        self.artist = artist
-        self.artworkUrl = artworkUrl
-    }
+    public let id = UUID()
     
-    // MARK: -Location
-    public init(locationTitle: String, locationSubtitle: String, coordinate: CLLocationCoordinate2D) {
-        self.locationTitle = locationTitle
-        self.locationSubtitle = locationSubtitle
-        self.coordinate = coordinate
-    }
+    public var locationTitle: String
+    public var locationSubtitle: String
+    public var coordinate: CLLocationCoordinate2D
 }
 
 
-public class MumoryAnnotation: NSObject, MKAnnotation {
+public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
+    
+    public var date: Date
+    public var musicModel: MusicModel
+    public var locationModel: LocationModel
 
     public var coordinate: CLLocationCoordinate2D
-    public let title: String?
-    public let subtitle: String?
 
-    public init(coordinate: CLLocationCoordinate2D) {
-        self.coordinate = coordinate
-        self.title = nil
-        self.subtitle = nil
-        
-        super.init()
+    public init(date: Date, musicModel: MusicModel, locationModel: LocationModel) {
+        self.date = date
+        self.musicModel = musicModel
+        self.locationModel = locationModel
+        self.coordinate = locationModel.coordinate
+//        super.init()
     }
 }
+
+

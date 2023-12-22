@@ -15,37 +15,15 @@ import _MapKit_SwiftUI
 @available(iOS 16.0, *)
 struct SearchLocationMapView: View {
     
-    @State var result: MKLocalSearchCompletion = MKLocalSearchCompletion()
-    @State var mumoryModel: MumoryModel = .init(coordinate: MapConstant.defaultCoordinate2D)
-
-    @StateObject private var localSearchViewModel: LocalSearchViewModel = .init()
+    @State var locationModel: LocationModel = .init(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D())
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject private var locationViewModel: LocationViewModel
-
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                SearchLocationMapViewRepresentable(mumoryModel: $mumoryModel)
-//                Map(
-//                    coordinateRegion: $localSearchViewModel.region
-////                    annotationItems: localSearchViewModel.annotationItems,
-////                    annotationContent: { item in
-////                        MapMarker(coordinate: item.coordinate)
-////                    }
-//                )
-//                .onAppear {
-//                    localSearchViewModel.getRegion(localSearchCompletion: result) { coordinate in
-//                        if let coordinate = coordinate {
-//                            print("장소의 위도: \(coordinate.latitude), 경도: \(coordinate.longitude)")
-//                            // 여기에 가져온 좌표를 사용하는 로직을 추가할 수 있습니다.
-//                        } else {
-//                            print("장소의 좌표를 찾을 수 없습니다.")
-//                        }
-//                    }
-//                }
+                SearchLocationMapViewRepresentable(locationModel: $locationModel)
                 
                 Button(action: {
                     withAnimation {
@@ -69,7 +47,7 @@ struct SearchLocationMapView: View {
             .frame(height: UIScreen.main.bounds.height * 0.94 * 0.72)
             
             VStack(spacing: 0) {
-                Text("\(mumoryModel.locationTitle ?? "locationTitle")")
+                Text("\(locationModel.locationTitle)")
                     .font(
                         Font.custom("Pretendard", size: 20)
                             .weight(.bold)
@@ -79,7 +57,7 @@ struct SearchLocationMapView: View {
                     .padding(.horizontal, 30)
                     .padding(.top, 35)
                 
-                Text("\(mumoryModel.locationSubtitle ?? "locationSubtitle")")
+                Text("\(locationModel.locationSubtitle)")
                     .font(
                         Font.custom("Pretendard", size: 15)
                             .weight(.medium)
@@ -90,7 +68,7 @@ struct SearchLocationMapView: View {
                     .padding(.top, 14)
                 
                 Button(action: {
-                    locationViewModel.choosedMumoryModel = mumoryModel
+                    mumoryDataViewModel.choosedLocationModel = locationModel
                     appCoordinator.path.removeLast(appCoordinator.path.count)
                 }) {
                     Rectangle()

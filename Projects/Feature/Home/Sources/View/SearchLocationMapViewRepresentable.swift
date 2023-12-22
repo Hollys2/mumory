@@ -16,7 +16,9 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
     
     typealias UIViewType = MKMapView
     
-    @Binding var mumoryModel: MumoryModel
+    @Binding var locationModel: LocationModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
         print("@@makeUIView")
@@ -31,6 +33,10 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
         
         mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan), animated: true)
         
+        if let currentLocation: CLLocation = locationManager.currentLocation {
+            mapView.setRegion(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude), span: MapConstant.defaultSpan), animated: true)
+        }
+        
         context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
         context.coordinator.setCompassButton()
@@ -38,25 +44,14 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
         
         mapView.delegate = context.coordinator
         
-//        for musicAnnotation in musicAnnotations {
-//            mapView.addAnnotation(musicAnnotation)
-//        }
-        
-//        let annotation = MKPointAnnotation()
-//        annotation.coordinate = CLLocationCoordinate2D(latitude: 35.16097, longitude: 129.162577)
-//        annotation.title = "Custom Location"
-//        mapView.addAnnotation(musicAnnotation)
-
-        
         return mapView
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-//        print("@@updateUIView")
     }
     
     func makeCoordinator() -> MapViewCoordinator {
-        MapViewCoordinator(parent: self, mumoryModel: self.$mumoryModel)
+        MapViewCoordinator(parent: self)
     }
 }
 
@@ -64,30 +59,19 @@ extension SearchLocationMapViewRepresentable {
     
     class MapViewCoordinator: NSObject {
         
-        @Binding var mumoryModel: MumoryModel
-        
         let parent: SearchLocationMapViewRepresentable
+        
         var mapView: MKMapView?
-        var startPlace: String = ""
-        private let completer = MKLocalSearchCompleter()
-        var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
         var isChanging: Bool = false {
             didSet {
                 setPin()
             }
         }
                 
-        init(parent: SearchLocationMapViewRepresentable, mumoryModel: Binding<MumoryModel>) {
+        init(parent: SearchLocationMapViewRepresentable) {
             self.parent = parent
-            self._mumoryModel = mumoryModel
             super.init()
         }
-//        init(parent: SearchLocationMapViewRepresentable, annotationItem: Binding<AnnotationItem?>) {
-//            self.parent = parent
-//            self._annotationItem = annotationItem // Use the passed binding here
-//            super.init()
-//            //            completer.delegate = self
-//        }
         
         func setGPSButton() {
             guard let mapView = self.mapView else { return }
@@ -158,35 +142,21 @@ extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelega
 
     // 사용자가 지도를 움직이고 난 후
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        print("regionDidChangeAnimated in MKMapViewDelegate")
-
         self.isChanging = false
         
         let centerCoordinate = mapView.centerCoordinate
         let location = CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude)
 
-        let geocoder = CLGeocoder()
-        geocoder.reverseGeocodeLocation(location) { placemarks, error in
-            guard let placemark = placemarks?.first, error == nil else {
-                print("Error retrieving location information:", error?.localizedDescription ?? "Unknown error")
-                return }
-            
-            let locationTitle = placemark.name ?? ""
-            let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
-            
-            self.mumoryModel = MumoryModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: centerCoordinate)
-            
-            print("self.mumoryModel regionDidChangeAnimated in MKMapViewDelegate: \(self.mumoryModel)")
+        parent.mumoryDataViewModel.getChoosedeMumoryModelLocation(location: location) { model in
+            self.parent.locationModel = model
         }
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        //        guard let userLocation = annotation as? MKUserLocation else { return nil }
-//        if annotation is MKUserLocation {
-//                return nil // MKUserLocation에 대한 기본 어노테이션 뷰를 사용하고 싶지 않을 때
-//            }
+        print("@@@viewFor")
+        guard annotation is MKUserLocation else { return nil }
         
-        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "userLocationAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "userLocationAnnotation")
+        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "UserLocationAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "UserLocationAnnotation")
         
         annotationView.image = SharedAsset.userLocation.image
         if let image = annotationView.image {

@@ -12,36 +12,189 @@ import MusicKit
 import Core
 import Shared
 
-struct List: View {
+@available(iOS 16.0, *)
+struct MumoryCarousel: UIViewRepresentable {
+
+//    typealias UIViewType = UIScrollView
     
-    @State var annotationModels: [MumoryModel]
+    @Binding var annotationSelected: Bool
+    
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    var width: CGFloat
+    var height: CGFloat
+
+    func makeUIView(context: Context) -> UIScrollView {
+        let view = UIScrollView()
+        view.isPagingEnabled = true
+        
+        let totalWidth = self.width * CGFloat(mumoryDataViewModel.mumoryAnnotations.count)
+
+        view.contentSize = CGSize(width: totalWidth, height: self.height)
+        view.bounces = true
+        
+        view.showsVerticalScrollIndicator = false
+        view.showsHorizontalScrollIndicator = false
+        
+        let view1 = UIHostingController(rootView: MumoryList(annotationSelected: $annotationSelected, mumoryAnnotations: mumoryDataViewModel.mumoryAnnotations))
+//        view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: self.height)
+        view1.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: 418)
+        
+        view.addSubview(view1.view)
+        view.backgroundColor = .yellow
+
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIScrollView, context: Context) {}
+}
+
+@available(iOS 16.0, *)
+struct MumoryList: View {
+    
+    @Binding var annotationSelected: Bool
+    
+    @State var mumoryAnnotations: [MumoryAnnotation]
+    
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
         HStack(spacing: 0) {
-            ForEach($annotationModels) { i in
-                
-                GeometryReader { g in
-                    Card(annotationModel: i, width: g.frame(in: .global).width)
-                }
-                
+            ForEach($mumoryAnnotations) { i in
+                MumoryCard(mumoryAnnotation: i)
             }
+            Spacer()
         }
+        .background()
     }
 }
 
-struct Card: View {
+struct MumoryCard: View {
     
-    @Binding var annotationModel: MumoryModel
-
-    var width: CGFloat
+    @Binding var mumoryAnnotation: MumoryAnnotation
+    
+    @State var date: String = ""
     
     var body: some View {
         VStack {
-//            Image
-//            Text(self.annotationModel.location)
-//                .font(.title)
-//                .fontWeight(.bold)
+            ZStack {
+                VStack {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 310, height: 310)
+                        .background(
+                            AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 310, height: 310)
+                                default:
+                                    Color.red
+                                        .frame(width: 310, height: 310)
+                                }
+                            }
+                        )
+                        .cornerRadius(15)
+                    Spacer()
+                }
+                
+                VStack {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 310, height: 310)
+                        .background(
+                            LinearGradient(
+                                stops: [
+                                    Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98).opacity(0), location: 0.35),
+                                    Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98), location: 0.85),
+                                ],
+                                startPoint: UnitPoint(x: 0.5, y: 0.74),
+                                endPoint: UnitPoint(x: 0.5, y: 1)
+                            )
+                        )
+                        .cornerRadius(15)
+                    Spacer()
+                }
+                
+                VStack {
+                    Spacer()
+                    
+                    HStack(spacing: 5)  {
+                        Text("\(date)")
+                            .font(
+                                Font.custom("Pretendard", size: 15)
+                                    .weight(.semibold)
+                            )
+                            .foregroundColor(.white)
+                            .onAppear {
+                                let dateFormatter = DateFormatter()
+                                dateFormatter.dateFormat = "yyyy.MM.dd"
+                                self.date = dateFormatter.string(from: mumoryAnnotation.date)
+                            }
+                        
+                        Spacer()
+                        
+                        SharedAsset.locationMumoryPopup.swiftUIImage
+                            .resizable()
+                            .frame(width: 17, height: 17)
+                        
+                        Text("\(mumoryAnnotation.locationModel.locationTitle)")
+                            .font(
+                                Font.custom("Pretendard", size: 15)
+                                    .weight(.medium)
+                            )
+                            .foregroundColor(.white)
+                            .frame(width: 117, alignment: .leading)
+                            .lineLimit(1)
+                    } // HStack
+                    .padding(.horizontal, 16)
+                    
+                    // MARK: - Underline
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 284, height: 0.5)
+                        .background(.white.opacity(0.5))
+                    
+                    HStack {
+                        VStack(spacing: 12) {
+                            Text("\(mumoryAnnotation.musicModel.title)")
+                                .font(
+                                    Font.custom("Pretendard", size: 18)
+                                        .weight(.bold)
+                                )
+                                .foregroundColor(.white)
+                                .frame(width: 199, height: 13, alignment: .topLeading)
+                                .lineLimit(1)
+                            
+                            Text("\(mumoryAnnotation.musicModel.artist)")
+                                .font(Font.custom("Pretendard", size: 18))
+                                .foregroundColor(.white)
+                                .frame(width: 199, height: 13, alignment: .topLeading)
+                                .lineLimit(1)
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            
+                        }, label: {
+                            SharedAsset.nextButtonMumoryPopup.swiftUIImage
+                                .resizable()
+                                .frame(width: 48, height: 48)
+                        })
+                    } // HStack
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 22)
+                } // VStack
+            } // ZStack
+            .frame(width: 310, height: 418)
+            .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+            .cornerRadius(15)
         }
+        .frame(width: UIScreen.main.bounds.width - 80)
+        .background(.clear)
     }
 }
 
@@ -51,13 +204,12 @@ public struct HomeView: View {
 
     @State private var selectedTab: Tab = .home
     @State private var annotationSelected = false
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-//    @EnvironmentObject var locationManager: LocationManager
-    
     @State private var offset: CGFloat = 16
     @State private var sheetOffset: CGFloat = .zero
-
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     public init() {}
     
     public var body: some View {
@@ -65,21 +217,13 @@ public struct HomeView: View {
             NavigationStack {
                 main
             }
-            //                .sheet(isPresented: $appCoordinator.isCreateMumorySheetShown) {
-            //                    NavigationView {
-            //                        CreateMumoryView()
-            //                    }
-            //                    .presentationDetents([.height(UIScreen.main.bounds.height - 41)])
-            //                    .presentationDragIndicator(.visible)
-            //                    //            .interactiveDismissDisabled()
-            
         } else {
             main
         }
     }
     
     var main: some View {
-        ZStack {
+        ZStack(alignment: .center) {
             VStack(spacing: 0) {
                 switch selectedTab {
                 case .home:
@@ -115,12 +259,24 @@ public struct HomeView: View {
             }
             
             if self.annotationSelected {
-                Color.black.opacity(0.3).ignoresSafeArea()
-                    .onTapGesture {
-                        self.annotationSelected.toggle()
-                    }
-                Color.pink
-                    .frame(width: 300, height: 200)
+                ZStack(alignment: .center) {
+                    Color.black.opacity(0.3).ignoresSafeArea()
+                        .onTapGesture {
+                            self.annotationSelected.toggle()
+                        }
+                    
+                    MumoryCarousel(annotationSelected: $annotationSelected, width: UIScreen.main.bounds.width, height: 418)
+                        .frame(height: 418)
+                        
+                    Button(action: {
+                        self.annotationSelected = false
+                    }, label: {
+                        SharedAsset.closeButtonMumoryPopup.swiftUIImage
+                            .resizable()
+                            .frame(width: 26, height: 26)
+                    })
+                } // ZStack
+                .ignoresSafeArea()
             }
         }
     }
@@ -129,17 +285,12 @@ public struct HomeView: View {
         ZStack {
             HomeMapViewRepresentable(annotationSelected: $annotationSelected)
                 .ignoresSafeArea()
-            
-//            Map(coordinateRegion: .constant(MKCoordinateRegion(
-//                center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-//                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-//            )), interactionModes: .all)
-//            .ignoresSafeArea()
-//            .onAppear {
-//                MKMapView.appearance().mapType = .mutedStandard
-//                MKMapView.appearance().isPitchEnabled = true
-//            }
-            
+                .onAppear {
+                    Task {
+                        await mumoryDataViewModel.loadMusics()
+                    }
+                }
+
             VStack {
                 Rectangle()
                     .foregroundColor(.clear)

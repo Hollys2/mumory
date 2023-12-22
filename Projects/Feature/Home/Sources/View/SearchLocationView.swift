@@ -21,7 +21,7 @@ struct AddressRow: View {
     @ObservedObject var localSearchViewModel: LocalSearchViewModel = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var locationViewModel: LocationViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
         Button(action: {
@@ -29,7 +29,7 @@ struct AddressRow: View {
                 if let region = region {
                     DispatchQueue.main.async {
                         let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
-                        locationViewModel.choosedMumoryModel = MumoryModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
+                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
                     }
                 } else {
                     print("ERROR: 해당하는 주소가 없습니다.")
@@ -75,7 +75,7 @@ struct SearchLocationView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var locationManager: LocationManager
-    @EnvironmentObject var mapViewModel : LocationViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @GestureState var dragAmount = CGSize.zero
     
@@ -154,14 +154,15 @@ struct SearchLocationView: View {
             .frame(maxWidth: .infinity)
             .padding(.bottom, 15)
             
-            
             if self.localSearchViewModel.results.isEmpty {
                 ScrollView {
                     VStack(spacing: 15) {
                         VStack(spacing: 0) {
                             Button(action: {
                                 if let currentLocation = locationManager.currentLocation {
-                                    mapViewModel.chooseMumoryModelLocation(location: currentLocation)
+                                    mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
+                                        mumoryDataViewModel.choosedLocationModel = model
+                                    }
                                     appCoordinator.path.removeLast()
                                 } else {
                                     print("ERROR: locationManager.userLocation is nil")

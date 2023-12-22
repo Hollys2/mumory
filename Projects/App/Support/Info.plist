@@ -28,6 +28,8 @@
 	<string>지도 사용할 때만 사용하고싶죠?</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>항상 그리고 사용할 때만 사용하고싶다구?</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>뮤직킷?</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

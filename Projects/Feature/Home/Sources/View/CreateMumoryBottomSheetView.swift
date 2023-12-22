@@ -22,16 +22,11 @@ public struct CreateMumoryBottomSheetView: View {
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     
-    @EnvironmentObject private var locationViewModel: LocationViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var locationManager: LocationManager
-    @EnvironmentObject var mumoryDataModel: MumoryDataViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @GestureState var dragAmount = CGSize.zero
     @State private var translation: CGSize = .zero
-    
-    @State var annotationItem: MumoryModel?
-    
     
     public init() {}
     
@@ -55,6 +50,9 @@ public struct CreateMumoryBottomSheetView: View {
                                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                                         if value.translation.height > 130 {
                                             appCoordinator.isCreateMumorySheetShown = false
+                                            
+                                            mumoryDataViewModel.choosedMusicModel = nil
+                                            mumoryDataViewModel.choosedLocationModel = nil
                                         }
                                         translation.height = 0
                                     }
@@ -66,6 +64,9 @@ public struct CreateMumoryBottomSheetView: View {
                             Button(action: {
                                 withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
                                     appCoordinator.isCreateMumorySheetShown = false
+                                    
+                                    mumoryDataViewModel.choosedMusicModel = nil
+                                    mumoryDataViewModel.choosedLocationModel = nil
                                 }
                             }) {
                                 Image(uiImage: SharedAsset.closeCreateMumory.image)
@@ -76,16 +77,19 @@ public struct CreateMumoryBottomSheetView: View {
                             Spacer()
                             
                             Button(action: {
-                                if let x = locationViewModel.choosedMumoryModel {
-                                    let newMumoryModel = MumoryModel(locationTitle: x.locationTitle, locationSubtitle: x.locationSubtitle, coordinate: x.coordinate)
-                                    print("x: \(x.coordinate)")
-                                    let newMumoryAnnotation = MumoryAnnotation(coordinate: x.coordinate!)
-                                    mumoryDataModel.mumoryAnnotations.append(newMumoryAnnotation)
+                                if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+                                    let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: choosedMusicModel, locationModel: choosedLocationModel)
+                                    mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
+                                    mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
                                 }
-                             
+                                
                                 withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
                                     appCoordinator.isCreateMumorySheetShown = false
+                                    
                                 }
+                                
+                                mumoryDataViewModel.choosedMusicModel = nil
+                                mumoryDataViewModel.choosedLocationModel = nil
                             }) {
                                 Rectangle()
                                     .foregroundColor(.clear)
@@ -122,6 +126,9 @@ public struct CreateMumoryBottomSheetView: View {
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     if value.translation.height > 130 {
                                         appCoordinator.isCreateMumorySheetShown = false
+                                        
+                                        mumoryDataViewModel.choosedMusicModel = nil
+                                        mumoryDataViewModel.choosedLocationModel = nil
                                     }
                                     translation.height = 0
                                 }
@@ -144,15 +151,56 @@ public struct CreateMumoryBottomSheetView: View {
                                             .frame(height: 60)
                                             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                             .cornerRadius(15)
-                                        
-                                        Text("음악 추가하기")
-                                            .font(Font.custom("Pretendard", size: 16))
-                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .padding(.horizontal, 20)
-                                    }
-                                }
-                            }
+                                        if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel {
+                                            HStack(spacing: 10) {
+                                                Rectangle()
+                                                    .foregroundColor(.clear)
+                                                    .frame(width: 40, height: 40)
+                                                    .background(
+                                                        AsyncImage(url: choosedMusicModel.artworkUrl) { phase in
+                                                            switch phase {
+                                                            case .success(let image):
+                                                                image
+                                                                    .resizable()
+                                                                    .aspectRatio(contentMode: .fit)
+                                                                    .frame(width: 40, height: 40)
+                                                            default:
+                                                                Color.purple
+                                                                    .frame(width: 40, height: 40)
+                                                            }
+                                                        }
+                                                    )
+                                                    .cornerRadius(6)
+                                                
+                                                VStack(spacing: 3) {
+                                                    Text(choosedMusicModel.title)
+                                                        .font(
+                                                            Font.custom("Pretendard", size: 15)
+                                                                .weight(.semibold)
+                                                        )
+                                                        .lineLimit(1)
+                                                        .foregroundColor(.white)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                    
+                                                    Text(choosedMusicModel.artist)
+                                                        .font(Font.custom("Pretendard", size: 13))
+                                                        .lineLimit(1)
+                                                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                }
+                                                .frame(height: 60)
+                                            } // HStack
+                                            .padding(.horizontal, 15)
+                                        } else {
+                                            Text("음악 추가하기")
+                                                .font(Font.custom("Pretendard", size: 16))
+                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .padding(.horizontal, 20)
+                                        }
+                                    } // ZStack
+                                } // HStack
+                            } // NavigationLink
                             
                             // MARK: -Underline
                             Divider()
@@ -176,15 +224,15 @@ public struct CreateMumoryBottomSheetView: View {
                                             .frame(height: 60)
                                             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                             .cornerRadius(15)
-                                        if let choosedMumoryModel = locationViewModel.choosedMumoryModel {
+                                        if let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                                             VStack(spacing: 10) {
-                                                Text("\(choosedMumoryModel.locationTitle!)")
+                                                Text("\(choosedLocationModel.locationTitle)")
                                                     .font(Font.custom("Pretendard", size: 15))
                                                     .foregroundColor(.white)
                                                     .frame(maxWidth: .infinity, alignment: .leading)
                                                     .lineLimit(1)
                                                 
-                                                Text("\(choosedMumoryModel.locationSubtitle!)")
+                                                Text("\(choosedLocationModel.locationSubtitle)")
                                                     .font(Font.custom("Pretendard", size: 13))
                                                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -445,11 +493,13 @@ public struct CreateMumoryBottomSheetView: View {
             .background(SharedAsset.backgroundColor.swiftUIColor)
             .ignoresSafeArea()
             .onDisappear {
-                locationViewModel.choosedMumoryModel = nil
+//                mumoryDataViewModel.choosedMumoryModel = nil
+//                mumoryDataViewModel.choosedMusicModel = nil
+//                mumoryDataViewModel.choosedLocationModel = nil
             }
             .navigationDestination(for: Int.self, destination: { i in // NavigationStack 안에 있어야 동작함
                 if i == 0 {
-                    SearchMusicView()
+                    SearchMusicView(translation: $translation)
                 } else if i == 1 {
                     SearchLocationView(translation: $translation)
                 } else if i == 2 {
