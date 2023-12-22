@@ -8,53 +8,26 @@
 
 
 import SwiftUI
+import Shared
+import _MapKit_SwiftUI
 
-public struct TestView: View {
-    @State private var selectedDate = Date()
-    
-    public init(){}
-    
-    public var body: some View {
-        VStack {
-            DatePicker("Select a date", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
-                        .datePickerStyle(GraphicalDatePickerStyle())
-                        .accentColor(.orange)
-                        .frame(maxHeight: 400)
-                }
-//        TabView {
-//            OnBoardingView(title: "Hello1", description: "It's me1.")
-//            OnBoardingView(title: "Hello2", description: "It's me2.")
-//            OnBoardingView(title: "Hello3", description: "It's me3.")
-//        }
-//        .tabViewStyle(.page)
+class SwipeBackHostingController<Content: View>: UIHostingController<Content> {
+    override init(rootView: Content) {
+        super.init(rootView: rootView)
+        print("@@SwipeBackHostingController")
+        
+        // 백 스와이프를 처리하는 GestureRecognizer 추가
+        let gesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture))
+        gesture.direction = .right
+        view.addGestureRecognizer(gesture)
     }
-}
-
-struct OnBoardingView: View {
     
-    let title: String
-    let description: String
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "star")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 100, height: 100)
-            
-            Text(title)
-                .font(.title).bold()
-            
-            Text(description)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
-        }
-        .padding(.horizontal, 50)
+    @objc private func handleSwipeGesture() {
+        // 백 스와이프가 감지되면 뷰를 닫음
+        presentationController?.presentedViewController.dismiss(animated: true, completion: nil)
     }
-}
-
-struct TestView_Previews: PreviewProvider {
-    static var previews: some View {
-        TestView()
+    
+    @objc required dynamic init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

@@ -11,7 +11,7 @@ let project = Project(name: "Feature",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .default,
                                        sources: ["**/Sources/**"],
-                                       resources: ["**/Resources/**"],
+//                                       resources: ["**/Resources/**"],
                                        dependencies: [
                                         .project(target: "Core", path: "../Core"),
                                         .project(target: "Shared", path: "../Shared"),

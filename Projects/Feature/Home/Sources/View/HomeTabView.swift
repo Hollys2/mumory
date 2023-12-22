@@ -17,10 +17,12 @@ enum Tab {
     case notification
 }
 
+@available(iOS 16.0, *)
 struct HomeTabView: View {
 
     @Binding var selectedTab: Tab
-    @Binding var isBottomSheetShown: Bool
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
     
     var body: some View {
         GeometryReader { geometry in
@@ -40,8 +42,8 @@ struct HomeTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    withAnimation {
-                        self.isBottomSheetShown.toggle()
+                    withAnimation(Animation.easeInOut(duration: 0.3)) {
+                        appCoordinator.isCreateMumorySheetShown.toggle()
                     }
                 }) {
                     Image(asset: SharedAsset.createMumoryTabbar)
