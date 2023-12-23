@@ -51,6 +51,9 @@ struct SearchSongItem: View {
         .padding(.bottom, 19)
         .padding(.leading, 20)
         .background(.clear)
+        .onAppear(perform: {
+            print(song.genreNames)
+        })
     }
     
     
