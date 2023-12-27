@@ -52,9 +52,8 @@ public struct RecommendationView: View {
                     .padding(.top, 6)
                     
                     //최신 곡 순위
-    //                UIScrollViewWrapper{
-                        ScrollView(.horizontal) {
-                        LazyHGrid(rows: rows,content: {
+                    UIScrollViewWrapper{
+                        LazyHGrid(rows: rows, content: {
                             ForEach(0 ..< musicChart.count, id: \.self) { index in
                                 let song = musicChart[index]
                                 let rank = index + 1
@@ -63,20 +62,25 @@ public struct RecommendationView: View {
                                     .frame(width: 330, alignment: .leading)
                                     .onTapGesture {
                                         nowPlaySong.song = song
-                                        isShowing = true
+//                                        isShowing = true
                                     }
-                                    .sheet(isPresented: $isShowing, content: {
-                                        bottomView(isTouch: $isShowing)
-                                            .presentationDragIndicator(.visible)
-                                            .presentationDetents([.fraction(0.5)])
-                                            .environmentObject(setView)
-    
-                                    })
+//                                    .sheet(isPresented: $isShowing, content: {
+//                                        bottomView(isTouch: $isShowing)
+//                                            .presentationDragIndicator(.visible)
+//                                            .presentationDetents([.fraction(0.5)])
+//                                            .environmentObject(setView)
+//    
+//                                    })
                                 
                             }
                         })
                     }
-                    .scrollIndicators(.hidden)
+                    
+    //                UIScrollViewWrapper{
+//                        ScrollView(.horizontal) {
+                      
+//                    }
+//                    .scrollIndicators(.hidden)
 
     //                .onChange(of: musicChart) { newValue in
     //

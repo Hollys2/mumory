@@ -8,23 +8,26 @@
 
 import UIKit
 import SwiftUI
+import MusicKit
 
 struct UIScrollViewWrapper<Content: View>: UIViewControllerRepresentable {
-
     var content: () -> Content
 
     init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
     }
 
+    
     func makeUIViewController(context: Context) -> UIScrollViewController {
         let vc = UIScrollViewController()
         vc.hostingController.rootView = AnyView(self.content())
+        print("makeUIcontroller")
         return vc
     }
 
     func updateUIViewController(_ viewController: UIScrollViewController, context: Context) {
         viewController.hostingController.rootView = AnyView(self.content())
+        print("update view controller")
     }
 }
 
@@ -32,7 +35,7 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
 
     lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.isPagingEnabled = true
+//        scrollView.isPagingEnabled = true
         return scrollView
     }()
     
@@ -66,18 +69,5 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
             viewA.bottomAnchor.constraint(equalTo: viewB.bottomAnchor),
         ])
     }
-    
-    //scroll view delegate
-//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        if (scrollView.contentOffset.x.truncatingRemainder(dividingBy: 350)) > (350/2) {
-////            scrollView.contentOffset.x = 0
-//        }
-//    }
-//    
-//    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-//        print("scrollview decelerating")
-//    }
-    
-    
 }
 
