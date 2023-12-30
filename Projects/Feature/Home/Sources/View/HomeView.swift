@@ -21,184 +21,245 @@ struct MumoryCarousel: UIViewRepresentable {
 
 //    typealias UIViewType = UIScrollView
     
+    @Binding var mumoryAnnotations: [MumoryAnnotation]
     @Binding var annotationSelected: Bool
     
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+//    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    var width: CGFloat
-    var height: CGFloat
-
     func makeUIView(context: Context) -> UIScrollView {
-        let view = UIScrollView()
-        view.isPagingEnabled = true
+        let scrollView = UIScrollView()
         
-        let totalWidth = self.width * CGFloat(mumoryDataViewModel.mumoryAnnotations.count)
+        scrollView.delegate = context.coordinator
+                
+        let totalWidth = (310 + 20) * CGFloat(mumoryAnnotations.count)
+        scrollView.contentSize = CGSize(width: totalWidth, height: 1)
+        
+        scrollView.isPagingEnabled = true
+        scrollView.contentMode = .scaleToFill
+        scrollView.clipsToBounds = false
+        scrollView.bounces = true
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        
+        let hostingController = UIHostingController(rootView: MumoryList(mumoryAnnotations: $mumoryAnnotations))
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: 418)
+        
+        scrollView.addSubview(hostingController.view)
+//        view.backgroundColor = .red
+        hostingController.view.backgroundColor = .clear
 
-        view.contentSize = CGSize(width: totalWidth, height: self.height)
-        view.bounces = true
-        
-        view.showsVerticalScrollIndicator = false
-        view.showsHorizontalScrollIndicator = false
-        
-        let view1 = UIHostingController(rootView: MumoryList(annotationSelected: $annotationSelected, mumoryAnnotations: mumoryDataViewModel.mumoryAnnotations))
-//        view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: self.height)
-        view1.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: 418)
-        
-        view.addSubview(view1.view)
-        view.backgroundColor = .yellow
-
-        return view
+        return scrollView
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+}
+
+extension MumoryCarousel {
+    
+    class Coordinator: NSObject {
+        
+        let parent: MumoryCarousel
+        
+        init(parent: MumoryCarousel) {
+            self.parent = parent
+            super.init()
+        }
+    }
+}
+
+extension MumoryCarousel.Coordinator: UIScrollViewDelegate {
+//    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+//           let pageWidth: CGFloat = 330.0 // 페이지의 너비
+//
+//           // 사용자가 놓은 스크롤의 최종 위치를 페이지 단위로 계산하여 목표 위치(targetContentOffset)를 조정
+//           let targetX = targetContentOffset.pointee.x
+//           let contentWidth = scrollView.contentSize.width
+//           let newPage = round(targetX / pageWidth)
+//           let xOffset = min(newPage * pageWidth, contentWidth - scrollView.bounds.width) // 너무 많이 이동하지 않도록 bounds 체크
+//
+//           targetContentOffset.pointee = CGPoint(x: xOffset, y: 0)
+//       }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        print(scrollView.contentOffset.x)
+    }
+
 }
 
 @available(iOS 16.0, *)
 struct MumoryList: View {
     
-    @Binding var annotationSelected: Bool
-    
-    @State var mumoryAnnotations: [MumoryAnnotation]
-    
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @Binding var mumoryAnnotations: [MumoryAnnotation]
     
     var body: some View {
         HStack(spacing: 0) {
-            ForEach($mumoryAnnotations) { i in
-                MumoryCard(mumoryAnnotation: i)
+            ForEach(mumoryAnnotations.indices, id: \.self) { index in
+                MumoryCard(mumoryAnnotation: $mumoryAnnotations[index], selectedIndex: index)
+                    .padding(.horizontal, 10)
             }
-            Spacer()
         }
-        .background()
     }
 }
 
 struct MumoryCard: View {
     
     @Binding var mumoryAnnotation: MumoryAnnotation
+    let selectedIndex: Int
     
     @State var date: String = ""
     
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
     var body: some View {
-        VStack {
-            ZStack {
-                VStack {
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: 310, height: 310)
-                        .background(
-                            AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 310, height: 310)
-                                default:
-                                    Color.red
-                                        .frame(width: 310, height: 310)
-                                }
+        ZStack {
+            VStack {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 310, height: 310)
+                    .background(
+                        AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 310, height: 310)
+                            default:
+                                Rectangle()
+                                  .foregroundColor(.clear)
+                                  .frame(width: 310, height: 310)
+                                  .background(Color(red: 0.25, green: 0.25, blue: 0.25))
+                                  .overlay(
+                                    Rectangle()
+                                      .inset(by: 0.5)
+                                      .stroke(.white, lineWidth: 1)
+                                  )
+                                  .overlay(
+                                    SharedAsset.defaultArtwork.swiftUIImage
+                                        .frame(width: 103, height: 124)
+                                        .background(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                  )
+                                
+//                                Color.red
+//                                    .frame(width: 310, height: 310)
                             }
-                        )
-                        .cornerRadius(15)
-                    Spacer()
-                }
-                
-                VStack {
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: 310, height: 310)
-                        .background(
-                            LinearGradient(
-                                stops: [
-                                    Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98).opacity(0), location: 0.35),
-                                    Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98), location: 0.85),
-                                ],
-                                startPoint: UnitPoint(x: 0.5, y: 0.74),
-                                endPoint: UnitPoint(x: 0.5, y: 1)
-                            )
-                        )
-                        .cornerRadius(15)
-                    Spacer()
-                }
-                
-                VStack {
-                    Spacer()
-                    
-                    HStack(spacing: 5)  {
-                        Text("\(date)")
-                            .font(
-                                Font.custom("Pretendard", size: 15)
-                                    .weight(.semibold)
-                            )
-                            .foregroundColor(.white)
-                            .onAppear {
-                                let dateFormatter = DateFormatter()
-                                dateFormatter.dateFormat = "yyyy.MM.dd"
-                                self.date = dateFormatter.string(from: mumoryAnnotation.date)
-                            }
-                        
-                        Spacer()
-                        
-                        SharedAsset.locationMumoryPopup.swiftUIImage
-                            .resizable()
-                            .frame(width: 17, height: 17)
-                        
-                        Text("\(mumoryAnnotation.locationModel.locationTitle)")
-                            .font(
-                                Font.custom("Pretendard", size: 15)
-                                    .weight(.medium)
-                            )
-                            .foregroundColor(.white)
-                            .frame(width: 117, alignment: .leading)
-                            .lineLimit(1)
-                    } // HStack
-                    .padding(.horizontal, 16)
-                    
-                    // MARK: - Underline
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: 284, height: 0.5)
-                        .background(.white.opacity(0.5))
-                    
-                    HStack {
-                        VStack(spacing: 12) {
-                            Text("\(mumoryAnnotation.musicModel.title)")
-                                .font(
-                                    Font.custom("Pretendard", size: 18)
-                                        .weight(.bold)
-                                )
-                                .foregroundColor(.white)
-                                .frame(width: 199, height: 13, alignment: .topLeading)
-                                .lineLimit(1)
-                            
-                            Text("\(mumoryAnnotation.musicModel.artist)")
-                                .font(Font.custom("Pretendard", size: 18))
-                                .foregroundColor(.white)
-                                .frame(width: 199, height: 13, alignment: .topLeading)
-                                .lineLimit(1)
                         }
+                    )
+                    .cornerRadius(15)
+                Spacer()
+            }
+            
+            VStack {
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 310, height: 310)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98).opacity(0), location: 0.35),
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98), location: 0.85),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 0.74),
+                            endPoint: UnitPoint(x: 0.5, y: 1)
+                        )
+                    )
+                    .cornerRadius(15)
+                Spacer()
+            }
+            
+            VStack {
+                Spacer()
+                
+                HStack(spacing: 5)  {
+                    Text("\(date)")
+                        .font(
+                            Font.custom("Pretendard", size: 15)
+                                .weight(.semibold)
+                        )
+                        .foregroundColor(.white)
+                        .onAppear {
+                            let dateFormatter = DateFormatter()
+                            dateFormatter.dateFormat = "yyyy.MM.dd"
+                            self.date = dateFormatter.string(from: mumoryAnnotation.date)
+                        }
+                    
+                    Spacer()
+                    
+                    SharedAsset.locationMumoryPopup.swiftUIImage
+                        .resizable()
+                        .frame(width: 17, height: 17)
+                    
+                    Text("\(mumoryAnnotation.locationModel.locationTitle)")
+                        .font(
+                            Font.custom("Pretendard", size: 15)
+                                .weight(.medium)
+                        )
+                        .foregroundColor(.white)
+                        .frame(width: 117, alignment: .leading)
+                        .lineLimit(1)
+                } // HStack
+                .padding(.horizontal, 16)
+                
+                // MARK: - Underline
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: 284, height: 0.5)
+                    .background(.white.opacity(0.5))
+                
+                HStack {
+                    VStack(spacing: 12) {
+                        Text("\(mumoryAnnotation.musicModel.title)")
+                            .font(
+                                Font.custom("Pretendard", size: 18)
+                                    .weight(.bold)
+                            )
+                            .foregroundColor(.white)
+                            .frame(width: 199, height: 13, alignment: .topLeading)
+                            .lineLimit(1)
                         
-                        Spacer()
-                        
-                        Button(action: {
-                            
-                        }, label: {
-                            SharedAsset.nextButtonMumoryPopup.swiftUIImage
-                                .resizable()
-                                .frame(width: 48, height: 48)
-                        })
-                    } // HStack
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 22)
-                } // VStack
-            } // ZStack
-            .frame(width: 310, height: 418)
-            .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-            .cornerRadius(15)
-        }
-        .frame(width: UIScreen.main.bounds.width - 80)
-        .background(.clear)
+                        Text("\(mumoryAnnotation.musicModel.artist)")
+                            .font(Font.custom("Pretendard", size: 18))
+                            .foregroundColor(.white)
+                            .frame(width: 199, height: 13, alignment: .topLeading)
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer()
+                    
+//                    NavigationLink(value: 1) {
+//                        SharedAsset.nextButtonMumoryPopup.swiftUIImage
+//                            .resizable()
+//                            .frame(width: 48, height: 48)
+//                    }
+                    Button(action: {
+                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+                            appCoordinator.isMumoryDetailShown = true
+                        }
+//                        appCoordinator.path.append(3)
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                        }
+                    }, label: {
+                        SharedAsset.nextButtonMumoryPopup.swiftUIImage
+                            .resizable()
+                            .frame(width: 48, height: 48)
+                    })
+                } // HStack
+                .padding(.horizontal, 16)
+                .padding(.bottom, 22)
+            } // VStack
+        } // ZStack
+        .frame(width: 310, height: 418)
+        .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+        .cornerRadius(15)
+        
+//        .fullScreenCover(isPresented: $appCoordinator.isMumoryDetailShown, content: {
+//            MumoryDetailView(mumoryAnnotation: $mumoryAnnotation)
+//                .ignoresSafeArea()
+//        })
     }
 }
 
@@ -217,17 +278,23 @@ public struct HomeView: View {
     public init() {}
     
     public var body: some View {
-        if appCoordinator.isNavigationStackShown {
-            NavigationStack {
-                main
-            }
-        } else {
-            main
-        }
+//        GeometryReader { geometry in
+//            if appCoordinator.isNavigationStackShown {
+//                NavigationStack(path: $appCoordinator.path) {
+//                    main
+//                        .onAppear {
+//                            print(print("geometry.safeAreaInsets.top: \(geometry.safeAreaInsets.top)"))
+//                        }
+//                }
+//            } else {
+//                main
+//            }
+//        }
+        main
     }
     
     var main: some View {
-        ZStack(alignment: .center) {
+        ZStack {
             VStack(spacing: 0) {
                 switch selectedTab {
                 case .home:
@@ -241,7 +308,6 @@ public struct HomeView: View {
                         Color.red
                         Color.blue
                     }
-
                     .ignoresSafeArea()
                 }
                 HomeTabView(selectedTab: $selectedTab)
@@ -258,21 +324,23 @@ public struct HomeView: View {
                             }
                         }
                     }
+
                 CreateMumoryBottomSheetView()
                     .transition(.move(edge: .bottom))
                     .zIndex(1) // 추가해서 사라질 때 에니메이션 적용됨
             }
             
             if self.annotationSelected {
-                ZStack(alignment: .center) {
-                    Color.black.opacity(0.3).ignoresSafeArea()
+                ZStack {
+                    Color.black.opacity(0.6).ignoresSafeArea()
                         .onTapGesture {
                             self.annotationSelected.toggle()
                         }
                     
-                    MumoryCarousel(annotationSelected: $annotationSelected, width: UIScreen.main.bounds.width, height: 418)
+                    MumoryCarousel(mumoryAnnotations: $mumoryDataViewModel.mumoryAnnotations, annotationSelected: $annotationSelected)
                         .frame(height: 418)
-                        
+                        .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
+                    
                     Button(action: {
                         self.annotationSelected = false
                     }, label: {
@@ -280,8 +348,17 @@ public struct HomeView: View {
                             .resizable()
                             .frame(width: 26, height: 26)
                     })
+                    .offset(y: 209 + 13 + 25)
                 } // ZStack
                 .ignoresSafeArea()
+                .zIndex(2)
+    
+                if appCoordinator.isMumoryDetailShown {
+                    MumoryDetailView(mumoryAnnotation: mumoryDataViewModel.mumoryAnnotations[0])
+                        .transition(.move(edge: .trailing))
+                        .ignoresSafeArea()
+                        .zIndex(3)
+                }
             }
         }
     }
@@ -418,10 +495,10 @@ public struct HomeView: View {
 //        }
 //    }
 
-@available(iOS 16.4, *)
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-    }
-}
+//@available(iOS 16.4, *)
+//struct HomeView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        HomeView()
+//    }
+//}
 

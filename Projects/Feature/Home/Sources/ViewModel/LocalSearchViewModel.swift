@@ -11,29 +11,34 @@ import Foundation
 import Combine
 import MapKit
 import Shared
+import Core
 
 
-class LocalSearchViewModel: NSObject, ObservableObject {
+public class LocalSearchViewModel: NSObject, ObservableObject {
     
     @Published var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
-//    @Published var region: MKCoordinateRegion?
-    
-    private let searchCompleter = MKLocalSearchCompleter()
-    
     @Published var queryFragment: String = "" {
         didSet {
             searchCompleter.queryFragment = queryFragment
         }
     }
     
+    private let searchCompleter = MKLocalSearchCompleter()
+    
     var cancellable: AnyCancellable?
     
-    override init() {
+    private let locationManager = CLLocationManager()
+    
+    public override init() {
         super.init()
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        
         searchCompleter.delegate = self
+//        searchCompleter.region = MKCoordinateRegion(MKMapRect.world)
         
         cancellable = $queryFragment
-            .debounce(for: .seconds(0.1), scheduler: DispatchQueue.main)
+            .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
             .removeDuplicates()
             .sink(receiveValue: { value in
                 self.searchAddress(value)
@@ -72,9 +77,26 @@ class LocalSearchViewModel: NSObject, ObservableObject {
 }
 
 extension LocalSearchViewModel: MKLocalSearchCompleterDelegate {
-    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+    public func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         self.results = completer.results
         
         print("results = \(self.results)")
     }
+}
+
+extension LocalSearchViewModel: CLLocationManagerDelegate {
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//            if let userLocation = locations.first?.coordinate {
+//                print("userLocation is not nil")
+//                // 사용자의 위치가 업데이트되면 해당 위치를 기반으로 region 설정
+//                searchCompleter.region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+//            }
+        }
+        
+        // CLLocationManagerDelegate에서 권한 변경 처리
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+            if manager.authorizationStatus == .authorizedWhenInUse {
+                locationManager.startUpdatingLocation() // 권한이 승인되면 위치 업데이트 시작
+            }
+        }
 }

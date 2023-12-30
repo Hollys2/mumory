@@ -42,11 +42,10 @@ final public class LocationManager: NSObject, ObservableObject {
             print(".denied")
         case .authorizedAlways:
             print(".authorizedAlways")
-            //            locationManager.startUpdatingLocation()
+            locationManager.startUpdatingLocation()
         case .authorizedWhenInUse:
             print(".authorizedWhenInUse")
-            //            locationManager.startUpdatingLocation()
-            //            region = MKCoordinateRegion(center: locationManager.location!.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+            locationManager.startUpdatingLocation()
             
             break
         @unknown default:
