@@ -40,13 +40,13 @@ struct MusicRow: View {
                 }
                 
                 VStack(spacing: 6) {
-                    Text(musicModel.title ?? "NO TITLE ")
+                    Text(musicModel.title)
                         .lineLimit(1)
                         .font(Font.custom("Pretendard", size: 15).weight(.semibold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Text(musicModel.artist ?? "NO ARTIST")
+                    Text(musicModel.artist)
                         .lineLimit(1)
                         .font(Font.custom("Pretendard", size: 13))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
@@ -119,7 +119,7 @@ struct SearchMusicView: View {
                     .foregroundColor(.white)
                     .onChange(of: searchText){ newValue in
                         if !searchText.isEmpty {
-                            mumoryDataViewModel.musicModels = searchAppleMusic()
+//                            mumoryDataViewModel.musicModels = searchAppleMusic()
                         } else {
                             mumoryDataViewModel.musicModels = []
                         }
@@ -165,9 +165,6 @@ struct SearchMusicView: View {
                     }
                 } // VStack
                 .padding(.bottom, 66)
-                .onAppear {
-                    fetchMusic()
-                }
             } // ScrollView
             .scrollIndicators(.hidden)
         } // VStack
@@ -175,11 +172,15 @@ struct SearchMusicView: View {
         .padding(.horizontal, 21)
         .frame(width: UIScreen.main.bounds.width + 1)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .onAppear {
+            fetchMusic()
+        }
         .onDisappear {
             appCoordinator.isSearchLocationViewShown = false
             self.searchText = ""
             mumoryDataViewModel.musicModels = []
         }
+        
     }
     
     private let requestSearch: MusicCatalogSearchRequest = {
@@ -195,7 +196,7 @@ struct SearchMusicView: View {
             case .authorized:
                 do {
                     let response = try await requestSearch.response()
-                    
+
                     self.mumoryDataViewModel.musicModels = response.songs.compactMap({
                         .init(songID: $0.id, title: $0.title, artist: $0.artistName, artworkUrl: $0.artwork?.url(width: 500, height: 500))
                     })
@@ -208,26 +209,26 @@ struct SearchMusicView: View {
             }
         }
     }
-    
-    private func searchAppleMusic() -> [MusicModel] {
-        mumoryDataViewModel.musicModels = []
-        
-        Task {
-            do {
-                var request = MusicCatalogSearchRequest(term: searchText, types: [Song.self])
-                request.limit = 10
-                let response = try await request.response()
-
-                response.songs.forEach { song in
-                    let newMusicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
-                    mumoryDataViewModel.musicModels.append(newMusicModel)
-                }
-            } catch {
-                print("에러2: \(error)")
-            }
-        }
-        return mumoryDataViewModel.musicModels
-    }
+//
+//    private func searchAppleMusic() -> [MusicModel] {
+//        mumoryDataViewModel.musicModels = []
+//
+//        Task {
+//            do {
+//                var request = MusicCatalogSearchRequest(term: searchText, types: [Song.self])
+//                request.limit = 10
+//                let response = try await request.response()
+//
+//                response.songs.forEach { song in
+//                    let newMusicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
+//                    mumoryDataViewModel.musicModels.append(newMusicModel)
+//                }
+//            } catch {
+//                print("에러2: \(error)")
+//            }
+//        }
+//        return mumoryDataViewModel.musicModels
+//    }
     
     func fetchSongInfo(songId: String) async throws -> MusicModel {
         let musicItemID = MusicItemID(rawValue: songId)
@@ -270,14 +271,14 @@ struct SearchMusicView: View {
 }
 
 
-@available(iOS 16.0, *)
-struct SearchMusicView_Previews: PreviewProvider {
-    @State static var x: CGSize = CGSize(width: 100, height: 100)
-    
-    static var previews: some View {
-        SearchMusicView(translation: $x)
-    }
-}
+//@available(iOS 16.0, *)
+//struct SearchMusicView_Previews: PreviewProvider {
+//    @State static var x: CGSize = CGSize(width: 100, height: 100)
+//    
+//    static var previews: some View {
+//        SearchMusicView(translation: $x)
+//    }
+//}
 
 
 

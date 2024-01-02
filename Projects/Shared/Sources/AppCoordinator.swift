@@ -22,8 +22,20 @@ public class AppCoordinator: ObservableObject {
     @Published public var isCreateMumorySheetShown = false
     @Published public var isSearchLocationViewShown = false
     @Published public var isSearchLocationMapViewShown = false
+    @Published public var isMumoryDetailShown = false
+    @Published public var isNavigationBarShown = true
+    @Published public var isNavigationBarColored = false
+    @Published public var isReactionBarShown = true
+    @Published public var isMumoryDetailMenuSheetShown = false
     
     @Published public var isNavigationStackShown = false
     
+    @Published public var page: Int = -1
+    
     @Published public var translation: CGSize = CGSize(width: 0, height: 0)
+    
+    @Published public var safeAreaInsetsTop: CGFloat = 0.0
+    @Published public var safeAreaInsetsBottom: CGFloat = 0.0
+    
+//    @Published public var choosedMumory: MumoryAnnotation = MumoryAnnotation()
 }

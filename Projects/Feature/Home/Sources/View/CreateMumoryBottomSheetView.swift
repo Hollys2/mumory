@@ -39,25 +39,26 @@ public struct CreateMumoryBottomSheetView: View {
                     Image(uiImage: SharedAsset.dragIndicator.image)
                         .padding(.top, 14)
                         .frame(maxWidth: .infinity)
-                        .gesture(
-                            DragGesture()
-                                .updating($dragAmount) { value, state, _ in
-                                    if value.translation.height > 0 {
-                                        translation.height = value.translation.height
-                                    }
-                                }
-                                .onEnded { value in
-                                    withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                        if value.translation.height > 130 {
-                                            appCoordinator.isCreateMumorySheetShown = false
-                                            
-                                            mumoryDataViewModel.choosedMusicModel = nil
-                                            mumoryDataViewModel.choosedLocationModel = nil
-                                        }
-                                        translation.height = 0
-                                    }
-                                }
-                        )
+//                        .background(.pink)
+//                        .gesture(
+//                            DragGesture()
+//                                .updating($dragAmount) { value, state, _ in
+//                                    if value.translation.height > 0 {
+//                                        translation.height = value.translation.height
+//                                    }
+//                                }
+//                                .onEnded { value in
+//                                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+//                                        if value.translation.height > 130 {
+//                                            appCoordinator.isCreateMumorySheetShown = false
+//
+//                                            mumoryDataViewModel.choosedMusicModel = nil
+//                                            mumoryDataViewModel.choosedLocationModel = nil
+//                                        }
+//                                        translation.height = 0
+//                                    }
+//                                }
+//                        )
                     
                     ZStack {
                         HStack {
@@ -114,7 +115,8 @@ public struct CreateMumoryBottomSheetView: View {
                             .foregroundColor(.white)
                     } // ZStack
                     .padding(.top, 12)
-                    .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
+//                    .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
+                    .background(.pink)
                     .gesture(
                         DragGesture()
                             .updating($dragAmount) { value, state, _ in
@@ -123,7 +125,7 @@ public struct CreateMumoryBottomSheetView: View {
                                 }
                             }
                             .onEnded { value in
-                                withAnimation(Animation.easeInOut(duration: 0.1)) {
+                                withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     if value.translation.height > 130 {
                                         appCoordinator.isCreateMumorySheetShown = false
                                         
@@ -424,7 +426,6 @@ public struct CreateMumoryBottomSheetView: View {
                                             .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
                                         }
                                     }
-                                    
                                 }
                                 Spacer()
                             }
@@ -492,11 +493,6 @@ public struct CreateMumoryBottomSheetView: View {
             .padding(.horizontal, 20)
             .background(SharedAsset.backgroundColor.swiftUIColor)
             .ignoresSafeArea()
-            .onDisappear {
-//                mumoryDataViewModel.choosedMumoryModel = nil
-//                mumoryDataViewModel.choosedMusicModel = nil
-//                mumoryDataViewModel.choosedLocationModel = nil
-            }
             .navigationDestination(for: Int.self, destination: { i in // NavigationStack 안에 있어야 동작함
                 if i == 0 {
                     SearchMusicView(translation: $translation)
@@ -506,9 +502,9 @@ public struct CreateMumoryBottomSheetView: View {
                     SearchLocationMapView()
                 }
             })
-        } // NavigationStack
+        }// NavigationStack
         .cornerRadius(23, corners: [.topLeft, .topRight])
-        .offset(y: translation.height + 36) // withAnimation과 연관 있음
+        .offset(y: translation.height + appCoordinator.safeAreaInsetsTop + 16) // withAnimation과 연관 있음
         .ignoresSafeArea()
     }
 }

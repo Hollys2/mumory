@@ -47,6 +47,11 @@ public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
         self.coordinate = locationModel.coordinate
 //        super.init()
     }
+    
+    // 프리뷰에서 기본 생성자 사용
+    public override convenience init() {
+        self.init(date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()))
+       }
 }
 
 

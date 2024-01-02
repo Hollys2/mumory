@@ -18,10 +18,9 @@ struct AddressRow: View {
     
     @State var result: MKLocalSearchCompletion
     
-    @ObservedObject var localSearchViewModel: LocalSearchViewModel = .init()
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
     
     var body: some View {
         Button(action: {
@@ -71,10 +70,9 @@ struct SearchLocationView: View {
     @State private var text = ""
     @FocusState private var isFocusedTextField: Bool
     
-    @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @GestureState var dragAmount = CGSize.zero
@@ -90,7 +88,7 @@ struct SearchLocationView: View {
                     DragGesture()
                         .updating($dragAmount) { value, state, _ in
                             if value.translation.height > 0 {
-                                translation.height = value.translation.height
+                                self.translation.height = value.translation.height
                             }
                         }
                         .onEnded { value in

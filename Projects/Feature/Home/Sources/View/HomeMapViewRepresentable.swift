@@ -156,21 +156,21 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             artwork.layer.cornerRadius = 12
             artwork.clipsToBounds = true
             
-            if let url = parent.mumoryDataViewModel.createdMumoryAnnotation?.musicModel.artworkUrl {
-                artwork.loadImage(from: url)
-                annotationView.addSubview(artwork)
-            } else {
-                print("ERROR: NO URL")
-            }
-            
-//            for i in parent.mumoryDataViewModel.mumoryAnnotations {
-//                if let url = i.musicModel.artworkUrl {
-//                    artwork.loadImage(from: url)
-//                    annotationView.addSubview(artwork)
-//                } else {
-//                    print("ERROR: NO URL222")
-//                }
+//            if let url = parent.mumoryDataViewModel.createdMumoryAnnotation?.musicModel.artworkUrl {
+//                artwork.loadImage(from: url)
+//                annotationView.addSubview(artwork)
+//            } else {
+//                print("ERROR: NO URL")
 //            }
+            
+            for i in parent.mumoryDataViewModel.mumoryAnnotations {
+                if let url = i.musicModel.artworkUrl {
+                    artwork.loadImage(from: url)
+                    annotationView.addSubview(artwork)
+                } else {
+                    print("ERROR: NO URL222")
+                }
+            }
             
             
         } else if annotation is MKUserLocation {
