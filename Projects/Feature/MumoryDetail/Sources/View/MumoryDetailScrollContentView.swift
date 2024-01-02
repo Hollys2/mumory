@@ -10,7 +10,33 @@
 import SwiftUI
 import Shared
 
+struct TagView: View {
+    var text: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 5) {
+            Image(uiImage: SharedAsset.tagMumoryDatail.image)
+                .frame(width: 14, height: 14)
+
+            Text(text)
+                .font(
+                    Font.custom("Pretendard", size: 12)
+                        .weight(.semibold)
+                )
+                .foregroundColor(.white)
+        }
+        .padding(.leading, 8)
+        .padding(.trailing, 10)
+        .padding(.vertical, 7)
+        .background(.white.opacity(0.2))
+        .cornerRadius(14)
+    }
+}
+
 struct MumoryDetailScrollContentView: View {
+    
+    @State private var tagWidth: CGFloat = .zero
+    @State private var tags: [String] = ["기쁨기쁨기쁨",]
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     
@@ -91,52 +117,35 @@ struct MumoryDetailScrollContentView: View {
                     Spacer().frame(height: 55)
                     
                     // MARK: Tag
-                    HStack(spacing: 6) {
-                        HStack(alignment: .center, spacing: 5) {
-                            Image(uiImage: SharedAsset.tagMumoryDatail.image)
-                                .frame(width: 14, height: 14)
+                    HStack(spacing: 0) {
+                        ForEach(tags.indices, id: \.self) { index in
+                            TagView(text: tags[index])
+                                .background(
+                                    GeometryReader { proxy in
+                                        Color.clear
+                                            .onAppear {
+                                                self.tagWidth += proxy.size.width
+                                                print("tagWidth: \(tagWidth)")
+                                            }
+                                    })
                             
-                            Text("신남")
-                                .font(
-                                    Font.custom("Pretendard", size: 12)
-                                        .weight(.semibold)
-                                )
-                                .foregroundColor(.white)
+                            if index != 2 {
+                                Spacer().frame(width: 6)
+                            }
                         }
-                        .padding(.leading, 8)
-                        .padding(.trailing, 10)
-                        .padding(.vertical, 7)
-                        .background(.white.opacity(0.2))
-                        .cornerRadius(14)
-                        
-                        HStack(alignment: .center, spacing: 5) {
-                            Image(uiImage: SharedAsset.tagMumoryDatail.image)
-                                .frame(width: 14, height: 14)
-                            
-                            Text("태그태그")
-                                .font(
-                                    Font.custom("Pretendard", size: 12)
-                                        .weight(.semibold)
-                                )
-                                .foregroundColor(.white)
-                        }
-                        .padding(.leading, 8)
-                        .padding(.trailing, 10)
-                        .padding(.vertical, 7)
-                        .background(.white.opacity(0.2))
-                        .cornerRadius(14)
-                        
-                        Spacer()
+                        Spacer(minLength: 0)
                     } // HStack
                     
                     Spacer().frame(height: 25)
                     
                     // MARK: Content
-                    Text("내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내")
+                    Text("내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용 내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내")
                         .font(Font.custom("Pretendard", size: 15))
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.white)
-                    //                        .frame(minHeight: 300)
+                        .frame(maxWidth: .infinity)
+                        .fixedSize(horizontal: false, vertical: true)
+
                     Spacer().frame(height: 27)
                     
                     // MARK: Image
@@ -229,5 +238,12 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()   
+    }
+}
+
+struct MumoryDetailScrollContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        MumoryDetailScrollContentView()
+            .environmentObject(AppCoordinator())
     }
 }

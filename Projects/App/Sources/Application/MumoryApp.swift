@@ -17,8 +17,9 @@ struct MumoryApp: App {
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-//                HomeView()
-                ContentView()
+                HomeView()
+//                ContentView()
+//                MumoryDetailEditView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
@@ -26,12 +27,14 @@ struct MumoryApp: App {
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
+                        
                     }
+                    
+
             }
         }
     }
 }
-
 
 
 struct ContentView: View {

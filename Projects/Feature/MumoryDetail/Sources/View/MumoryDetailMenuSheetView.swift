@@ -18,6 +18,8 @@ struct MumoryDetailMenuSheetView: View {
     @GestureState var dragAmount: CGSize = CGSize(width: 0, height: 0)
     @State private var translation: CGSize = CGSize(width: 0, height: 0)
     
+    @State private var isEditMumory: Bool = false
+    
     public init() {}
     
     var dragGesture: some Gesture {
@@ -54,9 +56,10 @@ struct MumoryDetailMenuSheetView: View {
 //                    .gesture(dragGesture)
                 
                 Group {
-                    Button(action: {
-                        
-                    }, label: {
+                    NavigationLink(value: 4) {
+                        //                    Button(action: {
+                        //                        self.isEditMumory = true
+                        //                    }, label: {
                         HStack(spacing: 0) {
                             Spacer().frame(width: 24)
                             SharedAsset.editMumoryDetailMenu.swiftUIImage
@@ -74,7 +77,8 @@ struct MumoryDetailMenuSheetView: View {
                             
                             Spacer()
                         }
-                    })
+                        //                    })
+                    }
                     
                     Rectangle()
                         .foregroundColor(.clear)

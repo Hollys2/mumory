@@ -13,23 +13,19 @@ import Shared
 struct MumoryDetailReactionBarView: View {
     
     @State var isOn: Bool
+    @EnvironmentObject var appCoordinator: AppCoordinator
     
     var body: some View {
         ZStack(alignment: .top) {
             Rectangle()
                 .foregroundColor(.clear)
-                .frame(width: UIScreen.main.bounds.width, height: 85)
+                .frame(width: UIScreen.main.bounds.width, height: 64 + appCoordinator.safeAreaInsetsBottom)
                 .background(Color(red: 0.09, green: 0.09, blue: 0.09))
                 .overlay(
-                    self.isOn ?
                     Rectangle()
                         .frame(height: 0.5)
                         .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                        .offset(y: -42.75)
-                    : Rectangle()
-                        .frame(height: 0.5)
-                        .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                        .offset(y: 32.25)
+                        .offset(y: self.isOn ? -(64 + appCoordinator.safeAreaInsetsBottom + 0.5) / 2 : 21.25 + 22)
                 )
         
             HStack(alignment: .center) {
@@ -82,7 +78,7 @@ struct MumoryDetailReactionBarView: View {
             .padding(.horizontal, 20)
             .padding(.top, 11)
         }
-        .offset(y: self.isOn ? UIScreen.main.bounds.height - 85 : 0)
+        .offset(y: self.isOn ? UIScreen.main.bounds.height - 64 - appCoordinator.safeAreaInsetsBottom : 0)
     }
 }
 
