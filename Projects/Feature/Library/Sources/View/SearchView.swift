@@ -11,6 +11,7 @@ import Shared
 import MusicKit
 
 struct SearchView: View {
+    @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var nowPlaySong: NowPlaySong
     @Environment(\.dismiss) private var dismiss
 
@@ -35,7 +36,7 @@ struct SearchView: View {
                         
                         TextField("제목을 입력하세요", text: $term, prompt: searchPlaceHolder())
                             .textFieldStyle(.plain)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
                             .foregroundColor(.white)
                     
@@ -57,11 +58,15 @@ struct SearchView: View {
                             .padding(.leading, 8)
                             .foregroundColor(.white)
                             .font(.system(size: 16, weight: .medium))
+                            .onTapGesture {
+                                manager.nowPage = .entry
+                            }
                     })
                 })
                 .padding(.top, 12)
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
+                .padding(.bottom, 15)
                 .background(.clear)
                 
                 if term.count > 0{

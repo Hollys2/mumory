@@ -9,9 +9,7 @@
 import Foundation
 
 public class SetView: ObservableObject{
-    public init(){
-        
-    }
+    public init(){}
     
     @Published var isSearchViewShowing: Bool = false
 }

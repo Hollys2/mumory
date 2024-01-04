@@ -95,7 +95,7 @@ public struct HomeView: View {
                 case .social:
                     Text("The Second Tab")
                 case .library:
-                    LibraryView()
+                    LibraryManageView()
                 case .notification:
                     VStack(spacing: 0){
                         Color.red

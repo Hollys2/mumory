@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct SearchEntryView: View {
-    @EnvironmentObject var recentSearchObject: RecentSearchObject
+    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
 //    @State var recentSearchList: [String] = []
 
     var body: some View {
