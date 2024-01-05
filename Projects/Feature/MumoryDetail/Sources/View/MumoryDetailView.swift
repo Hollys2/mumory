@@ -32,11 +32,9 @@ struct MumoryDetailScrollView: UIViewRepresentable {
         
         let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView().environmentObject(appCoordinator))
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        hostingController.view.frame = CGRect(x: 0, y: -20, width: UIScreen.main.bounds.width, height: x)
-        // 가변 높이
+        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: 2300)
         
-        
-        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: 2000)
+        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: 2300)
         
         scrollView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
@@ -125,8 +123,10 @@ extension MumoryDetailScrollView.Coordinator: UIScrollViewDelegate {
     }
 }
 
-struct MumoryDetailView: View {
+public struct MumoryDetailView: View {
     
+    @Environment(\.presentationMode) var presentationMode
+
     @State var mumoryAnnotation: MumoryAnnotation
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -135,128 +135,112 @@ struct MumoryDetailView: View {
     @GestureState var dragAmount = CGSize.zero
     @State private var translation: CGSize = .zero
     
-    init(mumoryAnnotation: MumoryAnnotation) {
-        self.mumoryAnnotation = mumoryAnnotation
-//        UIScrollView.appearance().bounces = false
-    }
+//    init(mumoryAnnotation: MumoryAnnotation) {
+//        self.mumoryAnnotation = mumoryAnnotation
+////        UIScrollView.appearance().bounces = false
+//    }
+//    public init(mumoryAnnotation: MumoryAnnotation) {
+//        self.mumoryAnnotation = mumoryAnnotation
+//    }
     
-    var body: some View {
-        NavigationStack(path: self.$appCoordinator.path) {
-            ZStack(alignment: .top) {
-                Color(red: 0.09, green: 0.09, blue: 0.09)
-                
-                ZStack(alignment: .bottomLeading) {
-                    AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .transition(.move(edge: .trailing))
-                        default:
-                            // 로딩 이미지
-                            Color.purple
-                        }
-                    }.frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                    
-                    VStack(spacing: 23) {
-                        Text("\(mumoryAnnotation.musicModel.title)")
-                            .font(
-                                Font.custom("Pretendard", size: 24)
-                                    .weight(.medium)
-                            )
-                            .lineLimit(2)
-                            .foregroundColor(.white)
-                            .frame(width: 301, alignment: .leading)
-                        
-                        Text("\(mumoryAnnotation.musicModel.artist)")
-                            .font(
-                                Font.custom("Pretendard", size: 20)
-                                    .weight(.light)
-                            )
-                            .lineLimit(1)
-                            .foregroundColor(.white.opacity(0.8))
-                            .frame(width: 301, alignment: .leading)
-                    }
-                    .offset(y: -6.99)
-                    .padding(.leading, 20)
-                } // ZStack
-                
-                //            Button(action: {
-                //                print("HEY")
-                //            }, label: {
-                //                Image(uiImage: SharedAsset.playButtonMumoryDatail.image)
-                //                    .resizable()
-                //                    .frame(width: 19, height: 19)
-                //                    .background(.yellow)
-                //            })
-                //            .zIndex(1)
-                //            .allowsHitTesting(true)
-                
-                MumoryDetailScrollView()
-                
-                HStack {
-                    Button(action: {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isMumoryDetailShown = false
-                        }
-                    }, label: {
-                        Image(uiImage: SharedAsset.closeButtonMumoryDetail.image)
+    public var body: some View {
+        ZStack(alignment: .top) {
+            Color(red: 0.09, green: 0.09, blue: 0.09)
+            
+            ZStack(alignment: .bottomLeading) {
+                AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
                             .resizable()
-                            .frame(width: 30, height: 30)
-                    })
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isMumoryDetailMenuSheetShown = true
-                        }
-                    }, label: {
-                        Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                    })
-                }
-                .frame(width: UIScreen.main.bounds.width - 40)
-                .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
-                .padding(.bottom, 12)
-                .padding(.horizontal, 20)
-                .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
-                //            .transition(.move(edge: .top))
-                
-                if appCoordinator.isReactionBarShown {
-                    MumoryDetailReactionBarView(isOn: true)
-                    //                    .transition(.move(edge: .bottom))
-                }
-                
-                ZStack {
-                    if appCoordinator.isMumoryDetailMenuSheetShown {
-                        Color.black.opacity(0.5).ignoresSafeArea()
-                            .onTapGesture {
-                                withAnimation(Animation.easeOut(duration: 0.2)) {
-                                    appCoordinator.isMumoryDetailMenuSheetShown = false
-                                }
-                            }
-                        
-                        MumoryDetailMenuSheetView()
-                            .transition(.move(edge: .bottom))
+                            .aspectRatio(contentMode: .fit)
+                            .transition(.move(edge: .trailing))
+                    default:
+                        Color(red: 0.18, green: 0.18, blue: 0.18)
                     }
                 }
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                
+                VStack(spacing: 23) {
+                    Text("\(mumoryAnnotation.musicModel.title)")
+                        .font(
+                            Font.custom("Pretendard", size: 24)
+                                .weight(.medium)
+                        )
+                        .lineLimit(2)
+                        .foregroundColor(.white)
+                        .frame(width: 301, alignment: .leading)
+                    
+                    Text("\(mumoryAnnotation.musicModel.artist)")
+                        .font(
+                            Font.custom("Pretendard", size: 20)
+                                .weight(.light)
+                        )
+                        .lineLimit(1)
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 301, alignment: .leading)
+                }
+                .offset(y: -6.99)
+                .padding(.leading, 20)
             } // ZStack
-            .ignoresSafeArea()
-            .navigationDestination(for: Int.self, destination: { i in // NavigationStack 안에 있어야 동작함
-                if i == 0 {
-                    SearchMusicView(translation: $translation)
-                } else if i == 1 {
-                    SearchLocationView(translation: $translation)
-                } else if i == 2 {
-                    SearchLocationMapView()
-                } else if i == 4 {
-                    MumoryDetailEditView()
-                }
-            })
-        } // NavigationStack
+            
+            MumoryDetailScrollView()
+            
+            HStack {
+                Button(action: {
+                    if !appCoordinator.rootPath.isEmpty {
+                        appCoordinator.rootPath.removeLast()
+                    }
+                }, label: {
+                    Image(uiImage: SharedAsset.closeButtonMumoryDetail.image)
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                })
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(Animation.easeInOut(duration: 0.2)) {
+                        appCoordinator.isMumoryDetailMenuSheetShown = true
+                    }
+                }, label: {
+                    Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                })
+            }
+            .frame(width: UIScreen.main.bounds.width - 40)
+            .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
+            .padding(.bottom, 12)
+            .padding(.horizontal, 20)
+            .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
+            //            .transition(.move(edge: .top))
+            
+            if appCoordinator.isReactionBarShown {
+                MumoryDetailReactionBarView(isOn: true)
+                //                    .transition(.move(edge: .bottom))
+            }
+            
+//            if appCoordinator.isMumoryDetailMenuSheetShown {
+//                Color.black.opacity(0.5).ignoresSafeArea()
+//                    .onTapGesture {
+//                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+//                            appCoordinator.isMumoryDetailMenuSheetShown = false
+//                        }
+//                    }
+//                
+//                NavigationStack() {
+//                    MumoryDetailMenuSheetView(translation: $translation)
+//                    Spacer()
+//                }
+//                .cornerRadius(15)
+//                .offset(y: translation.height - appCoordinator.safeAreaInsetsBottom + UIScreen.main.bounds.height - 361)
+//                .ignoresSafeArea()
+//                .transition(.move(edge: .bottom))
+//                .zIndex(1)
+//            }
+        } // ZStack
+        .ignoresSafeArea()
     }
 }
 

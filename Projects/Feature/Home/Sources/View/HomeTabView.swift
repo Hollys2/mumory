@@ -44,6 +44,8 @@ struct HomeTabView: View {
                 Button(action: {
                     withAnimation(Animation.easeInOut(duration: 0.2)) {
                         appCoordinator.isCreateMumorySheetShown = true
+//                        appCoordinator.isTestViewShown = true
+                        
                     }
                 }) {
                     Image(asset: SharedAsset.createMumoryTabbar)

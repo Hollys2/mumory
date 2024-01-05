@@ -47,6 +47,8 @@ public struct MumoryDetailEditView: View {
     
     @State private var translation: CGSize = .zero
     
+    @Environment(\.dismiss) private var dismiss
+    
     public init() {}
     
     public var body: some View {
@@ -63,7 +65,7 @@ public struct MumoryDetailEditView: View {
                                 mumoryDataViewModel.choosedMusicModel = nil
                                 mumoryDataViewModel.choosedLocationModel = nil
                                 
-                                appCoordinator.path.removeLast()
+                                appCoordinator.rootPath.removeLast()
                             }
                         }) {
                             Image(uiImage: SharedAsset.closeCreateMumory.image)
@@ -92,7 +94,7 @@ public struct MumoryDetailEditView: View {
                                 .foregroundColor(.clear)
                                 .frame(width: 46, height: 30)
                                 .background(Color(red: 0.85, green: 0.85, blue: 0.85))
-//                                .background(Color(red: 0.47, green: 0.47, blue: 0.47)) 미충족
+                            //                                .background(Color(red: 0.47, green: 0.47, blue: 0.47)) 미충족
                                 .cornerRadius(31.5)
                                 .overlay(
                                     Text("완료")
@@ -117,7 +119,7 @@ public struct MumoryDetailEditView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         // MARK: -Search Music
-                        NavigationLink(value: 0) {
+                        NavigationLink(value: 2) {
                             HStack(spacing: 16) {
                                 Image(uiImage: SharedAsset.musicCreateMumory.image)
                                     .resizable()
@@ -189,13 +191,13 @@ public struct MumoryDetailEditView: View {
                         
                         // MARK: -Search location
                         HStack(spacing: 16) {
-                            NavigationLink(value: 1) {
+                            NavigationLink(value: 3) {
                                 Image(uiImage: SharedAsset.locationCreateMumory.image)
                                     .resizable()
                                     .frame(width: 60, height: 60)
                             }
                             
-                            NavigationLink(value: 1) {
+                            NavigationLink(value: 3) {
                                 ZStack {
                                     Rectangle()
                                         .foregroundColor(.clear)
@@ -286,24 +288,24 @@ public struct MumoryDetailEditView: View {
                                     TextField("", text: $tags[index], onEditingChanged: { isEditing in
                                         self.isTagEditing = isEditing
                                     })
-                                        .font(
-                                            Font.custom("Pretendard", size: 16)
-                                                .weight(.medium)
-                                        )
-                                        .foregroundColor(self.isTagEditing ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
-                                        .frame(width: min(CGFloat(tags[index].count * 9), (UIScreen.main.bounds.width - 80 - 16) / 3), alignment: .leading)
-                                        .onChange(of: tags[index], perform: { i in
-                                            if i.contains(" ") || i.hasSuffix(" ") {
-                                                let beforeSpace = i.components(separatedBy: " ").first ?? ""
-                                                tags[index] = beforeSpace
-
-                                                self.isCommit = true
-                                            } else if i == "" {
-                                                tags.remove(at: index)
-                                            } else if !i.hasPrefix("#") {
-                                                tags.remove(at: index)
-                                            }
-                                        })
+                                    .font(
+                                        Font.custom("Pretendard", size: 16)
+                                            .weight(.medium)
+                                    )
+                                    .foregroundColor(self.isTagEditing ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                                    .frame(width: min(CGFloat(tags[index].count * 9), (UIScreen.main.bounds.width - 80 - 16) / 3), alignment: .leading)
+                                    .onChange(of: tags[index], perform: { i in
+                                        if i.contains(" ") || i.hasSuffix(" ") {
+                                            let beforeSpace = i.components(separatedBy: " ").first ?? ""
+                                            tags[index] = beforeSpace
+                                            
+                                            self.isCommit = true
+                                        } else if i == "" {
+                                            tags.remove(at: index)
+                                        } else if !i.hasPrefix("#") {
+                                            tags.remove(at: index)
+                                        }
+                                    })
                                 }
                                 
                                 
@@ -345,12 +347,12 @@ public struct MumoryDetailEditView: View {
                                 .padding(.leading, 20 - 6)
                                 .padding(.trailing, 20 - 6)
                                 .padding(.vertical, 22 - 8)
-//                                .onReceive(contentText.publisher.collect()) {
-//                                    let newText = String($0.prefix(60))
-//                                    if newText != contentText {
-//                                        contentText = newText
-//                                    }
-//                                }
+                            //                                .onReceive(contentText.publisher.collect()) {
+                            //                                    let newText = String($0.prefix(60))
+                            //                                    if newText != contentText {
+                            //                                        contentText = newText
+                            //                                    }
+                            //                                }
                                 .onTapGesture {} // VStack의 onTapGesture를 무효화합니다.
                                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                             //                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
@@ -361,12 +363,12 @@ public struct MumoryDetailEditView: View {
                             //                        }
                             
                             
-//                            Text(contentText.count > 0 ? "\(contentText.count)" : "00")
-//                                .font(Font.custom("Pretendard", size: 13))
-//                                .foregroundColor(.white)
-//                                .padding(.trailing, 15)
-//                                .padding(.vertical, 22)
-//                                .frame(maxWidth: .infinity, alignment: .trailing)
+                            //                            Text(contentText.count > 0 ? "\(contentText.count)" : "00")
+                            //                                .font(Font.custom("Pretendard", size: 13))
+                            //                                .foregroundColor(.white)
+                            //                                .padding(.trailing, 15)
+                            //                                .padding(.vertical, 22)
+                            //                                .frame(maxWidth: .infinity, alignment: .trailing)
                             
                             
                             if self.contentText.isEmpty {
@@ -375,7 +377,7 @@ public struct MumoryDetailEditView: View {
                                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     .allowsHitTesting(false)
                                     .padding(.leading, 20)
-//                                    .padding(.trailing, 42)
+                                //                                    .padding(.trailing, 42)
                                     .padding(.vertical, 22)
                             }
                         }

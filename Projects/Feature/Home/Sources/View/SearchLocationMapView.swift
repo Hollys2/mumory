@@ -22,29 +22,25 @@ struct SearchLocationMapView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            ZStack {
+            ZStack(alignment: .topLeading) {
                 SearchLocationMapViewRepresentable(locationModel: $locationModel)
-                
+                    .statusBarHidden(true)
+
                 Button(action: {
                     withAnimation {
                         appCoordinator.isSearchLocationMapViewShown = false
-                        appCoordinator.path.removeLast()
+                        appCoordinator.rootPath.removeLast()
                     }
                 }) {
                     Image(uiImage: SharedAsset.backSearchLocation.image)
                         .resizable()
                         .frame(width: 30, height: 30)
-//                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
+                    //                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
                         .background(Color.red)
-                        
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.top, 31)
                 .padding(.leading, 20)
-                
-
             }
-            .frame(height: UIScreen.main.bounds.height * 0.94 * 0.72)
             
             VStack(spacing: 0) {
                 Text("\(locationModel.locationTitle)")
@@ -69,7 +65,7 @@ struct SearchLocationMapView: View {
                 
                 Button(action: {
                     mumoryDataViewModel.choosedLocationModel = locationModel
-                    appCoordinator.path.removeLast(appCoordinator.path.count)
+                    appCoordinator.rootPath.removeLast(appCoordinator.rootPath.count)
                 }) {
                     Rectangle()
                         .foregroundColor(.clear)
@@ -89,13 +85,13 @@ struct SearchLocationMapView: View {
                         .padding(.top, 38)
                 }
             } // VStack
-            .frame(height: UIScreen.main.bounds.height * 0.94 * 0.28)
-            Spacer()
+//            .frame(height: UIScreen.main.bounds.height * 0.94 * 0.28)
         } // VStack
         .navigationBarBackButtonHidden(true)
 //        .padding(.horizontal, 21)
         .frame(width: UIScreen.main.bounds.width + 1)
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+//        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .background(.brown)
         .ignoresSafeArea()
     }
 }

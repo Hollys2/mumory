@@ -9,17 +9,16 @@ struct MumoryApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    @ObservedObject var appCoordinator: AppCoordinator = .init()
-    @ObservedObject var locationManager: LocationManager = .init() // 위치 권한
-    @ObservedObject var localSearchViewModel: LocalSearchViewModel = .init()
-    @ObservedObject var mumoryDataViewModel: MumoryDataViewModel = .init()
+    @StateObject var appCoordinator: AppCoordinator = .init()
+    @StateObject var locationManager: LocationManager = .init() // 위치 권한
+    @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
+    @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
                 HomeView()
 //                ContentView()
-//                MumoryDetailEditView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
@@ -29,8 +28,6 @@ struct MumoryApp: App {
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                         
                     }
-                    
-
             }
         }
     }
@@ -38,37 +35,40 @@ struct MumoryApp: App {
 
 
 struct ContentView: View {
-
     var body: some View {
-        VStack {
-            ZStack(alignment: .bottom) {
-                Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                  .background(Color(red: 0.17, green: 0.17, blue: 0.17).opacity(0.2))
-                
-                Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(width: UIScreen.main.bounds.width, height: 64)
-                  .background(
-                    LinearGradient(
-                      stops: [
-                        Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09), location: 0.38),
-                        Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0), location: 0.59),
-                      ],
-                      startPoint: UnitPoint(x: 0.5, y: 1.28),
-                      endPoint: UnitPoint(x: 0.5, y: 0.56)
-                    )
-                  )
+        NavigationStack {
+            ZStack {
+                Color.orange
+                VStack {
+                    Color.red
+                    Color.blue
+                }
             }
-            
-            
-            Spacer()
+            .background(.green)
+            .ignoresSafeArea()
         }
     }
 }
 
 
+// blur
+//ZStack {
+//    SharedAsset.artworkSample.swiftUIImage
+//        .frame(width: UIScreen.main.bounds.width)
+//
+//    Text("FUCK YOU")
+//        .padding()
+//        .background(
+//            HStack{
+//                Rectangle()
+//                    .frame(width: 5)
+//                    .background(.ultraThinMaterial)
+//                    .blur(radius: 5)
+//                Spacer()
+//            }
+//        )
+//        .offset(y: 100)
+//}
 
 //struct ContentView: View {
 //    @State private var scrollOffset: Int = 0

@@ -16,6 +16,7 @@ extension View {
     }
 }
 
+// View.clipShape(RoundedCorner(radius: , corners: ))
 struct RoundedCorner: Shape {
     
     var radius: CGFloat = .infinity

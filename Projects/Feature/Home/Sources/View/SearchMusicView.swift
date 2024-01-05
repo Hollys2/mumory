@@ -23,7 +23,7 @@ struct MusicRow: View {
     var body: some View {
         Button(action: {
             mumoryDataViewModel.choosedMusicModel = musicModel
-            appCoordinator.path.removeLast()
+            appCoordinator.rootPath.removeLast()
         }) {
             HStack(alignment: .center, spacing: 13) {
                 AsyncImage(url: musicModel.artworkUrl) { phase in
@@ -63,7 +63,7 @@ struct MusicRow: View {
 @available(iOS 16.0, *)
 struct SearchMusicView: View {
     
-    @Binding var translation: CGSize
+//    @Binding var translation: CGSize
     
     @State private var searchText = ""
     
@@ -75,6 +75,8 @@ struct SearchMusicView: View {
     
     @GestureState var dragAmount = CGSize.zero
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         VStack(spacing: 0) {
             Image(uiImage: SharedAsset.dragIndicator.image)
@@ -82,25 +84,6 @@ struct SearchMusicView: View {
                 .padding(.top, 14)
                 .padding(.bottom, 14)
                 .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
-                .gesture(
-                    DragGesture()
-                        .updating($dragAmount) { value, state, _ in
-                            if value.translation.height > 0 {
-                                translation.height = value.translation.height
-                            }
-                        }
-                        .onEnded { value in
-                            withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                if value.translation.height > 130 {
-                                    appCoordinator.isCreateMumorySheetShown = false
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        appCoordinator.path.removeLast(appCoordinator.path.count)
-                                    }
-                                }
-                                translation.height = 0
-                            }
-                        }
-                )
             
             //        onCommit: {
             //            UIApplication.shared.resignFirstResponder() // 리턴 누르면 키보드 내림
@@ -145,7 +128,7 @@ struct SearchMusicView: View {
                 }
                 
                 Button(action: {
-                    appCoordinator.path.removeLast()
+                    self.appCoordinator.rootPath.removeLast()
                 }) {
                     Text("취소")
                         .font(

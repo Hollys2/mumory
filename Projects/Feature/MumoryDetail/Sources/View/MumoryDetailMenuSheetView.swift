@@ -12,77 +12,62 @@ import Shared
 
 struct MumoryDetailMenuSheetView: View {
     
+    @Binding private var translation: CGSize
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @GestureState var dragAmount: CGSize = CGSize(width: 0, height: 0)
-    @State private var translation: CGSize = CGSize(width: 0, height: 0)
     
     @State private var isEditMumory: Bool = false
     
-    public init() {}
-    
-    var dragGesture: some Gesture {
-        DragGesture()
-            .updating($dragAmount) { value, state, _ in
-                print("updating: \(value.translation.height)")
-                if value.translation.height > 0 {
-                    DispatchQueue.main.async {
-                        self.translation.height = value.translation.height
-                    }
-                }
-                
-            }
-            .onEnded { value in
-                print("onEnded: \(value.translation.height)")
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    if value.translation.height > 50 {
-                        appCoordinator.isMumoryDetailMenuSheetShown = false
-                    }
-                    self.translation.height = 0
-                }
-            }
+    public init(translation: Binding<CGSize>) {
+        self._translation =  translation
     }
     
     var body: some View {
-        ZStack {
-            Color(red: 0.12, green: 0.12, blue: 0.12)
+        VStack(spacing: 0) {
+            Spacer().frame(height: 9)
+            
+            Image(uiImage: SharedAsset.dragIndicator.image)
+                .resizable()
+                .frame(width: 47, height: 4)
+            
+            Spacer().frame(height: 9)
             
             VStack(spacing: 0) {
-//                Image(uiImage: SharedAsset.dragIndicator.image)
-//                    .frame(maxWidth: .infinity)
-//                    .frame(height: 22)
-//                    .background(.pink) // 색이 존재해야 제스처 동작함
-//                    .gesture(dragGesture)
-                
                 Group {
-                    NavigationLink(value: 4) {
-                        //                    Button(action: {
-                        //                        self.isEditMumory = true
-                        //                    }, label: {
-                        HStack(spacing: 0) {
-                            Spacer().frame(width: 24)
-                            SharedAsset.editMumoryDetailMenu.swiftUIImage
-                                .frame(width: 22, height: 22)
-                            
-                            Spacer().frame(width: 14)
-                            
-                            Text("뮤모리 수정")
-                                .font(
-                                    Font.custom("Pretendard", size: 16)
-                                        .weight(.medium)
-                                )
-                                .foregroundColor(.white)
-                                .frame(height: 55)
-                            
-                            Spacer()
+                    HStack(spacing: 0) {
+                        Spacer().frame(width: 24)
+                        SharedAsset.editMumoryDetailMenu.swiftUIImage
+                            .frame(width: 22, height: 22)
+                        
+                        Spacer().frame(width: 14)
+                        
+                        Text("뮤모리 수정")
+                            .font(
+                                Font.custom("Pretendard", size: 16)
+                                    .weight(.medium)
+                            )
+                            .foregroundColor(.white)
+                            .frame(height: 55)
+                        
+                        Spacer()
+                    }
+                    .background(Color(red: 0.09, green: 0.09, blue: 0.09)) // 배경색 지정해야 탭제스처 동작함
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            self.appCoordinator.isMumoryDetailMenuSheetShown = false
                         }
-                        //                    })
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            self.appCoordinator.rootPath.append(1)
+                        }
                     }
                     
                     Rectangle()
                         .foregroundColor(.clear)
-                        .frame(height: 0.3)
+                        .frame(height: 0.5)
                         .background(Color(red: 0.38, green: 0.38, blue: 0.38).opacity(0.4))
                     
                     Button(action: {
@@ -109,7 +94,7 @@ struct MumoryDetailMenuSheetView: View {
                     
                     Rectangle()
                         .foregroundColor(.clear)
-                        .frame(height: 0.3)
+                        .frame(height: 0.5)
                         .background(Color(red: 0.38, green: 0.38, blue: 0.38).opacity(0.4))
                     
                     Button(action: {
@@ -136,7 +121,7 @@ struct MumoryDetailMenuSheetView: View {
                     
                     Rectangle()
                         .foregroundColor(.clear)
-                        .frame(height: 0.3)
+                        .frame(height: 0.5)
                         .background(Color(red: 0.38, green: 0.38, blue: 0.38).opacity(0.4))
                 }
                 
@@ -170,11 +155,11 @@ struct MumoryDetailMenuSheetView: View {
                     
                     Rectangle()
                         .foregroundColor(.clear)
-                        .frame(height: 0.3)
+                        .frame(height: 0.5)
                         .background(Color(red: 0.38, green: 0.38, blue: 0.38).opacity(0.4))
                     
                     Button(action: {
-                        
+
                     }, label: {
                         HStack(spacing: 0) {
                             Spacer().frame(width: 24)
@@ -197,7 +182,7 @@ struct MumoryDetailMenuSheetView: View {
                     
                     Rectangle()
                         .foregroundColor(.clear)
-                        .frame(height: 0.3)
+                        .frame(height: 0.5)
                         .background(Color(red: 0.38, green: 0.38, blue: 0.38).opacity(0.4))
                     
                     Button(action: {
@@ -226,19 +211,21 @@ struct MumoryDetailMenuSheetView: View {
             .frame(width: UIScreen.main.bounds.width - 14 - 18, height: 330)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .cornerRadius(15)
-        } // VStack
+            
+            Spacer().frame(height: 9)
+        }
         .frame(width: UIScreen.main.bounds.width - 14, height: 361)
+        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
         .cornerRadius(15)
-        .offset(y: (UIScreen.main.bounds.height - 361) / 2 - appCoordinator.safeAreaInsetsBottom) // withAnimation과 연관 있음
     }
 }
 
-struct MumoryDetailMenuSheetView_Previews: PreviewProvider {
-    
-    static var previews: some View {
-        let appCoordinator = AppCoordinator() // 또는 실제 AppCoordinator 인스턴스 생성
-        
-        MumoryDetailMenuSheetView()
-            .environmentObject(appCoordinator)
-    }
-}
+//struct MumoryDetailMenuSheetView_Previews: PreviewProvider {
+//
+//    static var previews: some View {
+//        let appCoordinator = AppCoordinator() // 또는 실제 AppCoordinator 인스턴스 생성
+//
+//        MumoryDetailMenuSheetView()
+//            .environmentObject(appCoordinator)
+//    }
+//}

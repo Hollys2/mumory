@@ -34,7 +34,7 @@ struct AddressRow: View {
                     print("ERROR: 해당하는 주소가 없습니다.")
                 }
             }
-            appCoordinator.path.removeLast()
+            appCoordinator.rootPath.removeLast()
         }) {
             HStack(alignment: .center, spacing: 13) {
                 Image(uiImage: SharedAsset.addressSearchLocation.image)
@@ -65,8 +65,6 @@ struct AddressRow: View {
 @available(iOS 16.0, *)
 struct SearchLocationView: View {
     
-    @Binding var translation: CGSize
-    
     @State private var text = ""
     @FocusState private var isFocusedTextField: Bool
     
@@ -77,6 +75,8 @@ struct SearchLocationView: View {
     
     @GestureState var dragAmount = CGSize.zero
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         VStack(spacing: 0) {
             Image(uiImage: SharedAsset.dragIndicator.image)
@@ -84,25 +84,6 @@ struct SearchLocationView: View {
                 .padding(.top, 14)
                 .padding(.bottom, 14)
                 .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
-                .gesture(
-                    DragGesture()
-                        .updating($dragAmount) { value, state, _ in
-                            if value.translation.height > 0 {
-                                self.translation.height = value.translation.height
-                            }
-                        }
-                        .onEnded { value in
-                            withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                if value.translation.height > 130 {
-                                    appCoordinator.isCreateMumorySheetShown = false
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        appCoordinator.path.removeLast(appCoordinator.path.count)
-                                    }
-                                }
-                                translation.height = 0
-                            }
-                        }
-                )
             
             HStack {
                 ZStack(alignment: .leading) {
@@ -138,7 +119,7 @@ struct SearchLocationView: View {
                 }
                 
                 Button(action: {
-                    appCoordinator.path.removeLast()
+                    appCoordinator.rootPath.removeLast()
                 }) {
                     Text("취소")
                         .font(
@@ -161,7 +142,7 @@ struct SearchLocationView: View {
                                     mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
                                         mumoryDataViewModel.choosedLocationModel = model
                                     }
-                                    appCoordinator.path.removeLast()
+                                    appCoordinator.rootPath.removeLast()
                                 } else {
                                     print("ERROR: locationManager.userLocation is nil")
                                 }
@@ -197,7 +178,7 @@ struct SearchLocationView: View {
                                 .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
                             
                             Button(action: {
-                                appCoordinator.path.append(2)
+                                appCoordinator.rootPath.append("map")
                             }) {
                                 ZStack {
                                     Rectangle()
