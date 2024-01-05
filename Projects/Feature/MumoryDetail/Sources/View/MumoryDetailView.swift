@@ -135,13 +135,30 @@ public struct MumoryDetailView: View {
     @GestureState var dragAmount = CGSize.zero
     @State private var translation: CGSize = .zero
     
-//    init(mumoryAnnotation: MumoryAnnotation) {
-//        self.mumoryAnnotation = mumoryAnnotation
-////        UIScrollView.appearance().bounces = false
-//    }
-//    public init(mumoryAnnotation: MumoryAnnotation) {
-//        self.mumoryAnnotation = mumoryAnnotation
-//    }
+    var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                print("onChanged: \(value.translation.height)")
+                if value.translation.height > 0 {
+                    DispatchQueue.main.async {
+                        translation.height = value.translation.height
+                    }
+                }
+            }
+            .onEnded { value in
+                print("onEnded: \(value.translation.height)")
+                
+                withAnimation(Animation.easeInOut(duration: 0.2)) {
+//                    if value.translation.height > 130 {
+//                        appCoordinator.isCreateMumorySheetShown = false
+//
+//                        mumoryDataViewModel.choosedMusicModel = nil
+//                        mumoryDataViewModel.choosedLocationModel = nil
+//                    }
+                        translation.height = 0
+                }
+            }
+    }
     
     public var body: some View {
         ZStack(alignment: .top) {
@@ -221,25 +238,37 @@ public struct MumoryDetailView: View {
                 //                    .transition(.move(edge: .bottom))
             }
             
-//            if appCoordinator.isMumoryDetailMenuSheetShown {
-//                Color.black.opacity(0.5).ignoresSafeArea()
-//                    .onTapGesture {
-//                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-//                            appCoordinator.isMumoryDetailMenuSheetShown = false
-//                        }
-//                    }
-//                
-//                NavigationStack() {
-//                    MumoryDetailMenuSheetView(translation: $translation)
-//                    Spacer()
-//                }
-//                .cornerRadius(15)
-//                .offset(y: translation.height - appCoordinator.safeAreaInsetsBottom + UIScreen.main.bounds.height - 361)
-//                .ignoresSafeArea()
-//                .transition(.move(edge: .bottom))
-//                .zIndex(1)
-//            }
+            if appCoordinator.isMumoryDetailMenuSheetShown {
+                Color.black.opacity(0.5).ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+                            appCoordinator.isMumoryDetailMenuSheetShown = false
+                        }
+                    }
+                
+                MumoryDetailMenuSheetView(translation: $translation)
+                    .offset(y: self.translation.height + UIScreen.main.bounds.height - 361 - appCoordinator.safeAreaInsetsBottom)
+                    .simultaneousGesture(dragGesture)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(3)
+            }
+            
+            if appCoordinator.isMumoryDetailCommentSheetViewShown {
+                Color.black.opacity(0.5).ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                        }
+                    }
+                
+                MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
+                    .offset(y: self.translation.height + UIScreen.main.bounds.height - (UIScreen.main.bounds.height * 0.84) - appCoordinator.safeAreaInsetsBottom)
+                    .gesture(dragGesture)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
         } // ZStack
+        .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
     }
 }

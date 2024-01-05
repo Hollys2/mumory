@@ -30,9 +30,7 @@ public class AppCoordinator: ObservableObject {
     
     public init () {}
 
-    @Published public var path: NavigationPath = NavigationPath()
     @Published public var rootPath: NavigationPath = NavigationPath()
-
     @Published public var createMumoryPath: NavigationPath = NavigationPath()
     
     @Published public var isCreateMumorySheetShown = false

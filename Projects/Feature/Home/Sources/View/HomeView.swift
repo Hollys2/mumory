@@ -313,7 +313,6 @@ public struct HomeView: View {
                     }
                     
                     HomeTabView(selectedTab: $selectedTab)
-                        .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
                 }
                 
                 if appCoordinator.isCreateMumorySheetShown {
@@ -331,38 +330,30 @@ public struct HomeView: View {
                         .zIndex(1)
                 }
                 
-                //            if self.annotationSelected {
                 if self.appCoordinator.isMumoryPopUpShown {
-                    //                ZStack { // 부모 ZStack의 정렬 무시
-                    Color.black.opacity(0.6)
-                        .onTapGesture {
-                            //                            self.annotationSelected.toggle()
+                    ZStack { // 부모 ZStack의 정렬 무시
+                        Color.black.opacity(0.6)
+                            .onTapGesture {
+                                self.appCoordinator.isMumoryPopUpShown = false
+                            }
+                        
+                        MumoryCarousel(mumoryAnnotations: $mumoryDataViewModel.mumoryAnnotations)
+                            .frame(height: 418)
+                            .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
+                        
+                        Button(action: {
                             self.appCoordinator.isMumoryPopUpShown = false
-                        }
-                    
-                    MumoryCarousel(mumoryAnnotations: $mumoryDataViewModel.mumoryAnnotations)
-                        .frame(height: 418)
-                        .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
-                    
-                    Button(action: {
-                        //                        self.annotationSelected = false
-                        self.appCoordinator.isMumoryPopUpShown = false
-                    }, label: {
-                        SharedAsset.closeButtonMumoryPopup.swiftUIImage
-                            .resizable()
-                            .frame(width: 26, height: 26)
-                    })
-                    .offset(y: 209 + 13 + 25)
-                    //                }
-                    //                .background(.orange)
-                    .frame(width: 100, height: 100)
-                    .padding()
-                    .foregroundColor(.purple)
-                    
+                        }, label: {
+                            SharedAsset.closeButtonMumoryPopup.swiftUIImage
+                                .resizable()
+                                .frame(width: 26, height: 26)
+                        })
+                        .offset(y: 209 + 13 + 25)
+                    }
                 }
                 
                 if self.appCoordinator.isSocialMenuSheetViewShown {
-                    Color.black.opacity(0.3).ignoresSafeArea()
+                    Color.black.opacity(0.5).ignoresSafeArea()
                         .onTapGesture {
                             withAnimation(Animation.easeOut(duration: 0.2)) {
                                 self.appCoordinator.isSocialMenuSheetViewShown = false
@@ -370,56 +361,24 @@ public struct HomeView: View {
                         }
                     
                     SocialMenuSheetView(translation: $translation)
-                        .frame(width: UIScreen.main.bounds.width - 14)
-                        .offset(y: self.translation.height)
+                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
                         .simultaneousGesture(dragGesture)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
-                
-                if appCoordinator.isMumoryDetailMenuSheetShown {
-                    Color.black.opacity(0.5).ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(Animation.easeInOut(duration: 0.2)) {
-                                appCoordinator.isMumoryDetailMenuSheetShown = false
-                            }
-                        }
-                    
-                    MumoryDetailMenuSheetView(translation: $translation)
-                        .frame(width: UIScreen.main.bounds.width - 14)
-                        .offset(y: self.translation.height)
-                        .simultaneousGesture(dragGesture)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
-                
-                if appCoordinator.isMumoryDetailCommentSheetViewShown {
-                    Color.black.opacity(0.5).ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(Animation.easeInOut(duration: 0.2)) {
-                                appCoordinator.isMumoryDetailCommentSheetViewShown = false
-                            }
-                        }
-                    
-                    MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
-                        .offset(y: self.translation.height)
-                        .gesture(dragGesture)
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
             } // ZStack
             .ignoresSafeArea()
             .navigationDestination(for: Int.self) { i in
-                if i == 0 {
+                switch i {
+                case 0:
                     MumoryDetailView(mumoryAnnotation: mumoryDataViewModel.mumoryAnnotations[2])
-                        .navigationBarBackButtonHidden(true)
-                } else if i == 1 {
+                case 1:
                     MumoryDetailEditView()
-                } else if i == 2 {
+                case 2:
                     SearchMusicView()
-                } else if i == 3 {
+                case 3:
                     SearchLocationView()
-                } else {
+                default:
                     Color.pink
                 }
             }

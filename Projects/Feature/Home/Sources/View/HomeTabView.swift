@@ -67,9 +67,10 @@ struct HomeTabView: View {
                 }
                 .frame(width: geometry.size.width / 5)
             }
-            .frame(height: 89)
+            .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
             .background(Color.black)
         }
+        .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
     }
 }
 

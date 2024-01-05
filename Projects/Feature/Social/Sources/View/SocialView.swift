@@ -387,8 +387,8 @@ struct SocialItemView: View {
                             .lineLimit(1)
                             .frame(width: (UIScreen.main.bounds.width - 20) * 0.66 * 0.87, alignment: .leading)
                         
-//                        Spacer(minLength: 0)
                         Spacer()
+
                         // 컨텐트 너비에 따른 조건문 추가 예정
                         Text("더보기")
                             .font(
