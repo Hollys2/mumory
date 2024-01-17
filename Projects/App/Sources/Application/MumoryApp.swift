@@ -6,7 +6,7 @@ struct MumoryApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var nowPlaySong: NowPlaySong = NowPlaySong()
-    @StateObject var setView: SetView = SetView()
+//    @StateObject var setView: SetView = SetView()
 
 //    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
     
@@ -14,7 +14,7 @@ struct MumoryApp: App {
         WindowGroup {
             HomeView()
                 .environmentObject(nowPlaySong)
-                .environmentObject(setView)
+//                .environmentObject(setView)
 //                .environmentObject(recentSearchObject)
 //                .ignoresSafeArea()
         }

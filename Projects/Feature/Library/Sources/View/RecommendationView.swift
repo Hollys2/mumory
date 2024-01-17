@@ -51,42 +51,33 @@ public struct RecommendationView: View {
                     .padding(20)
                     .padding(.top, 6)
                     
+//                    RecentPopularSongView(musicChart: $musicChart)
+    
+                    
                     //최신 곡 순위
-                    UIScrollViewWrapper{
-                        LazyHGrid(rows: rows, content: {
-                            ForEach(0 ..< musicChart.count, id: \.self) { index in
-                                let song = musicChart[index]
-                                let rank = index + 1
-                                
-                                MusicChartItem(rank: rank, song: song) //순위 곡 item
-                                    .frame(width: 330, alignment: .leading)
-                                    .onTapGesture {
-                                        nowPlaySong.song = song
-//                                        isShowing = true
-                                    }
-//                                    .sheet(isPresented: $isShowing, content: {
-//                                        bottomView(isTouch: $isShowing)
-//                                            .presentationDragIndicator(.visible)
-//                                            .presentationDetents([.fraction(0.5)])
-//                                            .environmentObject(setView)
-//    
-//                                    })
-                                
-                            }
-                        })
-                    }
+//                    UIScrollViewWrapper{
+                    GeometryReader(content: { geometry in
                     
-    //                UIScrollViewWrapper{
-//                        ScrollView(.horizontal) {
-                      
-//                    }
-//                    .scrollIndicators(.hidden)
+                        UIScrollViewWrapper(musicChart: $musicChart) {
+                            LazyHGrid(rows: rows, content: {
+                                ForEach(0 ..< musicChart.count, id: \.self) { index in
+                                    let song = musicChart[index]
+                                    let rank = index + 1
+                                    
+                                    MusicChartItem(rank: rank, song: song) //순위 곡 item
+                                        .frame(width: 330, alignment: .leading)
+                                        .onTapGesture {
+                                            nowPlaySong.song = song
+                                            //                                        isShowing = true
+                                        }
+                                    
+                                }
+                            })
+                        }
+                        .frame(width: geometry.size.width, height: 500)
 
-    //                .onChange(of: musicChart) { newValue in
-    //
-    //                }
-    //                }
-                    
+                    })
+//                    }
                     
 
                     

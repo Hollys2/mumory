@@ -12,21 +12,25 @@ import MusicKit
 
 struct UIScrollViewWrapper<Content: View>: UIViewControllerRepresentable {
     var content: () -> Content
-
-    init(@ViewBuilder content: @escaping () -> Content) {
+    @Binding var musicChart: MusicItemCollection<Song>
+    
+    init(musicChart: Binding<MusicItemCollection<Song>>, @ViewBuilder content: @escaping () -> Content) {
         self.content = content
-    }
+        self._musicChart = musicChart
 
+    }
     
     func makeUIViewController(context: Context) -> UIScrollViewController {
         let vc = UIScrollViewController()
         vc.hostingController.rootView = AnyView(self.content())
+        vc.scrollView.contentSize = CGSize(width: 1000, height: 500) // contentSize 설정
         print("makeUIcontroller")
         return vc
     }
 
     func updateUIViewController(_ viewController: UIScrollViewController, context: Context) {
         viewController.hostingController.rootView = AnyView(self.content())
+        viewController.scrollView.contentSize = CGSize(width: 1000, height: 500)
         print("update view controller")
     }
 }
@@ -35,7 +39,8 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
 
     lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-//        scrollView.isPagingEnabled = true
+        scrollView.isScrollEnabled = true
+        scrollView.isPagingEnabled = true
         return scrollView
     }()
     
@@ -46,9 +51,7 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
         super.viewDidLoad()
         
         scrollView.delegate = self
-        
-//        print("view width: \(view.frame.width), height: \(view.frame.height)")
-        
+                
         self.view.addSubview(self.scrollView)
         self.pinEdges(of: self.scrollView, to: self.view)
 
@@ -56,8 +59,6 @@ class UIScrollViewController: UIViewController, UIScrollViewDelegate{
         self.scrollView.addSubview(self.hostingController.view)
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
-
-        hostingController.view.backgroundColor = .purple
     }
 
     func pinEdges(of viewA: UIView, to viewB: UIView) {
