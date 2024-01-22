@@ -45,10 +45,11 @@ public class AppCoordinator: ObservableObject {
     @Published public var isMumoryPopUpShown = false
     @Published public var isSocialMenuSheetViewShown = false
     @Published public var isMumoryDetailCommentSheetViewShown = false
+    @Published public var isAddFriendViewShown = false
+    @Published public var isPopUpViewShown = false
     
     @Published public var isTestViewShown = false
     
-    @Published public var mumoryPopUpZIndex: Double = 2.0
     
     @Published public var isNavigationStackShown = false
     

@@ -226,7 +226,7 @@ struct MumoryDetailScrollContentView: View {
                         }
                     })
                     
-                    Spacer().frame(height: 146)
+                    Spacer().frame(height: 100)
                 }
             } // VStack
             .frame(width: UIScreen.main.bounds.width - 40)

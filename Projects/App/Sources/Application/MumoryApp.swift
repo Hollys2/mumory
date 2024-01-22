@@ -26,29 +26,132 @@ struct MumoryApp: App {
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
-                        
                     }
             }
         }
     }
 }
 
-
-struct ContentView: View {
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.orange
-                VStack {
-                    Color.red
-                    Color.blue
-                }
-            }
-            .background(.green)
-            .ignoresSafeArea()
-        }
+extension Int {
+    func formatted() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = ""
+        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
     }
 }
+
+struct YearMonthPicker: View {
+    @State private var selectedYear = 2022
+    @State private var selectedMonth = "January"
+    
+    let years = Array(2000...2030)
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            Picker("Year", selection: $selectedYear) {
+                ForEach(years, id: \.self) {
+                    Text("\($0.formatted())년")
+                }
+            }
+            .pickerStyle(WheelPickerStyle())
+//            .frame(width: 100)
+            
+            Picker("Month", selection: $selectedMonth) {
+                ForEach(months, id: \.self) {
+                    Text($0)
+                }
+            }
+            .pickerStyle(WheelPickerStyle())
+//            .frame(width: 150)
+        }
+        .padding()
+    }
+}
+
+struct YearMonthPicker2: View {
+    @State private var selectedDateIndex = 0
+    
+    let yearMonthOptions: [String] = {
+        let years = Array(2000...2030).map { "\($0)" }
+        let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        return years.flatMap { year in
+            months.map { month in
+                "\(month) \(year)"
+            }
+        }
+    }()
+    
+    var body: some View {
+        Picker("Year and Month", selection: $selectedDateIndex) {
+            ForEach(0..<yearMonthOptions.count, id: \.self) {
+                Text(yearMonthOptions[$0])
+            }
+        }
+        .pickerStyle(WheelPickerStyle())
+        .frame(width: 200)
+        .padding()
+    }
+}
+
+//
+//struct ContentView: View {
+//    @State private var selectedTab = 0
+//    @State private var underlineOffset: CGFloat = 0
+//
+//    var body: some View {
+//        VStack(spacing: 0) {
+//            // TabView와 언더라인을 포함한 탭 뷰
+//            TabView(selection: $selectedTab) {
+//                Text("Tab 1")
+//                    .tag(0)
+//
+//                Text("Tab 2")
+//                    .tag(1)
+//
+//                Text("Tab 3")
+//                    .tag(2)
+//            }
+//            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+//            .background(Color.white)
+//
+//            // 선택된 탭에 따라 언더라인을 표시하는 뷰
+//            GeometryReader { geometry in
+//                HStack(spacing: 0) {
+//                    ForEach(0..<3) { index in
+//                        Text("Tab \(index + 1)")
+//                            .font(.headline)
+//                            .padding()
+//                            .onTapGesture {
+//                                withAnimation {
+//                                    selectedTab = index
+//                                    // 언더라인 위치 업데이트
+//                                    underlineOffset = geometry.size.width / 3 * CGFloat(index)
+//                                }
+//                            }
+//                    }
+//
+//                    // 언더라인
+//                    Rectangle()
+//                        .fill(Color.blue)
+//                        .frame(width: geometry.size.width / 3, height: 2)
+//                        .offset(x: underlineOffset)
+//                        .animation(.easeInOut)
+//                        .onAppear {
+////                            underlineOffset = geometry.size.width / 3 * CGFloat(selectedTab)
+//                        }
+//                        .onChange(of: selectedTab) { newIndex in
+//                            withAnimation {
+//                                underlineOffset = geometry.size.width / 3 * CGFloat(newIndex)
+//                            }
+//                        }
+//                }
+//            }
+//        }
+//        .frame(height: 50)
+//    }
+//}
 
 
 // blur

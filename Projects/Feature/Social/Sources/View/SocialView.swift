@@ -11,6 +11,126 @@ import SwiftUI
 import Shared
 
 
+struct SocialScrollViewRepresentable: UIViewRepresentable {
+    
+    //    typealias UIViewType = UIScrollView
+    
+    @Binding var offsetY: CGFloat
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    func makeUIView(context: Context) -> UIScrollView {
+        let scrollView = UIScrollView()
+
+        scrollView.delegate = context.coordinator
+        
+        scrollView.contentMode = .scaleToFill
+//        scrollView.bounces = false
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        
+        
+        let hostingController = UIHostingController(rootView: SocialScrollCotentView())
+        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
+        
+        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width - 20, height: x)
+//        scrollView.contentInset = UIEdgeInsets(top: ㅌ, left: 0, bottom: 0, right: 0)
+        scrollView.contentInsetAdjustmentBehavior = .never
+
+        scrollView.backgroundColor = .clear
+        hostingController.view.backgroundColor = .clear
+        
+       
+        scrollView.addSubview(hostingController.view)
+        
+        return scrollView
+    }
+    
+    
+    func updateUIView(_ uiView: UIScrollView, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+}
+
+extension SocialScrollViewRepresentable {
+    
+    class Coordinator: NSObject {
+        
+        let parent: SocialScrollViewRepresentable
+        var preOffsetY: CGFloat = 0.0
+        var topBarOffsetY: CGFloat = 0.0
+        
+        init(parent: SocialScrollViewRepresentable) {
+            self.parent = parent
+            super.init()
+        }
+        
+        func handleScrollDirection(_ direction: ScrollDirection) {
+            switch direction {
+            case .up:
+                withAnimation(Animation.easeInOut(duration: 0.2)) {
+                    parent.appCoordinator.isNavigationBarShown = true
+                }
+            case .down:
+                withAnimation(Animation.easeInOut(duration: 0.2)) {
+                    parent.appCoordinator.isNavigationBarShown = false
+                }
+            }
+        }
+        
+        func handleScrollBoundary(_ view: ScrollBoundary) {
+            switch view {
+            case .above:
+                parent.appCoordinator.isNavigationBarColored = false
+            case .below:
+                parent.appCoordinator.isNavigationBarColored = true
+            }
+        }
+    }
+}
+
+extension SocialScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.bounds.height
+        let limitHeight = self.parent.appCoordinator.safeAreaInsetsTop + 64
+
+        topBarOffsetY += (offsetY - preOffsetY)
+        
+        if topBarOffsetY < .zero || offsetY <= .zero {
+            topBarOffsetY = .zero
+        } else if topBarOffsetY > limitHeight || offsetY >= contentHeight - scrollViewHeight {
+            topBarOffsetY = limitHeight
+        }
+        
+        parent.offsetY = topBarOffsetY
+
+        preOffsetY = offsetY
+    }
+}
+
+struct SocialScrollCotentView: View {
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer().frame(height: 100)
+            
+            LazyVStack(spacing: 0) {
+                ForEach(0..<3) { _ in
+                    SocialItemView()
+                }
+            }
+            .frame(width: UIScreen.main.bounds.width - 20)
+        } // VStack
+    }
+}
+
+
 struct SocialMenuSheetView: View {
     
     @Binding private var translation: CGSize
@@ -236,6 +356,12 @@ struct SocialItemView: View {
                         )
                     )
                     .cornerRadius(15)
+                    .gesture(
+                        TapGesture(count: 1)
+                            .onEnded {
+                                self.appCoordinator.rootPath.append(0)
+                            }
+                    )
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
@@ -363,18 +489,13 @@ struct SocialItemView: View {
                             
                             Spacer()
                         } // HStack
-     
+                        
                     } // ScrollView
-                  
-              
-//                    .frame(maxWidth: .infinity)
-                    //                .background(
-                    //                    Rectangle()
-                    //                      .foregroundColor(.clear)
-                    //                      .frame(height: 44)
-                    //                      .background(.white)
-                    //                      .blur(radius: 3)
-                    //                )
+                    .mask(
+                        Rectangle()
+                            .frame(width: (UIScreen.main.bounds.width - 20) * 0.66, height: 44)
+                            .blur(radius: 3)
+                    )
                     
                     // MARK: Content
                     HStack(spacing: 0) {
@@ -385,7 +506,7 @@ struct SocialItemView: View {
                             )
                             .foregroundColor(.white)
                             .lineLimit(1)
-                            .frame(width: (UIScreen.main.bounds.width - 20) * 0.66 * 0.87, alignment: .leading)
+                            .frame(alignment: .leading)
                         
                         Spacer()
 
@@ -398,7 +519,7 @@ struct SocialItemView: View {
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(.white.opacity(0.7))
                             .lineLimit(1)
-                            .frame(width: (UIScreen.main.bounds.width - 20) * 0.66 * 0.13, alignment: .leading)
+                            .frame(alignment: .leading)
                     }
                 } // VStack
                 .frame(width: (UIScreen.main.bounds.width - 20) * 0.66)
@@ -432,7 +553,9 @@ struct SocialItemView: View {
                         .foregroundColor(.white)
                     
                     Button(action: {
-                        
+                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+                            self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
+                        }
                     }, label: {
                         SharedAsset.commentButtonSocial.swiftUIImage
                             .frame(width: 42, height: 42)
@@ -454,14 +577,6 @@ struct SocialItemView: View {
             } // ZStack
             Spacer().frame(height: 40)
         } // VStack
-        .background(
-            GeometryReader{ g in
-                Color.clear
-                    .onAppear {
-                        print("g.size.height: \(g.size.height)")
-                    }
-            }
-        )
         //        .sheet(isPresented: self.$isMenuShown, content: {
         //            SocialMenuSheetView()
         //                .padding(.horizontal, 9)
@@ -474,6 +589,7 @@ struct SocialItemView: View {
 
 public struct SocialView: View {
     
+    @State private var offsetY: CGFloat = 0
     @State private var isAddFriendNotification: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -484,77 +600,72 @@ public struct SocialView: View {
     public init() {}
     
     public var body: some View {
-        ZStack {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    HStack(alignment: .top, spacing: 0) {
-                        Spacer().frame(width: 10)
-                        
-                        Text("소셜")
-                            .font(
-                                Font.custom("Pretendard", size: 24)
-                                    .weight(.semibold)
-                            )
-                            .foregroundColor(.white)
-                        
-                        Spacer()
-                        
-                        Button(action: {
-                            
-                        }) {
-                            SharedAsset.searchButtonSocial.swiftUIImage
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                        }
-                        
-                        Spacer().frame(width: 12)
-                        
-                        Button(action: {
-                            
-                        }) {
-                            (self.isAddFriendNotification ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                        }
-                        
-                        Spacer().frame(width: 12)
-                        
-                        Button(action: {
-                            
-                        }) {
-                            Image("UserProfile_BT")
-                                .frame(width: 30, height: 30)
-                                .background(
-                                    Image("PATH_TO_IMAGE")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 30, height: 30)
-                                        .clipped()
-                                )
-                                .overlay(
-                                    Rectangle()
-                                        .stroke(.white, lineWidth: 1)
-                                )
-                        }
-                        
-                        Spacer().frame(width: 10)
+        ZStack(alignment: .top) {
+            SocialScrollViewRepresentable(offsetY: self.$offsetY)
+                .frame(width: UIScreen.main.bounds.width - 20)
+        
+            HStack(alignment: .top, spacing: 0) {
+                Spacer().frame(width: 10)
+
+                Text("소셜")
+                    .font(
+                        Font.custom("Pretendard", size: 24)
+                            .weight(.semibold)
+                    )
+                    .foregroundColor(.white)
+
+                Spacer()
+
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        self.appCoordinator.rootPath.append(4)
                     }
-                    .frame(width: UIScreen.main.bounds.width - 20)
-                    .padding(.top, 19 + appCoordinator.safeAreaInsetsTop)
-                    
-                    Spacer().frame(height: 51)
-                    
-                    LazyVStack(spacing: 0) {
-                        ForEach(0..<1) { _ in
-                            SocialItemView()
-                        }
+                }) {
+                    SharedAsset.searchButtonSocial.swiftUIImage
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                }
+
+                Spacer().frame(width: 12)
+
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        self.appCoordinator.isAddFriendViewShown = true
                     }
-                    .frame(width: UIScreen.main.bounds.width - 20)
-                    
-                } // VStack
-            } // ScrollView
+                }) {
+                    (self.isAddFriendNotification ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                }
+
+                Spacer().frame(width: 12)
+
+                Button(action: {
+
+                }) {
+                    Image("UserProfile_BT")
+                        .frame(width: 30, height: 30)
+                        .background(
+                            Image("PATH_TO_IMAGE")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 30, height: 30)
+                                .clipped()
+                        )
+                        .overlay(
+                            Rectangle()
+                                .stroke(.white, lineWidth: 1)
+                        )
+                }
+
+                Spacer().frame(width: 10)
+            } // HStack
+            .padding(.horizontal, 10)
+            .padding(.top, 19 + appCoordinator.safeAreaInsetsTop)
+            .padding(.bottom, 15)
+            .background(.pink)
+            .offset(y: -self.offsetY)
         }
-        .padding(.horizontal, 10)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .preferredColorScheme(.dark)
     }

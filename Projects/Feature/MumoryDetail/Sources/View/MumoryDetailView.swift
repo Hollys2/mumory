@@ -14,10 +14,6 @@ struct MumoryDetailScrollView: UIViewRepresentable {
     
     //    typealias UIViewType = UIScrollView
     
-    //    @Binding var mumoryAnnotations: [MumoryAnnotation]
-    //    @Binding var annotationSelected: Bool
-    
-    //    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     func makeUIView(context: Context) -> UIScrollView {
@@ -180,24 +176,28 @@ public struct MumoryDetailView: View {
                 
                 VStack(spacing: 23) {
                     Text("\(mumoryAnnotation.musicModel.title)")
+//                    Text("What Was I Made For? [From The Motion Picture \"Barbie\"]")
                         .font(
-                            Font.custom("Pretendard", size: 24)
-                                .weight(.medium)
+                            SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24)
+//                            Font.custom("Pretendard", size: 24)
+//                                .weight(.medium)
                         )
                         .lineLimit(2)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
+                        .background(.pink)
                     
                     Text("\(mumoryAnnotation.musicModel.artist)")
                         .font(
-                            Font.custom("Pretendard", size: 20)
-                                .weight(.light)
+                            SharedFontFamily.Pretendard.light.swiftUIFont(size: 20)
+//                            Font.custom("Pretendard", size: 20)
+//                                .weight(.light)
                         )
                         .lineLimit(1)
                         .foregroundColor(.white.opacity(0.8))
                         .frame(width: 301, alignment: .leading)
                 }
-                .offset(y: -6.99)
+                .offset(y: -4)
                 .padding(.leading, 20)
             } // ZStack
             
@@ -260,7 +260,7 @@ public struct MumoryDetailView: View {
                             appCoordinator.isMumoryDetailCommentSheetViewShown = false
                         }
                     }
-                
+
                 MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
                     .offset(y: self.translation.height + UIScreen.main.bounds.height - (UIScreen.main.bounds.height * 0.84) - appCoordinator.safeAreaInsetsBottom)
                     .gesture(dragGesture)

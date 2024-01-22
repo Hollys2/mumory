@@ -145,9 +145,6 @@ struct MumoryCard: View {
                                             .frame(width: 103, height: 124)
                                             .background(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     )
-                                
-                                //                                Color.red
-                                //                                    .frame(width: 310, height: 310)
                             }
                         }
                     )
@@ -234,12 +231,12 @@ struct MumoryCard: View {
                     
                     Button(action: {
                         //                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                        //                            appCoordinator.isMumoryDetailShown = true
-                        //                        }
-                        appCoordinator.mumoryPopUpZIndex = 0
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            appCoordinator.mumoryPopUpZIndex = 2
-                        }
+//                        //                            appCoordinator.isMumoryDetailShown = true
+//                        //                        }
+//                        appCoordinator.mumoryPopUpZIndex = 0
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                            appCoordinator.mumoryPopUpZIndex = 2
+//                        }
                         appCoordinator.rootPath.append(0)
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage
@@ -267,12 +264,22 @@ public struct HomeView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
+    let customDetent = UISheetPresentationController.Detent.custom(identifier: nil) { context in
+        let statusBarHeight = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.statusBarManager?.statusBarFrame.height }
+            .first ?? 0
+        let safeAreaInsetsTop = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.windows.first?.safeAreaInsets.top }
+            .first ?? 0
+        return UIScreen.main.bounds.height - 100
+    }
+       
+    
     public init() {}
     
     var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-                print("onChanged: \(value.translation.height)")
                 if value.translation.height > 0 {
                     DispatchQueue.main.async {
                         translation.height = value.translation.height                        
@@ -280,7 +287,6 @@ public struct HomeView: View {
                 }
             }
             .onEnded { value in
-                print("onEnded: \(value.translation.height)")
                 
                 withAnimation(Animation.easeInOut(duration: 0.2)) {
 //                    if value.translation.height > 130 {
@@ -315,20 +321,21 @@ public struct HomeView: View {
                     HomeTabView(selectedTab: $selectedTab)
                 }
                 
-                if appCoordinator.isCreateMumorySheetShown {
-                    Color.black.opacity(0.6)
-                        .onTapGesture {
-                            withAnimation(Animation.easeOut(duration: 0.2)) {
-                                appCoordinator.isCreateMumorySheetShown = false
-                            }
-                        }
+//                if appCoordinator.isCreateMumorySheetShown {
+//                    Color.black.opacity(0.6)
+//                        .onTapGesture {
+//                            withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
+//                                appCoordinator.isCreateMumorySheetShown = false
+//                                //                                mumoryDataViewModel.choosedMusicModel = nil
+//                                //                                mumoryDataViewModel.choosedLocationModel = nil
+//                            }}
                     
-                    CreateMumoryBottomSheetView()
-                        .offset(y: translation.height)
-                        .gesture(dragGesture)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
+//                    CreateMumoryBottomSheetView()
+//                        .offset(y: translation.height)
+//                        .gesture(dragGesture)
+//                        .transition(.move(edge: .bottom))
+//                        .zIndex(1)
+//                }
                 
                 if self.appCoordinator.isMumoryPopUpShown {
                     ZStack { // 부모 ZStack의 정렬 무시
@@ -366,6 +373,28 @@ public struct HomeView: View {
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
+                
+                if appCoordinator.isMumoryDetailCommentSheetViewShown {
+                    Color.black.opacity(0.5).ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(Animation.easeInOut(duration: 0.2)) {
+                                appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                            }
+                        }
+                    
+                    MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
+                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
+                        .gesture(dragGesture)
+                        .transition(.move(edge: .bottom))
+                        .zIndex(1)
+                }
+                
+                if self.appCoordinator.isAddFriendViewShown {
+                    SocialFriendView()
+                        .transition(.move(edge: .bottom))
+                        .zIndex(1)
+                }
+                
             } // ZStack
             .ignoresSafeArea()
             .navigationDestination(for: Int.self) { i in
@@ -378,6 +407,8 @@ public struct HomeView: View {
                     SearchMusicView()
                 case 3:
                     SearchLocationView()
+                case 4:
+                    SocialSearchView()
                 default:
                     Color.pink
                 }
@@ -393,7 +424,77 @@ public struct HomeView: View {
                     Color.gray
                 }
             })
+            .navigationDestination(for: SearchFriendType.self, destination: { type in
+                switch type {
+                case .cancelRequestFriend:
+                    FriendMenuView(type: .cancelRequestFriend)
+                case .unblockFriend:
+                    FriendMenuView(type: .unblockFriend)
+                default:
+                    Color.pink
+                }
+            })
+//            .sheetWithDetents(
+//                isPresented: $appCoordinator.isCreateMumorySheetShown,
+//                detents: [UISheetPresentationController.Detent.custom(
+//                    identifier: UISheetPresentationController.Detent.Identifier("FUCK"),
+//                    resolver: { dimension in
+//                        // Set your custom height here
+//                        return UIScreen.main.bounds.height - 200
+//                    }
+//                )]) {
+//                        print("The sheet has been dismissed")
+//                } content: {
+//                    VStack(spacing: 0) {
+//                        Color.red
+//                            .onTapGesture {
+//                                appCoordinator.createMumoryPath.append(0.1)
+//                            }
+//                        Color.blue
+//                            .onTapGesture {
+//                                appCoordinator.createMumoryPath.append(1.1)
+//                            }
+//                    }
+//                    .navigationDestination(for: Double.self, destination: { i in
+//                        switch i {
+//                        case 0.1:
+//                            Color.orange
+//                                .navigationBarBackButtonHidden(true)
+//                        default:
+//                            Color.pink
+//                        }
+//                    })
+//                }
+
+            .sheet(isPresented: $appCoordinator.isCreateMumorySheetShown) {
+                NavigationStack(path: $appCoordinator.createMumoryPath) {
+                    VStack(spacing: 0) {
+                        Color.red
+                            .onTapGesture {
+                                appCoordinator.createMumoryPath.append(0.1)
+                            }
+                        Color.blue
+                            .onTapGesture {
+                                appCoordinator.createMumoryPath.append(3.3)
+                            }
+                            .navigationDestination(for: Double.self, destination: { i in
+                                switch i {
+                                case 0.1:
+                                    Color.orange
+                                        .navigationBarBackButtonHidden(true)
+                                default:
+                                    Color.pink
+                                }
+                            })
+                    }
+
+
+                }
+                .presentationDetents([.height(getUIScreenBounds().height - appCoordinator.safeAreaInsetsTop - 36)])
+                //                .presentationCornerRadius(23)
+            }
         } // NavigationStack
+        
     }
     
     var homeView: some View {
@@ -431,11 +532,11 @@ public struct HomeView: View {
                         Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
                         Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
                       ],
-                      startPoint: UnitPoint(x: 0.5, y: 0),
-                      endPoint: UnitPoint(x: 0.5, y: 1)
+                      startPoint: UnitPoint(x: 0.5, y: 1),
+                      endPoint: UnitPoint(x: 0.5, y: 0)
                     )
                   )
-                  .allowsHitTesting(false)
+                  .offset(y: 89 + appCoordinator.safeAreaInsetsBottom)
             }
             
             VStack {
@@ -452,3 +553,264 @@ public struct HomeView: View {
 //        HomeView()
 //    }
 //}
+
+
+struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: View {
+    
+    @Binding var isPresented: Bool
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    let detents: [UISheetPresentationController.Detent]
+    let content: Content
+
+    init(
+        _ isPresented: Binding<Bool>,
+        detents: [UISheetPresentationController.Detent],
+        @ViewBuilder content: () -> Content
+    ) {
+        self._isPresented = isPresented
+        self.detents = detents
+        self.content = content()
+    }
+    
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: Context) {
+        
+        // Create the UIViewController that will be presented by the UIButton
+        let viewController = UIViewController()
+        viewController.modalPresentationStyle = .formSheet
+
+        // Create the UIHostingController that will embed the SwiftUI View
+        let hostingController = UIHostingController(rootView: content)
+        hostingController.view.backgroundColor = .brown
+        
+        // Add the UIHostingController to the UIViewController
+        viewController.addChild(hostingController)
+        viewController.view.addSubview(hostingController.view)
+        
+        // Set constraints
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.centerXAnchor.constraint(equalTo: viewController.view.centerXAnchor).isActive = true
+        //            hostingController.view.centerYAnchor.constraint(equalTo: viewController.view.centerYAnchor).isActive = true
+//        hostingController.view.topAnchor.constraint(equalTo: viewController.view.topAnchor).isActive = true
+        
+        hostingController.view.widthAnchor.constraint(equalToConstant: getUIScreenBounds().width).isActive = true  // Set the width as needed
+        hostingController.view.heightAnchor.constraint(equalToConstant: getUIScreenBounds().height - 100).isActive = true  // Set the height as needed
+        hostingController.didMove(toParent: viewController)
+        
+        // Set the presentationController as a UISheetPresentationController
+        if let sheetController = viewController.presentationController as? UISheetPresentationController {
+            let customDetent = UISheetPresentationController.Detent.custom(
+                identifier: UISheetPresentationController.Detent.Identifier("FUCK"),
+                resolver: { dimension in
+                    // Set your custom height here
+                    return UIScreen.main.bounds.height - 200
+                }
+            )
+            sheetController.detents = [customDetent]
+            sheetController.largestUndimmedDetentIdentifier = customDetent.identifier
+            
+            sheetController.prefersGrabberVisible = false
+            sheetController.prefersScrollingExpandsWhenScrolledToEdge = true
+            sheetController.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheetController.preferredCornerRadius = 23
+            
+        }
+
+        viewController.presentationController?.delegate = context.coordinator
+        viewController.transitioningDelegate = context.coordinator
+        
+        
+        if isPresented {
+            if uiView.window?.rootViewController?.presentedViewController == nil {
+                uiView.window?.rootViewController?.present(viewController, animated: true)
+            }
+        } else {
+            uiView.window?.rootViewController?.dismiss(animated: true)
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+    
+    class Coordinator: NSObject, UISheetPresentationControllerDelegate, UIViewControllerTransitioningDelegate {
+        
+        let parent: SheetPresentationForSwiftUI
+        
+        init(parent: SheetPresentationForSwiftUI) {
+            self.parent = parent
+            super.init()
+        }
+        
+        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+            parent.appCoordinator.isCreateMumorySheetShown = false
+            print("FUCK")
+//            withAnimation(.easeInOut(duration: 0.2)) {
+//            }
+//            if let onDismiss = onDismiss {
+//                onDismiss()
+//            }
+        }
+        
+//        func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//            return CustomPresentationAnimator(duration: 0.3)
+//          }
+//
+//        func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//            return CustomPresentationAnimator(duration: 0.3)
+//        }
+    }
+}
+
+struct sheetWithDetentsViewModifier<SwiftUIContent>: ViewModifier where SwiftUIContent: View {
+    
+    @Binding var isPresented: Bool
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    let onDismiss: (() -> Void)?
+    let detents: [UISheetPresentationController.Detent]
+    let swiftUIContent: SwiftUIContent
+    
+    init(isPresented: Binding<Bool>, detents: [UISheetPresentationController.Detent] = [.medium()] , onDismiss: (() -> Void)? = nil, content: () -> SwiftUIContent) {
+        self._isPresented = isPresented
+        self.onDismiss = onDismiss
+        self.swiftUIContent = content()
+        self.detents = detents
+    }
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            SheetPresentationForSwiftUI($isPresented, detents: detents) {
+                swiftUIContent
+            }
+            //            .fixedSize()
+            
+            content
+        }
+        .ignoresSafeArea()
+    }
+}
+
+extension View {
+    
+    func sheetWithDetents<Content>(
+        isPresented: Binding<Bool>,
+        detents: [UISheetPresentationController.Detent],
+        onDismiss: (() -> Void)?,
+        content: @escaping () -> Content) -> some View where Content : View {
+            modifier(
+                    sheetWithDetentsViewModifier(
+                        isPresented: isPresented,
+                        detents: detents,
+                        onDismiss: onDismiss,
+                        content: content)
+                    )
+        }
+    
+}
+
+class CustomPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    let duration: TimeInterval
+    
+    init(duration: TimeInterval) {
+        self.duration = duration
+    }
+
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return duration
+    }
+
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+           guard let toViewController = transitionContext.viewController(forKey: .to) else { return }
+
+           let finalFrame = transitionContext.finalFrame(for: toViewController)
+           let containerView = transitionContext.containerView
+
+           let initialFrame = finalFrame.offsetBy(dx: 0, dy: containerView.bounds.height)
+           toViewController.view.frame = initialFrame
+
+           containerView.addSubview(toViewController.view)
+
+           UIView.animate(withDuration: duration, animations: {
+               toViewController.view.frame = finalFrame
+           }) { _ in
+               transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+           }
+       }
+}
+
+
+struct SheetViewController<Content>: UIViewControllerRepresentable where Content: View {
+    @Binding var isPresented: Bool
+    var content: Content
+    var cornerRadius: CGFloat
+    
+    init(
+        _ isPresented: Binding<Bool>,
+        @ViewBuilder content: () -> Content,
+        cornerRadius: CGFloat
+    ) {
+        self._isPresented = isPresented
+        self.content = content()
+        self.cornerRadius = cornerRadius
+    }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        return UIViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        if isPresented {
+            let sheetController = UIHostingController(rootView: content)
+
+            let viewController = uiViewController
+            viewController.view.addSubview(sheetController.view)
+            viewController.modalPresentationStyle = .formSheet
+            viewController.presentationController?.delegate = context.coordinator
+
+            context.coordinator.sheetController = sheetController
+
+            uiViewController.present(viewController, animated: true)
+        } else {
+            uiViewController.dismiss(animated: true)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(parent: self)
+    }
+
+    class Coordinator: NSObject, UISheetPresentationControllerDelegate {
+        var parent: SheetViewController
+        var sheetController: UIHostingController<Content>?
+
+        init(parent: SheetViewController) {
+            self.parent = parent
+        }
+
+        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+            parent.isPresented = false
+        }
+    }
+}
+
+struct SheetWithCornerRadius<Content>: View where Content: View {
+    @Binding var isPresented: Bool
+    var content: () -> Content
+    var cornerRadius: CGFloat
+
+    var body: some View {
+        SheetViewController($isPresented, content: content, cornerRadius: cornerRadius)
+    }
+}
+
+extension View {
+    func sheetWithCornerRadius<Content: View>(isPresented: Binding<Bool>, cornerRadius: CGFloat, @ViewBuilder content: @escaping () -> Content) -> some View {
+        SheetWithCornerRadius(isPresented: isPresented, content: content, cornerRadius: cornerRadius)
+    }
+}

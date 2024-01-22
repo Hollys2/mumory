@@ -205,6 +205,7 @@ public struct CreateMumoryBottomSheetView: View {
                     HStack(spacing: 16) {
                         Button(action: {
                             appCoordinator.rootPath.append("location")
+//                            appCoordinator.createMumoryPath.append(3)
                         }) {
                             Image(uiImage: SharedAsset.locationCreateMumory.image)
                                 .resizable()
@@ -433,10 +434,7 @@ public struct CreateMumoryBottomSheetView: View {
                         Spacer().frame(width: 20)
                         
                         Text("전체공개")
-                            .font(
-                                Font.custom("Pretendard", size: 15)
-                                    .weight(.semibold)
-                            )
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                             .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
                         
                         Spacer().frame(width: 7)

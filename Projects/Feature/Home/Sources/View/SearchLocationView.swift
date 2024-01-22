@@ -13,7 +13,6 @@ import Core
 import Shared
 
 
-@available(iOS 16.0, *)
 struct AddressRow: View {
     
     @State var result: MKLocalSearchCompletion
@@ -62,7 +61,6 @@ struct AddressRow: View {
     }
 }
 
-@available(iOS 16.0, *)
 struct SearchLocationView: View {
     
     @State private var text = ""
@@ -72,10 +70,6 @@ struct SearchLocationView: View {
     @EnvironmentObject var locationManager: LocationManager
     @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
-    @GestureState var dragAmount = CGSize.zero
-    
-    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 0) {
