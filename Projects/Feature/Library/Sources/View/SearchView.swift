@@ -39,6 +39,9 @@ struct SearchView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
                             .foregroundColor(.white)
+                            .onAppear(perform: {
+                                term = manager.searchTerm
+                            })
                     
                         
                         SharedAsset.xWhiteCircle.swiftUIImage
@@ -71,6 +74,7 @@ struct SearchView: View {
                 
                 if term.count > 0{
                     SearchResultView(term: $term)
+                    
                 }else{
                     SearchEntryView()
                 }

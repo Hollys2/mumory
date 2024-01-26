@@ -7,13 +7,91 @@
 //
 
 import SwiftUI
+import Shared
+import MusicKit
+import FirebaseFirestore
 
-struct PlaylistView: View {
+struct PlaylistView: View {    
+    @EnvironmentObject var manager: LibraryManageModel
+    @State var playlistArray: [Playlist] = []
+
+    var cols: [GridItem] = [
+        GridItem(.flexible(minimum: 150, maximum: 220), spacing: 0),
+        GridItem(.flexible(minimum: 150, maximum: 220), spacing: 0)
+    ]
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack{
+            LibraryColorSet.background.ignoresSafeArea()
+            
+            VStack{
+                TopBar(leftButton: SharedAsset.back.swiftUIImage, title: "내 플레이리스트", rightButton: SharedAsset.add
+                    .swiftUIImage) {
+                        //left action
+                        manager.nowPage = .entry
+                } rightButtonAction: {
+                        //right action
+                }
+                
+                ScrollView(.vertical) {
+                    LazyVGrid(columns: cols, content: {
+                        ForEach(playlistArray, id: \.title) { playlist in
+                            PlaylistItem(playlist: playlist)
+                                .frame(minWidth: 163, minHeight: 209)
+                        }
+                    })
+                    .padding(.leading, 20)
+                }
+                .padding(.top, 26)
+                .scrollIndicators(.hidden)
+
+                Spacer()
+            }
+        }
+        .onAppear(perform: {
+            getPlayList()
+        })
+    }
+    
+    func getPlayList(){
+        let db = Firestore.firestore().collection("Playlist")
+        
+        let uid = "a1234"//uid userdefault에서 가져오는 걸로 수정하기
+        db.whereField("uid", isEqualTo: uid).getDocuments { snapShot, error in
+            if let error = error {
+                print(error)
+            }else if let documents = snapShot?.documents{
+               for data in documents {
+                    let playlist = data.data()
+                    guard let title = playlist["title"] as? String else {return}
+                    guard let IDs = playlist["IDs"] as? [String] else {return}
+                    Task{
+                        let songs = try await fetchSongInfo(songIDs: IDs)
+                        playlistArray.append(Playlist(title: title, songs: songs, songIDs: IDs))
+                    }
+                }
+            }
+        }
+        
+    }
+
+    
+    private func fetchSongInfo(songIDs: [String]) async throws -> [Song] {
+        var songs: [Song] = []
+        
+        for id in songIDs{
+            let musicItemID = MusicItemID(rawValue: id)
+            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            let response = try await request.response()
+            guard let song = response.items.first else {
+                throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+            }
+            songs.append(song)
+        }
+        
+        return songs
     }
 }
 
-#Preview {
-    PlaylistView()
-}
+//#Preview {
+//    PlaylistView()
+//}

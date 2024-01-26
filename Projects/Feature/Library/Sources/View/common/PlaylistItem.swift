@@ -17,40 +17,63 @@ struct PlaylistItem: View {
         VStack(spacing: 0){
             HStack(spacing: 0, content: {
                 
-                //                AsyncImage(url: getArtWork(songId: playlist.musicList[0])) { image in
-                //                    image
-                //                } placeholder: {
-                //                    ProgressView()
-                //                }
+                AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                    image
+                        .resizable()
+                        .frame(width: 81, height: 81)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.topLeft]))
+                } placeholder: {
+                    Rectangle()
+                        .frame(width: 81, height: 81)
+                        .foregroundStyle(.gray)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.topLeft]))
+                }
                 
-//                AsyncDataFetcher()
-                Rectangle()
-                    .frame(width: 81, height: 81)
-                    .foregroundStyle(.gray)
-                    .clipShape(RoundedCorner(radius: radius, corners: [.topLeft]))
                 
-                Rectangle()
-                    .frame(width: 81, height: 81)
-                    .foregroundStyle(.black)
-                    .clipShape(RoundedCorner(radius: radius, corners: [.topRight]))
+                AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                    image
+                        .resizable()
+                        .frame(width: 81, height: 81)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.topRight]))
+                } placeholder: {
+                    Rectangle()
+                        .frame(width: 81, height: 81)
+                        .foregroundStyle(.black)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.topRight]))
+                }
+
 
             })
             
             HStack(spacing: 0,content: {
-                Rectangle()
-                    .frame(width: 81, height: 81)
-                    .foregroundStyle(.black)
-                    .clipShape(RoundedCorner(radius: radius, corners: [.bottomLeft]))
-
+                AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                    image
+                        .resizable()
+                        .frame(width: 81, height: 81)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomLeft]))
+                } placeholder: {
+                    Rectangle()
+                        .frame(width: 81, height: 81)
+                        .foregroundStyle(.black)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomLeft]))
+                }
                 
-                Rectangle()
-                    .frame(width: 81, height: 81)
-                    .foregroundStyle(.gray)
-                    .clipShape(RoundedCorner(radius: radius, corners: [.bottomRight]))
+                
+                AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                    image
+                        .resizable()
+                        .frame(width: 81, height: 81)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomRight]))
+                } placeholder: {
+                    Rectangle()
+                        .frame(width: 81, height: 81)
+                        .foregroundStyle(.gray)
+                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomRight]))
+                }
 
             })
             
-            Text(playlist.name)
+            Text(playlist.title)
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .frame(maxWidth: 160, alignment: .leading)
                 .lineLimit(1)
@@ -58,13 +81,14 @@ struct PlaylistItem: View {
                 .padding(.top, 10)
                 .foregroundStyle(.white)
             
-            Text("\(playlist.musicList.count)곡")
+            Text("\(playlist.songIDs.count)곡")
                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                 .foregroundStyle(LibraryColorSet.lightGrayTitle)
                 .frame(maxWidth: 160, alignment: .leading)
                 .padding(.top, 5)
 
         }
+       
     }
     
 //    @ViewBuilder

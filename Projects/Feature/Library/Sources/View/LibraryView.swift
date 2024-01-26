@@ -24,19 +24,19 @@ struct LibraryView: View {
                 
                 Spacer()
                 
-                
                 SharedAsset.search.swiftUIImage
                     .frame(width: 30, height: 30)
                     .onTapGesture {
                         manager.nowPage = .search
                     }
-                
             }
             .padding(.leading, 20)
             .padding(.trailing, 20)
             
-            //마이뮤직, 추천 선택 버튼
+            //마이뮤직, 추천 선택 스택
             HStack(spacing: 6, content: {
+                
+                //마이뮤직버튼
                 Button(action: {
                     isTapMyMusic = true
                 }, label: {
@@ -51,9 +51,9 @@ struct LibraryView: View {
                         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 22, height: 22)))
                 })
                 
+                //추천버튼
                 Button(action: {
                     isTapMyMusic = false
-                    //                                setView.isSearchViewShowing = true
                 }, label: {
                     Text("추천")
                         .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
@@ -72,12 +72,17 @@ struct LibraryView: View {
             .padding(.top, 40)
             
             //마이뮤직, 추천에 따라 바뀔 뷰
-            SwitchView(isMyMusic: isTapMyMusic)
-                .environmentObject(nowPlaySong)
-                .environmentObject(setView)
-                .padding(.top, 40)
-            
-            
+            if isTapMyMusic{
+                MyPlaylistView()
+                    .padding(.top, 40)
+                    .environmentObject(nowPlaySong)
+                    .environmentObject(manager)
+            }else {
+                RecommendationView()
+                    .padding(.top, 40)
+                    .environmentObject(nowPlaySong)
+                    .environmentObject(manager)
+            }
             
             Spacer()
         }
@@ -98,7 +103,6 @@ struct SwitchView: View{
         }else{
             RecommendationView()
                 .environmentObject(nowPlaySong)
-                .environmentObject(setView)
                 .environmentObject(manager)
         }
     }

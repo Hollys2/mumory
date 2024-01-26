@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import MusicKit
 
 public class LibraryManageModel: ObservableObject{
     public init(){}
@@ -15,7 +16,10 @@ public class LibraryManageModel: ObservableObject{
         case entry
         case search
         case playlist
+        case artist
     }
     
     @Published var nowPage: LibraryPage = .entry
+    @Published var searchTerm: String = ""
+    @Published var tappedArtist: Artist?
 }

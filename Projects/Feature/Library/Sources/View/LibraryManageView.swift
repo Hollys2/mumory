@@ -19,6 +19,10 @@ public struct LibraryManageView: View {
     //    @EnvironmentObject var setView: SetView
     @StateObject var setView: SetView = SetView()
     @StateObject var manager: LibraryManageModel = LibraryManageModel()
+    
+    var libarayView: LibraryView = LibraryView()
+    var searchView: SearchView = SearchView()
+    var artistView: ArtistView = ArtistView()
     @State var isPlaying: Bool = true
     
     public init() {
@@ -30,12 +34,19 @@ public struct LibraryManageView: View {
                 LibraryColorSet.background.ignoresSafeArea()
                 VStack(spacing: 0, content: {
                     if manager.nowPage == .entry{
-                        LibraryView()
+                        libarayView
                             .environmentObject(manager)
                         
                     }else if manager.nowPage == .search {
-                        SearchView()
+                        searchView
                             .environmentObject(manager)
+                    }else if manager.nowPage == .artist {
+                        artistView
+                            .environmentObject(manager)
+                    }else if manager.nowPage == .playlist {
+                        PlaylistView()
+                            .environmentObject(manager)
+
                     }
                 })
                 

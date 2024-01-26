@@ -12,10 +12,13 @@ import FirebaseFirestore
 import MusicKit
 
 struct Playlist {
-    let name: String
-    let musicList: [String]
+    var title: String
+    var songs: [Song]
+    var songIDs: [String]
 }
+
 struct MyPlaylistView: View {
+    @EnvironmentObject var manager: LibraryManageModel
     @State var numberOfPlaylist: Int = 0
     @State var playlistArray: [Playlist] = []
     var rows: [GridItem] = [
@@ -40,13 +43,15 @@ struct MyPlaylistView: View {
                 }
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
+                .onTapGesture {
+                    manager.nowPage = .playlist
+                }
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows, content: {
-                        ForEach(playlistArray, id: \.name) { playlist in
+                        ForEach(playlistArray, id: \.title) { playlist in
                             PlaylistItem(playlist: playlist)
                                 .frame(minWidth: 163, minHeight: 209)
-                                
                         }
                     })
                     .padding(.leading, 20)
@@ -60,44 +65,49 @@ struct MyPlaylistView: View {
  
         }
         .onAppear(perform: {
-            getNumberOfPlaylist()
+            getPlayList()
         })
        
     }
     
-    func getNumberOfPlaylist(){
+    func getPlayList(){
         let db = Firestore.firestore().collection("Playlist")
-        //실제로는 저장된 uid로 해당 문서 접근하기
-//        guard let uid = UserDefaults.standard.string(forKey: "uid") else {print("no uid");return}
-//        db.document(uid)
         
-        db.document("userid").getDocument { snapshot, error in
-            if let snapshot = snapshot{
-                guard let data = snapshot.data() as? [String: [String]] else {print("snap shot error");return}
-                numberOfPlaylist = data.count
-                data.forEach { (key: String, value: [String]) in
-                    playlistArray.append(Playlist(name: key, musicList: value))
+        let uid = "a1234"
+        db.whereField("uid", isEqualTo: uid).getDocuments { snapShot, error in
+            if let error = error {
+                print(error)
+            }else if let documents = snapShot?.documents{
+                numberOfPlaylist = documents.count
+                for data in documents {
+                    let playlist = data.data()
+                    guard let title = playlist["title"] as? String else {return}
+                    guard let IDs = playlist["IDs"] as? [String] else {return}
+                    Task{
+                        let songs = try await fetchSongInfo(songIDs: IDs)
+                        playlistArray.append(Playlist(title: title, songs: songs, songIDs: IDs))
+                    }
                 }
-                
-            }else {
-                
             }
         }
         
     }
-    
 
-    func nothing(){
-        let data: [String : Any] = [
-            "name" : "놀때 듣는 노래",
-            "musiclist" : ["1234", "2345", "4556"],
-            "isPrivate" : false,
-            "isFavorite" : true
-        ]
-        let db = Firestore.firestore()
-        db.collection("Playlist").document("uid").collection("")
+    
+    private func fetchSongInfo(songIDs: [String]) async throws -> [Song] {
+        var songs: [Song] = []
         
+        for id in songIDs{
+            let musicItemID = MusicItemID(rawValue: id)
+            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            let response = try await request.response()
+            guard let song = response.items.first else {
+                throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+            }
+            songs.append(song)
+        }
         
+        return songs
     }
 }
 

@@ -12,6 +12,8 @@ import MusicKit
 
 struct SearchResultView: View {
     @EnvironmentObject var recentSearchObject: RecentSearchObject
+    @EnvironmentObject var manager: LibraryManageModel
+
     @Binding var term: String
     @State var musicList: MusicItemCollection<Song> = []
     @State var albumList: MusicItemCollection<Album> = []
@@ -19,12 +21,19 @@ struct SearchResultView: View {
     
     var body: some View {
         ZStack{
+            //부모뷰의 검색 단어가 변경될 때 마다 검색 요청
             Text(term)
                 .opacity(0)
-                .onChange(of: term, perform: { value in
-                    requestSearch(term: value)
-                    print("term change")
+                .onAppear(perform: {
+                    requestSearch(term: term)
                 })
+                .onChange(of: term, perform: { value in
+                    Task{
+                        requestSearch(term: value)
+                        manager.searchTerm = value
+                    }
+                })
+                
             
             ScrollView{
                 Text("아티스트")
@@ -36,20 +45,18 @@ struct SearchResultView: View {
                 
                 LazyVStack(content: {
                     ForEach(artistList){ artist in
+                        SearchArtistItem(artist: artist)
+                            .gesture(TapGesture().onEnded({ void in
+                                print("tap item")
+                                manager.nowPage = .artist
+                                manager.tappedArtist = artist
+                                let userDefault = UserDefaults.standard
+                                var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                recentSearchList.removeAll(where: {$0 == artist.name})
+                                recentSearchList.insert(artist.name, at: 0)
+                                userDefault.set(recentSearchList, forKey: "recentSearchList")
+                            }))
                         
-                        NavigationLink {
-                            //가수 페이지로 넘어가기
-                        } label: {
-                            SearchArtistItem(artist: artist)
-                                .gesture(TapGesture().onEnded({ void in
-                                    print("tap item")
-                                    let userDefault = UserDefaults.standard
-                                    var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
-                                    recentSearchList.removeAll(where: {$0 == artist.name})
-                                    recentSearchList.insert(artist.name, at: 0)
-                                    userDefault.set(recentSearchList, forKey: "recentSearchList")
-                                }))
-                        }
                         
                     }
                 })
@@ -82,10 +89,10 @@ struct SearchResultView: View {
                 
             }
         }
+
     }
     public func requestSearch(term: String){
-        print("request search")
-        Task{
+        Task {
             var request = MusicCatalogSearchRequest(term: term, types: [Song.self, Artist.self])
             request.limit = 20
             let response = try await request.response()
@@ -93,6 +100,7 @@ struct SearchResultView: View {
             self.albumList = response.albums
             self.artistList = response.artists
         }
+   
     }
 }
 
