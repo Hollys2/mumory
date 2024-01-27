@@ -9,12 +9,14 @@
 import SwiftUI
 import Shared
 
-struct SignUpWithEmailView: View {
+public struct SignUpWithEmailView: View {
     @EnvironmentObject var signUpViewModel: SignUpViewModel
     @State var email: String = ""
     @State var isValidEmail: Bool = false
     
-    var body: some View {
+    public init(){}
+    
+    public var body: some View {
             VStack(spacing: 0, content: {
                 //이메일 표시 텍스트
                 Text("이메일")
@@ -25,11 +27,26 @@ struct SignUpWithEmailView: View {
                     .padding(.top, 43)
                 
                 //이메일 입력 텍스트 필드
-                AuthTextFieldSmall(text: $email, prompt: "ex)abcdefg@hhhhhh.com")
-                    .padding(.leading, 20)
-                    .padding(.trailing, 20)
-                    .padding(.top, 14)
-                    .onChange(of: email, perform: { value in
+                HStack(spacing: 0){
+                    TextField("email", text: $email)
+                        .frame(maxWidth: .infinity)
+                        .padding(.leading, 25)
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundColor(.white)
+                    
+                    SharedAsset.xWhiteCircle.swiftUIImage
+                        .frame(width: 23, height: 23)
+                        .padding(.trailing, 17)
+                        .padding(.leading, 5)
+                        .onTapGesture {
+                            email = ""
+                        }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 58)
+                .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30)))
+                .onChange(of: email, perform: { value in
                         isValidEmail = isValidEmailStyle(email: value)
                         signUpViewModel.isValidEmail = isValidEmail
                     })
@@ -51,6 +68,11 @@ struct SignUpWithEmailView: View {
                 }
             })
         
+    }
+    func getPrompt() -> Text {
+        return Text("ex) abcdefg@hhhhh.com")
+            .foregroundColor(Color(red: 0.77, green: 0.77, blue: 0.77))
+            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 18))
     }
     
     private func isValidEmailStyle(email: String) -> Bool {

@@ -12,7 +12,7 @@ struct MumoryApp: App {
     
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            LoginView()
                 .environmentObject(nowPlaySong)
 //                .environmentObject(setView)
 //                .environmentObject(recentSearchObject)

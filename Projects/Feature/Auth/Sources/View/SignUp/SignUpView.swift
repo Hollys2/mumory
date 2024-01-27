@@ -57,9 +57,7 @@ struct SignUpView: View {
                         SignUpFinishView()
                             .environmentObject(signUpViewModel)
                             .transition(AnyTransition.move(edge: .trailing))
-
                     }
-                        
                     
                     Spacer()
                     
@@ -176,7 +174,7 @@ struct SignUpView: View {
     
     private func createUser(email: String, password: String){
         print("email: \(email), pw: \(password)")
-        let Auth = AuthManager.shared.firebaseAuth
+        let Auth = FirebaseManager.shared.auth
         Auth.createUser(withEmail: email, password: password) { data, error in
             if let error = error {
                 print("create user error: \(error)")

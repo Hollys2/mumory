@@ -9,6 +9,7 @@
 
 import SwiftUI
 import Firebase
+import KakaoSDKCommon
 
 class AppDelegate: NSObject, UIApplicationDelegate{
 
@@ -16,6 +17,7 @@ class AppDelegate: NSObject, UIApplicationDelegate{
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 
         FirebaseApp.configure()
+        KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
         
         return true
     }

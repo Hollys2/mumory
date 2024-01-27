@@ -23,5 +23,12 @@ let project = Project(name: "Core",
                                         .external(name: "Moya"),
                                         .external(name: "FirebaseAuth"),
                                         .external(name: "FirebaseFirestore"),
+                                        .external(name: "FirebaseStorage"),
+                                        .external(name: "KakaoSDKCommon"),
+                                        .external(name: "KakaoSDKAuth"),
+                                        .external(name: "KakaoSDKUser"),
+                                        .external(name: "GTMSessionFetcher")
+//                                        .external(name: "GoogleSignIn"),
+//                                        .external(name: "GoogleSignInSwift")
                                        ])
                       ])

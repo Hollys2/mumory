@@ -99,13 +99,13 @@ struct EmailLoginView: View {
     func tapLoginButton(email: String, password: String, completion: @escaping (Bool) -> Void){
         //Core에 정의해둔 FirebaseAuth
         print("it's in tap login button func")
-        let Auth = AuthManager.shared.firebaseAuth
+        let Auth = FirebaseManager.shared.auth
         Auth.signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 print("로그인 실패, \(error)")
                 completion(true)
             }
-            else{
+            else if let result = result{
                 print("login success")
                 isLoginSuccess = true
                 completion(false)

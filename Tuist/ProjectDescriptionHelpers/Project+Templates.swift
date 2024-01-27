@@ -102,6 +102,11 @@ extension Project {
             "CFBundleShortVersionString": "\(appStoreVersion)",
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
             "NSLocationWhenInUseUsageDescription": "지도를 주세요.",
+            "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
+            "CFBundleURLTypes" : [
+                "kakaoac7735b6f63e81d971e4a58a05994260",
+                "kakaoac7735b6f63e81d971e4a58a05994260:ouath"
+            ]
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in

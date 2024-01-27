@@ -70,9 +70,10 @@ struct FindPWView: View {
     }
     
     private func tapFindPWButton(){
-        let Auth = AuthManager.shared.firebaseAuth
-        Auth.sendPasswordReset(withEmail: email) { error in
+        let auth = FirebaseManager.shared.auth
+        auth.sendPasswordReset(withEmail: email) { error in
             if let error = error {
+                //다시 시도해주세요팝업
                 print(error)
             }
         }
