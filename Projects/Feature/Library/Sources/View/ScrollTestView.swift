@@ -9,24 +9,23 @@
 import SwiftUI
 
 struct ScrollTestView: View {
+    @State private var contentOffset: CGPoint = .zero
+    @State private var scrollViewHeight: CGFloat = .zero
+    @State private var scrollViewVisibleHeight: CGFloat = .zero
+    
     var body: some View {
         ZStack{
-            ScrollView {
-                VStack{
-                    Text("텍스트111")
-                    Spacer()
+            Color.yellow
+            ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
+                
+                ForEach(0...100, id: \.self){index in
+                    Rectangle()
+                        .foregroundStyle(.yellow)
                 }
+                .background(.yellow)
+                
             }
-            
-            ScrollView {
-                VStack{
-                    Spacer()
-                    Spacer()
-                    Text("텍스트222")
-                        
-                    Spacer()
-                }
-            }
+            .background(.yellow)
         }
     }
 }

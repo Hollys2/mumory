@@ -11,14 +11,18 @@ import Shared
 import MusicKit
 
 struct ArtistView: View {
+    @State private var contentOffset: CGPoint = .zero
+    @State private var scrollViewHeight: CGFloat = .zero
+    @State private var scrollViewVisibleHeight: CGFloat = .zero
     @EnvironmentObject var manager: LibraryManageModel
     @State var musicList: MusicItemCollection<Song> = []
     
     var body: some View {
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
-            //첫번째 뷰 - 아티스트 이미지
+//            첫번째 뷰 - 아티스트 이미지
             VStack{
+//                ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
                     
                     GeometryReader(content: { geometry in
                         AsyncImage(url: manager.tappedArtist?.artwork?.url(width: 1000, height: 1000)) { image in
@@ -32,27 +36,39 @@ struct ArtistView: View {
                             Rectangle()
                                 .frame(width: geometry.size.width, height: geometry.size.width)
                         }
-                        .ignoresSafeArea()
                         
                     })
                     
                     Spacer()
+                    
+                    ForEach(0...50, id: \.self) {index in
+                        Rectangle()
+                            .foregroundStyle(.clear)
+                    }
+                    .foregroundStyle(.clear)
+                }
+                .ignoresSafeArea()
+//                .onChange(of: contentOffset, perform: { value in
+//                    contentOffset = value.y > 0 ? CGPoint(x: 0, y: 0) : value
+//                    print(value)
+//                })
+//                .onAppear(perform: {
+//                    contentOffset = CGPoint(x: 0, y: 0)
+//                })
+
               
 
-            }
+//            }
             
             //두번째 뷰 - 상단 버튼들
             VStack(spacing: 0){
                 GeometryReader(content: { geometry in
+//                    ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
                     ScrollView{
-                        ScrollViewReader(content: { proxy in
-                            
-                            MusicList(musicList: $musicList)
-                                .environmentObject(manager)
-                                .padding(.top, geometry.size.width - geometry.safeAreaInsets.top - 45) //사진 사이즈 - 세이프에이리아높이 - (그라데이션 + 아티스트이름)
-                                
-                            
-                        })
+                        MusicList(musicList: $musicList)
+                            .environmentObject(manager)
+                            .padding(.top, geometry.size.width - geometry.safeAreaInsets.top - 45) //사진 사이즈 - 세이프에이리아높이 - (그라데이션 + 아티스트이름)
+                        //                    }
                     }
                 })
             }

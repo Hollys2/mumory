@@ -14,7 +14,7 @@ import FirebaseFirestore
 struct PlaylistView: View {    
     @EnvironmentObject var manager: LibraryManageModel
     @State var playlistArray: [Playlist] = []
-
+    @State var isShowCreatePopup: Bool = false
     var cols: [GridItem] = [
         GridItem(.flexible(minimum: 150, maximum: 220), spacing: 0),
         GridItem(.flexible(minimum: 150, maximum: 220), spacing: 0)
@@ -30,6 +30,7 @@ struct PlaylistView: View {
                         manager.nowPage = .entry
                 } rightButtonAction: {
                         //right action
+                    isShowCreatePopup = true
                 }
                 
                 ScrollView(.vertical) {
@@ -45,6 +46,17 @@ struct PlaylistView: View {
                 .scrollIndicators(.hidden)
 
                 Spacer()
+            }
+            if isShowCreatePopup{
+                Color(red: 0, green: 0, blue: 0, opacity: 0.5)
+                    .ignoresSafeArea()
+            }
+            if isShowCreatePopup{
+                CreatePlaylistPopupView(xButtonAction: {
+                    isShowCreatePopup = false
+                })
+                    .padding(.leading, 40)
+                    .padding(.trailing, 40)
             }
         }
         .onAppear(perform: {
@@ -91,6 +103,8 @@ struct PlaylistView: View {
         return songs
     }
 }
+
+
 
 //#Preview {
 //    PlaylistView()
