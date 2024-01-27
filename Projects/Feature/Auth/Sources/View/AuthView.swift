@@ -10,6 +10,7 @@
 import SwiftUI
 import Core
 
+
 public struct AuthView: View {
     
     let db = FirebaseManager.shared.db
