@@ -1,6 +1,7 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
+
 let project = Project(name: "Shared",
                       organizationName: "hollys",
                       packages: [],
@@ -11,8 +12,34 @@ let project = Project(name: "Shared",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .default,
                                        sources: ["Sources/**"],
-//                                       resources: ["Resources/**"],
+                                       resources: ["Resources/**"],
                                        dependencies: [
                                         
                                        ])
                       ])
+
+
+
+
+
+//public static func makeInfoPlist(merging other: [String: InfoPlist.Value] = [:]) -> InfoPlist {
+//    var extendedPlist: [String: InfoPlist.Value] = [
+//        //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
+//        "UILaunchScreen": [],
+//        "UISupportedInterfaceOrientations":
+//            [
+//                "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
+//            ],
+//        "CFBundleVersion": "\(bundleVersion)",
+//        "CFBundleShortVersionString": "\(appStoreVersion)",
+//        "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
+//    ]
+//    
+//    other.forEach { (key: String, value: InfoPlist.Value) in
+//        extendedPlist[key] = value
+//    }
+//    
+//    return InfoPlist.extendingDefault(with: extendedPlist)
+//}
+
+
