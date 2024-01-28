@@ -83,8 +83,8 @@ extension Project {
     
     
     public static func makeConfiguration() -> [Configuration] {
-        let debug: Configuration = Configuration.debug(name: "Debug", xcconfig: "Configs/Debug.xcconfig")
-        let release: Configuration = Configuration.release(name: "Release", xcconfig: "Configs/Release.xcconfig")
+        let debug: Configuration = Configuration.debug(name: "Debug", xcconfig: "/Users/hyennaeon/mumory/Projects/App/Configs/Debug.xcconfig")
+        let release: Configuration = Configuration.release(name: "Release", xcconfig: "/Users/hyennaeon/mumory/Projects/App/Configs/Release.xcconfig")
         
         return [debug, release]
     }

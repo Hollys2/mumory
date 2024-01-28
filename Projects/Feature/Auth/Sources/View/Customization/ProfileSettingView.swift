@@ -45,6 +45,7 @@ struct ProfileSettingView: View {
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 140, height: 140)
                                     .clipShape(Circle())
+                                
                             }
 
                         }else{

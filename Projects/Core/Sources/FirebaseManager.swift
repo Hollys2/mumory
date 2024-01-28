@@ -17,12 +17,12 @@ public class FirebaseManager {
     
     public static let shared = FirebaseManager()
     public let db: Firestore
-//    public let storage: Storage = Storage.storage()
+    public let storage: Storage
     public let auth: Auth
     
     private init() {
         db = Firestore.firestore()
-//        storage = Storage.storage()
+        storage = Storage.storage()
         auth = Auth.auth()
     }
 }
