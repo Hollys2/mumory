@@ -18,6 +18,7 @@ enum loginType{
 
 struct LoginButtonItem: View {
     var type: loginType
+    var action: () -> Void
     var body: some View {
         HStack(spacing: 0){
             switch(type){
@@ -32,15 +33,20 @@ struct LoginButtonItem: View {
             }
         }
         .padding(.top, 10)
+        .onTapGesture {
+            action()
+        }
     
         
         
     }
 }
 
-#Preview {
-    LoginButtonItem(type: .google)
-}
+//#Preview {
+//    LoginButtonItem(type: .google) {
+//        //
+//    }
+//}
 
 struct KakaoLoginButton: View {
     var body: some View {

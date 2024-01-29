@@ -30,9 +30,10 @@ struct AuthSecureFieldSmall: View {
                 }
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 58)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
         .background(Color(red: 0.24, green: 0.24, blue: 0.24))
-        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30)))
+        .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
         
 
     }

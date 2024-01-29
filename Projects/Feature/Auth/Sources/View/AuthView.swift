@@ -26,19 +26,19 @@ public struct AuthView: View {
     }
     
     private func loadSongs() {
-        db.collection("favorite").document("musicIDs").getDocument { (document, error) in
-            if let error = error {
-                print("Error getting document: \(error)")
-            } else if let document = document, document.exists {
-                if let musicIDs = document.data()?["IDs"] as? [String] {
-                    print("Music IDs: \(musicIDs)")
-                } else {
-                    print("No Music IDs")
-                }
-            } else {
-                print("Document does not exist")
-            }
-        }
+//        db.collection("favorite").document("musicIDs").getDocument { (document, error) in
+//            if let error = error {
+//                print("Error getting document: \(error)")
+//            } else if let document = document, document.exists {
+//                if let musicIDs = document.data()?["IDs"] as? [String] {
+//                    print("Music IDs: \(musicIDs)")
+//                } else {
+//                    print("No Music IDs")
+//                }
+//            } else {
+//                print("Document does not exist")
+//            }
+//        }
     }
 }
 

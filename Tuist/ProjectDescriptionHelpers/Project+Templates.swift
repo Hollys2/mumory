@@ -83,8 +83,8 @@ extension Project {
     
     
     public static func makeConfiguration() -> [Configuration] {
-        let debug: Configuration = Configuration.debug(name: "Debug", xcconfig: "/Users/hyennaeon/mumory/Projects/App/Configs/Debug.xcconfig")
-        let release: Configuration = Configuration.release(name: "Release", xcconfig: "/Users/hyennaeon/mumory/Projects/App/Configs/Release.xcconfig")
+        let debug: Configuration = Configuration.debug(name: .debug, xcconfig: "/Users/hyennaeon/mumory/Projects/App/Configs/Debug.xcconfig")
+        let release: Configuration = Configuration.release(name: .release, xcconfig: "/Users/hyennaeon/mumory/Projects/App/Configs/Release.xcconfig")
         
         return [debug, release]
     }
@@ -104,8 +104,21 @@ extension Project {
             "NSLocationWhenInUseUsageDescription": "지도를 주세요.",
             "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
             "CFBundleURLTypes" : [
-                "kakaoac7735b6f63e81d971e4a58a05994260",
-                "kakaoac7735b6f63e81d971e4a58a05994260:ouath"
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "kakao1",
+                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
+                ],
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "kakao2",
+                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260:ouath"]
+                ],
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "fireBase-google",
+                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
+                ]
             ]
         ]
         
@@ -120,7 +133,10 @@ extension Project {
         let settings = SettingsDictionary()
         
         return Settings.settings(base: settings,
-                                 configurations: [],
+                                 configurations: [
+                                    .debug(name: .debug),
+                                    .release(name: .release)
+                                 ],
                                  defaultSettings: .recommended)
         
     }

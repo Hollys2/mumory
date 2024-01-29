@@ -3,8 +3,9 @@ import ProjectDescriptionHelpers
 
 let project = Project(name: "App",
                       organizationName: "hollys",
-                      packages: [],
-                      settings: Settings.settings(configurations: Project.makeConfiguration() ),
+                      packages: [
+                      ],
+                      settings: Settings.settings(configurations: Project.makeConfiguration()),
                       targets: [Target(name: "App",
                                        platform: .iOS,
                                        product: .app,
@@ -15,8 +16,7 @@ let project = Project(name: "App",
                                        resources: ["Resources/**"],
                                        dependencies: [
                                         .project(target: "Feature", path: "../Feature"),
-                                        .project(target: "Shared", path: "../Shared"),
-
+                                        .project(target: "Shared", path: "../Shared")
                                        ])
                       ])
 

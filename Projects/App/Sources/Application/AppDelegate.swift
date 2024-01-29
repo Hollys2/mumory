@@ -8,18 +8,24 @@
 
 
 import SwiftUI
-import Firebase
-import KakaoSDKCommon
+import FirebaseCore
+//import KakaoSDKCommon
+import GoogleSignIn
 
-class AppDelegate: NSObject, UIApplicationDelegate{
+public class AppDelegate: NSObject, UIApplicationDelegate{
 
-    func application(_ application: UIApplication,
+    public func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-
+        print("launch in appdelegate")
         FirebaseApp.configure()
-        KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
-        
+//        KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
         return true
     }
+    
+    public func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        print("handle url")
+        return GIDSignIn.sharedInstance.handle(url)
+    }
+
 }
 
