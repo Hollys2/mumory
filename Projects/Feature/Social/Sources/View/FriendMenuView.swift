@@ -80,7 +80,6 @@ struct FriendMenuView: View {
                 , alignment: .bottom
             )
             
-            
             ScrollView {
                 switch type {
                 case .addFriend:
