@@ -17,8 +17,9 @@ struct MumoryApp: App {
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-                HomeView()
-//                ContentView()
+//                MyMumoryView()
+                MyPageSearchView()
+//                HomeView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
@@ -66,31 +67,6 @@ struct YearMonthPicker: View {
             .pickerStyle(WheelPickerStyle())
 //            .frame(width: 150)
         }
-        .padding()
-    }
-}
-
-struct YearMonthPicker2: View {
-    @State private var selectedDateIndex = 0
-    
-    let yearMonthOptions: [String] = {
-        let years = Array(2000...2030).map { "\($0)" }
-        let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-        return years.flatMap { year in
-            months.map { month in
-                "\(month) \(year)"
-            }
-        }
-    }()
-    
-    var body: some View {
-        Picker("Year and Month", selection: $selectedDateIndex) {
-            ForEach(0..<yearMonthOptions.count, id: \.self) {
-                Text(yearMonthOptions[$0])
-            }
-        }
-        .pickerStyle(WheelPickerStyle())
-        .frame(width: 200)
         .padding()
     }
 }

@@ -27,8 +27,6 @@ public struct StackView: Hashable {
 
 @available(iOS 16.0, *)
 public class AppCoordinator: ObservableObject {
-    
-    public init () {}
 
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var createMumoryPath: NavigationPath = NavigationPath()
@@ -50,7 +48,6 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var isTestViewShown = false
     
-    
     @Published public var isNavigationStackShown = false
     
     @Published public var page: Int = -1
@@ -60,5 +57,40 @@ public class AppCoordinator: ObservableObject {
     @Published public var safeAreaInsetsTop: CGFloat = 0.0
     @Published public var safeAreaInsetsBottom: CGFloat = 0.0
     
-//    @Published public var choosedMumory: MumoryAnnotation = MumoryAnnotation()
+    @Published public var selectedDate = Date()
+    
+    public var selectedYear: Int {
+        Calendar.current.component(.year, from: self.selectedDate)
+     }
+
+    public var selectedMonth: Int {
+        Calendar.current.component(.month, from: self.selectedDate)
+    }
+    
+    public func updateSelectedDate(year: Int, month: Int){
+         var components = DateComponents()
+         components.year = year
+         components.month = month
+
+        self.selectedDate = Calendar.current.date(from: components) ?? Date()
+     }
+
+    public func formattedDate(date: Date, dateFormat: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = dateFormat
+        return dateFormatter.string(from: date)
+        
+        //        let date = Calendar.current.date(from: DateComponents(year: selectedYear, month: selectedMonth, day: 1)) ?? Date()
+        //        return dateFormatter.string(from: date)
+    }
+    
+    public static func getYearMonthDate(year: Int, month: Int) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        
+        return Calendar.current.date(from: components) ?? Date()
+    }
+    
+    public init () {}
 }

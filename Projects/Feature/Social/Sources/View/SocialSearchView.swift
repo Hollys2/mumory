@@ -39,6 +39,7 @@ struct PageTabView<Content: View, Label: View>: View {
                     .foregroundColor(.clear)
                     .frame(width: getUIScreenBounds().width, height: 0.3)
                     .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
+                    
                 , alignment: .bottom
             )
             .onPreferenceChange(TabWidthPreferenceKey.self) { preferences in
@@ -46,7 +47,6 @@ struct PageTabView<Content: View, Label: View>: View {
                     tabWidths[index] = width
                 }
             }
-            
             Rectangle()
                 .fill(Color(red: 0.64, green: 0.51, blue: 0.99))
                 .frame(width: tabWidths[selection], height: 3)
@@ -65,6 +65,7 @@ struct PageTabView<Content: View, Label: View>: View {
             }
             
         }
+
         
     }
 }
@@ -156,6 +157,7 @@ public struct SocialSearchView: View {
                 }
                 
             } content: {
+                
                 ScrollView(showsIndicators: false) {
                     
                     VStack(spacing: 0) {
@@ -206,8 +208,6 @@ public struct SocialSearchView: View {
                 }
                 .pageView()
                 .tag(0)
-                
-                
                 
                 ScrollView(showsIndicators: false) {
                     
@@ -407,6 +407,7 @@ public struct SocialSearchView: View {
             }
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
     }
 }
