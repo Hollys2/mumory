@@ -44,6 +44,8 @@ struct HomeTabView: View {
                 Button(action: {
                     withAnimation(Animation.easeInOut(duration: 0.2)) {
                         appCoordinator.isCreateMumorySheetShown = true
+//                        appCoordinator.isTestViewShown = true
+                        
                     }
                 }) {
                     Image(asset: SharedAsset.createMumoryTabbar)
@@ -65,9 +67,10 @@ struct HomeTabView: View {
                 }
                 .frame(width: geometry.size.width / 5)
             }
-            .frame(height: 89)
+            .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
             .background(Color.black)
         }
+        .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
     }
 }
 

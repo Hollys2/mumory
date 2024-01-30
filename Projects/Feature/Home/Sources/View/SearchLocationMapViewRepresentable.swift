@@ -21,8 +21,6 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
     @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
-        print("@@makeUIView")
-
         let mapView: MKMapView = .init()
 
         mapView.mapType = .mutedStandard
@@ -41,6 +39,7 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
         context.coordinator.setGPSButton()
         context.coordinator.setCompassButton()
         context.coordinator.setPin()
+        mapView.overrideUserInterfaceStyle = .light // 라이트 테마
         
         mapView.delegate = context.coordinator
         
@@ -153,7 +152,6 @@ extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelega
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        print("@@@viewFor")
         guard annotation is MKUserLocation else { return nil }
         
         let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "UserLocationAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "UserLocationAnnotation")

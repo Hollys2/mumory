@@ -9,17 +9,17 @@ struct MumoryApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    @ObservedObject var appCoordinator: AppCoordinator = .init()
-    @ObservedObject var locationManager: LocationManager = .init() // 위치 권한
-    @ObservedObject var localSearchViewModel: LocalSearchViewModel = .init()
-    @ObservedObject var mumoryDataViewModel: MumoryDataViewModel = .init()
+    @StateObject var appCoordinator: AppCoordinator = .init()
+    @StateObject var locationManager: LocationManager = .init() // 위치 권한
+    @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
+    @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-                HomeView()
-//                ContentView()
-//                MumoryDetailEditView()
+//                MyMumoryView()
+                MyPageSearchView()
+//                HomeView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
@@ -27,48 +27,127 @@ struct MumoryApp: App {
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
-                        
                     }
-                    
-
             }
         }
     }
 }
 
+extension Int {
+    func formatted() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = ""
+        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
+    }
+}
 
-struct ContentView: View {
-
+struct YearMonthPicker: View {
+    @State private var selectedYear = 2022
+    @State private var selectedMonth = "January"
+    
+    let years = Array(2000...2030)
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    
     var body: some View {
-        VStack {
-            ZStack(alignment: .bottom) {
-                Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                  .background(Color(red: 0.17, green: 0.17, blue: 0.17).opacity(0.2))
-                
-                Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(width: UIScreen.main.bounds.width, height: 64)
-                  .background(
-                    LinearGradient(
-                      stops: [
-                        Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09), location: 0.38),
-                        Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0), location: 0.59),
-                      ],
-                      startPoint: UnitPoint(x: 0.5, y: 1.28),
-                      endPoint: UnitPoint(x: 0.5, y: 0.56)
-                    )
-                  )
+        HStack(spacing: 0) {
+            Picker("Year", selection: $selectedYear) {
+                ForEach(years, id: \.self) {
+                    Text("\($0.formatted())년")
+                }
             }
+            .pickerStyle(WheelPickerStyle())
+//            .frame(width: 100)
             
-            
-            Spacer()
+            Picker("Month", selection: $selectedMonth) {
+                ForEach(months, id: \.self) {
+                    Text($0)
+                }
+            }
+            .pickerStyle(WheelPickerStyle())
+//            .frame(width: 150)
         }
+        .padding()
     }
 }
 
+//
+//struct ContentView: View {
+//    @State private var selectedTab = 0
+//    @State private var underlineOffset: CGFloat = 0
+//
+//    var body: some View {
+//        VStack(spacing: 0) {
+//            // TabView와 언더라인을 포함한 탭 뷰
+//            TabView(selection: $selectedTab) {
+//                Text("Tab 1")
+//                    .tag(0)
+//
+//                Text("Tab 2")
+//                    .tag(1)
+//
+//                Text("Tab 3")
+//                    .tag(2)
+//            }
+//            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+//            .background(Color.white)
+//
+//            // 선택된 탭에 따라 언더라인을 표시하는 뷰
+//            GeometryReader { geometry in
+//                HStack(spacing: 0) {
+//                    ForEach(0..<3) { index in
+//                        Text("Tab \(index + 1)")
+//                            .font(.headline)
+//                            .padding()
+//                            .onTapGesture {
+//                                withAnimation {
+//                                    selectedTab = index
+//                                    // 언더라인 위치 업데이트
+//                                    underlineOffset = geometry.size.width / 3 * CGFloat(index)
+//                                }
+//                            }
+//                    }
+//
+//                    // 언더라인
+//                    Rectangle()
+//                        .fill(Color.blue)
+//                        .frame(width: geometry.size.width / 3, height: 2)
+//                        .offset(x: underlineOffset)
+//                        .animation(.easeInOut)
+//                        .onAppear {
+////                            underlineOffset = geometry.size.width / 3 * CGFloat(selectedTab)
+//                        }
+//                        .onChange(of: selectedTab) { newIndex in
+//                            withAnimation {
+//                                underlineOffset = geometry.size.width / 3 * CGFloat(newIndex)
+//                            }
+//                        }
+//                }
+//            }
+//        }
+//        .frame(height: 50)
+//    }
+//}
 
+
+// blur
+//ZStack {
+//    SharedAsset.artworkSample.swiftUIImage
+//        .frame(width: UIScreen.main.bounds.width)
+//
+//    Text("FUCK YOU")
+//        .padding()
+//        .background(
+//            HStack{
+//                Rectangle()
+//                    .frame(width: 5)
+//                    .background(.ultraThinMaterial)
+//                    .blur(radius: 5)
+//                Spacer()
+//            }
+//        )
+//        .offset(y: 100)
+//}
 
 //struct ContentView: View {
 //    @State private var scrollOffset: Int = 0

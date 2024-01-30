@@ -204,14 +204,12 @@ public struct MumoryDetailCommentSheetView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    public init() {}
-    
     public var body: some View {
         VStack(spacing: 0) {
             ZStack {
                 Rectangle()
                     .foregroundColor(.clear)
-                    .frame(width: 390, height: 72)
+                    .frame(height: 72)
                     .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                     .cornerRadius(23)
                 
@@ -235,27 +233,24 @@ public struct MumoryDetailCommentSheetView: View {
                     Spacer()
                     
                     Button(action: {
-                        
+                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                        }
                     }, label: {
                         SharedAsset.commentCloseButtonMumoryDetail.swiftUIImage
                             .frame(width: 25, height: 25)
                     })
                 } // HStack
-                .frame(height: 72)
-                .padding(.horizontal, 20)
-                .background(.gray)
-            }
+                .frame(width: UIScreen.main.bounds.width - 40, height: 72)
+            } // ZStack
             
             ScrollView {
                 VStack(spacing: 0) {
-                    
                     // MARK: Comment
                     Comment()
-                    
                 }
             }
-            
-//            Spacer()
+            .gesture(TapGesture(count: 1))
             
             ZStack {
                 Rectangle()
@@ -293,7 +288,7 @@ public struct MumoryDetailCommentSheetView: View {
                     })
                     
                 }
-            }
+            } // ZStack
             
             ZStack {
                 Rectangle()
@@ -337,7 +332,7 @@ public struct MumoryDetailCommentSheetView: View {
                             Button(action: {
                                 
                             }, label: {
-                                SharedAsset.commentWriteButtonMumoryDetail.swiftUIImage
+                                SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
                                     .frame(width: 20, height: 20)
                             })
                             .padding(.trailing, 10)
@@ -359,14 +354,25 @@ public struct MumoryDetailCommentSheetView: View {
             } // ZStack
             
         } // VStack
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(height: UIScreen.main.bounds.height * 0.84)
         .background(Color(red: 0.16, green: 0.16, blue: 0.16))
         .cornerRadius(23, corners: [.topLeft, .topRight])
+                    .background(
+                        GeometryReader{ g in
+                            Color.clear
+                                .onAppear {
+                                    print("g.size.width: \(g.size.width)")
+                                }
+                        }
+                    )
+        .onDisappear {
+            self.appCoordinator.isMumoryDetailCommentSheetViewShown = false
+        }
     }
 }
 
-struct MumoryDetailCommentSheetView_Previews: PreviewProvider {
-    static var previews: some View {
-        MumoryDetailCommentSheetView()
-    }
-}
+//struct MumoryDetailCommentSheetView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        MumoryDetailCommentSheetView()
+//    }
+//}

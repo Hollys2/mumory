@@ -26,6 +26,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
     private let searchCompleter = MKLocalSearchCompleter()
     
     var cancellable: AnyCancellable?
+    private var cancellables: Set = [""]
     
     private let locationManager = CLLocationManager()
     
@@ -36,22 +37,27 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
         
         searchCompleter.delegate = self
 //        searchCompleter.region = MKCoordinateRegion(MKMapRect.world)
+//        searchCompleter.resultTypes = MKLocalSearchCompleter.ResultType([.address])
+        searchCompleter.resultTypes = .pointOfInterest
         
         cancellable = $queryFragment
             .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
+//            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
             .removeDuplicates()
             .sink(receiveValue: { value in
                 self.searchAddress(value)
             })
+//            .store(in: &cancellables)
     }
     
     func searchAddress(_ queryFragment: String) {
         if queryFragment.isEmpty {
-            results = []
+            self.results = []
         } else {
-            searchCompleter.queryFragment = queryFragment
+            self.searchCompleter.queryFragment = queryFragment
         }
     }
+
     
     func getRegion(localSearchCompletion: MKLocalSearchCompletion, completion: @escaping (MKCoordinateRegion?) -> Void) {
         let request = MKLocalSearch.Request(completion: localSearchCompletion)

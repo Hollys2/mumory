@@ -49,7 +49,9 @@ struct MumoryDetailReactionBarView: View {
                 Spacer().frame(width: 12)
                 
                 Button(action: {
-                    
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
+                    }
                 }, label: {
                     Image(uiImage: SharedAsset.commentButtonMumoryDetail.image)
                         .resizable()

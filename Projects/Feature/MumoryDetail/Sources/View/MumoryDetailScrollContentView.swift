@@ -62,7 +62,6 @@ struct MumoryDetailScrollContentView: View {
                         )
                     )
             }
-//            .gesture(DragGesture())
             
             VStack(spacing: 0) {
                 Group {
@@ -124,8 +123,7 @@ struct MumoryDetailScrollContentView: View {
                                     GeometryReader { proxy in
                                         Color.clear
                                             .onAppear {
-                                                self.tagWidth += proxy.size.width
-                                                print("tagWidth: \(tagWidth)")
+//                                                self.tagWidth += proxy.size.width
                                             }
                                     })
                             
@@ -228,7 +226,7 @@ struct MumoryDetailScrollContentView: View {
                         }
                     })
                     
-                    Spacer().frame(height: 146)
+                    Spacer().frame(height: 100)
                 }
             } // VStack
             .frame(width: UIScreen.main.bounds.width - 40)
@@ -237,7 +235,7 @@ struct MumoryDetailScrollContentView: View {
             
             Spacer()
         } // VStack
-        .ignoresSafeArea()   
+        .ignoresSafeArea()
     }
 }
 
