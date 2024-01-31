@@ -14,13 +14,10 @@ import Core
 
 
 public struct SelectGenreView: View {
-    @EnvironmentObject var customizationObject: CustomizationViewModel
+    @EnvironmentObject var manager: CustomizationManageViewModel
     //장르가 결정되면, 서버에서 받아오기
-    @State var genreList: [String] = ["K-pop", "Rock", "J-POP", "POP", "WorldWide", "Indie Rock", "Dance", "Disney", "Anime", "R&B", "Soul", "Hip-Hop", "어쩌구저쩌구", "이렇게 저렇게", "하나추가", "두개", "냥", "야호 야호", "태그레이아웃성공", "나는 짱!!",
-                               "K-pop", "Rock", "J-POP", "POP", "WorldWide", "Indie Rock", "Dance", "Disney", "Anime", "R&B", "Soul", "Hip-Hop", "어쩌구저쩌구", "이렇게 저렇게", "하나추가", "두개", "냥", "야호 야호", "태그레이아웃성공", "나는 짱!!"]
-    var index = 0
-    @State var itemBackgroundColorList = Array(repeating: ColorSet.mainPurpleColor, count: 100)
-    let selectedColor = Color(red: 0.82, green: 0.82, blue: 0.82)
+    @State private var genreList: [String] = []
+    
     public var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
@@ -56,14 +53,14 @@ public struct SelectGenreView: View {
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
-                        .padding(.top, 3)
+                        .padding(.top, 1)
                     
                     Text("라이브러리 > 추천에서 수정할 수 있어요")
                         .foregroundColor(ColorSet.subGray)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
-                        .padding(.top, 15)
+                        .padding(.top, 13)
                     
                     
                     //Tag Layout
@@ -79,20 +76,15 @@ public struct SelectGenreView: View {
                                         .padding(.trailing, 19)
                                         .padding(.top, 10)
                                         .padding(.bottom, 10)
-                                        .foregroundStyle(customizationObject.isContained(term: genreText) ? Color.black : ColorSet.lightGray)
-                                        .background(customizationObject.isContained(term: genreText) ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+                                        .background(manager.contains(genre: genreText) ? ColorSet.moreDeepGray : ColorSet.mainPurpleColor)
+                                        .foregroundStyle(manager.contains(genre: genreText) ? ColorSet.lightGray : Color.black)
                                         .overlay(content: {
                                             RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                                .stroke(Color.white, lineWidth: customizationObject.isContained(term: genreText) ? 0 : 1)
+                                                .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genreText) ? 1 : 0)
                                         })
                                         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
-
                                         .onTapGesture {
-                                            print()
-                                            if customizationObject.checkedCount < 5 {
-                                                customizationObject.checkedCount += 1
-                                                customizationObject.selectedGenreList.append(genreText)
-                                            }
+                                            manager.appendGenre(genre: genreText)
                                         }
                                         
                                 }
@@ -103,9 +95,15 @@ public struct SelectGenreView: View {
                     })
                     .padding(.top, 42)
                     
+                    Rectangle()
+                        .foregroundStyle(Color.clear)
+                        .frame(width: 10, height: 200)
                 }
             })
         }
+        .onAppear(perform: {
+            getGenreList()
+        })
 
         
     }
@@ -141,6 +139,23 @@ public struct SelectGenreView: View {
         }
         return returnValue
     }
+    
+    private func getGenreList(){
+        let db = FirebaseManager.shared.db
+        db.collection("Admin").document("Data").getDocument { snapShot, error in
+            if let error = error {
+                print("firestore error: \(error)")
+            }else if let snapshot = snapShot {
+                if let data = snapshot.data(){
+                    guard let genreList = data["genre_list"] as? [String] else {
+                        print("no genreList")
+                        return
+                    }
+                    self.genreList = genreList
+                }
+            }
+        }
+    }
 }
 
 //#Preview {
@@ -148,3 +163,6 @@ public struct SelectGenreView: View {
 //}
 
 
+//                                        .foregroundStyle(customizationObject.isContained(term: genreText) ? Color.black : ColorSet.lightGray)
+//                                        .background(customizationObject.isContained(term: genreText) ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+                                     

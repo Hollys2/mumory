@@ -9,7 +9,7 @@
 import SwiftUI
 import Shared
 struct SelectTimeView: View {
-    @EnvironmentObject var customizationObject: CustomizationViewModel
+    @EnvironmentObject var manager: CustomizationManageViewModel
 
     var body: some View {
         ZStack{
@@ -59,33 +59,33 @@ struct SelectTimeView: View {
                     })
                     
                     TimeItem(timeZone: .moring)
-                        .environmentObject(customizationObject)
+                        .environmentObject(manager)
                         .onTapGesture {
-                            customizationObject.selectedTime = 1
+                            manager.selectedTime = 1
                         }
                     
                     TimeItem(timeZone: .afternoon)
-                        .environmentObject(customizationObject)
+                        .environmentObject(manager)
                         .onTapGesture {
-                            customizationObject.selectedTime = 2
+                            manager.selectedTime = 2
                         }
                     
                     TimeItem(timeZone: .evening)
-                        .environmentObject(customizationObject)
+                        .environmentObject(manager)
                         .onTapGesture {
-                            customizationObject.selectedTime = 3
+                            manager.selectedTime = 3
                         }
                     
                     TimeItem(timeZone: .night)
-                        .environmentObject(customizationObject)
+                        .environmentObject(manager)
                         .onTapGesture {
-                            customizationObject.selectedTime = 4
+                            manager.selectedTime = 4
                         }
                     
                     TimeItem(timeZone: .auto)
-                        .environmentObject(customizationObject)
+                        .environmentObject(manager)
                         .onTapGesture {
-                            customizationObject.selectedTime = 5
+                            manager.selectedTime = 5
                         }
                     
                     Text("설정 > 알림에서 수정할 수 있어요")
@@ -117,7 +117,7 @@ struct TimeItem: View {
         case night
         case auto
     }
-    @EnvironmentObject var customizationObject: CustomizationViewModel
+    @EnvironmentObject var manager: CustomizationManageViewModel
     @State var timeZone: time = .moring
     @State var selectedTime: Int = 0
     var body: some View {
@@ -126,21 +126,22 @@ struct TimeItem: View {
             VStack(spacing: 0, content: {
                 Text("아침")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(customizationObject.selectedTime == 1 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 1 ? Color.black : ColorSet.lightGray)
                     .padding(.top, 9)
                 
             
                 Text("6:00AM ~ 11:00AM")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                    .foregroundStyle(customizationObject.selectedTime == 1 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 1 ? Color.black : ColorSet.lightGray)
+                    .padding(.top, 4)
                     .padding(.bottom, 9)
 
             })
             .frame(maxWidth: .infinity)
-            .background(customizationObject.selectedTime == 1 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+            .background(manager.selectedTime == 1 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
                 RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
-                    .stroke(Color.white, lineWidth: customizationObject.selectedTime == 1 ? 0 : 1)
+                    .stroke(Color.white, lineWidth: manager.selectedTime == 1 ? 0 : 1)
             })
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
             .padding(.leading, 20)
@@ -151,21 +152,22 @@ struct TimeItem: View {
             VStack(spacing: 0, content: {
                 Text("점심")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(customizationObject.selectedTime == 2 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 2 ? Color.black : ColorSet.lightGray)
                     .padding(.top, 9)
                 
             
                 Text("11:00AM - 4:00PM")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                    .foregroundStyle(customizationObject.selectedTime == 2 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 2 ? Color.black : ColorSet.lightGray)
+                    .padding(.top, 4)
                     .padding(.bottom, 9)
 
             })
             .frame(maxWidth: .infinity)
-            .background(customizationObject.selectedTime == 2 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+            .background(manager.selectedTime == 2 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
                 RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
-                    .stroke(Color.white, lineWidth: customizationObject.selectedTime == 2 ? 0 : 1)
+                    .stroke(Color.white, lineWidth: manager.selectedTime == 2 ? 0 : 1)
             })
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
             .padding(.leading, 20)
@@ -176,21 +178,22 @@ struct TimeItem: View {
             VStack(spacing: 0, content: {
                 Text("저녁")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(customizationObject.selectedTime == 3 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 3 ? Color.black : ColorSet.lightGray)
                     .padding(.top, 9)
                 
             
                 Text("4:00PM - 9:00PM")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                    .foregroundStyle(customizationObject.selectedTime == 3 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 3 ? Color.black : ColorSet.lightGray)
+                    .padding(.top, 4)
                     .padding(.bottom, 9)
 
             })
             .frame(maxWidth: .infinity)
-            .background(customizationObject.selectedTime == 3 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+            .background(manager.selectedTime == 3 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
                 RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
-                    .stroke(Color.white, lineWidth: customizationObject.selectedTime == 3 ? 0 : 1)
+                    .stroke(Color.white, lineWidth: manager.selectedTime == 3 ? 0 : 1)
             })
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
             .padding(.leading, 20)
@@ -201,21 +204,22 @@ struct TimeItem: View {
             VStack(spacing: 0, content: {
                 Text("밤")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(customizationObject.selectedTime == 4 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 4 ? Color.black : ColorSet.lightGray)
                     .padding(.top, 9)
                 
             
                 Text("9:00PM - 2:00AM")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                    .foregroundStyle(customizationObject.selectedTime == 4 ? Color.black : ColorSet.lightGray)
+                    .foregroundStyle(manager.selectedTime == 4 ? Color.black : ColorSet.lightGray)
+                    .padding(.top, 4)
                     .padding(.bottom, 9)
 
             })
             .frame(maxWidth: .infinity)
-            .background(customizationObject.selectedTime == 4 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+            .background(manager.selectedTime == 4 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
                 RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
-                    .stroke(Color.white, lineWidth: customizationObject.selectedTime == 4 ? 0 : 1)
+                    .stroke(Color.white, lineWidth: manager.selectedTime == 4 ? 0 : 1)
             })
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
             .padding(.leading, 20)
@@ -226,16 +230,16 @@ struct TimeItem: View {
             VStack(spacing: 0, content: {
                 Text("이용 시간대를 분석해 자동으로 설정")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(customizationObject.selectedTime == 5 ? Color.black : ColorSet.lightGray)
-                    .padding(.top, 13)
-                    .padding(.bottom, 13)
+                    .foregroundStyle(manager.selectedTime == 5 ? Color.black : ColorSet.lightGray)
+                    .padding(.top, 19)
+                    .padding(.bottom, 19)
 
             })
             .frame(maxWidth: .infinity)
-            .background(customizationObject.selectedTime == 5 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
+            .background(manager.selectedTime == 5 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
                 RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
-                    .stroke(Color.white, lineWidth: customizationObject.selectedTime == 5 ? 0 : 1)
+                    .stroke(Color.white, lineWidth: manager.selectedTime == 5 ? 0 : 1)
             })
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
             .padding(.leading, 20)

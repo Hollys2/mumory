@@ -13,8 +13,7 @@ struct InputPWView: View {
     @EnvironmentObject var manager: SignUpManageViewModel
     @State var password: String = ""
     @State var confirmPassword: String = ""
-//    @State var isValidPassword = false
-//    @State var isValidConfirmPassword = false
+
     var body: some View {
         VStack(spacing: 0){
             Text("비밀번호")
@@ -66,16 +65,12 @@ struct InputPWView: View {
                 .frame(height: confirmPassword.count < 1 ? 0 : (password == confirmPassword) ? 0 : nil)
         }
         .onAppear(perform: {
+            //앞페이지에서 뒤로가기 했을 때 이전에 작성해놓은 비밀번호가 다시 보일 수 있도록 함
             if manager.isValidPassword() && manager.isValidConfirmPassword(){
                 password = manager.password
                 confirmPassword = manager.confirmPassword
             }
         })
-//        .onDisappear(perform: {
-//            if manager.isValidPassword() && manager.isValidConfirmPassword(){
-//                manager.password = password
-//            }
-//        })
     }
 }
 

@@ -23,7 +23,9 @@ let project = Project(name: "Core",
                                         .external(name: "FirebaseStorage"),
                                         .external(name: "GoogleSignIn"),
                                         .external(name: "GoogleSignInSwift"),
-                                        .external(name: "Lottie")
+                                        .external(name: "Lottie"),
+                                        .external(name: "KakaoSDKUser"),
+                                        .external(name: "KakaoSDKAuth")
                                        ],
                                        settings: Settings.settings(base: [
                                         "HEADER_SEARCH_PATHS": "$(inherited) $(PROJECT_DIR)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",

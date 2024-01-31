@@ -32,28 +32,40 @@ public struct InputEmailView: View {
                     .padding(.trailing, 20)
                     .onChange(of: email, perform: { value in
                         manager.email = value
+                        manager.checkEmail()
                     })
                 
                 //이메일 형식 오류 텍스트
-                Text("이메일 형식이 올바르지 않습니다 :(")
+                Text(getErrorMessage())
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .foregroundColor(Color(red: 1, green: 0.34, blue: 0.34))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 40)
                     .padding(.top, 15)
-                    .opacity(email.count < 1 ? 0 : manager.isValidEmail() ? 0 : 1)
             })
             .onAppear(perform: {
-                if manager.isValidEmail(){
+                if manager.isValidEmailStyle && manager.isAvailableEmail {
                     email = manager.email
                 }
             })
-//            .onDisappear(perform: {
-//                if manager.isValidEmail(){
-//                    manager.email = email
-//                }
-//            })
+ 
         
+    }
+    
+    private func getErrorMessage() -> String {
+        if email.count > 0 {
+            if manager.isValidEmailStyle {
+                if manager.isAvailableEmail{
+                    return ""
+                }else {
+                    return "이미 사용 중인 이메일입니다."
+                }
+            }else {
+                return "이메일 형식이 올바르지 않습니다. :("
+            }
+        }else {
+            return ""
+        }
     }
 }
 

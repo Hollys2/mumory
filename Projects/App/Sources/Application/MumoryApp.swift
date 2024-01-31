@@ -1,7 +1,6 @@
 import SwiftUI
 import Feature
-import FirebaseCore
-//import KakaoSDKCommon
+import KakaoSDKAuth
 import GoogleSignIn
 
 @main
@@ -15,6 +14,11 @@ public struct MumoryApp: App {
     public var body: some Scene {
         WindowGroup {
             SplashView()
+                .onOpenURL(perform: { url in
+                    if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                        AuthController.handleOpenUrl(url: url)
+                    }
+                })
         }
     }
 }

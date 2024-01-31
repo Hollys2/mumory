@@ -18,7 +18,6 @@ struct TermsAndConditionsView: View {
     @State var isCheckedSecondItem: Bool = false
     @State var isCheckedThirdItem: Bool = false
     @State var isCheckedFourthItem: Bool = false
-    
 
     var body: some View {
         ZStack{
@@ -100,6 +99,7 @@ struct TermsAndConditionsView: View {
                         manager.isCheckedEventNotification = value
                     })
             }
+            
         }
     }
 }

@@ -12,7 +12,7 @@ import Shared
 struct AuthTextFieldSmall: View {
     @Binding var text: String
     var prompt: String = ""
-
+    
     var body: some View {
         HStack(spacing: 0){
             TextField("", text: $text, prompt: getPrompt())
@@ -20,14 +20,17 @@ struct AuthTextFieldSmall: View {
                 .padding(.leading, 25)
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .foregroundColor(.white)
+                .textInputAutocapitalization(.never)
             
-            SharedAsset.xWhiteCircle.swiftUIImage
-                .frame(width: 23, height: 23)
-                .padding(.trailing, 17)
-                .padding(.leading, 5)
-                .onTapGesture {
-                    text = ""
-                }
+            Button(action: {
+                text = ""
+            }, label: {
+                SharedAsset.xWhiteCircle.swiftUIImage
+                    .frame(width: 23, height: 23)
+                    .padding(.trailing, 17)
+                    .padding(.leading, 5)
+            })
+            
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 18)

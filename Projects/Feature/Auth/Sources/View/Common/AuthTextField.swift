@@ -20,10 +20,10 @@ struct AuthTextField: View {
                 .padding(.leading, 25)
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                 .foregroundColor(.white)
-            
+                .textInputAutocapitalization(.never)
+
             Button(action: {
                 text = ""
-
             }, label: {
                 SharedAsset.xWhiteCircle.swiftUIImage
                     .frame(width: 23, height: 23)
