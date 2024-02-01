@@ -47,7 +47,7 @@ struct ProfileSettingView: View {
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
                                             .clipShape(Circle())
-                                            .frame(width: 140)
+                                            .frame(width: 105)
                                     }
                                     
 
@@ -55,7 +55,7 @@ struct ProfileSettingView: View {
                                 
                             }else{
                                 SharedAsset.selectImage.swiftUIImage
-                                    .frame(width: 140, height: 140)
+                                    .frame(width: 105, height: 105)
                                     .clipShape(Circle())
 
                             }

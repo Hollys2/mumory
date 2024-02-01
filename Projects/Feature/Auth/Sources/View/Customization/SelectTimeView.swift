@@ -192,10 +192,10 @@ struct TimeItem: View {
             .frame(maxWidth: .infinity)
             .background(manager.selectedTime == 3 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
+                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
                     .stroke(Color.white, lineWidth: manager.selectedTime == 3 ? 0 : 1)
             })
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
             .padding(.leading, 20)
             .padding(.trailing, 20)
             .padding(.top, 14)

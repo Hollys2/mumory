@@ -23,88 +23,92 @@ public struct SelectGenreView: View {
             ColorSet.background.ignoresSafeArea()
             GeometryReader(content: { geometry in
                 
-                ScrollView{
-                    Text("관심있는 장르를\n선택해주세요")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 20)
-                        .padding(.top, 44)
-                    
-                    HStack(spacing: 0){
-                        Text("관심있는 음악 장르를 ")
-                            .foregroundColor(.white)
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                ScrollView(){
+                    VStack(spacing: 0, content: {
                         
-                        Text("5가지 이내")
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        
-                        Text("로 선택해주세요.")
+                        Text("관심있는 음악 장르를\n선택해주세요")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                             .foregroundColor(.white)
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 20)
-                    .padding(.top, 55)
-                    
-                    Text("나에게 맞는 음악을 추천받을 수 있습니다!")
-                        .foregroundColor(.white)
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 20)
-                        .padding(.top, 1)
-                    
-                    Text("라이브러리 > 추천에서 수정할 수 있어요")
-                        .foregroundColor(ColorSet.subGray)
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 20)
-                        .padding(.top, 13)
-                    
-                    
-                    //Tag Layout
-                    //2차원배열이기 때문에 ForEach 2개 사용
-                    VStack(content: {
-                        ForEach(gerRows(list: genreList, screenWidth: geometry.size.width), id: \.self){ list in
-                            
-                            HStack(spacing: 7, content: {
-                                ForEach(list, id: \.self){ genreText in
-                                    Text(genreText)
-                                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
-                                        .padding(.leading, 19)
-                                        .padding(.trailing, 19)
-                                        .padding(.top, 10)
-                                        .padding(.bottom, 10)
-                                        .background(manager.contains(genre: genreText) ? ColorSet.moreDeepGray : ColorSet.mainPurpleColor)
-                                        .foregroundStyle(manager.contains(genre: genreText) ? ColorSet.lightGray : Color.black)
-                                        .overlay(content: {
-                                            RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                                .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genreText) ? 1 : 0)
-                                        })
-                                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
-                                        .onTapGesture {
-                                            manager.appendGenre(genre: genreText)
-                                        }
-                                        
-                                }
-                            })
+                            .lineSpacing(8)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 20)
+                            .padding(.top, 44)
+                        
+                        HStack(spacing: 0){
+                            Text("관심있는 음악 장르를 ")
+                                .foregroundColor(.white)
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            
+                            Text("5가지 이내")
+                                .foregroundStyle(ColorSet.mainPurpleColor)
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            
+                            Text("로 선택해주세요.")
+                                .foregroundColor(.white)
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 20)
+                        .padding(.top, 50)
+                        
+                        Text("나에게 맞는 음악을 추천받을 수 있습니다!")
+                            .foregroundColor(.white)
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 20)
+                        
+                        Text("라이브러리 > 추천에서 수정할 수 있어요")
+                            .foregroundColor(ColorSet.subGray)
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 20)
+                            .padding(.top, 13)
+                        
+                        
+                        //Tag Layout
+                        //2차원배열이기 때문에 ForEach 2개 사용
+                        VStack(spacing: 13, content: {
+                            ForEach(gerRows(list: genreList, screenWidth: geometry.size.width), id: \.self){ list in
+                                HStack(spacing: 10, content: {
+                                    ForEach(list, id: \.self){ genreText in
+                                        Text(genreText)
+                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                                            .padding(.leading, 19)
+                                            .padding(.trailing, 19)
+                                            .padding(.top, 10)
+                                            .padding(.bottom, 10)
+                                            .background(manager.contains(genre: genreText) ? ColorSet.moreDeepGray : ColorSet.mainPurpleColor)
+                                            .foregroundStyle(manager.contains(genre: genreText) ? ColorSet.lightGray : Color.black)
+                                            .overlay(content: {
+                                                RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
+                                                    .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genreText) ? 1 : 0)
+                                            })
+                                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
+                                            .onTapGesture {
+                                                manager.appendGenre(genre: genreText)
+                                            }
+                                        
+                                    }
+                                })
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.leading, 20)
+                            }
+                        })
+                        .padding(.top, 42)
+                        
+                        Rectangle()
+                            .foregroundStyle(Color.clear)
+                            .frame(width: 10, height: 200)
                     })
-                    .padding(.top, 42)
-                    
-                    Rectangle()
-                        .foregroundStyle(Color.clear)
-                        .frame(width: 10, height: 200)
                 }
+                
             })
+            
         }
         .onAppear(perform: {
             getGenreList()
         })
-
+        
         
     }
     
@@ -165,4 +169,4 @@ public struct SelectGenreView: View {
 
 //                                        .foregroundStyle(customizationObject.isContained(term: genreText) ? Color.black : ColorSet.lightGray)
 //                                        .background(customizationObject.isContained(term: genreText) ? ColorSet.mainPurpleColor : ColorSet.deepGray)
-                                     
+

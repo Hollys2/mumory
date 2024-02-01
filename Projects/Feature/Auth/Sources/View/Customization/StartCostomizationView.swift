@@ -26,15 +26,18 @@ struct StartCostomizationView: View {
                 
                 Text("다음 설문지를 통해 나의 음악 취향\n설정과 프로필이 생성됩니다.")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .lineSpacing(5)
+                    .tracking(0.5)
                     .foregroundStyle(Color(red: 0.54, green: 0.54, blue: 0.54))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 30)
-                    .padding(.top, 55)
+                    .padding(.top, 50)
                 
                 Spacer()
 
                 LottieView(animation: .named("survey", bundle: .module))
                     .looping()
+                    .ignoresSafeArea()
                 
                 Spacer()
                 
@@ -51,7 +54,7 @@ struct StartCostomizationView: View {
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .padding(.bottom, 20)
-                        .padding(.top, 28)
+                        .padding(.top, 25)
                 }
 
                 

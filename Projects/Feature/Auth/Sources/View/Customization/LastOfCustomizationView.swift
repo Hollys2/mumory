@@ -30,7 +30,7 @@ struct LastOfCustomizationView: View {
                     Text("프로필 생성이 완료되었습니다!")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                         .foregroundStyle(.white)
-                        .padding(.top, geometry.size.height > 700 ? 80 : 55)
+                        .padding(.top, geometry.size.height > 700 ? 75 : 50)
                         .offset(y: firstYOffset)
                         .opacity(firstOpacity)
                     
@@ -125,15 +125,16 @@ struct LastOfCustomizationView: View {
                     })
                     .padding(.leading, 58)
                     .padding(.trailing, 58)
-                    .padding(.top, geometry.size.height > 700 ? 50 : 30)
+                    .padding(.top, geometry.size.height > 700 ? 43 : 23)
                     .offset(y: secondYOffset)
                     .opacity(secondOpacity)
                     
-                    Text("이제 뮤모리를 통해 많은 음악과\n특별한 순간을 공유해보세요")
+                    Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
                         .foregroundStyle(ColorSet.subGray)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 40)
+                        .padding(.top, 37)
+                        .tracking(0.5)
                         .offset(y: thirdYOffset)
                         .opacity(geometry.size.height > 700 ? thirdOpacity : 0)
                     
