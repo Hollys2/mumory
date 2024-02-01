@@ -26,7 +26,7 @@ public struct SearchLocationMapView: View {
         VStack(spacing: 0) {
             ZStack(alignment: .topLeading) {
                 SearchLocationMapViewRepresentable(locationModel: $locationModel)
-                    .statusBarHidden(true)
+//                    .statusBarHidden(true)
 
                 Button(action: {
                     withAnimation {
@@ -39,7 +39,7 @@ public struct SearchLocationMapView: View {
                         .frame(width: 30, height: 30)
                     //                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
                 }
-                .padding(.top, 31)
+                .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
                 .padding(.leading, 20)
             }
             

@@ -26,7 +26,9 @@ struct HomeTabView: View {
     
     var body: some View {
         GeometryReader { geometry in
-            HStack(spacing: 0) {
+            
+            HStack(alignment: .bottom, spacing: 0) {
+                
                 Button(action: {
                     selectedTab = .home
                 }) {
@@ -45,12 +47,11 @@ struct HomeTabView: View {
                     withAnimation(Animation.easeInOut(duration: 0.2)) {
                         appCoordinator.isCreateMumorySheetShown = true
 //                        appCoordinator.isTestViewShown = true
-                        
                     }
                 }) {
                     Image(asset: SharedAsset.createMumoryTabbar)
                 }
-                .offset(y: -5)
+//                .offset(y: -5)
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
@@ -67,10 +68,10 @@ struct HomeTabView: View {
                 }
                 .frame(width: geometry.size.width / 5)
             }
-            .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
-            .background(Color.black)
+            .padding(.top, 2)
         }
-        .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
+        .frame(height: 89)
+        .background(Color.black)
     }
 }
 

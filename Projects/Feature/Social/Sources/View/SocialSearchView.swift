@@ -118,13 +118,12 @@ public struct SocialSearchView: View {
                 }
                 
                 Text("취소")
-                    .font(
-                        SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)
-//                        Font.custom("Pretendard", size: 16)
-//                            .weight(.medium)
-                    )
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.white)
+                    .onTapGesture {
+                        appCoordinator.rootPath.removeLast()
+                    }
             }
             .padding(.horizontal, 20)
             

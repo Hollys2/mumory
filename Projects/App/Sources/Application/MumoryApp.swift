@@ -18,8 +18,8 @@ struct MumoryApp: App {
         WindowGroup {
             GeometryReader { geometry in
 //                CreateMumoryBottomSheetView()
-//                HomeView()
-                SearchLocationMapView()
+                HomeView()
+//                SearchLocationMapView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)

@@ -276,6 +276,7 @@ public struct HomeView: View {
     var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
+                print("onChanged: \(value.translation.height)")
                 if value.translation.height > 0 {
                     DispatchQueue.main.async {
                         translation.height = value.translation.height                        
@@ -283,7 +284,7 @@ public struct HomeView: View {
                 }
             }
             .onEnded { value in
-                
+                print("onEnded: \(value.translation.height)")
                 withAnimation(Animation.easeInOut(duration: 0.2)) {
 //                    if value.translation.height > 130 {
 //                        appCoordinator.isCreateMumorySheetShown = false
@@ -328,7 +329,7 @@ public struct HomeView: View {
                     
                     CreateMumoryBottomSheetView()
                         .offset(y: translation.height)
-                        .gesture(dragGesture)
+                        .simultaneousGesture(dragGesture)
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
@@ -543,7 +544,7 @@ public struct HomeView: View {
                       endPoint: UnitPoint(x: 0.5, y: 0)
                     )
                   )
-                  .offset(y: 89 + appCoordinator.safeAreaInsetsBottom)
+                  .offset(y: 89)
             }
             
             VStack {
