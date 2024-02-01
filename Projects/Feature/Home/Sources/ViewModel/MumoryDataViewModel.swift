@@ -47,7 +47,7 @@ final public class MumoryDataViewModel: ObservableObject {
         for id in musicIDs {
             do {
                 let songItem = try await fetchMusics(songID: id)
-                let newAnnotation = MumoryAnnotation(date: Date(), musicModel: songItem, locationModel: LocationModel(locationTitle: "ㅋㅋ", locationSubtitle: "ㅎㅎ", coordinate: userLocation.coordinate))
+                let newAnnotation = MumoryAnnotation(date: Date(), musicModel: songItem, locationModel: LocationModel(locationTitle: "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", locationSubtitle: "ㅎㅎ", coordinate: userLocation.coordinate))
                 self.mumoryAnnotations.append(newAnnotation)
             } catch {
                 print("Error fetching song info for ID \(id): \(error)")

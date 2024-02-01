@@ -57,12 +57,12 @@ final public class LocationManager: NSObject, ObservableObject {
 extension LocationManager: CLLocationManagerDelegate {
     
     // 현재 위치
-//    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//        print("didUpdateLocations in CLLocationManagerDelegate")
-//        guard let location = locations.last else { return }
-//        
-//        self.currentLocation = location
-//    }
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("didUpdateLocations in CLLocationManagerDelegate")
+        guard let location = locations.last else { return }
+        
+        self.currentLocation = location
+    }
     
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("didFailWithError in CLLocationManagerDelegate")
