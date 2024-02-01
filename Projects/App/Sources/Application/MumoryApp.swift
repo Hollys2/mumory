@@ -17,9 +17,9 @@ struct MumoryApp: App {
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-//                MyMumoryView()
-                MyPageSearchView()
+//                CreateMumoryBottomSheetView()
 //                HomeView()
+                SearchLocationMapView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)

@@ -171,14 +171,12 @@ struct MumoryCard: View {
             }
             
             VStack {
+                
                 Spacer()
                 
                 HStack(spacing: 5)  {
                     Text("\(date)")
-                        .font(
-                            Font.custom("Pretendard", size: 15)
-                                .weight(.semibold)
-                        )
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                         .foregroundColor(.white)
                         .onAppear {
                             let dateFormatter = DateFormatter()
@@ -186,19 +184,17 @@ struct MumoryCard: View {
                             self.date = dateFormatter.string(from: mumoryAnnotation.date)
                         }
                     
-                    Spacer()
+                    
+                    Spacer(minLength: 59)
                     
                     SharedAsset.locationMumoryPopup.swiftUIImage
                         .resizable()
                         .frame(width: 17, height: 17)
                     
                     Text("\(mumoryAnnotation.locationModel.locationTitle)")
-                        .font(
-                            Font.custom("Pretendard", size: 15)
-                                .weight(.medium)
-                        )
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                         .foregroundColor(.white)
-                        .frame(width: 117, alignment: .leading)
+//                        .frame(maxWidth: getUIScreenBounds().width * 0.3, alignment: .leading)
                         .lineLimit(1)
                 } // HStack
                 .padding(.horizontal, 16)
@@ -321,21 +317,29 @@ public struct HomeView: View {
                     HomeTabView(selectedTab: $selectedTab)
                 }
                 
-//                if appCoordinator.isCreateMumorySheetShown {
-//                    Color.black.opacity(0.6)
-//                        .onTapGesture {
-//                            withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
-//                                appCoordinator.isCreateMumorySheetShown = false
-//                                //                                mumoryDataViewModel.choosedMusicModel = nil
-//                                //                                mumoryDataViewModel.choosedLocationModel = nil
-//                            }}
+                if appCoordinator.isCreateMumorySheetShown {
+                    Color.black.opacity(0.6)
+                        .onTapGesture {
+                            withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
+                                appCoordinator.isCreateMumorySheetShown = false
+                                //                                mumoryDataViewModel.choosedMusicModel = nil
+                                //                                mumoryDataViewModel.choosedLocationModel = nil
+                            }}
                     
-//                    CreateMumoryBottomSheetView()
-//                        .offset(y: translation.height)
-//                        .gesture(dragGesture)
-//                        .transition(.move(edge: .bottom))
-//                        .zIndex(1)
+                    CreateMumoryBottomSheetView()
+                        .offset(y: translation.height)
+                        .gesture(dragGesture)
+                        .transition(.move(edge: .bottom))
+                        .zIndex(1)
+                }
+                
+//                ZStack(alignment: .center) {
+//
+//                    Color.black.opacity(0.5)
+//
+//                    RewardPopUpView()
 //                }
+                    
                 
                 if self.appCoordinator.isMumoryPopUpShown {
                     ZStack { // 부모 ZStack의 정렬 무시
@@ -466,39 +470,41 @@ public struct HomeView: View {
 //                    })
 //                }
 
-            .sheet(isPresented: $appCoordinator.isCreateMumorySheetShown) {
-                NavigationStack(path: $appCoordinator.createMumoryPath) {
-                    VStack(spacing: 0) {
-                        Color.red
-                            .onTapGesture {
-                                appCoordinator.createMumoryPath.append(0.1)
-                            }
-                        Color.blue
-                            .onTapGesture {
-                                appCoordinator.createMumoryPath.append(3.3)
-                            }
-                            .navigationDestination(for: Double.self, destination: { i in
-                                switch i {
-                                case 0.1:
-                                    Color.orange
-                                        .navigationBarBackButtonHidden(true)
-                                default:
-                                    Color.pink
-                                }
-                            })
-                    }
-
-
-                }
-                .presentationDetents([.height(getUIScreenBounds().height - appCoordinator.safeAreaInsetsTop - 36)])
-                //                .presentationCornerRadius(23)
-            }
+//            .sheet(isPresented: $appCoordinator.isCreateMumorySheetShown) {
+//                NavigationStack(path: $appCoordinator.createMumoryPath) {
+//                    VStack(spacing: 0) {
+//                        Color.red
+//                            .onTapGesture {
+//                                appCoordinator.createMumoryPath.append(0.1)
+//                            }
+//                        Color.blue
+//                            .onTapGesture {
+//                                appCoordinator.createMumoryPath.append(3.3)
+//                            }
+//                            .navigationDestination(for: Double.self, destination: { i in
+//                                switch i {
+//                                case 0.1:
+//                                    Color.orange
+//                                        .navigationBarBackButtonHidden(true)
+//                                default:
+//                                    Color.pink
+//                                }
+//                            })
+//                    }
+//
+//
+//                }
+//                .presentationDetents([.height(getUIScreenBounds().height - appCoordinator.safeAreaInsetsTop - 36)])
+//                //                .presentationCornerRadius(23)
+//            }
         } // NavigationStack
         
     }
     
     var homeView: some View {
+        
         ZStack {
+            
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown)
                 .onAppear {
                     Task {
@@ -507,6 +513,7 @@ public struct HomeView: View {
                 }
             
             VStack(spacing: 0) {
+                
                 Rectangle()
                   .foregroundColor(.clear)
                   .frame(height: 95)
@@ -542,6 +549,7 @@ public struct HomeView: View {
             VStack {
                 PlayingMusicBarView()
                     .offset(y: appCoordinator.safeAreaInsetsTop + 16)
+                
                 Spacer()
             }
         }

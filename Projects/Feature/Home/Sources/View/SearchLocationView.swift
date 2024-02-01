@@ -73,11 +73,11 @@ struct SearchLocationView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            Image(uiImage: SharedAsset.dragIndicator.image)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 14)
-                .padding(.bottom, 14)
-                .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
+//            Image(uiImage: SharedAsset.dragIndicator.image)
+//                .frame(maxWidth: .infinity)
+//                .padding(.top, 14)
+//                .padding(.bottom, 14)
+//                .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
             
             HStack {
                 ZStack(alignment: .leading) {
@@ -279,6 +279,7 @@ struct SearchLocationView: View {
         .navigationBarBackButtonHidden(true)
         .padding(.horizontal, 21)
         .frame(width: UIScreen.main.bounds.width + 1)
+        .padding(.top, 12)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .onDisappear {
             appCoordinator.isSearchLocationViewShown = false

@@ -13,14 +13,16 @@ import Shared
 import _MapKit_SwiftUI
 
 @available(iOS 16.0, *)
-struct SearchLocationMapView: View {
+public struct SearchLocationMapView: View {
     
     @State var locationModel: LocationModel = .init(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D())
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
-    var body: some View {
+    public init() {}
+    
+    public var body: some View {
         VStack(spacing: 0) {
             ZStack(alignment: .topLeading) {
                 SearchLocationMapViewRepresentable(locationModel: $locationModel)
@@ -36,32 +38,53 @@ struct SearchLocationMapView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                     //                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
-                        .background(Color.red)
                 }
                 .padding(.top, 31)
                 .padding(.leading, 20)
             }
             
             VStack(spacing: 0) {
+                
                 Text("\(locationModel.locationTitle)")
-                    .font(
-                        Font.custom("Pretendard", size: 20)
-                            .weight(.bold)
-                    )
+                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 30)
-                    .padding(.top, 35)
+                    .padding(.top, 27)
                 
                 Text("\(locationModel.locationSubtitle)")
-                    .font(
-                        Font.custom("Pretendard", size: 15)
-                            .weight(.medium)
-                    )
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                     .foregroundColor(.white.opacity(0.7))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 30)
-                    .padding(.top, 14)
+                    .padding(.top, 8)
+                    .padding(.bottom, 13)
+                
+                HStack(alignment: .center, spacing: 6) {
+                    
+                    SharedAsset.pencilIconCreateMumory.swiftUIImage
+                        .resizable()
+                        .frame(width: 12, height: 12)
+                    
+                    Text("직접 입력")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                }
+                .padding(.horizontal, 13)
+                .padding(.vertical, 10)
+                .frame(height: 33, alignment: .leading)
+                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+                .cornerRadius(30)
+                .overlay(
+                  RoundedRectangle(cornerRadius: 30)
+                    .inset(by: 0.5)
+                    .stroke(Color(red: 0.47, green: 0.47, blue: 0.47), lineWidth: 1)
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 30)
+                
+                Spacer()
                 
                 Button(action: {
                     mumoryDataViewModel.choosedLocationModel = locationModel
@@ -74,24 +97,21 @@ struct SearchLocationMapView: View {
                         .cornerRadius(35)
                         .overlay(
                             Text("선택하기")
-                                .font(
-                                    Font.custom("Pretendard", size: 18)
-                                        .   weight(.bold)
-                                )
+                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.black)
                         )
                         .padding(.horizontal, 20)
-                        .padding(.top, 38)
+                        .padding(.bottom, 39)
+                        
                 }
             } // VStack
-//            .frame(height: UIScreen.main.bounds.height * 0.94 * 0.28)
+            .frame(height: UIScreen.main.bounds.height * 0.349 + appCoordinator.safeAreaInsetsBottom)
+            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         } // VStack
         .navigationBarBackButtonHidden(true)
 //        .padding(.horizontal, 21)
         .frame(width: UIScreen.main.bounds.width + 1)
-//        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-        .background(.brown)
         .ignoresSafeArea()
     }
 }
