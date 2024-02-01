@@ -21,6 +21,8 @@ struct AuthTextFieldSmall: View {
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .foregroundColor(.white)
                 .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+
             
             Button(action: {
                 text = ""

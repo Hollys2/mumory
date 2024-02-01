@@ -109,8 +109,9 @@ struct ProfileSettingView: View {
                                 .padding(.top, 14)
                                 .padding(.bottom, 14)
                                 .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
                                 .onChange(of: nickname) { newValue in
-                                    getNicknameError(nickname: newValue)
+                                    getNicknameError(nickname: newValue.lowercased())
                                 }
                             
                             
@@ -193,8 +194,9 @@ struct ProfileSettingView: View {
                                 .padding(.top, 14)
                                 .padding(.bottom, 14)
                                 .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
                                 .onChange(of: id) { newValue in
-                                    getIdError(id: newValue)
+                                    getIdError(id: newValue.lowercased())
                                 }
                             
                             SharedAsset.xWhiteCircle.swiftUIImage
@@ -236,7 +238,7 @@ struct ProfileSettingView: View {
     
     private func getNicknameError(nickname: String){
         
-        if nickname.count > 0 && nickname.count < 3 {
+        if nickname.count < 2 {
             nicknameErrorString = "2자 이상 입력해주세요"
             manager.nickname = ""
         }else{

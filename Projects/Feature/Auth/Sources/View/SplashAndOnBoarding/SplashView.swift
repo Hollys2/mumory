@@ -30,9 +30,9 @@ public struct SplashView: View {
             .navigationDestination(isPresented: $isNextViewPresenting) {
                 if isNextViewPresenting{
                     if hasUid ?? false {
-                        OnBoardingManageView()
+                        HomeView()
                     }else if hasLoginHistory ?? false {
-                        OnBoardingManageView()
+                        LoginView()
                     }else {
                         OnBoardingManageView()
                     }

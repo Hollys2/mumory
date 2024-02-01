@@ -31,7 +31,7 @@ public struct InputEmailView: View {
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .onChange(of: email, perform: { value in
-                        manager.email = value
+                        manager.email = value.lowercased()
                         manager.checkEmail()
                     })
                 

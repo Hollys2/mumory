@@ -43,12 +43,12 @@ struct LastOfCustomizationView: View {
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 105, height: 105)
                                     .clipShape(Circle())
-                                    .padding(.top, 33)
+                                    .padding(.top, 30)
                             }else{
                                 SharedAsset.profile.swiftUIImage
                                     .frame(width: 105, height: 105)
                                     .clipShape(Circle())
-                                    .padding(.top, 33)
+                                    .padding(.top, 30)
                             }
                                 
                             
@@ -60,8 +60,8 @@ struct LastOfCustomizationView: View {
                             Text("@\(manager.id)")
                                 .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
                                 .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .padding(.top, 7)
-                                .padding(.bottom, 20)
+                                .padding(.top, 2)
+                                .padding(.bottom, 23)
                         })
                         
                         VStack(spacing: 0, content: {
@@ -113,7 +113,7 @@ struct LastOfCustomizationView: View {
 
                         })
                         .frame(maxWidth: .infinity)
-                        .background(ColorSet.deepGray)
+                        .background(ColorSet.moreDeepGray)
                         .clipShape(RoundedCorner(radius: 20, corners: [.bottomLeft, .bottomRight]))
 
                         
@@ -222,7 +222,7 @@ struct LastOfCustomizationView: View {
             return "저녁 4:00PM - 9:00PM"
         }else if timeZone == 4 {
             return "밤 9:00PM - 2:00AM"
-        }else if timeZone == 3 {
+        }else if timeZone == 5 {
             return "이용 시간대를 분석해 자동으로 설정"
         }
         
