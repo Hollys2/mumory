@@ -31,6 +31,7 @@ struct AuthTextFieldSmall: View {
                     .frame(width: 23, height: 23)
                     .padding(.trailing, 17)
                     .padding(.leading, 5)
+                    .opacity(text.count > 0 ? 1 : 0)
             })
             
         }
@@ -44,7 +45,7 @@ struct AuthTextFieldSmall: View {
     func getPrompt() -> Text {
         return Text(prompt)
             .foregroundColor(Color(red: 0.77, green: 0.77, blue: 0.77))
-            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
     }
 }
 

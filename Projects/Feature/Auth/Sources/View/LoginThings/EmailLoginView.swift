@@ -77,6 +77,7 @@ struct EmailLoginView: View {
                     
                     Spacer()
                 })
+                    
                 
                 LottieView(animation: .named("loading", bundle: .module))
                     .looping()
@@ -98,7 +99,9 @@ struct EmailLoginView: View {
                         }
                 }
             })
-            
+            .onTapGesture {
+                self.hideKeyboard()
+            }
         })
     }
     

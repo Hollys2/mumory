@@ -12,6 +12,7 @@ import Lottie
 
 struct StartCostomizationView: View {
     var body: some View {
+        
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
             
@@ -22,7 +23,7 @@ struct StartCostomizationView: View {
                     .lineSpacing(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 30)
-                    .padding(.top, 69)
+                    .padding(.top, 48.5)
                 
                 Text("다음 설문지를 통해 나의 음악 취향\n설정과 프로필이 생성됩니다.")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -31,7 +32,7 @@ struct StartCostomizationView: View {
                     .foregroundStyle(Color(red: 0.54, green: 0.54, blue: 0.54))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 30)
-                    .padding(.top, 50)
+                    .padding(.top, 40)
                 
                 Spacer()
 
@@ -42,7 +43,7 @@ struct StartCostomizationView: View {
                 Spacer()
                 
                 Text("뮤모리는 Apple Music과 연계된 어플입니다.")
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                 
             

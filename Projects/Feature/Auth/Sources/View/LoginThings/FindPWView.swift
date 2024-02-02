@@ -67,6 +67,9 @@ struct FindPWView: View {
                     }
             }
         })
+        .onTapGesture {
+            self.hideKeyboard()
+        }
         })
     }
     

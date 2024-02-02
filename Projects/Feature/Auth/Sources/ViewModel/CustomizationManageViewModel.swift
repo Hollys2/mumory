@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Shared
 import SwiftUI
 
 class CustomizationManageViewModel: ObservableObject{
@@ -20,6 +21,7 @@ class CustomizationManageViewModel: ObservableObject{
     
     @Published var profileImageData: Data?
     @Published var profileImage: Image?
+    @Published var randomProfileImageIndex = Int.random(in: 0...3)
     
     public func getNavigationTitle() -> String {
         return ""
@@ -54,5 +56,45 @@ class CustomizationManageViewModel: ObservableObject{
     
     public func contains(genre: String) -> Bool{
         return genreList.contains(where: {$0 == genre})
+    }
+    
+    public func RandomSelectProfile() -> some View {
+        switch(randomProfileImageIndex){
+        case 0: return SharedAsset.profileSelectPurple.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        case 1: return SharedAsset.profileSelectRed.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        case 2: return SharedAsset.profileSelectYellow.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        case 3: return SharedAsset.profileSelectOrange.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        default: return SharedAsset.profileSelectRed.swiftUIImage
+                 .frame(width: 105, height: 105)
+                 .clipShape(Circle())
+        }
+    }
+    
+    public func RandomProfile() -> some View {
+        switch(randomProfileImageIndex){
+        case 0: return SharedAsset.profilePurple.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        case 1: return SharedAsset.profileRed.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        case 2: return SharedAsset.profileYellow.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        case 3: return SharedAsset.profileOrange.swiftUIImage
+                .frame(width: 105, height: 105)
+                .clipShape(Circle())
+        default: return SharedAsset.profileSelectRed.swiftUIImage
+                 .frame(width: 105, height: 105)
+                 .clipShape(Circle())
+        }
     }
 }

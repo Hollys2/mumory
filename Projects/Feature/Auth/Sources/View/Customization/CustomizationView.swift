@@ -149,6 +149,10 @@ public struct CustomizationView: View {
                     
                 }
             }))
+            .onTapGesture {
+                self.hideKeyboard()
+            }
+            
         })
         
     }
@@ -247,22 +251,9 @@ public struct CustomizationView: View {
             isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted
             isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted)
         }
-
-        
-      
-        
-
-        
-
-        
-
-        
-        
-        
-        
     }
 }
 
-#Preview {
-    CustomizationView()
-}
+//#Preview {
+//    CustomizationView()
+//}

@@ -32,7 +32,7 @@ public struct SelectGenreView: View {
                             .lineSpacing(8)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 20)
-                            .padding(.top, 44)
+                            .padding(.top, 40)
                         
                         HStack(spacing: 0){
                             Text("관심있는 음악 장르를 ")
@@ -49,27 +49,28 @@ public struct SelectGenreView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
-                        .padding(.top, 50)
+                        .padding(.top, 45)
                         
                         Text("나에게 맞는 음악을 추천받을 수 있습니다!")
                             .foregroundColor(.white)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 20)
+                            .padding(.top, 3)
                         
                         Text("라이브러리 > 추천에서 수정할 수 있어요")
                             .foregroundColor(ColorSet.subGray)
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 20)
-                            .padding(.top, 13)
-                        
+                            .padding(.top, 7)
+
                         
                         //Tag Layout
                         //2차원배열이기 때문에 ForEach 2개 사용
                         VStack(spacing: 13, content: {
                             ForEach(gerRows(list: genreList, screenWidth: geometry.size.width), id: \.self){ list in
-                                HStack(spacing: 10, content: {
+                                HStack(spacing: 9, content: {
                                     ForEach(list, id: \.self){ genreText in
                                         Text(genreText)
                                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
@@ -77,11 +78,11 @@ public struct SelectGenreView: View {
                                             .padding(.trailing, 19)
                                             .padding(.top, 10)
                                             .padding(.bottom, 10)
-                                            .background(manager.contains(genre: genreText) ? ColorSet.moreDeepGray : ColorSet.mainPurpleColor)
-                                            .foregroundStyle(manager.contains(genre: genreText) ? ColorSet.lightGray : Color.black)
+                                            .background(manager.contains(genre: genreText) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
+                                            .foregroundStyle(manager.contains(genre: genreText) ? Color.black : ColorSet.lightGray)
                                             .overlay(content: {
                                                 RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                                    .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genreText) ? 1 : 0)
+                                                    .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genreText) ? 0 : 1)
                                             })
                                             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                             .onTapGesture {

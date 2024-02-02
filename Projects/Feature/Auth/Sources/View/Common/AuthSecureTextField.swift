@@ -30,6 +30,7 @@ struct AuthSecureTextField: View {
                     .frame(width: 23, height: 23)
                     .padding(.trailing, 17)
                     .padding(.leading, 5)
+                    .opacity(text.count > 0 ? 1 : 0)
             })
         }
         .frame(maxWidth: .infinity)

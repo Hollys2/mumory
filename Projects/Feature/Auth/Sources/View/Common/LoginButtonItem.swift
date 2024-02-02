@@ -52,13 +52,15 @@ struct KakaoLoginButton: View {
     var body: some View {
         HStack(spacing: 0){
             SharedAsset.kakao.swiftUIImage
-                .frame(width: 24, height: 24)
+                .frame(width: 23, height: 23)
             
             Text("카카오로 로그인")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                 .padding(.leading, 18)
         }
-        .frame(maxWidth: .infinity, maxHeight: 60)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
+        .frame(maxWidth: .infinity)
         .background(Color(red: 0.98, green: 0.88, blue: 0))
         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
         .padding(.leading, 20)
@@ -70,14 +72,16 @@ struct GoogleLoginButton: View {
     var body: some View {
         HStack(spacing: 0){
             SharedAsset.google.swiftUIImage
-                .frame(width: 30, height: 30)
+                .frame(width: 23, height: 23)
             
             Text("Google로 로그인")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                .padding(.leading, 15)
+                .padding(.leading, 18)
                 .foregroundStyle(.black)
         }
-        .frame(maxWidth: .infinity, maxHeight: 60)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
+        .frame(maxWidth: .infinity)
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
         .padding(.leading, 20)
@@ -90,14 +94,16 @@ struct AppleLoginButton: View {
     var body: some View {
         HStack(spacing: 0){
             SharedAsset.apple.swiftUIImage
-                .frame(width: 37, height: 37)
+                .frame(width: 23, height: 23)
             
             Text("Apple로 로그인")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                .padding(.leading, 11)
+                .padding(.leading, 18)
                 .foregroundStyle(.white)
         }
-        .frame(maxWidth: .infinity, maxHeight: 60)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
+        .frame(maxWidth: .infinity)
         .background(Color.black)
         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
         .padding(.leading, 20)
@@ -116,7 +122,9 @@ struct EmailLoginButton: View {
                 .padding(.leading, 18)
                 .foregroundStyle(.black)
         }
-        .frame(maxWidth: .infinity, maxHeight: 60)
+        .padding(.top, 18)
+        .padding(.bottom, 18)
+        .frame(maxWidth: .infinity)
         .background(Color(red: 0.64, green: 0.51, blue: 0.99))
         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
         .padding(.leading, 20)

@@ -33,7 +33,7 @@ public struct LoginView: View {
                 VStack(spacing: 0){
                     
                     SharedAsset.logo.swiftUIImage
-                        .padding(.top, geometry.size.height > 700 ? 100 : 46)
+                        .padding(.top, geometry.size.height > 700 ? 127 : 71)
                     
                     
                     //로그인 버튼. 이메일부터 시작 (이후에 끝 주석 있음)
@@ -42,7 +42,7 @@ public struct LoginView: View {
                         EmailLoginView()
                     } label: {
                         EmailLoginButton()
-                            .padding(.top, geometry.size.height > 700 ? 100 : 74)
+                            .padding(.top, geometry.size.height > 700 ? 116 : 90)
                     }
                     .buttonStyle(EmpeyActionStyle())
                     
@@ -135,11 +135,14 @@ public struct LoginView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                 .padding(.top, 8)
                             
+                            Spacer()
+                            
                         }
                     }
                     .buttonStyle(EmpeyActionStyle()) //터치 애니메이션 삭제
                     
                 }
+               
                 
                 //로딩 로티 애니메이션 - Z스택 최상단       
                 LottieView(animation: .named("loading", bundle: .module))
@@ -156,6 +159,7 @@ public struct LoginView: View {
                 //로그인 완료시 홈 화면으로 이동
                 HomeView()
             }
+            
                 
             })
             
@@ -401,6 +405,6 @@ public struct LoginView: View {
     
 }
 
-//#Preview {
-//    LoginView()
-//}
+#Preview {
+    LoginView()
+}

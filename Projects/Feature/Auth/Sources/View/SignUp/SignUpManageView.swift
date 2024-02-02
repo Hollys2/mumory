@@ -147,6 +147,9 @@ struct SignUpManageView: View {
                     
                 }
             }))
+            .onTapGesture {
+                self.hideKeyboard()
+            }
         })
         
     }

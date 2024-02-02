@@ -22,7 +22,7 @@ struct SelectTimeView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
-                        .padding(.top, 44)
+                        .padding(.top, 50)
                     
                     //서브멘트
                     VStack(spacing: 0, content: {
@@ -41,7 +41,7 @@ struct SelectTimeView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
-                        .padding(.top, 50)
+                        .padding(.top, 45)
                         
                         Text("더 나은 음악 추천을 제공하는 데 도움이 되며,")
                             .foregroundColor(.white)
@@ -58,45 +58,51 @@ struct SelectTimeView: View {
                             .padding(.top, 3)
                     })
                     
+                    Text("설정 > 알림에서 수정할 수 있어요")
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundStyle(ColorSet.subGray)
+                        .padding(.leading, 20)
+                        .padding(.top, 7)
+
                     TimeItem(timeZone: .moring)
                         .environmentObject(manager)
+                        .padding(.top, 42)
                         .onTapGesture {
                             manager.selectedTime = 1
                         }
                     
                     TimeItem(timeZone: .afternoon)
                         .environmentObject(manager)
+                        .padding(.top, 14)
                         .onTapGesture {
                             manager.selectedTime = 2
                         }
                     
                     TimeItem(timeZone: .evening)
                         .environmentObject(manager)
+                        .padding(.top, 14)
                         .onTapGesture {
                             manager.selectedTime = 3
                         }
                     
                     TimeItem(timeZone: .night)
                         .environmentObject(manager)
+                        .padding(.top, 14)
                         .onTapGesture {
                             manager.selectedTime = 4
                         }
                     
                     TimeItem(timeZone: .auto)
                         .environmentObject(manager)
+                        .padding(.top, 14)
                         .onTapGesture {
                             manager.selectedTime = 5
                         }
                     
-                    Text("설정 > 알림에서 수정할 수 있어요")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
-                        .foregroundStyle(ColorSet.subGray)
-                        .padding(.top, 37)
-                    
-                    
                     Rectangle()
                         .fill(.clear)
-                        .frame(height: 80)
+                        .frame(height: 100)
                     
                 })
                 
@@ -140,13 +146,12 @@ struct TimeItem: View {
             .frame(maxWidth: .infinity)
             .background(manager.selectedTime == 1 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
+                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
                     .stroke(Color.white, lineWidth: manager.selectedTime == 1 ? 0 : 1)
             })
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .padding(.top, 40)
             
         case .afternoon:
             VStack(spacing: 0, content: {
@@ -166,13 +171,12 @@ struct TimeItem: View {
             .frame(maxWidth: .infinity)
             .background(manager.selectedTime == 2 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
+                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
                     .stroke(Color.white, lineWidth: manager.selectedTime == 2 ? 0 : 1)
             })
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .padding(.top, 14)
             
         case .evening:
             VStack(spacing: 0, content: {
@@ -198,7 +202,6 @@ struct TimeItem: View {
             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .padding(.top, 14)
             
         case .night:
             VStack(spacing: 0, content: {
@@ -218,13 +221,12 @@ struct TimeItem: View {
             .frame(maxWidth: .infinity)
             .background(manager.selectedTime == 4 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
+                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
                     .stroke(Color.white, lineWidth: manager.selectedTime == 4 ? 0 : 1)
             })
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .padding(.top, 14)
             
         case .auto:
             VStack(spacing: 0, content: {
@@ -238,13 +240,12 @@ struct TimeItem: View {
             .frame(maxWidth: .infinity)
             .background(manager.selectedTime == 5 ? ColorSet.mainPurpleColor : ColorSet.deepGray)
             .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular)
+                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
                     .stroke(Color.white, lineWidth: manager.selectedTime == 5 ? 0 : 1)
             })
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
             .padding(.leading, 20)
             .padding(.trailing, 20)
-            .padding(.top, 14)
             
         }
     }

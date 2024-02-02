@@ -30,7 +30,7 @@ struct LastOfCustomizationView: View {
                     Text("프로필 생성이 완료되었습니다!")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                         .foregroundStyle(.white)
-                        .padding(.top, geometry.size.height > 700 ? 75 : 50)
+                        .padding(.top, geometry.size.height > 700 ? 65 : 50)
                         .offset(y: firstYOffset)
                         .opacity(firstOpacity)
                     
@@ -43,33 +43,31 @@ struct LastOfCustomizationView: View {
                                     .aspectRatio(contentMode: .fill)
                                     .frame(width: 105, height: 105)
                                     .clipShape(Circle())
-                                    .padding(.top, 30)
+                                    .padding(.top, 38)
                             }else{
-                                SharedAsset.profile.swiftUIImage
-                                    .frame(width: 105, height: 105)
-                                    .clipShape(Circle())
-                                    .padding(.top, 30)
+                                manager.RandomProfile()
+                                    .padding(.top, 38)
                             }
                                 
                             
                             Text(manager.nickname)
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
                                 .foregroundStyle(.white)
-                                .padding(.top, 15)
+                                .padding(.top, 18)
                             
                             Text("@\(manager.id)")
                                 .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
                                 .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .padding(.top, 2)
-                                .padding(.bottom, 23)
+                                .padding(.top, 8)
+                                .padding(.bottom, 25)
                         })
                         
                         VStack(spacing: 0, content: {
                             Text("관심 음악 장르")
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
                                 .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 4)
-                                .padding(.bottom, 4)
+                                .padding(.top, 6)
+                                .padding(.bottom, 6)
                                 .padding(.leading, 12)
                                 .padding(.trailing, 12)
                                 .background(Color(red: 0.16, green: 0.16, blue: 0.16))
@@ -88,14 +86,14 @@ struct LastOfCustomizationView: View {
                                 .frame(height: 1)
                                 .padding(.leading, 57)
                                 .padding(.trailing, 57)
-                                .padding(.top, 21)
+                                .padding(.top, 20)
                                 .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
                             
                             Text("음악 감상 시간대")
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
                                 .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 4)
-                                .padding(.bottom, 4)
+                                .padding(.top, 6)
+                                .padding(.bottom, 6)
                                 .padding(.leading, 12)
                                 .padding(.trailing, 12)
                                 .background(Color(red: 0.16, green: 0.16, blue: 0.16))
@@ -108,8 +106,8 @@ struct LastOfCustomizationView: View {
                                 .foregroundColor(ColorSet.mainPurpleColor)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(5)
-                                .padding(.top, 13)
-                                .padding(.bottom, 23)
+                                .padding(.top, 12)
+                                .padding(.bottom, 20)
 
                         })
                         .frame(maxWidth: .infinity)
@@ -125,7 +123,7 @@ struct LastOfCustomizationView: View {
                     })
                     .padding(.leading, 58)
                     .padding(.trailing, 58)
-                    .padding(.top, geometry.size.height > 700 ? 43 : 23)
+                    .padding(.top, geometry.size.height > 700 ? 40 : 20)
                     .offset(y: secondYOffset)
                     .opacity(secondOpacity)
                     

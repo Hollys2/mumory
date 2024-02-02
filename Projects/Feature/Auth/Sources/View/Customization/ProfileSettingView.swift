@@ -26,6 +26,8 @@ struct ProfileSettingView: View {
     @State var selectedItem: PhotosPickerItem?
     @State var selectedImage: Image?
     
+    var profileImageList: [Image] = [SharedAsset.profileSelectRed.swiftUIImage, SharedAsset.profileSelectGray.swiftUIImage, SharedAsset.profileSelectOrange.swiftUIImage, SharedAsset.profileSelectPurple.swiftUIImage, SharedAsset.profileSelectYellow.swiftUIImage]
+        
     var body: some View {
         GeometryReader(content: { geometry in
             ZStack{
@@ -34,10 +36,17 @@ struct ProfileSettingView: View {
                     VStack(spacing: 0) {
                         Text("프로필을 설정해주세요")
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.system(size: 24, weight: .semibold))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                             .foregroundStyle(.white)
-                            .padding(.leading, 35)
-                            .padding(.top, 44)
+                            .padding(.leading, 20)
+                            .padding(.top, 40)
+                        
+                        Text("마이페이지에서 수정할 수 있어요")
+                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundStyle(ColorSet.subGray)
+                            .padding(.top, 7)
+                            .padding(.leading, 20)
                         
                         PhotosPicker(selection: $selectedItem, matching: .images) {
                             if let item = selectedItem{
@@ -47,22 +56,18 @@ struct ProfileSettingView: View {
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
                                             .clipShape(Circle())
-                                            .frame(width: 105)
+                                            .frame(width: 105, height: 105)
                                     }
                                     
 
                                 }
                                 
                             }else{
-                                SharedAsset.selectImage.swiftUIImage
-                                    .frame(width: 105, height: 105)
-                                    .clipShape(Circle())
-
+                                manager.RandomSelectProfile()
                             }
-                                                        
                         }
                         .frame(width: 140, height: 140)
-                        .padding(.top, 50)
+                        .padding(.top, 25)
                         .onChange(of: selectedItem, perform: { value in
                             Task{
                                 if let loaded = try? await selectedItem?.loadTransferable(type: Data.self) {
@@ -96,43 +101,23 @@ struct ProfileSettingView: View {
                                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                                 .foregroundColor(ColorSet.subGray)
                         }
-                        .padding(.top, 50)
+                        .padding(.top, 25)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         
-                        HStack(spacing: 0) {
                             
-                            TextField("nickname", text: $nickname)
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .foregroundStyle(.white)
-                                .padding(.leading, 25)
-                                .padding(.top, 14)
-                                .padding(.bottom, 14)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                                .onChange(of: nickname) { newValue in
-                                    getNicknameError(nickname: newValue.lowercased())
-                                }
-                            
-                            
-                            SharedAsset.xWhiteCircle.swiftUIImage
-                                .frame(width: 23, height: 23)
-                                .padding(.trailing, 17)
-                                .onTapGesture {
-                                    nickname = ""
-                                }
-                        }
-                        .background(Color(red: 0.24, green: 0.24, blue: 0.24))
-                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 27.5, height: 27.5), style: .circular))
-                        .padding(.leading, 20)
-                        .padding(.trailing, 20)
-                        .padding(.top, 15)
-                        
-                        
+                        AuthTextFieldSmall(text: $nickname, prompt: "닉네임을 입력해 주세요!")
+                            .padding(.leading, 20)
+                            .padding(.trailing, 20)
+                            .padding(.top, 15)
+                            .onChange(of: nickname) { newValue in
+                                getNicknameError(nickname: newValue.lowercased())
+                            }
+
                         Text(nicknameErrorString)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.system(size: 12))
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                             .padding(.leading, 20)
                             .padding(.top, 14)
                         
@@ -153,19 +138,20 @@ struct ProfileSettingView: View {
                             
                             HStack(spacing: 0) {
                                 Text("친구 찾기용 아이디 입니다.")
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 10))
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                 
                                 SharedAsset.xBlack.swiftUIImage
-                                    .padding(.leading, 7)
+                                    .frame(width: 13, height: 13)
+                                    .padding(.leading, 6)
                                     .onTapGesture {
                                         isTouchInfo = false
                                     }
                                 
                             }
-                            .padding(.top, 6)
-                            .padding(.bottom, 6)
-                            .padding(.trailing, 9)
-                            .padding(.leading, 11)
+                            .padding(.top, 10)
+                            .padding(.bottom, 10)
+                            .padding(.trailing, 12)
+                            .padding(.leading, 16)
                             .background(ColorSet.mainPurpleColor)
                             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .circular))
                             .padding(.leading, 5)
@@ -181,48 +167,27 @@ struct ProfileSettingView: View {
                                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                                 .foregroundStyle(ColorSet.subGray)
                         }
-                        .padding(.top, 25)
+                        .padding(.top, 20)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         
                         
-                        HStack(spacing: 0) {
-                            TextField("id", text: $id)
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .foregroundStyle(.white)
-                                .padding(.leading, 25)
-                                .padding(.top, 14)
-                                .padding(.bottom, 14)
-                                .textInputAutocapitalization(.never)
-                                .autocorrectionDisabled()
-                                .onChange(of: id) { newValue in
-                                    getIdError(id: newValue.lowercased())
-                                }
-                            
-                            SharedAsset.xWhiteCircle.swiftUIImage
-                                .frame(width: 23, height: 23)
-                                .padding(.trailing, 17)
-                                .onTapGesture {
-                                    id = ""
-                                }
-                        }
-                        .background(Color(red: 0.24, green: 0.24, blue: 0.24))
-                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 27.5, height: 27.5), style: .circular))
+                       AuthTextFieldSmall(text: $id, prompt: "ID를 입력해 주세요!")
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
-                        .padding(.top, 15)
+                        .padding(.top, 10)
+                        .onChange(of: id, perform: { value in
+                            getIdError(id: id.lowercased())
+                        })
                         
                         Text(idErrorString)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .font(.system(size: 12))
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                             .padding(.leading, 20)
                             .padding(.top, 14)
                         
-                        Text("마이페이지에서 수정할 수 있어요")
-                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
-                            .foregroundStyle(ColorSet.subGray)
-                            .padding(.top, 53)
+                        
                         
                         Rectangle()
                             .fill(.clear)
@@ -231,6 +196,9 @@ struct ProfileSettingView: View {
                 }
                 
             }
+            .onTapGesture {
+                hideKeyboard()
+            }
         })
     }
     
@@ -238,7 +206,7 @@ struct ProfileSettingView: View {
     
     private func getNicknameError(nickname: String){
         
-        if nickname.count < 2 {
+        if nickname.count > 0 && nickname.count < 2 {
             nicknameErrorString = "2자 이상 입력해주세요"
             manager.nickname = ""
         }else{
@@ -311,18 +279,3 @@ struct ProfileSettingView: View {
 //    ProfileSettingView()
 //}
 
-private enum ConverResult {
-    case success(Image)
-    case failure(Image)
-}
-
-struct ProfileImage: View {
-    @Binding var selectedItem: PhotosPickerItem?
-    var body: some View {
-        if let item = selectedItem {
-            
-        }else {
-            SharedAsset.selectImage.swiftUIImage
-        }
-    }
-}
