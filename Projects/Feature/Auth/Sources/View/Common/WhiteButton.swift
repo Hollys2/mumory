@@ -9,6 +9,7 @@
 import SwiftUI
 import Shared
 
+
 struct WhiteButton: View {
     var title: String = ""
     var isEnabled: Bool = false
@@ -21,7 +22,7 @@ struct WhiteButton: View {
         .frame(height: 58)
         .foregroundColor(.black)
         .background(isEnabled ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-        .cornerRadius(30)
+        .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
     }
 }
 

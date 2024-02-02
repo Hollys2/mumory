@@ -6,7 +6,6 @@
 //  Copyright © 2023 hollys. All rights reserved.
 //
 
-
 import CoreLocation
 
 final public class LocationManager: NSObject, ObservableObject {

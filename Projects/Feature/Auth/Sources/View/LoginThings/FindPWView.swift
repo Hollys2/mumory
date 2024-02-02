@@ -36,13 +36,14 @@ struct FindPWView: View {
                     })
                 
                 //로그인 버튼(재사용)
-                WhiteButton(title: "비밀번호 찾기")
+                WhiteButton(title: "비밀번호 찾기", isEnabled: isEmailStyle)
                     .padding(.leading, 40)
                     .padding(.trailing, 40)
                     .padding(.top, 12)
+                    .disabled(!isEmailStyle)
                 
                 //로그인 오류 텍스트
-                Text("이메일 형식이 옳바르지 않습니다 :(")
+                Text("이메일 형식이 올바르지 않습니다 :(")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .foregroundColor(Color(red: 1, green: 0.34, blue: 0.34))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -66,13 +67,17 @@ struct FindPWView: View {
                     }
             }
         })
+        .onTapGesture {
+            self.hideKeyboard()
+        }
         })
     }
     
     private func tapFindPWButton(){
-        let Auth = AuthManager.shared.firebaseAuth
-        Auth.sendPasswordReset(withEmail: email) { error in
+        let auth = FirebaseManager.shared.auth
+        auth.sendPasswordReset(withEmail: email) { error in
             if let error = error {
+                //다시 시도해주세요팝업
                 print(error)
             }
         }

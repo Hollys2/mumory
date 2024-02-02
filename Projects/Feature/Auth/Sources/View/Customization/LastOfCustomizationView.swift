@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct LastOfCustomizationView: View {
-    @EnvironmentObject var customizationObject: CustomizationViewModel
+    @EnvironmentObject var manager: CustomizationManageViewModel
     
     @State var firstYOffset: CGFloat = 0
     @State var firstOpacity: CGFloat = 0
@@ -26,38 +26,48 @@ struct LastOfCustomizationView: View {
             GeometryReader(content: { geometry in
                 
                 
-                VStack{
+                VStack(spacing: 0){
                     Text("프로필 생성이 완료되었습니다!")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                         .foregroundStyle(.white)
-                        .padding(.top, 65)
+                        .padding(.top, geometry.size.height > 700 ? 65 : 50)
                         .offset(y: firstYOffset)
                         .opacity(firstOpacity)
                     
                     VStack(spacing: 0, content: {
                         VStack(spacing: 0, content: {
-                            SharedAsset.profile.swiftUIImage
-                                .frame(width: 105, height: 105)
-                                .padding(.top, 33)
                             
-                            Text(customizationObject.nickname)
+                            if let image = manager.profileImage {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 105, height: 105)
+                                    .clipShape(Circle())
+                                    .padding(.top, 38)
+                            }else{
+                                manager.RandomProfile()
+                                    .padding(.top, 38)
+                            }
+                                
+                            
+                            Text(manager.nickname)
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
                                 .foregroundStyle(.white)
-                                .padding(.top, 15)
+                                .padding(.top, 18)
                             
-                            Text("@\(customizationObject.id)")
+                            Text("@\(manager.id)")
                                 .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
                                 .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .padding(.top, 7)
-                                .padding(.bottom, 20)
+                                .padding(.top, 8)
+                                .padding(.bottom, 25)
                         })
                         
                         VStack(spacing: 0, content: {
                             Text("관심 음악 장르")
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
                                 .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 4)
-                                .padding(.bottom, 4)
+                                .padding(.top, 6)
+                                .padding(.bottom, 6)
                                 .padding(.leading, 12)
                                 .padding(.trailing, 12)
                                 .background(Color(red: 0.16, green: 0.16, blue: 0.16))
@@ -65,7 +75,7 @@ struct LastOfCustomizationView: View {
                                 .padding(.top, 18)
                             
 
-                        Text(getGenreText(list: customizationObject.selectedGenreList,screen: geometry.size))
+                        Text(getGenreText(list: manager.genreList,screen: geometry.size))
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                                 .foregroundColor(ColorSet.mainPurpleColor)
                                 .multilineTextAlignment(.center)
@@ -76,14 +86,14 @@ struct LastOfCustomizationView: View {
                                 .frame(height: 1)
                                 .padding(.leading, 57)
                                 .padding(.trailing, 57)
-                                .padding(.top, 21)
+                                .padding(.top, 20)
                                 .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
                             
                             Text("음악 감상 시간대")
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
                                 .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 4)
-                                .padding(.bottom, 4)
+                                .padding(.top, 6)
+                                .padding(.bottom, 6)
                                 .padding(.leading, 12)
                                 .padding(.trailing, 12)
                                 .background(Color(red: 0.16, green: 0.16, blue: 0.16))
@@ -91,17 +101,17 @@ struct LastOfCustomizationView: View {
                                 .padding(.top, 21)
                             
 
-                            Text(getTimeZoneComment(timeZone: customizationObject.selectedTime))
+                            Text(getTimeZoneComment(timeZone: manager.selectedTime))
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                                 .foregroundColor(ColorSet.mainPurpleColor)
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(5)
-                                .padding(.top, 13)
-                                .padding(.bottom, 23)
+                                .padding(.top, 12)
+                                .padding(.bottom, 20)
 
                         })
                         .frame(maxWidth: .infinity)
-                        .background(ColorSet.deepGray)
+                        .background(ColorSet.moreDeepGray)
                         .clipShape(RoundedCorner(radius: 20, corners: [.bottomLeft, .bottomRight]))
 
                         
@@ -113,17 +123,26 @@ struct LastOfCustomizationView: View {
                     })
                     .padding(.leading, 58)
                     .padding(.trailing, 58)
-                    .padding(.top, 30)
+                    .padding(.top, geometry.size.height > 700 ? 40 : 20)
                     .offset(y: secondYOffset)
                     .opacity(secondOpacity)
                     
-//                    Text("이제 뮤모리를 통해 많은 음악과\n특별한 순간을 공유해보세요")
-//                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
-//                        .foregroundStyle(ColorSet.subGray)
-//                        .multilineTextAlignment(.center)
-//                        .padding(.top, 40)
+                    Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
+                        .foregroundStyle(ColorSet.subGray)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 37)
+                        .tracking(0.5)
+                        .offset(y: thirdYOffset)
+                        .opacity(geometry.size.height > 700 ? thirdOpacity : 0)
                     
                     
+                    Spacer()
+         
+
+                }
+                
+                VStack{
                     Spacer()
                     NavigationLink {
                         HomeView()
@@ -133,7 +152,6 @@ struct LastOfCustomizationView: View {
                             .padding(.leading, 20)
                             .padding(.trailing, 20)
                     }
-
                 }
             })
         }
@@ -150,6 +168,13 @@ struct LastOfCustomizationView: View {
                 withAnimation(.easeOut(duration: 0.3)) {
                     secondYOffset -= 15
                     secondOpacity = 1
+                }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    thirdYOffset -= 15
+                    thirdOpacity = 1
                 }
             }
         })
@@ -189,14 +214,14 @@ struct LastOfCustomizationView: View {
     
     private func getTimeZoneComment(timeZone: Int) -> String {
         if timeZone == 1 {
-            return "아침"
+            return "아침 6:00AM ~ 11:00AM"
         }else if timeZone == 2 {
-            return "낮"
+            return "점심 11:00AM - 4:00PM"
         }else if timeZone == 3 {
-            return "저녁"
+            return "저녁 4:00PM - 9:00PM"
         }else if timeZone == 4 {
-            return "밤"
-        }else if timeZone == 3 {
+            return "밤 9:00PM - 2:00AM"
+        }else if timeZone == 5 {
             return "이용 시간대를 분석해 자동으로 설정"
         }
         

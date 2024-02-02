@@ -8,34 +8,45 @@
 
 import SwiftUI
 import Shared
+import Lottie
 
 struct StartCostomizationView: View {
-
     var body: some View {
+        
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-                Text("음악과 일상을\n나누는 새로운 방법\n뮤모리를 통해 친구들과\n특별한 순간을 기록하세요")
+                Text("음악과 일상을  나누는 새로운 방법,\n뮤모리를 통해 친구들과\n특별한 순간을 기록하세요")
                     .foregroundColor(.white)
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                    .lineSpacing(6)
+                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 22))
+                    .lineSpacing(8)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 20)
-                    .padding(.top, 80)
+                    .padding(.leading, 30)
+                    .padding(.top, 48.5)
                 
-                Text("다음 설문지를 통해\n나의 음악 취향 설정과 프로필이 생성됩니다.")
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundColor(.white)
+                Text("다음 설문지를 통해 나의 음악 취향\n설정과 프로필이 생성됩니다.")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .lineSpacing(5)
+                    .tracking(0.5)
+                    .foregroundStyle(Color(red: 0.54, green: 0.54, blue: 0.54))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 20)
-                    .padding(.top, 69)
+                    .padding(.leading, 30)
+                    .padding(.top, 40)
                 
                 Spacer()
+
+                LottieView(animation: .named("survey", bundle: .module))
+                    .looping()
+                    .ignoresSafeArea()
+                
+                Spacer()
+                
                 Text("뮤모리는 Apple Music과 연계된 어플입니다.")
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                 
+            
                 NavigationLink {
                     CustomizationView()
                 } label: {
@@ -43,8 +54,8 @@ struct StartCostomizationView: View {
                     WhiteButton(title: "시작하기", isEnabled: true)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
-                        .padding(.bottom, 10)
-                        .padding(.top, 28)
+                        .padding(.bottom, 20)
+                        .padding(.top, 25)
                 }
 
                 

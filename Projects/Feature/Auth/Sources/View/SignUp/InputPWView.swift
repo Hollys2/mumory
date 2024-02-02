@@ -10,11 +10,10 @@ import SwiftUI
 import Shared
 
 struct InputPWView: View {
-    @EnvironmentObject var signUpViewModel: SignUpViewModel
+    @EnvironmentObject var manager: SignUpManageViewModel
     @State var password: String = ""
     @State var confirmPassword: String = ""
-    @State var isValidPassword = false
-    @State var isValidConfirmPassword = false
+
     var body: some View {
         VStack(spacing: 0){
             Text("비밀번호")
@@ -29,9 +28,7 @@ struct InputPWView: View {
                 .padding(.trailing, 20)
                 .padding(.top, 14)
                 .onChange(of: password, perform: { value in
-                    isValidPassword = isValidPasswordStyle(password: value)
-                    signUpViewModel.isValidPassword = isValidPassword
-                    
+                    manager.password = value
                 })
             
             Text("영문, 숫자, 특수기호로 모두 조합된 8~20자")
@@ -40,8 +37,8 @@ struct InputPWView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 40)
                 .padding(.top, 15)
-                .opacity(password.count < 1 ? 0 : isValidPassword ? 0 : 1)
-                .frame(height: password.count < 1 ? 0 : isValidPassword ? 0 : nil)
+                .opacity(password.count < 1 ? 0 : manager.isValidPassword() ? 0 : 1)
+                .frame(height: password.count < 1 ? 0 : manager.isValidPassword() ? 0 : nil)
             
             Text("비밀번호 확인")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
@@ -50,13 +47,12 @@ struct InputPWView: View {
                 .padding(.leading, 23)
                 .padding(.top, 33)
             
-            AuthSecureFieldSmall(text: $confirmPassword, prompt: "비밀번호 확인")
+            AuthSecureFieldSmall(text: $confirmPassword, prompt: "한 번 더 입력해 주세요!")
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
                 .padding(.top, 11)
                 .onChange(of: confirmPassword, perform: { value in
-                    isValidConfirmPassword = isValidPasswordStyle(password: value)
-                    signUpViewModel.isValidConfirmPassword = isValidConfirmPassword
+                    manager.confirmPassword = value
                 })
             
             Text("비밀번호가 다릅니다. 다시 한 번 확인해 주세요.")
@@ -65,24 +61,20 @@ struct InputPWView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 40)
                 .padding(.top, 15)
-                .opacity(confirmPassword.count < 1 ? 0 : isValidConfirmPassword ? 0 : 1)
-                .frame(height: confirmPassword.count < 1 ? 0 :  isValidConfirmPassword ? 0 : nil)
+                .opacity(confirmPassword.count < 1 ? 0 : (password == confirmPassword) ? 0 : 1)
+                .frame(height: confirmPassword.count < 1 ? 0 : (password == confirmPassword) ? 0 : nil)
         }
-        .onDisappear(perform: {
-            if isValidPassword && isValidConfirmPassword{
-                signUpViewModel.password = password
+        .onAppear(perform: {
+            //앞페이지에서 뒤로가기 했을 때 이전에 작성해놓은 비밀번호가 다시 보일 수 있도록 함
+            if manager.isValidPassword() && manager.isValidConfirmPassword(){
+                password = manager.password
+                confirmPassword = manager.confirmPassword
             }
         })
     }
-    
-    func isValidPasswordStyle(password: String) -> Bool {
-        let passwordRegex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$"
-        let passwordPredicate = NSPredicate(format:"SELF MATCHES %@", passwordRegex)
-        return passwordPredicate.evaluate(with: password)
-    }
 }
 
-#Preview {
-    InputPWView()
-}
+//#Preview {
+//    InputPWView()
+//}
 
