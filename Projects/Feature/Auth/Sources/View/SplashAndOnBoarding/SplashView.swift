@@ -30,7 +30,7 @@ public struct SplashView: View {
             .navigationDestination(isPresented: $isNextViewPresenting) {
                 if isNextViewPresenting{
                     if hasUid ?? false {
-                        LoginView()
+                        MusickitTestView()
                     }else if hasLoginHistory ?? false {
                         LoginView()
                     }else {
