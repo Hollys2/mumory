@@ -100,9 +100,7 @@ public struct LoginView: View {
                                 }else if let user = result?.user {
                                     //파이어베이스 로그인 성공
                                     print("firebase sign in success ")
-                                    
-                                    setLoginHistoryAndUID(uid: user.uid)//로그인기록 남기기
-                                    
+                                                            
                                     checkInitialSetting(uid: user.uid, email: user.email, method: "Apple")
                                 }
                             })
@@ -237,7 +235,6 @@ public struct LoginView: View {
                         print("create user error: \(error)")
                     }else if let user = result?.user{
                         print("success creating or login user ")
-                        setLoginHistoryAndUID(uid: user.uid)//로그인기록 남기기
                         checkInitialSetting(uid: user.uid, email: user.email, method: "Google")
                     }
                 }
@@ -290,7 +287,6 @@ public struct LoginView: View {
                                 }else{
                                     guard let user = result?.user else {return}
                                     print("firebase sign up successful")
-                                    setLoginHistoryAndUID(uid: user.uid)
                                     isTermsOfServiceNotDone = true
                                 }
                                 
@@ -302,7 +298,6 @@ public struct LoginView: View {
                                     print("login error \(error)")
                                 }else if let user = result?.user{
                                     print("success login")
-                                    setLoginHistoryAndUID(uid: user.uid)
                                     checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
                                 }
                             }
@@ -347,17 +342,12 @@ public struct LoginView: View {
         
         return hashString
     }
-    
-    //로그인 이력 남기기
-    private func setLoginHistoryAndUID(uid: String) {
-        
-    }
+
     
     private func checkInitialSetting(uid: String, email: String?, method: String){
         //로그인 기록 및 uid 셋팅
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
-        userDefualt.setValue(uid, forKey: "uid")
         
         //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
         let db = Firestore.firestore().collection("User")

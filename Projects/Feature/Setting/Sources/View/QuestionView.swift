@@ -171,14 +171,15 @@ struct QuestionView: View {
         isLoading = true
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
+        let auth = Firebase.auth
         
-        guard let uid = UserDefaults.standard.string(forKey: "uid") else {
-            print("no uid")
+        guard let currentUser = auth.currentUser else {
+            print("no current user. please sign in again")
             return
         }
         
         let questionData: [String: Any] = [
-            "uid": uid,
+            "uid": currentUser.uid,
             "title": title,
             "content": content
         ]

@@ -13,6 +13,7 @@ import Core
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject var manager: SettingViewModel = SettingViewModel()
+    @State var isLogout: Bool = false
     var body: some View {
         //테스트때문에 navigationStack 추가함. 이후 삭제하기
         ZStack{
@@ -51,6 +52,8 @@ struct SettingView: View {
                     //로그아웃
                     UserDefaults.standard.removeObject(forKey: "uid")
                     try? FirebaseManager.shared.auth.signOut()
+                    print("로그아웃 완료")
+                    isLogout = true
                     
                 } label: {
                     Text("로그아웃")
@@ -75,6 +78,9 @@ struct SettingView: View {
                 
             }
         }
+        .navigationDestination(isPresented: $isLogout, destination: {
+            LoginView()
+        })
         .navigationBarBackButtonHidden()
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -111,9 +117,12 @@ struct SettingView: View {
     }
     
     private func getUserInfo(){
-        let db = FirebaseManager.shared.db
-        if let uid = UserDefaults.standard.string(forKey: "uid") {
-            let query = db.collection("User").whereField("uid", isEqualTo: uid)
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let auth = Firebase.auth
+        
+        if let currentUser = auth.currentUser {
+            let query = db.collection("User").whereField("uid", isEqualTo: currentUser.uid)
             query.getDocuments { snapshot, error in
                 if let error = error {
                     print("firestore error: \(error)")

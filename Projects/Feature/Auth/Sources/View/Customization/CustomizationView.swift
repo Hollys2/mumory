@@ -7,10 +7,10 @@
 //
 
 import SwiftUI
-import FirebaseStorage
-import FirebaseFirestore
+import Core
 import Shared
 import Lottie
+import FirebaseStorage
 
 public struct CustomizationView: View {
     let imageModel: UIImage = UIImage()
@@ -171,16 +171,21 @@ public struct CustomizationView: View {
     
     private func uploadUserData(){
         isLoading = true
-        
+        let Firebase = FirebaseManager.shared
         let userDefault = UserDefaults.standard
-        let db = Firestore.firestore()
+        let db = Firebase.db
+        let auth = Firebase.auth
 
-        guard let uid = userDefault.string(forKey: "uid") else{
-            print("no uid")
-            //아이디가 없으면 재로그인하고 다시 셋팅해야됨
-            //유저에게 적절한 오류안내와 피드백
+        guard let currentUser = auth.currentUser else {
+            print("no current user. please sign in again")
             return
         }
+//        guard let uid = userDefault.string(forKey: "uid") else{
+//            print("no uid")
+//            //아이디가 없으면 재로그인하고 다시 셋팅해야됨
+//            //유저에게 적절한 오류안내와 피드백
+//            return
+//        }
         
         //유저데이터 업로드
         let userData: [String : Any] = [
@@ -190,8 +195,7 @@ public struct CustomizationView: View {
             "selected_notification_time": manager.selectedTime,
         ]
         
-        
-        let query = db.collection("User").document(uid)
+        let query = db.collection("User").document(currentUser.uid)
         query.getDocument { snapshot, error in
             if let error = error {
                 print("get document error: \(error)")
@@ -220,7 +224,7 @@ public struct CustomizationView: View {
             //이미지 메타데이터 - 이미지 타입, 경로 및 이름 정의
             let metaData = StorageMetadata()
             metaData.contentType = "image/jpeg"
-            let imageName = "ProfileImage/\(uid)"
+            let imageName = "ProfileImage/\(currentUser.uid)"
             
             //업로드
             let storageReference = Storage.storage().reference().child("\(imageName)")

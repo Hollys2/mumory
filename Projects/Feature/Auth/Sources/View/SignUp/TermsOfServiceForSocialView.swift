@@ -124,14 +124,18 @@ struct TermsOfServiceForSocialView: View {
     private func setUserData() {
         isLoading = true
         
-        guard let uid = UserDefaults.standard.string(forKey: "uid") else {
-            print("no uid")
-            return
-        }
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let messaging = Firebase.messaging
-        let query = db.collection("User").document(uid)
+        let auth = Firebase.auth
+        
+        guard let currentUser = auth.currentUser else {
+            print("no current user. please sign in again")
+            return
+        }
+        
+        let query = db.collection("User").document(currentUser.uid)
+        
         let userData = [
             "is_checked_service_news_notification" : isCheckedServiceNewsNotification,
             "is_checked_social_notification": true

@@ -44,9 +44,10 @@ class SettingViewModel: ObservableObject{
     public func setNotificationTime() {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        
-        guard let uid = UserDefaults.standard.string(forKey: "uid") else {
-            print("no uid")
+        let auth = Firebase.auth
+
+        guard let currentUser = auth.currentUser else {
+            print("no current user. please sign in again")
             return
         }
         
@@ -54,7 +55,7 @@ class SettingViewModel: ObservableObject{
             "selected_notification_time" : selectedNotificationTime
         ]
         
-        let query = db.collection("User").document(uid)
+        let query = db.collection("User").document(currentUser.uid)
         query.setData(userData, merge: true) { error in
             if let error = error {
                 print("set Data error: \(error)")
@@ -66,9 +67,10 @@ class SettingViewModel: ObservableObject{
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let messaging = Firebase.messaging
-        
-        guard let uid = UserDefaults.standard.string(forKey: "uid") else {
-            print("no uid")
+        let auth = Firebase.auth
+
+        guard let currentUser = auth.currentUser else {
+            print("no current user. please sign in again")
             return
         }
         
@@ -115,7 +117,7 @@ class SettingViewModel: ObservableObject{
             "is_checked_social_notification": isCheckedSocialNotification
         ]
         
-        let query = db.collection("User").document(uid)
+        let query = db.collection("User").document(currentUser.uid)
         query.setData(userData, merge: true) { error in
             if let error = error {
                 print("set Data error: \(error)")
