@@ -55,7 +55,6 @@ struct NotificationView: View {
                 
                 NotificationItem(title: "소셜 알림", isOn: $isSocialOn)
                     .onChange(of: isSocialOn, perform: { value in
-//                        SetMessagingSubscribe(category: .social, isOn: $isSocialOn)
                         withAnimation {
                             isEntireOn = isSocialOn && isServiceOn
                         }
@@ -63,7 +62,6 @@ struct NotificationView: View {
                 
                 NotificationItem(title: "서비스 소식 알림", isOn: $isServiceOn)
                     .onChange(of: isServiceOn, perform: { value in
-                        //                        SetMessagingSubscribe(category: .service, isOn: $isServiceOn)
                         withAnimation {
                             isEntireOn = isSocialOn && isServiceOn
                         }
@@ -127,52 +125,15 @@ struct NotificationView: View {
                     .foregroundColor(.white)
             }
         }
-    }
-    
-    private func SetMessagingSubscribe(category: notificationCategory, isOn: Binding<Bool>){
-    switch(category){
-        case .social:
-            if isOn.wrappedValue{
-                FirebaseManager.shared.messaging.subscribe(toTopic: "Social") { error in
-                    if let error = error {
-                        print("subscribe error: \(error)")
-                        isOn.wrappedValue = false
-                    }else{
-                        print("'Social' subscribe successful")
-                    }
-                }
-            }else {
-                FirebaseManager.shared.messaging.unsubscribe(fromTopic: "Social") { error in
-                    if let error = error {
-                        print("unsubscribe error: \(error)")
-                        isOn.wrappedValue = true
-                    }else{
-                        print("'Social' unsubscribe successful")
-                    }
-                }
-            }
-        
-        case .service:
-            if isOn.wrappedValue{
-                FirebaseManager.shared.messaging.subscribe(toTopic: "Service") { error in
-                    if let error = error {
-                        print("subscribe error: \(error)")
-                        isOn.wrappedValue = false
-                    }else {
-                        print("'Service' subscribe successful")
-                    }
-                }
-            }else {
-                FirebaseManager.shared.messaging.unsubscribe(fromTopic: "Service") { error in
-                    if let error = error {
-                        print("unsubscribe error: \(error)")
-                        isOn.wrappedValue = true
-                    }else{
-                        print("'Service' unsubscribe successful")
-                    }
-                }
-            }
-        }
+        .onAppear(perform: {
+            isSocialOn = manager.isCheckedSocialNotification
+            isServiceOn = manager.isCheckedServiceNewsNotification
+        })
+        .onDisappear(perform: {
+            manager.isCheckedSocialNotification = isSocialOn
+            manager.isCheckedServiceNewsNotification = isServiceOn
+            manager.subscribeTopicAndUpdateUserData()
+        })
     }
 }
 

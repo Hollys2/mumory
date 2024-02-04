@@ -71,6 +71,9 @@ struct SelectNotificationTimeView: View {
                     .foregroundColor(.white)
             }
         }
+        .onDisappear(perform: {
+            manager.setNotificationTime()
+        })
     }
 }
 
