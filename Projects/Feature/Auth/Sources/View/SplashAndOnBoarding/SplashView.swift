@@ -9,10 +9,13 @@
 import SwiftUI
 import Shared
 import Lottie
+import FirebaseAuth
 
 public struct SplashView: View {
     public init(){}
     @State var hasUid: Bool?
+    @State var hasCurrentUser: Bool?
+    @State var currentUser: User?
     @State var hasLoginHistory: Bool?
     @State var isNextViewPresenting: Bool = false
     public var body: some View {
@@ -29,8 +32,9 @@ public struct SplashView: View {
             .transition(.opacity)
             .navigationDestination(isPresented: $isNextViewPresenting) {
                 if isNextViewPresenting{
-                    if hasUid ?? false {
-                        LoginView()
+                    
+                    if hasCurrentUser ?? false {
+                        HomeView()
                     }else if hasLoginHistory ?? false {
                         LoginView()
                     }else {
@@ -47,6 +51,16 @@ public struct SplashView: View {
                     hasUid = (userDefault.string(forKey: "uid") != nil )
                     //로그인한 기록이 있는지 확인
                     hasLoginHistory = (userDefault.value(forKey: "loginHistory") != nil)
+                    
+                    if let user = Auth.auth().currentUser {
+                        print("로그인된 계정 존재함")
+                        print("email: \(user.email ?? "no mail")")
+                        hasCurrentUser = true
+                    }else{
+                        print("로그인된 계정 존재 안 함")
+                        hasCurrentUser = false
+                    }
+                    
                 }
                 
                 var time = 0.0
