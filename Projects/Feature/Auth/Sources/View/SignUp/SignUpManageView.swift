@@ -194,12 +194,15 @@ struct SignUpManageView: View {
             "uid": uid,
             "email": manager.email,
             "signin_method": "Email",
-            "is_checked_service_news_notification": manager.isCheckedServiceNewsNotification
+            "is_checked_service_news_notification": manager.isCheckedServiceNewsNotification,
+            "is_checked_social_notification": true
         ]
         
         if manager.isCheckedServiceNewsNotification {
             messaging.subscribe(toTopic: "SERVICE")
         }
+        
+        messaging.subscribe(toTopic: "SOCIAL")
         
         query.setData(userData) { error in
             if let error = error {

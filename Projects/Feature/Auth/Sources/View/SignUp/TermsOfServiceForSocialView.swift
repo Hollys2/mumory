@@ -133,12 +133,15 @@ struct TermsOfServiceForSocialView: View {
         let messaging = Firebase.messaging
         let query = db.collection("User").document(uid)
         let userData = [
-            "is_checked_service_news_notification" : isCheckedServiceNewsNotification
+            "is_checked_service_news_notification" : isCheckedServiceNewsNotification,
+            "is_checked_social_notification": true
         ]
         
         if isCheckedServiceNewsNotification {
             messaging.subscribe(toTopic: "SERVICE")
         }
+        
+        messaging.subscribe(toTopic: "SOCIAL")
         
         query.getDocument { snapshot, error in
             if let error = error {
