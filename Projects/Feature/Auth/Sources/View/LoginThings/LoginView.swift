@@ -287,7 +287,7 @@ public struct LoginView: View {
                                 }else{
                                     guard let user = result?.user else {return}
                                     print("firebase sign up successful")
-                                    isTermsOfServiceNotDone = true
+                                    checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
                                 }
                                 
                             }

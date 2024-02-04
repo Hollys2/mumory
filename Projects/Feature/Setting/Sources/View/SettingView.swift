@@ -9,11 +9,21 @@
 import SwiftUI
 import Shared
 import Core
+import FirebaseAuth
+import Firebase
+import GoogleSignIn
+import KakaoSDKAuth
+import KakaoSDKUser
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject var manager: SettingViewModel = SettingViewModel()
     @State var isLogout: Bool = false
+    @State var isShowingWithdrawPopup = false
+    @State var isDeleteUserDone: Bool = false
+    @State var isDeleteDocumentsDone: Bool = false
+    @State var isPresent: Bool = false
+
     var body: some View {
         //테스트때문에 navigationStack 추가함. 이후 삭제하기
         ZStack{
@@ -75,10 +85,65 @@ struct SettingView: View {
                     .underline()
                     .padding(.bottom, 70)
                     .padding(.top, 67)
+                    .onTapGesture {
+                        isShowingWithdrawPopup = true
+                    }
                 
             }
+            
+            if isShowingWithdrawPopup{
+                Color.black.opacity(0.5).ignoresSafeArea()
+            }
+            
+            if isShowingWithdrawPopup{
+                WithdrawPopupView {
+                    isShowingWithdrawPopup = false
+                } positiveAction: {
+                    let Firebase = FirebaseManager.shared
+                    let db = Firebase.db
+                    let auth = Firebase.auth
+                    var credential: AuthCredential
+                    guard let currentUser = auth.currentUser else {
+                        print("no current user")
+                        return
+                    }
+                    
+                    getCredential(method: manager.signinMethod) { credential in
+                        if let credential = credential {
+                            
+                        }
+                    }
+                    
+//                    currentUser.reauthenticate(with: T##AuthCredential)
+                    currentUser.delete { error in
+                        if let error = error{
+                            print("delete user error: \(error)")
+                        }else {
+                            isDeleteUserDone = true
+                            
+                            db.collection("User").document(currentUser.uid).delete { error in
+                                if let error = error {
+                                    print("delete document error: \(error)")
+                                }else {
+                                    isDeleteDocumentsDone = true
+                                    isPresent = isDeleteUserDone && isDeleteDocumentsDone
+                                }
+                            }
+                            
+                            isPresent = isDeleteUserDone && isDeleteDocumentsDone
+                        }
+                    }
+                    
+                 
+                   
+                }
+            }
+
         }
         .navigationDestination(isPresented: $isLogout, destination: {
+            LoginView()
+        })
+        .navigationDestination(isPresented: $isPresent, destination: {
             LoginView()
         })
         .navigationBarBackButtonHidden()
@@ -122,12 +187,13 @@ struct SettingView: View {
         let auth = Firebase.auth
         
         if let currentUser = auth.currentUser {
-            let query = db.collection("User").whereField("uid", isEqualTo: currentUser.uid)
-            query.getDocuments { snapshot, error in
+            let query = db.collection("User").document(currentUser.uid)
+            
+            query.getDocument { snapshot, error in
                 if let error = error {
                     print("firestore error: \(error)")
                 }else if let snapshot = snapshot {
-                    guard let documentData = snapshot.documents.first?.data() else {
+                    guard let documentData = snapshot.data() else {
                         print("no document")
                         return
                     }
@@ -147,7 +213,7 @@ struct SettingView: View {
                     guard let selectedTime = documentData["selected_notification_time"] as? Int else {
                         print("no time")
                         return
-                    }                    
+                    }
                     self.manager.selectedNotificationTime = selectedTime
 
                     guard let isCheckdServiceNewsNotification = documentData["is_checked_service_news_notification"] as? Bool else {
@@ -177,7 +243,94 @@ struct SettingView: View {
             //재로그인
         }
     }
-
+    
+    private func getCredential(method: String, completion: @escaping (AuthCredential?) -> Void){
+        if method == "Google"{
+            if let id = FirebaseApp.app()?.options.clientID {
+                let config = GIDConfiguration(clientID: id)
+                GIDSignIn.sharedInstance.configuration = config
+                
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first,
+                   let presentingVC = window.rootViewController {
+                    
+                    GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
+                        if let error = error{
+                            print("google error: \(error)")
+                        }else{
+                            print("google login success")
+                            guard let idToken = result?.user.idToken?.tokenString else {print("no idToken");return}
+                            guard let accessToken = result?.user.accessToken.tokenString else {print("no accessToken");return}
+                            
+                            completion(GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken))
+                            
+                        }
+                    }
+                }
+            }
+        }else if method == "Apple"{
+            
+            
+            
+        }else if method == "Kakao"{
+            if UserApi.isKakaoTalkLoginAvailable(){
+                //카카오톡 어플 사용이 가능하다면
+                UserApi.shared.loginWithKakaoTalk { authToken, error in
+                    //앱로그인
+                    if let error = error{
+                        //카카오 로그인 실패
+                        print("kakao login error: \(error)")
+                    }else if let authToken = authToken {
+                        //카카오 로그인 성공
+                        print("login successful with app")
+                        UserApi.shared.me { user, error in
+                            if let user = user {
+                                let email = user.kakaoAccount?.email ?? ""
+                                let id = user.id ?? 0
+                                
+                                Auth.auth().signIn(withEmail: "kakao/\(email)", password: "kakao/\(id)") { result, error in
+                                    if let error = error {
+                                        print("sign in error: \(error)")
+                                    }else if let result = result {
+                                        completion(result.credential)
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+            }else{
+                //카카오톡 어플 사용이 불가하다면
+                UserApi.shared.loginWithKakaoAccount { authToken, error in
+                    //계정로그인
+                    if let error = error{
+                        print("kakao acount login error: \(error)")
+                    }else if let authToken = authToken{
+                        print("login successful with account")
+                        UserApi.shared.me { user, error in
+                            if let user = user {
+                                let email = user.kakaoAccount?.email ?? ""
+                                let id = user.id ?? 0
+                                
+                                Auth.auth().signIn(withEmail: "kakao/\(email)", password: "kakao/\(id)") { result, error in
+                                    if let error = error {
+                                        print("sign in error: \(error)")
+                                    }else if let result = result {
+                                        completion(result.credential)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }else {
+            
+        }
+        
+    }
+    
 }
 
 #Preview {
