@@ -22,8 +22,7 @@ public class SignUpManageViewModel: ObservableObject{
     @Published var isAvailableEmail = false
     
     @Published var isCheckedRequiredItems: Bool = false
-    @Published var isCheckedMarketingNotification: Bool = false
-    @Published var isCheckedEventNotification: Bool = false
+    @Published var isCheckedServiceNewsNotification: Bool = false
 
     @Published var genreList: [String] = []
     @Published var selectedTime = 0

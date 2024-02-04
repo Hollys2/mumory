@@ -17,7 +17,6 @@ struct TermsAndConditionsView: View {
     @State var isCheckedFirstItem: Bool = false
     @State var isCheckedSecondItem: Bool = false
     @State var isCheckedThirdItem: Bool = false
-    @State var isCheckedFourthItem: Bool = false
 
     var body: some View {
         ZStack{
@@ -42,27 +41,25 @@ struct TermsAndConditionsView: View {
                     Spacer()
                     
                     //동의항목 선택 여부에 따라 전체동의 아이콘 변경 및 동작
-                    if isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem&&isCheckedFourthItem {
+                    if isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem {
                         SharedAsset.checkCircleFill.swiftUIImage
                             .onTapGesture {
                                 isEntireChecked = 
-                                !(isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem&&isCheckedFourthItem)
+                                !(isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem)
                                 
                                 isCheckedFirstItem = isEntireChecked
                                 isCheckedSecondItem = isEntireChecked
                                 isCheckedThirdItem = isEntireChecked
-                                isCheckedFourthItem = isEntireChecked
                             }
                     }else {
                         SharedAsset.checkCircle.swiftUIImage
                             .onTapGesture {
                                 isEntireChecked = 
-                                !(isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem&&isCheckedFourthItem)
+                                !(isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem)
                                 
                                 isCheckedFirstItem = isEntireChecked
                                 isCheckedSecondItem = isEntireChecked
                                 isCheckedThirdItem = isEntireChecked
-                                isCheckedFourthItem = isEntireChecked
                             }
                     }
                     
@@ -85,18 +82,10 @@ struct TermsAndConditionsView: View {
                         manager.isCheckedRequiredItems = isCheckedFirstItem && isCheckedSecondItem
                     })
                 
-                SignUpConsentItem(type: .select, title: "마케팅 정보 수신 동의", isChecked: $isCheckedThirdItem)
+                SignUpConsentItem(type: .select, title: "서비스 소식 수신 동의", isChecked: $isCheckedThirdItem)
                     .padding(.top, 35)
                     .onChange(of: isCheckedThirdItem, perform: { value in
-                        manager.isCheckedMarketingNotification = value
-                    })
-
-                
-                SignUpConsentItem(type: .select, title: "이벤트 앱 푸시 수신 동의", isChecked: $isCheckedFourthItem)
-                    .padding(.top, 35)
-                    .padding(.bottom, 64)
-                    .onChange(of: isCheckedFourthItem, perform: { value in
-                        manager.isCheckedEventNotification = value
+                        manager.isCheckedServiceNewsNotification = value
                     })
             }
             

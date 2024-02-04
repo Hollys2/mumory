@@ -10,6 +10,7 @@ import SwiftUI
 import Shared
 import Core
 import Lottie
+import Firebase
 
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
@@ -117,6 +118,7 @@ struct EmailLoginView: View {
             else if let result = result{
                 print("login success")
                 isLoginSuccess = true
+//                Firebase
                 completion(false)
             }
             isLoading = false

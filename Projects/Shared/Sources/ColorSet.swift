@@ -18,4 +18,7 @@ public class ColorSet{
     public static let lightGray = Color(red: 0.82, green: 0.82, blue: 0.82)
     public static let moreDeepGray = Color(red: 0.12, green: 0.12, blue: 0.12)
     public static let skeleton02 = Color(red: 0.25, green: 0.25, blue: 0.25)
+    public static let charSubGray = Color(red: 0.76, green: 0.76, blue: 0.76)
+
+    
 }

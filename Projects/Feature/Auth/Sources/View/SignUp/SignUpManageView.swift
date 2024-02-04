@@ -188,8 +188,7 @@ struct SignUpManageView: View {
             "uid": uid,
             "email": manager.email,
             "signin_method": "Email",
-            "is_chcked_marketing_notification": manager.isCheckedMarketingNotification,
-            "is_checked_event_notification": manager.isCheckedEventNotification
+            "is_checked_service_news_notification": manager.isCheckedServiceNewsNotification
         ]
         
         let firestoreReference = Firestore.firestore().collection("User").addDocument(data: userData) { error in

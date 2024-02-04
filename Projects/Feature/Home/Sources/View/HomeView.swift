@@ -97,11 +97,7 @@ public struct HomeView: View {
                 case .library:
                     LibraryManageView()
                 case .notification:
-                    VStack(spacing: 0){
-                        Color.red
-                        Color.blue
-                    }
-                    .ignoresSafeArea()
+                    SettingView()
                 }
                 Spacer(minLength: 0) // 추후 수정
                 HomeTabView(selectedTab: $selectedTab, isBottomSheetShown: $isBottomSheetShown)
