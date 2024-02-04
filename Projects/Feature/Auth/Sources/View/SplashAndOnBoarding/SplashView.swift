@@ -32,7 +32,6 @@ public struct SplashView: View {
             .transition(.opacity)
             .navigationDestination(isPresented: $isNextViewPresenting) {
                 if isNextViewPresenting{
-                    
                     if hasCurrentUser ?? false {
                         HomeView()
                     }else if hasLoginHistory ?? false {

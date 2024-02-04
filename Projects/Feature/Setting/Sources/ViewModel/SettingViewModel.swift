@@ -7,11 +7,16 @@
 //
 
 import Foundation
+import Core
 
 class SettingViewModel: ObservableObject{
     @Published var email: String = ""
     @Published var signinMethod: String = ""
     @Published var selectedNotificationTime = 0
+    @Published var isCheckedServiceNewsNotification = false
+    @Published var isCheckedSocialNotification = false
+    @Published var nickname: String = ""
+
     
     public func getSignInMethodText() -> String {
         switch(signinMethod){
@@ -34,5 +39,89 @@ class SettingViewModel: ObservableObject{
         case 5: return "이용 시간대를 분석해 자동으로 설정"
         default : return "시간을 설정해주세요"
         }
+    }
+    
+    public func setNotificationTime() {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        
+        guard let uid = UserDefaults.standard.string(forKey: "uid") else {
+            print("no uid")
+            return
+        }
+        
+        let userData = [
+            "selected_notification_time" : selectedNotificationTime
+        ]
+        
+        let query = db.collection("User").document(uid)
+        query.setData(userData, merge: true) { error in
+            if let error = error {
+                print("set Data error: \(error)")
+            }
+        }
+    }
+    
+    public func subscribeTopicAndUpdateUserData() {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let messaging = Firebase.messaging
+        
+        guard let uid = UserDefaults.standard.string(forKey: "uid") else {
+            print("no uid")
+            return
+        }
+        
+        //소셜 알림 설정
+        if isCheckedSocialNotification {
+            messaging.subscribe(toTopic: "SOCIAL") { error in
+                if let error = error {
+                    print("subscribe error: \(error)")
+                }else{
+                    print("'Social' subscribe successful")
+                }
+            }
+        }else {
+            messaging.unsubscribe(fromTopic: "SOCIAL") { error in
+                if let error = error {
+                    print("unsubscribe error: \(error)")
+                }else{
+                    print("'Social' unsubscribe successful")
+                }
+            }
+        }
+        
+        //서비스 소식 알림 설정
+        if isCheckedServiceNewsNotification{
+            messaging.subscribe(toTopic: "SERVICE") { error in
+                if let error = error {
+                    print("subscribe error: \(error)")
+                }else {
+                    print("'Service' subscribe successful")
+                }
+            }
+        }else {
+            messaging.unsubscribe(fromTopic: "SERVICE") { error in
+                if let error = error {
+                    print("unsubscribe error: \(error)")
+                }else{
+                    print("'Service' unsubscribe successful")
+                }
+            }
+        }
+        
+        let userData = [
+            "is_checked_service_news_notification" : isCheckedServiceNewsNotification,
+            "is_checked_social_notification": isCheckedSocialNotification
+        ]
+        
+        let query = db.collection("User").document(uid)
+        query.setData(userData, merge: true) { error in
+            if let error = error {
+                print("set Data error: \(error)")
+            }
+        }
+        
+        
     }
 }

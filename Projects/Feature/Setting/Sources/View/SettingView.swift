@@ -9,7 +9,6 @@
 import SwiftUI
 import Shared
 import Core
-//import FirebaseMessaging
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
@@ -36,14 +35,23 @@ struct SettingView: View {
                     SettingItem(title: "알림")
                 }
                 
-                SettingItem(title: "1:1 문의")
-                
+                NavigationLink {
+                    QuestionView()
+                        .environmentObject(manager)
+                } label: {
+                    SettingItem(title: "1:1 문의")
+
+                }
+
                 SettingItem(title: "앱 리뷰 남기기")
                 
                 
                 Spacer()
                 Button {
                     //로그아웃
+                    UserDefaults.standard.removeObject(forKey: "uid")
+                    try? FirebaseManager.shared.auth.signOut()
+                    
                 } label: {
                     Text("로그아웃")
                         .foregroundColor(.white)
@@ -119,20 +127,37 @@ struct SettingView: View {
                         print("no email")
                         return
                     }
-                    
+                    self.manager.email = email
+
                     guard let method = documentData["signin_method"] as? String else {
                         print("no method")
                         return
                     }
+                    self.manager.signinMethod = method
                     
                     guard let selectedTime = documentData["selected_notification_time"] as? Int else {
                         print("no time")
                         return
-                    }
-                    self.manager.email = email
-                    self.manager.signinMethod = method
+                    }                    
                     self.manager.selectedNotificationTime = selectedTime
+
+                    guard let isCheckdServiceNewsNotification = documentData["is_checked_service_news_notification"] as? Bool else {
+                        print("no service notification")
+                        return
+                    }
+                    self.manager.isCheckedServiceNewsNotification = isCheckdServiceNewsNotification
                     
+                    guard let isCheckdSocialNotification = documentData["is_checked_social_notification"] as? Bool else {
+                        print("no social notification")
+                        return
+                    }
+                    self.manager.isCheckedSocialNotification = isCheckdSocialNotification
+                    
+                    guard let nickname = documentData["nickname"] as? String else {
+                        print("no nickname")
+                        return
+                    }
+                    self.manager.nickname = nickname
 
                     
                     
