@@ -9,7 +9,7 @@
 import SwiftUI
 import Shared
 
-struct TermsAndConditionsView: View {
+struct TermsOfServiceView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var manager: SignUpManageViewModel
 //    @State var isSignUpSuccess: Bool = false
@@ -84,6 +84,7 @@ struct TermsAndConditionsView: View {
                 
                 SignUpConsentItem(type: .select, title: "서비스 소식 수신 동의", isChecked: $isCheckedThirdItem)
                     .padding(.top, 35)
+                    .padding(.bottom, 64)
                     .onChange(of: isCheckedThirdItem, perform: { value in
                         manager.isCheckedServiceNewsNotification = value
                     })
@@ -94,5 +95,5 @@ struct TermsAndConditionsView: View {
 }
 
 //#Preview {
-//    TermsAndConditionsView()
+//    TermsOfServiceView()
 //}

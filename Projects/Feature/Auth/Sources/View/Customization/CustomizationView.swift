@@ -173,6 +173,8 @@ public struct CustomizationView: View {
         isLoading = true
         
         let userDefault = UserDefaults.standard
+        let db = Firestore.firestore()
+
         guard let uid = userDefault.string(forKey: "uid") else{
             print("no uid")
             //아이디가 없으면 재로그인하고 다시 셋팅해야됨
@@ -182,36 +184,28 @@ public struct CustomizationView: View {
         
         //유저데이터 업로드
         let userData: [String : Any] = [
-            "uid": uid,
             "id": manager.id,
             "nickname": manager.nickname,
             "favorite_genres": manager.genreList,
             "selected_notification_time": manager.selectedTime,
         ]
         
-        let db = Firestore.firestore()
         
-        let userQuery = db.collection("User").whereField("uid", isEqualTo: uid)
-                
-        userQuery.getDocuments { snapShot, error in
+        let query = db.collection("User").document(uid)
+        query.getDocument { snapshot, error in
             if let error = error {
                 print("get document error: \(error)")
-            }else if let snapShot = snapShot {
-                //해당 uid가 있는 문서를 가져와서 해당 문서 업데이트
-                if let document = snapShot.documents.first {
-                    document.reference.setData(userData, merge: true) { error in
-                        if let error = error {
-                            print("document update error: \(error)")
-                            //에러처리
-                        }else{
-                            //데이터 추가 성공
-                            isUploadUserDataCompleted = true
-                            isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted
-                            isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted)
-                        }
+            }else if let snapshot = snapshot {
+                snapshot.reference.setData(userData, merge: true) { error in
+                    if let error = error {
+                        print("document update error: \(error)")
+                        //에러처리
+                    }else{
+                        //데이터 추가 성공
+                        isUploadUserDataCompleted = true
+                        isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted
+                        isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted)
                     }
-                }else{
-                    print("no document of this uid")
                 }
             }
         }

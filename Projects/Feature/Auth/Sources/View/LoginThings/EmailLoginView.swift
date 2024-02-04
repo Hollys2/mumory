@@ -10,15 +10,17 @@ import SwiftUI
 import Shared
 import Core
 import Lottie
-import Firebase
 
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @State var email: String = ""
     @State var password: String = ""
     @State var isLoginError: Bool = false
-    @State var isLoginSuccess: Bool = false
     @State var isLoading: Bool = false
+    @State var isCustomCompleted: Bool = false
+    @State var isLoginSuccess: Bool = false
+    @State var isPresent: Bool = false
+
     
     var body: some View {
         GeometryReader(content: { geometry in
@@ -85,8 +87,12 @@ struct EmailLoginView: View {
                     .opacity(isLoading ? 1 : 0)
                     .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
             }
-            .navigationDestination(isPresented: $isLoginSuccess, destination: {
-                HomeView()
+            .navigationDestination(isPresented: $isPresent, destination: {
+                if isLoginSuccess && isCustomCompleted{
+                    HomeView()
+                }else {
+                    StartCostomizationView()
+                }
             })
             .frame(width: geometry.size.width + 1)
             .background(LibraryColorSet.background)
@@ -109,17 +115,42 @@ struct EmailLoginView: View {
     func tapLoginButton(email: String, password: String, completion: @escaping (Bool) -> Void){
         //Core에 정의해둔 FirebaseAuth
         isLoading = true
-        let Auth = FirebaseManager.shared.auth
+        let Firebase = FirebaseManager.shared
+        let Auth = Firebase.auth
+        let db = Firebase.db
+        
         Auth.signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 print("로그인 실패, \(error)")
-                completion(true)
+                completion(true) //isLoginError = true -> 오류발생
             }
             else if let result = result{
                 print("login success")
                 isLoginSuccess = true
-//                Firebase
-                completion(false)
+                let uid = result.user.uid
+                UserDefaults.standard.setValue(uid, forKey: "uid")
+                
+                db.collection("User").document(uid).getDocument { snapshot, error in
+                    if let error = error {
+                        print("get document error: \(error)")
+                    }else if let snapshot = snapshot {
+                        print("data exist")
+                        guard let userData = snapshot.data() else {
+                            print("no data")
+                            return
+                        }
+                        if let id = userData["id"] as? String {
+                            print("id exist")
+                            isCustomCompleted = true
+                        }else {
+                            print("no id")
+                            isCustomCompleted = false
+                        }
+                        isPresent = true
+
+                    }
+                }
+                completion(false) //isLoginError = false -> 오류 미발생
             }
             isLoading = false
         }

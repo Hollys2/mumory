@@ -9,8 +9,8 @@
 import SwiftUI
 import Shared
 import Lottie
-import FirebaseAuth
-import FirebaseFirestore
+import Core
+
 
 struct SignUpManageView: View {
     @Environment(\.dismiss) private var dismiss
@@ -58,7 +58,7 @@ struct SignUpManageView: View {
                                 isTapBackButton = false
                             })
                     case 2:
-                        TermsAndConditionsView()
+                        TermsOfServiceView()
                             .environmentObject(manager)
                             .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                             .onAppear(perform: {
@@ -165,7 +165,8 @@ struct SignUpManageView: View {
     }
     
     private func createUser(email: String, password: String){
-        Auth.auth().createUser(withEmail: email, password: password) { data, error in
+        let auth = FirebaseManager.shared.auth
+        auth.createUser(withEmail: email, password: password) { data, error in
             if let error = error {
                 print("create user error: \(error)")
                 isLoading = false
@@ -183,6 +184,11 @@ struct SignUpManageView: View {
     }
     
     private func uploadUserData(uid: String){
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let messaging = Firebase.messaging
+        let query = db.collection("User").document(uid)
+        
         //유저데이터 업로드
         let userData: [String : Any] = [
             "uid": uid,
@@ -191,7 +197,11 @@ struct SignUpManageView: View {
             "is_checked_service_news_notification": manager.isCheckedServiceNewsNotification
         ]
         
-        let firestoreReference = Firestore.firestore().collection("User").addDocument(data: userData) { error in
+        if manager.isCheckedServiceNewsNotification {
+            messaging.subscribe(toTopic: "SERVICE")
+        }
+        
+        query.setData(userData) { error in
             if let error = error {
                 print("firestore error \(error)")
                 isSignUpErrorShowing = true
@@ -202,6 +212,7 @@ struct SignUpManageView: View {
                 isSignUpCompleted = true
             }
         }
+
     }
 }
 

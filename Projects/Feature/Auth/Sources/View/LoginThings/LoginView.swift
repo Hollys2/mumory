@@ -22,10 +22,10 @@ public struct LoginView: View {
     @State fileprivate var currentNonce: String?
     @State var isLoginCompleted: Bool = false
     @State var isCustomizationNotDone: Bool = false
+    @State var isTermsOfServiceNotDone: Bool = false
     @State var isLoading: Bool = false
     public var body: some View {
-        NavigationStack {
-            GeometryReader(content: { geometry in
+        GeometryReader(content: { geometry in
             
             ZStack{
                 LibraryColorSet.background.ignoresSafeArea()
@@ -66,7 +66,7 @@ public struct LoginView: View {
                         switch(result){
                         case .success(let authResult):
                             print("apple sign in success")
-
+                            
                             guard let appleIDCredential = authResult.credential as? ASAuthorizationAppleIDCredential else {
                                 print("credential error")
                                 return}
@@ -103,7 +103,7 @@ public struct LoginView: View {
                                     
                                     setLoginHistoryAndUID(uid: user.uid)//로그인기록 남기기
                                     
-                                    checkOldUserAndCustomization(uid: user.uid, email: user.email, method: "Apple")
+                                    checkInitialSetting(uid: user.uid, email: user.email, method: "Apple")
                                 }
                             })
                             
@@ -129,7 +129,7 @@ public struct LoginView: View {
                                 .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                 .padding(.top, geometry.size.height > 700 ? 68 : 51)
-
+                            
                             Text("이메일로 가입하기")
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
@@ -142,15 +142,16 @@ public struct LoginView: View {
                     .buttonStyle(EmpeyActionStyle()) //터치 애니메이션 삭제
                     
                 }
-               
                 
-                //로딩 로티 애니메이션 - Z스택 최상단       
+                
+                //로딩 로티 애니메이션 - Z스택 최상단
                 LottieView(animation: .named("loading", bundle: .module))
                     .looping()
                     .opacity(isLoading ? 1 : 0)
                     .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
                 
             }
+            .navigationBarBackButtonHidden()
             .navigationDestination(isPresented: $isCustomizationNotDone, destination: {
                 //커스텀 안 했을 시 커스텀 화면으로 이동
                 StartCostomizationView()
@@ -159,14 +160,15 @@ public struct LoginView: View {
                 //로그인 완료시 홈 화면으로 이동
                 HomeView()
             }
-            
-                
+            .navigationDestination(isPresented: $isTermsOfServiceNotDone) {
+                //이용약관 동의 안 했을 시 이용약관 화면으로 이동
+                TermsOfServiceForSocialView()
+            }
+            .onDisappear(perform: {
+                isLoading = false
             })
             
-        }
-        .navigationBarBackButtonHidden()
-        
-        
+        })
     }
     
     
@@ -183,7 +185,7 @@ public struct LoginView: View {
                 }else if let authToken = authToken {
                     //카카오 로그인 성공
                     print("login successful with app")
-                    createUserWithKakao()
+                    signInWithKakao()
                     
                 }
             }
@@ -195,7 +197,7 @@ public struct LoginView: View {
                     print("kakao acount login error: \(error)")
                 }else if let authToken = authToken{
                     print("login successful with account")
-                    createUserWithKakao()
+                    signInWithKakao()
                 }
             }
         }
@@ -208,7 +210,7 @@ public struct LoginView: View {
     //구글 로그인 기능
     private func tapGoogleButton(){
         isLoading = true
-
+        
         guard let id = FirebaseApp.app()?.options.clientID else { return }
         let config = GIDConfiguration(clientID: id)
         GIDSignIn.sharedInstance.configuration = config
@@ -236,7 +238,7 @@ public struct LoginView: View {
                     }else if let user = result?.user{
                         print("success creating or login user ")
                         setLoginHistoryAndUID(uid: user.uid)//로그인기록 남기기
-                        checkOldUserAndCustomization(uid: user.uid, email: user.email, method: "Google")
+                        checkInitialSetting(uid: user.uid, email: user.email, method: "Google")
                     }
                 }
             }
@@ -249,10 +251,11 @@ public struct LoginView: View {
     }
     
     //카카오 로그인 관련 코드 - 비즈 전환 후 재테스트 해야함
-    private func createUserWithKakao(){
+    private func signInWithKakao(){
         print("create user with kakao")
         let auth = FirebaseManager.shared.auth
         let db = FirebaseManager.shared.db
+        //기존에 존재하는 유저인지 판단 후 회원가입 혹은 로그인 진행
         
         //유저 정보 접근
         UserApi.shared.me { user, error in
@@ -264,44 +267,43 @@ public struct LoginView: View {
                 //동의,비동의 항목에 따라 가지고 올 수 있는 데이터가 다름
                 guard let email = user.kakaoAccount?.email else {return}
                 guard let uid = user.id else {return} //카카오 uid
-
+                
                 //저장된 유저데이터에서 기존유저 판단 쿼리
                 let checkOldUserQuery = db.collection("User")
                     .whereField("email", isEqualTo: email)
-                    .whereField("method", isEqualTo: "Kakao")
+                    .whereField("signin_method", isEqualTo: "Kakao")
                 
                 //쿼리 기반 데이터 가져오기
                 checkOldUserQuery.getDocuments { snapShot, error in
                     if let error = error {
-                        //에러발생
                         print("fire base query error: \(error)")
                     }else if let snapShot = snapShot {
                         //카카오 이메일과 동일한 회원 데이터가 있는지 확인
                         if snapShot.isEmpty {
-                            //카카오 이메일이 동일한 회원이 없으니 회원가입
+                            //이메일이 동일한 카카오 로그인 회원이 없으니 회원가입
                             print("no user")
                             
                             //비밀번호 하드코딩한 거 수정하기
-                            auth.createUser(withEmail: "kakao/\(email)", password: "kakao\(uid)"){result, error in
+                            auth.createUser(withEmail: "kakao/\(email)", password: "kakao/\(uid)"){result, error in
                                 if let error = error{
                                     print("firebase sign up error: \(error)")
                                 }else{
                                     guard let user = result?.user else {return}
                                     print("firebase sign up successful")
                                     setLoginHistoryAndUID(uid: user.uid)
-                                    checkOldUserAndCustomization(uid: user.uid, email: email, method: "Kakao")
+                                    isTermsOfServiceNotDone = true
                                 }
                                 
                             }
                         }else {
                             //카카오 이메일이 동일한 회원 데이터가 존재하면 로그인
-                            auth.signIn(withEmail: email, password: String(uid)) { result, error in
+                            auth.signIn(withEmail: "kakao/\(email)", password: "kakao/\(uid)") { result, error in
                                 if let error = error {
                                     print("login error \(error)")
                                 }else if let user = result?.user{
                                     print("success login")
                                     setLoginHistoryAndUID(uid: user.uid)
-                                    checkOldUserAndCustomization(uid: user.uid, email: email, method: "Kakao")
+                                    checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
                                 }
                             }
                         }
@@ -348,59 +350,90 @@ public struct LoginView: View {
     
     //로그인 이력 남기기
     private func setLoginHistoryAndUID(uid: String) {
+        
+    }
+    
+    private func checkInitialSetting(uid: String, email: String?, method: String){
+        //로그인 기록 및 uid 셋팅
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         userDefualt.setValue(uid, forKey: "uid")
-    }
-    
-    private func checkOldUserAndCustomization(uid: String, email: String?, method: String){
+        
         //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
         let db = Firestore.firestore().collection("User")
-        let query = db.whereField("uid", isEqualTo: uid)
+        let query = db.document(uid)
         
-        query.getDocuments { snapshot, error in
+        query.getDocument { snapshot, error in
             if let error = error {
                 //업로드에러
                 //사용자 피드백
-                print("error")
-            }else if let data = snapshot {
-                print("data count: \(data.count)")
-                if data.isEmpty{
-                    print("기존유저X")
+                print("get document error: \(error)")
+            }else if let snapshot = snapshot {
+                if snapshot.exists{
+                    //기존 유저 O
+                    print("기존유저O")
+                    guard let userData = snapshot.data() else {
+                        print("no data")
+                        return
+                    }
+                    
+                    //이용약관 동의 했는지 확인
+                    if let isCheckedServiceNewsNotification = userData["is_checked_service_news_notification"]{
+                        //이용약관 동의 O
+                        
+                        //커스텀 할 때 기입한 id 존재 유무 확인
+                        if let id = userData["id"]{
+                            //기존유저O, 이용약관동의O, 커스텀O -> 홈화면으로 이동
+                            print("커스텀O")
+                            isLoginCompleted = true
+                        }else {
+                            print("커스텀X")
+                            //기존유저O, 커스텀X -> 커스텀 페이지로 이동
+                            isCustomizationNotDone = true
+                        }
+                    }else {
+                        //이용약관 동의X -> 이용약관 동의 페이지
+                        isTermsOfServiceNotDone = true
+                    }
+                    
+                }else{
                     //기존 유저 X, 유저 정보 업로드 후 custom페이지 이동
+                    print("기존유저X")
+                    
                     let userData: [String: Any] = [
                         "uid": uid,
-                        //이메일 없을 경우 - NOEMAIL유저아이디
-                        "email": email ?? "NOEMAIL\(uid)",
+                        "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
                         "signin_method": method
                     ]
                     
-                    db.addDocument(data: userData) { error in
+                    snapshot.reference.setData(userData) { error in
                         if let error = error {
                             //업로드 에러 사용자 피드백
                             print("add document error: \(error)")
                         }else {
                             print("upload user data successful")
-                            isCustomizationNotDone = true
+                            isTermsOfServiceNotDone = true
                         }
-                    }
-                }else{
-                    //기존 유저 O
-                    print("기존유저O")
-                    guard let userDocument = data.documents.first?.data() else{return}
-                    
-                    if let id = userDocument["id"]{
-                        //기존유저O, 커스텀O -> 홈화면으로 이동
-                        print("커스텀O")
-                        isLoginCompleted = true
-                    }else {
-                        print("커스텀X")
-                        //기존유저O, 커스텀X -> 커스텀 페이지로 이동
-                        isCustomizationNotDone = true
                     }
                 }
             }
         }
+        
+        
+        //        query.getDocuments { snapshot, error in
+        //            if let error = error {
+        //                //업로드에러
+        //                //사용자 피드백
+        //                print("error")
+        //            }else if let data = snapshot {
+        //                print("data count: \(data.count)")
+        //                if data.isEmpty{
+        //
+        //                }else{
+        //
+        //                }
+        //            }
+        //        }
     }
     
 }
