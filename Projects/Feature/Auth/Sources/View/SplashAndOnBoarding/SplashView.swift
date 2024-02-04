@@ -9,14 +9,17 @@
 import SwiftUI
 import Shared
 import Lottie
-import FirebaseAuth
+import Core
 
 public struct SplashView: View {
     public init(){}
     @State var hasUid: Bool?
-    @State var hasCurrentUser: Bool?
+    @State var isSignInCompleted: Bool?
     @State var hasLoginHistory: Bool?
     @State var isNextViewPresenting: Bool = false
+    @State var isCustomizationDone: Bool?
+    @State var isTermsOfServiceDone: Bool?
+    @State var isInitialSettingDone = false
     public var body: some View {
         NavigationStack{
             ZStack{
@@ -31,12 +34,24 @@ public struct SplashView: View {
             .transition(.opacity)
             .navigationDestination(isPresented: $isNextViewPresenting) {
                 if isNextViewPresenting{
-                    if hasCurrentUser ?? false {
-                        HomeView()
-                    }else if hasLoginHistory ?? false {
+                    if !(isSignInCompleted ?? false) {
+                        //로그인 실패
+                        if hasLoginHistory ?? false{
+                            //로그인 기록O
+                            LoginView()
+                        }else {
+                            //로그인 기록X
+                            OnBoardingManageView()
+                        }
+                    }else if !(isTermsOfServiceDone ?? false){
+                        //이용약관 동의X
+                        LoginView()
+                    }else if !(isCustomizationDone ?? false) {
+                        //프로필 커스텀 X
                         LoginView()
                     }else {
-                        OnBoardingManageView()
+                        //이용약관O, 커스텀O
+                        HomeView()
                     }
                 }
             }
@@ -50,14 +65,56 @@ public struct SplashView: View {
                     
                     //현재 로그인 되어있는 상태인지 확인
 //                    hasCurrentUser = (Auth.auth().currentUser != nil)
-                    if let user = Auth.auth().currentUser {
-                        
+                    
+                    let Firebase = FirebaseManager.shared
+                    let db = Firebase.db
+                    let auth = Firebase.auth
+                    
+                    if let user = auth.currentUser {
                         print("로그인된 계정 존재함")
                         print("email: \(user.email ?? "no mail")")
-                        hasCurrentUser = true
+                        db.collection("User").document(user.uid).getDocument { snapshot, error in
+                            if let error = error {
+                                print("get document error: \(error)")
+                                isSignInCompleted = false
+                            }else if let snapshot = snapshot {
+                                if snapshot.exists {
+                                    print("document 존재")
+                                    if let data = snapshot.data(){
+                                        isSignInCompleted = true
+                                        if let checkedThing = data["is_checked_service_news_notification"] {
+                                            print("이용약관 존재")
+                                            isTermsOfServiceDone = true
+                                            if let id = data["id"]{
+                                                print("id 존재")
+                                                isCustomizationDone = true
+                                                isInitialSettingDone = true
+                                            }else{
+                                                print("id 존재X")
+                                                isCustomizationDone = false
+                                                isInitialSettingDone = true
+                                            }
+                                        }else {
+                                            print("이용약관 존재 X")
+                                            isTermsOfServiceDone = false
+                                            isInitialSettingDone = true
+                                        }
+                                    }else {
+                                        print("data 존재X")
+                                        isSignInCompleted = false
+                                        isInitialSettingDone = true
+                                    }
+                                }else {
+                                    print("document 존재X")
+                                    isSignInCompleted = false
+                                    isInitialSettingDone = true
+                                }
+                            }
+                        }
                     }else{
                         print("로그인된 계정 존재 안 함")
-                        hasCurrentUser = false
+                        isSignInCompleted = false
+                        isInitialSettingDone = true
                     }
                     
                 }
@@ -66,10 +123,7 @@ public struct SplashView: View {
                 Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
                     time += 0.5
                     if time > 4 {
-                        //스플래쉬 화면 기본 설정 시간이 4초이지만 초기 셋팅이 더 걸릴 경우에는 초기 셋팅이 완료된 후에 다음 화면으로 넘어가도록 함
-                        withAnimation {
-                            isNextViewPresenting = hasCurrentUser != nil && hasLoginHistory != nil
-                        }
+                        isNextViewPresenting = isInitialSettingDone
                         if isNextViewPresenting{
                             //다음 화면으로 넘어갈 때 타이머 멈추기
                             timer.invalidate()

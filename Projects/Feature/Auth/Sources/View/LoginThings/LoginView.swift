@@ -18,12 +18,15 @@ import Firebase
 import FirebaseFirestore
 
 public struct LoginView: View {
-    public init() {}
+    @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @State fileprivate var currentNonce: String?
     @State var isLoginCompleted: Bool = false
     @State var isCustomizationNotDone: Bool = false
     @State var isTermsOfServiceNotDone: Bool = false
     @State var isLoading: Bool = false
+    
+    public init() {}
+
     public var body: some View {
         GeometryReader(content: { geometry in
             
@@ -52,71 +55,80 @@ public struct LoginView: View {
                     //구글 로그인 버튼
                     LoginButtonItem(type: .google, action: tapGoogleButton)
                     
-                    //애플 로그인 버튼 및 기능
-                    SignInWithAppleButton(.continue) { request in
-                        //애플 로그인 요청에 넣을 사항들
-                        isLoading = true
-                        let nonce = randomNonceString()
-                        currentNonce = nonce
-                        request.requestedScopes = [.email]
-                        request.nonce = sha256(nonce)
-                        
-                    } onCompletion: { result in
-                        //요청 결과 처리
-                        switch(result){
-                        case .success(let authResult):
-                            print("apple sign in success")
-                            
-                            guard let appleIDCredential = authResult.credential as? ASAuthorizationAppleIDCredential else {
-                                print("credential error")
-                                return}
-                            
-                            guard let nonce = currentNonce else {
-                                print("nonce error")
-                                return
-                            }
-                            
-                            guard let appleIDToken = appleIDCredential.identityToken else {
-                                print("id token error")
-                                return
-                            }
-                            
-                            guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-                                print("string convert error")
-                                return
-                            }
-                            
-                            
-                            let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
-                                                                           rawNonce: nonce,
-                                                                           fullName: appleIDCredential.fullName)
-                            
-                            Auth.auth().signIn(with: credential, completion: { result, error in
-                                if let error = error {
-                                    //파이어베이스 로그인/회원가입 실패
-                                    //유저에게 피드백 해주기
-                                    print("fire sign in error: \(error)")
-                                    
-                                }else if let user = result?.user {
-                                    //파이어베이스 로그인 성공
-                                    print("firebase sign in success ")
-                                                            
-                                    checkInitialSetting(uid: user.uid, email: user.email, method: "Apple")
+                    LoginButtonItem(type: .apple, action: tapAppleButton)
+                        .onChange(of: signInWithAppleManager.isUserAuthenticated) { newValue in
+                            if newValue{
+                                if let currentUser = Auth.auth().currentUser {
+                                    checkInitialSetting(uid: currentUser.uid, email: currentUser.email, method: "Apple")
                                 }
-                            })
-                            
-                        case .failure(let error):
-                            //애플로그인 실패 - 유저에게 피드백 해주기
-                            print("apple sign in failure: \(error)")
+                            }
                         }
-                    }
-                    .signInWithAppleButtonStyle(.black)
-                    .frame(maxWidth: .infinity, maxHeight: 60)
-                    .background(Color.black)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
-                    .padding(.leading, 20)
-                    .padding(.trailing, 20)
-                    .padding(.top, 10)
+                    
+                    //애플 로그인 버튼 및 기능
+//                    SignInWithAppleButton(.continue) { request in
+//                        //애플 로그인 요청에 넣을 사항들
+//                        isLoading = true
+//                        let nonce = randomNonceString()
+//                        currentNonce = nonce
+//                        request.requestedScopes = [.email]
+//                        request.nonce = sha256(nonce)
+//                        
+//                    } onCompletion: { result in
+//                        //요청 결과 처리
+//                        switch(result){
+//                        case .success(let authResult):
+//                            print("apple sign in success")
+//                            
+//                            guard let appleIDCredential = authResult.credential as? ASAuthorizationAppleIDCredential else {
+//                                print("credential error")
+//                                return}
+//                            
+//                            guard let nonce = currentNonce else {
+//                                print("nonce error")
+//                                return
+//                            }
+//                            
+//                            guard let appleIDToken = appleIDCredential.identityToken else {
+//                                print("id token error")
+//                                return
+//                            }
+//                            
+//                            guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
+//                                print("string convert error")
+//                                return
+//                            }
+//                            
+//                            
+//                            let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
+//                                                                           rawNonce: nonce,
+//                                                                           fullName: appleIDCredential.fullName)
+//                            
+//                            Auth.auth().signIn(with: credential, completion: { result, error in
+//                                if let error = error {
+//                                    //파이어베이스 로그인/회원가입 실패
+//                                    //유저에게 피드백 해주기
+//                                    print("fire sign in error: \(error)")
+//                                    
+//                                }else if let user = result?.user {
+//                                    //파이어베이스 로그인 성공
+//                                    print("firebase sign in success ")
+//                                                            
+//                                    checkInitialSetting(uid: user.uid, email: user.email, method: "Apple")
+//                                }
+//                            })
+//                            
+//                        case .failure(let error):
+//                            //애플로그인 실패 - 유저에게 피드백 해주기
+//                            print("apple sign in failure: \(error)")
+//                        }
+//                    }
+//                    .signInWithAppleButtonStyle(.black)
+//                    .frame(maxWidth: .infinity, maxHeight: 60)
+//                    .background(Color.black)
+//                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
+//                    .padding(.leading, 20)
+//                    .padding(.trailing, 20)
+//                    .padding(.top, 10)
                     //로그인 버튼 UI 및 기능 끝
                     
                     NavigationLink {
@@ -245,6 +257,8 @@ public struct LoginView: View {
     
     private func tapAppleButton(){
         print("tap apple button")
+        signInWithAppleManager.performSignIn()
+        isLoading = true
     }
     
     //카카오 로그인 관련 코드 - 비즈 전환 후 재테스트 해야함
