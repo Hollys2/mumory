@@ -51,7 +51,14 @@ struct AccountManageView: View {
                     .padding(.bottom, 7)
                     
                 
-                SettingItem(title: "비밀번호 변경")
+                NavigationLink {
+                    SetPWView()
+                        .environmentObject(manager)
+                } label: {
+                    SettingItem(title: "비밀번호 재설정")
+
+                }
+
 
                 
                 

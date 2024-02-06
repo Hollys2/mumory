@@ -10,6 +10,7 @@ import SwiftUI
 import Shared
 import Lottie
 import Core
+import FirebaseAuth
 
 public struct SplashView: View {
     public init(){}
@@ -69,6 +70,10 @@ public struct SplashView: View {
                     let Firebase = FirebaseManager.shared
                     let db = Firebase.db
                     let auth = Firebase.auth
+                    
+                    if let user = Auth.auth().currentUser {
+                        user.uid
+                    }
                     
                     if let user = auth.currentUser {
                         print("로그인된 계정 존재함")

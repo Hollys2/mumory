@@ -11,8 +11,10 @@ import Shared
 import Core
 import Lottie
 
-struct EmailLoginView: View {
+struct EmailLoginForWithdrawView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var withdrawManager: WithdrawViewModel
     @State var email: String = ""
     @State var password: String = ""
     @State var isLoginError: Bool = false
@@ -20,6 +22,7 @@ struct EmailLoginView: View {
     @State var isCustomCompleted: Bool = false
     @State var isLoginSuccess: Bool = false
     @State var isPresent: Bool = false
+    @State var errorText = "•  이메일 또는 비밀번호가 일치하지 않습니다."
 
     
     var body: some View {
@@ -29,7 +32,7 @@ struct EmailLoginView: View {
                 
                 VStack(spacing: 0, content: {
                     //상단 타이틀
-                    Text("이메일로 로그인 하기")
+                    Text("계정 인증")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
                         .foregroundColor(.white)
                         .padding(.top, 30)
@@ -47,7 +50,7 @@ struct EmailLoginView: View {
                         .padding(.top, 11)
                     
                     //로그인 오류 텍스트
-                    Text("•  이메일 또는 비밀번호가 일치하지 않습니다.")
+                    Text(errorText)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                         .foregroundColor(Color(red: 1, green: 0.34, blue: 0.34))
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -57,28 +60,30 @@ struct EmailLoginView: View {
                         .frame(height: isLoginError ? nil : 0)
                     
                     //로그인 버튼(재사용)
-                    WhiteButton(title: "로그인 하기", isEnabled: email.count > 0 && password.count > 0)
+                    WhiteButton(title: "계정 인증 하기", isEnabled: true)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .padding(.top, 20)
                         .onTapGesture {
-                            tapLoginButton(email: email, password: password) { isError in
-                                isLoginError = isError
+                            print("tapButton")
+                            if email == manager.email{
+                                withdrawManager.EmailLogin(email: email, password: password) { isError in
+                                    if isError {
+                                        isLoginError = isError
+                                    }else {
+                                        dismiss()
+                                    }
+                                }
+                            }else {
+                                
+                                isLoginError = true
                             }
                         }
-                        .disabled(!(email.count > 0 && password.count > 0))
-
+                    
+                
+                    
                     
                     //비밀번호 찾기 네비게이션 링크 텍스트
-                    NavigationLink {
-                        FindPWView()
-                    } label: {
-                        Text("비밀번호 찾기")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                            .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                            .padding(.top, 80)
-                    }
-                    
                     Spacer()
                 })
                     
@@ -88,13 +93,6 @@ struct EmailLoginView: View {
                     .opacity(isLoading ? 1 : 0)
                     .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
             }
-            .navigationDestination(isPresented: $isPresent, destination: {
-                if isLoginSuccess && isCustomCompleted{
-                    HomeView()
-                }else {
-                    StartCostomizationView()
-                }
-            })
             .frame(width: geometry.size.width + 1)
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()
@@ -112,52 +110,8 @@ struct EmailLoginView: View {
             }
         })
     }
-    
-    func tapLoginButton(email: String, password: String, completion: @escaping (Bool) -> Void){
-        //Core에 정의해둔 FirebaseAuth
-        isLoading = true
-        let Firebase = FirebaseManager.shared
-        let Auth = Firebase.auth
-        let db = Firebase.db
-        
-        Auth.signIn(withEmail: email, password: password) { result, error in
-            if let error = error {
-                print("로그인 실패, \(error)")
-                completion(true) //isLoginError = true -> 오류발생
-            }
-            else if let result = result{
-                print("login success")
-                isLoginSuccess = true
-                let uid = result.user.uid
-                UserDefaults.standard.setValue(uid, forKey: "uid")
-                
-                db.collection("User").document(uid).getDocument { snapshot, error in
-                    if let error = error {
-                        print("get document error: \(error)")
-                    }else if let snapshot = snapshot {
-                        print("data exist")
-                        guard let userData = snapshot.data() else {
-                            print("no data")
-                            return
-                        }
-                        if let id = userData["id"] as? String {
-                            print("id exist")
-                            isCustomCompleted = true
-                        }else {
-                            print("no id")
-                            isCustomCompleted = false
-                        }
-                        isPresent = true
-
-                    }
-                }
-                completion(false) //isLoginError = false -> 오류 미발생
-            }
-            isLoading = false
-        }
-    }
 }
 
 #Preview {
-    EmailLoginView()
+    EmailLoginForWithdrawView()
 }

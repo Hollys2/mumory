@@ -19,12 +19,19 @@ struct ProfileSettingView: View {
     @State var nickname: String = ""
     @State var id: String = ""
     @State var isTouchInfo: Bool = false
-    @State var isValidNickname: Bool = false
-    @State var isOver2Char: Bool = false
+    
     @State var nicknameErrorString: String = ""
     @State var idErrorString: String = ""
+    
     @State var selectedItem: PhotosPickerItem?
     @State var selectedImage: Image?
+    
+    @State var nicknameTimer: Timer?
+    @State var nicknameTime = 0.0
+    @State var idTimer: Timer?
+    @State var idTime = 0.0
+    @State var isValidNicknameStyle: Bool = false
+    @State var isValidIDStyle: Bool = false
     
     var profileImageList: [Image] = [SharedAsset.profileSelectRed.swiftUIImage, SharedAsset.profileSelectGray.swiftUIImage, SharedAsset.profileSelectOrange.swiftUIImage, SharedAsset.profileSelectPurple.swiftUIImage, SharedAsset.profileSelectYellow.swiftUIImage]
         
@@ -111,15 +118,25 @@ struct ProfileSettingView: View {
                             .padding(.trailing, 20)
                             .padding(.top, 15)
                             .onChange(of: nickname) { newValue in
-                                getNicknameError(nickname: newValue.lowercased())
+                                nicknameTime = 0
+                                isValidNicknameStyle(nickname: newValue.lowercased())
+//                                getNicknameError(nickname: newValue.lowercased())
                             }
+                            .onChange(of: nicknameTime, perform: { value in
+                                if nicknameTime > 1 && nicknameTime < 2 {
+                                    if isValidNicknameStyle {
+                                        checkNickname(nickname: self.nickname.lowercased())
+                                    }
+                                }
+                            })
 
                         Text(nicknameErrorString)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                            .padding(.leading, 20)
+                            .padding(.leading, 30)
                             .padding(.top, 14)
+                            .frame(height: nicknameErrorString.count > 0 ? nil : 0)
                         
                         HStack(spacing: 0){
                             Text("검색 ID")
@@ -176,26 +193,46 @@ struct ProfileSettingView: View {
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .padding(.top, 10)
-                        .onChange(of: id, perform: { value in
-                            getIdError(id: id.lowercased())
+                        .onChange(of: id) { newValue in
+                            idTime = 0
+                            isValidIDStyle(id: self.id.lowercased())
+//                                getNicknameError(nickname: newValue.lowercased())
+                        }
+                        .onChange(of: idTime, perform: { value in
+                            if idTime > 1 && idTime < 2 {
+                                if isValidIDStyle {
+                                    checkID(id: self.id.lowercased())
+                                }
+                            }
                         })
                         
                         Text(idErrorString)
                             .foregroundStyle(.red)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                            .padding(.leading, 20)
+                            .padding(.leading, 30)
                             .padding(.top, 14)
-                        
-                        
+                            .frame(height: idErrorString.count > 0 ? nil : 0)
                         
                         Rectangle()
                             .fill(.clear)
-                            .frame(height: 80)
+                            .frame(height: 150)
                     }
                 }
                 
             }
+            .onAppear(perform: {
+                self.nicknameTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+                    nicknameTime += 0.5
+                }
+                self.idTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+                    idTime += 0.5
+                }
+            })
+            .onDisappear(perform: {
+                self.nicknameTimer?.invalidate()
+                self.idTimer?.invalidate()
+            })
             .onTapGesture {
                 hideKeyboard()
             }
@@ -204,74 +241,145 @@ struct ProfileSettingView: View {
     
 
     
-    private func getNicknameError(nickname: String){
-        
-        if nickname.count > 0 && nickname.count < 2 {
-            nicknameErrorString = "2자 이상 입력해주세요"
-            manager.nickname = ""
-        }else{
-            let db = FirebaseManager.shared.db
-            let query = db.collection("User").whereField("nickname", isEqualTo: nickname)
-            
-            query.getDocuments { snapshot, error in
-                if let error = error {
-                    print("query error: \(error)")
-                }else if let snapshot = snapshot{
-                    let dataCount = snapshot.count
-                    
-                    //동일한 문자열이 존재한다면
-                    if dataCount > 0 {
-                        nicknameErrorString = "이미 사용중인 닉네임 입니다."
-                        manager.nickname = ""
-                    }else{
-                        nicknameErrorString = ""
-                        manager.nickname = nickname
-                        print("nickname: \(manager.nickname), id: \(manager.id)")
-                        
-                        
-                    }
-                }else {
-                    print("snapshot error")
-                }
-            }
-        }
-    }
+//    private func getNicknameError(nickname: String){
+//        
+//        if nickname.count > 0 && nickname.count < 2 {
+//            nicknameErrorString = "•  2자 이상 입력해주세요"
+//            manager.nickname = ""
+//        }else{
+//            let db = FirebaseManager.shared.db
+//            let query = db.collection("User").whereField("nickname", isEqualTo: nickname)
+//            
+//            query.getDocuments { snapshot, error in
+//                if let error = error {
+//                    print("query error: \(error)")
+//                }else if let snapshot = snapshot{
+//                    let dataCount = snapshot.count
+//                    
+//                    //동일한 문자열이 존재한다면
+//                    if dataCount > 0 {
+//                        nicknameErrorString = "•  이미 사용중인 닉네임 입니다."
+//                        manager.nickname = ""
+//                    }else{
+//                        nicknameErrorString = ""
+//                        manager.nickname = nickname
+//                        print("nickname: \(manager.nickname), id: \(manager.id)")
+//                        
+//                        
+//                    }
+//                }else {
+//                    print("snapshot error")
+//                }
+//            }
+//        }
+//    }
     
-    private func getIdError(id: String) {
-        print("nickname: \(manager.nickname), id: \(manager.id)")
-        if isValidID(id: id){
-            let db = FirebaseManager.shared.db
-            let query = db.collection("User").whereField("id", isEqualTo: id)
-            
-            query.getDocuments { snapshot, error in
-                if let error = error {
-                    print("query error: \(error)")
-                }else if let snapshot = snapshot{
-                    let dataCount = snapshot.count
-                    if dataCount > 0 {
-                        idErrorString = "이미 사용중인 ID 입니다."
-                        manager.id = ""
-                    }else{
-                        idErrorString = ""
-                        manager.id = id
-                        print("nickname: \(manager.nickname), id: \(manager.id)")
-                        
-                    }
-                }else {
-                    print("snapshot error")
-                }
-            }
-        }else{
-            idErrorString = "영어, 숫자만 사용할 수 있습니다."
-            manager.id = ""
-        }
-    }
+//    private func getIdError(id: String) {
+//        print("nickname: \(manager.nickname), id: \(manager.id)")
+//        if id.count > 0 {
+//            if isValidID(id: id){
+//                let db = FirebaseManager.shared.db
+//                let query = db.collection("User").whereField("id", isEqualTo: id)
+//                
+//                query.getDocuments { snapshot, error in
+//                    if let error = error {
+//                        print("query error: \(error)")
+//                    }else if let snapshot = snapshot{
+//                        if snapshot.isEmpty {
+//                            idErrorString = "•  이미 사용중인 ID 입니다."
+//                            manager.id = ""
+//                        }else{
+//                            idErrorString = ""
+//                            manager.id = id
+//                            print("nickname: \(manager.nickname), id: \(manager.id)")
+//                            
+//                        }
+//                    }else {
+//                        print("snapshot error")
+//                    }
+//                }
+//            }else{
+//                idErrorString = "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
+//                manager.id = ""
+//            }
+//        }else {
+//            idErrorString = ""
+//        }
+//    }
     
-    private func isValidID(id: String) -> Bool {
+//    private func isValidID(id: String) -> Bool {
+//        let idRegex = "^[a-zA-Z0-9_]+$"
+//        let idPredicate = NSPredicate(format:"SELF MATCHES %@", idRegex)
+//        return idPredicate.evaluate(with: id)
+//    }
+    
+    private func isValidIDStyle(id: String){
+        manager.isValidID = false
         let idRegex = "^[a-zA-Z0-9_]+$"
         let idPredicate = NSPredicate(format:"SELF MATCHES %@", idRegex)
-        return idPredicate.evaluate(with: id)
+        isValidIDStyle = idPredicate.evaluate(with: id)
+        idErrorString = isValidIDStyle ? "" : "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
     }
+    
+    private func checkID(id: String){
+        let db = FirebaseManager.shared.db
+        let query = db.collection("User").whereField("id", isEqualTo: id)
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("query error: \(error)")
+            }else if let snapshot = snapshot{
+                if snapshot.isEmpty {
+                    idErrorString = ""
+                    manager.id = id
+                    manager.isValidID = true
+                    print("nickname: \(manager.nickname), id: \(manager.id)")
+               
+                }else{
+                    idErrorString = "•  이미 사용중인 ID 입니다."
+                    manager.isValidID = false
+                    
+                }
+            }else {
+                print("snapshot error")
+            }
+        }
+    }
+    
+    private func isValidNicknameStyle(nickname: String){
+        manager.isValidNickname = false
+        let nicknameRegex = "^[a-zA-Z가-힣0-9]{3,}$"
+        let nicknamePredicate = NSPredicate(format:"SELF MATCHES %@", nicknameRegex)
+
+        isValidNicknameStyle = nicknamePredicate.evaluate(with: nickname)
+        nicknameErrorString = isValidNicknameStyle ? "" : "•  한글, 영어, 숫자 - 3자 이상"
+    }
+    
+    private func checkNickname(nickname: String){
+        let db = FirebaseManager.shared.db
+        let query = db.collection("User").whereField("nickname", isEqualTo: nickname)
+        
+        query.getDocuments { snapshot, error in
+            if let error = error {
+                print("query error: \(error)")
+            }else if let snapshot = snapshot{
+                //동일한 문자열이 존재한다면
+                if snapshot.isEmpty {
+                    nicknameErrorString = ""
+                    manager.isValidNickname = true
+                    manager.nickname = nickname
+                    print("nickname: \(manager.nickname), id: \(manager.id)")
+                }else{
+                    nicknameErrorString = "•  이미 사용중인 닉네임 입니다."
+                    manager.isValidNickname = false
+                }
+            }else {
+                print("snapshot error")
+            }
+        }
+    }
+    
+
 
 }
 

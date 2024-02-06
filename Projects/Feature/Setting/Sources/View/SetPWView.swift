@@ -1,9 +1,9 @@
 //
-//  FindPWView.swift
+//  SetPWView.swift
 //  Feature
 //
-//  Created by 제이콥 on 12/10/23.
-//  Copyright © 2023 hollys. All rights reserved.
+//  Created by 제이콥 on 2/6/24.
+//  Copyright © 2024 hollys. All rights reserved.
 //
 
 import SwiftUI
@@ -11,8 +11,10 @@ import Shared
 import Core
 import Lottie
 
-struct FindPWView: View {
+struct SetPWView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var manager: SettingViewModel
+
     @State var email: String = ""
     @State var errorText: String = ""
     @State var isError: Bool = false
@@ -59,6 +61,7 @@ struct FindPWView: View {
                                      
                 
                 
+                
                 //로그인 버튼(재사용)
                 WhiteButton(title: "비밀번호 찾기", isEnabled: true)
                     .padding(.leading, 20)
@@ -72,6 +75,12 @@ struct FindPWView: View {
                                 isValidEmail = false
                             }
                             
+                        }else if email != manager.email {
+                            withAnimation {
+                                errorText = "•  이메일 주소가 다릅니다. 다시 한 번 확인해 주세요."
+                                isError = true
+                                isValidEmail = false
+                            }
                         }else {
                             checkValidEmail(email: email)
                         }
@@ -147,9 +156,8 @@ struct FindPWView: View {
         }
         
     }
-    
 }
 
 #Preview {
-    FindPWView()
+    SetPWView()
 }

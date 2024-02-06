@@ -19,6 +19,6 @@ public class ColorSet{
     public static let moreDeepGray = Color(red: 0.12, green: 0.12, blue: 0.12)
     public static let skeleton02 = Color(red: 0.25, green: 0.25, blue: 0.25)
     public static let charSubGray = Color(red: 0.76, green: 0.76, blue: 0.76)
-
+    public static let errorRed = Color(red: 1.00, green: 0.34, blue: 0.34)
     
 }

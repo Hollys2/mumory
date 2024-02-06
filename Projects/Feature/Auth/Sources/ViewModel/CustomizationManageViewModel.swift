@@ -19,6 +19,9 @@ class CustomizationManageViewModel: ObservableObject{
     @Published var nickname = ""
     @Published var id = ""
     
+    @Published var isValidNickname = false
+    @Published var isValidID = false
+    
     @Published var profileImageData: Data?
     @Published var profileImage: Image?
     @Published var randomProfileImageIndex = Int.random(in: 0...3)
@@ -38,7 +41,7 @@ class CustomizationManageViewModel: ObservableObject{
         switch(step){
         case 0: return genreList.count > 0
         case 1: return selectedTime != 0
-        case 2: return id.count > 0 && nickname.count > 0
+        case 2: return isValidID && isValidNickname
         default: return false
         }
     }

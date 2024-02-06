@@ -14,171 +14,246 @@ import Firebase
 import GoogleSignIn
 import KakaoSDKAuth
 import KakaoSDKUser
+import Lottie
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject var manager: SettingViewModel = SettingViewModel()
+    @StateObject var withdrawManager: WithdrawViewModel = WithdrawViewModel()
     @State var isLogout: Bool = false
     @State var isShowingWithdrawPopup = false
-    @State var isDeleteUserDone: Bool = false
-    @State var isDeleteDocumentsDone: Bool = false
-    @State var isPresent: Bool = false
+    @State var isDeleteUserDone: Bool = false 
+    @State var isDeleteDocumentsDone: Bool = false //유저 관전 정보가 삭제 되었는지
+    @State var isUserDeleted: Bool = false //로그인 페이지로 넘어가는 조건
+    @State var isLoading: Bool = false
+    @State var isNeededEmailLogin = false
 
     var body: some View {
         //테스트때문에 navigationStack 추가함. 이후 삭제하기
-        ZStack{
-            ColorSet.background.ignoresSafeArea()
-            
-            VStack(spacing: 0){
-                //설정 버튼들
-                NavigationLink{
-                    AccountManageView()
-                        .environmentObject(manager)
-                }label: {
-                    SettingItem(title: "계정 정보 / 보안")
-                }
+        NavigationStack{
+            GeometryReader { geometry in
                 
-                NavigationLink {
-                    NotificationView()
-                        .environmentObject(manager)
-
-                } label: {
-                    SettingItem(title: "알림")
-                }
-                
-                NavigationLink {
-                    QuestionView()
-                        .environmentObject(manager)
-                } label: {
-                    SettingItem(title: "1:1 문의")
-
-                }
-
-                SettingItem(title: "앱 리뷰 남기기")
-                
-                
-                Spacer()
-                Button {
-                    //로그아웃
-                    UserDefaults.standard.removeObject(forKey: "uid")
-                    try? FirebaseManager.shared.auth.signOut()
-                    print("로그아웃 완료")
-                    isLogout = true
+                ZStack{
+                    ColorSet.background.ignoresSafeArea()
                     
-                } label: {
-                    Text("로그아웃")
-                        .foregroundColor(.white)
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                        .padding(.top, 15)
-                        .padding(.bottom, 15)
-                        .padding(.trailing, 58)
-                        .padding(.leading, 58)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 30)
-                                .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
-                        )
-                }
-                
-                Text("계정 탈퇴")
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundStyle(ColorSet.subGray)
-                    .underline()
-                    .padding(.bottom, 70)
-                    .padding(.top, 67)
-                    .onTapGesture {
-                        isShowingWithdrawPopup = true
-                    }
-                
-            }
-            
-            if isShowingWithdrawPopup{
-                Color.black.opacity(0.5).ignoresSafeArea()
-            }
-            
-            if isShowingWithdrawPopup{
-                WithdrawPopupView {
-                    isShowingWithdrawPopup = false
-                } positiveAction: {
-                    let Firebase = FirebaseManager.shared
-                    let db = Firebase.db
-                    let auth = Firebase.auth
-                    var credential: AuthCredential
-                    guard let currentUser = auth.currentUser else {
-                        print("no current user")
-                        return
-                    }
-                    
-                    getCredential(method: manager.signinMethod) { credential in
-                        if let credential = credential {
+                    VStack(spacing: 0){
+                        //설정 버튼들
+                        NavigationLink{
+                            AccountManageView()
+                                .environmentObject(manager)
+                        }label: {
+                            SettingItem(title: "계정 정보 / 보안")
+                        }
+                        
+                        NavigationLink {
+                            NotificationView()
+                                .environmentObject(manager)
+                            
+                        } label: {
+                            SettingItem(title: "알림")
+                        }
+                        
+                        NavigationLink {
+                            QuestionView()
+                                .environmentObject(manager)
+                        } label: {
+                            SettingItem(title: "1:1 문의")
                             
                         }
-                    }
-                    
-//                    currentUser.reauthenticate(with: T##AuthCredential)
-                    currentUser.delete { error in
-                        if let error = error{
-                            print("delete user error: \(error)")
-                        }else {
-                            isDeleteUserDone = true
+                        
+                        SettingItem(title: "앱 리뷰 남기기")
+                        
+                        
+                        Spacer()
+                        Button {
+                            //로그아웃
+                            UserDefaults.standard.removeObject(forKey: "uid")
+                            try? FirebaseManager.shared.auth.signOut()
+                            print("로그아웃 완료")
+                            isLogout = true
                             
-                            db.collection("User").document(currentUser.uid).delete { error in
-                                if let error = error {
-                                    print("delete document error: \(error)")
-                                }else {
-                                    isDeleteDocumentsDone = true
-                                    isPresent = isDeleteUserDone && isDeleteDocumentsDone
+                        } label: {
+                            Text("로그아웃")
+                                .foregroundColor(.white)
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                                .padding(.top, 15)
+                                .padding(.bottom, 15)
+                                .padding(.trailing, 58)
+                                .padding(.leading, 58)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 30)
+                                        .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
+                                )
+                        }
+                        
+                        Text("계정 탈퇴")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .foregroundStyle(ColorSet.subGray)
+                            .underline()
+                            .padding(.bottom, 70)
+                            .padding(.top, 67)
+                            .onChange(of: withdrawManager.isAppleUserAuthenticated, perform: { value in
+                                if value{
+                                    //계정 탈퇴를 위한 애플 로그인 성공시
+                                    deleteAppleUser()
                                 }
+                            })
+                            .onTapGesture {
+                                isShowingWithdrawPopup = true
                             }
+                        
+                        
+                    }
+                    
+                    if isShowingWithdrawPopup{
+                        Color.black.opacity(0.5).ignoresSafeArea()
+                    }
+                    
+                    if isShowingWithdrawPopup{
+                        WithdrawPopupView {
                             
-                            isPresent = isDeleteUserDone && isDeleteDocumentsDone
+                            //취소버튼 클릭 action - 팝업 창 삭제
+                            isShowingWithdrawPopup = false
+                            
+                        } positiveAction: {
+                            
+                            //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
+                            isLoading = true
+                            withdraw(method: manager.signinMethod)
+                            
                         }
                     }
                     
-                 
-                   
+                    LottieView(animation: .named("loading", bundle: .module))
+                        .looping()
+                        .opacity(isLoading ? 1 : 0)
+                        .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                    
                 }
+                .navigationDestination(isPresented: $isNeededEmailLogin, destination: {
+                    EmailLoginForWithdrawView()
+                        .environmentObject(withdrawManager)
+                })
+                .navigationDestination(isPresented: $isLogout, destination: {
+                    LoginView()
+                })
+                .navigationDestination(isPresented: $isUserDeleted, destination: {
+                    LoginView()
+                })
+                .navigationBarBackButtonHidden()
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            SharedAsset.back.swiftUIImage
+                                .frame(width: 30, height: 30)
+                        }
+                        
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        
+                        NavigationLink {
+                            HomeView()
+                        } label: {
+                            SharedAsset.home.swiftUIImage
+                                .frame(width: 30, height: 30)
+                        }
+                        
+                    }
+                    
+                    ToolbarItem(placement: .principal) {
+                        Text("설정")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                            .foregroundColor(.white)
+                    }
+                }
+                .onAppear(perform: {
+                    getUserInfo()
+                })
             }
+        }
 
-        }
-        .navigationDestination(isPresented: $isLogout, destination: {
-            LoginView()
-        })
-        .navigationDestination(isPresented: $isPresent, destination: {
-            LoginView()
-        })
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    SharedAsset.back.swiftUIImage
-                        .frame(width: 30, height: 30)
-                }
-                
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                
-                NavigationLink {
-                    HomeView()
-                } label: {
-                    SharedAsset.home.swiftUIImage
-                        .frame(width: 30, height: 30)
-                }
-                
-            }
-            
-            ToolbarItem(placement: .principal) {
-                Text("설정")
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                    .foregroundColor(.white)
-            }
-        }
-        .onAppear(perform: {
-            getUserInfo()
-        })
         
+    }
+    private func deleteAppleUser(){
+        print("in delete apple user")
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let auth = Firebase.auth
+        
+        guard let currentUser = auth.currentUser else {
+            print("no current user")
+            return
+        }
+        
+        currentUser.delete { error in
+            if let error = error{
+                print("delete user error: \(error)")
+                //에러처리
+            }else {
+                print("delete user successful")
+                isDeleteUserDone = true
+                
+                db.collection("User").document(currentUser.uid).delete { error in
+                    if let error = error {
+                        print("delete document error: \(error)")
+                        //에러처리
+                    }else {
+                        print("delete docs successful")
+                        isUserDeleted = true
+                    }
+                }
+            }
+            
+        }
+    }
+    private func withdraw(method: String){
+        if manager.signinMethod == "Apple" {
+            withdrawManager.AppleLogin()
+        }else if manager.signinMethod == "Google" {
+            withdrawManager.GoogleLogin { isSuccessful in
+                deleteUser(isSuccessful: isSuccessful)
+            }
+        }else if manager.signinMethod == "Kakao" {
+            withdrawManager.KakaoLogin { isSuccessful in
+                deleteUser(isSuccessful: isSuccessful)
+            }
+        }else if manager.signinMethod == "Email" {
+            isNeededEmailLogin = true
+        }
+        
+          
+        
+    }
+    
+    private func deleteUser(isSuccessful: Bool){
+        if isSuccessful {
+            let Firebase = FirebaseManager.shared
+            let db = Firebase.db
+            let auth = Firebase.auth
+            
+            guard let currentUser = auth.currentUser else {
+                print("no current user")
+                return
+            }
+            
+            currentUser.delete { error in
+                if let error = error{
+                    print("delete user error: \(error)")
+                }else {
+                    db.collection("User").document(currentUser.uid).delete { error in
+                        if let error = error {
+                            print("delete document error: \(error)")
+                        }else {
+                            isUserDeleted = true
+                        }
+                    }
+                }
+            }
+            
+        }
     }
     
     private func getUserInfo(){
@@ -242,93 +317,6 @@ struct SettingView: View {
         }else {
             //재로그인
         }
-    }
-    
-    private func getCredential(method: String, completion: @escaping (AuthCredential?) -> Void){
-        if method == "Google"{
-            if let id = FirebaseApp.app()?.options.clientID {
-                let config = GIDConfiguration(clientID: id)
-                GIDSignIn.sharedInstance.configuration = config
-                
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first,
-                   let presentingVC = window.rootViewController {
-                    
-                    GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
-                        if let error = error{
-                            print("google error: \(error)")
-                        }else{
-                            print("google login success")
-                            guard let idToken = result?.user.idToken?.tokenString else {print("no idToken");return}
-                            guard let accessToken = result?.user.accessToken.tokenString else {print("no accessToken");return}
-                            
-                            completion(GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken))
-                            
-                        }
-                    }
-                }
-            }
-        }else if method == "Apple"{
-            
-            
-            
-        }else if method == "Kakao"{
-            if UserApi.isKakaoTalkLoginAvailable(){
-                //카카오톡 어플 사용이 가능하다면
-                UserApi.shared.loginWithKakaoTalk { authToken, error in
-                    //앱로그인
-                    if let error = error{
-                        //카카오 로그인 실패
-                        print("kakao login error: \(error)")
-                    }else if let authToken = authToken {
-                        //카카오 로그인 성공
-                        print("login successful with app")
-                        UserApi.shared.me { user, error in
-                            if let user = user {
-                                let email = user.kakaoAccount?.email ?? ""
-                                let id = user.id ?? 0
-                                
-                                Auth.auth().signIn(withEmail: "kakao/\(email)", password: "kakao/\(id)") { result, error in
-                                    if let error = error {
-                                        print("sign in error: \(error)")
-                                    }else if let result = result {
-                                        completion(result.credential)
-                                    }
-                                }
-                            }
-                        }
-                        
-                    }
-                }
-            }else{
-                //카카오톡 어플 사용이 불가하다면
-                UserApi.shared.loginWithKakaoAccount { authToken, error in
-                    //계정로그인
-                    if let error = error{
-                        print("kakao acount login error: \(error)")
-                    }else if let authToken = authToken{
-                        print("login successful with account")
-                        UserApi.shared.me { user, error in
-                            if let user = user {
-                                let email = user.kakaoAccount?.email ?? ""
-                                let id = user.id ?? 0
-                                
-                                Auth.auth().signIn(withEmail: "kakao/\(email)", password: "kakao/\(id)") { result, error in
-                                    if let error = error {
-                                        print("sign in error: \(error)")
-                                    }else if let result = result {
-                                        completion(result.credential)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }else {
-            
-        }
-        
     }
     
 }

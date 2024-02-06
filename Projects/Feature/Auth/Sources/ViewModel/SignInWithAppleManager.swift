@@ -107,6 +107,7 @@ public class SignInWithAppleManager: NSObject, ObservableObject, ASAuthorization
             }
         }
     }
+    
 
     public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         return (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.windows.first ?? UIWindow()

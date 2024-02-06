@@ -20,6 +20,7 @@ public class SignUpManageViewModel: ObservableObject{
     
     @Published var isValidEmailStyle = false
     @Published var isAvailableEmail = false
+    @Published var isValidEmail = false
     
     @Published var isCheckedRequiredItems: Bool = false
     @Published var isCheckedServiceNewsNotification: Bool = false
@@ -55,7 +56,7 @@ public class SignUpManageViewModel: ObservableObject{
     
     public func isButtonEnabled() -> Bool {
         switch(step){
-        case 0: return isValidEmailStyle && isAvailableEmail
+        case 0: return isValidEmail
         case 1: return isValidPassword() && isValidConfirmPassword()
         case 2: return isCheckedRequiredItems
         case 3: return genreList.count > 0
@@ -67,29 +68,29 @@ public class SignUpManageViewModel: ObservableObject{
 
     
     //이메일 중복 체크
-    public func checkEmail(){
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
-        
-        if emailPredicate.evaluate(with: email){
-            isValidEmailStyle = true
-            
-            let db = FirebaseManager.shared.db
-            
-            let emailCheckQuery = db.collection("User").whereField("email", isEqualTo: email)
-            emailCheckQuery.getDocuments { snapshot, error in
-                if let error = error {
-                    print("getDocument error: \(error)")
-                }else if let snapshot = snapshot {
-                    self.isAvailableEmail = snapshot.documents.isEmpty
-                }
-            }
-        }else{
-            isValidEmailStyle = false
-        }
-        
-      
-    }
+//    public func checkEmail(){
+//        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+//        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+//        
+//        if emailPredicate.evaluate(with: email){
+//            isValidEmailStyle = true
+//            
+//            let db = FirebaseManager.shared.db
+//            
+//            let emailCheckQuery = db.collection("User").whereField("email", isEqualTo: email)
+//            emailCheckQuery.getDocuments { snapshot, error in
+//                if let error = error {
+//                    print("getDocument error: \(error)")
+//                }else if let snapshot = snapshot {
+//                    self.isAvailableEmail = snapshot.documents.isEmpty
+//                }
+//            }
+//        }else{
+//            isValidEmailStyle = false
+//        }
+//        
+//      
+//    }
     
     
     public func isValidPassword() -> Bool {

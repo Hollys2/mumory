@@ -8,11 +8,16 @@
 
 import SwiftUI
 import Shared
+import Core
 
 public struct InputEmailView: View {
     @EnvironmentObject var manager: SignUpManageViewModel
     @State var email: String = ""
-    
+    @State var errorText: String = ""
+    @State var localTimer = 0.0
+    @State var isGoodEmail: Bool = false //중복X
+    @State var isValidStyle: Bool = false //이메일형식O
+    @State var timer: Timer?
     public init(){}
     
     public var body: some View {
@@ -31,12 +36,19 @@ public struct InputEmailView: View {
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .onChange(of: email, perform: { value in
-                        manager.email = value.lowercased()
-                        manager.checkEmail()
+                        localTimer = 0
+                        isValidEmail(email: value.lowercased())
+                    })
+                    .onChange(of: localTimer, perform: { value in
+                        if localTimer > 1 && localTimer < 2 {
+                            if isValidStyle {
+                                checkValidEmail()
+                            }
+                        }
                     })
                 
                 //이메일 형식 오류 텍스트
-                Text(getErrorMessage())
+                Text(errorText)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .foregroundColor(Color(red: 1, green: 0.34, blue: 0.34))
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -44,9 +56,15 @@ public struct InputEmailView: View {
                     .padding(.top, 15)
             })
             .onAppear(perform: {
-                if manager.isValidEmailStyle && manager.isAvailableEmail {
+                if manager.isValidEmail {
                     email = manager.email
                 }
+                self.timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+                    localTimer += 0.5
+                }
+            })
+            .onDisappear(perform: {
+                self.timer?.invalidate()
             })
  
         
@@ -65,6 +83,39 @@ public struct InputEmailView: View {
             }
         }else {
             return ""
+        }
+    }
+    
+    private func isValidEmail(email: String) {
+        manager.isValidEmail = false
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
+        
+         emailPredicate.evaluate(with: email)
+        
+        
+        isValidStyle = emailPredicate.evaluate(with: email)
+        errorText = isValidStyle ? "" : "이메일 형식이 올바르지 않습니다. :("
+    }
+    
+    private func checkValidEmail(){
+        print("check valid email")
+        let db = FirebaseManager.shared.db
+        
+        let emailCheckQuery = db.collection("User").whereField("email", isEqualTo: email)
+        emailCheckQuery.getDocuments { snapshot, error in
+            if let error = error {
+                print("getDocument error: \(error)")
+            }else if let snapshot = snapshot {
+                if snapshot.isEmpty {
+                    errorText = ""
+                    manager.isValidEmail = true
+                    manager.email = email
+                }else {
+                    errorText = "이미 사용 중인 이메일입니다."
+                    manager.isValidEmail = false
+                }
+            }
         }
     }
 }

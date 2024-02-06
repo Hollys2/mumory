@@ -194,7 +194,7 @@ public struct CustomizationView: View {
             "favorite_genres": manager.genreList,
             "selected_notification_time": manager.selectedTime,
         ]
-        
+                
         let query = db.collection("User").document(currentUser.uid)
         query.getDocument { snapshot, error in
             if let error = error {
