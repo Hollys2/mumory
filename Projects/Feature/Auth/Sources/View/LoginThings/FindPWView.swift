@@ -126,7 +126,7 @@ struct FindPWView: View {
                 if snapshot.documents.isEmpty{
                     isLoading = false
                     withAnimation {
-                        errorText = "•  이메일 주소가 다릅니다. 다시 한 번 확인해 주세요."
+                        errorText = "•  해당 이메일 주소가 존재하지 않습니다. 다시 한 번 \n    확인해 주세요."
                         isError = true
                         isValidEmail = false
                     }

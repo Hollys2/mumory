@@ -8,11 +8,15 @@
 
 import SwiftUI
 import Shared
-
+enum Field {
+    case password
+    case confirm
+}
 struct InputPWView: View {
     @EnvironmentObject var manager: SignUpManageViewModel
     @State var password: String = ""
     @State var confirmPassword: String = ""
+    @FocusState private var focusedField: Field?
 
     var body: some View {
         VStack(spacing: 0){
@@ -54,6 +58,7 @@ struct InputPWView: View {
                 .onChange(of: confirmPassword, perform: { value in
                     manager.confirmPassword = value
                 })
+
             
             Text("비밀번호가 다릅니다. 다시 한 번 확인해 주세요.")
                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))

@@ -119,11 +119,14 @@ struct ProfileSettingView: View {
                             .padding(.top, 15)
                             .onChange(of: nickname) { newValue in
                                 nicknameTime = 0
-                                isValidNicknameStyle(nickname: newValue.lowercased())
-//                                getNicknameError(nickname: newValue.lowercased())
+                                nicknameErrorString = ""
+                                manager.isValidNickname = false
                             }
                             .onChange(of: nicknameTime, perform: { value in
-                                if nicknameTime > 1 && nicknameTime < 2 {
+                                //1초 지났을 때만 실행
+                                if nicknameTime == 0.8 {
+                                    isValidNicknameStyle(nickname: nickname.lowercased())
+                                }else if nicknameTime >= 1 && nicknameTime <= 1.2 {
                                     if isValidNicknameStyle {
                                         checkNickname(nickname: self.nickname.lowercased())
                                     }
@@ -195,11 +198,13 @@ struct ProfileSettingView: View {
                         .padding(.top, 10)
                         .onChange(of: id) { newValue in
                             idTime = 0
-                            isValidIDStyle(id: self.id.lowercased())
-//                                getNicknameError(nickname: newValue.lowercased())
+                            idErrorString = ""
+                            manager.isValidID = false
                         }
                         .onChange(of: idTime, perform: { value in
-                            if idTime > 1 && idTime < 2 {
+                            if idTime == 0.8 {
+                                isValidIDStyle(id: id.lowercased())
+                            }else if idTime >= 1 && idTime <= 1.2 {
                                 if isValidIDStyle {
                                     checkID(id: self.id.lowercased())
                                 }
@@ -222,11 +227,11 @@ struct ProfileSettingView: View {
                 
             }
             .onAppear(perform: {
-                self.nicknameTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
-                    nicknameTime += 0.5
+                self.nicknameTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
+                    nicknameTime += 0.2
                 }
-                self.idTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
-                    idTime += 0.5
+                self.idTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
+                    idTime += 0.2
                 }
             })
             .onDisappear(perform: {
@@ -318,7 +323,7 @@ struct ProfileSettingView: View {
         let idRegex = "^[a-zA-Z0-9_]+$"
         let idPredicate = NSPredicate(format:"SELF MATCHES %@", idRegex)
         isValidIDStyle = idPredicate.evaluate(with: id)
-        idErrorString = isValidIDStyle ? "" : "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
+        idErrorString = id.count <= 0 ? "" : isValidIDStyle ? "" : "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
     }
     
     private func checkID(id: String){
@@ -352,7 +357,7 @@ struct ProfileSettingView: View {
         let nicknamePredicate = NSPredicate(format:"SELF MATCHES %@", nicknameRegex)
 
         isValidNicknameStyle = nicknamePredicate.evaluate(with: nickname)
-        nicknameErrorString = isValidNicknameStyle ? "" : "•  한글, 영어, 숫자 - 3자 이상"
+        nicknameErrorString = nickname.count <= 0 ? "" : isValidNicknameStyle ? "" : "•  한글, 영어, 숫자 - 3자 이상"
     }
     
     private func checkNickname(nickname: String){

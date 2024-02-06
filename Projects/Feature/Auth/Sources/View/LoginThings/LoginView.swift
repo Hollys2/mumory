@@ -24,6 +24,7 @@ public struct LoginView: View {
     @State var isCustomizationNotDone: Bool = false
     @State var isTermsOfServiceNotDone: Bool = false
     @State var isLoading: Bool = false
+    @State var isEmailLoginTapped = false
     
     public init() {}
 
@@ -41,13 +42,16 @@ public struct LoginView: View {
                     
                     //로그인 버튼. 이메일부터 시작 (이후에 끝 주석 있음)
                     //이메일 로그인 버튼
-                    NavigationLink {
-                        EmailLoginView()
-                    } label: {
-                        EmailLoginButton()
-                            .padding(.top, geometry.size.height > 700 ? 116 : 90)
-                    }
-                    .buttonStyle(EmpeyActionStyle())
+                    
+                    
+                    EmailLoginButton()
+                        .padding(.top, geometry.size.height > 700 ? 116 : 90)
+                        .onTapGesture {
+                            isEmailLoginTapped = true
+                        }
+                        .fullScreenCover(isPresented: $isEmailLoginTapped, content: {
+                            EmailLoginView()
+                        })
                     
                     //카카오 로그인 버튼
                     LoginButtonItem(type: .kakao, action: tapKakaoButton)
