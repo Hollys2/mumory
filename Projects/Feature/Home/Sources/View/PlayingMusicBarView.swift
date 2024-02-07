@@ -17,7 +17,7 @@ public struct PlayingMusicBarView: View {
     public var body: some View {
         Rectangle()
             .foregroundColor(.clear)
-            .frame(width: 360, height: 53)
+            .frame(width: getUIScreenBounds().width - 30, height: 53)
             .overlay(
                 HStack {
                     Rectangle()

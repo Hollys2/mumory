@@ -22,41 +22,34 @@ public struct CreateMumoryBottomSheetView: View {
     @State private var isScrollEnabled = true
     @State private var contentText: String = ""
     @State private var isPublic: Bool = true
-    @State private var isSatisfied: Bool = false
+    
+    @State private var showDatePicker: Bool = false
+    @State private var date: Date = Date()
+    
+//    {
+//
+//        var components = DateComponents()
+//        components.year = 2023
+//        components.month = 1
+//        components.day = 21
+//        components.hour = 12 // Set the desired hour
+//        components.minute = 0 // Set the desired minute
+//        return Calendar.current.date(from: components) ?? Date()
+//    }()
+    
+    @State private var scrollViewOffset: CGFloat = 0
+    @State private var tagContainerViewFrame: CGRect = .zero
+    @State private var isEditing: Bool = false
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var dateManager: DateManager
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     
     public init () {
 //        UIScrollView.appearance().bounces = false
-    }
-    
-    var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                print("onChanged: \(value.translation.height)")
-                if value.translation.height > 0 {
-                    DispatchQueue.main.async {
-                        translation.height = value.translation.height
-                    }
-                }
-            }
-            .onEnded { value in
-                print("onEnded: \(value.translation.height)")
-                
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    //                    if value.translation.height > 130 {
-                    //                        appCoordinator.isCreateMumorySheetShown = false
-                    //
-                    //                        mumoryDataViewModel.choosedMusicModel = nil
-                    //                        mumoryDataViewModel.choosedLocationModel = nil
-                    //                    }
-                    translation.height = 0
-                }
-            }
     }
     
     public var body: some View {
@@ -83,8 +76,7 @@ public struct CreateMumoryBottomSheetView: View {
                     Button(action: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                             let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: choosedMusicModel, locationModel: choosedLocationModel)
-//                            mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
-//                            mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
+                            
                             mumoryDataViewModel.createMumory(newMumoryAnnotation)
                         }
                         
@@ -98,7 +90,7 @@ public struct CreateMumoryBottomSheetView: View {
                         Rectangle()
                             .foregroundColor(.clear)
                             .frame(width: 46, height: 30)
-                            .background(isSatisfied ? Color(red: 0.85, green: 0.85, blue: 0.85) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .background(self.appCoordinator.isMusicChoosed && self.appCoordinator.isLocationChoosed ? Color(red: 0.85, green: 0.85, blue: 0.85) : Color(red: 0.47, green: 0.47, blue: 0.47))
                             .cornerRadius(31.5)
                             .overlay(
                                 Text("게시")
@@ -107,6 +99,7 @@ public struct CreateMumoryBottomSheetView: View {
                             )
                             .allowsHitTesting(true)
                     }
+                    .disabled(!(self.appCoordinator.isMusicChoosed && self.appCoordinator.isLocationChoosed))
                 } // HStack
                 
                 Text("뮤모리 만들기")
@@ -124,16 +117,66 @@ public struct CreateMumoryBottomSheetView: View {
                     VStack(spacing: 16) {
                         
                         NavigationLink(value: "music") {
-                        
                             ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
                         }
                         
                         NavigationLink(value: "location") {
-                            
                             ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                         }
 
-                        CalendarContainerView(title: "2023. 10. 02. 월요일")
+                        CalendarContainerView(title: "\(dateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
+                            .onTapGesture {
+                                self.showDatePicker = true
+                            }
+                            .fullScreenCover(isPresented: $showDatePicker, content: {
+                                VStack(spacing: 0) {
+                                    
+//                                    HStack {
+//
+//                                        SharedAsset.closeCreateMumory.swiftUIImage
+//                                            .resizable()
+//                                            .frame(width: 25, height: 25)
+//                                            .onTapGesture {
+//                                                self.date = Date()
+//                                                self.showDatePicker = false
+//                                            }
+//
+//                                        Spacer()
+//
+//                                        Rectangle()
+//                                            .foregroundColor(.clear)
+//                                            .frame(width: 46, height: 30)
+//                                            .background(Color(red: 0.85, green: 0.85, blue: 0.85))
+//                                            .cornerRadius(31.5)
+//                                            .overlay(
+//                                                Text("완료")
+//                                                    .font(Font.custom("Pretendard", size: 13).weight(.bold))
+//                                                    .multilineTextAlignment(.center)
+//                                                    .foregroundColor(.black)
+//                                            )
+//                                            .onTapGesture {
+//                                                showDatePicker = false
+//                                            }
+//                                    }
+//                                    .padding(.top, 23.43)
+//                                    .padding(.horizontal, 24.43)
+
+                                    
+                                    Spacer()
+                                    
+                                    DatePicker("", selection: $date, displayedComponents: [.date])
+                                        .datePickerStyle(GraphicalDatePickerStyle())
+                                        .labelsHidden()
+                                        .accentColor(SharedAsset.mainColor.swiftUIColor)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .padding()
+                                        .preferredColorScheme(.dark)
+                                        .onChange(of: date) { _ in
+                                            showDatePicker = false
+                                        }
+                                }
+                                .background(SharedAsset.backgroundColor.swiftUIColor)
+                            })
                     }
                     .padding(.horizontal, 20)
                     
@@ -146,8 +189,30 @@ public struct CreateMumoryBottomSheetView: View {
                     VStack(spacing: 16) {
                         
                         TagContainerView(title: "#때끄")
+                            .background(GeometryReader { geometry -> Color in
+                                DispatchQueue.main.async {
+                                    self.tagContainerViewFrame = geometry.frame(in: .global)
+                                }
+                                return Color.clear
+                            })
+//                            .onAppear {
+//                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
+//                                    guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+//                                    let keyboardHeight = keyboardSize.height
+//
+//                                    withAnimation {
+//                                        scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
+//                                    }
+//                                }
+//
+//                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
+//                                    withAnimation {
+//                                         scrollViewOffset = 0
+//                                    }
+//                                }
+//                            }
                         
-                        ContentContainerView(title: "하이")
+                        ContentContainerView(contentText: "하이")
                         
                         HStack(spacing: 11) {
                             PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -208,285 +273,19 @@ public struct CreateMumoryBottomSheetView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 300)
-                    
-                    
-                    
-                    
-                    
-                    NavigationLink(value: "music") {
-                        HStack(spacing: 16) {
-                            Image(uiImage: SharedAsset.musicCreateMumory.image)
-                                .resizable()
-                                .frame(width: 60, height: 60)
-                            
-                            
-                            ZStack {
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 60)
-                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                    .cornerRadius(15)
-                                
-                                if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel {
-                                    HStack(spacing: 10) {
-                                        Rectangle()
-                                            .foregroundColor(.clear)
-                                            .frame(width: 40, height: 40)
-                                            .background(
-                                                AsyncImage(url: choosedMusicModel.artworkUrl) { phase in
-                                                    switch phase {
-                                                    case .success(let image):
-                                                        image
-                                                            .resizable()
-                                                            .aspectRatio(contentMode: .fit)
-                                                            .frame(width: 40, height: 40)
-                                                    default:
-                                                        Color.purple
-                                                            .frame(width: 40, height: 40)
-                                                    }
-                                                }
-                                            )
-                                            .cornerRadius(6)
-                                        
-                                        VStack(spacing: 3) {
-                                            Text(choosedMusicModel.title)
-                                                .font(
-                                                    Font.custom("Pretendard", size: 15)
-                                                        .weight(.semibold)
-                                                )
-                                                .lineLimit(1)
-                                                .foregroundColor(.white)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                            
-                                            Text(choosedMusicModel.artist)
-                                                .font(Font.custom("Pretendard", size: 13))
-                                                .lineLimit(1)
-                                                .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                        }
-                                        .frame(height: 60)
-                                    } // HStack
-                                    .padding(.horizontal, 15)
-                                } else {
-                                    Text("음악 추가하기")
-                                        .font(Font.custom("Pretendard", size: 16))
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.horizontal, 20)
-                                }
-                            } // ZStack
-                        } // HStack
-                    } // NavigationLink
-                    
-                    // MARK: -Search location
-                    HStack(spacing: 16) {
-                        Button(action: {
-                            appCoordinator.rootPath.append("location")
-//                            appCoordinator.createMumoryPath.append(3)
-                        }) {
-                            Image(uiImage: SharedAsset.locationCreateMumory.image)
-                                .resizable()
-                                .frame(width: 60, height: 60)
-                        }
-                        
-                        NavigationLink(value: "location") {
-                            ZStack {
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 60)
-                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                    .cornerRadius(15)
-                                
-                                if let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                                    VStack(spacing: 10) {
-                                        Text("\(choosedLocationModel.locationTitle)")
-                                            .font(Font.custom("Pretendard", size: 15))
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .lineLimit(1)
-                                        
-                                        Text("\(choosedLocationModel.locationSubtitle)")
-                                            .font(Font.custom("Pretendard", size: 13))
-                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .lineLimit(1)
-                                    }
-                                    .padding(.horizontal, 15)
-                                } else {
-                                    Text("위치 추가하기")
-                                        .font(Font.custom("Pretendard", size: 16))
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .lineLimit(1)
-                                        .padding(.horizontal, 20)
-                                }
-                                
-                            }
-                        }
-                    }
-                    .padding(.top, 14)
-                    
-                    // MARK: -Date
-                    ZStack {
-                        Rectangle()
-                            .foregroundColor(.clear)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                            .cornerRadius(15)
-                        
-                        HStack {
-                            Text("2023. 10. 02. 월요일")
-                                .font(Font.custom("Pretendard", size: 16).weight(.medium))
-                                .foregroundColor(.white)
-                            Spacer()
-                            
-                            Button(action: {
-                                //                                    self.showDatePicker = true
-                            }) {
-                                Image(uiImage: SharedAsset.calendarCreateMumory.image)
-                                    .resizable()
-                                    .frame(width: 25, height: 25)
-                            }
-                            //                                .popover(isPresented: $showDatePicker, content: {
-                            //                                    DatePicker("", selection: $date)
-                            //                                        .datePickerStyle(GraphicalDatePickerStyle())
-                            //                                        .labelsHidden()
-                            //                                        .frame(width: 100, height: 100)
-                            //                                        .padding()
-                            //                                })
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    .padding(.top, 14)
-                    
-                    // MARK: -Tag
-                    ZStack {
-                        Rectangle()
-                            .foregroundColor(.clear)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                            .cornerRadius(15)
-                        
-                        Text("#을 넣어 기분을 태그해 보세요  (최대 3개)")
-                            .font(Font.custom("Pretendard", size: 15))
-                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 20)
-                    }
-                    .padding(.top, 15)
-                    
-                    // MARK: -Content
-                    ZStack(alignment: .topLeading) {
-                        TextEditor(text: $contentText)
-                            .scrollContentBackground(.hidden)
-                            .foregroundColor(Color.white)
-                            .font(.custom("Pretendard", size: 15))
-                            .lineSpacing(5)
-                            .frame(minHeight: 104)
-                            .padding(.leading, 20 - 6)
-                            .padding(.trailing, 42 - 6)
-                            .padding(.vertical, 22 - 8)
-                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                        //                                .onTapGesture {} // VStack의 onTapGesture를 무효화합니다.
-                        //                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-                        //                            isEditing = true
-                        //                        }
-                        //                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                        //                            isEditing = false
-                        //                        }
-                        
-                        if self.contentText.isEmpty {
-                            Text("자유롭게 내용을 입력하세요  (60자 이내)")
-                                .font(Font.custom("Pretendard", size: 15))
-                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                .allowsHitTesting(false)
-                                .padding(.leading, 20)
-                                .padding(.vertical, 22)
-                        }
-                    }
-                    .cornerRadius(15)
-                    .padding(.top, 15)
-                    
-                    // MARK: -Image
-                    HStack(spacing: 10) {
-                        PhotosPicker(selection: $photoPickerViewModel.imageSelections,
-                                     maxSelectionCount: 3,
-                                     matching: .images) {
-                            Rectangle()
-                                .foregroundColor(.clear)
-                                .frame(width: 72, height: 72)
-                                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                .cornerRadius(10)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .inset(by: 0.5)
-                                        .stroke(Color(red: 0.47, green: 0.47, blue: 0.47), lineWidth: 1)
-                                )
-                                .overlay(
-                                    VStack(spacing: 0) {
-                                        Image(uiImage: SharedAsset.imageCreateMumory.image)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 23.5, height: 23.5)
-                                        
-                                        HStack(spacing: 0) {
-                                            Text("\(photoPickerViewModel.imageSelectionCount)")
-                                                .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                            Text(" / 3")
-                                                .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        }
-                                        .multilineTextAlignment(.center)
-                                        .padding(.top, 11.25)
-                                    }
-                                )
-                        }
-                        
-                        if !photoPickerViewModel.selectedImages.isEmpty {
-                            ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
-                                ZStack {
-                                    Image(uiImage: image)
-                                        .resizable()
-                                        .frame(width: 72, height: 72)
-                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                        .cornerRadius(10)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .inset(by: 0.5)
-                                                .stroke(Color(red: 0.47, green: 0.47, blue: 0.47), lineWidth: 1)
-                                        )
-                                    Button(action: {
-                                        photoPickerViewModel.removeImage(image)
-                                    }) {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .resizable()
-                                            .frame(width: 27, height: 27)
-                                            .foregroundColor(.white)
-                                    }
-                                    .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
-                                }
-                            }
-                        }
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 20)
-                    //                            .padding(.bottom, 111)
-                    .onChange(of: photoPickerViewModel.imageSelections) { _ in
-                        photoPickerViewModel.convertDataToImage()
-                    }
+                    .padding(.bottom, 50)
+
                 } // VStack
                 .padding(.top, 20)
                 .padding(.bottom, 50)
+                .offset(y: -scrollViewOffset)
             } // ScrollView
-            .gesture(TapGesture(count: 1))
-            //            .simultaneousGesture(TapGesture(count: 1))
+            .simultaneousGesture(DragGesture().onChanged { i in
+                print("FUCKYOU")
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            })
+            
+            
             
             ZStack(alignment: .topLeading) {
                 Rectangle()
@@ -530,17 +329,27 @@ public struct CreateMumoryBottomSheetView: View {
 //            mumoryDataViewModel.choosedMusicModel = nil
 //            mumoryDataViewModel.choosedLocationModel = nil
         }
+        .onTapGesture {
+            print("FUCK")
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
     }
 }
     
 struct ContainerView: View {
     
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     let title: String
     let image: Image
+    
+    @State private var isMusicChoosed: Bool = false
+    @State private var isLocationChoosed: Bool = false
 
     init(title: String, image: Image) {
+        
         self.title = title
         self.image = image
     }
@@ -613,6 +422,9 @@ struct ContainerView: View {
                         SharedAsset.editIconCreateMumory.swiftUIImage
                             .resizable()
                             .frame(width: 31, height: 31)
+                            .onAppear {
+                                self.appCoordinator.isMusicChoosed = true
+                            }
                         
                     } else {
                         Group {
@@ -654,6 +466,9 @@ struct ContainerView: View {
                         SharedAsset.editIconCreateMumory.swiftUIImage
                             .resizable()
                             .frame(width: 31, height: 31)
+                            .onAppear {
+                                self.appCoordinator.isLocationChoosed = true
+                            }
                         
                     } else {
                         Group {
@@ -672,11 +487,11 @@ struct ContainerView: View {
                         }
                     }
                 }
-                
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 17)
         }
+
     }
 }
 
@@ -721,6 +536,13 @@ struct CalendarContainerView: View {
 struct TagContainerView: View {
     
     let title: String
+    
+    @State private var tagText: String = ""
+    @State private var tags: [String] = []
+    
+    @State private var isEditing = false
+    @State private var isTagEditing = false
+    @State private var isCommit = false
 
     init(title: String) {
         self.title = title
@@ -729,7 +551,7 @@ struct TagContainerView: View {
     var body: some View {
         
         ZStack {
-        
+            
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
@@ -744,28 +566,71 @@ struct TagContainerView: View {
                 
                 Spacer().frame(width: 17)
                 
-                Text("태그를 입력하세요. (5글자 이내, 최대 3개)")
+                ForEach(tags.indices, id: \.self) { index in
+                    
+                    TextField("", text: $tags[index], onEditingChanged: { isEditing in
+                        self.isTagEditing = isEditing
+                    })
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .foregroundColor(self.isTagEditing ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                    .onChange(of: tags[index], perform: { newValue in
+                        
+                        if newValue.count > 6 {
+                            tags[index] = String(newValue.prefix(6))
+                        }
+                        
+                        if newValue.contains(" ") || newValue.hasSuffix(" ") {
+                            let beforeSpace = newValue.components(separatedBy: " ").first ?? ""
+                            tags[index] = beforeSpace
+                            
+                            self.isCommit = true
+                        } else if newValue == "" {
+                            tags.remove(at: index)
+                        } else if !newValue.hasPrefix("#") {
+                            tags.remove(at: index)
+                        }
+                    })
+                    .fixedSize(horizontal: true, vertical: false)
+                    
+                    Spacer().frame(width: 8)
+                }
+                
+                
+                if self.tags.count < 3 {
+                    CustomTextField(text: $tagText, onCommit: {
+                        if tagText.first == "#" {
+                            tags.append(tagText)
+                            tagText = ""
+                        }
+                    }, onEditingChanged: { isEditing in
+                        self.isEditing = isEditing
+                    })
+                }
+                
+                Spacer(minLength: 0)
+            } // HStack
+            .padding(.horizontal, 17)
+            
+            if self.tags.count == 0 {
+                Text(self.isEditing ? "" : "태그를 입력하세요. (5글자 이내, 최대 3개)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                
-//                Text("#태그태그태")
-//                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-//                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                
-                Spacer()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 17 + 26 + 17)
+                    .allowsHitTesting(false)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 17)
-        }
+        } // ZStack
     }
 }
 
 struct ContentContainerView: View {
     
-    let title: String
+    @State var contentText: String = ""
+    @State private var textEditorHeight: CGFloat = .zero
 
-    init(title: String) {
-        self.title = title
+
+    init(contentText: String) {
+        self.contentText = contentText
     }
     
     var body: some View {
@@ -775,10 +640,10 @@ struct ContentContainerView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                .frame(minHeight: getUIScreenBounds().height == 667 ? 60 : 111)
+                .frame(minHeight: getUIScreenBounds().height == 667 ? 100 : 127)
                 .cornerRadius(15)
             
-            HStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 0) {
                 
                 SharedAsset.contentIconCreateMumory.swiftUIImage
                     .resizable()
@@ -786,15 +651,22 @@ struct ContentContainerView: View {
                 
                 Spacer().frame(width: 17)
                 
-                Text("자유롭게 내용을 입력하세요.")
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                
-//                Text("내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일내용내용내용내용옹")
-//                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-//                    .kerning(0.24)
-//                    .foregroundColor(.white)
-//                    .frame(width: 270, alignment: .topLeading)
+                TextEditor(text: $contentText)
+                    .scrollContentBackground(.hidden)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .kerning(0.24)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .padding([.top, .leading], -5)
+                    .overlay(
+                        Text("자유롭게 내용을 입력하세요.")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .offset(y: 3)
+                            .opacity(self.contentText.isEmpty ? 1 : 0)
+                            .allowsHitTesting(false)
+                        , alignment: .topLeading
+                    )
                 
                 Spacer()
             }

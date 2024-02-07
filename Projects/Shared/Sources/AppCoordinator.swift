@@ -47,6 +47,10 @@ public class AppCoordinator: ObservableObject {
     @Published public var isPopUpViewShown = false
     @Published public var isRewardPopUpViewShown = false
     
+    @Published public var isSatisfiedInCreateMumory = false
+    @Published public var isMusicChoosed: Bool = false
+    @Published public var isLocationChoosed: Bool = false
+    
     @Published public var isTestViewShown = false
     
     @Published public var isNavigationStackShown = false
@@ -95,3 +99,19 @@ public class AppCoordinator: ObservableObject {
     
     public init () {}
 }
+
+public class DateManager: ObservableObject {
+    
+    public init () {}
+    
+    public func formattedDate(date: Date, dateFormat: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = dateFormat
+//        dateFormatter.locale = Locale(identifier: "ko_KR")
+        return dateFormatter.string(from: date)
+        
+        //        let date = Calendar.current.date(from: DateComponents(year: selectedYear, month: selectedMonth, day: 1)) ?? Date()
+        //        return dateFormatter.string(from: date)
+    }
+}
+    

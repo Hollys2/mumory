@@ -16,7 +16,7 @@ import Shared
 struct HomeMapViewRepresentable: UIViewRepresentable {
     
     typealias UIViewType = MKMapView
-        
+    
     @State var count: Int = 1
     @Binding var annotationSelected: Bool
     
@@ -25,14 +25,14 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     
     func makeUIView(context: Context) -> UIViewType {
         print("@@makeUIView")
-
+        
         let mapView: MKMapView = .init()
-
+        
         mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
         mapView.isPitchEnabled = false
-//        mapView.userTrackingMode = .follow 권한 동의 후에
+        //        mapView.userTrackingMode = .follow 권한 동의 후에
         
         mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan), animated: true)
         
@@ -53,7 +53,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-//        uiView.removeAnnotations(uiView.annotations)
+        //        uiView.removeAnnotations(uiView.annotations)
         
         let mumoryAnnotations = self.mumoryDataViewModel.mumoryAnnotations.filter { !($0 is MKUserLocation) }
         uiView.addAnnotations(self.mumoryDataViewModel.mumoryAnnotations)
@@ -71,10 +71,10 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     
     private func groupAndShowAnnotations(on mapView: MKMapView) {
         var groupedAnnotations: [[MumoryAnnotation]] = []
-
+        
         for annotation in mumoryDataViewModel.mumoryAnnotations {
             var foundGroup = false
-
+            
             for (index, group) in groupedAnnotations.enumerated() {
                 if let firstAnnotation = group.first,
                    distanceBetweenCoordinates(firstAnnotation.coordinate, annotation.coordinate) < 100 {
@@ -83,12 +83,12 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
                     break
                 }
             }
-
+            
             if !foundGroup {
                 groupedAnnotations.append([annotation])
             }
         }
-
+        
         for group in groupedAnnotations {
             if group.count > 1 {
                 // Add logic to display number on the map
@@ -105,13 +105,13 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
             }
         }
     }
-
+    
 }
 
 extension HomeMapViewRepresentable {
     
     class MapViewCoordinator: NSObject {
-    
+        
         let parent: HomeMapViewRepresentable
         var mapView: MKMapView?
         
@@ -184,87 +184,9 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
         print("didUpdate in MKMapViewDelegate")
         
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-
-//        mapView.setRegion(region, animated: true)
+        
+        //        mapView.setRegion(region, animated: true)
     }
-    
-//    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-//
-//        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "MumoryAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "MumoryAnnotation")
-//
-//        if annotation is MumoryAnnotation {
-////            annotationView.annotation = annotation
-//
-//            annotationView.image = SharedAsset.musicPin.image
-//            annotationView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
-//
-//            if let mumoryAnnotation = annotation as? MumoryAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
-//                let artwork = AsyncImageView()
-//                artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
-//                artwork.layer.cornerRadius = 12
-//                artwork.clipsToBounds = true
-//                artwork.loadImage(from: url)
-//                annotationView.addSubview(artwork)
-//            } else {
-//                print("ERROR: NO URL222")
-//            }
-//
-//            if let mumoryAnnotation = annotation as? MumoryAnnotation {
-//
-//                let nearbyAnnotations = mapView.annotations(in: mapView.visibleMapRect)
-//                    .compactMap { $0 as? MumoryAnnotation }
-////                    .filter { mumoryAnnotation.coordinate.latitude != $0.coordinate.latitude || mumoryAnnotation.coordinate.longitude != $0.coordinate.longitude }
-//                    .filter { parent.distanceBetweenCoordinates(mumoryAnnotation.coordinate, $0.coordinate) < 100 }
-//
-//                if nearbyAnnotations.count > 1 {
-//                    let countView = CountView(text: String(nearbyAnnotations.count))
-//                    let hostingController = UIHostingController(rootView: countView)
-//                    annotationView.addSubview(hostingController.view)
-//                }
-//            }
-//
-////            var groupedAnnotations: [[MumoryAnnotation]] = []
-////
-////            for annotation in parent.mumoryDataViewModel.mumoryAnnotations {
-////                var foundGroup = false
-////
-////                for (index, group) in groupedAnnotations.enumerated() {
-////                    if let firstAnnotation = group.first,
-////                       parent.distanceBetweenCoordinates(firstAnnotation.coordinate, annotation.coordinate) < 100 {
-////                        groupedAnnotations[index].append(annotation)
-////                        foundGroup = true
-////                        break
-////                    }
-////                }
-////
-////                if !foundGroup {
-////                    groupedAnnotations.append([annotation])
-////                }
-////            }
-////
-////            for group in groupedAnnotations {
-////
-////                if group.count > 1 {
-////                    print("group: \(group)")
-////                    let countView = CountView(text: String(group.count))
-////                    let hostingController = UIHostingController(rootView: countView)
-////
-////                    if let annotationView = mapView.view(for: group[0]) {
-////                        annotationView.addSubview(hostingController.view)
-////                    }
-////                }
-////            }
-//
-//        } else if annotation is MKUserLocation {
-//            annotationView.image = SharedAsset.userLocation.image
-//            if let image = annotationView.image {
-//                annotationView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
-//            }
-//        }
-////        annotationView.canShowCallout = false
-//        return annotationView
-//    }
-    
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         
@@ -332,54 +254,32 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
         return nil
     }
     
-//    func mapView(_ mapView: MKMapView, clusterAnnotationForMemberAnnotations memberAnnotations: [MKAnnotation]) -> MKClusterAnnotation {
-//        let nonUserLocationAnnotations = memberAnnotations.filter { !($0 is MKUserLocation) }
-//
-//        let cluster = MKClusterAnnotation(memberAnnotations: nonUserLocationAnnotations)
-//        return cluster
-//    }
-    
-    func createClusterAnnotationView(for cluster: MKClusterAnnotation, in mapView: MKMapView) -> MKAnnotationView {
-        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "Cluster") ?? MKMarkerAnnotationView(annotation: cluster, reuseIdentifier: "Cluster")
-
-//        annotationView.glyphText = "\(cluster.memberAnnotations.count)"
-        return annotationView
-    }
-
-    func createIndividualAnnotationView(for annotation: MumoryAnnotation, in mapView: MKMapView) -> MKAnnotationView {
-        let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "MumoryAnnotation") ?? MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: "MumoryAnnotation")
-        
-        annotationView.image = SharedAsset.musicPin.image
-        annotationView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
-        
-        if let mumoryAnnotation = annotation as? MumoryAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
-            let artwork = AsyncImageView()
-            artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
-            artwork.layer.cornerRadius = 12
-            artwork.clipsToBounds = true
-            artwork.loadImage(from: url)
-            annotationView.addSubview(artwork)
-        } else {
-            print("ERROR: NO URL222")
-        }
-    
-        return annotationView
-    }
+    //    func mapView(_ mapView: MKMapView, clusterAnnotationForMemberAnnotations memberAnnotations: [MKAnnotation]) -> MKClusterAnnotation {
+    //        let nonUserLocationAnnotations = memberAnnotations.filter { !($0 is MKUserLocation) }
+    //
+    //        let cluster = MKClusterAnnotation(memberAnnotations: nonUserLocationAnnotations)
+    //        return cluster
+    //    }
     
     
     func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
-//        if annotation is MumoryAnnotation {
-//            self.parent.annotationSelected = true
-//            print("didSelect: \(annotation)")
-//        }
+        //        if annotation is MumoryAnnotation {
+        //            self.parent.annotationSelected = true
+        //            print("didSelect: \(annotation)")
+        //        }
         
         if let mumoryAnnotation = annotation as? MumoryAnnotation {
             self.parent.annotationSelected = true
+            self.parent.mumoryDataViewModel.mumoryAnnotations = [mumoryAnnotation]
             print("didSelect MumoryAnnotation: \(mumoryAnnotation)")
         } else if annotation is MKUserLocation {
             print("didSelect User Location")
         } else if let cluster = annotation as? MKClusterAnnotation {
             self.parent.annotationSelected = true
+            
+            let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
+            self.parent.mumoryDataViewModel.mumoryAnnotations = memberAnnotations
+            
             print("didSelect cluster: \(cluster)")
         }
         
@@ -443,7 +343,7 @@ struct CountSwiftUIView: View {
 struct CountView: UIViewRepresentable {
     
     let text: String
-
+    
     init(text: String) {
         self.text = text
     }
@@ -456,6 +356,6 @@ struct CountView: UIViewRepresentable {
         
         return hostingView
     }
-
+    
     func updateUIView(_ uiView: UIView, context: Context) {}
 }

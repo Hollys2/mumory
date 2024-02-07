@@ -44,7 +44,7 @@ struct HomeTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    withAnimation(Animation.easeInOut(duration: 0.2)) {
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
 //                        appCoordinator.isTestViewShown = true
                     }

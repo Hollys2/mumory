@@ -13,6 +13,7 @@ struct MumoryApp: App {
     @StateObject var locationManager: LocationManager = .init() // 위치 권한
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
+    @StateObject var dateManager: DateManager = .init()
     
     var body: some Scene {
         WindowGroup {
@@ -24,6 +25,7 @@ struct MumoryApp: App {
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
                     .environmentObject(mumoryDataViewModel)
+                    .environmentObject(dateManager)
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom

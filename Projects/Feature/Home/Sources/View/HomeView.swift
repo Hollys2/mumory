@@ -117,6 +117,7 @@ struct MumoryCard: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     var body: some View {
+        
         ZStack {
             VStack {
                 Rectangle()
@@ -285,16 +286,13 @@ public struct HomeView: View {
             }
             .onEnded { value in
 //                print("onEnded: \(value.translation.height)")
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                                        if value.translation.height > 130 {
-                                            appCoordinator.isCreateMumorySheetShown = false
-                    //
-                    //                        mumoryDataViewModel.choosedMusicModel = nil
-                    //                        mumoryDataViewModel.choosedLocationModel = nil
-                                        }
-                    //                    DispatchQueue.main.async {
+                withAnimation(Animation.easeInOut(duration: 0.01)) {
+                    if value.translation.height > 130 {
+                        appCoordinator.isCreateMumorySheetShown = false
+                        mumoryDataViewModel.choosedMusicModel = nil
+                        mumoryDataViewModel.choosedLocationModel = nil
+                    }
                     translation.height = 0
-//                }
                 }
             }
     }
@@ -323,7 +321,7 @@ public struct HomeView: View {
                 if appCoordinator.isCreateMumorySheetShown {
                     Color.black.opacity(0.6)
                         .onTapGesture {
-                            withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
+                            withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
                                 appCoordinator.isCreateMumorySheetShown = false
                                 //                                mumoryDataViewModel.choosedMusicModel = nil
                                 //                                mumoryDataViewModel.choosedLocationModel = nil
@@ -331,7 +329,7 @@ public struct HomeView: View {
                     
                     CreateMumoryBottomSheetView()
                         .offset(y: translation.height)
-                        .simultaneousGesture(dragGesture)
+                        .gesture(dragGesture)
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
@@ -496,6 +494,14 @@ public struct HomeView: View {
 //                //                .presentationCornerRadius(23)
 //            }
         } // NavigationStack
+        .onAppear {
+            print("HomeMapViewRepresentable onAppear")
+//                    Task {
+                self.mumoryDataViewModel.fetchData()
+//                        await mumoryDataViewModel.loadMusics()
+//                    }
+        
+        }
         
     }
     
@@ -504,13 +510,6 @@ public struct HomeView: View {
         ZStack {
             
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown)
-                .onAppear {
-                    Task {
-                        self.mumoryDataViewModel.fetchData()
-//                        await mumoryDataViewModel.loadMusics()
-                    }
-                
-                }
             
             VStack(spacing: 0) {
                 

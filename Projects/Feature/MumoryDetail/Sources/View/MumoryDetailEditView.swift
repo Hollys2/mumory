@@ -24,10 +24,11 @@ public struct MumoryDetailEditView: View {
 
     @State private var tagText: String = ""
     @State private var tags: [String] = []
-    @State private var isTagging = false
+    
     @State private var isEditing = false
     @State private var isTagEditing = false
     @State private var isCommit = false
+    
     @State private var editingTag: Int? = nil
     @State private var tagWidth: CGFloat = .zero
 
@@ -78,7 +79,7 @@ public struct MumoryDetailEditView: View {
                         Button(action: {
                             if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                                 let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: choosedMusicModel, locationModel: choosedLocationModel)
-                                mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
+//                                mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
                                 mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
                             }
                             
@@ -554,6 +555,7 @@ struct CustomTextField: UIViewRepresentable {
         
         func textFieldDidChangeSelection(_ textField: UITextField) {
             print("textFieldDidChangeSelection")
+            
             DispatchQueue.main.async {
                 self.parent.text = textField.text ?? ""
                 
@@ -561,6 +563,14 @@ struct CustomTextField: UIViewRepresentable {
                     self.parent.onCommit()
                 }
             }
+        }
+        
+        func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+            // 최대 길이를 6로 제한
+            let currentText = textField.text ?? ""
+            let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
+
+            return newText.count <= 6
         }
         
         func textFieldShouldReturn(_ textField: UITextField) -> Bool {

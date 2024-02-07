@@ -18,7 +18,6 @@ final public class MumoryDataViewModel: ObservableObject {
     
     @Published var choosedMusicModel: MusicModel?
     @Published var choosedLocationModel: LocationModel?
-    @Published var createdMumoryAnnotation: MumoryAnnotation?
     
     @Published public var musicModels: [MusicModel] = []
     @Published public var mumoryAnnotations: [MumoryAnnotation] = []
@@ -161,7 +160,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("Tester document added successfully!")
                 
                 let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel)
-                
+//                
                 self.mumoryAnnotations.append(newMumoryAnnotation)
             }
         }
