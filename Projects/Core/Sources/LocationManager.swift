@@ -7,41 +7,73 @@
 //
 
 import CoreLocation
+import MapKit
+import MusicKit
+import Combine
 
+
+// 1. 권한
+// 2. 현재 위치
 final public class LocationManager: NSObject, ObservableObject {
-    private let locationManager = CLLocationManager()
     
-    @Published public var userLocation: CLLocationCoordinate2D?
+    @Published public var locationManager: CLLocationManager = .init()
+    @Published public var currentLocation: CLLocation?
     
     override public init() {
         print("override public init in LocationManager")
         super.init()
         
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
         locationManager.delegate = self
+        
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        //        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
     }
     
+    func checkLocationAuthorization() {
+        switch locationManager.authorizationStatus {
+        case .notDetermined:
+            print(".notDetermined")
+            locationManager.requestWhenInUseAuthorization()
+        case .restricted:
+            print(".restricted")
+        case .denied:
+            print(".denied")
+        case .authorizedAlways:
+            print(".authorizedAlways")
+            locationManager.startUpdatingLocation()
+        case .authorizedWhenInUse:
+            print(".authorizedWhenInUse")
+            locationManager.startUpdatingLocation()
+            
+            break
+        @unknown default:
+            break
+        }
+    }
 }
 
 extension LocationManager: CLLocationManagerDelegate {
     
+    // 현재 위치
     public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if userLocation != nil { return }
+        print("didUpdateLocations in CLLocationManagerDelegate")
         guard let location = locations.last else { return }
         
-        userLocation = location.coordinate
-        print("Updated location: \(location)")
+        self.currentLocation = location
     }
     
+    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("didFailWithError in CLLocationManagerDelegate")
+    }
+    
+    
     public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
-            // 위치 서비스 권한이 허용된 경우 위치 업데이트 시작
-            locationManager.startUpdatingLocation()
-        } else if manager.authorizationStatus == .notDetermined {
-            // 위치 서비스 권한 상태가 결정되지 않은 경우 권한 요청
-            locationManager.requestWhenInUseAuthorization()
-        }
+        print("locationManagerDidChangeAuthorization in LocationManager")
+        checkLocationAuthorization() // 있어야 권한 확인함
+    }
+    
+    func handleLocationManagerDidChangeAuthorizationError() {
+        
     }
 }

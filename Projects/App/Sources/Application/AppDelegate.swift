@@ -23,6 +23,7 @@ public class AppDelegate: NSObject, UIApplicationDelegate{
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
+
         
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
                UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, _ in

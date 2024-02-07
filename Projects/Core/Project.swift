@@ -16,7 +16,7 @@ let project = Project(name: "Core",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .extendingDefault(with: extendedInfo),
                                        sources: ["Sources/**"],
-                                       dependencies: [     
+                                       dependencies: [
                                         .external(name: "Moya"),
                                         .external(name: "FirebaseAuth"),
                                         .external(name: "FirebaseFirestore"),
