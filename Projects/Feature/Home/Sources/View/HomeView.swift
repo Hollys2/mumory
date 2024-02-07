@@ -31,6 +31,7 @@ public struct HomeView: View {
     @State private var isSheetAnimating = false
     
     @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var playerManager = PlayerViewModel()
 
     
     public init(){
@@ -96,6 +97,7 @@ public struct HomeView: View {
                     Text("The Second Tab")
                 case .library:
                     LibraryManageView()
+                        .environmentObject(playerManager)
                 case .notification:
                     SettingView()
                 }

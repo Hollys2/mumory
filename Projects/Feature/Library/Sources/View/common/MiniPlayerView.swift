@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct MiniPlayerView: View {
-    @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var playerManager: PlayerViewModel
     private var player = ApplicationMusicPlayer.shared
     @State var isDisappear = false
     @State var isPlaying = false
@@ -21,7 +21,7 @@ struct MiniPlayerView: View {
             VStack{
                 Spacer()
                 HStack(spacing: 0, content: {
-                    AsyncImage(url: nowPlaySong.song?.artwork?.url(width: 100, height: 100), content: { image in
+                    AsyncImage(url: playerManager.song?.artwork?.url(width: 100, height: 100), content: { image in
                         image
                             .resizable()
                             .frame(width: 40, height: 40)
@@ -37,14 +37,14 @@ struct MiniPlayerView: View {
                     
                     
                     VStack(spacing: 4, content: {
-                        Text(nowPlaySong.song?.title ?? "NO TITLE")
+                        Text(playerManager.song?.title ?? "NO TITLE")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .lineLimit(1)
                             .truncationMode(.tail)
-                            .onChange(of: nowPlaySong.song, perform: { value in
-                                guard let music = nowPlaySong.song else {return}
+                            .onChange(of: playerManager.song, perform: { value in
+                                guard let music = playerManager.song else {return}
                                 player.queue = [music]
                                 Task{
                                     do {
@@ -56,7 +56,7 @@ struct MiniPlayerView: View {
                                 }
                             })
                         
-                        Text(nowPlaySong.song?.artistName ?? "NO ARTIST")
+                        Text(playerManager.song?.artistName ?? "NO ARTIST")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                             .foregroundStyle(Color(red: 0.89, green: 0.89, blue: 0.89))
                             .frame(maxWidth: .infinity, alignment: .leading)
