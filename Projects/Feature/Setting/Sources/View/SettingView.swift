@@ -22,20 +22,23 @@ struct SettingView: View {
     @StateObject var withdrawManager: WithdrawViewModel = WithdrawViewModel()
     @State var isLogout: Bool = false
     @State var isShowingWithdrawPopup = false
-    @State var isDeleteUserDone: Bool = false 
+    @State var isDeleteUserDone: Bool = false
     @State var isDeleteDocumentsDone: Bool = false //유저 관전 정보가 삭제 되었는지
     @State var isUserDeleted: Bool = false //로그인 페이지로 넘어가는 조건
     @State var isLoading: Bool = false
     @State var isNeededEmailLogin = false
-
+    
     var body: some View {
         //테스트때문에 navigationStack 추가함. 이후 삭제하기
-        NavigationStack{
-            GeometryReader { geometry in
-                
-                ZStack{
-                    ColorSet.background.ignoresSafeArea()
-                    
+        
+        
+        
+        
+        GeometryReader { geometry in
+            
+            ZStack{
+                ColorSet.background.ignoresSafeArea()
+                NavigationStack{
                     VStack(spacing: 0){
                         //설정 버튼들
                         NavigationLink{
@@ -43,6 +46,7 @@ struct SettingView: View {
                                 .environmentObject(manager)
                         }label: {
                             SettingItem(title: "계정 정보 / 보안")
+                                .padding(.top, 12)
                         }
                         
                         NavigationLink {
@@ -78,8 +82,8 @@ struct SettingView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                 .padding(.top, 15)
                                 .padding(.bottom, 15)
-                                .padding(.trailing, 58)
-                                .padding(.leading, 58)
+                                .padding(.trailing, 62)
+                                .padding(.leading, 62)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 30)
                                         .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
@@ -102,79 +106,88 @@ struct SettingView: View {
                                 isShowingWithdrawPopup = true
                             }
                         
-                        
                     }
-                    
-                    if isShowingWithdrawPopup{
-                        Color.black.opacity(0.5).ignoresSafeArea()
-                    }
-                    
-                    if isShowingWithdrawPopup{
-                        WithdrawPopupView {
-                            
-                            //취소버튼 클릭 action - 팝업 창 삭제
-                            isShowingWithdrawPopup = false
-                            
-                        } positiveAction: {
-                            
-                            //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
-                            isLoading = true
-                            withdraw(method: manager.signinMethod)
+                    .background(ColorSet.background)
+                    .navigationBarBackButtonHidden()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationDestination(isPresented: $isNeededEmailLogin, destination: {
+                        EmailLoginForWithdrawView()
+                            .environmentObject(withdrawManager)
+                            .environmentObject(manager)
+                    })
+                    .navigationDestination(isPresented: $isLogout, destination: {
+                        LoginView()
+                    })
+                    .navigationDestination(isPresented: $isUserDeleted, destination: {
+                        LoginView()
+                    })
+                    .onDisappear(perform: {
+                        isLoading = false
+                    })
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button {
+                                dismiss()
+                            } label: {
+                                SharedAsset.back.swiftUIImage
+                                    .frame(width: 30, height: 30)
+                            }
                             
                         }
-                    }
-                    
-                    LottieView(animation: .named("loading", bundle: .module))
-                        .looping()
-                        .opacity(isLoading ? 1 : 0)
-                        .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
-                    
-                }
-                .navigationDestination(isPresented: $isNeededEmailLogin, destination: {
-                    EmailLoginForWithdrawView()
-                        .environmentObject(withdrawManager)
-                })
-                .navigationDestination(isPresented: $isLogout, destination: {
-                    LoginView()
-                })
-                .navigationDestination(isPresented: $isUserDeleted, destination: {
-                    LoginView()
-                })
-                .navigationBarBackButtonHidden()
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            SharedAsset.back.swiftUIImage
-                                .frame(width: 30, height: 30)
+                        
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            
+                            NavigationLink {
+                                HomeView()
+                            } label: {
+                                SharedAsset.home.swiftUIImage
+                                    .frame(width: 30, height: 30)
+                            }
+                            
                         }
                         
-                    }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        
-                        NavigationLink {
-                            HomeView()
-                        } label: {
-                            SharedAsset.home.swiftUIImage
-                                .frame(width: 30, height: 30)
+                        ToolbarItem(placement: .principal) {
+                            Text("설정")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                                .foregroundColor(.white)
                         }
-                        
-                    }
-                    
-                    ToolbarItem(placement: .principal) {
-                        Text("설정")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                            .foregroundColor(.white)
                     }
                 }
-                .onAppear(perform: {
-                    getUserInfo()
-                })
+                if isShowingWithdrawPopup{
+                    Color.black.opacity(0.5).ignoresSafeArea()
+                }
+                
+                if isShowingWithdrawPopup{
+                    WithdrawPopupView {
+                        //취소버튼 클릭 action - 팝업 창 삭제
+                        isShowingWithdrawPopup = false
+                        
+                    } positiveAction: {
+                        //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
+                        withdraw(method: manager.signinMethod)
+                        
+                    }
+                }
+                
+                LottieView(animation: .named("loading", bundle: .module))
+                    .looping()
+                    .opacity(isLoading ? 1 : 0)
+                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                
             }
+            .onAppear(perform: {
+                    getUserInfo()
+            })
+            
+            
+            
+            
+            
+            
+            
         }
-
+        
+        
         
     }
     private func deleteAppleUser(){
@@ -210,21 +223,25 @@ struct SettingView: View {
         }
     }
     private func withdraw(method: String){
+        isLoading = true
+        isShowingWithdrawPopup = false
         if manager.signinMethod == "Apple" {
             withdrawManager.AppleLogin()
         }else if manager.signinMethod == "Google" {
-            withdrawManager.GoogleLogin { isSuccessful in
+            withdrawManager.GoogleLogin(originalEmail: manager.email) { isSuccessful in
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if manager.signinMethod == "Kakao" {
-            withdrawManager.KakaoLogin { isSuccessful in
+            withdrawManager.KakaoLogin(originalEmail: manager.email) { isSuccessful in
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if manager.signinMethod == "Email" {
+            isLoading = false
+            isShowingWithdrawPopup = false
             isNeededEmailLogin = true
         }
         
-          
+        
         
     }
     
@@ -247,6 +264,7 @@ struct SettingView: View {
                         if let error = error {
                             print("delete document error: \(error)")
                         }else {
+                            isLoading = false
                             isUserDeleted = true
                         }
                     }
@@ -278,7 +296,7 @@ struct SettingView: View {
                         return
                     }
                     self.manager.email = email
-
+                    
                     guard let method = documentData["signin_method"] as? String else {
                         print("no method")
                         return
@@ -290,7 +308,7 @@ struct SettingView: View {
                         return
                     }
                     self.manager.selectedNotificationTime = selectedTime
-
+                    
                     guard let isCheckdServiceNewsNotification = documentData["is_checked_service_news_notification"] as? Bool else {
                         print("no service notification")
                         return
@@ -308,12 +326,12 @@ struct SettingView: View {
                         return
                     }
                     self.manager.nickname = nickname
-
+                    
                     
                     
                 }
             }
-
+            
         }else {
             //재로그인
         }

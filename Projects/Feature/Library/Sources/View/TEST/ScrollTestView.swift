@@ -16,16 +16,27 @@ struct ScrollTestView: View {
     var body: some View {
         ZStack{
             Color.yellow
+            
             ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
-                
                 ForEach(0...100, id: \.self){index in
                     Rectangle()
                         .foregroundStyle(.yellow)
+                    Text("어쩔")
                 }
                 .background(.yellow)
                 
             }
+            .onChange(of: contentOffset, perform: { value in
+                print(value)
+            })
             .background(.yellow)
+            VStack{
+                Rectangle()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 100)
+                    .offset(x: 0, y: contentOffset.y > 0 ? 0 : -contentOffset.y)
+                Spacer()
+            }
         }
     }
 }

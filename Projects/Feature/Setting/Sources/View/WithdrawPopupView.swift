@@ -28,7 +28,7 @@ struct WithdrawPopupView: View {
             
             Rectangle()
                 .foregroundStyle(gray)
-                .frame(maxWidth: .infinity, maxHeight: 0.4)
+                .frame(maxWidth: .infinity, maxHeight: 0.5)
                 .padding(.top, 30)
 
 
@@ -47,7 +47,7 @@ struct WithdrawPopupView: View {
                 Spacer()
                 Rectangle()
                     .foregroundStyle(gray)
-                    .frame(maxWidth: 0.4, maxHeight: 45)
+                    .frame(maxWidth: 0.5, maxHeight: 45)
                 Spacer()
                 Text("탈퇴")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -65,11 +65,16 @@ struct WithdrawPopupView: View {
         }
         .background(ColorSet.darkGray)
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-        .padding(.leading, 40)
-        .padding(.trailing, 40)
+        .padding(.leading, 50)
+        .padding(.trailing, 50)
     }
 }
 
-//#Preview {
-//    WithdrawPopupView()
-//}
+#Preview {
+    WithdrawPopupView {
+        //
+    } positiveAction: {
+        //
+    }
+
+}

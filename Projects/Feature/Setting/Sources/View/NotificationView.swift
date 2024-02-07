@@ -30,6 +30,7 @@ struct NotificationView: View {
             
             VStack(spacing: 0, content: {
                 NotificationItem(title: "전체 알림", isOn: $isEntireButtonOn)
+                    .padding(.top, 12)
                     .onChange(of: isEntireButtonOn, perform: { value in
                         if value {
                             withAnimation {

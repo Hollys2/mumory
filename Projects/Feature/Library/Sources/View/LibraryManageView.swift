@@ -13,7 +13,7 @@ import Core
 
 public struct LibraryManageView: View {
     @State private var path = NavigationPath()
-    @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     
     //    @EnvironmentObject var setView: SetView
@@ -53,7 +53,7 @@ public struct LibraryManageView: View {
                 //미니 플레이어
                 if isPlaying{
                     MiniPlayerView()
-                        .environmentObject(nowPlaySong)
+                        .environmentObject(playerManager)
                 }
                 
             }

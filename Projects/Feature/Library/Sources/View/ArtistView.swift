@@ -31,10 +31,12 @@ struct ArtistView: View {
                                 .scaledToFill()
                                 .frame(width: geometry.size.width, height: geometry.size.width)
                                 .clipped()
+                                .offset(x: 0, y: contentOffset.y > 0 ? 0 : -contentOffset.y)
                             
                         } placeholder: {
                             Rectangle()
                                 .frame(width: geometry.size.width, height: geometry.size.width)
+                                .offset(x: 0, y: contentOffset.y > 0 ? 0 : -contentOffset.y)
                         }
                         
                     })
@@ -64,12 +66,14 @@ struct ArtistView: View {
             VStack(spacing: 0){
                 GeometryReader(content: { geometry in
 //                    ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
-                    ScrollView{
+                    
+                    ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
                         MusicList(musicList: $musicList)
                             .environmentObject(manager)
                             .padding(.top, geometry.size.width - geometry.safeAreaInsets.top - 45) //사진 사이즈 - 세이프에이리아높이 - (그라데이션 + 아티스트이름)
                         //                    }
                     }
+
                 })
             }
             

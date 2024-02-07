@@ -19,9 +19,7 @@ struct EmailLoginForWithdrawView: View {
     @State var password: String = ""
     @State var isLoginError: Bool = false
     @State var isLoading: Bool = false
-    @State var isCustomCompleted: Bool = false
-    @State var isLoginSuccess: Bool = false
-    @State var isPresent: Bool = false
+    @State var isWithdrawSuccess: Bool = false
     @State var errorText = "•  이메일 또는 비밀번호가 일치하지 않습니다."
 
     
@@ -32,7 +30,7 @@ struct EmailLoginForWithdrawView: View {
                 
                 VStack(spacing: 0, content: {
                     //상단 타이틀
-                    Text("계정 인증")
+                    Text("계정 인증 하기")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
                         .foregroundColor(.white)
                         .padding(.top, 30)
@@ -60,22 +58,24 @@ struct EmailLoginForWithdrawView: View {
                         .frame(height: isLoginError ? nil : 0)
                     
                     //로그인 버튼(재사용)
-                    WhiteButton(title: "계정 인증 하기", isEnabled: true)
+                    WhiteButton(title: "로그인", isEnabled: true)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .padding(.top, 20)
                         .onTapGesture {
                             print("tapButton")
+                            isLoading = true
                             if email == manager.email{
                                 withdrawManager.EmailLogin(email: email, password: password) { isError in
                                     if isError {
                                         isLoginError = isError
                                     }else {
-                                        dismiss()
+                                        isWithdrawSuccess = true
                                     }
+                                    isLoading = false
                                 }
                             }else {
-                                
+                                isLoading = false
                                 isLoginError = true
                             }
                         }
@@ -93,6 +93,9 @@ struct EmailLoginForWithdrawView: View {
                     .opacity(isLoading ? 1 : 0)
                     .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
             }
+            .navigationDestination(isPresented: $isWithdrawSuccess, destination: {
+                LoginView()
+            })
             .frame(width: geometry.size.width + 1)
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()

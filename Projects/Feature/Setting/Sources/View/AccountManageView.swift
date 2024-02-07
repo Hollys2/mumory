@@ -30,6 +30,7 @@ struct AccountManageView: View {
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                 }
                 .padding(20)
+                .padding(.top, 12)
                 
                 HStack{
                     Text("소셜 로그인")
@@ -43,20 +44,25 @@ struct AccountManageView: View {
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 }
                 .padding(20)
-                
-                Rectangle()
-                    .frame(maxWidth: .infinity, maxHeight: 0.5)
-                    .foregroundStyle(ColorSet.subGray)
-                    .padding(.top, 7)
-                    .padding(.bottom, 7)
-                    
-                
-                NavigationLink {
-                    SetPWView()
-                        .environmentObject(manager)
-                } label: {
-                    SettingItem(title: "비밀번호 재설정")
 
+                
+                //이메일 가입 유저만 비밀번호 재설정 가능하=
+                if manager.signinMethod == "Email" {
+                    
+                    Rectangle()
+                        .frame(maxWidth: .infinity, maxHeight: 0.5)
+                        .foregroundStyle(ColorSet.subGray)
+                        .padding(.top, 7)
+                        .padding(.bottom, 7)
+                    
+                    
+                    NavigationLink {
+                        SetPWView()
+                            .environmentObject(manager)
+                    } label: {
+                        SettingItem(title: "비밀번호 재설정")
+                        
+                    }
                 }
 
 

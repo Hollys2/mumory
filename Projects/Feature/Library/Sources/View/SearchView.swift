@@ -12,7 +12,7 @@ import MusicKit
 
 struct SearchView: View {
     @EnvironmentObject var manager: LibraryManageModel
-    @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var playerManager: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State var term: String = ""

@@ -41,6 +41,7 @@ public struct ScrollViewWrapper<Content: View>: UIViewRepresentable {
     }
     
     public func updateUIView(_ uiView: UIScrollView, context: UIViewRepresentableContext<ScrollViewWrapper>) {
+        print("update")
         uiView.contentOffset = self.contentOffset
         
         DispatchQueue.main.async {
@@ -49,7 +50,21 @@ public struct ScrollViewWrapper<Content: View>: UIViewRepresentable {
             
             // Update the frame of the hosted view if necessary
             if let hostedView = uiView.subviews.first {
+                print("hosting view exist")
+                hostedView.translatesAutoresizingMaskIntoConstraints = true
                 hostedView.frame = CGRect(origin: .zero, size: uiView.contentSize)
+                
+                print("1set auto layout again")
+                NSLayoutConstraint.activate([
+                    hostedView.leadingAnchor.constraint(equalTo: uiView.leadingAnchor),
+                    hostedView.trailingAnchor.constraint(equalTo: uiView.trailingAnchor),
+                    hostedView.topAnchor.constraint(equalTo: uiView.topAnchor),
+                    hostedView.bottomAnchor.constraint(equalTo: uiView.bottomAnchor),
+                    hostedView.widthAnchor.constraint(equalTo: uiView.widthAnchor)  // Ensures the width matches the scroll view
+                ])
+                print("2set auto layout again")
+
+                
             }
         }
     }
@@ -70,5 +85,6 @@ public struct ScrollViewWrapper<Content: View>: UIViewRepresentable {
         public func scrollViewDidScroll(_ scrollView: UIScrollView) {
             contentOffset.wrappedValue = scrollView.contentOffset
         }
+        
     }
 }

@@ -12,7 +12,7 @@ import MusicKit
 import Core
 import FirebaseFirestore
 public struct MyRecentMusicView: View {
-    @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var playerManager: PlayerViewModel
     @State var MusicList: [Song] = []
     
     public init() {
@@ -49,7 +49,7 @@ public struct MyRecentMusicView: View {
                         ForEach(MusicList, id: \.title) { song in
                             RecentMusicItem(song: song)
                                 .onTapGesture {
-                                    nowPlaySong.song = song
+                                    playerManager.song = song
                                 }
                         }
                     })
