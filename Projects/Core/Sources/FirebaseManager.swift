@@ -8,13 +8,16 @@
 
 
 import FirebaseFirestore
+import FirebaseAuth
 
 public class FirebaseManager {
     
     public static let shared = FirebaseManager()
     public let db: Firestore
+    public let auth: Auth
     
     private init() {
-        db = Firestore.firestore()
+        self.db = Firestore.firestore()
+        self.auth = Auth.auth()
     }
 }

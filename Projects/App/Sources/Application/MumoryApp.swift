@@ -17,7 +17,7 @@ struct MumoryApp: App {
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-//                CreateMumoryBottomSheetView()
+//                RewardView()
                 HomeView()
 //                SearchLocationMapView()
                     .environmentObject(appCoordinator)

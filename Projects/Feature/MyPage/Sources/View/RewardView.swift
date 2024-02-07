@@ -101,17 +101,22 @@ struct RewardContentView: View {
                                                 attendanceRewards[i]
                                                     .resizable()
                                                     .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
-//                                                    .blur(radius: 5)
+                                                    .blur(radius: 3)
+                                                    .mask(
+                                                        Rectangle()
+                                                            .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
+                                                            .cornerRadius(10)
+                                                    )
                                                 
-//                                                Rectangle()
-//                                                  .foregroundColor(.clear)
-//                                                  .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
-//                                                  .background(Color(red: 0.24, green: 0.24, blue: 0.24).opacity(0.6))
-//                                                  .cornerRadius(10)
+                                                Rectangle()
+                                                  .foregroundColor(.clear)
+                                                  .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
+                                                  .background(Color(red: 0.24, green: 0.24, blue: 0.24).opacity(0.6))
+                                                  .cornerRadius(10)
 //
-//                                                SharedAsset.lockReward.swiftUIImage
-//                                                    .resizable()
-//                                                    .frame(width: getUIScreenBounds().width * 0.082, height: getUIScreenBounds().width * 0.082)
+                                                SharedAsset.lockReward.swiftUIImage
+                                                    .resizable()
+                                                    .frame(width: getUIScreenBounds().width * 0.082, height: getUIScreenBounds().width * 0.082)
                                             }
                                             
                                             

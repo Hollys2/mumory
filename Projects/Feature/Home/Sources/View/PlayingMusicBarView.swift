@@ -40,8 +40,8 @@ public struct PlayingMusicBarView: View {
 //                            .font(.subheadline)
 //                            .foregroundColor(.white)
                         Text("재생 중인 음악이 없습니다.")
-                        .font(Font.custom("Pretendard", size: 11))
-                        .foregroundColor(.white)
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 11))
+                            .foregroundColor(.white)
                     }
                     
                     Spacer()

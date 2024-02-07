@@ -276,23 +276,25 @@ public struct HomeView: View {
     var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-                print("onChanged: \(value.translation.height)")
+//                print("onChanged: \(value.translation.height)")
                 if value.translation.height > 0 {
-                    DispatchQueue.main.async {
+//                    DispatchQueue.main.async {
                         translation.height = value.translation.height                        
-                    }
+//                    }
                 }
             }
             .onEnded { value in
-                print("onEnded: \(value.translation.height)")
+//                print("onEnded: \(value.translation.height)")
                 withAnimation(Animation.easeInOut(duration: 0.2)) {
-//                    if value.translation.height > 130 {
-//                        appCoordinator.isCreateMumorySheetShown = false
-//
-//                        mumoryDataViewModel.choosedMusicModel = nil
-//                        mumoryDataViewModel.choosedLocationModel = nil
-//                    }
-                        translation.height = 0
+                                        if value.translation.height > 130 {
+                                            appCoordinator.isCreateMumorySheetShown = false
+                    //
+                    //                        mumoryDataViewModel.choosedMusicModel = nil
+                    //                        mumoryDataViewModel.choosedLocationModel = nil
+                                        }
+                    //                    DispatchQueue.main.async {
+                    translation.height = 0
+//                }
                 }
             }
     }
@@ -333,14 +335,7 @@ public struct HomeView: View {
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
-                
-//                ZStack(alignment: .center) {
-//
-//                    Color.black.opacity(0.5)
-//
-//                    RewardPopUpView()
-//                }
-                    
+                                    
                 
                 if self.appCoordinator.isMumoryPopUpShown {
                     ZStack { // 부모 ZStack의 정렬 무시
@@ -399,6 +394,8 @@ public struct HomeView: View {
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
+                
+//                id self.appCoordinator.
                 
             } // ZStack
             .ignoresSafeArea()
@@ -509,8 +506,10 @@ public struct HomeView: View {
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown)
                 .onAppear {
                     Task {
-                        await mumoryDataViewModel.loadMusics()
+                        self.mumoryDataViewModel.fetchData()
+//                        await mumoryDataViewModel.loadMusics()
                     }
+                
                 }
             
             VStack(spacing: 0) {
@@ -546,6 +545,7 @@ public struct HomeView: View {
                   )
                   .offset(y: 89)
             }
+            .allowsHitTesting(false)
             
             VStack {
                 PlayingMusicBarView()

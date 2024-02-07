@@ -83,13 +83,13 @@ public struct CreateMumoryBottomSheetView: View {
                     Button(action: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                             let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: choosedMusicModel, locationModel: choosedLocationModel)
-                            mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
-                            mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
+//                            mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
+//                            mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
+                            mumoryDataViewModel.createMumory(newMumoryAnnotation)
                         }
                         
                         withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
                             appCoordinator.isCreateMumorySheetShown = false
-                            
                         }
                         
                         mumoryDataViewModel.choosedMusicModel = nil
@@ -527,8 +527,8 @@ public struct CreateMumoryBottomSheetView: View {
         .padding(.top, self.appCoordinator.safeAreaInsetsTop + 16)
         .ignoresSafeArea()
         .onDisappear {
-            mumoryDataViewModel.choosedMusicModel = nil
-            mumoryDataViewModel.choosedLocationModel = nil
+//            mumoryDataViewModel.choosedMusicModel = nil
+//            mumoryDataViewModel.choosedLocationModel = nil
         }
     }
 }

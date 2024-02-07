@@ -9,6 +9,7 @@
 
 import Foundation
 import Shared
+import Core
 import MapKit
 import MusicKit
 
@@ -24,8 +25,8 @@ final public class MumoryDataViewModel: ObservableObject {
     
     public init() {}
     
-    func fetchMusics(songID: String) async throws -> MusicModel {
-        let musicItemID = MusicItemID(rawValue: songID)
+    func fetchMusic(musicID: String) async throws -> MusicModel {
+        let musicItemID = MusicItemID(rawValue: musicID)
         let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
         let response = try await request.response()
         guard let song = response.items.first else {
@@ -46,14 +47,13 @@ final public class MumoryDataViewModel: ObservableObject {
         
         for id in musicIDs {
             do {
-                let songItem = try await fetchMusics(songID: id)
+                let songItem = try await fetchMusic(musicID: id)
                 let newAnnotation = MumoryAnnotation(date: Date(), musicModel: songItem, locationModel: LocationModel(locationTitle: "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", locationSubtitle: "ㅎㅎ", coordinate: userLocation.coordinate))
                 self.mumoryAnnotations.append(newAnnotation)
             } catch {
                 print("Error fetching song info for ID \(id): \(error)")
             }
         }
-        
     }
     
     // 위치 > 주소
@@ -73,6 +73,101 @@ final public class MumoryDataViewModel: ObservableObject {
             completion(locationModel)
         }
     }
+    
+    func fetchData() {
+        
+        let db = FirebaseManager.shared.db
+        
+        let playlistCollectionRef = db.collection("User").document("tester").collection("mumory")
+        
+        playlistCollectionRef.getDocuments { (snapshot, error) in
+            if let error = error {
+                print("Error fetching playlist documents: \(error.localizedDescription)")
+            } else {
+                for document in snapshot!.documents {
+                    let documentData = document.data()
+                    print("documentData: \(documentData)")
+                    
+                    if let musicItemIDString = documentData["MusicItemID"] as? String,
+                       let locationTitle = documentData["locationTitle"] as? String,
+                       let locationSubtitle = documentData["locationSubtitle"] as? String,
+                       let latitude = documentData["latitude"] as? Double,
+                       let longitude = documentData["longitude"] as? Double {
+                        
+                        Task {
+                            do {
+                                let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
+                                let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
+                                
+                                let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: musicModel, locationModel: locationModel)
+                                
+                                DispatchQueue.main.async {
+                                    self.mumoryAnnotations.append(newMumoryAnnotation)
+                                }
+                            } catch {
+                                print("Error fetching music: \(error.localizedDescription)")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    
+    func loadData() {
+        let db = FirebaseManager.shared.db
+        
+        let testerData: [String: Any] = [:]
+        
+        db.collection("User").document("tester").setData(testerData) { error in
+            if let error = error {
+                print("Error adding tester document: \(error.localizedDescription)")
+            } else {
+                print("Tester document added successfully!")
+                
+                // Add playlist data to the "playlist" collection inside the "tester" document
+                let playlistData: [String: Any] = [
+                    "playlist": ["1487778081", "1712044358", "1590067123"]
+                ]
+                
+                db.collection("User").document("tester").collection("playlist").document("").setData(playlistData) { error in
+                    if let error = error {
+                        print("Error adding playlist document: \(error.localizedDescription)")
+                    } else {
+                        print("Playlist document added successfully!")
+                    }
+                }
+            }
+        }
+    }
+    
+    public func createMumory(_ mumoryAnnotation : MumoryAnnotation) {
+        
+        let db = FirebaseManager.shared.db
+        
+        let newData: [String: Any] = [
+            "MusicItemID": String(describing: mumoryAnnotation.musicModel.songID),
+            "locationTitle": mumoryAnnotation.locationModel.locationTitle,
+            "locationSubtitle": mumoryAnnotation.locationModel.locationSubtitle,
+            "latitude": mumoryAnnotation.locationModel.coordinate.latitude,
+            "longitude": mumoryAnnotation.locationModel.coordinate.longitude
+        ]
+        
+        db.collection("User").document("tester").collection("mumory").document().setData(newData, merge: true) { error in
+            if let error = error {
+                print("Error adding tester document: \(error.localizedDescription)")
+            } else {
+                print("Tester document added successfully!")
+                
+                let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel)
+                
+                self.mumoryAnnotations.append(newMumoryAnnotation)
+            }
+        }
+        
+    }
+    
 }
 
 //    func fetchSongInfo(songId: String) async throws -> AnnotationModel {

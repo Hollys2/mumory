@@ -34,13 +34,16 @@ public struct LocationModel: Identifiable {
 
 public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
     
+    public var count: Int
+    
     public var date: Date
     public var musicModel: MusicModel
     public var locationModel: LocationModel
 
     public var coordinate: CLLocationCoordinate2D
 
-    public init(date: Date, musicModel: MusicModel, locationModel: LocationModel) {
+    public init(count: Int = 0, date: Date, musicModel: MusicModel, locationModel: LocationModel) {
+        self.count = count
         self.date = date
         self.musicModel = musicModel
         self.locationModel = locationModel
