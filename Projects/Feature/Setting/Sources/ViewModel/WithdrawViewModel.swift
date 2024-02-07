@@ -103,7 +103,7 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
             
             
             let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: idTokenString, rawNonce: nonce)
-            
+            appleIDCredential.email
             Auth.auth().signIn(with: credential) { result, error in
                 if let error = error {
                     print("sign in with firebase error: \(error)")
@@ -138,13 +138,19 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                 completion(true) //isLoginError = true -> 오류발생
             }else if let result = result{
                 print("login success")
-                self.isEmailUserAuthenticated = true
-                completion(false) //isLoginError = false -> 오류 미발생
+                result.user.delete { error in
+                    if let error = error {
+                        completion(true) //isLoginError = true -> 오류발생
+                    }else {
+                        completion(false) //isLoginError = false -> 로그인, 탈퇴 성공
+                    }
+                }
+                
             }
         }
     }
     
-    func KakaoLogin(completion: @escaping(_ isSuccessful: Bool) -> Void){
+    func KakaoLogin(originalEmail: String, completion: @escaping(_ isSuccessful: Bool) -> Void){
         if UserApi.isKakaoTalkLoginAvailable(){
             //카카오톡 어플 사용이 가능하다면
             UserApi.shared.loginWithKakaoTalk { authToken, error in
@@ -157,10 +163,27 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                     //카카오 로그인 성공
                     print("login successful with app")
                     UserApi.shared.me { user, error in
-                        if let user = user {
-                            let email = user.kakaoAccount?.email ?? ""
-                            let id = user.id ?? 0
-                            
+                        //에러 발생 하면 탈퇴 진행X
+                        if error != nil {
+                            completion(false)
+                        }
+                        
+                        //방금 로그인 한 카카오 유저 정보 확인
+                        guard let user = user else {
+                            print("no user")
+                            return
+                        }
+                        guard let email = user.kakaoAccount?.email else {
+                            print("no email")
+                            return
+                        }
+                        guard let id = user.id else {
+                            print("no id")
+                            return
+                        }
+                        
+                        if email == originalEmail {
+                            //가입했던 이메일과 현재 카카오 로그인 한 계정이 동일할 때만 탈퇴 진행
                             Auth.auth().signIn(withEmail: "kakao/\(email)", password: "kakao/\(id)") { result, error in
                                 if let error = error {
                                     print("sign in error: \(error)")
@@ -169,7 +192,10 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                                     completion(true)
                                 }
                             }
+                        }else {
+                            completion(false)
                         }
+                        
                     }
                     
                 }
@@ -184,10 +210,27 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                 }else if authToken != nil{
                     print("login successful with account")
                     UserApi.shared.me { user, error in
-                        if let user = user {
-                            let email = user.kakaoAccount?.email ?? ""
-                            let id = user.id ?? 0
-                            
+                        //에러 발생 하면 탈퇴 진행X
+                        if error != nil {
+                            completion(false)
+                        }
+                        
+                        //방금 로그인 한 카카오 유저 정보 확인
+                        guard let user = user else {
+                            print("no user")
+                            return
+                        }
+                        guard let email = user.kakaoAccount?.email else {
+                            print("no email")
+                            return
+                        }
+                        guard let id = user.id else {
+                            print("no id")
+                            return
+                        }
+                        
+                        if email == originalEmail {
+                            //가입했던 이메일과 현재 카카오 로그인 한 계정이 동일할 때만 탈퇴 진행
                             Auth.auth().signIn(withEmail: "kakao/\(email)", password: "kakao/\(id)") { result, error in
                                 if let error = error {
                                     print("sign in error: \(error)")
@@ -196,14 +239,17 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                                     completion(true)
                                 }
                             }
+                        }else {
+                            completion(false)
                         }
+                        
                     }
                 }
             }
         }
     }
     
-    func GoogleLogin(completion: @escaping(_ isSuccessful: Bool) -> Void){
+    func GoogleLogin(originalEmail: String, completion: @escaping(_ isSuccessful: Bool) -> Void){
         if let id = FirebaseApp.app()?.options.clientID {
             let config = GIDConfiguration(clientID: id)
             GIDSignIn.sharedInstance.configuration = config
@@ -212,27 +258,48 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                let window = windowScene.windows.first,
                let presentingVC = window.rootViewController {
                 
+                guard let user = Auth.auth().currentUser else {
+                    print("no user")
+                    return
+                }
+                
                 GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
+                    if error != nil {
+                        completion(false)
+                    }
                     if let error = error{
                         print("google error: \(error)")
                         completion(false)
-                    }else{
+                    }else if let result = result{
                         print("google login success")
-                        guard let idToken = result?.user.idToken?.tokenString else {print("no idToken");return}
-                        guard let accessToken = result?.user.accessToken.tokenString else {print("no accessToken");return}
-                        let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
-                        Auth.auth().signIn(with: credential) { result, error in
-                            if let error = error {
-                                print("sign in error: \(error)")
-                                completion(false)
-                            }else{
-                                completion(true)
+                        
+                        guard let googleEmail = result.user.profile?.email else {
+                            print("no email")
+                            return
+                        }
+                        
+                        //기존에 가입했던 구글 계정과 현재 계정 인증한 계정이 동일할 시에만 탈퇴 진행
+                        if googleEmail == originalEmail {
+                            guard let idToken = result.user.idToken?.tokenString else {print("no idToken");return}
+                            let accessToken = result.user.accessToken.tokenString
+                            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+                            
+                            Auth.auth().signIn(with: credential) { result, error in
+                                if let error = error {
+                                    print("sign in error: \(error)")
+                                    completion(false)
+                                }else{
+                                    completion(true)
+                                }
                             }
+                        }else {
+                            completion(false)
                         }
                         
                     }
                 }
             }
+                
         }
     }
     
