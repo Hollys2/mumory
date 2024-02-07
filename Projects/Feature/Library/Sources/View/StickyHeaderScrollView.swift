@@ -9,18 +9,27 @@
 import Foundation
 import SwiftUI
 
+enum ScrollDirection{
+    case up
+    case down
+    case stay
+}
 
 struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     @Binding var contentOffset: CGPoint
     @Binding var changeDetectValue: Bool
     @Binding var viewWidth: CGFloat
+    @Binding var scrollDirection: ScrollDirection
+    @Binding var topbarYoffset: CGFloat
     var content: () -> Content
 
     
-    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
+    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
         self._changeDetectValue = changeDetectValue
         self._contentOffset = contentOffset
         self._viewWidth = viewWidth
+        self._scrollDirection = scrollDirection
+        self._topbarYoffset = topbarYoffset
         self.content = content
 
     }
@@ -45,19 +54,49 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator(contentOffset: self._contentOffset)
+        Coordinator(contentOffset: self._contentOffset, scrollDirection: self._scrollDirection, topbarYoffset: self._topbarYoffset)
     }
     
     public class Coordinator: NSObject, UIScrollViewDelegate {
         let contentOffset: Binding<CGPoint>
+        let scrollDirection: Binding<ScrollDirection>
+        let topbarYoffset: Binding<CGFloat>
         
-        init(contentOffset: Binding<CGPoint>) { // Modify this line
+        init(contentOffset: Binding<CGPoint>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>) { // Modify this line
             self.contentOffset = contentOffset
+            self.scrollDirection = scrollDirection
+            self.topbarYoffset = topbarYoffset
         }
-        
+
         public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            contentOffset.wrappedValue = scrollView.contentOffset
+            let diff = scrollView.contentOffset.y - contentOffset.wrappedValue.y
             
+            if diff > 0{
+                //down
+                scrollDirection.wrappedValue = .down
+                if scrollView.contentOffset.y <= 0 {
+                    topbarYoffset.wrappedValue = 0
+                }else{
+                    topbarYoffset.wrappedValue -= diff
+                }
+            }else if diff < 0 {
+                //up
+                scrollDirection.wrappedValue = .up
+                if scrollView.contentOffset.y <= 0 {
+                    topbarYoffset.wrappedValue = 0
+                }else {
+                    if topbarYoffset.wrappedValue < 0 {
+                        if topbarYoffset.wrappedValue - diff > 0 {
+                            topbarYoffset.wrappedValue = 0
+                        }else {
+                            topbarYoffset.wrappedValue -= diff //diff가 음수이기 때문에 사실상 덧셈
+                        }
+                    }
+                }
+       
+            }
+            contentOffset.wrappedValue = scrollView.contentOffset
+
         }
     }
 }

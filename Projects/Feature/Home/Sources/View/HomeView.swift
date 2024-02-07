@@ -40,7 +40,7 @@ public struct HomeView: View {
     
     public var body: some View {
 
-        ZStack {
+        ZStack(alignment: .top) {
             VStack(spacing: 0) {
                 switch selectedTab {
                 case .home:
@@ -121,6 +121,7 @@ public struct HomeView: View {
                             }
                         }
                 }
+
 
         }
         .sheet(isPresented: $isBottomSheetShown) {
