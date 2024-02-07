@@ -55,17 +55,30 @@ public struct SplashView: View {
                         print("로그인된 계정 존재함")
                         print("email: \(user.email ?? "no mail")")
                         db.collection("User").document(user.uid).getDocument { snapshot, error in
-                            if let snapshot = snapshot {
-                                if snapshot.exists {
-                                    if let data = snapshot.data(){
-                                        //이용약관 동의와 커스텀 완료 여부
-                                        isSignInCompleted = (data["is_checked_service_news_notification"] != nil) && (data["id"] != nil)
-                                        isInitialSettingDone = true
-                                    }
-                                }
-                            }else {
+                            if let error = error {
+                                print("error 발생: \(error)")
                                 isSignInCompleted = false
                                 isInitialSettingDone = true
+                            }else{
+                                guard let snapshot = snapshot else {
+                                    isSignInCompleted = false
+                                    isInitialSettingDone = true
+                                    return
+                                }
+                                
+                                if snapshot.exists {
+                                    guard let data = snapshot.data() else {
+                                        isSignInCompleted = false
+                                        isInitialSettingDone = true
+                                        return
+                                    }
+                                    isSignInCompleted = (data["is_checked_service_news_notification"] != nil) && (data["id"] != nil)
+                                    isInitialSettingDone = true
+                                }else {
+                                    isSignInCompleted = false
+                                    isInitialSettingDone = true
+                                }
+                               
                             }
                         }
                     }else{

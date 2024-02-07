@@ -107,6 +107,7 @@ struct SettingView: View {
                             }
                         
                     }
+                    .background(ColorSet.background)
                     .navigationBarBackButtonHidden()
                     .navigationBarTitleDisplayMode(.inline)
                     .navigationDestination(isPresented: $isNeededEmailLogin, destination: {
@@ -119,6 +120,9 @@ struct SettingView: View {
                     })
                     .navigationDestination(isPresented: $isUserDeleted, destination: {
                         LoginView()
+                    })
+                    .onDisappear(perform: {
+                        isLoading = false
                     })
                     .toolbar {
                         ToolbarItem(placement: .navigationBarLeading) {
@@ -148,7 +152,6 @@ struct SettingView: View {
                                 .foregroundColor(.white)
                         }
                     }
-                    .background(ColorSet.background)
                 }
                 if isShowingWithdrawPopup{
                     Color.black.opacity(0.5).ignoresSafeArea()
@@ -261,8 +264,8 @@ struct SettingView: View {
                         if let error = error {
                             print("delete document error: \(error)")
                         }else {
-                            isUserDeleted = true
                             isLoading = false
+                            isUserDeleted = true
                         }
                     }
                 }
