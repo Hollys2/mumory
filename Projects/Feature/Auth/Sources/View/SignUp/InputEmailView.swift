@@ -15,7 +15,6 @@ public struct InputEmailView: View {
     @State var email: String = ""
     @State var errorText: String = ""
     @State var localTimer = 0.0
-    @State var isGoodEmail: Bool = false //중복X
     @State var isValidStyle: Bool = false //이메일형식O
     @State var timer: Timer?
     public init(){}
@@ -51,9 +50,9 @@ public struct InputEmailView: View {
                     })
                 
                 //이메일 형식 오류 텍스트
-                Text(errorText)
+                Text(manager.isValidEmail ? "올바른 형식 입니다." : errorText)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundColor(Color(red: 1, green: 0.34, blue: 0.34))
+                    .foregroundColor(manager.isValidEmail ? ColorSet.validGreen : ColorSet.errorRed)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 40)
                     .padding(.top, 15)

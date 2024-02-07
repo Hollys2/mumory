@@ -110,7 +110,6 @@ struct EmailLoginView: View {
                     }
                 })
                 .onTapGesture {
-                    dismiss()
                     self.hideKeyboard()
                 }
             }

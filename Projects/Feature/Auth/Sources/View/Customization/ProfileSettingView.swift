@@ -33,6 +33,8 @@ struct ProfileSettingView: View {
     @State var isValidNicknameStyle: Bool = false
     @State var isValidIDStyle: Bool = false
     
+    
+    
     var profileImageList: [Image] = [SharedAsset.profileSelectRed.swiftUIImage, SharedAsset.profileSelectGray.swiftUIImage, SharedAsset.profileSelectOrange.swiftUIImage, SharedAsset.profileSelectPurple.swiftUIImage, SharedAsset.profileSelectYellow.swiftUIImage]
         
     var body: some View {
@@ -133,13 +135,13 @@ struct ProfileSettingView: View {
                                 }
                             })
 
-                        Text(nicknameErrorString)
-                            .foregroundStyle(.red)
+                        Text(manager.isValidNickname ? "•  사용할 수 있는 닉네임 입니다." : nicknameErrorString)
+                            .foregroundStyle(manager.isValidNickname ? ColorSet.validGreen : ColorSet.errorRed)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                             .padding(.leading, 30)
                             .padding(.top, 14)
-                            .frame(height: nicknameErrorString.count > 0 ? nil : 0)
+                            .frame(height: nicknameErrorString.count > 0 ? nil : manager.isValidNickname ? nil : 0)
                         
                         HStack(spacing: 0){
                             Text("검색 ID")
@@ -211,13 +213,13 @@ struct ProfileSettingView: View {
                             }
                         })
                         
-                        Text(idErrorString)
-                            .foregroundStyle(.red)
+                        Text(manager.isValidID ? "•  사용할 수 있는 ID 입니다." : idErrorString)
+                            .foregroundStyle(manager.isValidID ? ColorSet.validGreen : ColorSet.errorRed)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                             .padding(.leading, 30)
                             .padding(.top, 14)
-                            .frame(height: idErrorString.count > 0 ? nil : 0)
+                            .frame(height: idErrorString.count > 0 ? nil : manager.isValidID ? nil : 0)
                         
                         Rectangle()
                             .fill(.clear)
@@ -244,83 +246,9 @@ struct ProfileSettingView: View {
         })
     }
     
-
-    
-//    private func getNicknameError(nickname: String){
-//        
-//        if nickname.count > 0 && nickname.count < 2 {
-//            nicknameErrorString = "•  2자 이상 입력해주세요"
-//            manager.nickname = ""
-//        }else{
-//            let db = FirebaseManager.shared.db
-//            let query = db.collection("User").whereField("nickname", isEqualTo: nickname)
-//            
-//            query.getDocuments { snapshot, error in
-//                if let error = error {
-//                    print("query error: \(error)")
-//                }else if let snapshot = snapshot{
-//                    let dataCount = snapshot.count
-//                    
-//                    //동일한 문자열이 존재한다면
-//                    if dataCount > 0 {
-//                        nicknameErrorString = "•  이미 사용중인 닉네임 입니다."
-//                        manager.nickname = ""
-//                    }else{
-//                        nicknameErrorString = ""
-//                        manager.nickname = nickname
-//                        print("nickname: \(manager.nickname), id: \(manager.id)")
-//                        
-//                        
-//                    }
-//                }else {
-//                    print("snapshot error")
-//                }
-//            }
-//        }
-//    }
-    
-//    private func getIdError(id: String) {
-//        print("nickname: \(manager.nickname), id: \(manager.id)")
-//        if id.count > 0 {
-//            if isValidID(id: id){
-//                let db = FirebaseManager.shared.db
-//                let query = db.collection("User").whereField("id", isEqualTo: id)
-//                
-//                query.getDocuments { snapshot, error in
-//                    if let error = error {
-//                        print("query error: \(error)")
-//                    }else if let snapshot = snapshot{
-//                        if snapshot.isEmpty {
-//                            idErrorString = "•  이미 사용중인 ID 입니다."
-//                            manager.id = ""
-//                        }else{
-//                            idErrorString = ""
-//                            manager.id = id
-//                            print("nickname: \(manager.nickname), id: \(manager.id)")
-//                            
-//                        }
-//                    }else {
-//                        print("snapshot error")
-//                    }
-//                }
-//            }else{
-//                idErrorString = "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
-//                manager.id = ""
-//            }
-//        }else {
-//            idErrorString = ""
-//        }
-//    }
-    
-//    private func isValidID(id: String) -> Bool {
-//        let idRegex = "^[a-zA-Z0-9_]+$"
-//        let idPredicate = NSPredicate(format:"SELF MATCHES %@", idRegex)
-//        return idPredicate.evaluate(with: id)
-//    }
-    
     private func isValidIDStyle(id: String){
         manager.isValidID = false
-        let idRegex = "^[a-zA-Z0-9_]+$"
+        let idRegex = "^[a-zA-Z0-9_]{1,15}$"
         let idPredicate = NSPredicate(format:"SELF MATCHES %@", idRegex)
         isValidIDStyle = idPredicate.evaluate(with: id)
         idErrorString = id.count <= 0 ? "" : isValidIDStyle ? "" : "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
@@ -353,11 +281,11 @@ struct ProfileSettingView: View {
     
     private func isValidNicknameStyle(nickname: String){
         manager.isValidNickname = false
-        let nicknameRegex = "^[a-zA-Z가-힣0-9]{3,}$"
+        let nicknameRegex = "^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ]{3,7}$"
         let nicknamePredicate = NSPredicate(format:"SELF MATCHES %@", nicknameRegex)
 
         isValidNicknameStyle = nicknamePredicate.evaluate(with: nickname)
-        nicknameErrorString = nickname.count <= 0 ? "" : isValidNicknameStyle ? "" : "•  한글, 영어, 숫자 - 3자 이상"
+        nicknameErrorString = nickname.count <= 0 ? "" : isValidNicknameStyle ? "" : "•  3~7자 사이로 영어,한글만 사용할 수 있습니다."
     }
     
     private func checkNickname(nickname: String){
