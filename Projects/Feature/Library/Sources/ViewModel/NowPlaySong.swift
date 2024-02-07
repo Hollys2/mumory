@@ -1,5 +1,4 @@
 //
-//  NowPlaySong.swift
 //  Feature
 //
 //  Created by 제이콥 on 11/27/23.
@@ -9,7 +8,7 @@
 import Foundation
 import MusicKit
 
-public class NowPlaySong: ObservableObject {
+public class PlayerViewModel: ObservableObject {
     public init() {
     }
     

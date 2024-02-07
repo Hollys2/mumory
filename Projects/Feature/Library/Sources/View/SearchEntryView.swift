@@ -11,6 +11,7 @@ import Shared
 
 struct SearchEntryView: View {
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
+    
 //    @State var recentSearchList: [String] = []
 
     var body: some View {

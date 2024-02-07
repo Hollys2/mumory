@@ -37,10 +37,13 @@ public struct InputEmailView: View {
                     .padding(.trailing, 20)
                     .onChange(of: email, perform: { value in
                         localTimer = 0
-                        isValidEmail(email: value.lowercased())
+                        errorText = ""
+                        manager.isValidEmail = false
                     })
                     .onChange(of: localTimer, perform: { value in
-                        if localTimer > 1 && localTimer < 2 {
+                        if localTimer == 0.8 {
+                            isValidEmail(email: email)
+                        }else if localTimer >= 1.0 && localTimer <= 1.2 {
                             if isValidStyle {
                                 checkValidEmail()
                             }
@@ -59,8 +62,8 @@ public struct InputEmailView: View {
                 if manager.isValidEmail {
                     email = manager.email
                 }
-                self.timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
-                    localTimer += 0.5
+                self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
+                    localTimer += 0.2
                 }
             })
             .onDisappear(perform: {
@@ -68,22 +71,6 @@ public struct InputEmailView: View {
             })
  
         
-    }
-    
-    private func getErrorMessage() -> String {
-        if email.count > 0 {
-            if manager.isValidEmailStyle {
-                if manager.isAvailableEmail{
-                    return ""
-                }else {
-                    return "이미 사용 중인 이메일입니다."
-                }
-            }else {
-                return "이메일 형식이 올바르지 않습니다. :("
-            }
-        }else {
-            return ""
-        }
     }
     
     private func isValidEmail(email: String) {
@@ -95,7 +82,7 @@ public struct InputEmailView: View {
         
         
         isValidStyle = emailPredicate.evaluate(with: email)
-        errorText = isValidStyle ? "" : "이메일 형식이 올바르지 않습니다. :("
+        errorText = email.count <= 0 ? "" : isValidStyle ? "" : "이메일 형식이 올바르지 않습니다. :("
     }
     
     private func checkValidEmail(){

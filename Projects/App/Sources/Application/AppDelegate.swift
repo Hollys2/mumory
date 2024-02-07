@@ -22,7 +22,6 @@ public class AppDelegate: NSObject, UIApplicationDelegate{
         print("launch in appdelegate")
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
-//        Messaging.messaging().send
         UNUserNotificationCenter.current().delegate = self
         
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]

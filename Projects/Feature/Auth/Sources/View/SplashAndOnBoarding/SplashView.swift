@@ -14,12 +14,9 @@ import FirebaseAuth
 
 public struct SplashView: View {
     public init(){}
-    @State var hasUid: Bool?
     @State var isSignInCompleted: Bool?
     @State var hasLoginHistory: Bool?
     @State var isNextViewPresenting: Bool = false
-    @State var isCustomizationDone: Bool?
-    @State var isTermsOfServiceDone: Bool?
     @State var isInitialSettingDone = false
     public var body: some View {
         NavigationStack{
@@ -34,86 +31,41 @@ public struct SplashView: View {
             }
             .transition(.opacity)
             .navigationDestination(isPresented: $isNextViewPresenting) {
-                if isNextViewPresenting{
-                    if !(isSignInCompleted ?? false) {
-                        //로그인 실패
-                        if hasLoginHistory ?? false{
-                            //로그인 기록O
-                            LoginView()
-                        }else {
-                            //로그인 기록X
-                            OnBoardingManageView()
-                        }
-                    }else if !(isTermsOfServiceDone ?? false){
-                        //이용약관 동의X
-                        LoginView()
-                    }else if !(isCustomizationDone ?? false) {
-                        //프로필 커스텀 X
+                if isNextViewPresenting {
+                    if isSignInCompleted ?? false {
+                        HomeView()
+                    }else if hasLoginHistory ?? false {
                         LoginView()
                     }else {
-                        //이용약관O, 커스텀O
-                        HomeView()
+                        OnBoardingManageView()
                     }
                 }
             }
             .onAppear(perform: {
                 //타이머와 초기셋팅 동시에 진행
                 DispatchQueue.global().async {
-                    let userDefault = UserDefaults.standard
-
-                    //로그인한 기록이 있는지 확인
-                    hasLoginHistory = (userDefault.value(forKey: "loginHistory") != nil)
-                    
-                    //현재 로그인 되어있는 상태인지 확인
-//                    hasCurrentUser = (Auth.auth().currentUser != nil)
-                    
                     let Firebase = FirebaseManager.shared
                     let db = Firebase.db
                     let auth = Firebase.auth
                     
-                    if let user = Auth.auth().currentUser {
-                        user.uid
-                    }
+                    //로그인한 기록이 있는지 확인
+                    hasLoginHistory = (UserDefaults.standard.value(forKey: "loginHistory") != nil)
                     
                     if let user = auth.currentUser {
                         print("로그인된 계정 존재함")
                         print("email: \(user.email ?? "no mail")")
                         db.collection("User").document(user.uid).getDocument { snapshot, error in
-                            if let error = error {
-                                print("get document error: \(error)")
-                                isSignInCompleted = false
-                            }else if let snapshot = snapshot {
+                            if let snapshot = snapshot {
                                 if snapshot.exists {
-                                    print("document 존재")
                                     if let data = snapshot.data(){
-                                        isSignInCompleted = true
-                                        if let checkedThing = data["is_checked_service_news_notification"] {
-                                            print("이용약관 존재")
-                                            isTermsOfServiceDone = true
-                                            if let id = data["id"]{
-                                                print("id 존재")
-                                                isCustomizationDone = true
-                                                isInitialSettingDone = true
-                                            }else{
-                                                print("id 존재X")
-                                                isCustomizationDone = false
-                                                isInitialSettingDone = true
-                                            }
-                                        }else {
-                                            print("이용약관 존재 X")
-                                            isTermsOfServiceDone = false
-                                            isInitialSettingDone = true
-                                        }
-                                    }else {
-                                        print("data 존재X")
-                                        isSignInCompleted = false
+                                        //이용약관 동의와 커스텀 완료 여부
+                                        isSignInCompleted = (data["is_checked_service_news_notification"] != nil) && (data["id"] != nil)
                                         isInitialSettingDone = true
                                     }
-                                }else {
-                                    print("document 존재X")
-                                    isSignInCompleted = false
-                                    isInitialSettingDone = true
                                 }
+                            }else {
+                                isSignInCompleted = false
+                                isInitialSettingDone = true
                             }
                         }
                     }else{

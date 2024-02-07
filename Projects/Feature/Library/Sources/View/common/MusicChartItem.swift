@@ -16,8 +16,7 @@ struct MusicChartItem: View {
     let artist = "아티스트"
     var song: Song
     var body: some View {
-//        ZStack{
-//            LibraryColorSet.background
+        VStack(spacing: 0) {
             HStack(spacing: 16){
                 AsyncImage(url: song.artwork?.url(width: 300, height: 300), content: { image in
                     image
@@ -51,12 +50,22 @@ struct MusicChartItem: View {
                 Spacer()
                 
                 SharedAsset.menu.swiftUIImage
+                    .frame(width: 22, height: 22)
+                    .padding(.trailing, 15)
             }
-            .padding(.leading, 20)
-            .padding(.trailing, 15)
+            .padding(.top, 15)
+            .padding(.bottom, 15)
+            
+            Divider()
+                .frame(maxWidth: .infinity)
+                .frame(height: 0.5)
+                .background(ColorSet.subGray)
+                .opacity(rank%4 == 0 ? 0 : 1)
+        }
+        .padding(.leading, 20)
+       
         }
 
-//    }
 }
 
 //#Preview {
