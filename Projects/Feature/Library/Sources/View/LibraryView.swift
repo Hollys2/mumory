@@ -132,7 +132,6 @@ struct LibraryView: View {
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
                 if newValue == .up {
-                    print("up")
                     if contentOffset.y >= 70 {
                         scrollYOffset = -70
                     }
@@ -151,22 +150,6 @@ struct LibraryView: View {
     }
 }
 
-//struct SwitchView: View{
-//    @EnvironmentObject var manager: LibraryManageModel
-//    @EnvironmentObject var playerManager: PlayerViewModel
-//    @EnvironmentObject var setView: SetView
-//    var isMyMusic: Bool = true
-//
-//    var body: some View{
-//        if isMyMusic{
-//            MyPlaylistView()
-//        }else{
-//            RecommendationView()
-//                .environmentObject(playerManager)
-//                .environmentObject(manager)
-//        }
-//    }
-//}
 
 //#Preview {
 //    LibraryView()

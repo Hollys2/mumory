@@ -119,8 +119,7 @@ class UIStickyScrollViewController: UIViewController{
         scrollView.showsHorizontalScrollIndicator = false
         
         self.hostingController.view.backgroundColor = .clear
-//        self.scrollView.backgroundColor = UIColor(red: 0, green: 1, blue: 0, alpha: 0.5)
-//        self.view.backgroundColor = UIColor(red: 1, green: 0.5, blue: 0.5, alpha: 0.5)
+
         
         self.view.addSubview(self.scrollView)
         self.pinEdges(of: self.scrollView, to: self.view)
@@ -129,11 +128,7 @@ class UIStickyScrollViewController: UIViewController{
         self.scrollView.addSubview(self.hostingController.view)
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
-//        
-//        print("1content size: \(scrollView.contentSize)")
-//        print("1hosting size: \(hostingController.view.frame.size)")
-//        print("1scrollview size: \(scrollView.frame.size)")
-//        print("1view size: \(view.frame.size)")
+
 
     }
 
