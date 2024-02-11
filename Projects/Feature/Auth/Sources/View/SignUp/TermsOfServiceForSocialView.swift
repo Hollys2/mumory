@@ -13,12 +13,13 @@ import Lottie
 
 struct TermsOfServiceForSocialView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject var manager: CustomizationManageViewModel = CustomizationManageViewModel()
+    
     @State var isEntireChecked: Bool = false
     @State var isCheckedFirstItem: Bool = false
     @State var isCheckedSecondItem: Bool = false
     @State var isCheckedServiceNewsNotification: Bool = false
     @State var isTOSDone = false
-    @State var isLoading: Bool = false
     
     var body: some View {
         GeometryReader(content: { geometry in
@@ -85,8 +86,10 @@ struct TermsOfServiceForSocialView: View {
                         .padding(.top, 35)
                         .padding(.bottom, 64)
                     
+                    
                     Button(action: {
-                        setUserData()
+                        manager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
+                        isTOSDone = true
                     }, label: {
                         WhiteButton(title: "회원가입", isEnabled: isCheckedFirstItem && isCheckedSecondItem)
                             .padding(.bottom, 20)
@@ -96,17 +99,10 @@ struct TermsOfServiceForSocialView: View {
                     .disabled(!(isCheckedFirstItem && isCheckedSecondItem))
                     
                 }
-                
-                LottieView(animation: .named("loading", bundle: .module))
-                    .looping()
-                    .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
-                
-                
-                
             }
             .navigationDestination(isPresented: $isTOSDone, destination: {
                 StartCostomizationView()
+                    .environmentObject(manager)
             })
             .navigationBarBackButtonHidden()
             .toolbar(content: {
@@ -120,48 +116,7 @@ struct TermsOfServiceForSocialView: View {
             })
         })
     }
-    
-    private func setUserData() {
-        isLoading = true
-        
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        let messaging = Firebase.messaging
-        let auth = Firebase.auth
-        
-        guard let currentUser = auth.currentUser else {
-            print("no current user. please sign in again")
-            return
-        }
-        
-        let query = db.collection("User").document(currentUser.uid)
-        
-        let userData = [
-            "is_checked_service_news_notification" : isCheckedServiceNewsNotification,
-            "is_checked_social_notification": true
-        ]
-        
-        if isCheckedServiceNewsNotification {
-            messaging.subscribe(toTopic: "SERVICE")
-        }
-        
-        messaging.subscribe(toTopic: "SOCIAL")
-        
-        query.getDocument { snapshot, error in
-            if let error = error {
-                print("get documnet error: \(error)")
-            }else if let snapshot = snapshot {
-                snapshot.reference.setData(userData, merge: true) { error in
-                    if let error = error {
-                        print("set data error: \(error)")
-                    }else {
-                        isTOSDone = true
-                        isLoading = false
-                    }
-                }
-            }
-        }
-    }
+
 }
 
 #Preview {

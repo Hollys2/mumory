@@ -248,7 +248,7 @@ struct ProfileSettingView: View {
     
     private func isValidIDStyle(id: String){
         manager.isValidID = false
-        let idRegex = "^[a-zA-Z0-9_]{1,15}$"
+        let idRegex = "^[a-zA-Z0-9_]{5,15}$"
         let idPredicate = NSPredicate(format:"SELF MATCHES %@", idRegex)
         isValidIDStyle = idPredicate.evaluate(with: id)
         idErrorString = id.count <= 0 ? "" : isValidIDStyle ? "" : "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."

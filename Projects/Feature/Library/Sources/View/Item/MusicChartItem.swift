@@ -22,9 +22,12 @@ struct MusicChartItem: View {
                     image
                         .resizable()
                         .frame(width: 40, height: 40)
-                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5)))
+                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular))
                 }, placeholder: {
-                    //
+                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                        .foregroundStyle(.gray)
+                        .frame(width: 40, height: 40)
+
                 })
                 
                 Text(String(format: "%02d", rank))

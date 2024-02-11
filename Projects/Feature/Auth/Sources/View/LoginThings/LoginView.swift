@@ -7,24 +7,23 @@
 //
 
 import SwiftUI
-import CryptoKit
 import Shared
 import Core
 import KakaoSDKUser
 import Lottie
 import GoogleSignIn
-import AuthenticationServices
 import Firebase
-import FirebaseFirestore
 
 public struct LoginView: View {
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
-    @State fileprivate var currentNonce: String?
+    @EnvironmentObject var userManager: UserViewModel
+
     @State var isLoginCompleted: Bool = false
     @State var isCustomizationNotDone: Bool = false
-    @State var isTermsOfServiceNotDone: Bool = false
     @State var isLoading: Bool = false
     @State var isEmailLoginTapped = false
+    
+    let Firebase = FirebaseManager.shared
     
     public init() {}
 
@@ -39,11 +38,7 @@ public struct LoginView: View {
                     SharedAsset.logo.swiftUIImage
                         .padding(.top, geometry.size.height > 700 ? 127 : 71)
                     
-                    
-                    //로그인 버튼. 이메일부터 시작 (이후에 끝 주석 있음)
                     //이메일 로그인 버튼
-                    
-                    
                     EmailLoginButton()
                         .padding(.top, geometry.size.height > 700 ? 116 : 90)
                         .onTapGesture {
@@ -59,81 +54,15 @@ public struct LoginView: View {
                     //구글 로그인 버튼
                     LoginButtonItem(type: .google, action: tapGoogleButton)
                     
+                    //애플 로그인 버튼
                     LoginButtonItem(type: .apple, action: tapAppleButton)
-                        .onChange(of: signInWithAppleManager.isUserAuthenticated) { newValue in
-                            if newValue{
-                                if let currentUser = Auth.auth().currentUser {
+                        .onChange(of: signInWithAppleManager.isUserAuthenticated) { isUserAuthenticated in
+                            if isUserAuthenticated{
+                                if let currentUser = Firebase.auth.currentUser {
                                     checkInitialSetting(uid: currentUser.uid, email: currentUser.email, method: "Apple")
                                 }
                             }
                         }
-                    
-                    //애플 로그인 버튼 및 기능
-//                    SignInWithAppleButton(.continue) { request in
-//                        //애플 로그인 요청에 넣을 사항들
-//                        isLoading = true
-//                        let nonce = randomNonceString()
-//                        currentNonce = nonce
-//                        request.requestedScopes = [.email]
-//                        request.nonce = sha256(nonce)
-//                        
-//                    } onCompletion: { result in
-//                        //요청 결과 처리
-//                        switch(result){
-//                        case .success(let authResult):
-//                            print("apple sign in success")
-//                            
-//                            guard let appleIDCredential = authResult.credential as? ASAuthorizationAppleIDCredential else {
-//                                print("credential error")
-//                                return}
-//                            
-//                            guard let nonce = currentNonce else {
-//                                print("nonce error")
-//                                return
-//                            }
-//                            
-//                            guard let appleIDToken = appleIDCredential.identityToken else {
-//                                print("id token error")
-//                                return
-//                            }
-//                            
-//                            guard let idTokenString = String(data: appleIDToken, encoding: .utf8) else {
-//                                print("string convert error")
-//                                return
-//                            }
-//                            
-//                            
-//                            let credential = OAuthProvider.appleCredential(withIDToken: idTokenString,
-//                                                                           rawNonce: nonce,
-//                                                                           fullName: appleIDCredential.fullName)
-//                            
-//                            Auth.auth().signIn(with: credential, completion: { result, error in
-//                                if let error = error {
-//                                    //파이어베이스 로그인/회원가입 실패
-//                                    //유저에게 피드백 해주기
-//                                    print("fire sign in error: \(error)")
-//                                    
-//                                }else if let user = result?.user {
-//                                    //파이어베이스 로그인 성공
-//                                    print("firebase sign in success ")
-//                                                            
-//                                    checkInitialSetting(uid: user.uid, email: user.email, method: "Apple")
-//                                }
-//                            })
-//                            
-//                        case .failure(let error):
-//                            //애플로그인 실패 - 유저에게 피드백 해주기
-//                            print("apple sign in failure: \(error)")
-//                        }
-//                    }
-//                    .signInWithAppleButtonStyle(.black)
-//                    .frame(maxWidth: .infinity, maxHeight: 60)
-//                    .background(Color.black)
-//                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
-//                    .padding(.leading, 20)
-//                    .padding(.trailing, 20)
-//                    .padding(.top, 10)
-                    //로그인 버튼 UI 및 기능 끝
                     
                     NavigationLink {
                         SignUpManageView()
@@ -167,19 +96,16 @@ public struct LoginView: View {
             }
             .navigationBarBackButtonHidden()
             .navigationDestination(isPresented: $isCustomizationNotDone, destination: {
-                //커스텀 안 했을 시 커스텀 화면으로 이동
-                StartCostomizationView()
+                TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
             })
             .navigationDestination(isPresented: $isLoginCompleted) {
-                //로그인 완료시 홈 화면으로 이동
-                HomeView()
-            }
-            .navigationDestination(isPresented: $isTermsOfServiceNotDone) {
-                //이용약관 동의 안 했을 시 이용약관 화면으로 이동
-                TermsOfServiceForSocialView()
+                HomeView() //로그인 완료시 홈 화면으로 이동
             }
             .onDisappear(perform: {
                 isLoading = false
+                
+                //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
+                signInWithAppleManager.isUserAuthenticated = false
             })
             
         })
@@ -196,11 +122,10 @@ public struct LoginView: View {
                 if let error = error{
                     //카카오 로그인 실패
                     print("kakao login error: \(error)")
-                }else if let authToken = authToken {
+                }else if authToken != nil {
                     //카카오 로그인 성공
                     print("login successful with app")
                     signInWithKakao()
-                    
                 }
             }
         }else{
@@ -209,16 +134,12 @@ public struct LoginView: View {
                 //계정로그인
                 if let error = error{
                     print("kakao acount login error: \(error)")
-                }else if let authToken = authToken{
+                }else if authToken != nil{
                     print("login successful with account")
                     signInWithKakao()
                 }
             }
         }
-    }
-    
-    private func tapEmailButton(){
-        print("tap email button")
     }
     
     //구글 로그인 기능
@@ -268,8 +189,6 @@ public struct LoginView: View {
     //카카오 로그인 관련 코드 - 비즈 전환 후 재테스트 해야함
     private func signInWithKakao(){
         print("create user with kakao")
-        let auth = FirebaseManager.shared.auth
-        let db = FirebaseManager.shared.db
         //기존에 존재하는 유저인지 판단 후 회원가입 혹은 로그인 진행
         
         //유저 정보 접근
@@ -284,7 +203,7 @@ public struct LoginView: View {
                 guard let uid = user.id else {return} //카카오 uid
                 
                 //저장된 유저데이터에서 기존유저 판단 쿼리
-                let checkOldUserQuery = db.collection("User")
+                let checkOldUserQuery = Firebase.db.collection("User")
                     .whereField("email", isEqualTo: email)
                     .whereField("signin_method", isEqualTo: "Kakao")
                 
@@ -299,7 +218,7 @@ public struct LoginView: View {
                             print("no user")
                             
                             //비밀번호 하드코딩한 거 수정하기
-                            auth.createUser(withEmail: "kakao/\(email)", password: "kakao/\(uid)"){result, error in
+                            Firebase.auth.createUser(withEmail: "kakao/\(email)", password: "kakao/\(uid)"){result, error in
                                 if let error = error{
                                     print("firebase sign up error: \(error)")
                                 }else{
@@ -311,7 +230,7 @@ public struct LoginView: View {
                             }
                         }else {
                             //카카오 이메일이 동일한 회원 데이터가 존재하면 로그인
-                            auth.signIn(withEmail: "kakao/\(email)", password: "kakao/\(uid)") { result, error in
+                            Firebase.auth.signIn(withEmail: "kakao/\(email)", password: "kakao/\(uid)") { result, error in
                                 if let error = error {
                                     print("login error \(error)")
                                 }else if let user = result?.user{
@@ -327,49 +246,14 @@ public struct LoginView: View {
             
         }
     }
-    
-    //애플 로그인 관련 코드
-    private func randomNonceString(length: Int = 32) -> String {
-        precondition(length > 0)
-        var randomBytes = [UInt8](repeating: 0, count: length)
-        let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
-        if errorCode != errSecSuccess {
-            fatalError(
-                "Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)"
-            )
-        }
         
-        let charset: [Character] =
-        Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
-        
-        let nonce = randomBytes.map { byte in
-            // Pick a random character from the set, wrapping around if needed.
-            charset[Int(byte) % charset.count]
-        }
-        
-        return String(nonce)
-    }
-    
-    @available(iOS 13, *)
-    private func sha256(_ input: String) -> String {
-        let inputData = Data(input.utf8)
-        let hashedData = SHA256.hash(data: inputData)
-        let hashString = hashedData.compactMap {
-            String(format: "%02x", $0)
-        }.joined()
-        
-        return hashString
-    }
-
-    
     private func checkInitialSetting(uid: String, email: String?, method: String){
         //로그인 기록 및 uid 셋팅
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         
         //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
-        let db = Firestore.firestore().collection("User")
-        let query = db.document(uid)
+        let query = Firebase.db.collection("User").document(uid)
         
         query.getDocument { snapshot, error in
             if let error = error {
@@ -377,35 +261,24 @@ public struct LoginView: View {
                 //사용자 피드백
                 print("get document error: \(error)")
             }else if let snapshot = snapshot {
-                if snapshot.exists{
-                    //기존 유저 O
-                    print("기존유저O")
-                    guard let userData = snapshot.data() else {
+                if snapshot.exists {
+                    guard let data = snapshot.data() else {
                         print("no data")
                         return
                     }
-                    
-                    //이용약관 동의 했는지 확인
-                    if let isCheckedServiceNewsNotification = userData["is_checked_service_news_notification"]{
-                        //이용약관 동의 O
-                        
-                        //커스텀 할 때 기입한 id 존재 유무 확인
-                        if let id = userData["id"]{
-                            //기존유저O, 이용약관동의O, 커스텀O -> 홈화면으로 이동
-                            print("커스텀O")
-                            isLoginCompleted = true
-                        }else {
-                            print("커스텀X")
-                            //기존유저O, 커스텀X -> 커스텀 페이지로 이동
-                            isCustomizationNotDone = true
-                        }
-                    }else {
-                        //이용약관 동의X -> 이용약관 동의 페이지
-                        isTermsOfServiceNotDone = true
-                    }
-                    
+                    userManager.uid = data["uid"] as? String ?? ""
+                    userManager.id = data["id"] as? String ?? ""
+                    userManager.nickname = data["nickname"] as? String ?? ""
+                    userManager.email = data["email"] as? String ?? ""
+                    userManager.signInMethod = data["signin_method"] as? String ?? ""
+                    userManager.selectedNotificationTime = data["selected_notification_time"] as? Int ?? 0
+                    userManager.favoriteGenres = data["favorite_genres"] as? [Int] ?? []
+                    userManager.isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool ?? nil
+                    userManager.isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool ?? nil
+
+                    isCustomizationNotDone = userManager.id == "" //저장된 아이디가 없으면 커스텀부터 시작
+                    isLoginCompleted = userManager.id != "" //저장된 아이디가 있으면 홈으로 이동
                 }else{
-                    //기존 유저 X, 유저 정보 업로드 후 custom페이지 이동
                     print("기존유저X")
                     
                     let userData: [String: Any] = [
@@ -420,10 +293,59 @@ public struct LoginView: View {
                             print("add document error: \(error)")
                         }else {
                             print("upload user data successful")
-                            isTermsOfServiceNotDone = true
+                            isCustomizationNotDone = true
                         }
                     }
                 }
+                
+                
+//                if snapshot.exists{
+//                    //기존 유저 O
+//                    print("기존유저O")
+//                    guard let userData = snapshot.data() else {
+//                        print("no data")
+//                        return
+//                    }
+//                    
+//                    //이용약관 동의 했는지 확인
+//                    if let isCheckedServiceNewsNotification = userData["is_checked_service_news_notification"]{
+//                        //이용약관 동의 O
+//                        
+//                        //커스텀 할 때 기입한 id 존재 유무 확인
+//                        if let id = userData["id"]{
+//                            //기존유저O, 이용약관동의O, 커스텀O -> 홈화면으로 이동
+//                            print("커스텀O")
+//                            isLoginCompleted = true
+//                        }else {
+//                            print("커스텀X")
+//                            //기존유저O, 커스텀X -> 커스텀 페이지로 이동
+//                            isCustomizationNotDone = true
+//                        }
+//                    }else {
+//                        //이용약관 동의X -> 이용약관 동의 페이지
+//                        isTermsOfServiceNotDone = true
+//                    }
+//                    
+//                }else{
+//                    //기존 유저 X, 유저 정보 업로드 후 custom페이지 이동
+//                    print("기존유저X")
+//                    
+//                    let userData: [String: Any] = [
+//                        "uid": uid,
+//                        "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
+//                        "signin_method": method
+//                    ]
+//                    
+//                    snapshot.reference.setData(userData) { error in
+//                        if let error = error {
+//                            //업로드 에러 사용자 피드백
+//                            print("add document error: \(error)")
+//                        }else {
+//                            print("upload user data successful")
+//                            isCustomizationNotDone = true
+//                        }
+//                    }
+//                }
             }
         }
         

@@ -15,10 +15,14 @@ import FirebaseStorage
 public struct CustomizationView: View {
     let imageModel: UIImage = UIImage()
     @Environment(\.dismiss) private var dismiss
-    @StateObject var manager: CustomizationManageViewModel = CustomizationManageViewModel()
+    @EnvironmentObject var manager: CustomizationManageViewModel
+    @EnvironmentObject var userManager: UserViewModel
+    
     @State var isUploadImageCompleted = false
     @State var isUploadUserDataCompleted = false
+    @State var isUploadPlaylistCompleted = false
     @State var isCustomizationDone = false
+    
     @State var isLoading: Bool = false
     @State var isTapBackButton: Bool = false
     
@@ -175,45 +179,63 @@ public struct CustomizationView: View {
         let userDefault = UserDefaults.standard
         let db = Firebase.db
         let auth = Firebase.auth
+        let messaging = Firebase.messaging
 
         guard let currentUser = auth.currentUser else {
             print("no current user. please sign in again")
             return
         }
-//        guard let uid = userDefault.string(forKey: "uid") else{
-//            print("no uid")
-//            //아이디가 없으면 재로그인하고 다시 셋팅해야됨
-//            //유저에게 적절한 오류안내와 피드백
-//            return
-//        }
-        
+                
         //유저데이터 업로드
-        let userData: [String : Any] = [
+        var userData: [String : Any] = [
             "id": manager.id,
             "nickname": manager.nickname,
-            "favorite_genres": manager.genreList,
-            "selected_notification_time": manager.selectedTime,
+            "favorite_genres": manager.selectedGenres.map({$0.id}),
+            "selected_notification_time": manager.selectedTime
         ]
-                
-        let query = db.collection("User").document(currentUser.uid)
-        query.getDocument { snapshot, error in
-            if let error = error {
-                print("get document error: \(error)")
-            }else if let snapshot = snapshot {
-                snapshot.reference.setData(userData, merge: true) { error in
-                    if let error = error {
-                        print("document update error: \(error)")
-                        //에러처리
-                    }else{
-                        //데이터 추가 성공
-                        isUploadUserDataCompleted = true
-                        isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted
-                        isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted)
-                    }
-                }
+        
+        var playlist: [String: Any] = [
+            "title": "즐겨찾기 목록",
+            "song_IDs": [],
+            "isPrivate": true
+        ]
+        
+        //소셜 로그인했을 경우 이용약관 여부도 함께 저장(이메일 회원가입은 이전단계에서 이미 저장함)
+        if let isCheckedServiceNewsNotification = manager.isCheckedServiceNewsNotification {
+            if isCheckedServiceNewsNotification {
+                messaging.subscribe(toTopic: "SERVICE")
+            }
+            messaging.subscribe(toTopic: "SOCIAL")
+            
+            //저장할 데이터에 이용약관 동의 여부도 추가
+            userData.merge([
+                "is_checked_service_news_notification" : isCheckedServiceNewsNotification,
+                "is_checked_social_notification": true
+            ])
+        }
+                        
+        db.collection("User").document(currentUser.uid).setData(userData, merge: true) { error in
+            if error == nil {
+                //데이터 추가 성공
+                isUploadUserDataCompleted = true
+                isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted
+                isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted)
+            }else {
+                print("error \(error!)")
             }
         }
         
+        db.collection("User").document(currentUser.uid).collection("Playlist").addDocument(data: playlist) { error in
+            if error == nil {
+                isUploadPlaylistCompleted = true
+                isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted && isUploadPlaylistCompleted
+                isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted && isUploadPlaylistCompleted)
+            }
+        }
+        
+        //어플 전역에서 사용할 변수에 데이터 저장
+        setUserManagerData()
+
         //프로필 이미지 업로드
         if let data = manager.profileImageData {
             guard let jpgImage = UIImage(data: data)?.jpegData(compressionQuality: 0.2) else {
@@ -227,8 +249,8 @@ public struct CustomizationView: View {
             let imageName = "ProfileImage/\(currentUser.uid)"
             
             //업로드
-            let storageReference = Storage.storage().reference().child("\(imageName)")
-            storageReference.putData(jpgImage, metadata: metaData) { metaData, error in
+            let storageRef = Storage.storage().reference().child("\(imageName)")
+            storageRef.putData(jpgImage, metadata: metaData) { metaData, error in
                 if let error = error {
                     print("storage error \(error)")
                     //에러시 어케 대처??
@@ -249,6 +271,15 @@ public struct CustomizationView: View {
             isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted
             isLoading = !(isUploadImageCompleted && isUploadUserDataCompleted)
         }
+    }
+    
+    private func setUserManagerData(){
+        userManager.id = manager.id
+        userManager.nickname = manager.nickname
+        userManager.favoriteGenres = manager.selectedGenres.map({$0.id})
+        userManager.selectedNotificationTime = manager.selectedTime
+        userManager.isCheckedServiceNewsNotification = manager.isCheckedServiceNewsNotification
+        userManager.isCheckedSocialNotification = true
     }
 }
 

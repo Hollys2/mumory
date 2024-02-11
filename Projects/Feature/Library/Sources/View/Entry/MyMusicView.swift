@@ -20,11 +20,19 @@ struct MyMusicView: View {
                 MyRecentMusicView()
                     .environmentObject(manager)
                     .environmentObject(playerManager)
+                    .background()
+                
+                Divider()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 0.3)
+                    .background(ColorSet.subGray)
+                    .padding(.top, 45)
                 
                 MyPlaylistView()
                     .environmentObject(manager)
                     .environmentObject(playerManager)
-                
+                    .padding(.top, 35)
+
                 
             })
         }

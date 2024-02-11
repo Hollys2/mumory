@@ -16,7 +16,7 @@ import Core
 public struct SelectGenreView: View {
     @EnvironmentObject var manager: CustomizationManageViewModel
     //장르가 결정되면, 서버에서 받아오기
-    @State private var genreList: [String] = []
+//    @State private var genreList: [String] = []
     
     public var body: some View {
         ZStack{
@@ -69,24 +69,22 @@ public struct SelectGenreView: View {
                         //Tag Layout
                         //2차원배열이기 때문에 ForEach 2개 사용
                         VStack(spacing: 13, content: {
-                            ForEach(gerRows(list: genreList, screenWidth: geometry.size.width), id: \.self){ list in
+                            ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: geometry.size.width), id: \.self){ genreList in
                                 HStack(spacing: 9, content: {
-                                    ForEach(list, id: \.self){ genreText in
-                                        Text(genreText)
+                                    ForEach(genreList, id: \.self){ genre in
+                                        Text(genre.name)
                                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
-                                            .padding(.leading, 19)
-                                            .padding(.trailing, 19)
-                                            .padding(.top, 10)
-                                            .padding(.bottom, 10)
-                                            .background(manager.contains(genre: genreText) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-                                            .foregroundStyle(manager.contains(genre: genreText) ? Color.black : ColorSet.lightGray)
+                                            .padding(.horizontal, 19)
+                                            .padding(.vertical, 8)
+                                            .background(manager.contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
+                                            .foregroundStyle(manager.contains(genre: genre) ? Color.black : ColorSet.lightGray)
                                             .overlay(content: {
                                                 RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                                    .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genreText) ? 0 : 1)
+                                                    .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genre) ? 0 : 1)
                                             })
                                             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                             .onTapGesture {
-                                                manager.appendGenre(genre: genreText)
+                                                manager.appendGenre(genre: genre)
                                             }
                                         
                                     }
@@ -107,7 +105,6 @@ public struct SelectGenreView: View {
             
         }
         .onAppear(perform: {
-            getGenreList()
         })
         
         
@@ -125,13 +122,13 @@ public struct SelectGenreView: View {
     //기존 장르 배열을 2차원 배열로 가공하기
     //화면에 띄워질 모습 그대로를 2차원 배열로 저장. 한 행에 가능한 개수만큼만 나눠지도록 함
     //크기를 계산해서 첫번재 행에 3개, 두번째 행에 4개가 가능하다면 똑같은 형태로 저장
-    private func gerRows(list: [String], screenWidth: CGFloat) ->[[String]] {
+    private func gerRows(list: [MusicGenre], screenWidth: CGFloat) ->[[MusicGenre]] {
         var sumWidth: CGFloat = 0
-        var returnValue:[[String]] = [[]]
+        var returnValue:[[MusicGenre]] = [[]]
         let screen = screenWidth - 40 //좌우 여백 20씩
         var index = 0
         for genre in list{
-            let textWidth = getTextWidth(term: genre)
+            let textWidth = getTextWidth(term: genre.name)
             if sumWidth + textWidth > screen{
                 sumWidth = textWidth
                 index += 1
@@ -145,22 +142,22 @@ public struct SelectGenreView: View {
         return returnValue
     }
     
-    private func getGenreList(){
-        let db = FirebaseManager.shared.db
-        db.collection("Admin").document("Data").getDocument { snapShot, error in
-            if let error = error {
-                print("firestore error: \(error)")
-            }else if let snapshot = snapShot {
-                if let data = snapshot.data(){
-                    guard let genreList = data["genre_list"] as? [String] else {
-                        print("no genreList")
-                        return
-                    }
-                    self.genreList = genreList
-                }
-            }
-        }
-    }
+//    private func getGenreList(){
+//        let db = FirebaseManager.shared.db
+//        db.collection("Admin").document("Data").getDocument { snapShot, error in
+//            if let error = error {
+//                print("firestore error: \(error)")
+//            }else if let snapshot = snapShot {
+//                if let data = snapshot.data(){
+//                    guard let genreList = data["genre_list"] as? [String] else {
+//                        print("no genreList")
+//                        return
+//                    }
+//                    self.genreList = genreList
+//                }
+//            }
+//        }
+//    }
 }
 
 //#Preview {

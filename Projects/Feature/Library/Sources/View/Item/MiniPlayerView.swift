@@ -13,27 +13,23 @@ import MusicKit
 struct MiniPlayerView: View {
     @EnvironmentObject var playerManager: PlayerViewModel
     private var player = ApplicationMusicPlayer.shared
-    @State var isDisappear = false
-    @State var isPlaying = false
     
     var body: some View {
-        ZStack{
-            VStack{
-                Spacer()
+  
                 HStack(spacing: 0, content: {
                     AsyncImage(url: playerManager.song?.artwork?.url(width: 100, height: 100), content: { image in
                         image
                             .resizable()
                             .frame(width: 40, height: 40)
-                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5)))
+                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular))
                     }, placeholder: {
-                        //
+                        RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular)
+                            .fill(.gray)
+                            .frame(width: 40, height: 40)
                     })
                     .padding(.leading, 25)
                     
-                    //                RoundedRectangle(cornerSize: CGSize(width: 5, height: 5))
-                    //                    .fill(.gray)
-                    //                    .frame(width: 40, height: 40)
+                    
                     
                     
                     VStack(spacing: 4, content: {
@@ -49,7 +45,7 @@ struct MiniPlayerView: View {
                                 Task{
                                     do {
                                         try await player.play()
-                                        isPlaying = true
+                                        playerManager.isPlaying = true
                                     } catch {
                                         print("Failed to prepare to play with error: \(error).")
                                     }
@@ -67,32 +63,28 @@ struct MiniPlayerView: View {
                     .padding(.leading, 8)
                     Spacer()
                     
-                    ZStack{
+                    if playerManager.isPlaying{
                         SharedAsset.pause.swiftUIImage
-                            .disabled(!isPlaying)
-                            .opacity(isPlaying ? 1 : 0)
-                        
+                            .frame(width: 20, height: 20)
+                            .padding(.trailing, 30)
+                            .onTapGesture {
+                                player.pause()
+                            }
+                    }else {
                         SharedAsset.play.swiftUIImage
-                            .disabled(isPlaying)
-                            .opacity(isPlaying ? 0 : 1)
-                    }
-                    .frame(width: 20, height: 20)
-                    .padding(.trailing, 30)
-                    .onTapGesture {
-                        isPlaying = !isPlaying
-                        
-                        if isPlaying {
-                            Task{
-                                do {
-                                    try await player.play()
-                                } catch {
-                                    print("Failed to prepare to play with error: \(error).")
+                            .frame(width: 20, height: 20)
+                            .padding(.trailing, 30)
+                            .onTapGesture {
+                                Task{
+                                    do {
+                                        try await player.play()
+                                    } catch {
+                                        print("Failed to prepare to play with error: \(error).")
+                                    }
                                 }
                             }
-                        }else {
-                            player.pause()
-                        }
                     }
+    
                     
                     SharedAsset.musicForward.swiftUIImage
                         .frame(width: 20, height: 20)
@@ -102,27 +94,30 @@ struct MiniPlayerView: View {
                     SharedAsset.playerX.swiftUIImage
                         .frame(width: 20, height: 20)
                         .padding(.trailing, 20)
+                        .onTapGesture {
+                            playerManager.isPresent = false
+                        }
                     
                     
                     
                 })
-                .padding(.leading, 8)
-                .padding(.trailing, 8)
-                .frame(width: 370, height: 70)
-                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 35, height: 35)))
+                .frame(maxWidth: .infinity)
+                .padding(.top, 15)
+                .padding(.bottom, 15)
+                .background(ColorSet.background)
+                .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
                 .overlay( /// apply a rounded border
                     RoundedRectangle(cornerRadius: 35, style: .circular)
-                        .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 0.3)
+                        .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 0.5)
                 )
                 .padding(.bottom, 10)
-                
-                
-                
-            }
+                .padding(.leading, 8)
+                .padding(.trailing, 8)
+                .opacity(playerManager.isPresent ? 1 : 0)
+
         }
         
-    }
+    
 }
 
 //#Preview {

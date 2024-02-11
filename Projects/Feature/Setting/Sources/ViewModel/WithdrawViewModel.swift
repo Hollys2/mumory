@@ -138,11 +138,18 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
                 completion(true) //isLoginError = true -> 오류발생
             }else if let result = result{
                 print("login success")
+                let uid = result.user.uid
                 result.user.delete { error in
                     if let error = error {
                         completion(true) //isLoginError = true -> 오류발생
                     }else {
-                        completion(false) //isLoginError = false -> 로그인, 탈퇴 성공
+                        db.collection("User").document(uid).delete { error in
+                            if let error = error {
+                                completion(true) //isLoginError = true -> 오류발생
+                            }else {
+                                completion(false) //isLoginError = false -> 성공
+                            }
+                        }
                     }
                 }
                 

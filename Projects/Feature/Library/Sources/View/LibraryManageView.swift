@@ -15,9 +15,7 @@ public struct LibraryManageView: View {
     @State private var path = NavigationPath()
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var recentSearchObject: RecentSearchObject
-    
-    //    @EnvironmentObject var setView: SetView
-    @StateObject var setView: SetView = SetView()
+    @EnvironmentObject var userManager: UserViewModel
     @StateObject var manager: LibraryManageModel = LibraryManageModel()
     
     var libarayView: LibraryView = LibraryView()
@@ -30,38 +28,43 @@ public struct LibraryManageView: View {
     }
     public var body: some View {
         NavigationStack{
-            ZStack{
+            ZStack(alignment:.top){
                 LibraryColorSet.background.ignoresSafeArea()
                 VStack(spacing: 0, content: {
-                    if manager.nowPage == .entry{
-                        libarayView
+                    
+                 
+                    
+                    switch(manager.page){
+                    case .entry(.myMusic):
+                        LibraryView(isTapMyMusic: true)
                             .environmentObject(manager)
-                        
-                    }else if manager.nowPage == .search {
-                        searchView
+                    case .entry(.recomendation):
+                        LibraryView(isTapMyMusic: false)
                             .environmentObject(manager)
-                    }else if manager.nowPage == .artist {
-                        artistView
+                    case .search:
+                        SearchView()
                             .environmentObject(manager)
-                    }else if manager.nowPage == .playlist {
+                    case .artist:
+                        ArtistView()
+                            .environmentObject(manager)
+                    case .playlist:
                         PlaylistView()
                             .environmentObject(manager)
-
+                    case .chart:
+                        ChartListView()
+                            .environmentObject(manager)
+                            .environmentObject(playerManager)
                     }
                 })
-                
-                //미니 플레이어
-                if isPlaying{
-                    MiniPlayerView()
-                        .environmentObject(playerManager)
-                }
+                .padding(.top, userManager.topInset)
+
+                ColorSet.background
+                    .frame(maxWidth: .infinity)
+                    .frame(height: userManager.topInset)
+  
                 
             }
             .navigationBarBackButtonHidden()
-            .navigationDestination(isPresented: $setView.isSearchViewShowing) {
-                ArtistView()
-            }
-            .environmentObject(setView)
             .onAppear(perform: {
                 Task{
                     let authRequest = await MusicAuthorization.request() //음악 사용 동의 창-앱 시작할 때

@@ -12,12 +12,12 @@ import Shared
 struct LibraryView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
-    @EnvironmentObject var setView: SetView
+    @EnvironmentObject var userManager: UserViewModel
     @State var isTapMyMusic: Bool = true
     @State var changeDetectValue: Bool = false
     @State var contentOffset: CGPoint = .zero
     @State var screenWidth: CGFloat = .zero
-    @State var scrollDirection: ScrollDirection = .stay
+    @State var scrollDirection: ScrollDirection = .up
     @State var scrollYOffset: CGFloat = 0
     var body: some View {
         ZStack(alignment: .top){
@@ -25,25 +25,6 @@ struct LibraryView: View {
                 
                 ZStack(alignment: .top) {
                     VStack(spacing: 0) {
-                        //Top bar(라이브러리, 검색버튼)
-                        HStack{
-                            Text("라이브러리")
-                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 24))
-                                .foregroundStyle(Color.white)
-                            
-                            Spacer()
-                            
-                            SharedAsset.search.swiftUIImage
-                                .frame(width: 30, height: 30)
-                                .onTapGesture {
-                                    manager.nowPage = .search
-                                }
-                        }
-                        .padding(.leading, 20)
-                        .padding(.trailing, 20)
-                        .padding(.top, 20)
-                        .padding(.bottom, 20)
-                        .opacity(0)
                         
                         //마이뮤직, 추천 선택 스택
                         HStack(spacing: 6, content: {
@@ -81,71 +62,72 @@ struct LibraryView: View {
                         })
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
-                        .padding(.top, 40)
+                        .padding(.top, 17)
+                        .padding(.top, userManager.customTopbarHeight )//상단뷰높이
                         
                         //마이뮤직, 추천에 따라 바뀔 뷰
                         if isTapMyMusic{
                             MyMusicView()
-                                .padding(.top, 40)
                                 .environmentObject(playerManager)
                                 .environmentObject(manager)
+                                .padding(.top, 38)
                         }else {
                             RecommendationView()
-                                .padding(.top, 40)
                                 .environmentObject(playerManager)
                                 .environmentObject(manager)
+                                .padding(.top, 38)
+
                         }
                         
                         Rectangle()
                             .frame(maxWidth: .infinity)
                             .frame(height: 1000)
                             .foregroundColor(.clear)
-        
+                        
                         
                         
                     }
                     
-               
+                    
                     
                 }
                 .frame(width: screenWidth)
                 
             })
             
-            HStack{
+            //상단바
+            HStack(){
                 Text("라이브러리")
                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 24))
                     .foregroundStyle(Color.white)
                     .padding(.leading, 20)
-
+                    .padding(.bottom, 5)
+                
                 Spacer()
-
+                
                 SharedAsset.search.swiftUIImage
+                    .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
+                    .padding(.top, 5)
                     .onTapGesture {
-                        manager.nowPage = .search
+                        manager.page = .search
+                        manager.previousPage = .entry(isTapMyMusic ? .myMusic : .recomendation)
                     }
             }
-            .frame(height: 70)
+            .frame(height: userManager.customTopbarHeight, alignment: .center)
             .background(ColorSet.background)
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
                 if newValue == .up {
-                    if contentOffset.y >= 70 {
-                        scrollYOffset = -70
+                    //스크롤뷰는 safearea공간 내부부터 offset이 0임. 따라서 세이프공간을 무시하고 스크롤 시작하면 safearea 높이 만큼의 음수부터 시작임
+                    //하지만 현재 상단뷰는 safearea를 무시해도 최상단이 0임. 따라서 스크롤뷰와 시작하는 offset이 다름
+                    if contentOffset.y >= userManager.customTopbarHeight/*상단뷰의 높이만큼의 여유 공간이 있는 경우*/{
+                        scrollYOffset = -userManager.customTopbarHeight/*-topbar height -safearea */
                     }
                 }
-            }
-            
-            GeometryReader { geometry in
-                ColorSet.background
-                    .frame(width: geometry.size.width, height: geometry.safeAreaInsets.top, alignment: .top)
-                    .ignoresSafeArea()
                 
             }
-            
-
         }
     }
 }

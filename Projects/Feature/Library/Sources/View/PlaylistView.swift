@@ -27,7 +27,7 @@ struct PlaylistView: View {
                 TopBar(leftButton: SharedAsset.back.swiftUIImage, title: "내 플레이리스트", rightButton: SharedAsset.add
                     .swiftUIImage) {
                         //left action
-                        manager.nowPage = .entry
+                        manager.page = .entry(.myMusic)
                 } rightButtonAction: {
                         //right action
                     isShowCreatePopup = true
@@ -78,7 +78,7 @@ struct PlaylistView: View {
                     guard let IDs = playlist["IDs"] as? [String] else {return}
                     Task{
                         let songs = try await fetchSongInfo(songIDs: IDs)
-                        playlistArray.append(Playlist(title: title, songs: songs, songIDs: IDs))
+                        playlistArray.append(Playlist(title: title, songs: songs, songIDs: IDs, isPrivate: false))
                     }
                 }
             }

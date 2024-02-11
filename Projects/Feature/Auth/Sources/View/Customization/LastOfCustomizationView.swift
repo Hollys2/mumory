@@ -18,7 +18,7 @@ struct LastOfCustomizationView: View {
     @State var secondOpacity: CGFloat = 0
     @State var thirdYOffset: CGFloat = 0
     @State var thirdOpacity: CGFloat = 0
-    var selectedGenreList = ["K-POP", "J-POP", "라이브음악", "인디", "HIP/HOP"]
+//    var selectedGenreList = ["K-POP", "J-POP", "라이브음악", "인디", "HIP/HOP"]
     
     var body: some View {
         ZStack{
@@ -75,7 +75,7 @@ struct LastOfCustomizationView: View {
                                 .padding(.top, 18)
                             
 
-                        Text(getGenreText(list: manager.genreList,screen: geometry.size))
+                        Text(getGenreText(list: manager.selectedGenres,screen: geometry.size))
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                                 .foregroundColor(ColorSet.mainPurpleColor)
                                 .multilineTextAlignment(.center)
@@ -132,7 +132,8 @@ struct LastOfCustomizationView: View {
                         .foregroundStyle(ColorSet.subGray)
                         .multilineTextAlignment(.center)
                         .padding(.top, 37)
-                        .tracking(0.5)
+                        .tracking(0.3)
+                        .lineSpacing(5)
                         .offset(y: thirdYOffset)
                         .opacity(geometry.size.height > 700 ? thirdOpacity : 0)
                     
@@ -186,25 +187,27 @@ struct LastOfCustomizationView: View {
         return width
     }
     
-    private func getGenreText(list: [String], screen: CGSize) -> String {
+    private func getGenreText(list: [MusicGenre], screen: CGSize) -> String {
         let screenWidth = screen.width - 114 - 116
         var result = ""
         var widthSum: CGFloat = 0
         var genreList = list
         
+        //장르 이름 보여줄 때 가장 앞에 있는 장르에는 | 를 붙이면 안 되니까 따로 저장해줌.
+        //0개를 선택할 일은 없지만 혹시 범위 오류 날까봐 조건문을 달아줌
         if list.count > 0 {
-            result = "\(genreList[0]) "
-            widthSum = getTextWidth(term: genreList[0])
+            result = "\(genreList[0].name) "
+            widthSum = getTextWidth(term: genreList[0].name)
             genreList.remove(at: 0)
         }
         
         for genre in genreList{
-            let textWidth = getTextWidth(term: genre)
+            let textWidth = getTextWidth(term: genre.name)
             if (widthSum + textWidth) > screenWidth {
-                result += "\n | \(genre) "
+                result += "\n | \(genre.name) "
                 widthSum = textWidth
             }else {
-                result += "| \(genre) "
+                result += "| \(genre.name) "
                 widthSum += textWidth
             }
         }

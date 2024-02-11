@@ -81,7 +81,7 @@ struct ArtistView: View {
                 HStack{
                     SharedAsset.back.swiftUIImage
                         .onTapGesture {
-                            manager.nowPage = .search
+                            manager.page = .search
                         }
                     Spacer()
                     SharedAsset.menuWhite.swiftUIImage

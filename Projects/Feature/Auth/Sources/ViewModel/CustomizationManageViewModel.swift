@@ -12,8 +12,11 @@ import SwiftUI
 
 class CustomizationManageViewModel: ObservableObject{
     @Published var step: Int = 0
+    
+    @Published var isCheckedRequiredItems: Bool?
+    @Published var isCheckedServiceNewsNotification: Bool?
 
-    @Published var genreList: [String] = []
+    @Published var selectedGenres: [MusicGenre] = []
     @Published var selectedTime = 0
     
     @Published var nickname = ""
@@ -25,6 +28,7 @@ class CustomizationManageViewModel: ObservableObject{
     @Published var profileImageData: Data?
     @Published var profileImage: Image?
     @Published var randomProfileImageIndex = Int.random(in: 0...3)
+    
     
     public func getNavigationTitle() -> String {
         return ""
@@ -39,7 +43,7 @@ class CustomizationManageViewModel: ObservableObject{
     
     public func isButtonEnabled() -> Bool {
         switch(step){
-        case 0: return genreList.count > 0
+        case 0: return selectedGenres.count > 0
         case 1: return selectedTime != 0
         case 2: return isValidID && isValidNickname
         default: return false
@@ -47,18 +51,18 @@ class CustomizationManageViewModel: ObservableObject{
     }
 
     
-    public func appendGenre(genre: String){
-        if genreList.contains(where: {$0 == genre}){
-            genreList.removeAll(where: {$0 == genre})
+    public func appendGenre(genre: MusicGenre){
+        if selectedGenres.contains(where: {$0.id == genre.id}){
+            selectedGenres.removeAll(where: {$0.id == genre.id})
         }else {
-            if genreList.count < 5 {
-                genreList.append(genre)
+            if selectedGenres.count < 5 {
+                selectedGenres.append(genre)
             }
         }
     }
     
-    public func contains(genre: String) -> Bool{
-        return genreList.contains(where: {$0 == genre})
+    public func contains(genre: MusicGenre) -> Bool{
+        return selectedGenres.contains(where: {$0.id == genre.id})
     }
     
     public func RandomSelectProfile() -> some View {

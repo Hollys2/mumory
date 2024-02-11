@@ -7,18 +7,19 @@
 //
 
 import Foundation
+import MusicKit
 import SwiftUI
 
 
 struct ChartPagingScrollView<Content: View>: UIViewControllerRepresentable {
     @Binding var scrollViewHeight: CGFloat
-    @Binding var changeDetectValue: Bool
+    @Binding var musicChart: MusicItemCollection<Song>
     var content: () -> Content
 
     
-    init(changeDetectValue: Binding<Bool>,scrollViewHeight: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
+    init(musicChart: Binding<MusicItemCollection<Song>>,scrollViewHeight: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
         self.content = content
-        self._changeDetectValue = changeDetectValue
+        self._musicChart = musicChart
         self._scrollViewHeight = scrollViewHeight
     }
 
@@ -29,11 +30,10 @@ struct ChartPagingScrollView<Content: View>: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ viewController: UIScrollPagingViewController, context: Context) {
-        print("update")
         viewController.hostingController.rootView = AnyView(self.content())
-    
+        viewController.update()
+
         DispatchQueue.main.async {
-            viewController.update()
             scrollViewHeight = viewController.scrollView.contentSize.height
         }
     }
@@ -43,7 +43,7 @@ class UIScrollPagingViewController: UIViewController, UIScrollViewDelegate {
     lazy var scrollView: UIScrollView = {
         let v = UIScrollView()
         v.isPagingEnabled = false
-        v.clipsToBounds = false
+        v.clipsToBounds = true
         return v
     }()
     

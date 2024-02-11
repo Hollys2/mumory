@@ -15,13 +15,14 @@ public struct RecommendationView: View {
     @State var isShowing: Bool = false
     @State var isTouch: Bool = false
     @State private var path = NavigationPath()
-    @EnvironmentObject var setView: SetView
     @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var manager: LibraryManageModel
     
     @State private var contentOffset: CGPoint = .zero
     @State private var scrollViewHeight: CGFloat = .zero
     @State private var scrollViewVisibleHeight: CGFloat = .zero
-
+    
     var rows: [GridItem] = [
         GridItem(.flexible(minimum: 70, maximum: 70),spacing: 0),
         GridItem(.flexible(minimum: 70, maximum: 70),spacing: 0),
@@ -32,7 +33,6 @@ public struct RecommendationView: View {
     
     @State var musicChart: MusicItemCollection<Song> = []
     @State var chartChangeDetectValue: Bool = false
-    @State var screenWidth: CGFloat = 0
     @State var testValue: CGFloat = 200
     public init() {
         
@@ -40,59 +40,41 @@ public struct RecommendationView: View {
     
     public var body: some View {
         
-        ZStack{
+        ZStack(alignment: .top){
+            LibraryColorSet.background.ignoresSafeArea()
             
-            LibraryColorSet.background.ignoresSafeArea() //임시 배경 색. 나중에 삭제하기
             VStack(spacing: 0, content: {
-                GeometryReader { geometry in
-                    HStack(spacing: 0, content: {
-                        Text("최신 인기곡")
-                            .foregroundStyle(.white)
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                            .padding(.leading, 20)
-                          
-                        
-                        
-                        Spacer()
-                        
-                        NavigationLink {
-                            //
-                        } label: {
-                            SharedAsset.next.swiftUIImage
-                                .frame(width: 17, height: 17)
-                                .padding(.trailing, 20)
-                        }
-                        
-                    })
-                    .onAppear {
-                        print("on appear. width: \(geometry.size.width), height: \(geometry.size.height)")
-                        screenWidth = geometry.size.width
+                //최신 인기곡 타이틀
+                SubTitle()
+                    .onTapGesture {
+                        manager.page = .chart
+                        manager.previousPage = .entry(.recomendation)
                     }
-                }
-                .padding(.top, 12)
-                .padding(.bottom, 12)
                 
-                ChartPagingScrollView(changeDetectValue: $chartChangeDetectValue, scrollViewHeight: $scrollViewHeight) {
+                
+                //가로 페이징 스크롤 차트
+                ChartPagingScrollView(musicChart: $musicChart, scrollViewHeight: $scrollViewHeight) {
                     LazyHGrid(rows: rows, spacing: 0,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
                             MusicChartItem(rank: index+1, song: song) //순위 곡 item
-                                .frame(width: screenWidth - 40)
+                                .frame(width: userManager.width - 40)
                                 .onTapGesture {
                                     playerManager.song = song
                                 }
-                            
                         }
                     })
                 }
-                .frame(height: scrollViewHeight)
+                .frame(height: 300)
                 
-                Rectangle()
+                Divider()
                     .frame(maxWidth: .infinity)
-                    .frame(height: 1000)
-                    .onChange(of: contentOffset, perform: { value in
-                        print(contentOffset.y)
-                    })
+                    .frame(height: 0.3)
+                    .background(ColorSet.subGray)
+                    .padding(.top, 15)
+                
+                FavoriteGenreRecommendationView()
+                
                 
             })
             
@@ -143,26 +125,43 @@ public struct RecommendationView: View {
     }
 }
 
-struct bottomView: View{
-    @State var height: CGFloat = 300
-    @Binding var isTouch: Bool
-    @EnvironmentObject var setView: SetView
-    
-    var body: some View{
-        GeometryReader(content: { geometry in
-            VStack{
-                Text("아티스트페이지로 이동")
-                    .onTapGesture {
-                        setView.isSearchViewShowing = true
-                        isTouch = false
-                        print("tap 탭탭탭")
-                        print("set view isShowing: \(setView.isSearchViewShowing)")
-                    }
-            }
-            .frame(width: geometry.size.width, height: height)
+private struct SubTitle: View {
+    var body: some View {
+        HStack(spacing: 0, content: {
+            Text("최신 인기곡")
+                .foregroundStyle(.white)
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+            Spacer()
+            SharedAsset.next.swiftUIImage
+                .resizable()
+                .frame(width: 17, height: 17)
         })
+        .padding(.leading, 20)
+        .padding(.trailing, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 10)
     }
 }
+
+//struct bottomView: View{
+//    @State var height: CGFloat = 300
+//    @Binding var isTouch: Bool
+//
+//    var body: some View{
+//        GeometryReader(content: { geometry in
+//            VStack{
+//                Text("아티스트페이지로 이동")
+//                    .onTapGesture {
+//                        setView.isSearchViewShowing = true
+//                        isTouch = false
+//                        print("tap 탭탭탭")
+//                        print("set view isShowing: \(setView.isSearchViewShowing)")
+//                    }
+//            }
+//            .frame(width: geometry.size.width, height: height)
+//        })
+//    }
+//}
 
 //#Preview {
 //    RecommendationView()

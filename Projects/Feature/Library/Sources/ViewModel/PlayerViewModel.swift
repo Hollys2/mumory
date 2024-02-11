@@ -13,4 +13,6 @@ public class PlayerViewModel: ObservableObject {
     }
     
     @Published var song: Song?
+    @Published var isPresent: Bool = true
+    @Published var isPlaying: Bool = false
 }

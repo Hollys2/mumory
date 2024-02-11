@@ -11,15 +11,20 @@ import MusicKit
 
 public class LibraryManageModel: ObservableObject{
     public init(){}
-    
+    enum entrySubView {
+        case myMusic
+        case recomendation
+    }
     enum LibraryPage{
-        case entry
+        case entry(entrySubView)
+        case chart
         case search
         case playlist
         case artist
     }
     
-    @Published var nowPage: LibraryPage = .entry
+    @Published var page: LibraryPage = .entry(.myMusic)
     @Published var searchTerm: String = ""
     @Published var tappedArtist: Artist?
+    @Published var previousPage: LibraryPage = .entry(.myMusic)
 }

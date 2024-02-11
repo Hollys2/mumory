@@ -54,17 +54,16 @@ struct SearchView: View {
                     .frame(height: 45)
                     .background(Color(red: 0.24, green: 0.24, blue: 0.24).clipShape(RoundedRectangle(cornerSize: CGSize(width: 22, height: 22))))
                     
-                    Button(action: {
-                        dismiss()
-                    }, label: {
+                  
                         Text("취소")
                             .padding(.leading, 8)
                             .foregroundColor(.white)
                             .font(.system(size: 16, weight: .medium))
                             .onTapGesture {
-                                manager.nowPage = .entry
+                                manager.page = manager.previousPage
+                                manager.previousPage = .search
                             }
-                    })
+                  
                 })
                 .padding(.top, 12)
                 .padding(.leading, 20)

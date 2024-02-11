@@ -15,6 +15,8 @@ import Core
 struct SignUpManageView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject var manager: SignUpManageViewModel = SignUpManageViewModel()
+    @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
+
     @State private var isSignUpCompleted = false
     @State private var isLoading = false
     @State private var isSignUpErrorShowing: Bool = false
@@ -132,7 +134,7 @@ struct SignUpManageView: View {
             //회원가입이 완료 되었을 때 다음 화면으로 이동
             .navigationDestination(isPresented: $isSignUpCompleted) {
                 StartCostomizationView()
-                    .environmentObject(manager)
+                    .environmentObject(customManager)
             }
             .gesture(DragGesture().onEnded({ gesture in
                 if gesture.location.x - gesture.startLocation.x > 80 {

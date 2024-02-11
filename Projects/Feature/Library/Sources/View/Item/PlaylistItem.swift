@@ -12,66 +12,86 @@ import MusicKit
 
 struct PlaylistItem: View {
     var playlist: Playlist
-    var radius: CGFloat = 10
+    var radius: CGFloat = 20
     var body: some View {
         VStack(spacing: 0){
-            HStack(spacing: 0, content: {
-                
-                AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                    image
-                        .resizable()
-                        .frame(width: 81, height: 81)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.topLeft]))
-                } placeholder: {
-                    Rectangle()
-                        .frame(width: 81, height: 81)
-                        .foregroundStyle(.gray)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.topLeft]))
-                }
-                
-                
-                AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                    image
-                        .resizable()
-                        .frame(width: 81, height: 81)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.topRight]))
-                } placeholder: {
-                    Rectangle()
-                        .frame(width: 81, height: 81)
-                        .foregroundStyle(.black)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.topRight]))
-                }
+            VStack(spacing: 0, content: {
+                HStack(spacing: 0, content: {
+                    if playlist.songs.count < 1 {
+                        Rectangle()
+                            .frame(width: 81, height: 81)
+                            .foregroundStyle(.gray)
+                    }else{
+                        AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            image
+                                .resizable()
+                                .frame(width: 81, height: 81)
+                        } placeholder: {
+                            Rectangle()
+                                .frame(width: 81, height: 81)
+                                .foregroundStyle(.gray)
+                        }
+                    }
+                    
+                    if playlist.songs.count < 2{
+                        Rectangle()
+                            .frame(width: 81, height: 81)
+                            .foregroundStyle(.black)
+                    }else{
+                        AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            image
+                                .resizable()
+                                .frame(width: 81, height: 81)
+                        } placeholder: {
+                            Rectangle()
+                                .frame(width: 81, height: 81)
+                                .foregroundStyle(.black)
+                        }
+                    }
 
 
+                })
+                
+                HStack(spacing: 0,content: {
+                    
+                    if playlist.songs.count < 3 {
+                        Rectangle()
+                            .frame(width: 81, height: 81)
+                            .foregroundStyle(.black)
+                    }else{
+                        AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            image
+                                .resizable()
+                                .frame(width: 81, height: 81)
+                        } placeholder: {
+                            Rectangle()
+                                .frame(width: 81, height: 81)
+                                .foregroundStyle(.black)
+                        }
+                    }
+                    
+                    if playlist.songs.count <  4 {
+                        Rectangle()
+                            .frame(width: 81, height: 81)
+                            .foregroundStyle(.gray)
+                    }else{
+                        AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            image
+                                .resizable()
+                                .frame(width: 81, height: 81)
+                        } placeholder: {
+                            Rectangle()
+                                .frame(width: 81, height: 81)
+                                .foregroundStyle(.gray)
+                        }
+                    }
+
+                })
             })
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
+           
             
-            HStack(spacing: 0,content: {
-                AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                    image
-                        .resizable()
-                        .frame(width: 81, height: 81)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomLeft]))
-                } placeholder: {
-                    Rectangle()
-                        .frame(width: 81, height: 81)
-                        .foregroundStyle(.black)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomLeft]))
-                }
-                
-                
-                AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                    image
-                        .resizable()
-                        .frame(width: 81, height: 81)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomRight]))
-                } placeholder: {
-                    Rectangle()
-                        .frame(width: 81, height: 81)
-                        .foregroundStyle(.gray)
-                        .clipShape(RoundedCorner(radius: radius, corners: [.bottomRight]))
-                }
-
-            })
+          
             
             Text(playlist.title)
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
