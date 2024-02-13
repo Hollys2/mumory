@@ -11,11 +11,13 @@ let project = Project(name: "App",
                                        bundleId: Project.bundleId,
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
                                        infoPlist: .file(path: "Support/Info.plist"),
-                                       //                                       infoPlist: Project.makeInfoPlist(), // 추후 plist 변경시 메서드 수정해서 사용
+//                                                                              infoPlist: Project.makeInfoPlist(), // 추후 plist 변경시 메서드 수정해서 사용
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
                                        dependencies: [
                                         .project(target: "Feature", path: "../Feature"),
+                                        .project(target: "Shared", path: "../Shared"),
+
                                        ])
                       ])
 
