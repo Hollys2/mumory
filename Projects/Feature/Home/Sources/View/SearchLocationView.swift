@@ -28,11 +28,14 @@ struct AddressRow: View {
                     DispatchQueue.main.async {
                         let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
                         mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
+                        
+                        self.localSearchViewModel.addRecentSearch(result.title)
                     }
                 } else {
                     print("ERROR: 해당하는 주소가 없습니다.")
                 }
             }
+            
             appCoordinator.rootPath.removeLast()
         }) {
             HStack(alignment: .center, spacing: 13) {
@@ -64,6 +67,8 @@ struct AddressRow: View {
 struct SearchLocationView: View {
     
     @State private var text = ""
+    @State private var recentSearches: [String] = []
+    
     @FocusState private var isFocusedTextField: Bool
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -202,61 +207,100 @@ struct SearchLocationView: View {
                         .cornerRadius(15)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         
-                        VStack(spacing: 0) {
-                            HStack {
-                                Text("최근 검색")
-                                    .font(
-                                        Font.custom("Pretendard", size: 13)
-                                            .weight(.medium)
-                                    )
-                                    .foregroundColor(.white)
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    
-                                }) {
-                                    Text("전체삭제")
-                                        .font(
-                                            Font.custom("Pretendard", size: 12)
-                                                .weight(.medium)
-                                        )
-                                        .multilineTextAlignment(.trailing)
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                }
-                            }
-                            .padding([.horizontal, .top], 20)
-                            .padding(.bottom, 11)
-                            
-                            ForEach(1...10, id: \.self) { index in
+                        if !self.localSearchViewModel.recentSearches.isEmpty {
+                            VStack(spacing: 0) {
                                 HStack {
-                                    Image(systemName: "magnifyingglass")
-                                        .frame(width: 23, height: 23)
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                    
-                                    Text("검색검색 \(index)")
+                                    Text("최근 검색")
                                         .font(
-                                            Font.custom("Pretendard", size: 14)
-                                                .weight(.semibold)
+                                            Font.custom("Pretendard", size: 13)
+                                                .weight(.medium)
                                         )
                                         .foregroundColor(.white)
                                     
                                     Spacer()
                                     
-                                    Button(action: {}) {
-                                        Image(systemName: "xmark")
-                                            .frame(width: 19, height: 19)
+                                    Button(action: {
+                                        self.localSearchViewModel.clearRecentSearches()
+                                    }) {
+                                        Text("전체삭제")
+                                            .font(
+                                                Font.custom("Pretendard", size: 12)
+                                                    .weight(.medium)
+                                            )
+                                            .multilineTextAlignment(.trailing)
                                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     }
                                 }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .padding(.leading, 15)
-                                .padding(.trailing, 20)
+                                .padding([.horizontal, .top], 20)
+                                .padding(.bottom, 11)
+                                
+                                ForEach(self.localSearchViewModel.recentSearches, id: \.self) { value in
+                                    HStack {
+                                        Image(systemName: "magnifyingglass")
+                                            .frame(width: 23, height: 23)
+                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                        
+                                        Text("\(value)")
+                                            .font(
+                                                Font.custom("Pretendard", size: 14)
+                                                    .weight(.semibold)
+                                            )
+                                            .foregroundColor(.white)
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            self.localSearchViewModel.removeRecentSearch("\(value)")
+                                        }) {
+                                            Image(systemName: "xmark")
+                                                .frame(width: 19, height: 19)
+                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .padding(.leading, 15)
+                                    .padding(.trailing, 20)
+                                }
                             }
+                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                            .cornerRadius(15)
                         }
-                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                        .cornerRadius(15)
+                        
+                        if !self.localSearchViewModel.popularSearches.isEmpty {
+                            VStack(alignment: .leading, spacing: 0) {
+                                
+                                HStack {
+                                    
+                                    Text("뮤모리 인기 위치 검색어")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                        .foregroundColor(.white)
+                                    
+                                    Spacer()
+                                }
+                                .padding(20)
+                                
+                                    HStack(spacing: 8) {
+                                        ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
+                                            Text(searchTerm)
+                                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                                .frame(height: 33)
+                                                .padding(.horizontal, 16)
+                                                .background(SharedAsset.mainColor.swiftUIColor)
+                                                .cornerRadius(35)
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 20)
+                                    .background(.pink)
+                                    
+                                    Spacer().frame(height: 12)
+                            }
+                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                            .cornerRadius(15)
+
+                        }
+                        
                     } // VStack
                     .padding(.bottom, 66)
                 } // ScrollView

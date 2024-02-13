@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Location_Spot (1) 2.png",
+      "filename" : "keyboard-button-create-mumory.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Location_Spot (1).png",
+      "filename" : "keyboard-button-create-mumory@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Location_Spot (1) 1.png",
+      "filename" : "keyboard-button-create-mumory@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

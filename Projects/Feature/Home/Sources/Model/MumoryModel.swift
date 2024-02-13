@@ -15,6 +15,8 @@ import MusicKit
 public struct MusicModel: Identifiable, Hashable {
 
     public let id = UUID()
+    
+//    public var song: Song
 
     public var songID: MusicItemID
     public var title: String

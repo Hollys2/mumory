@@ -11,6 +11,7 @@ import MapKit
 import MusicKit
 import CoreLocation
 import CoreLocationUI
+import PhotosUI
 
 import Core
 import Shared
@@ -176,7 +177,7 @@ struct MumoryCard: View {
                 Spacer()
                 
                 HStack(spacing: 5)  {
-                    Text("\(date)")
+                    Text("\(self.date)")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                         .foregroundColor(.white)
                         .onAppear {
@@ -256,51 +257,52 @@ public struct HomeView: View {
     
     @State private var selectedTab: Tab = .home
     
+    @State private var showDatePicker: Bool = false
+    
     @State private var translation: CGSize = .zero
+    @State private var offsetY: CGFloat = .zero
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
-    let customDetent = UISheetPresentationController.Detent.custom(identifier: nil) { context in
-        let statusBarHeight = UIApplication.shared.connectedScenes
-            .compactMap { ($0 as? UIWindowScene)?.statusBarManager?.statusBarFrame.height }
-            .first ?? 0
-        let safeAreaInsetsTop = UIApplication.shared.connectedScenes
-            .compactMap { ($0 as? UIWindowScene)?.windows.first?.safeAreaInsets.top }
-            .first ?? 0
-        return UIScreen.main.bounds.height - 100
-    }
        
-    
     public init() {}
+    
+    private func lerp(_ v0: CGFloat, _ v1: CGFloat, _ t: CGFloat) -> CGFloat {
+        return (1 - t) * v0 + t * v1
+    }
     
     var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
 //                print("onChanged: \(value.translation.height)")
                 if value.translation.height > 0 {
-//                    DispatchQueue.main.async {
-                        translation.height = value.translation.height                        
-//                    }
+//                    translation.height = value.translation.height
+                    let targetHeight = value.translation.height
+                    translation.height = lerp(translation.height, targetHeight, 1)
+
                 }
             }
             .onEnded { value in
 //                print("onEnded: \(value.translation.height)")
-                withAnimation(Animation.easeInOut(duration: 0.01)) {
+                withAnimation(Animation.easeInOut(duration: 0.1)) {
                     if value.translation.height > 130 {
                         appCoordinator.isCreateMumorySheetShown = false
                         mumoryDataViewModel.choosedMusicModel = nil
                         mumoryDataViewModel.choosedLocationModel = nil
                     }
-                    translation.height = 0
+                    translation.height = .zero
                 }
             }
     }
 
     public var body: some View {
+        
         NavigationStack(path: $appCoordinator.rootPath) {
+            
             ZStack(alignment: .bottom) { // 바텀시트를 위해 정렬
+            
                 VStack(spacing: 0) {
+                
                     switch selectedTab {
                     case .home:
                         homeView
@@ -318,23 +320,25 @@ public struct HomeView: View {
                     HomeTabView(selectedTab: $selectedTab)
                 }
                 
-                if appCoordinator.isCreateMumorySheetShown {
-                    Color.black.opacity(0.6)
-                        .onTapGesture {
-                            withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
-                                appCoordinator.isCreateMumorySheetShown = false
-                                //                                mumoryDataViewModel.choosedMusicModel = nil
-                                //                                mumoryDataViewModel.choosedLocationModel = nil
-                            }}
-                    
-                    CreateMumoryBottomSheetView()
-                        .offset(y: translation.height)
-                        .gesture(dragGesture)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
-                                    
+                TestBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
                 
+//                if appCoordinator.isCreateMumorySheetShown {
+//                    Color.black.opacity(0.6)
+//                        .onTapGesture {
+//                            withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
+//                                appCoordinator.isCreateMumorySheetShown = false
+//
+//                                mumoryDataViewModel.choosedMusicModel = nil
+//                                mumoryDataViewModel.choosedLocationModel = nil
+//                            }}
+//
+//                    CreateMumoryBottomSheetView(showDatePicker: $showDatePicker)
+//                        .offset(y: translation.height)
+//                        .gesture(self.dragGesture)
+//                        .transition(.move(edge: .bottom))
+//                        .zIndex(1)
+//                }
+                    
                 if self.appCoordinator.isMumoryPopUpShown {
                     ZStack { // 부모 ZStack의 정렬 무시
                         Color.black.opacity(0.6)
@@ -342,7 +346,7 @@ public struct HomeView: View {
                                 self.appCoordinator.isMumoryPopUpShown = false
                             }
                         
-                        MumoryCarousel(mumoryAnnotations: $mumoryDataViewModel.mumoryAnnotations)
+                        MumoryCarousel(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
                             .frame(height: 418)
                             .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
                         
@@ -400,7 +404,7 @@ public struct HomeView: View {
             .navigationDestination(for: Int.self) { i in
                 switch i {
                 case 0:
-                    MumoryDetailView(mumoryAnnotation: mumoryDataViewModel.mumoryAnnotations[2])
+                    MumoryDetailView(mumoryAnnotation: mumoryDataViewModel.mumoryAnnotations[0])
                 case 1:
                     MumoryDetailEditView()
                 case 2:
@@ -556,12 +560,6 @@ public struct HomeView: View {
     }
 }
 
-//struct HomeView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        HomeView()
-//    }
-//}
-
 
 struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: View {
     
@@ -657,7 +655,6 @@ struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: 
         
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
             parent.appCoordinator.isCreateMumorySheetShown = false
-            print("FUCK")
 //            withAnimation(.easeInOut(duration: 0.2)) {
 //            }
 //            if let onDismiss = onDismiss {
@@ -753,6 +750,7 @@ class CustomPresentationAnimator: NSObject, UIViewControllerAnimatedTransitionin
 }
 
 
+
 struct SheetViewController<Content>: UIViewControllerRepresentable where Content: View {
     @Binding var isPresented: Bool
     var content: Content
@@ -820,5 +818,418 @@ struct SheetWithCornerRadius<Content>: View where Content: View {
 extension View {
     func sheetWithCornerRadius<Content: View>(isPresented: Binding<Bool>, cornerRadius: CGFloat, @ViewBuilder content: @escaping () -> Content) -> some View {
         SheetWithCornerRadius(isPresented: isPresented, content: content, cornerRadius: cornerRadius)
+    }
+}
+
+
+
+
+
+struct TestBottomSheetView: View {
+    
+    @Binding var isSheetShown: Bool
+    @Binding var offsetY: CGFloat
+    
+    @State private var showDatePicker: Bool = false
+    @State private var isPublishPopUpShown: Bool = false
+    @State private var isPublishErrorPopUpShown: Bool = false
+    @State private var isTagErrorPopUpShown: Bool = false
+    @State private var isDeletePopUpShown: Bool = false
+    
+    @GestureState private var dragState = DragState.inactive
+//    @State var offsetY = CGFloat(0)
+    
+    @State private var contentText: String = ""
+    @State private var isPublic: Bool = true
+    @State private var calendarYOffset: CGFloat = .zero
+    @State private var scrollViewOffset: CGFloat = 0
+    @State private var tagContainerViewFrame: CGRect = .zero
+
+    @State var date: Date = Date()
+    
+    @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
+    @EnvironmentObject private var appCoordinator: AppCoordinator
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var dateManager: DateManager
+    
+    init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
+        self._isSheetShown = isSheetShown
+        self._offsetY = offsetY
+    }
+    
+    let maxHeight = CGFloat(16)
+    
+    var body: some View {
+        
+        let drag = DragGesture()
+            .updating($dragState) { drag, state, transaction in
+                var newTranslation = drag.translation
+                if self.offsetY + newTranslation.height < -maxHeight {  // 최대치를 넘지 않도록 제한
+                    newTranslation.height = -maxHeight - self.offsetY
+                }
+                state = .dragging(translation: newTranslation)
+                //                state = .dragging(translation: drag.translation)
+            }
+            .onEnded(onDragEnded)
+        
+        return ZStack(alignment: .bottom) {
+            
+            if isSheetShown {
+                
+                Color.black.opacity(0.6)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        self.isDeletePopUpShown = true
+                    }
+                
+                VStack(spacing: 0) {
+                    
+                    // MARK: -Top bar
+                    ZStack {
+                        
+                        HStack {
+                            Image(uiImage: SharedAsset.closeCreateMumory.image)
+                                .resizable()
+                                .frame(width: 25, height: 25)
+                                .gesture(TapGesture(count: 1).onEnded {
+                                    
+                                    self.isDeletePopUpShown = true
+                                    
+//                                    withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
+//                                        appCoordinator.isCreateMumorySheetShown = false
+//
+//                                        mumoryDataViewModel.choosedMusicModel = nil
+//                                        mumoryDataViewModel.choosedLocationModel = nil
+//                                    }
+                                })
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
+                                    self.isPublishPopUpShown = true
+                                } else {
+                                    self.isPublishErrorPopUpShown = true
+                                }
+//                                self.isTagErrorPopUpShown = true
+//                                if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+//                                    let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
+//
+//                                    mumoryDataViewModel.createMumory(newMumoryAnnotation)
+//                                }
+//
+//                                withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
+//                                    appCoordinator.isCreateMumorySheetShown = false
+//                                }
+//
+//                                mumoryDataViewModel.choosedMusicModel = nil
+//                                mumoryDataViewModel.choosedLocationModel = nil
+                                
+                            }) {
+                                Rectangle()
+                                    .foregroundColor(.clear)
+                                    .frame(width: 46, height: 30)
+                                    .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                    .cornerRadius(31.5)
+                                    .overlay(
+                                        Text("게시")
+                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
+                                            .foregroundColor(.black)
+                                    )
+                                    .allowsHitTesting(true)
+                            }
+//                            .disabled(!((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil)))
+                        } // HStack
+                        
+                        Text("뮤모리 만들기")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                            .foregroundColor(.white)
+                    } // ZStack
+                    .padding(.top, 26)
+                    .padding(.bottom, 11)
+                    .padding(.horizontal, 20)
+                    
+                    ScrollView(showsIndicators: false) {
+        
+                            VStack(spacing: 0) {
+        
+                                VStack(spacing: 16) {
+        
+                                    NavigationLink(value: "music") {
+                                        ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
+                                    }
+        
+                                    NavigationLink(value: "location") {
+                                        ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
+                                    }
+        
+                                    CalendarContainerView(title: "\(dateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
+                                        .onTapGesture {
+                                            withAnimation(.easeInOut(duration: 0.1)) {
+                                                self.showDatePicker.toggle()
+                                            }
+                                        }
+                                        .background {
+                                            GeometryReader { geometry in
+        
+                                                Color.clear
+                                                    .onAppear {
+                                                        self.calendarYOffset = geometry.frame(in: .global).maxY
+                                                    }
+                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                        // Update calendarYOffset when the offset changes
+                                                        self.calendarYOffset = newOffset
+                                                    }
+                                            }
+                                        }
+        
+                                }
+                                .padding(.horizontal, 20)
+        
+                                Rectangle()
+                                    .foregroundColor(.clear)
+                                    .frame(height: 6)
+                                    .background(.black)
+                                    .padding(.vertical, 18)
+        
+                                VStack(spacing: 16) {
+        
+                                    TagContainerView(title: "#때끄")
+                                        .background(GeometryReader { geometry -> Color in
+                                            DispatchQueue.main.async {
+                                                self.tagContainerViewFrame = geometry.frame(in: .global)
+                                            }
+                                            return Color.clear
+                                        })
+                                    //                            .onAppear {
+                                    //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
+                                    //                                    guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+                                    //                                    let keyboardHeight = keyboardSize.height
+                                    //
+                                    //                                    withAnimation {
+                                    //                                        scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
+                                    //                                    }
+                                    //                                }
+                                    //
+                                    //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
+                                    //                                    withAnimation {
+                                    //                                         scrollViewOffset = 0
+                                    //                                    }
+                                    //                                }
+                                    //                            }
+        
+                                    ContentContainerView(contentText: "하이")
+        
+                                    HStack(spacing: 11) {
+                                        PhotosPicker(selection: $photoPickerViewModel.imageSelections,
+                                                     maxSelectionCount: 3,
+                                                     matching: .images) {
+        
+                                            Rectangle()
+                                                .foregroundColor(.clear)
+                                                .frame(width: 75, height: 75)
+                                                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                                .cornerRadius(10)
+                                                .overlay(
+                                                    VStack(spacing: 0) {
+                                                        (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                                            .resizable()
+                                                            .frame(width: 25, height: 25)
+        
+                                                        HStack(spacing: 0) {
+                                                            Text("\(photoPickerViewModel.imageSelectionCount)")
+                                                                .font(Font.custom("Pretendard", size: 14).weight(.medium))
+                                                                .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                            Text(" / 3")
+                                                                .font(Font.custom("Pretendard", size: 14).weight(.medium))
+                                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                        }
+                                                        .multilineTextAlignment(.center)
+                                                        .padding(.top, 10)
+                                                    }
+                                                )
+                                        }
+        
+                                        if !photoPickerViewModel.selectedImages.isEmpty {
+        
+                                            ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
+        
+                                                ZStack {
+                                                    Image(uiImage: image)
+                                                        .resizable()
+                                                        .frame(width: 75, height: 75)
+                                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                                        .cornerRadius(10)
+        
+                                                    Button(action: {
+                                                        photoPickerViewModel.removeImage(image)
+                                                    }) {
+                                                        SharedAsset.closeButtonCreateMumory.swiftUIImage
+                                                            .resizable()
+                                                            .frame(width: 27, height: 27)
+                                                    }
+                                                    .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .onChange(of: photoPickerViewModel.imageSelections) { _ in
+                                        photoPickerViewModel.convertDataToImage()
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 50)
+        
+                            } // VStack
+                            .padding(.top, 20)
+                            .padding(.bottom, 50)
+        
+                    } // ScrollView
+                    .simultaneousGesture(DragGesture().onChanged { i in
+                        // 스크롤할 때 바텀시트 움직이는 것 방지?
+                        print("simultaneousGesture DragGesture")
+        
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    })
+                    
+
+                    ZStack(alignment: .topLeading) {
+                        Rectangle()
+                            .foregroundColor(Color(red: 0.12, green: 0.12, blue: 0.12))
+                            .frame(height: 72 + appCoordinator.safeAreaInsetsBottom)
+                            .overlay(
+                                Rectangle()
+                                    .inset(by: 0.15)
+                                    .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
+                                    .frame(height: 0.5)
+                                , alignment: .top
+                            )
+                        
+                        
+                            HStack(spacing: 0) {
+
+                                Group {
+                                    Text("전체공개")
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                                        .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
+                                    
+                                    Spacer().frame(width: 7)
+                                    
+                                    Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
+                                        .frame(width: 17, height: 17)
+                                    
+                                    Spacer()
+                                }
+                                .onTapGesture {
+                                    self.isPublic.toggle()
+                                }
+                                
+                                SharedAsset.keyboardButtonCreateMumory.swiftUIImage
+//                                    .resizable()
+                                    .frame(width: 26, height: 26)
+                            }
+                            .padding(.top, 18)
+                            .padding(.horizontal, 20)
+                    } // ZStack
+                    .offset(y: getUIScreenBounds().height == 667 || getUIScreenBounds().height == 736 ? -33  : -getSafeAreaInsets().bottom - 16)
+                    .highPriorityGesture(TapGesture())
+                    
+                } // VStack
+                .background(SharedAsset.backgroundColor.swiftUIColor)
+                .cornerRadius(23, corners: [.topLeft, .topRight])
+                .padding(.top, appCoordinator.safeAreaInsetsTop + 16)
+                .padding(.bottom, -appCoordinator.safeAreaInsetsTop - 16)
+                .offset(y: self.offsetY + self.dragState.translation.height)
+                .gesture(drag)
+                .transition(.move(edge: .bottom))
+                .zIndex(1)
+                .calendarPopup(show: self.$showDatePicker, yOffset: self.calendarYOffset) {
+
+                    DatePicker("", selection: self.$date, displayedComponents: [.date])
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .accentColor(SharedAsset.mainColor.swiftUIColor)
+                        .background(SharedAsset.backgroundColor.swiftUIColor)
+                        .preferredColorScheme(.dark)
+//                        .onChange(of: self.date) { _ in
+//                            withAnimation(.easeInOut(duration: 0.1)) {
+//                                self.showDatePicker = false
+//                            }
+//                        }
+                }
+                .popup(show: self.$isPublishPopUpShown, content: {
+                    PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하기겠습니까?", buttonTitle: "게시", buttonAction: {
+                        if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+                            let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
+                            
+                            mumoryDataViewModel.createMumory(newMumoryAnnotation)
+                        }
+                        
+                        withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
+                            appCoordinator.isCreateMumorySheetShown = false
+                        }
+                        
+                        mumoryDataViewModel.choosedMusicModel = nil
+                        mumoryDataViewModel.choosedLocationModel = nil
+                    })
+                })
+                .popup(show: self.$isPublishErrorPopUpShown, content: {
+                    PopUpView(isShown: self.$isPublishErrorPopUpShown, type: .oneButton, title: "음악, 위치, 날짜를 입력해주세요.", subTitle: "뮤모리를 남기시려면\n해당 조건을 필수로 입력해주세요!", buttonTitle: "확인", buttonAction: {
+                        self.isPublishErrorPopUpShown = false
+                    })
+                    
+                })
+                .popup(show: self.$isTagErrorPopUpShown, content: {
+                    PopUpView(isShown: self.$isTagErrorPopUpShown, type: .oneButton, title: "태그는 최대 3개까지 입력할 수 있습니다.", buttonTitle: "확인", buttonAction: {
+                        self.isTagErrorPopUpShown = false
+                    })
+                })
+                .popup(show: self.$isDeletePopUpShown, content: {
+                    PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
+                        self.isDeletePopUpShown = false
+                    })
+                    
+                })
+            }
+        }
+    }
+    
+    private func onDragEnded(drag: DragGesture.Value) {
+//        print("drag.translation.height: \(drag.translation.height)")
+        //        let verticalDirection = drag.predictedEndLocation.y - drag.location.y
+        let cardDismiss = drag.translation.height > 100
+        let offset = cardDismiss ? drag.translation.height : 0
+        
+        self.offsetY = CGFloat(offset)
+        
+        if cardDismiss {
+            withAnimation(.spring(response: 0.1)) {
+                self.isSheetShown = false
+            }
+        }
+    }
+}
+
+enum DragState {
+    case inactive
+    case dragging(translation: CGSize)
+    
+    var translation: CGSize {
+        switch self {
+        case .inactive:
+            return .zero
+        case .dragging(let translation):
+            return translation
+        }
+    }
+    
+    var isDragging: Bool {
+        switch self {
+        case .inactive:
+            return false
+        case .dragging:
+            return true
+        }
     }
 }

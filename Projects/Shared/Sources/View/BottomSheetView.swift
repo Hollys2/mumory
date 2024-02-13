@@ -88,7 +88,8 @@ public struct BottomSheetView: View {
 
 public struct SecondBottomSheetView: View {
     
-    @State var searchText: String = ""
+    @Binding var searchText: String
+    @Binding var isShown: Bool
     @EnvironmentObject var appCoordinator: AppCoordinator
     
 //    var menuOptions: [BottemSheetMenuOption]
@@ -96,6 +97,10 @@ public struct SecondBottomSheetView: View {
 //    public init(menuOptions: [BottemSheetMenuOption]) {
 //        self.menuOptions = menuOptions
 //    }
+    public init(searchText: Binding<String>, isShown: Binding<Bool>) {
+        self._searchText = searchText
+        self._isShown = isShown
+    }
     
     public var body: some View {
         VStack(spacing: 0) {
@@ -108,20 +113,22 @@ public struct SecondBottomSheetView: View {
             Spacer().frame(height: 33)
             
             VStack(spacing: 0) {
-                Text("선택한 장소의 이름을 직접 입력해주세요")
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                    .foregroundColor(.white)
-                    .frame(width: 286, alignment: .leading)
-                
-                Text("해당 장소에 대해 기억하기 쉬운 이름으로 변경해보세요")
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                    .foregroundColor(.white.opacity(0.7))
-                    .padding(.top, 10)
-                    .padding(.bottom, 33)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("선택한 장소의 이름을 직접 입력해주세요")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        .foregroundColor(.white)
+                        .frame(width: 286, alignment: .leading)
+                    
+                    Text("해당 장소에 대해 기억하기 쉬운 이름으로 변경해보세요")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.top, 10)
+                        .padding(.bottom, 33)
+                }
                 
                 ZStack(alignment: .leading) {
                     TextField("", text: $searchText,
-                              prompt: Text("장소명").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                              prompt: Text("장소명 입력").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .frame(maxWidth: .infinity)
                     .frame(height: 45)
@@ -146,18 +153,26 @@ public struct SecondBottomSheetView: View {
                     }
                 }
                 
-                Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(width: 321, height: 60)
-                  .background(Color(red: 0.47, green: 0.47, blue: 0.47))
-                  .cornerRadius(35)
-                  .overlay(
-                    Text("완료")
-                      .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
-                      .multilineTextAlignment(.center)
-                      .foregroundColor(.black)
-                  )
-                  .padding(.top, 33)
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.1)) {
+                        self.isShown = false
+                    }
+                }) {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 321, height: 60)
+                        .background(self.searchText.isEmpty ? Color(red: 0.47, green: 0.47, blue: 0.47) : SharedAsset.mainColor.swiftUIColor)
+                        .cornerRadius(35)
+                        .overlay(
+                            Text("완료")
+                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.black)
+                        )
+                        .padding(.top, 33)
+                }
+                .disabled(self.searchText.isEmpty)
+              
                 
                 Spacer()
             }
@@ -170,9 +185,4 @@ public struct SecondBottomSheetView: View {
 }
 
 
-struct BottomSheetView_Previews: PreviewProvider {
-    static var previews: some View {
-//        BottomSheetView(menuOptions: [])
-        SecondBottomSheetView()
-    }
-}
+

@@ -378,7 +378,7 @@ public struct SocialFriendView: View {
                             self.appCoordinator.isPopUpViewShown = false
                         }
                     
-                    PopUpView(type: .twoButton, title: "친구 요청을 보내시겠습니까?", buttonTitle: "친구 요청")
+//                    PopUpView(isShown: self.$appCoordinator.isPopUpViewShown, type: .twoButton, title: "친구 요청을 보내시겠습니까?", buttonTitle: "친구 요청", buttonAction: )
                 }
             }
             

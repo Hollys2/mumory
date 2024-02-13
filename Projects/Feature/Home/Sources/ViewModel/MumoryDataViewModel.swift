@@ -21,6 +21,7 @@ final public class MumoryDataViewModel: ObservableObject {
     
     @Published public var musicModels: [MusicModel] = []
     @Published public var mumoryAnnotations: [MumoryAnnotation] = []
+    @Published public var mumoryCarouselAnnotations: [MumoryAnnotation] = []
     
     public init() {}
     
@@ -91,14 +92,15 @@ final public class MumoryDataViewModel: ObservableObject {
                        let locationTitle = documentData["locationTitle"] as? String,
                        let locationSubtitle = documentData["locationSubtitle"] as? String,
                        let latitude = documentData["latitude"] as? Double,
-                       let longitude = documentData["longitude"] as? Double {
-                        
+                       let longitude = documentData["longitude"] as? Double,
+                       let date = document["date"] as? FirebaseManager.Timestamp
+                    {
                         Task {
                             do {
                                 let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
                                 let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
                                 
-                                let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: musicModel, locationModel: locationModel)
+                                let newMumoryAnnotation = MumoryAnnotation(date: date.dateValue(), musicModel: musicModel, locationModel: locationModel)
                                 
                                 DispatchQueue.main.async {
                                     self.mumoryAnnotations.append(newMumoryAnnotation)
@@ -150,7 +152,8 @@ final public class MumoryDataViewModel: ObservableObject {
             "locationTitle": mumoryAnnotation.locationModel.locationTitle,
             "locationSubtitle": mumoryAnnotation.locationModel.locationSubtitle,
             "latitude": mumoryAnnotation.locationModel.coordinate.latitude,
-            "longitude": mumoryAnnotation.locationModel.coordinate.longitude
+            "longitude": mumoryAnnotation.locationModel.coordinate.longitude,
+            "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date)
         ]
         
         db.collection("User").document("tester").collection("mumory").document().setData(newData, merge: true) { error in
@@ -159,7 +162,7 @@ final public class MumoryDataViewModel: ObservableObject {
             } else {
                 print("Tester document added successfully!")
                 
-                let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel)
+                let newMumoryAnnotation = MumoryAnnotation(date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel)
 //                
                 self.mumoryAnnotations.append(newMumoryAnnotation)
             }

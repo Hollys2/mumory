@@ -16,6 +16,10 @@ import Core
 
 public class LocalSearchViewModel: NSObject, ObservableObject {
     
+    @Published var recentSearches: [String] = UserDefaults.standard.stringArray(forKey: "recentLocationSearch") ?? []
+    @Published var popularSearches: [String] = []
+//    ["망원한강", "망원한강공원공원", "망원한강공원공원", "망원한강공원", "망원한강공원공원공원", "망원한강공원"]
+    
     @Published var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
     @Published var queryFragment: String = "" {
         didSet {
@@ -79,6 +83,30 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
                 completion(nil)
             }
         }
+    }
+    
+    func addRecentSearch(_ searchTerm: String) {
+        recentSearches.insert(searchTerm, at: 0)
+        
+        // Limit the number of recent searches to, for example, 10
+        recentSearches = Array(recentSearches.prefix(10))
+        
+        // Update UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+    }
+    
+    func removeRecentSearch(_ searchTerm: String) {
+        recentSearches.removeAll { $0 == searchTerm }
+        
+        // Update UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+    }
+    
+    func clearRecentSearches() {
+        recentSearches = []
+        
+        // Update UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
     }
 }
 

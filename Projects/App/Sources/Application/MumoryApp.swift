@@ -14,6 +14,7 @@ struct MumoryApp: App {
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     @StateObject var dateManager: DateManager = .init()
+//    @StateObject var firebaseManager: FirebaseManager = .init()
     
     var body: some Scene {
         WindowGroup {
@@ -26,6 +27,7 @@ struct MumoryApp: App {
                     .environmentObject(localSearchViewModel)
                     .environmentObject(mumoryDataViewModel)
                     .environmentObject(dateManager)
+//                    .environmentObject(firebaseManager)
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
@@ -70,6 +72,91 @@ struct YearMonthPicker: View {
 //            .frame(width: 150)
         }
         .padding()
+    }
+}
+
+struct ContentView: View {
+    @GestureState private var dragState = DragState.inactive
+    @State var position = CGFloat(0)
+    @State var isSheetShown = false // 바텀 시트 표시 여부를 제어하는 변수
+    
+    let maxHeight = CGFloat(50)
+
+    var body: some View {
+        let drag = DragGesture()
+            .updating($dragState) { drag, state, transaction in
+                var newTranslation = drag.translation
+                if self.position + newTranslation.height < -maxHeight {  // 최대치를 넘지 않도록 제한
+                    newTranslation.height = -maxHeight - self.position
+                }
+                
+                state = .dragging(translation: newTranslation)
+//                state = .dragging(translation: drag.translation)
+            }
+            .onEnded(onDragEnded)
+
+        return ZStack(alignment: .bottom) {
+            Color.gray
+            
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    self.position = 0
+                    self.isSheetShown = true
+                }
+            }) {
+                Text("Show Bottom Sheet")
+            }
+
+            if isSheetShown {
+                Rectangle()
+                    .foregroundColor(.orange)
+                    .frame(height: 500)
+                    .cornerRadius(10)
+                    .shadow(color: .black, radius: 10)
+                    .offset(y: self.position + self.dragState.translation.height)
+                    .gesture(drag)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
+        }
+    }
+
+    private func onDragEnded(drag: DragGesture.Value) {
+        print("drag.translation.height: \(drag.translation.height)")
+//        let verticalDirection = drag.predictedEndLocation.y - drag.location.y
+        let cardDismiss = drag.translation.height > 100
+        let offset = cardDismiss ? drag.translation.height : 0
+        self.position = CGFloat(offset)
+        
+        if cardDismiss {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                self.isSheetShown = false
+            }
+        }
+    }
+}
+
+
+enum DragState {
+    case inactive
+    case dragging(translation: CGSize)
+
+    var translation: CGSize {
+        switch self {
+        case .inactive:
+            return .zero
+        case .dragging(let translation):
+            return translation
+        }
+    }
+
+    var isDragging: Bool {
+        switch self {
+        case .inactive:
+            return false
+        case .dragging:
+            return true
+        }
     }
 }
 

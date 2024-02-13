@@ -46,6 +46,7 @@ struct HomeTabView: View {
                 Button(action: {
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
+                        appCoordinator.offsetY = CGFloat.zero
 //                        appCoordinator.isTestViewShown = true
                     }
                 }) {

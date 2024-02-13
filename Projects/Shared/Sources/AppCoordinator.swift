@@ -31,6 +31,8 @@ public class AppCoordinator: ObservableObject {
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var createMumoryPath: NavigationPath = NavigationPath()
     
+    
+    @Published public var offsetY: CGFloat = .zero
     @Published public var isCreateMumorySheetShown = false
     @Published public var isSearchLocationViewShown = false
     @Published public var isSearchLocationMapViewShown = false
@@ -46,10 +48,6 @@ public class AppCoordinator: ObservableObject {
     @Published public var isAddFriendViewShown = false
     @Published public var isPopUpViewShown = false
     @Published public var isRewardPopUpViewShown = false
-    
-    @Published public var isSatisfiedInCreateMumory = false
-    @Published public var isMusicChoosed: Bool = false
-    @Published public var isLocationChoosed: Bool = false
     
     @Published public var isTestViewShown = false
     

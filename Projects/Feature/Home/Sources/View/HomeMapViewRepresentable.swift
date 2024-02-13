@@ -54,8 +54,6 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
         //        uiView.removeAnnotations(uiView.annotations)
-        
-        let mumoryAnnotations = self.mumoryDataViewModel.mumoryAnnotations.filter { !($0 is MKUserLocation) }
         uiView.addAnnotations(self.mumoryDataViewModel.mumoryAnnotations)
     }
     
@@ -194,11 +192,9 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "CustomUserLocation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "CustomUserLocation")
             
             annotationView.image = SharedAsset.userLocation.image
-            if let image = annotationView.image {
-                annotationView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
-            }
+            annotationView.frame = CGRect(x: 0, y: 0, width: 47, height: 47)
             
-            annotationView.zPriority = .min
+            annotationView.zPriority = .max
             
             return annotationView
         } else if annotation is MumoryAnnotation {
@@ -217,7 +213,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             } else {
                 print("ERROR: NO URL222")
             }
-            
+
             annotationView.clusteringIdentifier = "ClusterView"
             
             return annotationView
@@ -270,7 +266,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
         
         if let mumoryAnnotation = annotation as? MumoryAnnotation {
             self.parent.annotationSelected = true
-            self.parent.mumoryDataViewModel.mumoryAnnotations = [mumoryAnnotation]
+            self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = [mumoryAnnotation]
             print("didSelect MumoryAnnotation: \(mumoryAnnotation)")
         } else if annotation is MKUserLocation {
             print("didSelect User Location")
@@ -278,7 +274,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             self.parent.annotationSelected = true
             
             let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
-            self.parent.mumoryDataViewModel.mumoryAnnotations = memberAnnotations
+            self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = memberAnnotations
             
             print("didSelect cluster: \(cluster)")
         }

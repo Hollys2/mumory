@@ -12,18 +12,18 @@ import PhotosUI
 import Core
 import Shared
 import MapKit
-
 import UIKit
 
 
+
 public struct CreateMumoryBottomSheetView: View {
-    
-    @State private var translation: CGSize = .zero
-    @State private var isScrollEnabled = true
+        
+    @Binding private var showDatePicker: Bool
+
     @State private var contentText: String = ""
     @State private var isPublic: Bool = true
+    @State private var calendarYOffset: CGFloat = .zero
     
-    @State private var showDatePicker: Bool = false
     @State private var date: Date = Date()
     
 //    {
@@ -48,7 +48,8 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     
-    public init () {
+    public init (showDatePicker: Binding<Bool>) {
+        self._showDatePicker = showDatePicker
 //        UIScrollView.appearance().bounces = false
     }
     
@@ -58,6 +59,7 @@ public struct CreateMumoryBottomSheetView: View {
             
             // MARK: -Top bar
             ZStack {
+                
                 HStack {
                     Image(uiImage: SharedAsset.closeCreateMumory.image)
                         .resizable()
@@ -75,7 +77,7 @@ public struct CreateMumoryBottomSheetView: View {
                     
                     Button(action: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                            let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: choosedMusicModel, locationModel: choosedLocationModel)
+                            let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
                             
                             mumoryDataViewModel.createMumory(newMumoryAnnotation)
                         }
@@ -90,7 +92,7 @@ public struct CreateMumoryBottomSheetView: View {
                         Rectangle()
                             .foregroundColor(.clear)
                             .frame(width: 46, height: 30)
-                            .background(self.appCoordinator.isMusicChoosed && self.appCoordinator.isLocationChoosed ? Color(red: 0.85, green: 0.85, blue: 0.85) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
                             .cornerRadius(31.5)
                             .overlay(
                                 Text("게시")
@@ -99,7 +101,7 @@ public struct CreateMumoryBottomSheetView: View {
                             )
                             .allowsHitTesting(true)
                     }
-                    .disabled(!(self.appCoordinator.isMusicChoosed && self.appCoordinator.isLocationChoosed))
+                    .disabled(!((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil)))
                 } // HStack
                 
                 Text("뮤모리 만들기")
@@ -109,188 +111,156 @@ public struct CreateMumoryBottomSheetView: View {
             .padding(.top, 26)
             .padding(.bottom, 11)
             .padding(.horizontal, 20)
-            
+                        
             ScrollView(showsIndicators: false) {
-                
-                VStack(spacing: 0) {
-                    
-                    VStack(spacing: 16) {
-                        
-                        NavigationLink(value: "music") {
-                            ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
-                        }
-                        
-                        NavigationLink(value: "location") {
-                            ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
-                        }
 
-                        CalendarContainerView(title: "\(dateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
-                            .onTapGesture {
-                                self.showDatePicker = true
+                    VStack(spacing: 0) {
+
+                        VStack(spacing: 16) {
+
+                            NavigationLink(value: "music") {
+                                ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
                             }
-                            .fullScreenCover(isPresented: $showDatePicker, content: {
-                                VStack(spacing: 0) {
-                                    
-//                                    HStack {
-//
-//                                        SharedAsset.closeCreateMumory.swiftUIImage
-//                                            .resizable()
-//                                            .frame(width: 25, height: 25)
-//                                            .onTapGesture {
-//                                                self.date = Date()
-//                                                self.showDatePicker = false
-//                                            }
-//
-//                                        Spacer()
-//
-//                                        Rectangle()
-//                                            .foregroundColor(.clear)
-//                                            .frame(width: 46, height: 30)
-//                                            .background(Color(red: 0.85, green: 0.85, blue: 0.85))
-//                                            .cornerRadius(31.5)
-//                                            .overlay(
-//                                                Text("완료")
-//                                                    .font(Font.custom("Pretendard", size: 13).weight(.bold))
-//                                                    .multilineTextAlignment(.center)
-//                                                    .foregroundColor(.black)
-//                                            )
-//                                            .onTapGesture {
-//                                                showDatePicker = false
-//                                            }
-//                                    }
-//                                    .padding(.top, 23.43)
-//                                    .padding(.horizontal, 24.43)
 
-                                    
-                                    Spacer()
-                                    
-                                    DatePicker("", selection: $date, displayedComponents: [.date])
-                                        .datePickerStyle(GraphicalDatePickerStyle())
-                                        .labelsHidden()
-                                        .accentColor(SharedAsset.mainColor.swiftUIColor)
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .padding()
-                                        .preferredColorScheme(.dark)
-                                        .onChange(of: date) { _ in
-                                            showDatePicker = false
-                                        }
+                            NavigationLink(value: "location") {
+                                ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
+                            }
+
+                            CalendarContainerView(title: "\(dateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
+                                .onTapGesture {
+                                    withAnimation(.easeInOut(duration: 0.1)) {
+                                        self.showDatePicker.toggle()
+                                    }
                                 }
-                                .background(SharedAsset.backgroundColor.swiftUIColor)
-                            })
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(height: 6)
-                        .background(.black)
-                        .padding(.vertical, 18)
-                    
-                    VStack(spacing: 16) {
-                        
-                        TagContainerView(title: "#때끄")
-                            .background(GeometryReader { geometry -> Color in
-                                DispatchQueue.main.async {
-                                    self.tagContainerViewFrame = geometry.frame(in: .global)
-                                }
-                                return Color.clear
-                            })
-//                            .onAppear {
-//                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
-//                                    guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-//                                    let keyboardHeight = keyboardSize.height
-//
-//                                    withAnimation {
-//                                        scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
-//                                    }
-//                                }
-//
-//                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
-//                                    withAnimation {
-//                                         scrollViewOffset = 0
-//                                    }
-//                                }
-//                            }
-                        
-                        ContentContainerView(contentText: "하이")
-                        
-                        HStack(spacing: 11) {
-                            PhotosPicker(selection: $photoPickerViewModel.imageSelections,
-                                         maxSelectionCount: 3,
-                                         matching: .images) {
-                                
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 75, height: 75)
-                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        VStack(spacing: 0) {
-                                            (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
-                                                .resizable()
-                                                .frame(width: 25, height: 25)
-                                            
-                                            HStack(spacing: 0) {
-                                                Text("\(photoPickerViewModel.imageSelectionCount)")
-                                                    .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                    .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                Text(" / 3")
-                                                    .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                .background {
+                                    GeometryReader { geometry in
+
+                                        Color.clear
+                                            .onAppear {
+                                                self.calendarYOffset = geometry.frame(in: .global).maxY
                                             }
-                                            .multilineTextAlignment(.center)
-                                            .padding(.top, 10)
-                                        }
-                                    )
-                            }
-                            
-                            if !photoPickerViewModel.selectedImages.isEmpty {
-                                
-                                ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
-                                    
-                                    ZStack {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .frame(width: 75, height: 75)
-                                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                            .cornerRadius(10)
-                                        
-                                        Button(action: {
-                                            photoPickerViewModel.removeImage(image)
-                                        }) {
-                                            SharedAsset.closeButtonCreateMumory.swiftUIImage
+                                            .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                // Update calendarYOffset when the offset changes
+                                                self.calendarYOffset = newOffset
+                                            }
+                                    }
+                                }
+
+                        }
+                        .padding(.horizontal, 20)
+
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .frame(height: 6)
+                            .background(.black)
+                            .padding(.vertical, 18)
+
+                        VStack(spacing: 16) {
+
+                            TagContainerView(title: "#때끄")
+                                .background(GeometryReader { geometry -> Color in
+                                    DispatchQueue.main.async {
+                                        self.tagContainerViewFrame = geometry.frame(in: .global)
+                                    }
+                                    return Color.clear
+                                })
+                            //                            .onAppear {
+                            //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
+                            //                                    guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+                            //                                    let keyboardHeight = keyboardSize.height
+                            //
+                            //                                    withAnimation {
+                            //                                        scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
+                            //                                    }
+                            //                                }
+                            //
+                            //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
+                            //                                    withAnimation {
+                            //                                         scrollViewOffset = 0
+                            //                                    }
+                            //                                }
+                            //                            }
+
+                            ContentContainerView(contentText: "하이")
+
+                            HStack(spacing: 11) {
+                                PhotosPicker(selection: $photoPickerViewModel.imageSelections,
+                                             maxSelectionCount: 3,
+                                             matching: .images) {
+
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(width: 75, height: 75)
+                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            VStack(spacing: 0) {
+                                                (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                                    .resizable()
+                                                    .frame(width: 25, height: 25)
+
+                                                HStack(spacing: 0) {
+                                                    Text("\(photoPickerViewModel.imageSelectionCount)")
+                                                        .font(Font.custom("Pretendard", size: 14).weight(.medium))
+                                                        .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                    Text(" / 3")
+                                                        .font(Font.custom("Pretendard", size: 14).weight(.medium))
+                                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                }
+                                                .multilineTextAlignment(.center)
+                                                .padding(.top, 10)
+                                            }
+                                        )
+                                }
+
+                                if !photoPickerViewModel.selectedImages.isEmpty {
+
+                                    ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
+
+                                        ZStack {
+                                            Image(uiImage: image)
                                                 .resizable()
-                                                .frame(width: 27, height: 27)
+                                                .frame(width: 75, height: 75)
+                                                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                                .cornerRadius(10)
+
+                                            Button(action: {
+                                                photoPickerViewModel.removeImage(image)
+                                            }) {
+                                                SharedAsset.closeButtonCreateMumory.swiftUIImage
+                                                    .resizable()
+                                                    .frame(width: 27, height: 27)
+                                            }
+                                            .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
                                         }
-                                        .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
                                     }
                                 }
                             }
+                            .onChange(of: photoPickerViewModel.imageSelections) { _ in
+                                photoPickerViewModel.convertDataToImage()
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .onChange(of: photoPickerViewModel.imageSelections) { _ in
-                            photoPickerViewModel.convertDataToImage()
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    .padding(.horizontal, 20)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 50)
+
+                    } // VStack
+                    .padding(.top, 20)
                     .padding(.bottom, 50)
 
-                } // VStack
-                .padding(.top, 20)
-                .padding(.bottom, 50)
-                .offset(y: -scrollViewOffset)
             } // ScrollView
             .simultaneousGesture(DragGesture().onChanged { i in
-                print("FUCKYOU")
+                // 스크롤할 때 바텀시트 움직이는 것 방지?
+                print("simultaneousGesture DragGesture")
+
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             })
             
-            
-            
+
             ZStack(alignment: .topLeading) {
                 Rectangle()
                     .foregroundColor(Color(red: 0.12, green: 0.12, blue: 0.12))
-                    .frame(width: UIScreen.main.bounds.width, height: 72 + appCoordinator.safeAreaInsetsBottom)
+                    .frame(height: 72 + appCoordinator.safeAreaInsetsBottom)
                     .overlay(
                         Rectangle()
                             .inset(by: 0.15)
@@ -300,44 +270,62 @@ public struct CreateMumoryBottomSheetView: View {
                     )
                 
                 
-                Button(action: {
-                    self.isPublic.toggle()
-                }) {
+  
                     HStack(spacing: 0) {
-                        Spacer().frame(width: 20)
+                        Spacer().frame(width: 20)         
                         
-                        Text("전체공개")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                            .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-                        
-                        Spacer().frame(width: 7)
-                        
-                        Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
-                            .frame(width: 17, height: 17)
-                        
-                        Spacer()
+                        Group {
+                            Text("전체공개")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                                .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
+                            
+                            Spacer().frame(width: 7)
+                            
+                            Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
+                                .frame(width: 17, height: 17)
+                            
+                            Spacer()
+                        }
+                        .onTapGesture {
+                            self.isPublic.toggle()
+                        }
                     }
                     .padding(.top, 18)
-                }
             } // ZStack
+            .offset(y: getUIScreenBounds().height == 667 ? -33  : -getSafeAreaInsets().bottom - 16)
         } // VStack
         .background(SharedAsset.backgroundColor.swiftUIColor)
         .cornerRadius(23, corners: [.topLeft, .topRight])
-        .padding(.top, self.appCoordinator.safeAreaInsetsTop + 16)
-        .ignoresSafeArea()
+//        .padding(.top, self.appCoordinator.safeAreaInsetsTop + 16)
         .onDisappear {
 //            mumoryDataViewModel.choosedMusicModel = nil
 //            mumoryDataViewModel.choosedLocationModel = nil
         }
-        .onTapGesture {
-            print("FUCK")
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        .gesture(
+            TapGesture()
+                .onEnded {
+                    print("UIApplication.shared.sendAction")
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+        )
+        .calendarPopup(show: self.$showDatePicker, yOffset: self.calendarYOffset) {
+
+            DatePicker("", selection: self.$date, displayedComponents: [.date])
+                .datePickerStyle(.graphical)
+                .labelsHidden()
+                .accentColor(SharedAsset.mainColor.swiftUIColor)
+                .background(SharedAsset.backgroundColor.swiftUIColor)
+                .preferredColorScheme(.dark)
+                .onChange(of: self.date) { _ in
+                    withAnimation(.easeInOut(duration: 0.1)) {
+                        self.showDatePicker = false
+                    }
+                }
         }
     }
 }
     
 struct ContainerView: View {
-    
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -422,10 +410,6 @@ struct ContainerView: View {
                         SharedAsset.editIconCreateMumory.swiftUIImage
                             .resizable()
                             .frame(width: 31, height: 31)
-                            .onAppear {
-                                self.appCoordinator.isMusicChoosed = true
-                            }
-                        
                     } else {
                         Group {
                             
@@ -466,10 +450,6 @@ struct ContainerView: View {
                         SharedAsset.editIconCreateMumory.swiftUIImage
                             .resizable()
                             .frame(width: 31, height: 31)
-                            .onAppear {
-                                self.appCoordinator.isLocationChoosed = true
-                            }
-                        
                     } else {
                         Group {
                             
@@ -497,6 +477,7 @@ struct ContainerView: View {
 
 struct CalendarContainerView: View {
     
+    @State private var date = Date()
     let title: String
 
     init(title: String) {
@@ -530,8 +511,51 @@ struct CalendarContainerView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 17)
         }
+//        .popover(isPresented: $isPopOverShown, content: {
+//            ZStack {
+//                DatePicker("",
+//                           selection: $date,
+//                           displayedComponents: [.date])
+//                .datePickerStyle(.graphical)
+//            }
+//
+//        })
     }
 }
+
+struct DatePickerView: UIViewRepresentable {
+    @Binding var selectedDate: Date
+
+    func makeUIView(context: Context) -> UIDatePicker {
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.addTarget(context.coordinator, action: #selector(Coordinator.dateChanged(_:)), for: .valueChanged)
+        
+        return datePicker
+    }
+
+    func updateUIView(_ uiView: UIDatePicker, context: Context) {
+        uiView.date = selectedDate
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject {
+        var parent: DatePickerView
+
+        init(_ parent: DatePickerView) {
+            self.parent = parent
+        }
+
+        @objc func dateChanged(_ senders: UIDatePicker) {
+            parent.selectedDate = senders.date
+        }
+    }
+}
+
 
 struct TagContainerView: View {
     
@@ -640,7 +664,7 @@ struct ContentContainerView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                .frame(minHeight: getUIScreenBounds().height == 667 ? 100 : 127)
+                .frame(minHeight: getUIScreenBounds().height == 667 ? 102 : 127)
                 .cornerRadius(15)
             
             HStack(alignment: .top, spacing: 0) {
@@ -677,12 +701,14 @@ struct ContentContainerView: View {
     }
 }
 
-struct CreateMumoryBottomSheetView_Previews: PreviewProvider {
-    static var previews: some View {
-        let appCoordinator = AppCoordinator()
-        let mumoryDataViewModel = MumoryDataViewModel()
-        CreateMumoryBottomSheetView()
-            .environmentObject(appCoordinator)
-            .environmentObject(mumoryDataViewModel)
-    }
-}
+//struct CreateMumoryBottomSheetView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let appCoordinator = AppCoordinator()
+//        let mumoryDataViewModel = MumoryDataViewModel()
+//        CreateMumoryBottomSheetView()
+//            .environmentObject(appCoordinator)
+//            .environmentObject(mumoryDataViewModel)
+//    }
+//}
+
+

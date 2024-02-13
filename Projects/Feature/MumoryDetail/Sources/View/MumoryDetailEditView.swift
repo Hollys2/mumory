@@ -80,7 +80,7 @@ public struct MumoryDetailEditView: View {
                             if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                                 let newMumoryAnnotation = MumoryAnnotation(date: Date(), musicModel: choosedMusicModel, locationModel: choosedLocationModel)
 //                                mumoryDataViewModel.createdMumoryAnnotation = newMumoryAnnotation
-                                mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
+//                                mumoryDataViewModel.mumoryAnnotations.append(newMumoryAnnotation)
                             }
                             
                             withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
