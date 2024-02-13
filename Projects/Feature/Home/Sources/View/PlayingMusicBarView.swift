@@ -11,7 +11,7 @@ import SwiftUI
 import Shared
 
 public struct PlayingMusicBarView: View {
-    
+    @State var isProfileTapped = false
     public init() {}
     
     public var body: some View {
@@ -54,6 +54,13 @@ public struct PlayingMusicBarView: View {
                       .background(Color(red: 0.52, green: 0.52, blue: 0.52))
                     
                     Image(uiImage: SharedAsset.profileTopbar.image)
+                        .fullScreenCover(isPresented: $isProfileTapped, content: {
+                            SettingView()
+                        })
+                        .onTapGesture {
+                            isProfileTapped = true
+                        }
+    
                 }
                     .padding()
             )

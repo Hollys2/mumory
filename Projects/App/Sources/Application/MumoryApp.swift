@@ -1,32 +1,47 @@
 import SwiftUI
 import Feature
+import KakaoSDKAuth
+import GoogleSignIn
 import Core
 import Shared
 
 @available(iOS 16.4, *)
 @main
-struct MumoryApp: App {
-    
+public struct MumoryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
     @StateObject var appCoordinator: AppCoordinator = .init()
     @StateObject var locationManager: LocationManager = .init() // 위치 권한
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
+    @StateObject var userManager: UserViewModel = UserViewModel()
+    public init(){}
     
-    var body: some Scene {
+    public var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-//                CreateMumoryBottomSheetView()
-//                HomeView()
-                SearchLocationMapView()
+                //                CreateMumoryBottomSheetView()
+                //                HomeView()
+                //충독나서 스플래시 화면으로 수정함
+                SplashView()
+                    .onOpenURL(perform: { url in
+                        if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                            AuthController.handleOpenUrl(url: url)
+                        }
+                    })
+                    .environmentObject(userManager)
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
                     .environmentObject(mumoryDataViewModel)
+                    .ignoresSafeArea()
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
+                        
+                        userManager.width = geometry.size.width
+                        userManager.height = geometry.size.height
+                        userManager.topInset = geometry.safeAreaInsets.top
+                        userManager.bottomInset = geometry.safeAreaInsets.bottom
                     }
             }
         }
@@ -57,7 +72,7 @@ struct YearMonthPicker: View {
                 }
             }
             .pickerStyle(WheelPickerStyle())
-//            .frame(width: 100)
+            //            .frame(width: 100)
             
             Picker("Month", selection: $selectedMonth) {
                 ForEach(months, id: \.self) {
@@ -65,7 +80,7 @@ struct YearMonthPicker: View {
                 }
             }
             .pickerStyle(WheelPickerStyle())
-//            .frame(width: 150)
+            //            .frame(width: 150)
         }
         .padding()
     }

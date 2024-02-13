@@ -255,6 +255,7 @@ public struct HomeView: View {
     
     @State private var selectedTab: Tab = .home
     
+    @StateObject private var playerManager = PlayerViewModel()
     @State private var translation: CGSize = .zero
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -306,7 +307,8 @@ public struct HomeView: View {
                     case .social:
                         SocialView()
                     case .library:
-                        Text("The Third Tab")
+                        LibraryManageView()
+                            .environmentObject(playerManager)
                     case .notification:
                         VStack(spacing: 0){
                             Color.red
@@ -316,6 +318,11 @@ public struct HomeView: View {
                     
                     HomeTabView(selectedTab: $selectedTab)
                 }
+                
+                    MiniPlayerView()
+                        .environmentObject(playerManager)
+                        .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
+            
                 
                 if appCoordinator.isCreateMumorySheetShown {
                     Color.black.opacity(0.6)
@@ -400,7 +407,8 @@ public struct HomeView: View {
                 }
                 
             } // ZStack
-            .ignoresSafeArea()
+            .ignoresSafeArea()            
+            .navigationBarBackButtonHidden()
             .navigationDestination(for: Int.self) { i in
                 switch i {
                 case 0:

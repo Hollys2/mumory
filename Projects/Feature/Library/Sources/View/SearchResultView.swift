@@ -11,6 +11,9 @@ import Shared
 import MusicKit
 
 struct SearchResultView: View {
+    @EnvironmentObject var recentSearchObject: RecentSearchObject
+    @EnvironmentObject var manager: LibraryManageModel
+
     @Binding var term: String
     @State var musicList: MusicItemCollection<Song> = []
     @State var albumList: MusicItemCollection<Album> = []
@@ -18,12 +21,19 @@ struct SearchResultView: View {
     
     var body: some View {
         ZStack{
+            //부모뷰의 검색 단어가 변경될 때 마다 검색 요청
             Text(term)
                 .opacity(0)
-                .onChange(of: term, perform: { value in
-                    requestSearch(term: value)
-                    print("term change")
+                .onAppear(perform: {
+                    requestSearch(term: term)
                 })
+                .onChange(of: term, perform: { value in
+                    Task{
+                        requestSearch(term: value)
+                        manager.searchTerm = value
+                    }
+                })
+                
             
             ScrollView{
                 Text("아티스트")
@@ -35,11 +45,33 @@ struct SearchResultView: View {
                 
                 LazyVStack(content: {
                     ForEach(artistList){ artist in
-                        NavigationLink {
-                            //가수 페이지로 넘어가기
-                        } label: {
-                            SearchArtistItem(artist: artist)
-                        }
+                        SearchArtistItem(artist: artist)
+                            .onAppear(perform: {
+//                                artist.id //아티스트 아이디 있음
+//                                artist.genreNames
+                                guard let genres = artist.genres else {
+                                    print("no no")
+                                    return
+                                }
+                                for genre in genres {
+                                    print("genre name: \(genre.name), id: \(genre.id)")
+                                }
+                                
+                                
+                            })
+                            .gesture(TapGesture().onEnded({ void in
+                                print("tap item")
+                                manager.page = .artist
+                                manager.page = .search //디테일 넣기
+                                manager.tappedArtist = artist
+                                let userDefault = UserDefaults.standard
+                                var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                recentSearchList.removeAll(where: {$0 == artist.name})
+                                recentSearchList.insert(artist.name, at: 0)
+                                userDefault.set(recentSearchList, forKey: "recentSearchList")
+                            }))
+                        
+                        
                     }
                 })
                 
@@ -51,28 +83,52 @@ struct SearchResultView: View {
                 
                 LazyVStack(content: {
                     ForEach(musicList){ music in
-                        NavigationLink {
-                            //곡 눌렀을 때 동작
-                        } label: {
+                        NavigationLink{
+                            
+                        }label: {
                             SearchSongItem(song: music)
+                                .onAppear {
+                                    
+                                    guard let genres = music.genres else {
+                                        print("no no")
+                                        return
+                                    }
+                                    for genre in genres {
+                                        print("genre name: \(genre.name), id: \(genre.id)")
+                                    }
+                                }
                         }
+                        .gesture(TapGesture().onEnded({ void in
+                            print("tap item")
+                            let userDefault = UserDefaults.standard
+                            var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                            recentSearchList.removeAll(where: {$0 == music.title})
+                            recentSearchList.insert(music.title, at: 0)
+                            userDefault.set(recentSearchList, forKey: "recentSearchList")
+                        }))
+                        
                     }
-                    
                 })
+                
+                
             }
         }
+
     }
     public func requestSearch(term: String){
-        print("request search")
-        Task{
-            var request = MusicCatalogSearchRequest(term: term, types: [Song.self, Artist.self])
+        Task {
+            var request = MusicCatalogSearchRequest(term: term, types: [Song.self, Artist.self, Album.self])
             request.limit = 20
             let response = try await request.response()
-            
             self.musicList = response.songs
             self.albumList = response.albums
             self.artistList = response.artists
+            
+            for album in albumList {
+                print(album.genres?.first?.id)
+            }
         }
+   
     }
 }
 

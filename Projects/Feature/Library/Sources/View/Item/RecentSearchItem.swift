@@ -10,6 +10,7 @@ import SwiftUI
 import Shared
 
 struct RecentSearchItem: View {
+    @EnvironmentObject var recentSearchObject: RecentSearchObject
     var title: String = "검색어"
     var body: some View {
         HStack(spacing: 13){
@@ -25,6 +26,13 @@ struct RecentSearchItem: View {
             
             SharedAsset.xGray.swiftUIImage
                 .frame(width: 19, height: 19)
+                .onTapGesture {
+                    recentSearchObject.recentSearchList.removeAll(where: {$0 == title})
+                    let userDefault = UserDefaults.standard
+                    guard var result = userDefault.value(forKey: "recentSearchList") as? [String] else {return}
+                    result.removeAll(where: {$0 == title})
+                    userDefault.set(result, forKey: "recentSearchList")
+                }
             
         }
         

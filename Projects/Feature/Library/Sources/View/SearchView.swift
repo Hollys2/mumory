@@ -11,7 +11,8 @@ import Shared
 import MusicKit
 
 struct SearchView: View {
-    @EnvironmentObject var nowPlaySong: NowPlaySong
+    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var playerManager: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
 
     @State var term: String = ""
@@ -35,9 +36,12 @@ struct SearchView: View {
                         
                         TextField("제목을 입력하세요", text: $term, prompt: searchPlaceHolder())
                             .textFieldStyle(.plain)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
                             .foregroundColor(.white)
+                            .onAppear(perform: {
+                                term = manager.searchTerm
+                            })
                     
                         
                         SharedAsset.xWhiteCircle.swiftUIImage
@@ -50,22 +54,26 @@ struct SearchView: View {
                     .frame(height: 45)
                     .background(Color(red: 0.24, green: 0.24, blue: 0.24).clipShape(RoundedRectangle(cornerSize: CGSize(width: 22, height: 22))))
                     
-                    Button(action: {
-                        dismiss()
-                    }, label: {
+                  
                         Text("취소")
                             .padding(.leading, 8)
                             .foregroundColor(.white)
                             .font(.system(size: 16, weight: .medium))
-                    })
+                            .onTapGesture {
+                                manager.page = manager.previousPage
+                                manager.previousPage = .search
+                            }
+                  
                 })
                 .padding(.top, 12)
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
+                .padding(.bottom, 15)
                 .background(.clear)
                 
                 if term.count > 0{
                     SearchResultView(term: $term)
+                    
                 }else{
                     SearchEntryView()
                 }
@@ -76,7 +84,8 @@ struct SearchView: View {
             }
         }
         .navigationBarBackButtonHidden()
-    }    
+        .background(.black)
+    }
 
     
     private func searchPlaceHolder() -> Text {

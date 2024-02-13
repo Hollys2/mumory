@@ -16,16 +16,21 @@ public struct RecentMusicItem: View {
     @State var song: Song
     public var body: some View {
     
-        VStack{
-            AsyncImage(url: song.artwork?.url(width: 1000, height: 1000), content: { image in
-                image
-                    .resizable()
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 10, height: 10)))
-            }, placeholder: {
-                ProgressView()
-            })
+        VStack(alignment: .leading){
+            ZStack{
+                AsyncImage(url: song.artwork?.url(width: 500, height: 500), content: { image in
+                    image
+                        .resizable()
+                  
+                }, placeholder: {
+                    RoundedRectangle(cornerRadius: 15,style: .circular)
+                        .foregroundStyle(.gray)
+                })
+                
+                LinearGradient(colors: [ColorSet.mainPurpleColor, Color.clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.6 ))
+            }
             .frame(width: 105, height: 105)
-
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
             
                 
             Text(song.title)
@@ -43,10 +48,7 @@ public struct RecentMusicItem: View {
                 .truncationMode(.tail)
             
         }
+        .padding(.trailing, 12)
 
     }
 }
-
-//#Preview {
-//    RecentMusicItem()
-//}

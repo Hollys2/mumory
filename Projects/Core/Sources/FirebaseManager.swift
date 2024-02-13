@@ -8,13 +8,29 @@
 
 
 import FirebaseFirestore
+import FirebaseAuth
+import FirebaseStorage
+import Firebase
+import FirebaseMessaging
 
 public class FirebaseManager {
     
     public static let shared = FirebaseManager()
     public let db: Firestore
+    public let storage: Storage
+    public let auth: Auth
+    public let app: FirebaseApp?
+    public let messaging: Messaging
     
     private init() {
         db = Firestore.firestore()
+        storage = Storage.storage()
+        auth = Auth.auth()
+        app = FirebaseApp.app()
+        messaging = Messaging.messaging()
+    }
+    
+    public func getGoogleCredential(idToken: String, accessToken: String) -> AuthCredential {
+        return GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
     }
 }

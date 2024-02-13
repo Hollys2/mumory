@@ -8,8 +8,13 @@
 
 import SwiftUI
 import Shared
+import ShazamKit
 
 struct SearchEntryView: View {
+    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
+    
+//    @State var recentSearchList: [String] = []
+
     var body: some View {
         ScrollView{
             VStack(spacing: 15){
@@ -43,11 +48,17 @@ struct SearchEntryView: View {
                         Text("전체삭제")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .onTapGesture {
+                                let userDefault = UserDefaults.standard
+                                userDefault.removeObject(forKey: "recentSearchList")
+                                recentSearchObject.recentSearchList = []
+                            }
                     }
                     
                     LazyVStack(content: {
-                        ForEach(1...5, id: \.self) { count in
-                            RecentSearchItem(title: "검색어 \(count)")
+                        ForEach(recentSearchObject.recentSearchList, id: \.self) { string in
+                            RecentSearchItem(title: string)
+                                .environmentObject(recentSearchObject)
                         }
                     })
                     .padding(.top, 25)
@@ -98,6 +109,46 @@ struct SearchEntryView: View {
                 Spacer()
                 
             }
+        }
+        .onAppear(perform: {
+            let userDefault = UserDefaults.standard
+            guard let result = userDefault.value(forKey: "recentSearchList") as? [String] else {print("no recent list");return}
+            recentSearchObject.recentSearchList = result
+        })
+    }
+    
+    func match() async {
+        
+        let granted = await AVAudioApplication.requestRecordPermission()
+        
+        guard granted else {
+            print("No recording permission granted...")
+            return
+        }
+
+        do {
+            try audioEngine.start()
+        } catch {
+            print("Failed to start audio engine")
+            return
+        }
+        
+        isMatching = true
+        
+        for await result in session.results {
+            switch result {
+            case .match(let match):
+                Task { @MainActor in
+                    self.currentMatchResult = MatchResult(match: match)
+                }
+            case .noMatch(_):
+                print("No match")
+                endSession()
+            case .error(let error, _):
+                print("Error \(error.localizedDescription)")
+                endSession()
+            }
+            stopRecording()
         }
     }
 }

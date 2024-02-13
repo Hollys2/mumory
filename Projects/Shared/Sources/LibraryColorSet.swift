@@ -16,4 +16,7 @@ public enum LibraryColorSet {
     public static let lightGrayForeground = Color(red: 0.82, green: 0.82, blue: 0.82)
     public static let lightGrayTitle = Color(red: 0.76, green: 0.76, blue: 0.76)
     public static let lightGrayLine = Color(red: 0.3, green: 0.3, blue: 0.3)
+    public static let subGray = Color(red: 0.47, green: 0.47, blue: 0.47)
+    public static let deepGray = Color(red: 0.16, green: 0.16, blue: 0.16)
+    public static let charSubGray = Color(red: 0.76, green: 0.76, blue: 0.76)
 }
