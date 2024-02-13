@@ -112,13 +112,13 @@ struct LastOfCustomizationView: View {
                         })
                         .frame(maxWidth: .infinity)
                         .background(ColorSet.moreDeepGray)
-                        .clipShape(RoundedCorner(radius: 20, corners: [.bottomLeft, .bottomRight]))
 
                         
                     })
                     .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
                     .overlay(content: {
-                        RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .continuous)
+                        RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .circular)
                             .stroke(ColorSet.subGray, lineWidth: 0.5)
                     })
                     .padding(.leading, 58)

@@ -194,10 +194,11 @@ public struct CustomizationView: View {
             "selected_notification_time": manager.selectedTime
         ]
         
-        var playlist: [String: Any] = [
+        let playlist: [String: Any] = [
             "title": "즐겨찾기 목록",
             "song_IDs": [],
-            "isPrivate": true
+            "is_private": true,
+            "is_favorite": true
         ]
         
         //소셜 로그인했을 경우 이용약관 여부도 함께 저장(이메일 회원가입은 이전단계에서 이미 저장함)

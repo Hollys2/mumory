@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Shared
+import ShazamKit
 
 struct SearchEntryView: View {
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
@@ -114,6 +115,41 @@ struct SearchEntryView: View {
             guard let result = userDefault.value(forKey: "recentSearchList") as? [String] else {print("no recent list");return}
             recentSearchObject.recentSearchList = result
         })
+    }
+    
+    func match() async {
+        
+        let granted = await AVAudioApplication.requestRecordPermission()
+        
+        guard granted else {
+            print("No recording permission granted...")
+            return
+        }
+
+        do {
+            try audioEngine.start()
+        } catch {
+            print("Failed to start audio engine")
+            return
+        }
+        
+        isMatching = true
+        
+        for await result in session.results {
+            switch result {
+            case .match(let match):
+                Task { @MainActor in
+                    self.currentMatchResult = MatchResult(match: match)
+                }
+            case .noMatch(_):
+                print("No match")
+                endSession()
+            case .error(let error, _):
+                print("Error \(error.localizedDescription)")
+                endSession()
+            }
+            stopRecording()
+        }
     }
 }
 

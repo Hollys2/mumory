@@ -9,18 +9,20 @@
 import Foundation
 
 
-struct MusicGenre: Hashable{
-    let name: String
-    let id: Int
+public struct MusicGenre: Hashable{
+    public let name: String
+    public let id: Int
 }
 
-struct MusicGenreHelper{
-    func genreName(id: Int) -> String {
+public struct MusicGenreHelper{
+    public init(){}
+    
+    public func genreName(id: Int) -> String {
         let name = genreDictionary[id] ?? "ERROR"
         return name
     }
     
-    private let genreDictionary: [Int: String] = [
+    public let genreDictionary: [Int: String] = [
         2: "블루스",
         4: "키즈",
         5: "클래식",
@@ -55,7 +57,7 @@ struct MusicGenreHelper{
         1029: "오케스트라"
     ]
     
-    let genres: [MusicGenre] = [
+    public let genres: [MusicGenre] = [
         MusicGenre(name: "K-POP", id: 51),
         MusicGenre(name: "POP", id: 14),
         MusicGenre(name: "클래식", id: 5),

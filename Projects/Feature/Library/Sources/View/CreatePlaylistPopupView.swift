@@ -8,13 +8,20 @@
 
 import SwiftUI
 import Shared
+import Core
 
 struct CreatePlaylistPopupView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var userManager: UserViewModel
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
-    var xButtonAction: () -> Void
-//    var finishButtonAction: () -> Void
+    @Binding var isCreatePlaylistCompleted: Bool
+    @State var backgroundOpacity = 0.0
     var body: some View {
+        ZStack{
+            Color.black.opacity(backgroundOpacity).ignoresSafeArea()
+                .transition(.opacity)
+            
             VStack(spacing: 0){
                 HStack{
                     Spacer()
@@ -22,7 +29,9 @@ struct CreatePlaylistPopupView: View {
                         .frame(width: 25, height: 25)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            xButtonAction()
+                            UIView.setAnimationsEnabled(true)
+                            backgroundOpacity = 0
+                            dismiss()
                         }
                 }
                 
@@ -91,7 +100,9 @@ struct CreatePlaylistPopupView: View {
                     .menuStyle(DarkMenuStyle())
                 }
                 
-                Button(action: {}, label: {
+                Button(action: {
+                    createPlaylist()
+                }, label: {
                     Text("만들기")
                         .frame(maxWidth: .infinity)
                         .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
@@ -111,14 +122,42 @@ struct CreatePlaylistPopupView: View {
             .padding(.bottom, 44)
             .background(LibraryColorSet.background)
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-
-        
+            .padding(.horizontal, 40)
+            
+        }
+        .onAppear(perform: {
+            withAnimation(.easeIn(duration: 0.5)){
+                backgroundOpacity = 0.7
+            }
+        })
     }
+    
     
     private func getPrompt() -> Text {
         return Text("플레이리스트 이름")
             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
             .foregroundColor(LibraryColorSet.subGray)
+    }
+    
+    private func createPlaylist() {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        
+        let data: [String: Any] = [
+            "title": playlistTitle,
+            "is_private": !isTapPublic,
+            "song_IDs": [],
+            "is_favorite": false
+        ]
+        
+        db.collection("User").document(userManager.uid).collection("Playlist").addDocument(data: data) { error in
+            if error == nil {
+                print("success")
+                UIView.setAnimationsEnabled(true)
+                isCreatePlaylistCompleted = true
+                dismiss()
+            }
+        }
     }
 }
 

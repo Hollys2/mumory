@@ -18,10 +18,8 @@ struct PlayAllButton: View {
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 .foregroundStyle(ColorSet.mainPurpleColor)
         })
-        .padding(.leading, 15)
-        .padding(.trailing, 14)
-        .padding(.top, 9)
-        .padding(.bottom, 9)
+        .padding(.horizontal, 13)
+        .padding(.vertical, 8)
         .overlay {
             RoundedRectangle(cornerRadius: 30, style: .circular).stroke(ColorSet.mainPurpleColor, lineWidth: 1.0)
         }

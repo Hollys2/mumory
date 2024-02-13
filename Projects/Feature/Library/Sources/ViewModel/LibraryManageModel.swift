@@ -8,6 +8,7 @@
 
 import Foundation
 import MusicKit
+import Shared
 
 public class LibraryManageModel: ObservableObject{
     public init(){}
@@ -19,8 +20,9 @@ public class LibraryManageModel: ObservableObject{
         case entry(entrySubView)
         case chart
         case search
-        case playlist
+        case playlistManage
         case artist
+        case playlist(playlist: MusicPlaylist)
     }
     
     @Published var page: LibraryPage = .entry(.myMusic)

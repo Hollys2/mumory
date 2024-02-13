@@ -17,12 +17,9 @@ public struct LibraryManageView: View {
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     @EnvironmentObject var userManager: UserViewModel
     @StateObject var manager: LibraryManageModel = LibraryManageModel()
-    
-    var libarayView: LibraryView = LibraryView()
-    var searchView: SearchView = SearchView()
-    var artistView: ArtistView = ArtistView()
+
     @State var isPlaying: Bool = true
-    
+    @State var isNeedtoRemoveSafearea: Bool = false
     public init() {
         
     }
@@ -47,26 +44,37 @@ public struct LibraryManageView: View {
                     case .artist:
                         ArtistView()
                             .environmentObject(manager)
-                    case .playlist:
-                        PlaylistView()
+                    case .playlistManage:
+                        PlaylistManageView()
                             .environmentObject(manager)
                     case .chart:
                         ChartListView()
                             .environmentObject(manager)
                             .environmentObject(playerManager)
+                    case .playlist(playlist: let playlist):
+                        PlaylistView(playlist: playlist)
+                            .environmentObject(manager)
+                            .onAppear(perform: {
+                                isNeedtoRemoveSafearea = true
+                            })
+                            .onDisappear(perform: {
+                                isNeedtoRemoveSafearea = false
+                            })
                     }
                 })
-                .padding(.top, userManager.topInset)
+                .padding(.top, isNeedtoRemoveSafearea ? 0 : userManager.topInset)
 
                 ColorSet.background
                     .frame(maxWidth: .infinity)
                     .frame(height: userManager.topInset)
+                    .opacity(isNeedtoRemoveSafearea ? 0 : 1)
   
                 
             }
             .navigationBarBackButtonHidden()
             .onAppear(perform: {
                 Task{
+//                    manager.page = .playlist(music)
                     let authRequest = await MusicAuthorization.request() //음악 사용 동의 창-앱 시작할 때
                 }
             })

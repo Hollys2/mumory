@@ -49,7 +49,7 @@ struct TopBar: View {
 
         }
         .padding(.horizontal, 20)
-        .frame(height: 65)
+        .frame(height: 50)
 
     }
 }
