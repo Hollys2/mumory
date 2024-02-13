@@ -81,7 +81,6 @@ extension View {
                             .frame(width: 280, height: 279)
                             .cornerRadius(15)
                             .offset(x: 50, y: yOffset + 8)
-                            .zIndex(3)
                     }
                 }
                 

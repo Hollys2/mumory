@@ -14,6 +14,8 @@ struct MumoryDetailScrollView: UIViewRepresentable {
     
     //    typealias UIViewType = UIScrollView
     
+    @State var mumoryAnnotation: MumoryAnnotation
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     func makeUIView(context: Context) -> UIScrollView {
@@ -26,7 +28,7 @@ struct MumoryDetailScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView().environmentObject(appCoordinator))
+        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumoryAnnotation: self.mumoryAnnotation).environmentObject(appCoordinator))
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
         hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: 2300)
         
@@ -157,7 +159,9 @@ public struct MumoryDetailView: View {
     }
     
     public var body: some View {
+        
         ZStack(alignment: .top) {
+            
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
             ZStack(alignment: .bottomLeading) {
@@ -201,7 +205,7 @@ public struct MumoryDetailView: View {
                 .padding(.leading, 20)
             } // ZStack
             
-            MumoryDetailScrollView()
+            MumoryDetailScrollView(mumoryAnnotation: self.mumoryAnnotation)
             
             HStack {
                 Button(action: {

@@ -9,6 +9,7 @@
 
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
 
 public class FirebaseManager {
     
@@ -16,6 +17,7 @@ public class FirebaseManager {
     
     public let db: Firestore
     public let auth: Auth
+    public let storage: Storage
     
     public typealias Timestamp = FirebaseFirestore.Timestamp
     
@@ -45,5 +47,6 @@ public class FirebaseManager {
     private init() {
         self.db = Firestore.firestore()
         self.auth = Auth.auth()
+        self.storage = Storage.storage()
     }
 }

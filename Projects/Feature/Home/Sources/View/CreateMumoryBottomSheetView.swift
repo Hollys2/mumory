@@ -157,13 +157,13 @@ public struct CreateMumoryBottomSheetView: View {
 
                         VStack(spacing: 16) {
 
-                            TagContainerView(title: "#때끄")
-                                .background(GeometryReader { geometry -> Color in
-                                    DispatchQueue.main.async {
-                                        self.tagContainerViewFrame = geometry.frame(in: .global)
-                                    }
-                                    return Color.clear
-                                })
+//                            TagContainerView(tags: <#T##Binding<[String]>#>)
+//                                .background(GeometryReader { geometry -> Color in
+//                                    DispatchQueue.main.async {
+//                                        self.tagContainerViewFrame = geometry.frame(in: .global)
+//                                    }
+//                                    return Color.clear
+//                                })
                             //                            .onAppear {
                             //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
                             //                                    guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
@@ -181,7 +181,7 @@ public struct CreateMumoryBottomSheetView: View {
                             //                                }
                             //                            }
 
-                            ContentContainerView(contentText: "하이")
+                            ContentContainerView(contentText: self.$contentText)
 
                             HStack(spacing: 11) {
                                 PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -559,17 +559,16 @@ struct DatePickerView: UIViewRepresentable {
 
 struct TagContainerView: View {
     
-    let title: String
+    @Binding private var tags: [String]
     
     @State private var tagText: String = ""
-    @State private var tags: [String] = []
     
     @State private var isEditing = false
     @State private var isTagEditing = false
     @State private var isCommit = false
 
-    init(title: String) {
-        self.title = title
+    init(tags: Binding<[String]>) {
+        self._tags = tags
     }
     
     var body: some View {
@@ -590,9 +589,9 @@ struct TagContainerView: View {
                 
                 Spacer().frame(width: 17)
                 
-                ForEach(tags.indices, id: \.self) { index in
+                ForEach(self.tags.indices, id: \.self) { index in
                     
-                    TextField("", text: $tags[index], onEditingChanged: { isEditing in
+                    TextField("", text: self.$tags[index], onEditingChanged: { isEditing in
                         self.isTagEditing = isEditing
                     })
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -629,6 +628,11 @@ struct TagContainerView: View {
                     }, onEditingChanged: { isEditing in
                         self.isEditing = isEditing
                     })
+                    .onChange(of: tagText) { newValue in
+                        if !self.isEditing {
+                            tagText = ""
+                        }
+                    }
                 }
                 
                 Spacer(minLength: 0)
@@ -636,6 +640,7 @@ struct TagContainerView: View {
             .padding(.horizontal, 17)
             
             if self.tags.count == 0 {
+
                 Text(self.isEditing ? "" : "태그를 입력하세요. (5글자 이내, 최대 3개)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
@@ -649,12 +654,12 @@ struct TagContainerView: View {
 
 struct ContentContainerView: View {
     
-    @State var contentText: String = ""
+    @Binding var contentText: String
     @State private var textEditorHeight: CGFloat = .zero
 
 
-    init(contentText: String) {
-        self.contentText = contentText
+    init(contentText: Binding<String>) {
+        self._contentText = contentText
     }
     
     var body: some View {
@@ -664,7 +669,7 @@ struct ContentContainerView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                .frame(minHeight: getUIScreenBounds().height == 667 ? 102 : 127)
+                .frame(minHeight: getUIScreenBounds().height == 667 ? 86 : 111)
                 .cornerRadius(15)
             
             HStack(alignment: .top, spacing: 0) {

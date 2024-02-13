@@ -35,10 +35,13 @@ struct TagView: View {
 
 struct MumoryDetailScrollContentView: View {
     
+    @State var mumoryAnnotation: MumoryAnnotation
+    
     @State private var tagWidth: CGFloat = .zero
-    @State private var tags: [String] = ["기쁨기쁨기쁨",]
+//    @State private var tags: [String] = ["기쁨기쁨기쁨",]
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -117,8 +120,8 @@ struct MumoryDetailScrollContentView: View {
                     
                     // MARK: Tag
                     HStack(spacing: 0) {
-                        ForEach(tags.indices, id: \.self) { index in
-                            TagView(text: tags[index])
+                        ForEach((self.mumoryAnnotation.tags ?? []).indices, id: \.self) { index in
+                            TagView(text: "\((self.mumoryAnnotation.tags ?? [])[index])")
                                 .background(
                                     GeometryReader { proxy in
                                         Color.clear
@@ -126,28 +129,29 @@ struct MumoryDetailScrollContentView: View {
 //                                                self.tagWidth += proxy.size.width
                                             }
                                     })
-                            
+
                             if index != 2 {
                                 Spacer().frame(width: 6)
                             }
                         }
+                        
                         Spacer(minLength: 0)
                     } // HStack
                     
                     Spacer().frame(height: 25)
                     
                     // MARK: Content
-                    Text("내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용 내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내용내용내용옹내용일상일상일상내용내")
-                        .font(Font.custom("Pretendard", size: 15))
+                    Text(self.mumoryAnnotation.content ?? "")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
                         .fixedSize(horizontal: false, vertical: true)
 
                     Spacer().frame(height: 27)
                     
                     // MARK: Image
-                    MumoryDetailImageScrollView()
+                    MumoryDetailImageScrollView(mumoryAnnotation: self.mumoryAnnotation)
                         .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
                 }
                 
@@ -236,12 +240,5 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
-    }
-}
-
-struct MumoryDetailScrollContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        MumoryDetailScrollContentView()
-            .environmentObject(AppCoordinator())
     }
 }

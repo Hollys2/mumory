@@ -8,16 +8,15 @@
 
 
 import Foundation
-import Shared
-import Core
+//import Core
 import MapKit
 import MusicKit
 
 
 final public class MumoryDataViewModel: ObservableObject {
     
-    @Published var choosedMusicModel: MusicModel?
-    @Published var choosedLocationModel: LocationModel?
+    @Published public var choosedMusicModel: MusicModel?
+    @Published public var choosedLocationModel: LocationModel?
     
     @Published public var musicModels: [MusicModel] = []
     @Published public var mumoryAnnotations: [MumoryAnnotation] = []
@@ -74,7 +73,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    func fetchData() {
+    public func fetchData() {
         
         let db = FirebaseManager.shared.db
         
@@ -86,21 +85,26 @@ final public class MumoryDataViewModel: ObservableObject {
             } else {
                 for document in snapshot!.documents {
                     let documentData = document.data()
-                    print("documentData: \(documentData)")
                     
                     if let musicItemIDString = documentData["MusicItemID"] as? String,
                        let locationTitle = documentData["locationTitle"] as? String,
                        let locationSubtitle = documentData["locationSubtitle"] as? String,
                        let latitude = documentData["latitude"] as? Double,
                        let longitude = documentData["longitude"] as? Double,
-                       let date = document["date"] as? FirebaseManager.Timestamp
+                       let date = documentData["date"] as? FirebaseManager.Timestamp,
+                       let tags = documentData["tags"] as? String,
+                       let content = documentData["content"] as? String,
+                       let imageURLs = documentData["imageURLs"] as? String
                     {
                         Task {
                             do {
                                 let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
                                 let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
                                 
-                                let newMumoryAnnotation = MumoryAnnotation(date: date.dateValue(), musicModel: musicModel, locationModel: locationModel)
+                                let tags = tags.components(separatedBy: ",")
+                                let imageURLs = imageURLs.components(separatedBy: ",")
+                                
+                                let newMumoryAnnotation = MumoryAnnotation(date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs)
                                 
                                 DispatchQueue.main.async {
                                     self.mumoryAnnotations.append(newMumoryAnnotation)
@@ -147,13 +151,19 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let db = FirebaseManager.shared.db
         
+        let tags = mumoryAnnotation.tags?.joined(separator: ",")
+        let imageURLs = mumoryAnnotation.imageURLs?.joined(separator: ",")
+        
         let newData: [String: Any] = [
             "MusicItemID": String(describing: mumoryAnnotation.musicModel.songID),
             "locationTitle": mumoryAnnotation.locationModel.locationTitle,
             "locationSubtitle": mumoryAnnotation.locationModel.locationSubtitle,
             "latitude": mumoryAnnotation.locationModel.coordinate.latitude,
             "longitude": mumoryAnnotation.locationModel.coordinate.longitude,
-            "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date)
+            "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date),
+            "tags": tags ?? [],
+            "content": mumoryAnnotation.content ?? "",
+            "imageURLs": imageURLs ?? []
         ]
         
         db.collection("User").document("tester").collection("mumory").document().setData(newData, merge: true) { error in
@@ -163,12 +173,54 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("Tester document added successfully!")
                 
                 let newMumoryAnnotation = MumoryAnnotation(date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel)
-//                
+//
                 self.mumoryAnnotations.append(newMumoryAnnotation)
             }
         }
-        
     }
+    
+    private func uploadImageToStorage(completion: @escaping (URL?) -> Void) {
+        
+//        guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
+//            print("Could not convert image to Data.")
+//            continue
+//        }
+        
+        let storageRef = FirebaseManager.shared.storage.reference()
+        let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpg")
+
+
+        // 예시: 이미지 데이터를 업로드
+        guard let imageData = UIImage(named: "exampleImage")?.jpegData(compressionQuality: 0.8) else {
+            print("Could not convert image to Data.")
+            completion(nil)
+            return
+        }
+
+        imageRef.putData(imageData, metadata: nil) { (metadata, error) in
+            guard metadata != nil else {
+                print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
+                completion(nil)
+                return
+            }
+            print("Image uploaded successfully.")
+
+            // 다운로드 URL을 가져오기
+            imageRef.downloadURL { (url, error) in
+                guard let url = url, error == nil else {
+                    print("Error getting download URL: \(error?.localizedDescription ?? "")")
+                    completion(nil)
+                    return
+                }
+
+                print("Download URL: \(url)")
+
+                // 이미지 다운로드 URL을 completionHandler에 전달
+                completion(url)
+            }
+        }
+    }
+
     
 }
 

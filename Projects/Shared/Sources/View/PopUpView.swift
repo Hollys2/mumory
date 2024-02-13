@@ -33,6 +33,7 @@ public struct PopUpView: View {
     @Binding private var isShown: Bool
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
     var type: PopUpType
     var title: String
@@ -40,7 +41,7 @@ public struct PopUpView: View {
     var buttonTitle: String
     var buttonAction: (() -> Void)?
     
-//    public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: @escaping () -> Void) {
+    //    public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: @escaping () -> Void) {
     public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: (() -> Void)? = nil) {
         self._isShown = isShown
         self.type = type
@@ -158,6 +159,9 @@ public struct PopUpView: View {
                                 withAnimation(.easeInOut(duration: 0.1)) {
                                     self.appCoordinator.isCreateMumorySheetShown = false
                                 }
+                                
+                                mumoryDataViewModel.choosedMusicModel = nil
+                                mumoryDataViewModel.choosedLocationModel = nil
                             }) {
                                 ZStack {
                                     Rectangle()

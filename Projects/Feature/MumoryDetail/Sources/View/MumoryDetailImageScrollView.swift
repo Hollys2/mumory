@@ -16,7 +16,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
 
 //    typealias UIViewType = UIScrollView
     
-//    @Binding var mumoryAnnotations: [MumoryAnnotation]
+    let mumoryAnnotation: MumoryAnnotation
 //    @Binding var annotationSelected: Bool
     
 //    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -37,7 +37,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
 
-        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView())
+        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumoryAnnotation))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
 
         //        scrollView.backgroundColor = .red
@@ -91,39 +91,54 @@ extension MumoryDetailImageScrollView.Coordinator: UIScrollViewDelegate {
 struct MumoryDetailImageScrollContentView: View {
     
 //    @Binding var mumoryAnnotations: [MumoryAnnotation]
+    let mumoryAnnotation: MumoryAnnotation
     
     var body: some View {
         HStack(spacing: 0) {
-            MumoryDetailImageView()
-                .padding(.horizontal, 5)
-            MumoryDetailImageView()
-                .padding(.horizontal, 5)
-            MumoryDetailImageView()
-                .padding(.horizontal, 5)
-//            ForEach(0..<3, id: \.self) { _ in
-//                MumoryDetailImageView()
-//                    .padding(.horizontal, 10)
-//            }
+//            MumoryDetailImageView()
+//                .padding(.horizontal, 5)
+//            MumoryDetailImageView()
+//                .padding(.horizontal, 5)
+//            MumoryDetailImageView()
+//                .padding(.horizontal, 5)
+            ForEach(mumoryAnnotation.imageURLs ?? [], id: \.self) { i in
+                MumoryDetailImageView(url: i)
+                    .padding(.horizontal, 5)
+            }
         }
     }
 }
 
 struct MumoryDetailImageView: View {
     
+    let url: String
+    
     var body: some View {
+        
         ZStack(alignment: .topTrailing) {
+            
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.width - 40)
-                .background(Color(red: 0.85, green: 0.85, blue: 0.85))
                 .background(
-                    Color.gray
-                    //                                    Image("PATH_TO_IMAGE")
-                    //                                                        .resizable()
-                    //                                        .aspectRatio(contentMode: .fill)
-                        .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.width - 40)
-                    //                                        .clipped()
+                    AsyncImage(url: URL(string: url)) { phase in
+                        switch phase {
+                        case .empty:
+                            ProgressView()
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.width - 40)
+                                .clipped()
+                        case .failure:
+                            Text("Failed to load image")
+                        @unknown default:
+                            Text("Unknown state")
+                        }
+                    }
                 )
+                .background(Color(red: 0.184, green: 0.184, blue: 0.184))
             
             HStack(alignment: .center, spacing: 10) {
                 Text("1 / 3")
@@ -143,8 +158,3 @@ struct MumoryDetailImageView: View {
     }
 }
 
-struct MumoryDetailImageView_Previews: PreviewProvider {
-    static var previews: some View {
-        MumoryDetailImageScrollContentView()
-    }
-}

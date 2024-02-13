@@ -839,7 +839,10 @@ struct TestBottomSheetView: View {
     @GestureState private var dragState = DragState.inactive
 //    @State var offsetY = CGFloat(0)
     
+    @State private var tags: [String] = []
     @State private var contentText: String = ""
+    @State private var imageURLs: [String] = []
+    
     @State private var isPublic: Bool = true
     @State private var calendarYOffset: CGFloat = .zero
     @State private var scrollViewOffset: CGFloat = 0
@@ -911,7 +914,7 @@ struct TestBottomSheetView: View {
                                 } else {
                                     self.isPublishErrorPopUpShown = true
                                 }
-//                                self.isTagErrorPopUpShown = true
+
 //                                if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
 //                                    let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
 //
@@ -938,7 +941,6 @@ struct TestBottomSheetView: View {
                                     )
                                     .allowsHitTesting(true)
                             }
-//                            .disabled(!((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil)))
                         } // HStack
                         
                         Text("뮤모리 만들기")
@@ -994,7 +996,7 @@ struct TestBottomSheetView: View {
         
                                 VStack(spacing: 16) {
         
-                                    TagContainerView(title: "#때끄")
+                                    TagContainerView(tags: self.$tags)
                                         .background(GeometryReader { geometry -> Color in
                                             DispatchQueue.main.async {
                                                 self.tagContainerViewFrame = geometry.frame(in: .global)
@@ -1018,7 +1020,7 @@ struct TestBottomSheetView: View {
                                     //                                }
                                     //                            }
         
-                                    ContentContainerView(contentText: "하이")
+                                    ContentContainerView(contentText: self.$contentText)
         
                                     HStack(spacing: 11) {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -1161,12 +1163,55 @@ struct TestBottomSheetView: View {
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하기겠습니까?", buttonTitle: "게시", buttonAction: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                            let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
                             
-                            mumoryDataViewModel.createMumory(newMumoryAnnotation)
+                            let group = DispatchGroup()
+                            
+                            for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
+                                
+                                guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
+                                    print("Could not convert image to Data.")
+                                    continue
+                                }
+                                
+                                let storageRef = FirebaseManager.shared.storage.reference()
+                                let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpg")
+                                
+                                group.enter()
+                                _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
+                                    
+                                    guard metadata != nil else {
+                                        print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
+                                        group.leave()
+                                        return
+                                    }
+                                    
+                                    print("Image \(index + 1) uploaded successfully.")
+                                    
+                                    imageRef.downloadURL { (url, error) in
+                                        guard let url = url, error == nil else {
+                                            print("Error getting download URL: \(error?.localizedDescription ?? "")")
+                                            group.leave()
+                                            return
+                                        }
+                                        
+                                        print("Download URL for Image \(index + 1)")
+                                        self.imageURLs.append(url.absoluteString)
+                                        group.leave()
+                                    }
+                                }
+                            }
+                            
+                            group.notify(queue: .main) {
+                                let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: tags, content: contentText, imageURLs: self.imageURLs)
+                                
+                                mumoryDataViewModel.createMumory(newMumoryAnnotation)
+                            }
+                        }
+                        else {
+                            print("else 일리가 없지?")
                         }
                         
-                        withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
+                        withAnimation(Animation.easeInOut(duration: 0.2)) {
                             appCoordinator.isCreateMumorySheetShown = false
                         }
                         
@@ -1194,6 +1239,55 @@ struct TestBottomSheetView: View {
             }
         }
     }
+    
+    func uploadImageToStorage(completion: @escaping (URL?) -> Void) {
+        // 이미지를 Storage에 업로드하고, 그 URL을 가져오는 로직 추가
+        // ...
+
+        // 예시: Firebase Storage에 이미지를 업로드하고, 다운로드 URL을 반환
+        let storageRef = FirebaseManager.shared.storage.reference()
+        let imageRef = storageRef.child("images/example.jpg")
+
+        // 예시: 이미지 데이터를 업로드
+        guard let imageData = UIImage(named: "exampleImage")?.jpegData(compressionQuality: 0.8) else {
+            print("Could not convert image to Data.")
+            completion(nil)
+            return
+        }
+
+        imageRef.putData(imageData, metadata: nil) { (metadata, error) in
+            guard metadata != nil else {
+                print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
+                completion(nil)
+                return
+            }
+            print("Image uploaded successfully.")
+
+            // 다운로드 URL을 가져오기
+            imageRef.downloadURL { (url, error) in
+                guard let url = url, error == nil else {
+                    print("Error getting download URL: \(error?.localizedDescription ?? "")")
+                    completion(nil)
+                    return
+                }
+
+                print("Download URL: \(url)")
+
+                // 이미지 다운로드 URL을 completionHandler에 전달
+                completion(url)
+            }
+        }
+    }
+//    uploadImageToStorage { imageURL in
+//                    // imageURL을 사용하여 Firestore에 추가적인 데이터 업데이트
+//                    if let imageURL = imageURL {
+//                        let additionalData: [String: Any] = [
+//                            "additionalImageURL": imageURL
+//                        ]
+//
+//                        db.collection("User").document("tester").collection("mumory").document().setData(additionalData, merge: true)
+//                    }
+//                }
     
     private func onDragEnded(drag: DragGesture.Value) {
 //        print("drag.translation.height: \(drag.translation.height)")

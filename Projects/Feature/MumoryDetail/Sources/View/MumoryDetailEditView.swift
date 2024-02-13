@@ -513,7 +513,9 @@ struct MumoryDetailEditView_Previews: PreviewProvider {
 
 
 struct CustomTextField: UIViewRepresentable {
+    
     @Binding var text: String
+    
     var onCommit: () -> Void
     var onEditingChanged: ((Bool) -> Void)?
     
@@ -586,6 +588,8 @@ struct CustomTextField: UIViewRepresentable {
         func textFieldDidEndEditing(_ textField: UITextField) {
             // 포커스가 나갔을 때 호출
             self.parent.onEditingChanged?(false)
+            
+            self.parent.text = ""
         }
     }
 }

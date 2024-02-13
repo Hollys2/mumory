@@ -37,50 +37,14 @@ struct MumoryApp: App {
     }
 }
 
-extension Int {
-    func formatted() -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.groupingSeparator = ""
-        return formatter.string(from: NSNumber(value: self)) ?? "\(self)"
-    }
-}
-
-struct YearMonthPicker: View {
-    @State private var selectedYear = 2022
-    @State private var selectedMonth = "January"
-    
-    let years = Array(2000...2030)
-    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-    
-    var body: some View {
-        HStack(spacing: 0) {
-            Picker("Year", selection: $selectedYear) {
-                ForEach(years, id: \.self) {
-                    Text("\($0.formatted())년")
-                }
-            }
-            .pickerStyle(WheelPickerStyle())
-//            .frame(width: 100)
-            
-            Picker("Month", selection: $selectedMonth) {
-                ForEach(months, id: \.self) {
-                    Text($0)
-                }
-            }
-            .pickerStyle(WheelPickerStyle())
-//            .frame(width: 150)
-        }
-        .padding()
-    }
-}
-
 struct ContentView: View {
     @GestureState private var dragState = DragState.inactive
     @State var position = CGFloat(0)
     @State var isSheetShown = false // 바텀 시트 표시 여부를 제어하는 변수
     
     let maxHeight = CGFloat(50)
+    
+    let imageURL = URL(string: "https://firebasestorage.googleapis.com:443/v0/b/music-app-62ca9.appspot.com/o/mumoryImages2%2F6F51D970-E066-4CD2-8874-B6E6B7328C7E.jpg?alt=media&token=43e9c3f2-3456-4bc4-b063-f3cecdb7013b")
 
     var body: some View {
         let drag = DragGesture()
@@ -95,28 +59,23 @@ struct ContentView: View {
             }
             .onEnded(onDragEnded)
 
-        return ZStack(alignment: .bottom) {
+        return ZStack {
             Color.gray
             
-            Button(action: {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    self.position = 0
-                    self.isSheetShown = true
+            AsyncImage(url: imageURL) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100, height: 100)
+                case .failure:
+                    Text("Failed to load image")
+                @unknown default:
+                    Text("Unknown state")
                 }
-            }) {
-                Text("Show Bottom Sheet")
-            }
-
-            if isSheetShown {
-                Rectangle()
-                    .foregroundColor(.orange)
-                    .frame(height: 500)
-                    .cornerRadius(10)
-                    .shadow(color: .black, radius: 10)
-                    .offset(y: self.position + self.dragState.translation.height)
-                    .gesture(drag)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
             }
         }
     }

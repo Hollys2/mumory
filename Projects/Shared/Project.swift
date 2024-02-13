@@ -14,8 +14,18 @@ let project = Project(name: "Shared",
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
                                        dependencies: [
-                                        
+                                        .external(name: "Moya"),
+                                        .external(name: "FirebaseAuth"),
+                                        .external(name: "FirebaseFirestore"),
+                                        .external(name: "FirebaseStorage")
+                                       ],
+                                       settings: Settings.settings(base: [
+                                        "HEADER_SEARCH_PATHS": "$(inherited) $(PROJECT_DIR)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+                                        "OTHER_LDFLAGS" : "-ObjC"
+
                                        ])
+                                      )
+                                
                       ])
 
 
