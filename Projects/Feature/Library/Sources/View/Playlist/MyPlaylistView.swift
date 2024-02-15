@@ -44,9 +44,8 @@ struct MyPlaylistView: View {
                 .padding(.trailing, 20)
                 .padding(.top, 10)
                 .padding(.bottom, 10)
-                
                 .onTapGesture {
-                    manager.page = .playlistManage
+                    manager.push(destination: .playlistManage)
                 }
                 
                 ScrollView(.horizontal) {

@@ -31,7 +31,7 @@ struct LibraryView: View {
                             
                             //마이뮤직버튼
                             Button(action: {
-                                isTapMyMusic = true
+                                manager.page = .entry(.myMusic)
                             }, label: {
                                 Text("마이뮤직")
                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
@@ -46,7 +46,7 @@ struct LibraryView: View {
                             
                             //추천버튼
                             Button(action: {
-                                isTapMyMusic = false
+                                manager.page = .entry(.recomendation)
                             }, label: {
                                 Text("추천")
                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
@@ -80,9 +80,8 @@ struct LibraryView: View {
                         }
                         
                         Rectangle()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 1000)
-                            .foregroundColor(.clear)
+                            .foregroundStyle(.clear)
+                            .frame(height: 87)
                         
                         
                         
@@ -111,8 +110,7 @@ struct LibraryView: View {
                     .padding(.trailing, 20)
                     .padding(.top, 5)
                     .onTapGesture {
-                        manager.page = .search
-                        manager.previousPage = .entry(isTapMyMusic ? .myMusic : .recomendation)
+                        manager.push(destination: .search(term: ""))
                     }
             }
             .frame(height: userManager.customTopbarHeight, alignment: .center)

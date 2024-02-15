@@ -33,8 +33,7 @@ struct ChartListView: View {
                         .frame(width: 30, height: 30)
                         .padding(.leading, 20)
                         .onTapGesture {
-                            manager.page = .entry(.recomendation)
-                            manager.previousPage = .chart
+                            manager.pop()
                         }
                     Spacer()
                     VStack(spacing: 5, content: {
@@ -52,8 +51,7 @@ struct ChartListView: View {
                         .frame(width: 30, height: 30)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            manager.page = .search
-                            manager.previousPage = .chart
+                            manager.push(destination: .search(term: ""))
                         }
                 })
 //                .padding(.top, sizeManager.topInset)
@@ -80,7 +78,7 @@ struct ChartListView: View {
                     .background(ColorSet.subGray)
                     .padding(.top, 15)
                 
-                VerticalScrollWrapper(songs: $songs, index: $searchOffset,contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
+                ScrollWrapperWithIndex(songs: $songs, index: $searchOffset,contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
                     LazyVStack(spacing: 0, content: {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])

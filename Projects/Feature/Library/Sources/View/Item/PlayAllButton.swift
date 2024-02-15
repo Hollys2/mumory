@@ -19,7 +19,7 @@ struct PlayAllButton: View {
                 .foregroundStyle(ColorSet.mainPurpleColor)
         })
         .padding(.horizontal, 13)
-        .padding(.vertical, 8)
+        .frame(height: 33)
         .overlay {
             RoundedRectangle(cornerRadius: 30, style: .circular).stroke(ColorSet.mainPurpleColor, lineWidth: 1.0)
         }

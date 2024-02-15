@@ -41,7 +41,6 @@ public struct ScrollViewWrapper<Content: View>: UIViewRepresentable {
     }
     
     public func updateUIView(_ uiView: UIScrollView, context: UIViewRepresentableContext<ScrollViewWrapper>) {
-        print("update")
         uiView.contentOffset = self.contentOffset
         
         DispatchQueue.main.async {

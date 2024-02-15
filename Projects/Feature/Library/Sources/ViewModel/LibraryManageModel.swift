@@ -19,14 +19,24 @@ public class LibraryManageModel: ObservableObject{
     enum LibraryPage{
         case entry(entrySubView)
         case chart
-        case search
+        case search(term: String)
         case playlistManage
-        case artist
+        case artist(artist: Artist)
         case playlist(playlist: MusicPlaylist)
+        case shazam
+        case addSong
     }
     
+    
     @Published var page: LibraryPage = .entry(.myMusic)
-    @Published var searchTerm: String = ""
-    @Published var tappedArtist: Artist?
-    @Published var previousPage: LibraryPage = .entry(.myMusic)
+    @Published var stack: [LibraryPage] = [.entry(.myMusic)]
+    
+    func pop() {
+        page = self.stack.popLast() ?? .entry(.myMusic)
+    }
+    
+    func push(destination: LibraryPage) {
+        self.stack.append(self.page)
+        self.page = destination
+    }
 }

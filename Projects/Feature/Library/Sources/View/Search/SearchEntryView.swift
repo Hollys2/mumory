@@ -9,10 +9,12 @@
 import SwiftUI
 import Shared
 import ShazamKit
+import AVFAudio
 
 struct SearchEntryView: View {
+    @Binding var term: String
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
-    
+    @EnvironmentObject var manager: LibraryManageModel
 //    @State var recentSearchList: [String] = []
 
     var body: some View {
@@ -26,6 +28,9 @@ struct SearchEntryView: View {
                     Text("음악 인식")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                         .foregroundColor(.white)
+                        .onTapGesture {
+                            manager.push(destination: .shazam)
+                        }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 20)
@@ -59,6 +64,9 @@ struct SearchEntryView: View {
                         ForEach(recentSearchObject.recentSearchList, id: \.self) { string in
                             RecentSearchItem(title: string)
                                 .environmentObject(recentSearchObject)
+                                .onTapGesture {
+                                    term = string
+                                }
                         }
                     })
                     .padding(.top, 25)
@@ -86,12 +94,10 @@ struct SearchEntryView: View {
                             Text("\(count) 검색검색")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                 .foregroundColor(.black)
-                                .padding(.leading, 16)
-                                .padding(.trailing, 16)
-                                .padding(.top, 11)
-                                .padding(.bottom, 11)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 11)
                                 .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25)))
+                                .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
                         }
                     })
                     .padding(.top, 25)
@@ -117,40 +123,10 @@ struct SearchEntryView: View {
         })
     }
     
-    func match() async {
+    private func Shazam() {
         
-        let granted = await AVAudioApplication.requestRecordPermission()
-        
-        guard granted else {
-            print("No recording permission granted...")
-            return
-        }
-
-        do {
-            try audioEngine.start()
-        } catch {
-            print("Failed to start audio engine")
-            return
-        }
-        
-        isMatching = true
-        
-        for await result in session.results {
-            switch result {
-            case .match(let match):
-                Task { @MainActor in
-                    self.currentMatchResult = MatchResult(match: match)
-                }
-            case .noMatch(_):
-                print("No match")
-                endSession()
-            case .error(let error, _):
-                print("Error \(error.localizedDescription)")
-                endSession()
-            }
-            stopRecording()
-        }
     }
+
 }
 
 //#Preview {

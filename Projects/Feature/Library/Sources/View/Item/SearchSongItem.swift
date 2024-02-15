@@ -47,8 +47,7 @@ struct SearchSongItem: View {
                 .frame(width: 30, height: 30)
                 .padding(.trailing, 16)
         })
-        .padding(.top, 19)
-        .padding(.bottom, 19)
+        .padding(.vertical, 19)
         .padding(.leading, 20)
         .background(.clear)
 

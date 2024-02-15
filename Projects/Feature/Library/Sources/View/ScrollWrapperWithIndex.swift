@@ -11,7 +11,7 @@ import Shared
 import SwiftUI
 import MusicKit
 
-struct VerticalScrollWrapper<Content: View>: UIViewControllerRepresentable {
+struct ScrollWrapperWithIndex<Content: View>: UIViewControllerRepresentable {
     @EnvironmentObject var userManager: UserViewModel
 
     @Binding var contentOffset: CGPoint
@@ -39,7 +39,6 @@ struct VerticalScrollWrapper<Content: View>: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ viewController: ScrollWrapperViewController, context: Context) {
-        print("update")
         viewController.hostingController.rootView = AnyView(self.content())
         viewController.update()
 
@@ -69,12 +68,12 @@ struct VerticalScrollWrapper<Content: View>: UIViewControllerRepresentable {
 
         public func scrollViewDidScroll(_ scrollView: UIScrollView) {
             self.contentOffset.wrappedValue = scrollView.contentOffset
-            print(scrollView.contentSize.height/CGFloat(songs.count))
             let cellHeight = 70.0
             //새로운 곡을 20개 단위로 불러옴
-            //따라서 화면에 10위, 30위, 50위 .. 가 보일 때 다음 순위를 요청함(index를 늘림)
+            //따라서 화면에 10위, 30위, 50위 .. 가 보일 때(보여줄 수 있는 아이템이 10개 남아서 다음 요청을 보내야할 때) index값을 1씩 올려줌
+            //index: 현재 페이지, 1400: 아이템 20개 높이 합, 70: 아이템 10개 높이 합
+            //index가 0이면 우측 값이 700일 때 다음 페이지 로딩 요청
             if scrollView.contentOffset.y > (CGFloat(index.wrappedValue) * 1400 + (70 * 10)) {
-                print("next page")
                 index.wrappedValue += 1
             }
         }
@@ -123,7 +122,6 @@ class ScrollWrapperViewController: UIViewController{
     }
     
     func update(){
-        print("update again")
         hostingController.view.translatesAutoresizingMaskIntoConstraints = true
         
         self.hostingController.willMove(toParent: self)

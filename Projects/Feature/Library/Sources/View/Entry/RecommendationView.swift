@@ -47,8 +47,7 @@ public struct RecommendationView: View {
                 //최신 인기곡 타이틀
                 SubTitle()
                     .onTapGesture {
-                        manager.page = .chart
-                        manager.previousPage = .entry(.recomendation)
+                        manager.push(destination: .chart)
                     }
                 
                 
@@ -142,30 +141,6 @@ private struct SubTitle: View {
         .padding(.bottom, 10)
     }
 }
-
-//struct bottomView: View{
-//    @State var height: CGFloat = 300
-//    @Binding var isTouch: Bool
-//
-//    var body: some View{
-//        GeometryReader(content: { geometry in
-//            VStack{
-//                Text("아티스트페이지로 이동")
-//                    .onTapGesture {
-//                        setView.isSearchViewShowing = true
-//                        isTouch = false
-//                        print("tap 탭탭탭")
-//                        print("set view isShowing: \(setView.isSearchViewShowing)")
-//                    }
-//            }
-//            .frame(width: geometry.size.width, height: height)
-//        })
-//    }
-//}
-
-//#Preview {
-//    RecommendationView()
-//}
 
 
 

@@ -55,7 +55,7 @@ struct EditFavoriteGenreView: View {
                                 }
                             })
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 35)
+                            .padding(.horizontal, 20)
                         }
                     })
                     .padding(.top, 30)
@@ -128,7 +128,7 @@ struct EditFavoriteGenreView: View {
     private func gerRows(list: [MusicGenre], screenWidth: CGFloat) ->[[MusicGenre]] {
         var sumWidth: CGFloat = 0
         var returnValue:[[MusicGenre]] = [[]]
-        let screen = screenWidth - 70 //좌우 여백 35씩
+        let screen = screenWidth - 40 //좌우 여백 35씩
         var index = 0
         for genre in list{
             let textWidth = getTextWidth(term: genre.name)

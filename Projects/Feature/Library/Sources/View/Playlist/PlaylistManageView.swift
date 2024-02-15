@@ -39,7 +39,7 @@ struct PlaylistManageView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                manager.page = .entry(.myMusic)
+                                manager.pop()
                             }
                     }
                     

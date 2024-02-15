@@ -14,6 +14,7 @@ struct PlaylistView: View {
     @EnvironmentObject var userManager: UserViewModel
     @State var playlist: MusicPlaylist
     @State var offset: CGPoint = .zero
+    @State var isBottomSheetPresent: Bool = false
     var body: some View {
         ZStack(alignment: .top){
             //이미지
@@ -27,19 +28,21 @@ struct PlaylistView: View {
                         SharedAsset.bottomGradient.swiftUIImage
                             .resizable()
                             .frame(width: userManager.width, height: 45)
+                            .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+
                         
-                        Text(playlist.title)
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                            .frame(width: userManager.width, alignment: .center)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
-                            .foregroundStyle(.white)
-                            .padding(.top, 20)
+                      
                     }
-                    .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
               
                    
                         VStack(spacing: 0, content: {
+                            Text(playlist.title)
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
+                                .frame(width: userManager.width, alignment: .center)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                                .foregroundStyle(.white)
+                            
                             HStack(spacing: 5, content: {
                                 SharedAsset.lock.swiftUIImage
                                     .resizable()
@@ -80,6 +83,7 @@ struct PlaylistView: View {
                                 .frame(height: 100)
                                 .padding(.top, 1000)
                         })
+                        .offset(y: -30)
                         .background(ColorSet.background)
                         
                     
@@ -96,7 +100,7 @@ struct PlaylistView: View {
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
                     .onTapGesture {
-                        manager.page = manager.previousPage
+                        manager.pop()
                     }
                 
                 Spacer()
@@ -105,18 +109,26 @@ struct PlaylistView: View {
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
+                    .onTapGesture {
+                        isBottomSheetPresent = true
+                    }
+                
             })
             .frame(height: 50)
             .padding(.top, userManager.topInset)
+            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+                    PlaylistBottomSheetView(playlist: playlist)
+                        .environmentObject(manager)
+                }
+                .background(TransparentBackground())
+            })
             
             
         }
     }
 }
 
-//#Preview {
-//    PlaylistView()
-//}
 
 private struct PlaylistImage: View {
     @EnvironmentObject var userManager: UserViewModel

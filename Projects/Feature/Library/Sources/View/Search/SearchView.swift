@@ -14,7 +14,6 @@ struct SearchView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
-
     @State var term: String = ""
     @State var musicList: MusicItemCollection<Song> = []
     @State var albumList: MusicItemCollection<Album> = []
@@ -24,6 +23,11 @@ struct SearchView: View {
     @State var playlist = []
     private var player = ApplicationMusicPlayer.shared
     
+    init(term: String) {
+        self.term = term
+        print("init term:\(term)")
+    }
+        
     var body: some View {
         ZStack{
             Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 1).ignoresSafeArea()
@@ -39,9 +43,6 @@ struct SearchView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
                             .foregroundColor(.white)
-                            .onAppear(perform: {
-                                term = manager.searchTerm
-                            })
                     
                         
                         SharedAsset.xWhiteCircle.swiftUIImage
@@ -60,8 +61,7 @@ struct SearchView: View {
                             .foregroundColor(.white)
                             .font(.system(size: 16, weight: .medium))
                             .onTapGesture {
-                                manager.page = manager.previousPage
-                                manager.previousPage = .search
+                                manager.pop()
                             }
                   
                 })
@@ -75,7 +75,7 @@ struct SearchView: View {
                     SearchResultView(term: $term)
                     
                 }else{
-                    SearchEntryView()
+                    SearchEntryView(term: $term)
                 }
                 
                 

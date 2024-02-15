@@ -2,8 +2,8 @@
 //  ArtistView.swift
 //  Feature
 //
-//  Created by 제이콥 on 12/6/23.
-//  Copyright © 2023 hollys. All rights reserved.
+//  Created by 제이콥 on 2/14/24.
+//  Copyright © 2024 hollys. All rights reserved.
 //
 
 import SwiftUI
@@ -11,153 +11,159 @@ import Shared
 import MusicKit
 
 struct ArtistView: View {
-    @State private var contentOffset: CGPoint = .zero
-    @State private var scrollViewHeight: CGFloat = .zero
-    @State private var scrollViewVisibleHeight: CGFloat = .zero
-    @EnvironmentObject var manager: LibraryManageModel
-    @State var musicList: MusicItemCollection<Song> = []
+    @EnvironmentObject private var userManager: UserViewModel
+    @EnvironmentObject private var manager: LibraryManageModel
+    @State private var isBottomSheetPresent: Bool = false
+    @State private var offset: CGPoint = .zero
+    @State private var contentSize: CGSize = .zero
+    @State private var songs: [Song] = []
+    @State private var haveToLoadNextPage: Bool = false
+    @State private var requestIndex: Int = 0
+    let artist: Artist
+    
+    init(artist: Artist) {
+        self.artist = artist
+    }
     
     var body: some View {
-        ZStack{
-            LibraryColorSet.background.ignoresSafeArea()
-//            첫번째 뷰 - 아티스트 이미지
-            VStack{
-//                ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
+        ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
+            
+            AsyncImage(url: artist.artwork?.url(width: 1000, height: 1000)) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: userManager.width, height: userManager.width)
+            } placeholder: {
+                SharedAsset.artistProfile.swiftUIImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: userManager.width, height: userManager.width)
+            }
+            .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+
+
+        
+            
+            ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize) {
+                LazyVStack(spacing: 0, content: {
+                    //그라데이션
+                    SharedAsset.bottomGradient.swiftUIImage
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: userManager.width, height: 45)
+                        .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
-                    GeometryReader(content: { geometry in
-                        AsyncImage(url: manager.tappedArtist?.artwork?.url(width: 1000, height: 1000)) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: geometry.size.width, height: geometry.size.width)
-                                .clipped()
-                                .offset(x: 0, y: contentOffset.y > 0 ? 0 : -contentOffset.y)
-                            
-                        } placeholder: {
-                            Rectangle()
-                                .frame(width: geometry.size.width, height: geometry.size.width)
-                                .offset(x: 0, y: contentOffset.y > 0 ? 0 : -contentOffset.y)
+                    //그라데이션 하위
+                    VStack(spacing: 0, content: {
+                        Text(artist.name)
+                            .foregroundStyle(.white)
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 40))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                        
+                        //곡 개수와 전체 재생 버튼
+                        HStack(alignment: .bottom, spacing: 0, content: {
+                            Text(songs.count > 0 ? "\(songs.count)곡" : "")
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                                .foregroundStyle(ColorSet.subGray)
+                            Spacer()
+                            PlayAllButton()
+                        })
+                        .padding(.horizontal, 20)
+                        .padding(.leading, 1)
+                        .padding(.top, 39)
+                        .padding(.bottom, 18)
+                        
+                        //구분선
+                        Divider()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 0.5)
+                            .background(ColorSet.subGray)
+                        
+                        //노래 리스트
+                        ForEach(songs, id: \.id){ song in
+                            MusicListItem(song: song)
+                            Divider()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 0.5)
+                                .background(ColorSet.subGray)
                         }
                         
-                    })
-                    
-                    Spacer()
-                    
-                    ForEach(0...50, id: \.self) {index in
                         Rectangle()
+                            .frame(height: 87)
                             .foregroundStyle(.clear)
-                    }
-                    .foregroundStyle(.clear)
-                }
-                .ignoresSafeArea()
-//                .onChange(of: contentOffset, perform: { value in
-//                    contentOffset = value.y > 0 ? CGPoint(x: 0, y: 0) : value
-//                    print(value)
-//                })
-//                .onAppear(perform: {
-//                    contentOffset = CGPoint(x: 0, y: 0)
-//                })
-
-              
-
-//            }
-            
-            //두번째 뷰 - 상단 버튼들
-            VStack(spacing: 0){
-                GeometryReader(content: { geometry in
-//                    ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
-                    
-                    ScrollViewWrapper(contentOffset: $contentOffset, scrollViewHeight: $scrollViewHeight, visibleHeight: $scrollViewVisibleHeight) {
-                        MusicList(musicList: $musicList)
-                            .environmentObject(manager)
-                            .padding(.top, geometry.size.width - geometry.safeAreaInsets.top - 45) //사진 사이즈 - 세이프에이리아높이 - (그라데이션 + 아티스트이름)
-                        //                    }
-                    }
-
+                    })
+                    .offset(y: -33)
+                    .background(ColorSet.background)
                 })
+                .frame(width: userManager.width)
+
             }
-            
-            VStack{
-                HStack{
-                    SharedAsset.back.swiftUIImage
-                        .onTapGesture {
-                            manager.page = .search
-                        }
-                    Spacer()
-                    SharedAsset.menuWhite.swiftUIImage
-                }
-                .padding(.leading, 20)
-                .padding(.trailing, 20)
-                .padding(.top, 19)
+
+            //상단바 - z축 최상위
+            HStack(spacing: 0, content: {
+                SharedAsset.back.swiftUIImage
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .padding(.leading, 20)
+                    .onTapGesture {
+                        manager.pop()
+                    }
                 
                 Spacer()
-            }
-            
-            
+                
+                SharedAsset.menuWhite.swiftUIImage
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .padding(.trailing, 20)
+                    .onTapGesture {
+                        isBottomSheetPresent = true
+                    }
+                
+            })
+            .frame(height: 50)
+            .padding(.top, userManager.topInset)
+            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+                   ArtistBottomSheetView(artist: artist)
+                }
+                .background(TransparentBackground())
+            })
         }
         .onAppear(perform: {
-            requestSearch(term: manager.tappedArtist?.name ?? "")
+            requestArtistSongs(offset: 0)
         })
     }
     
-    public func requestSearch(term: String){
-        print("request search")
+    private func requestArtistSongs(offset: Int) {
+        print("request")
+        let artistName = artist.name
+        var request = MusicCatalogSearchRequest(term: artist.name, types: [Song.self])
+        request.includeTopResults = true
+        request.limit = 20
+        request.offset = offset * 20
         Task{
-            var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
-            request.limit = 20
-            let response = try await request.response()
-            self.musicList = response.songs
-        }
-    }
-    
-}
-
-struct MusicList: View {
-    @Binding var musicList: MusicItemCollection<Song>
-    @EnvironmentObject var manager: LibraryManageModel
-    
-    var body: some View {
-        ZStack{
-            VStack(spacing: 0){
-                SharedAsset.artistGradiant.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity)
-                
-                LibraryColorSet.background
-                
-                Spacer()
-            }
-
-            
-            VStack{
-                Text(manager.tappedArtist?.name ?? "Artist")
-                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 40))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundStyle(.white)
-                    .padding(.leading, 20)
-                    .padding(.top, 10)
-                
-                ForEach(musicList, id: \.id) {song in
-                    MusicItem(song: song)
+            do {
+                let response = try await request.response()
+                if response.songs.count > 0 {
+                    requestArtistSongs(offset: offset + 1)
                 }
-                .padding(.top, 50)
+                
+                DispatchQueue.main.async {
+                    songs += response.songs.filter({$0.artistName == artistName})
+                }
+                
+            }catch(let error){
+                print("request error: \(error.localizedDescription)")
             }
-            
         }
-        
         
     }
 }
 
-struct ScrollOffsetKey: PreferenceKey {
-    typealias Value = CGFloat
-    
-    static var defaultValue: CGFloat = .zero
-    static func reduce(value: inout Value, nextValue: () -> Value) {
-        value += nextValue()
-    }
-}
+
+
 //#Preview {
 //    ArtistView()
 //}

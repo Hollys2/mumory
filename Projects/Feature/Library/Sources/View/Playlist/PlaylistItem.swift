@@ -150,8 +150,7 @@ struct PlaylistItem: View {
                 
             }
             .onTapGesture {
-                manager.page = .playlist(playlist: playlist)
-                manager.previousPage = .entry(.myMusic)
+                manager.push(destination: .playlist(playlist: playlist))
             }
         }
     }

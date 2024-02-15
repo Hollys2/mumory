@@ -31,7 +31,6 @@ struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ viewController: SimpleScrollViewController, context: Context) {
-        print("update")
         viewController.hostingController.rootView = AnyView(self.content())
         viewController.update()
 
@@ -53,6 +52,7 @@ struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
 
         public func scrollViewDidScroll(_ scrollView: UIScrollView) {
             self.contentOffset.wrappedValue = scrollView.contentOffset
+            print("y_offset: \(scrollView.contentOffset.y), content height: \(scrollView.contentSize.height)")
         }
 
     }
@@ -63,7 +63,7 @@ class SimpleScrollViewController: UIViewController{
     lazy var scrollView: UIScrollView = {
         let v = UIScrollView()
         v.isPagingEnabled = false
-        v.indexDisplayMode = .alwaysHidden
+        v.showsVerticalScrollIndicator = false
         return v
     }()
     
@@ -96,7 +96,6 @@ class SimpleScrollViewController: UIViewController{
     }
     
     func update(){
-        print("update again")
         hostingController.view.translatesAutoresizingMaskIntoConstraints = true
         
         self.hostingController.willMove(toParent: self)

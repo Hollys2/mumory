@@ -32,41 +32,47 @@ struct FavoriteGenreRecommendationView: View {
                 }
                 
                 //장르 변경 아이템들
-                HStack(spacing: 8) {
-                    Text("장르")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                        .padding(.leading, 14)
-                        .padding(.trailing, 14)
-                        .frame(height: 30)
-                        .foregroundStyle(Color.white)
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 30, style: .circular)
-                                .stroke(Color.white, lineWidth: 1)
-                        }
-                        .padding(.leading, 20)
+                
+                ScrollView(.horizontal) {
+                    HStack(spacing: 8) {
+                        Text("장르")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .padding(.leading, 14)
+                            .padding(.trailing, 14)
+                            .frame(height: 30)
+                            .foregroundStyle(Color.white)
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 30, style: .circular)
+                                    .stroke(Color.white, lineWidth: 1)
+                            }
 
-                    
-                    ForEach(userManager.favoriteGenres, id: \.self){ genreID in
-                        GenreItem(genreID: genreID)
+                        
+                        ForEach(userManager.favoriteGenres, id: \.self){ genreID in
+                            GenreItem(genreID: genreID)
+                        }
+                        
+                        Circle()
+                            .frame(width: 30, height: 30)
+                            .foregroundStyle(ColorSet.mainPurpleColor)
+                            .overlay {
+                                SharedAsset.addBlack.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                            }
+                            .onTapGesture {
+                                isEditGenreViewPresent = true
+                            }
+                            .fullScreenCover(isPresented: $isEditGenreViewPresent, content: {
+                                EditFavoriteGenreView()
+                            })
+                        
                     }
-                    
-                    Circle()
-                        .frame(width: 30, height: 30)
-                        .foregroundStyle(ColorSet.mainPurpleColor)
-                        .overlay {
-                            SharedAsset.addBlack.swiftUIImage
-                                .resizable()
-                                .frame(width: 20, height: 20)
-                        }
-                        .onTapGesture {
-                            isEditGenreViewPresent = true
-                        }
-                        .fullScreenCover(isPresented: $isEditGenreViewPresent, content: {
-                            EditFavoriteGenreView()
-                        })
-                    
+                    .padding(.vertical, 2)
+                    .padding(.horizontal, 20)
                 }
+                .scrollIndicators(.hidden)
                 .padding(.top, 75)
+                
            
             }
         }
