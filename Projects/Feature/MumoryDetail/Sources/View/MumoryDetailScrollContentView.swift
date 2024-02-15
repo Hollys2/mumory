@@ -8,6 +8,7 @@
 
 
 import SwiftUI
+import Core
 import Shared
 
 struct TagView: View {
@@ -40,12 +41,17 @@ struct MumoryDetailScrollContentView: View {
     @State private var tagWidth: CGFloat = .zero
 //    @State private var tags: [String] = ["기쁨기쁨기쁨",]
     
+    @StateObject var dateManager: DateManager = DateManager()
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
+        
         VStack(spacing: 0) {
+            
             ZStack(alignment: .bottom) {
+                
                 Rectangle()
                     .foregroundColor(.clear)
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
@@ -67,9 +73,8 @@ struct MumoryDetailScrollContentView: View {
             }
             
             VStack(spacing: 0) {
+                
                 Group {
-                    Spacer().frame(height: 58)
-                    
                     // MARK: Profile & Info
                     HStack(spacing: 8) {
                         Image(uiImage: SharedAsset.profileMumoryDetail.image)
@@ -86,18 +91,17 @@ struct MumoryDetailScrollContentView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             HStack(spacing: 0) {
-                                Text("10월 12일 ・ ")
-                                    .font(
-                                        Font.custom("Pretendard", size: 15)
-                                            .weight(.medium)
-                                    )
+                                
+                                Text("\(dateManager.formattedDate(date: self.mumoryAnnotation.date))")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+
                                 
                                 Image(uiImage: SharedAsset.lockMumoryDatail.image)
                                     .resizable()
                                     .frame(width: 18, height: 18)
                                 
-                                Spacer()
+                                Spacer(minLength: getUIScreenBounds().width * 0.217948)
                                 
                                 Image(uiImage: SharedAsset.locationMumoryDatail.image)
                                     .resizable()
@@ -105,57 +109,56 @@ struct MumoryDetailScrollContentView: View {
                                 
                                 Spacer().frame(width: 4)
                                 
-                                Text("반포한강공원반포한강공원")
-                                    .font(
-                                        Font.custom("Pretendard", size: 15)
-                                            .weight(.medium)
-                                    )
+                                Text("\(self.mumoryAnnotation.locationModel.locationTitle)")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                    .frame(width: 106, height: 11, alignment: .leading)
+                                    .lineLimit(1)
+                                    .frame(height: 11, alignment: .trailing)
+                                    .fixedSize(horizontal: false, vertical: true)
                             } // HStack
                         } // VStack
                     } // HStack
+                    .padding(.vertical, 55)
                     
-                    Spacer().frame(height: 55)
-                    
-                    // MARK: Tag
-                    HStack(spacing: 0) {
-                        ForEach((self.mumoryAnnotation.tags ?? []).indices, id: \.self) { index in
-                            TagView(text: "\((self.mumoryAnnotation.tags ?? [])[index])")
-                                .background(
-                                    GeometryReader { proxy in
-                                        Color.clear
-                                            .onAppear {
-//                                                self.tagWidth += proxy.size.width
-                                            }
-                                    })
-
-                            if index != 2 {
-                                Spacer().frame(width: 6)
+                    if let tags = self.mumoryAnnotation.tags {
+                        // MARK: Tag
+                        HStack(spacing: 0) {
+                            
+                            ForEach(tags.indices, id: \.self) { index in
+                                
+                                TagView(text: "\(tags[index])")
+                                
+                                if index != 2 {
+                                    Spacer().frame(width: 6)
+                                }
                             }
-                        }
-                        
-                        Spacer(minLength: 0)
-                    } // HStack
+                            
+                            Spacer(minLength: 0)
+                        } // HStack
+                        .padding(.bottom, 25)
+                    }
                     
-                    Spacer().frame(height: 25)
-                    
-                    // MARK: Content
-                    Text(self.mumoryAnnotation.content ?? "")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                        .multilineTextAlignment(.leading)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if let content = self.mumoryAnnotation.content, !content.isEmpty {
+                        // MARK: Content
+                        Text("\(content)")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.bottom, 25)
+                    }
 
-                    Spacer().frame(height: 27)
                     
-                    // MARK: Image
-                    MumoryDetailImageScrollView(mumoryAnnotation: self.mumoryAnnotation)
-                        .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
+                    if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
+                        // MARK: Image
+                        MumoryDetailImageScrollView(imageURLs: imageURLs)
+                            .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
+                            .padding(.bottom, 25)
+                    }
                 }
                 
-                Spacer().frame(height: 50)
+                Spacer().frame(height: 25)
                 
                 MumoryDetailReactionBarView(isOn: false)
                     .background(GeometryReader { geometry in

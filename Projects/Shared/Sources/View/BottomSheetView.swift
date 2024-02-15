@@ -88,18 +88,17 @@ public struct BottomSheetView: View {
 
 public struct SecondBottomSheetView: View {
     
-    @Binding var searchText: String
+    @Binding var locationTitleText: String
     @Binding var isShown: Bool
+    
+    @State private var searchText: String
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     
-//    var menuOptions: [BottemSheetMenuOption]
-//
-//    public init(menuOptions: [BottemSheetMenuOption]) {
-//        self.menuOptions = menuOptions
-//    }
-    public init(searchText: Binding<String>, isShown: Binding<Bool>) {
-        self._searchText = searchText
+    public init(isShown: Binding<Bool>, locationTitleText: Binding<String>, searchText: String) {
         self._isShown = isShown
+        self._locationTitleText = locationTitleText
+        self.searchText = searchText
     }
     
     public var body: some View {
@@ -113,11 +112,13 @@ public struct SecondBottomSheetView: View {
             Spacer().frame(height: 33)
             
             VStack(spacing: 0) {
+                
                 VStack(alignment: .leading, spacing: 0) {
+                    
                     Text("선택한 장소의 이름을 직접 입력해주세요")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundColor(.white)
-                        .frame(width: 286, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Text("해당 장소에 대해 기억하기 쉬운 이름으로 변경해보세요")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
@@ -125,9 +126,10 @@ public struct SecondBottomSheetView: View {
                         .padding(.top, 10)
                         .padding(.bottom, 33)
                 }
+                .padding(.horizontal, 10)
                 
                 ZStack(alignment: .leading) {
-                    TextField("", text: $searchText,
+                    TextField("가나다라마바사", text: $searchText,
                               prompt: Text("장소명 입력").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .frame(maxWidth: .infinity)
@@ -140,27 +142,33 @@ public struct SecondBottomSheetView: View {
                     .foregroundColor(.white)
                     
                     if !self.searchText.isEmpty {
-                        Button(action: {
-                            self.searchText = ""
-                        }) {
-                            HStack {
-                                Spacer()
+                        
+                        HStack {
+                            Spacer()
+                            
+                            Button(action: {
+                                self.searchText = ""
+                            }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.white)
                             }
-                            .padding(.trailing, 17)
                         }
+                        .padding(.trailing, 17)
                     }
                 }
                 
                 Button(action: {
+                    self.locationTitleText = self.searchText
+                    self.searchText = ""
+                    
                     withAnimation(.easeInOut(duration: 0.1)) {
                         self.isShown = false
                     }
                 }) {
                     Rectangle()
                         .foregroundColor(.clear)
-                        .frame(width: 321, height: 60)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 60)
                         .background(self.searchText.isEmpty ? Color(red: 0.47, green: 0.47, blue: 0.47) : SharedAsset.mainColor.swiftUIColor)
                         .cornerRadius(35)
                         .overlay(

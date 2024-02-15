@@ -12,6 +12,8 @@ import Shared
 
 struct MumoryDetailMenuSheetView: View {
     
+    private var mumoryAnnotation: MumoryAnnotation
+    
     @Binding private var translation: CGSize
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -21,7 +23,8 @@ struct MumoryDetailMenuSheetView: View {
     
     @State private var isEditMumory: Bool = false
     
-    public init(translation: Binding<CGSize>) {
+    public init(mumoryAnnotation: MumoryAnnotation, translation: Binding<CGSize>) {
+        self.mumoryAnnotation = mumoryAnnotation
         self._translation =  translation
     }
     
@@ -45,10 +48,7 @@ struct MumoryDetailMenuSheetView: View {
                         Spacer().frame(width: 14)
                         
                         Text("뮤모리 수정")
-                            .font(
-                                Font.custom("Pretendard", size: 16)
-                                    .weight(.medium)
-                            )
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundColor(.white)
                             .frame(height: 55)
                         
@@ -61,7 +61,7 @@ struct MumoryDetailMenuSheetView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            self.appCoordinator.rootPath.append(1)
+                            self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, musicItemID: self.mumoryAnnotation.musicModel.songID))
                         }
                     }
                     

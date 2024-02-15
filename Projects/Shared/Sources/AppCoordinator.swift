@@ -59,6 +59,7 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var safeAreaInsetsTop: CGFloat = 0.0
     @Published public var safeAreaInsetsBottom: CGFloat = 0.0
+    @Published public var keyboardHeight: CGFloat = 0.0
     
     @Published public var selectedDate = Date()
     
@@ -106,10 +107,23 @@ public class DateManager: ObservableObject {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
 //        dateFormatter.locale = Locale(identifier: "ko_KR")
-        return dateFormatter.string(from: date)
         
-        //        let date = Calendar.current.date(from: DateComponents(year: selectedYear, month: selectedMonth, day: 1)) ?? Date()
-        //        return dateFormatter.string(from: date)
+        return dateFormatter.string(from: date)
+    }
+    
+    public func formattedDate(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let targetYear = Calendar.current.component(.year, from: date)
+        
+        if currentYear > targetYear {
+            dateFormatter.dateFormat = "yyyy년 MM월 dd일 ・ "
+        } else {
+            dateFormatter.dateFormat = "MM월 dd일 ・ "
+        }
+        
+        return dateFormatter.string(from: date)
     }
 }
     

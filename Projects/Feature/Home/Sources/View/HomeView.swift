@@ -16,6 +16,17 @@ import PhotosUI
 import Core
 import Shared
 
+enum MumoryViewType {
+    case mumoryDetailView
+    case editMumoryView
+}
+
+struct MumoryView: Hashable {
+    
+    let type: MumoryViewType
+    let musicItemID: MusicItemID
+}
+
 
 @available(iOS 16.0, *)
 struct MumoryCarousel: UIViewRepresentable {
@@ -235,7 +246,7 @@ struct MumoryCard: View {
 //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
 //                            appCoordinator.mumoryPopUpZIndex = 2
 //                        }
-                        appCoordinator.rootPath.append(0)
+                        appCoordinator.rootPath.append(mumoryAnnotation.id ?? "")
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage
                             .resizable()
@@ -264,7 +275,7 @@ public struct HomeView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-       
+    
     public init() {}
     
     private func lerp(_ v0: CGFloat, _ v1: CGFloat, _ t: CGFloat) -> CGFloat {
@@ -274,16 +285,16 @@ public struct HomeView: View {
     var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-//                print("onChanged: \(value.translation.height)")
+                //                print("onChanged: \(value.translation.height)")
                 if value.translation.height > 0 {
-//                    translation.height = value.translation.height
+                    //                    translation.height = value.translation.height
                     let targetHeight = value.translation.height
                     translation.height = lerp(translation.height, targetHeight, 1)
-
+                    
                 }
             }
             .onEnded { value in
-//                print("onEnded: \(value.translation.height)")
+                //                print("onEnded: \(value.translation.height)")
                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                     if value.translation.height > 130 {
                         appCoordinator.isCreateMumorySheetShown = false
@@ -294,15 +305,15 @@ public struct HomeView: View {
                 }
             }
     }
-
+    
     public var body: some View {
         
         NavigationStack(path: $appCoordinator.rootPath) {
             
             ZStack(alignment: .bottom) { // 바텀시트를 위해 정렬
-            
-                VStack(spacing: 0) {
                 
+                VStack(spacing: 0) {
+                    
                     switch selectedTab {
                     case .home:
                         homeView
@@ -322,23 +333,23 @@ public struct HomeView: View {
                 
                 TestBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
                 
-//                if appCoordinator.isCreateMumorySheetShown {
-//                    Color.black.opacity(0.6)
-//                        .onTapGesture {
-//                            withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
-//                                appCoordinator.isCreateMumorySheetShown = false
-//
-//                                mumoryDataViewModel.choosedMusicModel = nil
-//                                mumoryDataViewModel.choosedLocationModel = nil
-//                            }}
-//
-//                    CreateMumoryBottomSheetView(showDatePicker: $showDatePicker)
-//                        .offset(y: translation.height)
-//                        .gesture(self.dragGesture)
-//                        .transition(.move(edge: .bottom))
-//                        .zIndex(1)
-//                }
-                    
+                //                if appCoordinator.isCreateMumorySheetShown {
+                //                    Color.black.opacity(0.6)
+                //                        .onTapGesture {
+                //                            withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
+                //                                appCoordinator.isCreateMumorySheetShown = false
+                //
+                //                                mumoryDataViewModel.choosedMusicModel = nil
+                //                                mumoryDataViewModel.choosedLocationModel = nil
+                //                            }}
+                //
+                //                    CreateMumoryBottomSheetView(showDatePicker: $showDatePicker)
+                //                        .offset(y: translation.height)
+                //                        .gesture(self.dragGesture)
+                //                        .transition(.move(edge: .bottom))
+                //                        .zIndex(1)
+                //                }
+                
                 if self.appCoordinator.isMumoryPopUpShown {
                     ZStack { // 부모 ZStack의 정렬 무시
                         Color.black.opacity(0.6)
@@ -361,20 +372,20 @@ public struct HomeView: View {
                     }
                 }
                 
-                if self.appCoordinator.isSocialMenuSheetViewShown {
-                    Color.black.opacity(0.5).ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(Animation.easeOut(duration: 0.2)) {
-                                self.appCoordinator.isSocialMenuSheetViewShown = false
-                            }
-                        }
-                    
-                    SocialMenuSheetView(translation: $translation)
-                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
-                        .simultaneousGesture(dragGesture)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
+//                if self.appCoordinator.isSocialMenuSheetViewShown {
+//                    Color.black.opacity(0.5).ignoresSafeArea()
+//                        .onTapGesture {
+//                            withAnimation(Animation.easeOut(duration: 0.2)) {
+//                                self.appCoordinator.isSocialMenuSheetViewShown = false
+//                            }
+//                        }
+//                    
+//                    SocialMenuSheetView(translation: $translation)
+//                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
+//                        .simultaneousGesture(dragGesture)
+//                        .transition(.move(edge: .bottom))
+//                        .zIndex(1)
+//                }
                 
                 if appCoordinator.isMumoryDetailCommentSheetViewShown {
                     Color.black.opacity(0.5).ignoresSafeArea()
@@ -397,16 +408,18 @@ public struct HomeView: View {
                         .zIndex(1)
                 }
                 
-//                id self.appCoordinator.
+                //                id self.appCoordinator.
                 
             } // ZStack
             .ignoresSafeArea()
             .navigationDestination(for: Int.self) { i in
                 switch i {
                 case 0:
-                    MumoryDetailView(mumoryAnnotation: mumoryDataViewModel.mumoryAnnotations[0])
+//                    MumoryDetailView(mumoryAnnotation: mumoryDataViewModel.mumoryAnnotations[1])
+                    Color.green
                 case 1:
-                    MumoryDetailEditView()
+//                    MumoryDetailEditView()
+                    Color.red
                 case 2:
                     SearchMusicView()
                 case 3:
@@ -418,7 +431,9 @@ public struct HomeView: View {
                 }
             }
             .navigationDestination(for: String.self, destination: { i in
-                if i == "music" {
+                if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.id == i }) {
+                    MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
+                } else if i == "music" {
                     SearchMusicView()
                 } else if i == "location" {
                     SearchLocationView()
@@ -438,73 +453,29 @@ public struct HomeView: View {
                     Color.pink
                 }
             })
-//            .sheetWithDetents(
-//                isPresented: $appCoordinator.isCreateMumorySheetShown,
-//                detents: [UISheetPresentationController.Detent.custom(
-//                    identifier: UISheetPresentationController.Detent.Identifier("FUCK"),
-//                    resolver: { dimension in
-//                        // Set your custom height here
-//                        return UIScreen.main.bounds.height - 200
+            .navigationDestination(for: MumoryView.self) { view in
+                switch view.type {
+                case .mumoryDetailView:
+//                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.id == i }) {
+//                        MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
 //                    }
-//                )]) {
-//                        print("The sheet has been dismissed")
-//                } content: {
-//                    VStack(spacing: 0) {
-//                        Color.red
-//                            .onTapGesture {
-//                                appCoordinator.createMumoryPath.append(0.1)
-//                            }
-//                        Color.blue
-//                            .onTapGesture {
-//                                appCoordinator.createMumoryPath.append(1.1)
-//                            }
-//                    }
-//                    .navigationDestination(for: Double.self, destination: { i in
-//                        switch i {
-//                        case 0.1:
-//                            Color.orange
-//                                .navigationBarBackButtonHidden(true)
-//                        default:
-//                            Color.pink
-//                        }
-//                    })
-//                }
-
-//            .sheet(isPresented: $appCoordinator.isCreateMumorySheetShown) {
-//                NavigationStack(path: $appCoordinator.createMumoryPath) {
-//                    VStack(spacing: 0) {
-//                        Color.red
-//                            .onTapGesture {
-//                                appCoordinator.createMumoryPath.append(0.1)
-//                            }
-//                        Color.blue
-//                            .onTapGesture {
-//                                appCoordinator.createMumoryPath.append(3.3)
-//                            }
-//                            .navigationDestination(for: Double.self, destination: { i in
-//                                switch i {
-//                                case 0.1:
-//                                    Color.orange
-//                                        .navigationBarBackButtonHidden(true)
-//                                default:
-//                                    Color.pink
-//                                }
-//                            })
-//                    }
-//
-//
-//                }
-//                .presentationDetents([.height(getUIScreenBounds().height - appCoordinator.safeAreaInsetsTop - 36)])
-//                //                .presentationCornerRadius(23)
-//            }
+                    EmptyView()
+                case .editMumoryView:
+                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.musicModel.songID == view.musicItemID }) {
+                        MumoryDetailEditView(mumoryAnnotation: mumoryAnnotation)
+                    } else {
+                        Color.blue
+                    }
+                }
+            }
         } // NavigationStack
         .onAppear {
             print("HomeMapViewRepresentable onAppear")
-//                    Task {
-                self.mumoryDataViewModel.fetchData()
-//                        await mumoryDataViewModel.loadMusics()
-//                    }
-        
+            //                    Task {
+            self.mumoryDataViewModel.fetchData()
+            //                        await mumoryDataViewModel.loadMusics()
+            //                    }
+            
         }
         
     }
@@ -518,35 +489,35 @@ public struct HomeView: View {
             VStack(spacing: 0) {
                 
                 Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(height: 95)
-                  .background(
-                    LinearGradient(
-                      stops: [
-                        Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.9), location: 0.08),
-                        Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
-                      ],
-                      startPoint: UnitPoint(x: 0.5, y: 0),
-                      endPoint: UnitPoint(x: 0.5, y: 1)
+                    .foregroundColor(.clear)
+                    .frame(height: 95)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.9), location: 0.08),
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 0),
+                            endPoint: UnitPoint(x: 0.5, y: 1)
+                        )
                     )
-                  )
                 
                 Spacer()
                 
                 Rectangle()
-                  .foregroundColor(.clear)
-                  .frame(height: 159.99997)
-                  .background(
-                    LinearGradient(
-                      stops: [
-                        Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
-                        Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
-                      ],
-                      startPoint: UnitPoint(x: 0.5, y: 1),
-                      endPoint: UnitPoint(x: 0.5, y: 0)
+                    .foregroundColor(.clear)
+                    .frame(height: 159.99997)
+                    .background(
+                        LinearGradient(
+                            stops: [
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
+                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
+                            ],
+                            startPoint: UnitPoint(x: 0.5, y: 1),
+                            endPoint: UnitPoint(x: 0.5, y: 0)
+                        )
                     )
-                  )
-                  .offset(y: 89)
+                    .offset(y: 89)
             }
             .allowsHitTesting(false)
             
@@ -559,271 +530,6 @@ public struct HomeView: View {
         }
     }
 }
-
-
-struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: View {
-    
-    @Binding var isPresented: Bool
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    
-    let detents: [UISheetPresentationController.Detent]
-    let content: Content
-
-    init(
-        _ isPresented: Binding<Bool>,
-        detents: [UISheetPresentationController.Detent],
-        @ViewBuilder content: () -> Content
-    ) {
-        self._isPresented = isPresented
-        self.detents = detents
-        self.content = content()
-    }
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-        
-        // Create the UIViewController that will be presented by the UIButton
-        let viewController = UIViewController()
-        viewController.modalPresentationStyle = .formSheet
-
-        // Create the UIHostingController that will embed the SwiftUI View
-        let hostingController = UIHostingController(rootView: content)
-        hostingController.view.backgroundColor = .brown
-        
-        // Add the UIHostingController to the UIViewController
-        viewController.addChild(hostingController)
-        viewController.view.addSubview(hostingController.view)
-        
-        // Set constraints
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        hostingController.view.centerXAnchor.constraint(equalTo: viewController.view.centerXAnchor).isActive = true
-        //            hostingController.view.centerYAnchor.constraint(equalTo: viewController.view.centerYAnchor).isActive = true
-//        hostingController.view.topAnchor.constraint(equalTo: viewController.view.topAnchor).isActive = true
-        
-        hostingController.view.widthAnchor.constraint(equalToConstant: getUIScreenBounds().width).isActive = true  // Set the width as needed
-        hostingController.view.heightAnchor.constraint(equalToConstant: getUIScreenBounds().height - 100).isActive = true  // Set the height as needed
-        hostingController.didMove(toParent: viewController)
-        
-        // Set the presentationController as a UISheetPresentationController
-        if let sheetController = viewController.presentationController as? UISheetPresentationController {
-            let customDetent = UISheetPresentationController.Detent.custom(
-                identifier: UISheetPresentationController.Detent.Identifier("FUCK"),
-                resolver: { dimension in
-                    // Set your custom height here
-                    return UIScreen.main.bounds.height - 200
-                }
-            )
-            sheetController.detents = [customDetent]
-            sheetController.largestUndimmedDetentIdentifier = customDetent.identifier
-            
-            sheetController.prefersGrabberVisible = false
-            sheetController.prefersScrollingExpandsWhenScrolledToEdge = true
-            sheetController.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-            sheetController.preferredCornerRadius = 23
-            
-        }
-
-        viewController.presentationController?.delegate = context.coordinator
-        viewController.transitioningDelegate = context.coordinator
-        
-        
-        if isPresented {
-            if uiView.window?.rootViewController?.presentedViewController == nil {
-                uiView.window?.rootViewController?.present(viewController, animated: true)
-            }
-        } else {
-            uiView.window?.rootViewController?.dismiss(animated: true)
-        }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
-    }
-    
-    class Coordinator: NSObject, UISheetPresentationControllerDelegate, UIViewControllerTransitioningDelegate {
-        
-        let parent: SheetPresentationForSwiftUI
-        
-        init(parent: SheetPresentationForSwiftUI) {
-            self.parent = parent
-            super.init()
-        }
-        
-        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            parent.appCoordinator.isCreateMumorySheetShown = false
-//            withAnimation(.easeInOut(duration: 0.2)) {
-//            }
-//            if let onDismiss = onDismiss {
-//                onDismiss()
-//            }
-        }
-        
-//        func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-//            return CustomPresentationAnimator(duration: 0.3)
-//          }
-//
-//        func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-//            return CustomPresentationAnimator(duration: 0.3)
-//        }
-    }
-}
-
-struct sheetWithDetentsViewModifier<SwiftUIContent>: ViewModifier where SwiftUIContent: View {
-    
-    @Binding var isPresented: Bool
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    
-    let onDismiss: (() -> Void)?
-    let detents: [UISheetPresentationController.Detent]
-    let swiftUIContent: SwiftUIContent
-    
-    init(isPresented: Binding<Bool>, detents: [UISheetPresentationController.Detent] = [.medium()] , onDismiss: (() -> Void)? = nil, content: () -> SwiftUIContent) {
-        self._isPresented = isPresented
-        self.onDismiss = onDismiss
-        self.swiftUIContent = content()
-        self.detents = detents
-    }
-    
-    func body(content: Content) -> some View {
-        ZStack {
-            SheetPresentationForSwiftUI($isPresented, detents: detents) {
-                swiftUIContent
-            }
-            //            .fixedSize()
-            
-            content
-        }
-        .ignoresSafeArea()
-    }
-}
-
-extension View {
-    
-    func sheetWithDetents<Content>(
-        isPresented: Binding<Bool>,
-        detents: [UISheetPresentationController.Detent],
-        onDismiss: (() -> Void)?,
-        content: @escaping () -> Content) -> some View where Content : View {
-            modifier(
-                    sheetWithDetentsViewModifier(
-                        isPresented: isPresented,
-                        detents: detents,
-                        onDismiss: onDismiss,
-                        content: content)
-                    )
-        }
-    
-}
-
-class CustomPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    let duration: TimeInterval
-    
-    init(duration: TimeInterval) {
-        self.duration = duration
-    }
-
-    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        return duration
-    }
-
-    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-           guard let toViewController = transitionContext.viewController(forKey: .to) else { return }
-
-           let finalFrame = transitionContext.finalFrame(for: toViewController)
-           let containerView = transitionContext.containerView
-
-           let initialFrame = finalFrame.offsetBy(dx: 0, dy: containerView.bounds.height)
-           toViewController.view.frame = initialFrame
-
-           containerView.addSubview(toViewController.view)
-
-           UIView.animate(withDuration: duration, animations: {
-               toViewController.view.frame = finalFrame
-           }) { _ in
-               transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
-           }
-       }
-}
-
-
-
-struct SheetViewController<Content>: UIViewControllerRepresentable where Content: View {
-    @Binding var isPresented: Bool
-    var content: Content
-    var cornerRadius: CGFloat
-    
-    init(
-        _ isPresented: Binding<Bool>,
-        @ViewBuilder content: () -> Content,
-        cornerRadius: CGFloat
-    ) {
-        self._isPresented = isPresented
-        self.content = content()
-        self.cornerRadius = cornerRadius
-    }
-
-    func makeUIViewController(context: Context) -> UIViewController {
-        return UIViewController()
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-        if isPresented {
-            let sheetController = UIHostingController(rootView: content)
-
-            let viewController = uiViewController
-            viewController.view.addSubview(sheetController.view)
-            viewController.modalPresentationStyle = .formSheet
-            viewController.presentationController?.delegate = context.coordinator
-
-            context.coordinator.sheetController = sheetController
-
-            uiViewController.present(viewController, animated: true)
-        } else {
-            uiViewController.dismiss(animated: true)
-        }
-    }
-
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(parent: self)
-    }
-
-    class Coordinator: NSObject, UISheetPresentationControllerDelegate {
-        var parent: SheetViewController
-        var sheetController: UIHostingController<Content>?
-
-        init(parent: SheetViewController) {
-            self.parent = parent
-        }
-
-        func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            parent.isPresented = false
-        }
-    }
-}
-
-struct SheetWithCornerRadius<Content>: View where Content: View {
-    @Binding var isPresented: Bool
-    var content: () -> Content
-    var cornerRadius: CGFloat
-
-    var body: some View {
-        SheetViewController($isPresented, content: content, cornerRadius: cornerRadius)
-    }
-}
-
-extension View {
-    func sheetWithCornerRadius<Content: View>(isPresented: Binding<Bool>, cornerRadius: CGFloat, @ViewBuilder content: @escaping () -> Content) -> some View {
-        SheetWithCornerRadius(isPresented: isPresented, content: content, cornerRadius: cornerRadius)
-    }
-}
-
-
-
-
 
 struct TestBottomSheetView: View {
     
@@ -895,15 +601,7 @@ struct TestBottomSheetView: View {
                                 .resizable()
                                 .frame(width: 25, height: 25)
                                 .gesture(TapGesture(count: 1).onEnded {
-                                    
                                     self.isDeletePopUpShown = true
-                                    
-//                                    withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
-//                                        appCoordinator.isCreateMumorySheetShown = false
-//
-//                                        mumoryDataViewModel.choosedMusicModel = nil
-//                                        mumoryDataViewModel.choosedLocationModel = nil
-//                                    }
                                 })
                             
                             Spacer()
@@ -914,20 +612,6 @@ struct TestBottomSheetView: View {
                                 } else {
                                     self.isPublishErrorPopUpShown = true
                                 }
-
-//                                if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-//                                    let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
-//
-//                                    mumoryDataViewModel.createMumory(newMumoryAnnotation)
-//                                }
-//
-//                                withAnimation(Animation.easeInOut(duration: 0.1)) { // 사라질 때 애니메이션 적용
-//                                    appCoordinator.isCreateMumorySheetShown = false
-//                                }
-//
-//                                mumoryDataViewModel.choosedMusicModel = nil
-//                                mumoryDataViewModel.choosedLocationModel = nil
-                                
                             }) {
                                 Rectangle()
                                     .foregroundColor(.clear)
@@ -1003,22 +687,6 @@ struct TestBottomSheetView: View {
                                             }
                                             return Color.clear
                                         })
-                                    //                            .onAppear {
-                                    //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
-                                    //                                    guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-                                    //                                    let keyboardHeight = keyboardSize.height
-                                    //
-                                    //                                    withAnimation {
-                                    //                                        scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
-                                    //                                    }
-                                    //                                }
-                                    //
-                                    //                                NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
-                                    //                                    withAnimation {
-                                    //                                         scrollViewOffset = 0
-                                    //                                    }
-                                    //                                }
-                                    //                            }
         
                                     ContentContainerView(contentText: self.$contentText)
         
@@ -1112,6 +780,7 @@ struct TestBottomSheetView: View {
                             HStack(spacing: 0) {
 
                                 Group {
+                                    
                                     Text("전체공개")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                         .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
@@ -1123,19 +792,21 @@ struct TestBottomSheetView: View {
                                     
                                     Spacer()
                                 }
-                                .onTapGesture {
-                                    self.isPublic.toggle()
-                                }
+                                .gesture(TapGesture(count: 1)
+                                    .onEnded {
+                                        self.isPublic.toggle()
+                                    })
                                 
                                 SharedAsset.keyboardButtonCreateMumory.swiftUIImage
-//                                    .resizable()
+                                    .resizable()
                                     .frame(width: 26, height: 26)
                             }
                             .padding(.top, 18)
                             .padding(.horizontal, 20)
                     } // ZStack
                     .offset(y: getUIScreenBounds().height == 667 || getUIScreenBounds().height == 736 ? -33  : -getSafeAreaInsets().bottom - 16)
-                    .highPriorityGesture(TapGesture())
+                    .offset(y: -self.appCoordinator.keyboardHeight)
+                    .highPriorityGesture(DragGesture())
                     
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -1205,15 +876,17 @@ struct TestBottomSheetView: View {
                                 let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: tags, content: contentText, imageURLs: self.imageURLs)
                                 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation)
+                                
+                                withAnimation(Animation.easeInOut(duration: 0.2)) {
+                                    appCoordinator.isCreateMumorySheetShown = false
+                                }
                             }
                         }
                         else {
                             print("else 일리가 없지?")
                         }
                         
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isCreateMumorySheetShown = false
-                        }
+
                         
                         mumoryDataViewModel.choosedMusicModel = nil
                         mumoryDataViewModel.choosedLocationModel = nil
@@ -1236,6 +909,26 @@ struct TestBottomSheetView: View {
                     })
                     
                 })
+                .onAppear {
+                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
+                        guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+                        let keyboardHeight = keyboardSize.height
+                        
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            self.appCoordinator.keyboardHeight = keyboardSize.height
+//                            scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
+                        }
+                    }
+                    
+                    NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
+                        DispatchQueue.main.async{
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                self.appCoordinator.keyboardHeight = CGFloat.zero
+                                //                            scrollViewOffset = 0
+                            }
+                        }
+                    }
+                }
             }
         }
     }

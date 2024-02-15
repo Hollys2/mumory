@@ -35,25 +35,25 @@ final public class MumoryDataViewModel: ObservableObject {
         return MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
     }
     
-    @MainActor
-    func loadMusics() async {
-        let musicIDs: [String] = ["1487778081", "1712044358", "1590067123"]
-        
-        guard let userLocation = CLLocationManager().location else {
-            print("User location is not available")
-            return
-        }
-        
-        for id in musicIDs {
-            do {
-                let songItem = try await fetchMusic(musicID: id)
-                let newAnnotation = MumoryAnnotation(date: Date(), musicModel: songItem, locationModel: LocationModel(locationTitle: "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", locationSubtitle: "ㅎㅎ", coordinate: userLocation.coordinate))
-                self.mumoryAnnotations.append(newAnnotation)
-            } catch {
-                print("Error fetching song info for ID \(id): \(error)")
-            }
-        }
-    }
+//    @MainActor
+//    func loadMusics() async {
+//        let musicIDs: [String] = ["1487778081", "1712044358", "1590067123"]
+//
+//        guard let userLocation = CLLocationManager().location else {
+//            print("User location is not available")
+//            return
+//        }
+//
+//        for id in musicIDs {
+//            do {
+//                let songItem = try await fetchMusic(musicID: id)
+//                let newAnnotation = MumoryAnnotation(date: Date(), musicModel: songItem, locationModel: LocationModel(locationTitle: "ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", locationSubtitle: "ㅎㅎ", coordinate: userLocation.coordinate))
+//                self.mumoryAnnotations.append(newAnnotation)
+//            } catch {
+//                print("Error fetching song info for ID \(id): \(error)")
+//            }
+//        }
+//    }
     
     // 위치 > 주소
     public func getChoosedeMumoryModelLocation(location: CLLocation, completion: @escaping (LocationModel) -> Void) {
@@ -77,13 +77,14 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let db = FirebaseManager.shared.db
         
-        let playlistCollectionRef = db.collection("User").document("tester").collection("mumory")
-        
-        playlistCollectionRef.getDocuments { (snapshot, error) in
+        let mumoryCollectionRef = db.collection("User").document("tester").collection("mumory")
+
+        mumoryCollectionRef.getDocuments { (snapshot, error) in
             if let error = error {
                 print("Error fetching playlist documents: \(error.localizedDescription)")
             } else {
                 for document in snapshot!.documents {
+                    print("document.documentID: \(document.documentID)")
                     let documentData = document.data()
                     
                     if let musicItemIDString = documentData["MusicItemID"] as? String,
@@ -92,19 +93,19 @@ final public class MumoryDataViewModel: ObservableObject {
                        let latitude = documentData["latitude"] as? Double,
                        let longitude = documentData["longitude"] as? Double,
                        let date = documentData["date"] as? FirebaseManager.Timestamp,
-                       let tags = documentData["tags"] as? String,
+                       let tags = documentData["tags"] as? [String],
                        let content = documentData["content"] as? String,
-                       let imageURLs = documentData["imageURLs"] as? String
+                       let imageURLs = documentData["imageURLs"] as? [String]
                     {
                         Task {
                             do {
                                 let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
                                 let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
                                 
-                                let tags = tags.components(separatedBy: ",")
-                                let imageURLs = imageURLs.components(separatedBy: ",")
+//                                let tags = tags.components(separatedBy: ",")
+//                                let imageURLs = imageURLs.components(separatedBy: ",")
                                 
-                                let newMumoryAnnotation = MumoryAnnotation(date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs)
+                                let newMumoryAnnotation = MumoryAnnotation(id: document.documentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs)
                                 
                                 DispatchQueue.main.async {
                                     self.mumoryAnnotations.append(newMumoryAnnotation)
@@ -151,29 +152,35 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let db = FirebaseManager.shared.db
         
-        let tags = mumoryAnnotation.tags?.joined(separator: ",")
-        let imageURLs = mumoryAnnotation.imageURLs?.joined(separator: ",")
+        let tags = mumoryAnnotation.tags?.isEmpty == false ? mumoryAnnotation.tags?.joined(separator: ",") : nil
+        let imageURLs = mumoryAnnotation.imageURLs?.isEmpty == false ? mumoryAnnotation.imageURLs?.joined(separator: ",") : nil
         
-        let newData: [String: Any] = [
+        var newData: [String: Any] = [
             "MusicItemID": String(describing: mumoryAnnotation.musicModel.songID),
             "locationTitle": mumoryAnnotation.locationModel.locationTitle,
             "locationSubtitle": mumoryAnnotation.locationModel.locationSubtitle,
             "latitude": mumoryAnnotation.locationModel.coordinate.latitude,
             "longitude": mumoryAnnotation.locationModel.coordinate.longitude,
             "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date),
-            "tags": tags ?? [],
+            "tags": mumoryAnnotation.tags ?? [],
             "content": mumoryAnnotation.content ?? "",
-            "imageURLs": imageURLs ?? []
+            "imageURLs": mumoryAnnotation.imageURLs ?? []
         ]
         
-        db.collection("User").document("tester").collection("mumory").document().setData(newData, merge: true) { error in
+//        if let content = mumoryAnnotation.content, !content.isEmpty {
+//            newData["content"] = content
+//        }
+        
+        let documentReference = db.collection("User").document("tester").collection("mumory").document()
+        
+        documentReference.setData(newData, merge: true) { error in
             if let error = error {
                 print("Error adding tester document: \(error.localizedDescription)")
             } else {
-                print("Tester document added successfully!")
+                print("Tester document added successfully! : \(documentReference.documentID)")
                 
-                let newMumoryAnnotation = MumoryAnnotation(date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel)
-//
+                let newMumoryAnnotation = MumoryAnnotation(id: documentReference.documentID, date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel, tags: mumoryAnnotation.tags, content: mumoryAnnotation.content, imageURLs: mumoryAnnotation.imageURLs)
+                
                 self.mumoryAnnotations.append(newMumoryAnnotation)
             }
         }

@@ -49,7 +49,7 @@ public struct LocationModel: Identifiable {
 
 public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
     
-    public var count: Int
+    public var id: String?
     
     public var date: Date
     public var musicModel: MusicModel
@@ -61,8 +61,8 @@ public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
     public var content: String?
     public var imageURLs: [String]?
 
-    public init(count: Int = 0, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil) {
-        self.count = count
+    public init(id: String? = nil, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil) {
+        self.id = id
         self.date = date
         self.musicModel = musicModel
         self.locationModel = locationModel
@@ -76,7 +76,7 @@ public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
     
     // 프리뷰에서 기본 생성자 사용
     public override convenience init() {
-        self.init(date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()))
+        self.init(id: "", date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()))
        }
 }
 

@@ -18,6 +18,7 @@ struct SocialScrollViewRepresentable: UIViewRepresentable {
     @Binding var offsetY: CGFloat
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
@@ -30,7 +31,7 @@ struct SocialScrollViewRepresentable: UIViewRepresentable {
         scrollView.showsHorizontalScrollIndicator = false
         
         
-        let hostingController = UIHostingController(rootView: SocialScrollCotentView())
+        let hostingController = UIHostingController(rootView: SocialScrollCotentView().environmentObject(mumoryDataViewModel))
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
         hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
         
@@ -116,13 +117,19 @@ extension SocialScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
 
 struct SocialScrollCotentView: View {
     
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    
     var body: some View {
+        
         VStack(spacing: 0) {
+            
             Spacer().frame(height: 100)
             
             LazyVStack(spacing: 0) {
-                ForEach(0..<3) { _ in
-                    SocialItemView()
+                
+                ForEach(self.mumoryDataViewModel.mumoryAnnotations, id: \.self) { i in
+                    SocialItemView(mumoryAnnotation: i)
                 }
             }
             .frame(width: UIScreen.main.bounds.width - 20)
@@ -140,7 +147,10 @@ struct SocialMenuSheetView: View {
     
     @GestureState var dragAmount = CGSize.zero
     
-    public init(translation: Binding<CGSize>) {
+    let mumoryAnnotation: MumoryAnnotation
+    
+    public init(mumoryAnnotation: MumoryAnnotation, translation: Binding<CGSize>) {
+        self.mumoryAnnotation = mumoryAnnotation
         self._translation =  translation
     }
     
@@ -187,6 +197,11 @@ struct SocialMenuSheetView: View {
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         self.appCoordinator.rootPath.append(0)
+//                        if let id = self.mumoryAnnotation.id {
+//                            self.appCoordinator.rootPath.append(id)
+//                        } else {
+//                            print("ERROR: NO ID")
+//                        }
                     }
                 }
                 
@@ -275,31 +290,33 @@ struct SocialItemView: View {
     
     @State private var isMenuShown: Bool = false
     
+    @StateObject private var dateManager: DateManager = DateManager()
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     
+    let mumoryAnnotation: MumoryAnnotation
+    
     var body: some View {
-        // MARK: Profile
+        
         VStack(spacing: 0) {
+            // MARK: Profile
             HStack(spacing: 8) {
+                
                 Image(uiImage: SharedAsset.profileMumoryDetail.image)
                     .resizable()
                     .frame(width: 38, height: 38)
                 
                 VStack(spacing: 5.25) {
+                    
                     Text("이르음음음음음")
-                        .font(
-                            Font.custom("Pretendard", size: 16)
-                                .weight(.medium)
-                        )
+                        .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     HStack(spacing: 0) {
-                        Text("10월 12일 ・ ")
-                            .font(
-                                Font.custom("Pretendard", size: 15)
-                                    .weight(.medium)
-                            )
+                        
+                        Text(dateManager.formattedDate(date: self.mumoryAnnotation.date))
+                            .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                         
                         Image(uiImage: SharedAsset.lockMumoryDatail.image)
@@ -314,11 +331,8 @@ struct SocialItemView: View {
                         
                         Spacer().frame(width: 4)
                         
-                        Text("반포한강공원반포한강공원")
-                            .font(
-                                Font.custom("Pretendard", size: 15)
-                                    .weight(.medium)
-                            )
+                        Text(self.mumoryAnnotation.locationModel.locationTitle)
+                            .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                             .frame(width: 106, height: 11, alignment: .leading)
                     } // HStack
@@ -328,15 +342,53 @@ struct SocialItemView: View {
             Spacer().frame(height: 13)
             
             ZStack(alignment: .topLeading) {
+                
                 Rectangle()
                     .foregroundColor(.clear)
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                     .background(
-                        SharedAsset.artworkSample.swiftUIImage
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
+                        
+//                        SharedAsset.artworkSample.swiftUIImage
+//                            .resizable()
+//                            .aspectRatio(contentMode: .fill)
+//                            .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
+//                            .clipped()
+                        
+                        AsyncImage(url: self.mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+//                                    .transition(.move(edge: .trailing))
+                            case .failure:
+                                Text("Failed to load image")
+                            default:
+                                Color(red: 0.18, green: 0.18, blue: 0.18)
+                            }
+                        }
+//                            .resizable()
+//                            .aspectRatio(contentMode: .fill)
                             .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                             .clipped()
+                        
+//                        AsyncImage(url: URL(string: self.mumoryAnnotation)) { phase in
+//                            switch phase {
+//                            case .empty:
+//                                ProgressView()
+//                            case .success(let image):
+//                                image
+//                                    .resizable()
+//                                    .aspectRatio(contentMode: .fill)
+//                                    .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.width - 40)
+//                                    .clipped()
+//                            case .failure:
+//                                Text("Failed to load image")
+//                            @unknown default:
+//                                Text("Unknown state")
+//                            }
+//                        }
+
                     )
                     .cornerRadius(15)
                 
@@ -359,33 +411,32 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
-                                self.appCoordinator.rootPath.append(0)
+                                if let id = self.mumoryAnnotation.id {
+                                    self.appCoordinator.rootPath.append(id)
+                                } else {
+                                    print("ERROR: NO ID")
+                                }
                             }
                     )
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
+                    
                     SharedAsset.musicIconSocial.swiftUIImage
                         .resizable()
                         .frame(width: 14, height: 14)
                     
                     Spacer().frame(width: 6)
                     
-                    Text("Hollywood")
-                        .font(
-                            Font.custom("Pretendard", size: 14)
-                                .weight(.bold)
-                        )
+                    Text(self.mumoryAnnotation.musicModel.title)
+                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                         .multilineTextAlignment(.trailing)
                         .foregroundColor(.white)
                     
                     Spacer().frame(width: 8)
                     
-                    Text("검정치마")
-                        .font(
-                            Font.custom("Pretendard", size: 14)
-                                .weight(.light)
-                        )
+                    Text(self.mumoryAnnotation.musicModel.artist)
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                         .foregroundColor(.white)
                     
                     Spacer()
@@ -407,87 +458,59 @@ struct SocialItemView: View {
                 .padding(.trailing, 17)
                 
                 VStack(spacing: 14) {
-                    // MARK: Image Counter & Tag
                     ScrollView(.horizontal, showsIndicators: false) {
+                        
                         HStack(spacing: 8) {
-                            HStack(spacing: 4) {
-                                SharedAsset.imageCountSocial.swiftUIImage
-                                    .frame(width: 18, height: 18)
-                                Text("2")
-                                    .font(
-                                        Font.custom("Pretendard", size: 15)
-                                            .weight(.medium)
-                                    )
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.white)
-                            }
-                            .frame(width: 48, height: 28)
-                            .background(
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 48, height: 28)
-                                    .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
-                                    .cornerRadius(15)
-                            )
                             
-                            HStack(alignment: .center, spacing: 5) {
-                                SharedAsset.tagMumoryDatail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 14, height: 14)
+                            // MARK: Image Counter
+                            if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
                                 
-                                Text("태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그")
-                                    .font(
-                                        Font.custom("Pretendard", size: 12)
-                                            .weight(.semibold)
-                                    )
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
+                                HStack(spacing: 4) {
+                                    
+                                    SharedAsset.imageCountSocial.swiftUIImage
+                                        .resizable()
+                                        .frame(width: 18, height: 18)
+                                    
+                                    Text("\(imageURLs.count)")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                }
+                                .frame(width: 48, height: 28)
+                                .background(
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(width: 48, height: 28)
+                                        .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
+                                        .cornerRadius(15)
+                                )
                             }
-                            .padding(.leading, 8)
-                            .padding(.trailing, 10)
-                            .padding(.vertical, 7)
-                            .background(.white.opacity(0.25))
-                            .cornerRadius(14)
                             
-                            HStack(alignment: .center, spacing: 5) {
-                                SharedAsset.tagMumoryDatail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 14, height: 14)
+                            // MARK: Tag
+                            if let tags = self.mumoryAnnotation.tags {
                                 
-                                Text("태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그")
-                                    .font(
-                                        Font.custom("Pretendard", size: 12)
-                                            .weight(.semibold)
-                                    )
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                            }
-                            .padding(.leading, 8)
-                            .padding(.trailing, 10)
-                            .padding(.vertical, 7)
-                            .background(.white.opacity(0.25))
-                            .cornerRadius(14)
-                            
-                            HStack(alignment: .center, spacing: 5) {
-                                SharedAsset.tagMumoryDatail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 14, height: 14)
+                                ForEach(tags, id: \.self) { i in
+                                    
+                                    HStack(alignment: .center, spacing: 5) {
+                                    
+                                        SharedAsset.tagMumoryDatail.swiftUIImage
+                                            .resizable()
+                                            .frame(width: 14, height: 14)
+                                        
+                                        Text(i)
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                            .foregroundColor(.white)
+                                            .lineLimit(1)
+                                    }
+                                    .padding(.leading, 8)
+                                    .padding(.trailing, 10)
+                                    .padding(.vertical, 7)
+                                    .background(.white.opacity(0.25))
+                                    .cornerRadius(14)
+                                }
                                 
-                                Text("태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그")
-                                    .font(
-                                        Font.custom("Pretendard", size: 12)
-                                            .weight(.semibold)
-                                    )
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
+                                Spacer()
                             }
-                            .padding(.leading, 8)
-                            .padding(.trailing, 10)
-                            .padding(.vertical, 7)
-                            .background(.white.opacity(0.25))
-                            .cornerRadius(14)
-                            
-                            Spacer()
                         } // HStack
                         
                     } // ScrollView
@@ -499,27 +522,25 @@ struct SocialItemView: View {
                     
                     // MARK: Content
                     HStack(spacing: 0) {
-                        Text("내용 내용내용 내용내용내용 내용내용내용내용내용 내용내용내용내용내용내용")
-                            .font(
-                                Font.custom("Pretendard", size: 13)
-                                    .weight(.medium)
-                            )
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .frame(alignment: .leading)
                         
-                        Spacer()
-
-                        // 컨텐트 너비에 따른 조건문 추가 예정
-                        Text("더보기")
-                            .font(
-                                Font.custom("Pretendard", size: 11)
-                                    .weight(.medium)
-                            )
-                            .multilineTextAlignment(.trailing)
-                            .foregroundColor(.white.opacity(0.7))
-                            .lineLimit(1)
-                            .frame(alignment: .leading)
+                        if let content = self.mumoryAnnotation.content, !content.isEmpty {
+                            
+                            Text(content)
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .frame(alignment: .leading)
+                            
+                            Spacer()
+                            
+                            // 컨텐트 너비에 따른 조건문 추가 예정
+                            Text("더보기")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(.white.opacity(0.7))
+                                .lineLimit(1)
+                                .frame(alignment: .leading)
+                        }
                     }
                 } // VStack
                 .frame(width: (UIScreen.main.bounds.width - 20) * 0.66)
@@ -536,19 +557,21 @@ struct SocialItemView: View {
                 
                 // MARK: Heart & Comment
                 VStack(spacing: 12) {
+                    
                     Button(action: {
                         
                     }, label: {
                         SharedAsset.heartButtonSocial.swiftUIImage
+                            .resizable()
                             .frame(width: 42, height: 42)
-                            .background(.white.opacity(0.1))
+                            .background(
+                                .white.opacity(0.1)
+                            )
+                            .mask {Circle()}
                     })
                     
                     Text("10")
-                        .font(
-                            Font.custom("Pretendard", size: 15)
-                                .weight(.medium)
-                        )
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                         .multilineTextAlignment(.center)
                         .foregroundColor(.white)
                     
@@ -558,7 +581,12 @@ struct SocialItemView: View {
                         }
                     }, label: {
                         SharedAsset.commentButtonSocial.swiftUIImage
+                            .resizable()
                             .frame(width: 42, height: 42)
+                            .background(
+                                .white.opacity(0.1)
+                            )
+                            .mask {Circle()}
                     })
                     
                     //                Text("10")
@@ -597,10 +625,36 @@ public struct SocialView: View {
     
     @State private var translation: CGSize = .zero
     
+//    var dragGesture: some Gesture {
+//        DragGesture()
+//            .onChanged { value in
+//                //                print("onChanged: \(value.translation.height)")
+//                if value.translation.height > 0 {
+//                    //                    translation.height = value.translation.height
+//                    let targetHeight = value.translation.height
+//                    translation.height = lerp(translation.height, targetHeight, 1)
+//                    
+//                }
+//            }
+//            .onEnded { value in
+//                //                print("onEnded: \(value.translation.height)")
+//                withAnimation(Animation.easeInOut(duration: 0.1)) {
+//                    if value.translation.height > 130 {
+//                        appCoordinator.isCreateMumorySheetShown = false
+//                        mumoryDataViewModel.choosedMusicModel = nil
+//                        mumoryDataViewModel.choosedLocationModel = nil
+//                    }
+//                    translation.height = .zero
+//                }
+//            }
+//    }
+    
     public init() {}
     
     public var body: some View {
+        
         ZStack(alignment: .top) {
+            
             SocialScrollViewRepresentable(offsetY: self.$offsetY)
                 .frame(width: UIScreen.main.bounds.width - 20)
         
@@ -608,10 +662,7 @@ public struct SocialView: View {
                 Spacer().frame(width: 10)
 
                 Text("소셜")
-                    .font(
-                        Font.custom("Pretendard", size: 24)
-                            .weight(.semibold)
-                    )
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                     .foregroundColor(.white)
 
                 Spacer()
@@ -663,8 +714,27 @@ public struct SocialView: View {
             .padding(.horizontal, 10)
             .padding(.top, 19 + appCoordinator.safeAreaInsetsTop)
             .padding(.bottom, 15)
-            .background(.pink)
+            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
+            
+            
+            ZStack(alignment: .bottom) {
+                if self.appCoordinator.isSocialMenuSheetViewShown {
+                    Color.black.opacity(0.5).ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(Animation.easeOut(duration: 0.2)) {
+                                self.appCoordinator.isSocialMenuSheetViewShown = false
+                            }
+                        }
+                    
+//                    SocialMenuSheetView(mumoryAnnotation: <#T##MumoryAnnotation#>, translation: $translation)
+//                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
+//                        .simultaneousGesture(dragGesture)
+//                        .transition(.move(edge: .bottom))
+//                        .zIndex(1)
+                }
+            }
+            
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .preferredColorScheme(.dark)

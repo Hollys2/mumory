@@ -134,9 +134,9 @@ extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelega
     // 사용자의 현재 위치가 변할 때
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
         print("didUpdate in MKMapViewDelegate")
-        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        
-        mapView.setRegion(region, animated: true)
+//        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
+//        
+//        mapView.setRegion(region, animated: true)
     }
 
     // 사용자가 지도를 움직이고 난 후

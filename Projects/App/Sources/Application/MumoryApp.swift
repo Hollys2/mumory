@@ -183,7 +183,6 @@ enum DragState {
 //    SharedAsset.artworkSample.swiftUIImage
 //        .frame(width: UIScreen.main.bounds.width)
 //
-//    Text("FUCK YOU")
 //        .padding()
 //        .background(
 //            HStack{

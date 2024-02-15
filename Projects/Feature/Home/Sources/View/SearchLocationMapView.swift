@@ -17,7 +17,7 @@ public struct SearchLocationMapView: View {
     
     @State var locationModel: LocationModel = .init(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D())
     
-    @State private var searchText: String = ""
+    @State private var locationTitleText: String = ""
     @State private var translation: CGSize = .zero
     @State private var isBottomSheetShown: Bool = false
     @State private var scrollViewOffset: CGFloat = .zero
@@ -62,10 +62,9 @@ public struct SearchLocationMapView: View {
                         Image(uiImage: SharedAsset.backSearchLocation.image)
                             .resizable()
                             .frame(width: 30, height: 30)
-                        //                        .frame(width: 50, height: 50) // 버튼의 터치 영역 확장
+                            .padding(20)
                     }
                     .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
-                    .padding(.leading, 20)
                 }
                 
                 VStack(spacing: 0) {
@@ -122,7 +121,7 @@ public struct SearchLocationMapView: View {
                     }) {
                         Rectangle()
                             .foregroundColor(.clear)
-                            .frame(width: 309, height: 55)
+                            .frame(width: getUIScreenBounds().width - 40, height: 55)
                             .background(Color(red: 0.64, green: 0.51, blue: 0.99))
                             .cornerRadius(35)
                             .overlay(
@@ -132,11 +131,11 @@ public struct SearchLocationMapView: View {
                                     .foregroundColor(.black)
                             )
                             .padding(.horizontal, 20)
-                            .padding(.bottom, 39)
+                            .padding(.bottom, 51)
                         
                     }
                 } // VStack
-                .frame(height: UIScreen.main.bounds.height * 0.349 + appCoordinator.safeAreaInsetsBottom)
+                .frame(height: UIScreen.main.bounds.height * 0.308)
                 .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             } // VStack
             .navigationBarBackButtonHidden(true)
@@ -150,7 +149,7 @@ public struct SearchLocationMapView: View {
                             self.isBottomSheetShown = false
                         }}
                 
-                SecondBottomSheetView(searchText: $searchText, isShown: self.$isBottomSheetShown)
+                SecondBottomSheetView(isShown: self.$isBottomSheetShown, locationTitleText: $locationModel.locationTitle, searchText: locationModel.locationTitle)
                     .offset(y: self.translation.height)
                     .gesture(dragGesture)
                     .transition(.move(edge: .bottom))

@@ -77,7 +77,12 @@ public struct CreateMumoryBottomSheetView: View {
                     
                     Button(action: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                            let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
+                            
+                            let db = FirebaseManager.shared.db
+                            let documentReference = db.collection("User").document("tester").collection("mumory").document()
+
+                            
+                            let newMumoryAnnotation = MumoryAnnotation(id: documentReference.documentID, date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel)
                             
                             mumoryDataViewModel.createMumory(newMumoryAnnotation)
                         }
@@ -332,14 +337,15 @@ struct ContainerView: View {
     
     let title: String
     let image: Image
+    var mumoryAnnotation: MumoryAnnotation?
     
     @State private var isMusicChoosed: Bool = false
     @State private var isLocationChoosed: Bool = false
 
-    init(title: String, image: Image) {
-        
+    init(title: String, image: Image, mumoryAnnotation: MumoryAnnotation? = nil) {
         self.title = title
         self.image = image
+        self.mumoryAnnotation = mumoryAnnotation
     }
     
     var body: some View {
@@ -367,105 +373,168 @@ struct ContainerView: View {
                 
                 if self.title == "음악 추가하기" {
                     
-                    if let choosedMusicModel = self.mumoryDataViewModel.choosedMusicModel {
-                        
-                        Rectangle()
-                            .foregroundColor(.clear)
-                            .frame(width: 36, height: 36)
-                            .background(
-                                AsyncImage(url: choosedMusicModel.artworkUrl) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 36, height: 36)
-                                    default:
-                                        Color.purple
-                                            .frame(width: 36, height: 36)
-                                    }
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            AsyncImage(url: self.mumoryAnnotation?.musicModel.artworkUrl) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 36, height: 36)
+                                default:
+                                    Color.purple
+                                        .frame(width: 36, height: 36)
                                 }
-                            )
-                            .cornerRadius(6)
+                            }
+                        )
+                        .cornerRadius(6)
+                    
+                    Spacer().frame(width: 12)
+                    
+                    VStack(spacing: 5) {
                         
-                        Spacer().frame(width: 12)
+                        Text("\(self.mumoryAnnotation?.musicModel.title ?? "NO NAME")")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
                         
-                        VStack(spacing: 5) {
-                            
-                            Text("\(choosedMusicModel.title)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                .foregroundColor(.white)
-                                .lineLimit(1)
-                                .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
-                            
-                            Text("\(choosedMusicModel.artist)")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                .lineLimit(1)
-                                .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
-                        }
-                        
-                        Spacer().frame(width: 15)
-                        
-                        SharedAsset.editIconCreateMumory.swiftUIImage
-                            .resizable()
-                            .frame(width: 31, height: 31)
-                    } else {
-                        Group {
-                            
-                            Text("\(self.title)")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                            
-                            Spacer().frame(width: 5)
-                            
-                            SharedAsset.nextIconCreateMumory.swiftUIImage
-                                .resizable()
-                                .frame(width: 19, height: 19)
-                            
-                            Spacer()
-                        }
+                        Text("\(self.mumoryAnnotation?.musicModel.artist ?? "NO NAME")")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                            .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+                            .lineLimit(1)
+                            .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
                     }
+                    
+                    Spacer().frame(width: 15)
+                    
+                    SharedAsset.editIconCreateMumory.swiftUIImage
+                        .resizable()
+                        .frame(width: 31, height: 31)
+                    
+//                    if let choosedMusicModel = self.mumoryDataViewModel.choosedMusicModel {
+//
+//                        Rectangle()
+//                            .foregroundColor(.clear)
+//                            .frame(width: 36, height: 36)
+//                            .background(
+//                                AsyncImage(url: choosedMusicModel.artworkUrl) { phase in
+//                                    switch phase {
+//                                    case .success(let image):
+//                                        image
+//                                            .resizable()
+//                                            .aspectRatio(contentMode: .fit)
+//                                            .frame(width: 36, height: 36)
+//                                    default:
+//                                        Color.purple
+//                                            .frame(width: 36, height: 36)
+//                                    }
+//                                }
+//                            )
+//                            .cornerRadius(6)
+//
+//                        Spacer().frame(width: 12)
+//
+//                        VStack(spacing: 5) {
+//
+//                            Text("\(choosedMusicModel.title)")
+//                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+//                                .foregroundColor(.white)
+//                                .lineLimit(1)
+//                                .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
+//
+//                            Text("\(choosedMusicModel.artist)")
+//                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+//                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+//                                .lineLimit(1)
+//                                .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
+//                        }
+//
+//                        Spacer().frame(width: 15)
+//
+//                        SharedAsset.editIconCreateMumory.swiftUIImage
+//                            .resizable()
+//                            .frame(width: 31, height: 31)
+//                    } else {
+//                        Group {
+//
+//                            Text("\(self.title)")
+//                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+//                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+//
+//                            Spacer().frame(width: 5)
+//
+//                            SharedAsset.nextIconCreateMumory.swiftUIImage
+//                                .resizable()
+//                                .frame(width: 19, height: 19)
+//
+//                            Spacer()
+//                        }
+//                    }
                 } else {
                     
-                    if let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+                    VStack(spacing: 5) {
                         
-                        VStack(spacing: 5) {
-                            
-                            Text("\(choosedLocationModel.locationTitle)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                .foregroundColor(.white)
-                                .lineLimit(1)
-                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                            
-                            Text("\(choosedLocationModel.locationSubtitle)")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                .lineLimit(1)
-                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                        }
+                        Text("\(self.mumoryAnnotation?.locationModel.locationTitle ?? "NO NAME")")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
                         
-                        Spacer().frame(width: 15)
-                        
-                        SharedAsset.editIconCreateMumory.swiftUIImage
-                            .resizable()
-                            .frame(width: 31, height: 31)
-                    } else {
-                        Group {
-                            
-                            Text("\(self.title)")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                            
-                            Spacer().frame(width: 5)
-                            
-                            SharedAsset.nextIconCreateMumory.swiftUIImage
-                                .resizable()
-                                .frame(width: 19, height: 19)
-                            
-                            Spacer()
-                        }
+                        Text("\(self.mumoryAnnotation?.locationModel.locationSubtitle ?? "NO NAME")")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                            .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+                            .lineLimit(1)
+                            .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
                     }
+                    
+                    Spacer().frame(width: 15)
+                    
+                    SharedAsset.editIconCreateMumory.swiftUIImage
+                        .resizable()
+                        .frame(width: 31, height: 31)
+                    
+//                    if let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+//
+//                        VStack(spacing: 5) {
+//
+//                            Text("\(choosedLocationModel.locationTitle)")
+//                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+//                                .foregroundColor(.white)
+//                                .lineLimit(1)
+//                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
+//
+//                            Text("\(choosedLocationModel.locationSubtitle)")
+//                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+//                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+//                                .lineLimit(1)
+//                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
+//                        }
+//
+//                        Spacer().frame(width: 15)
+//
+//                        SharedAsset.editIconCreateMumory.swiftUIImage
+//                            .resizable()
+//                            .frame(width: 31, height: 31)
+//                    } else {
+//                        Group {
+//
+//                            Text("\(self.title)")
+//                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+//                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+//
+//                            Spacer().frame(width: 5)
+//
+//                            SharedAsset.nextIconCreateMumory.swiftUIImage
+//                                .resizable()
+//                                .frame(width: 19, height: 19)
+//
+//                            Spacer()
+//                        }
+//                    }
                 }
             }
             .frame(maxWidth: .infinity)
@@ -565,7 +634,6 @@ struct TagContainerView: View {
     
     @State private var isEditing = false
     @State private var isTagEditing = false
-    @State private var isCommit = false
 
     init(tags: Binding<[String]>) {
         self._tags = tags
@@ -591,13 +659,17 @@ struct TagContainerView: View {
                 
                 ForEach(self.tags.indices, id: \.self) { index in
                     
-                    TextField("", text: self.$tags[index], onEditingChanged: { isEditing in
+                    TextField("", text: Binding(
+                        get: { "#\(self.tags[index])" },
+                        set: { self.tags[index] = $0.replacingOccurrences(of: "#", with: "") }
+                    ), onEditingChanged: { isEditing in
                         self.isTagEditing = isEditing
                     })
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(self.isTagEditing ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .onChange(of: tags[index], perform: { newValue in
                         
+                        print("newValue: \(newValue)")
                         if newValue.count > 6 {
                             tags[index] = String(newValue.prefix(6))
                         }
@@ -606,11 +678,10 @@ struct TagContainerView: View {
                             let beforeSpace = newValue.components(separatedBy: " ").first ?? ""
                             tags[index] = beforeSpace
                             
-                            self.isCommit = true
                         } else if newValue == "" {
                             tags.remove(at: index)
                         } else if !newValue.hasPrefix("#") {
-                            tags.remove(at: index)
+//                            tags.remove(at: index)
                         }
                     })
                     .fixedSize(horizontal: true, vertical: false)
@@ -622,6 +693,7 @@ struct TagContainerView: View {
                 if self.tags.count < 3 {
                     CustomTextField(text: $tagText, onCommit: {
                         if tagText.first == "#" {
+                            tagText.removeFirst()
                             tags.append(tagText)
                             tagText = ""
                         }
@@ -696,6 +768,10 @@ struct ContentContainerView: View {
                             .allowsHitTesting(false)
                         , alignment: .topLeading
                     )
+                    .onChange(of: contentText) { newValue in
+                        print("newValue: \(newValue)@")
+                        
+                    }
                 
                 Spacer()
             }

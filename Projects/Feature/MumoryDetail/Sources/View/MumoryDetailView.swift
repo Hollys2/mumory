@@ -55,7 +55,7 @@ extension MumoryDetailScrollView {
     class Coordinator: NSObject {
         
         let parent: MumoryDetailScrollView
-//        var previousOffset: CGFloat = 0.0
+        //        var previousOffset: CGFloat = 0.0
         
         init(parent: MumoryDetailScrollView) {
             self.parent = parent
@@ -100,31 +100,31 @@ extension MumoryDetailScrollView.Coordinator: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-//        print("offsetY: \(offsetY)")
-
-//        let scrollDirection: ScrollDirection = (offsetY < previousOffset) ? .up : .down
-//        let scrollBoundary: ScrollBoundary = (offsetY < UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20) ? .above : .below
-
-//        DispatchQueue.main.async {
-//            self.handleScrollDirection(scrollDirection)
-//            self.handleScrollBoundary(scrollBoundary)
-//        }
-
+        //        print("offsetY: \(offsetY)")
+        
+        //        let scrollDirection: ScrollDirection = (offsetY < previousOffset) ? .up : .down
+        //        let scrollBoundary: ScrollBoundary = (offsetY < UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20) ? .above : .below
+        
+        //        DispatchQueue.main.async {
+        //            self.handleScrollDirection(scrollDirection)
+        //            self.handleScrollBoundary(scrollBoundary)
+        //        }
+        
         let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
-
+        
         DispatchQueue.main.async {
             if self.parent.appCoordinator.isNavigationBarColored != isNavigationBarColored {
                 self.parent.appCoordinator.isNavigationBarColored = isNavigationBarColored
             }
         }
-//        previousOffset = offsetY
+        //        previousOffset = offsetY
     }
 }
 
 public struct MumoryDetailView: View {
     
     @Environment(\.presentationMode) var presentationMode
-
+    
     @State var mumoryAnnotation: MumoryAnnotation
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -147,13 +147,13 @@ public struct MumoryDetailView: View {
                 print("onEnded: \(value.translation.height)")
                 
                 withAnimation(Animation.easeInOut(duration: 0.2)) {
-//                    if value.translation.height > 130 {
-//                        appCoordinator.isCreateMumorySheetShown = false
-//
-//                        mumoryDataViewModel.choosedMusicModel = nil
-//                        mumoryDataViewModel.choosedLocationModel = nil
-//                    }
-                        translation.height = 0
+                    //                    if value.translation.height > 130 {
+                    //                        appCoordinator.isCreateMumorySheetShown = false
+                    //
+                    //                        mumoryDataViewModel.choosedMusicModel = nil
+                    //                        mumoryDataViewModel.choosedLocationModel = nil
+                    //                    }
+                    translation.height = 0
                 }
             }
     }
@@ -165,6 +165,7 @@ public struct MumoryDetailView: View {
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
             ZStack(alignment: .bottomLeading) {
+                
                 AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
                     switch phase {
                     case .success(let image):
@@ -179,24 +180,15 @@ public struct MumoryDetailView: View {
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                 
                 VStack(spacing: 23) {
+                    
                     Text("\(mumoryAnnotation.musicModel.title)")
-//                    Text("What Was I Made For? [From The Motion Picture \"Barbie\"]")
-                        .font(
-                            SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24)
-//                            Font.custom("Pretendard", size: 24)
-//                                .weight(.medium)
-                        )
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                         .lineLimit(2)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
-                        .background(.pink)
                     
                     Text("\(mumoryAnnotation.musicModel.artist)")
-                        .font(
-                            SharedFontFamily.Pretendard.light.swiftUIFont(size: 20)
-//                            Font.custom("Pretendard", size: 20)
-//                                .weight(.light)
-                        )
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
                         .lineLimit(1)
                         .foregroundColor(.white.opacity(0.8))
                         .frame(width: 301, alignment: .leading)
@@ -250,7 +242,7 @@ public struct MumoryDetailView: View {
                         }
                     }
                 
-                MumoryDetailMenuSheetView(translation: $translation)
+                MumoryDetailMenuSheetView(mumoryAnnotation: self.mumoryAnnotation, translation: $translation)
                     .offset(y: self.translation.height + UIScreen.main.bounds.height - 361 - appCoordinator.safeAreaInsetsBottom)
                     .simultaneousGesture(dragGesture)
                     .transition(.move(edge: .bottom))
@@ -264,7 +256,7 @@ public struct MumoryDetailView: View {
                             appCoordinator.isMumoryDetailCommentSheetViewShown = false
                         }
                     }
-
+                
                 MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
                     .offset(y: self.translation.height + UIScreen.main.bounds.height - (UIScreen.main.bounds.height * 0.84) - appCoordinator.safeAreaInsetsBottom)
                     .gesture(dragGesture)

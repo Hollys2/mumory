@@ -16,7 +16,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
 
 //    typealias UIViewType = UIScrollView
     
-    let mumoryAnnotation: MumoryAnnotation
+    let imageURLs: [String]?
 //    @Binding var annotationSelected: Bool
     
 //    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -26,7 +26,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
 
         scrollView.delegate = context.coordinator
 
-        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(3)
+        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(imageURLs?.count ?? 0)
         scrollView.contentSize = CGSize(width: totalWidth, height: 1)
 
         scrollView.isPagingEnabled = true
@@ -37,7 +37,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
 
-        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumoryAnnotation))
+        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
 
         //        scrollView.backgroundColor = .red
@@ -90,19 +90,12 @@ extension MumoryDetailImageScrollView.Coordinator: UIScrollViewDelegate {
 @available(iOS 16.0, *)
 struct MumoryDetailImageScrollContentView: View {
     
-//    @Binding var mumoryAnnotations: [MumoryAnnotation]
-    let mumoryAnnotation: MumoryAnnotation
+    let imageURLs: [String]?
     
     var body: some View {
         HStack(spacing: 0) {
-//            MumoryDetailImageView()
-//                .padding(.horizontal, 5)
-//            MumoryDetailImageView()
-//                .padding(.horizontal, 5)
-//            MumoryDetailImageView()
-//                .padding(.horizontal, 5)
-            ForEach(mumoryAnnotation.imageURLs ?? [], id: \.self) { i in
-                MumoryDetailImageView(url: i)
+            ForEach((imageURLs ?? []).indices, id: \.self) { index in
+                MumoryDetailImageView(url: (imageURLs ?? [])[index], count: imageURLs?.count ?? 0, index: Int(index))
                     .padding(.horizontal, 5)
             }
         }
@@ -112,6 +105,8 @@ struct MumoryDetailImageScrollContentView: View {
 struct MumoryDetailImageView: View {
     
     let url: String
+    let count: Int
+    let index: Int
     
     var body: some View {
         
@@ -141,7 +136,7 @@ struct MumoryDetailImageView: View {
                 .background(Color(red: 0.184, green: 0.184, blue: 0.184))
             
             HStack(alignment: .center, spacing: 10) {
-                Text("1 / 3")
+                Text("\(index + 1) / \(count)")
                   .font(
                     Font.custom("Pretendard", size: 12)
                       .weight(.semibold)
@@ -153,6 +148,7 @@ struct MumoryDetailImageView: View {
             .padding(.vertical, 6)
             .background(.black.opacity(0.7))
             .cornerRadius(10.5)
+            .cornerRadius(14)
             .offset(x: -13, y: 15)
         }
     }
