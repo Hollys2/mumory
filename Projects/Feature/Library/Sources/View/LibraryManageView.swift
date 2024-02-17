@@ -69,8 +69,8 @@ public struct LibraryManageView: View {
                     ShazamView()
                         .environmentObject(manager)
                         .environmentObject(playerManager)
-                case .addSong:
-                    AddPlaylistSongView()
+                case .addSong(originPlaylist: let originPlaylist):
+                    AddPlaylistSongView(originPlaylist: originPlaylist)
                         .environmentObject(manager)
               
                 }

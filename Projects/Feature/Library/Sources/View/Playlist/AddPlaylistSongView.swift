@@ -10,14 +10,18 @@ import SwiftUI
 import Shared
 
 struct AddPlaylistSongView: View {
-    //보라색: 즐찾-55, 검색-28
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var manager: LibraryManageModel
+    
+    @State var originPlaylist: MusicPlaylist
     @State var isTapFavorite: Bool = true
     @State var selectLineWidth: CGFloat = 55
-    @State var tagIndex = 1
     private let lineGray = Color(white: 0.31)
     private let noneSelectedColor = Color(white: 0.65)
+    
+    init(originPlaylist: MusicPlaylist) {
+        self.originPlaylist = originPlaylist
+    }
+
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -92,20 +96,12 @@ struct AddPlaylistSongView: View {
                     .background(lineGray)
                 
                 if isTapFavorite{
-                    AddSongFromFavoriteView()
+                    AddSongFromFavoriteView(originPlaylist: $originPlaylist)
                         .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
                 }else {
-                    AddSongFromSearchView()
+                    AddSongFromSearchView(originPlaylist: $originPlaylist)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
                 }
-                
-//                TabView(selection: $isTapFavorite){
-//                    AddSongFromFavoriteView().tag(true)
-//                        .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
-//                    AddSongFromSearchView().tag(false)
-//                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
-//                }
-//                .tabViewStyle(.page(indexDisplayMode: .never))
         
                 
             })
@@ -113,8 +109,8 @@ struct AddPlaylistSongView: View {
     }
 }
 
-#Preview {
-    AddPlaylistSongView()
-}
+//#Preview {
+//    AddPlaylistSongView()
+//}
 
 

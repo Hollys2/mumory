@@ -15,12 +15,12 @@ struct PlaylistBottomSheetView: View {
     @EnvironmentObject var manager: LibraryManageModel
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
-    var playlist: MusicPlaylist
-    
+    @State var playlist: MusicPlaylist
+    @State var songs: [Song]
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(alignment: .center,spacing: 10,content: {
-                MiniPlaylistImage(songs: playlist.songs)
+                MiniPlaylistImage(songs: songs)
                 
                 
                 Text(playlist.title)
@@ -42,7 +42,7 @@ struct PlaylistBottomSheetView: View {
             BottomSheetItem(image: SharedAsset.addMusic.swiftUIImage, title: "음악 추가")
                 .onTapGesture {
                     dismiss()
-                    manager.push(destination: .addSong)
+                    manager.push(destination: .addSong(originPlaylist: playlist))
                 }
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트에 삭제")

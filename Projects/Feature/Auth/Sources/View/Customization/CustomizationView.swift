@@ -108,7 +108,6 @@ public struct CustomizationView: View {
                             .padding(.trailing, 20)
                     })
                     .disabled(!manager.isButtonEnabled())
-                    .shadow(color: .black, radius: 10, y: 8)
                     
                 }
                 
@@ -226,7 +225,7 @@ public struct CustomizationView: View {
             }
         }
         
-        db.collection("User").document(currentUser.uid).collection("Playlist").addDocument(data: playlist) { error in
+        db.collection("User").document(currentUser.uid).collection("Playlist").document("favorite").setData(playlist) { error in
             if error == nil {
                 isUploadPlaylistCompleted = true
                 isCustomizationDone = isUploadImageCompleted && isUploadUserDataCompleted && isUploadPlaylistCompleted

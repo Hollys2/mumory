@@ -8,22 +8,119 @@
 
 import SwiftUI
 import Shared
+import MusicKit
 
 struct AddSongFromSearchView: View {
-    var body: some View {
-        ZStack{
-            ColorSet.background.ignoresSafeArea()
-            VStack(spacing: 0, content: {
-                Text("Placeholder")
-                    .foregroundStyle(.white)
-                Text("Hello, World! favorite")
-                    .foregroundStyle(.white)
+    @Binding var originPlaylist: MusicPlaylist
+    
+    @EnvironmentObject var userManager: UserViewModel
+    @State var term: String = ""
+    @State var timer: Timer?
+    @State var localTimer = 0.0
+    @State var searchIndex = 0
+    @State var songs: MusicItemCollection<Song> = []
+    
+    @State var scrollOffset: CGPoint = .zero
+    @State var contentSize: CGSize = .zero
+    
+    private let lineGray = Color(white: 0.31)
 
+    var body: some View {
+        ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
+        
+            VStack(spacing: 0, content: {
+                SongSearchTextField(term: $term)
+                    .onChange(of: term, perform: { value in
+                        DispatchQueue.main.async {
+                            localTimer = 0
+                            songs = []
+                        }
+                    })
+                    .onChange(of: localTimer, perform: { value in
+                        if localTimer == 0.8 {
+                            searchSong(term: term, index: searchIndex)
+                        }
+                    })
+                
+                ScrollWrapperWithContentSize(contentOffset: $scrollOffset, contentSize: $contentSize) {
+                    LazyVStack(spacing: 0, content: {
+                        ForEach(songs, id: \.self) { song in
+                            AddMusicItem(songID: song.id.rawValue, originPlaylist: $originPlaylist)
+                            Divider()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 0.5)
+                                .background(lineGray)
+                        }
+                    })
+                    .frame(width: userManager.width)
+                }
+                    
             })
         }
+        .onAppear(perform: {
+            timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true, block: { timer in
+                localTimer += 0.2
+            })
+        })
+        .onDisappear(perform: {
+            timer?.invalidate()
+        })
     }
+    
+    private func searchSong(term: String, index: Int) {
+        Task {
+            var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
+            request.limit = 20
+            request.offset = index * 20
+            
+            do {
+                let response = try await request.response()
+                DispatchQueue.main.async {
+                    self.songs += response.songs
+                }
+            }catch(let error) {
+                print("error: \(error.localizedDescription)")
+            }
+            
+        }
+    }
+
 }
 
-#Preview {
-    AddSongFromSearchView()
+//#Preview {
+//    AddSongFromSearchView()
+//}
+
+struct SongSearchTextField: View {
+    @Binding var term: String
+    
+    let textfieldBackground = Color(white: 0.24)
+    var body: some View {
+        HStack(spacing: 0, content: {
+            TextField("", text: $term, prompt: getPrompt())
+                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                .foregroundStyle(Color.white)
+            
+            SharedAsset.xWhiteCircle.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 23, height: 23)
+                .padding(.leading, 10)
+        })
+        .padding(.leading, 25)
+        .padding(.trailing, 17)
+        .frame(height: 45)
+        .background(textfieldBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
+        .padding(20)
+        .padding(.top, 2)
+    }
+    
+    
+    private func getPrompt() -> Text {
+        return Text("음악 검색")
+            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+            .foregroundColor(ColorSet.subGray)
+    }
 }

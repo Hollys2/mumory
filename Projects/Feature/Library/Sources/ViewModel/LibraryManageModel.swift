@@ -24,7 +24,7 @@ public class LibraryManageModel: ObservableObject{
         case artist(artist: Artist)
         case playlist(playlist: MusicPlaylist)
         case shazam
-        case addSong
+        case addSong(originPlaylist: MusicPlaylist)
     }
     
     

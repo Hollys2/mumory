@@ -21,4 +21,5 @@ public class ColorSet{
     public static let charSubGray = Color(red: 0.76, green: 0.76, blue: 0.76)
     public static let errorRed = Color(red: 1.00, green: 0.34, blue: 0.34)
     public static let validGreen = Color(red: 0.33, green: 0.87, blue: 0.61)
+    public static let skeleton = Color(red: 0.18, green: 0.18, blue: 0.18)
 }

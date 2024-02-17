@@ -51,7 +51,7 @@ struct MyPlaylistView: View {
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: 12, content: {
                         ForEach(userManager.playlistArray, id: \.title) { playlist in
-                            PlaylistItem(playlist: .constant(playlist), isAddSongItem: playlist.isAddItme)
+                            PlaylistItem(playlist: playlist, isAddSongItem: playlist.isAddItme)
                                 .environmentObject(manager)
                         }
                     })
@@ -83,7 +83,7 @@ struct MyPlaylistView: View {
         
         //기본셋팅
         
-        userManager.playlistArray = [MusicPlaylist(id: "favorite", title: "즐겨찾기 목록", songs: [], songIDs: [], isPrivate: true, isFavorite: true, isAddItme: false), MusicPlaylist(id: "addItem", title: "", songs: [], songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)]
+        userManager.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)]
         
         let query = db.collection("User").document(userManager.uid).collection("Playlist")
         query.getDocuments { snapshot, error in
@@ -91,7 +91,6 @@ struct MyPlaylistView: View {
                 print(error)
             }else if let snapshot = snapshot {
                 snapshot.documents.forEach { snapshot in
-                    print("each")
                     guard let title = snapshot.data()["title"] as? String else {
                         print("no title")
                         return
@@ -112,20 +111,12 @@ struct MyPlaylistView: View {
                     
                     if isFavorite {
                         withAnimation {
-                            userManager.playlistArray[0] = MusicPlaylist(id: id, title: title, songs: [], songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false)
-                        }
-                        Task{
-                            let songs = await fetchSongInfo(songIDs: songIDs)
-                            userManager.playlistArray[0].songs = songs
+                            userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: 0)
                         }
                     }else {
                         let index = userManager.playlistArray.count - 1
                         withAnimation {
-                            userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songs: [], songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: index)
-                        }
-                        Task{
-                            let songs = await fetchSongInfo(songIDs: songIDs)
-                            userManager.playlistArray[index].songs = songs
+                            userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: index)
                         }
                     }
 

@@ -29,7 +29,6 @@ public class UserViewModel: ObservableObject {
     @Published public var customTopbarHeight: CGFloat = 68 //라이브러리, 소셜 상단 바 높이(safe area height 제외)
     
     @Published public var playlistArray: [MusicPlaylist] = [
-        MusicPlaylist(id: "favorite", title: "즐겨찾기 목록", songs: [], songIDs: [], isPrivate: true, isFavorite: true, isAddItme: false),
-        MusicPlaylist(id: "addItem", title: "", songs: [], songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)
+        MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)
     ]
 }

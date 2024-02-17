@@ -52,7 +52,6 @@ struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
 
         public func scrollViewDidScroll(_ scrollView: UIScrollView) {
             self.contentOffset.wrappedValue = scrollView.contentOffset
-            print("y_offset: \(scrollView.contentOffset.y), content height: \(scrollView.contentSize.height)")
         }
 
     }
