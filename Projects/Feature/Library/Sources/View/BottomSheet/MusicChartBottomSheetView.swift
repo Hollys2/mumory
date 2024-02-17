@@ -11,6 +11,7 @@ import MusicKit
 import Shared
 
 struct MusicChartBottomSheetView: View {
+    @EnvironmentObject var manager: LibraryManageModel
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
     var body: some View {
@@ -60,6 +61,9 @@ struct MusicChartBottomSheetView: View {
                     .padding(.horizontal, 4)
                 
                 BottomSheetItem(image: SharedAsset.artist.swiftUIImage, title: "아티스트 노래 목록 보기")
+                    .onTapGesture {
+                        manager.push(destination: .artist(.fromSong(data: song)))
+                    }
                 BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가")
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
@@ -70,5 +74,5 @@ struct MusicChartBottomSheetView: View {
             .padding(.bottom, 15)
             .background(ColorSet.background)
         }
-    
+
 }

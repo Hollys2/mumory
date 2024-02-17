@@ -169,7 +169,8 @@ struct PlaylistItem: View {
     private func fetchSongInfo(songIDs: [String]) async {
         for id in songIDs {
             let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
             
             do {
                 let response = try await request.response()
@@ -190,7 +191,7 @@ struct PlaylistItem: View {
 
 private struct AddSongItem: View {
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
-    
+    @State var isPresent: Bool = false
     var body: some View {
         VStack(spacing: 0, content: {
             RoundedRectangle(cornerRadius: 10, style: .circular)
@@ -212,5 +213,13 @@ private struct AddSongItem: View {
             
         })
         .frame(height: 215)
+        .onTapGesture {
+            UIView.setAnimationsEnabled(true)
+            isPresent = true
+        }
+        .fullScreenCover(isPresented: $isPresent, content: {
+            CreatePlaylistPopupView()
+                .background(TransparentBackground())
+        })
     }
 }

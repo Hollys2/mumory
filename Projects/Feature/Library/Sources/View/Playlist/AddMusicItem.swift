@@ -13,8 +13,12 @@ import Core
 
 struct AddMusicItem: View {
     @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var snackbarManager: SnackBarViewModel
+
     let songID: String
     @Binding var originPlaylist: MusicPlaylist
+    @State var isSnackBarPresent: Bool = false
+
     @State var song: Song?
     var body: some View {
         HStack(spacing: 0, content: {
@@ -55,7 +59,6 @@ struct AddMusicItem: View {
                 .onTapGesture {
                     addMusicToPlaylist()
                 }
-            
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 15)
@@ -69,7 +72,9 @@ struct AddMusicItem: View {
     private func addMusicToPlaylist() {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
+        
         if !originPlaylist.songIDs.contains(songID) {
+//            선택한 곡이 기존 플리에 없을 때
             originPlaylist.songIDs.append(songID)
             
             let songData: [String: Any] = [
@@ -78,18 +83,19 @@ struct AddMusicItem: View {
             
             db.collection("User").document(userManager.uid).collection("Playlist").document(originPlaylist.id).setData(songData, merge: true) { error in
                 if error == nil {
-                    print("add song success")
-                }else {
-                    print("add song fail")
+                    snackbarManager.setSnackBar(alreadExists: false)
                 }
             }
+        }else {
+//            선택한 곡이 기존 플리에 존재할 때
+            snackbarManager.setSnackBar(alreadExists: true)
         }
     }
     
     private func fetchSongInfo(songID: String) async {
         let musicItemID = MusicItemID(rawValue: songID)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        request.properties = [.genres, .artists]
         do {
             let response = try await request.response()
             

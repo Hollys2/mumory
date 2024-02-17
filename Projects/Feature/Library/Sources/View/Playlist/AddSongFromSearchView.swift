@@ -14,6 +14,8 @@ struct AddSongFromSearchView: View {
     @Binding var originPlaylist: MusicPlaylist
     
     @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var snackbarManager: SnackBarViewModel
+
     @State var term: String = ""
     @State var timer: Timer?
     @State var localTimer = 0.0
@@ -21,7 +23,6 @@ struct AddSongFromSearchView: View {
     @State var songs: MusicItemCollection<Song> = []
     
     @State var scrollOffset: CGPoint = .zero
-    @State var contentSize: CGSize = .zero
     
     private let lineGray = Color(white: 0.31)
 
@@ -39,14 +40,18 @@ struct AddSongFromSearchView: View {
                     })
                     .onChange(of: localTimer, perform: { value in
                         if localTimer == 0.8 {
-                            searchSong(term: term, index: searchIndex)
+                            if !term.isEmpty{
+                                searchIndex = 0
+                                searchSong(term: term, index: searchIndex)
+                            }
                         }
                     })
                 
-                ScrollWrapperWithContentSize(contentOffset: $scrollOffset, contentSize: $contentSize) {
+                SimpleScrollView(contentOffset: $scrollOffset) {
                     LazyVStack(spacing: 0, content: {
                         ForEach(songs, id: \.self) { song in
                             AddMusicItem(songID: song.id.rawValue, originPlaylist: $originPlaylist)
+                                .environmentObject(snackbarManager)
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
@@ -54,7 +59,16 @@ struct AddSongFromSearchView: View {
                         }
                     })
                     .frame(width: userManager.width)
-                }
+                }        
+                .onChange(of: scrollOffset, perform: { value in
+                    print("y offset: \(scrollOffset.y)")
+                    //아이템 높이: 70. 첫 페이지에서는 offset이 700일 때 다음 페이지 요청을 보내고, 두번째 페이지에서는 2100일 때 요청을 보냄...반복
+                    if scrollOffset.y > (1400.0 * CGFloat(searchIndex) + 700.0) {
+                        searchIndex += 1
+                        searchSong(term: term, index: searchIndex)
+                    }
+                })
+                
                     
             })
         }

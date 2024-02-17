@@ -83,7 +83,8 @@ public struct MyRecentMusicView: View {
     
     func fetchSongInfo(songId: String) async throws -> Song {
         let musicItemID = MusicItemID(rawValue: songId)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        request.properties = [.genres, .artists]
         let response = try await request.response()
         guard let song = response.items.first else {
             throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])

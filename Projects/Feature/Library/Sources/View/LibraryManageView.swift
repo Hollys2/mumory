@@ -40,8 +40,17 @@ public struct LibraryManageView: View {
                 case .search(term: let term):
                     SearchView(term: term)
                         .environmentObject(manager)
-                case .artist(artist: let artist):
+                case .artist(.fromArtist(data: let artist)):
                     ArtistView(artist: artist)
+                        .environmentObject(manager)
+                        .onAppear(perform: {
+                            isNeedtoRemoveSafearea = true
+                        })
+                        .onDisappear(perform: {
+                            isNeedtoRemoveSafearea = false
+                        })
+                case .artist(.fromSong(data: let song)):
+                    ArtistOfSongView(song: song)
                         .environmentObject(manager)
                         .onAppear(perform: {
                             isNeedtoRemoveSafearea = true

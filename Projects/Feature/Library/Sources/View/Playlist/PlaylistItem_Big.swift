@@ -218,7 +218,8 @@ struct PlaylistItem_Big: View {
     private func fetchSongInfo(songIDs: [String]) async {
         for id in songIDs {
             let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
             
             do {
                 let response = try await request.response()
@@ -240,7 +241,7 @@ struct PlaylistItem_Big: View {
 //새 플레이리스트 아이템
 private struct AddSongItem: View {
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
-    
+    @State var isPresent: Bool = false
     var body: some View {
         VStack(spacing: 0, content: {
             RoundedRectangle(cornerRadius: 10, style: .circular)
@@ -262,98 +263,13 @@ private struct AddSongItem: View {
             
         })
         .frame(height: 220)
-    }
-}
-
-//플레이리스트 삭제 팝업
-struct TwoButtonPopupView: View {
-    @EnvironmentObject var userManager: UserViewModel
-    @Environment(\.dismiss) private var dismiss
-    
-    private var lineGray = Color(red: 0.65, green: 0.65, blue: 0.65)
-    
-    var positiveAction: () -> Void
-    var title: String
-    var positiveButtonTitle: String
-    
-    init( title: String, positiveButtonTitle: String, positiveAction: @escaping () -> Void) {
-        self.title = title
-        self.positiveButtonTitle = positiveButtonTitle
-        self.positiveAction = positiveAction
-
-    }
-
-        
-    var body: some View {
-        ZStack(alignment: .center){
-            Color.black.opacity(0.7).ignoresSafeArea()
-            
-            VStack(alignment: .center, spacing: 0, content: {
-                Text(title)
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(.white)
-                    .padding(.top, 30)
-                    .padding(.bottom, 30)
-                
-                Divider()
-                    .frame(height: 0.5)
-                    .frame(maxWidth: .infinity)
-                    .background(lineGray)
-                
-                HStack(spacing: 0, content: {
-                    Button(action: {
-                        UIView.setAnimationsEnabled(false)
-                        dismiss()
-                    }, label: {
-                        Text("취소")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    })
-                    
-                    Divider()
-                        .frame(width: 0.5, height: 50)
-                        .background(lineGray)
-                    
-                    Button(action: {
-                        positiveAction()
-                    }, label: {
-                        Text(positiveButtonTitle)
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    })
-                    
-                    
-                })
-            })
-            .background(ColorSet.darkGray)
-            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-            .padding(.horizontal, 40)
+        .onTapGesture {
+            UIView.setAnimationsEnabled(true)
+            isPresent = true
         }
-
+        .fullScreenCover(isPresented: $isPresent, content: {
+            CreatePlaylistPopupView()
+                .background(TransparentBackground())
+        })
     }
 }
-
-// 투명 fullScreenCover
-//extension View {
-//    func transparentFullScreenCoverWithoutAnimation<Content: View>(isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View {
-//        fullScreenCover(isPresented: isPresented) {
-//            ZStack {
-//                content()
-//            }
-//            .background(TransparentBackground())
-//        }
-//        .transaction { transaction in
-//            transaction.disablesAnimations = true
-//        }
-//
-//    }
-//}
-
-
-//#Preview {
-//    DeletePopupView(isDeletePupupPresent: .constant(true)) {
-//        //
-//    }
-//}

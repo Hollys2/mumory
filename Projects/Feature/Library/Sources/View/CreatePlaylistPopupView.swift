@@ -15,8 +15,10 @@ struct CreatePlaylistPopupView: View {
     @EnvironmentObject var userManager: UserViewModel
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
-    @Binding var isCreatePlaylistCompleted: Bool
     @State var backgroundOpacity = 0.0
+    
+    let titleMaxLength = 30
+    
     var body: some View {
         ZStack{
             Color.black.opacity(backgroundOpacity).ignoresSafeArea()
@@ -39,18 +41,35 @@ struct CreatePlaylistPopupView: View {
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                     .foregroundStyle(.white)
                 
+                HStack(spacing: 0) {
+                    Text("\(playlistTitle.count) ")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
+                        .foregroundStyle(ColorSet.mainPurpleColor)
+                    
+                    Text("/ 30")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
+                        .foregroundStyle(ColorSet.subGray)
+
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .padding(.trailing, 45)
+                .padding(.top, 30)
+
+                
                 TextField("playlist_textfield", text: $playlistTitle, prompt: getPrompt())
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(.white)
-                    .padding(.top, 17)
-                    .padding(.bottom, 17)
-                    .padding(.leading, 25)
-                    .padding(.trailing, 25)
+                    .padding(.vertical, 17)
+                    .padding(.horizontal, 25)
                     .background(LibraryColorSet.deepGray)
                     .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
-                    .padding(.leading, 30)
-                    .padding(.trailing, 30)
-                    .padding(.top, 30)
+                    .padding(.horizontal, 30)
+                    .padding(.top, 10)
+                    .onChange(of: playlistTitle) { value in
+                        if value.count > 30 {
+                            playlistTitle = String(value.prefix(30))
+                        }
+                    }
                 
                 Menu {
                     Button(action: {
@@ -88,15 +107,12 @@ struct CreatePlaylistPopupView: View {
                             .frame(width: 16, height: 16)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.top, 17)
-                    .padding(.bottom, 17)
-                    .padding(.leading, 25)
-                    .padding(.trailing, 25)
+                    .padding(.vertical, 17)
+                    .padding(.horizontal, 25)
                     .background(LibraryColorSet.deepGray)
                     .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
-                    .padding(.leading, 30)
-                    .padding(.trailing, 30)
-                    .padding(.top, 30)
+                    .padding(.horizontal, 30)
+                    .padding(.top, 15)
                     .menuStyle(DarkMenuStyle())
                 }
                 
@@ -107,15 +123,12 @@ struct CreatePlaylistPopupView: View {
                         .frame(maxWidth: .infinity)
                         .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
                         .foregroundStyle(.black)
-                        .padding(.top, 17)
-                        .padding(.bottom, 17)
-                        .padding(.leading, 25)
-                        .padding(.trailing, 25)
+                        .padding(.vertical, 17)
+                        .padding(.horizontal, 25)
                         .background(LibraryColorSet.purpleBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
-                        .padding(.leading, 30)
-                        .padding(.trailing, 30)
-                        .padding(.top, 30)
+                        .padding(.horizontal, 30)
+                        .padding(.top, 40)
                 })
             }
             .padding(.top, 20)
@@ -154,7 +167,6 @@ struct CreatePlaylistPopupView: View {
             if error == nil {
                 print("success")
                 UIView.setAnimationsEnabled(true)
-                isCreatePlaylistCompleted = true
                 dismiss()
             }
         }

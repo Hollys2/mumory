@@ -69,7 +69,7 @@ struct SearchResultView: View {
                                     .onTapGesture {
                                         print("tap item")
                                         manager.page = .search(term: term)
-                                        manager.push(destination: .artist(artist: artist))
+                                        manager.push(destination: .artist(.fromArtist(data: artist)))
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == artist.name})
@@ -141,6 +141,7 @@ struct SearchResultView: View {
     public func requestArtist(term: String){
         var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
         request.limit = 20
+        
         Task {
             do {
                 let response = try await request.response()

@@ -14,6 +14,8 @@ import FirebaseFirestore
 struct PlaylistManageView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
+
     @State var isCreatePlaylistCompleted: Bool = false
     @State var playlistArray: [MusicPlaylist] = []
     @State var isShowCreatePopup: Bool = false
@@ -58,6 +60,7 @@ struct PlaylistManageView: View {
                             .onTapGesture {
                                 withAnimation {
                                     isEditing = false
+                                    appCoordinator.isHiddenTabBar = false
                                     editButtonHeight = nil
                                 }
                             }
@@ -76,7 +79,7 @@ struct PlaylistManageView: View {
                 .padding(.horizontal, 20)
                 .frame(height: 40)
                 .fullScreenCover(isPresented: $isShowCreatePopup, content: {
-                    CreatePlaylistPopupView(isCreatePlaylistCompleted: $isCreatePlaylistCompleted)
+                    CreatePlaylistPopupView()
                         .background(TransparentBackground())
                 })
             
@@ -93,6 +96,7 @@ struct PlaylistManageView: View {
                     .onTapGesture {
                         withAnimation {
                             isEditing = true
+                            appCoordinator.isHiddenTabBar = true
                             editButtonHeight = 0
                         }
                     }
@@ -124,7 +128,8 @@ struct PlaylistManageView: View {
         
         for id in songIDs{
             let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
             let response = try await request.response()
             guard let song = response.items.first else {
                 throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])

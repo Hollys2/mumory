@@ -70,7 +70,7 @@ struct HomeTabView: View {
             .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
             .background(Color.black)
         }
-        .frame(height: 89 + appCoordinator.safeAreaInsetsBottom)
+        .frame(height: appCoordinator.isHiddenTabBar ? 0 : 89 + appCoordinator.safeAreaInsetsBottom)
     }
 }
 

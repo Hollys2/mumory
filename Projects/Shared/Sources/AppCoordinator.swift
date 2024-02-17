@@ -59,6 +59,8 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var selectedDate = Date()
     
+    @Published public var isHiddenTabBar: Bool = false
+    
     public var selectedYear: Int {
         Calendar.current.component(.year, from: self.selectedDate)
      }

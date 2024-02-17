@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 import MusicKit
 
-struct ArtistView: View {
+struct ArtistOfSongView: View {
     @EnvironmentObject private var userManager: UserViewModel
     @EnvironmentObject private var manager: LibraryManageModel
     @State private var isBottomSheetPresent: Bool = false
@@ -19,17 +19,20 @@ struct ArtistView: View {
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
-    let artist: Artist
-    
-    init(artist: Artist) {
-        self.artist = artist
+    @State var artist: Artist?
+    let song: Song
+
+    init(song: Song){
+        self.song = song
     }
+
     
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             
-            AsyncImage(url: artist.artwork?.url(width: 1000, height: 1000)) { image in
+            
+            AsyncImage(url: artist?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -56,7 +59,7 @@ struct ArtistView: View {
                     
                     //그라데이션 하위
                     VStack(spacing: 0, content: {
-                        Text(artist.name)
+                        Text(artist?.name ?? "ARTIST")
                             .foregroundStyle(.white)
                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 40))
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -124,31 +127,57 @@ struct ArtistView: View {
             })
             .frame(height: 50)
             .padding(.top, userManager.topInset)
-            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
-                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                   ArtistBottomSheetView(artist: artist)
-                }
-                .background(TransparentBackground())
-            })
+//            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+//                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+//                    ArtistBottomSheetView(artist: artist)
+//                }
+//                .background(TransparentBackground())
+//            })
         }
         .onAppear(perform: {
-            requestArtistSongs(offset: 0)
+            Task{
+                await requestDetailSongInfo()
+            }
+//            requestArtistSongs(offset: 0)
+            
         })
     }
     
-    private func requestArtistSongs(offset: Int) {
-        print("request")
-        let artistName = artist.name
-        var rr = MusicCatalogResourceRequest<Artist>(matching: \.id, equalTo: "")
-        var request = MusicCatalogSearchRequest(term: artist.name, types: [Song.self])
+    private func requestDetailSongInfo() async {
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
+        request.properties = [.artists, .genres]
+        
+        do{
+            let response = try await request.response().items
+            guard let song = response.first else {
+                print("no song")
+                return
+            }
+            
+            guard let artist = song.artists?.first else {
+                print("no artist")
+                return
+            }
+            self.artist = artist
+            requestArtistSongs(artistName: artist.name, offset: 0)
+            
+        }catch(let error) {
+            print("error: \(error.localizedDescription)")
+        }
+        
+    }
+    
+    private func requestArtistSongs(artistName: String, offset: Int) {
+        var request = MusicCatalogSearchRequest(term: artistName, types: [Song.self])
         request.includeTopResults = true
         request.limit = 20
         request.offset = offset * 20
+    
         Task{
             do {
                 let response = try await request.response()
                 if response.songs.count > 0 {
-                    requestArtistSongs(offset: offset + 1)
+                    requestArtistSongs(artistName: artistName, offset: offset + 1)
                 }
                 
                 DispatchQueue.main.async {
@@ -159,6 +188,13 @@ struct ArtistView: View {
                 print("request error: \(error.localizedDescription)")
             }
         }
+        
+    }
+    
+    private func getTopSongs(artist: Artist) {
+        var request = MusicCatalogResourceRequest<Artist>(matching: \.id, equalTo: artist.id)
+        request.properties = [.topSongs]
+        
         
     }
 }

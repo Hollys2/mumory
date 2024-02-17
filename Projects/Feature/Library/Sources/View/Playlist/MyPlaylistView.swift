@@ -131,7 +131,8 @@ struct MyPlaylistView: View {
         
         for id in songIDs {
             let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
             
             do {
                 let response = try await request.response()

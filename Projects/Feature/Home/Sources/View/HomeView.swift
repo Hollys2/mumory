@@ -322,6 +322,7 @@ public struct HomeView: View {
                     MiniPlayerView()
                         .environmentObject(playerManager)
                         .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
+                        .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
             
                 
                 if appCoordinator.isCreateMumorySheetShown {

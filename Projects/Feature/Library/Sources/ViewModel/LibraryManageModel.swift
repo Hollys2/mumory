@@ -16,12 +16,17 @@ public class LibraryManageModel: ObservableObject{
         case myMusic
         case recomendation
     }
+    
+    enum artistParameter {
+        case fromArtist(data: Artist)
+        case fromSong(data: Song)
+    }
     enum LibraryPage{
         case entry(entrySubView)
         case chart
         case search(term: String)
         case playlistManage
-        case artist(artist: Artist)
+        case artist(artistParameter)
         case playlist(playlist: MusicPlaylist)
         case shazam
         case addSong(originPlaylist: MusicPlaylist)
