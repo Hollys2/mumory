@@ -61,7 +61,6 @@ struct AddSongFromSearchView: View {
                     .frame(width: userManager.width)
                 }        
                 .onChange(of: scrollOffset, perform: { value in
-                    print("y offset: \(scrollOffset.y)")
                     //아이템 높이: 70. 첫 페이지에서는 offset이 700일 때 다음 페이지 요청을 보내고, 두번째 페이지에서는 2100일 때 요청을 보냄...반복
                     if scrollOffset.y > (1400.0 * CGFloat(searchIndex) + 700.0) {
                         searchIndex += 1

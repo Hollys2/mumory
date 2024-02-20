@@ -12,12 +12,11 @@ import MusicKit
 
 struct MiniPlayerView: View {
     @EnvironmentObject var playerManager: PlayerViewModel
-    private var player = ApplicationMusicPlayer.shared
-    
+        
     var body: some View {
   
                 HStack(spacing: 0, content: {
-                    AsyncImage(url: playerManager.song?.artwork?.url(width: 100, height: 100), content: { image in
+                    AsyncImage(url: playerManager.playingSong?.artwork?.url(width: 100, height: 100), content: { image in
                         image
                             .resizable()
                             .frame(width: 40, height: 40)
@@ -31,28 +30,17 @@ struct MiniPlayerView: View {
                     
                     
                     
-                    
+                    //노래 제목 밑 아티스트 이름 - 세로정렬
                     VStack(spacing: 4, content: {
-                        Text(playerManager.song?.title ?? "NO TITLE")
+                        Text(playerManager.playingSong?.title ?? "NO TITLE")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .lineLimit(1)
                             .truncationMode(.tail)
-                            .onChange(of: playerManager.song, perform: { value in
-                                guard let music = playerManager.song else {return}
-                                player.queue = [music]
-                                Task{
-                                    do {
-                                        try await player.play()
-                                        playerManager.isPlaying = true
-                                    } catch {
-                                        print("Failed to prepare to play with error: \(error).")
-                                    }
-                                }
-                            })
+              
                         
-                        Text(playerManager.song?.artistName ?? "NO ARTIST")
+                        Text(playerManager.playingSong?.artistName ?? "NO ARTIST")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                             .foregroundStyle(Color(red: 0.89, green: 0.89, blue: 0.89))
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -68,20 +56,14 @@ struct MiniPlayerView: View {
                             .frame(width: 20, height: 20)
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                player.pause()
+                                playerManager.pause()
                             }
                     }else {
                         SharedAsset.play.swiftUIImage
                             .frame(width: 20, height: 20)
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                Task{
-                                    do {
-                                        try await player.play()
-                                    } catch {
-                                        print("Failed to prepare to play with error: \(error).")
-                                    }
-                                }
+                                playerManager.play()
                             }
                     }
     
@@ -95,7 +77,7 @@ struct MiniPlayerView: View {
                         .frame(width: 20, height: 20)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerManager.isPresent = false
+                            playerManager.isMiniPlayerPresent = false
                         }
                     
                     
@@ -113,7 +95,7 @@ struct MiniPlayerView: View {
                 .padding(.bottom, 10)
                 .padding(.leading, 8)
                 .padding(.trailing, 8)
-                .opacity(playerManager.isPresent ? 1 : 0)
+                .opacity(playerManager.isMiniPlayerPresent ? 1 : 0)
 
         }
         

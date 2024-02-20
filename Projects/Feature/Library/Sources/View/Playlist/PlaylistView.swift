@@ -16,28 +16,33 @@ struct PlaylistView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     
-    @State var playlist: MusicPlaylist
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
     @State var songs: [Song] = []
     @State var isEditing: Bool = false
     @State var isSongDeletePopupPresent: Bool = false
     @State var selectedSongsForDelete: [Song] = []
+    
+    @State var playlist: MusicPlaylist
+    
+    init(playlist: MusicPlaylist){
+        self.playlist = playlist
+    }
+    
     var body: some View {
         ZStack(alignment: .top){
             //이미지
-            PlaylistImage(playlist: $playlist, songs: $songs)
+            PlaylistImage(songs: $songs)
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
             
             SimpleScrollView(contentOffset: $offset) {
                 
                 VStack(spacing: 0, content: {
-                    ZStack(alignment: .top){
-                        SharedAsset.bottomGradient.swiftUIImage
-                            .resizable()
-                            .frame(width: userManager.width, height: 45)
-                            .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
-                    }
+                    SharedAsset.bottomGradient.swiftUIImage
+                        .resizable()
+                        .frame(width: userManager.width, height: 45)
+                        .ignoresSafeArea()
+                        .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(playlist.title)
@@ -47,6 +52,7 @@ struct PlaylistView: View {
                             .padding(.horizontal, 20)
                             .foregroundStyle(.white)
                         
+                        //나만보기 아이템
                         HStack(spacing: 5, content: {
                             SharedAsset.lock.swiftUIImage
                                 .resizable()
@@ -58,10 +64,10 @@ struct PlaylistView: View {
                                 .foregroundStyle(ColorSet.subGray)
                         })
                         .padding(.top, 10)
+                        .opacity(playlist.isPrivate ? 1 : 0)
                         
                         HStack(spacing: 0, content: {
                             if isEditing {
-                                //편집할 때 나오는 뷰
                                 HStack(alignment: .bottom, spacing: 0, content: {
                                     if songs.count == selectedSongsForDelete.count {
                                         SharedAsset.checkCircleFill.swiftUIImage
@@ -121,35 +127,37 @@ struct PlaylistView: View {
                         .frame(height: 74, alignment: .bottom)
                         .padding(.horizontal, 20)
                         
-//                        음악 추가 버튼
-//                        AddSongButtonInPlaylistView()
-//                            .frame(height: isEditing ? 0 : nil)
-//                            .opacity(isEditing ? 0 : 1)
+                        //음악 추가 버튼 - UI깨짐 때문에 잠시 주석
+                        //AddSongButtonInPlaylistView()
+                        //.frame(height: isEditing ? 0 : nil)
+                        //.opacity(isEditing ? 0 : 1)
                         
-                        LazyVStack(spacing: 0, content: {
-                            ForEach(songs, id: \.self) { song in
-                                PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongsForDelete: $selectedSongsForDelete)
-                                Divider()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 0.5)
-                                    .background(ColorSet.subGray)
-                                
-                            }
-                        })
+                        //플레이리스트 곡 목록
+                        ForEach(songs, id: \.self) { song in
+                            PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongsForDelete: $selectedSongsForDelete)
+                            Divider()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 0.5)
+                                .background(ColorSet.subGray)
+                        }
                         
                         
+                        //플레이어에 가려지는 높이만큼 채워주기
                         Rectangle()
-                            .foregroundStyle(.yellow)
-                            .frame(height: 100)
-                            .padding(.top, 1000)
+                            .foregroundStyle(.clear)
+                            .frame(height: 90)
+                        
+                        
                     })
-                    .offset(y: -30)
+                    .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
                     .background(ColorSet.background)
+                    
                     
                     
                 })
                 .frame(width: userManager.width)
-                
+                .frame(minHeight: userManager.height)
+
             }
             
             
@@ -181,7 +189,7 @@ struct PlaylistView: View {
                     })
                     .frame(width: 45, height: 45)
                     .padding(.trailing, 20)
-
+                    
                 }else {
                     SharedAsset.menuWhite.swiftUIImage
                         .resizable()
@@ -230,6 +238,37 @@ struct PlaylistView: View {
         .onAppear(perform: {
             getPlaylist()
         })
+        
+        
+    }
+    
+    private func fetchSongInfo(songIDs: [String]) async {
+        withAnimation {
+            self.songs = []
+        }
+        
+        for id in songIDs {
+            let musicItemID = MusicItemID(rawValue: id)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
+            
+            do {
+                let response = try await request.response()
+                
+                guard let song = response.items.first else {
+                    print("no song")
+                    continue
+                }
+                
+                withAnimation {
+                    self.songs.append(song)
+                }
+                
+                
+            } catch {
+                print("Error: \(error)")
+            }
+        }
     }
     
     private func deleteSongsFromPlaylist() {
@@ -250,7 +289,6 @@ struct PlaylistView: View {
                     DispatchQueue.main.async {
                         isSongDeletePopupPresent = false
                         isEditing = false
-                        
                         
                         songs.forEach { song in
                             if selectedSongsForDelete.contains(song){
@@ -280,10 +318,16 @@ struct PlaylistView: View {
                     print("no song id")
                     return
                 }
+                playlist.songIDs = songIDs
                 
-                DispatchQueue.main.async {
-                    playlist.songIDs = songIDs
+                Task {
+                    await fetchSongInfo(songIDs: songIDs)
                 }
+                
+                
+                
+            }else {
+                print("error: \(error!)")
             }
         }
     }
@@ -292,10 +336,15 @@ struct PlaylistView: View {
 
 private struct PlaylistImage: View {
     @EnvironmentObject var userManager: UserViewModel
-    var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
-    @Binding var playlist: MusicPlaylist
     @State var imageWidth: CGFloat = 0
     @Binding var songs: [Song]
+    
+    let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
+    
+    init(songs: Binding<[Song]>) {
+        self._songs = songs
+    }
+    
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -388,40 +437,15 @@ private struct PlaylistImage: View {
                 
             })
         })
-        .onAppear(perform: {
-            imageWidth = userManager.width/2
-            Task{
-                await fetchSongInfo(songIDs: playlist.songIDs)
-            }
-        })
-        .onChange(of: playlist.songIDs, perform: { value in
-            Task{
-                await fetchSongInfo(songIDs: value)
-            }
-        })
-    }
-    
-    private func fetchSongInfo(songIDs: [String]) async {
-        self.songs.removeAll()
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                
-                self.songs.append(song)
-            } catch {
-                print("Error: \(error)")
+        .onAppear {
+            DispatchQueue.main.async {
+                self.imageWidth = userManager.width/2
             }
         }
+        
     }
+    
+    
 }
 
 private struct AddSongButtonInPlaylistView: View {

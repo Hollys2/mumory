@@ -14,6 +14,8 @@ public struct MumoryApp: App {
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     @StateObject var userManager: UserViewModel = UserViewModel()
+    @StateObject var playerManager = PlayerViewModel()
+
     public init(){}
     
     public var body: some Scene {
@@ -33,6 +35,7 @@ public struct MumoryApp: App {
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
                     .environmentObject(mumoryDataViewModel)
+                    .environmentObject(playerManager)
                     .ignoresSafeArea()
                     .onAppear {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top

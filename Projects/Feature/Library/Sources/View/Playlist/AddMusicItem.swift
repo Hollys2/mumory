@@ -57,6 +57,7 @@ struct AddMusicItem: View {
                 .scaledToFill()
                 .frame(width: 31, height: 31)
                 .onTapGesture {
+                    hideKeyboard()
                     addMusicToPlaylist()
                 }
         })

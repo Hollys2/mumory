@@ -13,11 +13,19 @@ import MusicKit
 struct PlaylistItem: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var userManager: UserViewModel
+    
     @State var playlist: MusicPlaylist
+    @State var songs: [Song] = []
+
     var isAddSongItem: Bool
     var radius: CGFloat = 10
-    @State var songs: [Song] = []
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
+    
+    init(playlist: MusicPlaylist, isAddSongItem: Bool){
+        self.playlist = playlist
+        self.isAddSongItem = isAddSongItem
+    }
+    
     var body: some View {
         ZStack{
             if isAddSongItem {
@@ -159,7 +167,6 @@ struct PlaylistItem: View {
 
         }
         .onAppear(perform: {
-            songs.removeAll()
             Task{
                 await fetchSongInfo(songIDs: playlist.songIDs)
             }
@@ -167,6 +174,8 @@ struct PlaylistItem: View {
     }
     
     private func fetchSongInfo(songIDs: [String]) async {
+        songs = []
+        
         for id in songIDs {
             let musicItemID = MusicItemID(rawValue: id)
             var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)

@@ -59,7 +59,7 @@ public struct RecommendationView: View {
                             MusicChartItem(rank: index+1, song: song) //순위 곡 item
                                 .frame(width: userManager.width - 40)
                                 .onTapGesture {
-                                    playerManager.song = song
+                                    playerManager.playNewSong(song: song)
                                 }
                         }
                     })

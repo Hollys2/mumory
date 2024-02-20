@@ -81,7 +81,12 @@ public struct LibraryManageView: View {
                 case .addSong(originPlaylist: let originPlaylist):
                     AddPlaylistSongView(originPlaylist: originPlaylist)
                         .environmentObject(manager)
-              
+                case .play:
+                    NowPlayingView()
+                        .environmentObject(manager)
+                case .saveToPlaylist(song: let song):
+                    SaveToPlaylistView(song: song)
+                        .environmentObject(manager)
                 }
             })
             .padding(.top, isNeedtoRemoveSafearea ? 0 : userManager.topInset)

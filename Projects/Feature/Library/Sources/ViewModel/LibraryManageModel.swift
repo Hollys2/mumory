@@ -30,11 +30,13 @@ public class LibraryManageModel: ObservableObject{
         case playlist(playlist: MusicPlaylist)
         case shazam
         case addSong(originPlaylist: MusicPlaylist)
+        case play
+        case saveToPlaylist(song: Song)
     }
     
     
     @Published var page: LibraryPage = .entry(.myMusic)
-    @Published var stack: [LibraryPage] = [.entry(.myMusic)]
+    @Published private var stack: [LibraryPage] = [.entry(.myMusic)]
     
     func pop() {
         page = self.stack.popLast() ?? .entry(.myMusic)

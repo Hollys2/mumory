@@ -67,6 +67,9 @@ struct MusicChartBottomSheetView: View {
                 BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가")
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
+                    .onTapGesture {
+                        manager.push(destination: .saveToPlaylist(song: song))
+                    }
                 BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                 

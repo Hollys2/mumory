@@ -19,7 +19,7 @@ class SnackBarViewModel: ObservableObject {
         self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true, block: { timer in
             self.snackbarTimer += 0.2
             
-            if self.snackbarTimer == 1.0 {
+            if self.snackbarTimer == 1.2 {
                 withAnimation {
                     self.isPresent = false
                 }
@@ -162,8 +162,8 @@ struct AddPlaylistSongView: View {
                         .background(Color.white)
                         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                         .padding(.horizontal, 20)
-                        .transition(.opacity)
                         .padding(.bottom, userManager.bottomInset + 2)
+                        .transition(.asymmetric(insertion: .offset(y: 100), removal: .offset(y: 100)))
                     }
          
                    

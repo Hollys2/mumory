@@ -13,6 +13,7 @@ import Core
 struct CreatePlaylistPopupView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var userManager: UserViewModel
+    
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
     @State var backgroundOpacity = 0.0

@@ -11,6 +11,7 @@ import Shared
 import Core
 import MusicKit
 
+//라이브러리 첫 화면 - 최근 뮤모리 뮤직 하단 뷰
 struct MyPlaylistView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var userManager: UserViewModel
@@ -59,11 +60,6 @@ struct MyPlaylistView: View {
                 }
                 .padding(.top, 16)
                 .scrollIndicators(.hidden)
-//                .onChange(of: playlistArray, perform: { value in
-//                    playlistArray = value.sorted(by: { playlist1, playlist2 in
-//                        return playlist1.isFavorite
-//                    })
-//                })
             })
             
             Spacer()
@@ -79,11 +75,10 @@ struct MyPlaylistView: View {
     func getPlayList(){
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        let auth = Firebase.auth
-        
-        //기본셋팅
-        
-        userManager.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)]
+                
+        DispatchQueue.main.async {
+            userManager.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)]
+        }
         
         let query = db.collection("User").document(userManager.uid).collection("Playlist")
         query.getDocuments { snapshot, error in
@@ -109,16 +104,19 @@ struct MyPlaylistView: View {
                     }
                     let id = snapshot.reference.documentID
                     
-                    if isFavorite {
-                        withAnimation {
-                            userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: 0)
-                        }
-                    }else {
-                        let index = userManager.playlistArray.count - 1
-                        withAnimation {
-                            userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: index)
+                    DispatchQueue.main.async {
+                        if isFavorite {
+                            withAnimation {
+                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: 0)
+                            }
+                        }else {
+                            let index = userManager.playlistArray.count - 1
+                            withAnimation {
+                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: index)
+                            }
                         }
                     }
+          
 
                     
                 }
