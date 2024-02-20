@@ -175,6 +175,7 @@ public struct TestView: View {
                     }, label: {
                         HStack(spacing: 0) {
                             Spacer().frame(width: 24)
+                            
                             SharedAsset.shareMumoryDetailMenu.swiftUIImage
                                 .frame(width: 22, height: 22)
                             
@@ -313,56 +314,74 @@ struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: 
     
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
+        view.frame = CGRect(x: 0, y: 0, width: 300, height: 300)
+        view.backgroundColor = .red
         return view
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        
+ 
         // Create the UIViewController that will be presented by the UIButton
         let viewController = UIViewController()
-        viewController.modalPresentationStyle = .formSheet
+
+        viewController.view.backgroundColor = .yellow
+        viewController.modalPresentationStyle = .overFullScreen
+        viewController.sheetPresentationController?.prefersGrabberVisible = true
+
+        let tapGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
+        viewController.view.addGestureRecognizer(tapGestureRecognizer)
 
         // Create the UIHostingController that will embed the SwiftUI View
         let hostingController = UIHostingController(rootView: content)
         hostingController.view.backgroundColor = .brown
-        
+
         // Add the UIHostingController to the UIViewController
         viewController.addChild(hostingController)
         viewController.view.addSubview(hostingController.view)
-        
+
         // Set constraints
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         hostingController.view.centerXAnchor.constraint(equalTo: viewController.view.centerXAnchor).isActive = true
-        //            hostingController.view.centerYAnchor.constraint(equalTo: viewController.view.centerYAnchor).isActive = true
-//        hostingController.view.topAnchor.constraint(equalTo: viewController.view.topAnchor).isActive = true
-        
-        hostingController.view.widthAnchor.constraint(equalToConstant: getUIScreenBounds().width).isActive = true  // Set the width as needed
-        hostingController.view.heightAnchor.constraint(equalToConstant: getUIScreenBounds().height - 100).isActive = true  // Set the height as needed
+        hostingController.view.centerYAnchor.constraint(equalTo: viewController.view.centerYAnchor).isActive = true
+
+        hostingController.view.widthAnchor.constraint(equalToConstant: 300).isActive = true  // Set the width as needed
+        hostingController.view.heightAnchor.constraint(equalToConstant: 300).isActive = true  // Set the height as needed
+
+        hostingController.view.layer.cornerRadius = 30
         hostingController.didMove(toParent: viewController)
         
-        // Set the presentationController as a UISheetPresentationController
+//         Set the presentationController as a UISheetPresentationController
         if let sheetController = viewController.presentationController as? UISheetPresentationController {
             let customDetent = UISheetPresentationController.Detent.custom(
                 identifier: UISheetPresentationController.Detent.Identifier("FUCK"),
                 resolver: { dimension in
                     // Set your custom height here
-                    return UIScreen.main.bounds.height - 200
+                    return 600
                 }
             )
+//            let customDetent = detents[0]
             sheetController.detents = [customDetent]
             sheetController.largestUndimmedDetentIdentifier = customDetent.identifier
-            
-            sheetController.prefersGrabberVisible = false
-            sheetController.prefersScrollingExpandsWhenScrolledToEdge = true
+
+            sheetController.prefersGrabberVisible = true
+            sheetController.prefersScrollingExpandsWhenScrolledToEdge = false
             sheetController.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-            sheetController.preferredCornerRadius = 23
-            
+
+            sheetController.prefersEdgeAttachedInCompactHeight = false
+//            viewController.sheetPresentationController?.preferredContentSize = CGSize(width: 100, height: 100)
+
+            sheetController.preferredCornerRadius = 0
+
+            sheetController.largestUndimmedDetentIdentifier = nil
+
+            sheetController.delegate = context.coordinator
+
         }
 
         viewController.presentationController?.delegate = context.coordinator
         viewController.transitioningDelegate = context.coordinator
-        
-        
+
+
         if isPresented {
             if uiView.window?.rootViewController?.presentedViewController == nil {
                 uiView.window?.rootViewController?.present(viewController, animated: true)
@@ -375,8 +394,8 @@ struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
-    
-    class Coordinator: NSObject, UISheetPresentationControllerDelegate, UIViewControllerTransitioningDelegate {
+
+    class Coordinator: NSObject, UIAdaptivePresentationControllerDelegate, UISheetPresentationControllerDelegate, UIViewControllerTransitioningDelegate {
         
         let parent: SheetPresentationForSwiftUI
         
@@ -385,20 +404,44 @@ struct SheetPresentationForSwiftUI<Content>: UIViewRepresentable where Content: 
             super.init()
         }
         
+        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+                // Handle tap gesture here
+                print("Tapped on the yellow area!")
+            }
+        
         func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-            parent.appCoordinator.isCreateMumorySheetShown = false
+            parent.appCoordinator.isTestViewShown = false
 //            withAnimation(.easeInOut(duration: 0.2)) {
 //            }
-//            if let onDismiss = onDismiss {
-//                onDismiss()
-//            }
+            print("presentationControllerDidDismiss")
+
         }
         
+        func presentationControllerDidAttemptToDismiss(_ presentationController: UIPresentationController) {
+            print("presentationControllerDidAttemptToDismiss")
+        }
+        
+        func presentationControllerDidChangeCompactedness(_ presentationController: UIPresentationController) {
+            print("FUCKKK")
+               if presentationController.presentedView == nil {
+                   // Sheet has been dismissed
+                   // Handle the dismissal here
+                   print("NIL")
+               } else {
+                   print("NOT NIL")
+                   // Sheet is still presented
+                   // Handle accordingly
+               }
+           }
+        
+        
 //        func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//            print("하이")
 //            return CustomPresentationAnimator(duration: 0.3)
-//          }
+//        }
 //
 //        func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//            print("바이")
 //            return CustomPresentationAnimator(duration: 0.3)
 //        }
     }
@@ -423,6 +466,8 @@ struct sheetWithDetentsViewModifier<SwiftUIContent>: ViewModifier where SwiftUIC
     
     func body(content: Content) -> some View {
         ZStack {
+            
+            
             SheetPresentationForSwiftUI($isPresented, detents: detents) {
                 swiftUIContent
             }
@@ -464,22 +509,26 @@ class CustomPresentationAnimator: NSObject, UIViewControllerAnimatedTransitionin
     }
 
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-           guard let toViewController = transitionContext.viewController(forKey: .to) else { return }
+        guard let toViewController = transitionContext.viewController(forKey: .to) else { return }
+        
+        let finalFrame = transitionContext.finalFrame(for: toViewController)
+        let containerView = transitionContext.containerView
+        
+        // Set the initial frame to start from the left side of the screen
+        var initialFrame = finalFrame
+        initialFrame.origin.x = -containerView.bounds.width
+        toViewController.view.frame = initialFrame
+        
+        containerView.addSubview(toViewController.view)
+        
+        UIView.animate(withDuration: duration, animations: {
+            // Animate to the final frame to move from left to right
+            toViewController.view.frame = finalFrame
+        }) { _ in
+            transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+        }
+    }
 
-           let finalFrame = transitionContext.finalFrame(for: toViewController)
-           let containerView = transitionContext.containerView
-
-           let initialFrame = finalFrame.offsetBy(dx: 0, dy: containerView.bounds.height)
-           toViewController.view.frame = initialFrame
-
-           containerView.addSubview(toViewController.view)
-
-           UIView.animate(withDuration: duration, animations: {
-               toViewController.view.frame = finalFrame
-           }) { _ in
-               transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
-           }
-       }
 }
 
 
@@ -553,3 +602,92 @@ extension View {
         SheetWithCornerRadius(isPresented: isPresented, content: content, cornerRadius: cornerRadius)
     }
 }
+
+struct CustomModalView: UIViewControllerRepresentable {
+    @Binding var isPresented: Bool
+    let content: () -> AnyView
+
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(self)
+    }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        let viewController = UIViewController()
+        viewController.view.backgroundColor = .clear
+        viewController.modalPresentationStyle = .overFullScreen
+        viewController.transitioningDelegate = context.coordinator
+        return viewController
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // Handle updates if needed
+    }
+
+    class Coordinator: NSObject, UIViewControllerTransitioningDelegate {
+        var parent: CustomModalView
+
+        init(_ parent: CustomModalView) {
+            self.parent = parent
+        }
+
+        func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+            return CustomPresentationController(presentedViewController: presented, presenting: presenting)
+        }
+
+        func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+            return CustomPresentationAnimator(isPresentation: true)
+        }
+
+        func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+            return CustomPresentationAnimator(isPresentation: false)
+        }
+    }
+
+    class CustomPresentationController: UIPresentationController {
+        override var frameOfPresentedViewInContainerView: CGRect {
+            return containerView?.bounds ?? .zero
+        }
+    }
+
+    class CustomPresentationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+        let isPresentation: Bool
+
+        init(isPresentation: Bool) {
+            self.isPresentation = isPresentation
+            super.init()
+        }
+
+        func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+            return 0.3
+        }
+
+        func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+            guard let toView = transitionContext.view(forKey: .to) else { return }
+
+            if isPresentation {
+                transitionContext.containerView.addSubview(toView)
+            }
+
+            let duration = transitionDuration(using: transitionContext)
+            toView.alpha = isPresentation ? 0.0 : 1.0
+
+            UIView.animate(withDuration: duration, animations: {
+                toView.alpha = self.isPresentation ? 1.0 : 0.0
+            }) { _ in
+                if !self.isPresentation {
+                    toView.removeFromSuperview()
+                }
+                transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            }
+        }
+    }
+}
+
+
+
+extension View {
+    func customModal<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
+        return background(CustomModalView(isPresented: isPresented, content: { AnyView(content()) }))
+    }
+}
+

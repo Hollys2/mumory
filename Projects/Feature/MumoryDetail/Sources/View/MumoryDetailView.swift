@@ -126,6 +126,7 @@ public struct MumoryDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State var mumoryAnnotation: MumoryAnnotation
+    @State private var isPublic: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -166,13 +167,13 @@ public struct MumoryDetailView: View {
             
             ZStack(alignment: .bottomLeading) {
                 
-                AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
+                AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                     switch phase {
                     case .success(let image):
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .transition(.move(edge: .trailing))
+//                            .transition(.move(edge: .trailing))
                     default:
                         Color(red: 0.18, green: 0.18, blue: 0.18)
                     }
@@ -227,44 +228,44 @@ public struct MumoryDetailView: View {
             .padding(.bottom, 12)
             .padding(.horizontal, 20)
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
-            //            .transition(.move(edge: .top))
             
             if appCoordinator.isReactionBarShown {
                 MumoryDetailReactionBarView(isOn: true)
                 //                    .transition(.move(edge: .bottom))
             }
             
-            if appCoordinator.isMumoryDetailMenuSheetShown {
-                Color.black.opacity(0.5).ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isMumoryDetailMenuSheetShown = false
-                        }
-                    }
-                
-                MumoryDetailMenuSheetView(mumoryAnnotation: self.mumoryAnnotation, translation: $translation)
-                    .offset(y: self.translation.height + UIScreen.main.bounds.height - 361 - appCoordinator.safeAreaInsetsBottom)
-                    .simultaneousGesture(dragGesture)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(3)
-            }
+//            if appCoordinator.isMumoryDetailMenuSheetShown {
+//                Color.black.opacity(0.5).ignoresSafeArea()
+//                    .onTapGesture {
+//                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+//                            appCoordinator.isMumoryDetailMenuSheetShown = false
+//                        }
+//                    }
+//
+//                MumoryDetailMenuSheetView(mumoryAnnotation: self.mumoryAnnotation, translation: $translation)
+//                    .offset(y: self.translation.height + UIScreen.main.bounds.height - 361 - appCoordinator.safeAreaInsetsBottom)
+//                    .simultaneousGesture(dragGesture)
+//                    .transition(.move(edge: .bottom))
+//                    .zIndex(3)
+//            }
             
-            if appCoordinator.isMumoryDetailCommentSheetViewShown {
-                Color.black.opacity(0.5).ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
-                        }
-                    }
-                
-                MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
-                    .offset(y: self.translation.height + UIScreen.main.bounds.height - (UIScreen.main.bounds.height * 0.84) - appCoordinator.safeAreaInsetsBottom)
-                    .gesture(dragGesture)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
-            }
+//            if appCoordinator.isMumoryDetailCommentSheetViewShown {
+//                Color.black.opacity(0.5).ignoresSafeArea()
+//                    .onTapGesture {
+//                        withAnimation(Animation.easeInOut(duration: 0.2)) {
+//                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
+//                        }
+//                    }
+//
+//                MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
+//                    .offset(y: self.translation.height + UIScreen.main.bounds.height - (UIScreen.main.bounds.height * 0.84) - appCoordinator.safeAreaInsetsBottom)
+//                    .gesture(dragGesture)
+//                    .transition(.move(edge: .bottom))
+//                    .zIndex(1)
+//            }
         } // ZStack
         .navigationBarBackButtonHidden(true)
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: .mumoryDetailView, songID: self.mumoryAnnotation.musicModel.songID, isPublic: self.$isPublic))
         .ignoresSafeArea()
     }
 }

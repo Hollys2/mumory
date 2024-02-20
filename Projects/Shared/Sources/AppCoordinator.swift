@@ -9,6 +9,7 @@
 
 import SwiftUI
 import Foundation
+import MusicKit
 
 public enum StackViewType {
     case firstView
@@ -49,9 +50,11 @@ public class AppCoordinator: ObservableObject {
     @Published public var isPopUpViewShown = false
     @Published public var isRewardPopUpViewShown = false
     
-    @Published public var isTestViewShown = false
+    @Published public var isTestViewShown = true
     
     @Published public var isNavigationStackShown = false
+    
+    @Published public var choosedSongID: MusicItemID?
     
     @Published public var page: Int = -1
     
@@ -103,7 +106,7 @@ public class DateManager: ObservableObject {
     
     public init () {}
     
-    public func formattedDate(date: Date, dateFormat: String) -> String {
+    public static func formattedDate(date: Date, dateFormat: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
 //        dateFormatter.locale = Locale(identifier: "ko_KR")
@@ -111,16 +114,17 @@ public class DateManager: ObservableObject {
         return dateFormatter.string(from: date)
     }
     
-    public func formattedDate(date: Date) -> String {
+    public static func formattedDate(date: Date, isPublic: Bool) -> String {
         let dateFormatter = DateFormatter()
         
         let currentYear = Calendar.current.component(.year, from: Date())
         let targetYear = Calendar.current.component(.year, from: date)
         
         if currentYear > targetYear {
-            dateFormatter.dateFormat = "yyyy년 MM월 dd일 ・ "
+            
+            dateFormatter.dateFormat = isPublic ? "yyyy년 MM월 dd일" : "yyyy년 MM월 dd일 ・ "
         } else {
-            dateFormatter.dateFormat = "MM월 dd일 ・ "
+            dateFormatter.dateFormat = isPublic ? "MM월 dd일" : "MM월 dd일 ・ "
         }
         
         return dateFormatter.string(from: date)

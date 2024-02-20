@@ -95,7 +95,8 @@ final public class MumoryDataViewModel: ObservableObject {
                        let date = documentData["date"] as? FirebaseManager.Timestamp,
                        let tags = documentData["tags"] as? [String],
                        let content = documentData["content"] as? String,
-                       let imageURLs = documentData["imageURLs"] as? [String]
+                       let imageURLs = documentData["imageURLs"] as? [String],
+                       let isPublic = documentData["isPublic"] as? Bool
                     {
                         Task {
                             do {
@@ -105,7 +106,7 @@ final public class MumoryDataViewModel: ObservableObject {
 //                                let tags = tags.components(separatedBy: ",")
 //                                let imageURLs = imageURLs.components(separatedBy: ",")
                                 
-                                let newMumoryAnnotation = MumoryAnnotation(id: document.documentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs)
+                                let newMumoryAnnotation = MumoryAnnotation(id: document.documentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic)
                                 
                                 DispatchQueue.main.async {
                                     self.mumoryAnnotations.append(newMumoryAnnotation)
@@ -149,12 +150,8 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func createMumory(_ mumoryAnnotation : MumoryAnnotation) {
-        
         let db = FirebaseManager.shared.db
-        
-        let tags = mumoryAnnotation.tags?.isEmpty == false ? mumoryAnnotation.tags?.joined(separator: ",") : nil
-        let imageURLs = mumoryAnnotation.imageURLs?.isEmpty == false ? mumoryAnnotation.imageURLs?.joined(separator: ",") : nil
-        
+                
         var newData: [String: Any] = [
             "MusicItemID": String(describing: mumoryAnnotation.musicModel.songID),
             "locationTitle": mumoryAnnotation.locationModel.locationTitle,
@@ -164,12 +161,9 @@ final public class MumoryDataViewModel: ObservableObject {
             "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date),
             "tags": mumoryAnnotation.tags ?? [],
             "content": mumoryAnnotation.content ?? "",
-            "imageURLs": mumoryAnnotation.imageURLs ?? []
+            "imageURLs": mumoryAnnotation.imageURLs ?? [],
+            "isPublic": mumoryAnnotation.isPublic
         ]
-        
-//        if let content = mumoryAnnotation.content, !content.isEmpty {
-//            newData["content"] = content
-//        }
         
         let documentReference = db.collection("User").document("tester").collection("mumory").document()
         
@@ -179,12 +173,47 @@ final public class MumoryDataViewModel: ObservableObject {
             } else {
                 print("Tester document added successfully! : \(documentReference.documentID)")
                 
-                let newMumoryAnnotation = MumoryAnnotation(id: documentReference.documentID, date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel, tags: mumoryAnnotation.tags, content: mumoryAnnotation.content, imageURLs: mumoryAnnotation.imageURLs)
+                let newMumoryAnnotation = MumoryAnnotation(id: documentReference.documentID, date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel, tags: mumoryAnnotation.tags, content: mumoryAnnotation.content, imageURLs: mumoryAnnotation.imageURLs, isPublic: mumoryAnnotation.isPublic)
                 
                 self.mumoryAnnotations.append(newMumoryAnnotation)
             }
         }
     }
+    
+    public func updateMumory(_ mumoryAnnotation: MumoryAnnotation) {
+        let db = FirebaseManager.shared.db
+        
+        var updatedData: [String: Any] = [
+            "MusicItemID": String(describing: mumoryAnnotation.musicModel.songID),
+            "locationTitle": mumoryAnnotation.locationModel.locationTitle,
+            "locationSubtitle": mumoryAnnotation.locationModel.locationSubtitle,
+            "latitude": mumoryAnnotation.locationModel.coordinate.latitude,
+            "longitude": mumoryAnnotation.locationModel.coordinate.longitude,
+            "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date),
+            "tags": mumoryAnnotation.tags ?? [],
+            "content": mumoryAnnotation.content ?? "",
+            "imageURLs": mumoryAnnotation.imageURLs ?? [],
+            "isPublic": mumoryAnnotation.isPublic
+        ]
+        
+        let documentReference = db.collection("User").document("tester").collection("mumory").document(mumoryAnnotation.id ?? "")
+        
+        documentReference.updateData(updatedData) { error in
+            if let error = error {
+                print("Error updating document: \(error.localizedDescription)")
+            } else {
+                print("Document updated successfully! : \(documentReference.documentID)")
+                
+                // If you need to update the local array of annotations, you can find the index of the annotation and replace it
+                if let index = self.mumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
+                    self.mumoryAnnotations[index] = mumoryAnnotation
+                }
+                
+                
+            }
+        }
+    }
+
     
     private func uploadImageToStorage(completion: @escaping (URL?) -> Void) {
         

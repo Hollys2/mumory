@@ -12,6 +12,22 @@ import MapKit
 import MusicKit
 
 
+public enum MumoryViewType {
+    case mumoryDetailView
+    case editMumoryView
+}
+
+public struct MumoryView: Hashable {
+    
+    public let type: MumoryViewType
+    public let songID: MusicItemID?
+    
+    public init(type: MumoryViewType, musicItemID: MusicItemID? = nil) {
+        self.type = type
+        self.songID = musicItemID
+    }
+}
+
 public struct MusicModel: Identifiable, Hashable {
 
     public let id = UUID()
@@ -54,14 +70,17 @@ public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
     public var date: Date
     public var musicModel: MusicModel
     public var locationModel: LocationModel
+    
 
     public var coordinate: CLLocationCoordinate2D
 
     public var tags: [String]?
     public var content: String?
     public var imageURLs: [String]?
+    
+    public var isPublic: Bool
 
-    public init(id: String? = nil, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil) {
+    public init(id: String? = nil, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool) {
         self.id = id
         self.date = date
         self.musicModel = musicModel
@@ -71,13 +90,15 @@ public class MumoryAnnotation: NSObject, MKAnnotation, Identifiable {
         self.tags = tags
         self.content = content
         self.imageURLs = imageURLs
+        
+        self.isPublic = isPublic
 //        super.init()
     }
     
     // 프리뷰에서 기본 생성자 사용
     public override convenience init() {
-        self.init(id: "", date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()))
-       }
+        self.init(id: "", date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false)
+    }
 }
 
 

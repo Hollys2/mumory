@@ -29,7 +29,9 @@ struct MumoryDetailMenuSheetView: View {
     }
     
     var body: some View {
+        
         VStack(spacing: 0) {
+        
             Spacer().frame(height: 9)
             
             Image(uiImage: SharedAsset.dragIndicator.image)

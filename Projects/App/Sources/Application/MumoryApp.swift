@@ -14,21 +14,22 @@ struct MumoryApp: App {
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     @StateObject var dateManager: DateManager = .init()
-//    @StateObject var firebaseManager: FirebaseManager = .init()
+    //    @StateObject var firebaseManager: FirebaseManager = .init()
     
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-//                RewardView()
+                //                RewardView()
                 HomeView()
-//                SearchLocationMapView()
+                //                SearchLocationMapView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
                     .environmentObject(mumoryDataViewModel)
                     .environmentObject(dateManager)
-//                    .environmentObject(firebaseManager)
+                //                    .environmentObject(firebaseManager)
                     .onAppear {
+                        print("MumoryApp onAppear")
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                     }
@@ -37,87 +38,331 @@ struct MumoryApp: App {
     }
 }
 
-struct ContentView: View {
-    @GestureState private var dragState = DragState.inactive
-    @State var position = CGFloat(0)
-    @State var isSheetShown = false // 바텀 시트 표시 여부를 제어하는 변수
-    
-    let maxHeight = CGFloat(50)
-    
-    let imageURL = URL(string: "https://firebasestorage.googleapis.com:443/v0/b/music-app-62ca9.appspot.com/o/mumoryImages2%2F6F51D970-E066-4CD2-8874-B6E6B7328C7E.jpg?alt=media&token=43e9c3f2-3456-4bc4-b063-f3cecdb7013b")
+//public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
+//    
+//    //    typealias UIViewType = UIView
+//    
+//    @Binding var isShown: Bool
+//    
+//    let mumoryBottomSheet: MumoryBottomSheet
+//    
+//    //    var menuOptions: [BottemSheetMenuOption] {
+//    //        [
+//    //            BottemSheetMenuOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기", action: {
+//    //
+//    //            }),
+//    //            BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
+//    //            }
+//    //        ]
+//    //    }
+//    
+//    
+//    public func makeUIView(context: Context) -> UIView {
+//        
+//        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//              let topSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.top,
+//              let bottomSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.bottom
+//        else { return UIView() }
+//        
+//        let view = UIView()
+//        
+//        let dimmingView = UIView(frame: UIScreen.main.bounds)
+//        dimmingView.backgroundColor = UIColor.black
+//        dimmingView.alpha = 0
+//        view.addSubview(dimmingView)
+//        
+//        let tapGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture))
+//        dimmingView.addGestureRecognizer(tapGestureRecognizer)
+//        
+//        let newView = UIView()
+//        newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 0)
+//        newView.backgroundColor = .clear
+//        view.addSubview(newView)
+//        
+//        // Create the UIHostingController that will embed the SwiftUI View
+//        let hostingController = UIHostingController(rootView: BottomSheetView(isShown: $isShown, menuOptions: self.mumoryBottomSheet.menuOptions))
+//        hostingController.view.backgroundColor = .clear
+//        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31 + 27)
+//        
+//        newView.addSubview(hostingController.view)
+//        
+//        UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut]) {
+//            
+//            dimmingView.alpha = 0.5
+//            
+//            newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height - (54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31) - 27, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31 + 27)
+//        }
+//        
+//        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
+//        //        hostingController.view.addGestureRecognizer(panGesture)
+//        newView.addGestureRecognizer(panGesture)
+//        
+//        context.coordinator.uiView = view
+//        context.coordinator.newView = newView
+//        context.coordinator.dimmingView = dimmingView
+//        
+//        
+//        return view
+//    }
+//    
+//    public func updateUIView(_ uiView: UIView, context: Context) {}
+//    
+//    public func makeCoordinator() -> Coordinator {
+//        return Coordinator(parent: self)
+//    }
+//    
+//    public class Coordinator: NSObject {
+//        var parent: BottomSheetUIViewRepresentable
+//        var uiView: UIView?
+//        var newView: UIView?
+//        var dimmingView: UIView?
+//        
+//        init(parent: BottomSheetUIViewRepresentable) {
+//            self.parent = parent
+//        }
+//        
+//        @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+//            
+//            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//                  let topSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.top,
+//                  let bottomSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.bottom
+//            else { return }
+//            
+//            guard let newView = newView, let dimmingView = dimmingView else { return }
+//            
+//            var initialPosition: CGPoint = .zero
+//            
+//            let translation = gesture.translation(in: newView)
+//            
+//            switch gesture.state {
+//            case .began:
+//                print(".began: \(newView.frame.origin)")
+//                
+//                initialPosition = newView.frame.origin
+//                
+//            case .changed:
+//                
+//                print(".changed")
+//                if translation.y > Double(-10) {
+//                    let newY = initialPosition.y + translation.y
+//                    
+//                    newView.frame.origin.y = newY + UIScreen.main.bounds.height - (54 * CGFloat(parent.mumoryBottomSheet.menuOptions.count) + 31) - 27
+//                }
+//                
+//            case .ended, .cancelled:
+//                print(".ended")
+//                
+//                if translation.y > Double(30) {
+//                    UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveEaseInOut], animations: {
+//                        newView.frame.origin.y = UIScreen.main.bounds.height
+//                        dimmingView.alpha = 0
+//                    }) { value in
+//                        
+//                        print("value: \(value)")
+//                        
+//                        newView.removeFromSuperview()
+//                        dimmingView.removeFromSuperview()
+//                        self.parent.isShown = false
+//                        
+//                    }
+//                } else {
+//                    UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveEaseInOut]) {
+//                        newView.frame.origin.y = UIScreen.main.bounds.height - (54 * CGFloat(self.parent.mumoryBottomSheet.menuOptions.count) + 31) - 27
+//                    }
+//                }
+//                
+//            default:
+//                break
+//            }
+//            
+//            
+//        }
+//        
+//        @objc func handleTapGesture() {
+//            
+//            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//                  let topSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.top,
+//                  let bottomSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.bottom
+//            else { return }
+//            
+//            guard let newView = newView, let dimmingView = dimmingView else { return }
+//            
+//            UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut], animations: {
+//                
+//                newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height , width: UIScreen.main.bounds.width - 14, height: 54 * CGFloat(self.parent.mumoryBottomSheet.menuOptions.count) + 31 + 27)
+//                
+//                dimmingView.alpha = 0
+//            }) { (_) in
+//                newView.removeFromSuperview()
+//                dimmingView.removeFromSuperview()
+//                self.parent.isShown = false
+//            }
+//        }
+//    }
+//}
+//
+//struct ContentView: View {
+//    
+//    @State private var isShown = false
+//    
+//    var body: some View {
+//        
+//        ZStack {
+//            
+//            Color.white
+//            
+//            
+//            Button(action: {
+//                print("FUCK: \(isShown)")
+//                isShown = true
+//            }) {
+//                Text("버튼")
+//                    .padding()
+//                    .background(.green)
+//            }
+//            
+//            if isShown {
+//                BottomSheetUIViewRepresentable(isShown: $isShown, mumoryBottomSheet: MumoryBottomSheet(type: .mumoryDetailView))
+//                    .background(Color.clear)
+//            }
+//        }
+//        .ignoresSafeArea()
+//    }
+//}
 
-    var body: some View {
-        let drag = DragGesture()
-            .updating($dragState) { drag, state, transaction in
-                var newTranslation = drag.translation
-                if self.position + newTranslation.height < -maxHeight {  // 최대치를 넘지 않도록 제한
-                    newTranslation.height = -maxHeight - self.position
-                }
-                
-                state = .dragging(translation: newTranslation)
-//                state = .dragging(translation: drag.translation)
-            }
-            .onEnded(onDragEnded)
-
-        return ZStack {
-            Color.gray
-            
-            AsyncImage(url: imageURL) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 100, height: 100)
-                case .failure:
-                    Text("Failed to load image")
-                @unknown default:
-                    Text("Unknown state")
-                }
-            }
-        }
-    }
-
-    private func onDragEnded(drag: DragGesture.Value) {
-        print("drag.translation.height: \(drag.translation.height)")
-//        let verticalDirection = drag.predictedEndLocation.y - drag.location.y
-        let cardDismiss = drag.translation.height > 100
-        let offset = cardDismiss ? drag.translation.height : 0
-        self.position = CGFloat(offset)
-        
-        if cardDismiss {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                self.isSheetShown = false
-            }
-        }
-    }
-}
+//public enum MumoryBottomSheetType {
+//    case mumoryDetailView
+//    case mumorySocialView
+//}
+//
+//public struct MumoryBottomSheet {
+//
+//    let type: MumoryBottomSheetType
+//
+//    var menuOptions: [BottemSheetMenuOption] {
+//        switch self.type {
+//        case .mumoryDetailView:
+//            return [
+//                BottemSheetMenuOption(iconImage: SharedAsset.editMumoryDetailMenu.swiftUIImage, title: "뮤모리 수정", action: {
+//
+//                }),
+//                BottemSheetMenuOption(iconImage: SharedAsset.lockMumoryDetailMenu.swiftUIImage, title: "나만 보기") {
+//
+//                },
+//                BottemSheetMenuOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기") {
+//
+//                },
+//                BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
+//
+//                },
+//                BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
+//
+//                },
+//                BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
+//                }
+//            ]
+//        case .mumorySocialView:
+//            return [
+//                BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
+//
+//                }),
+//                BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
+//                },
+//                BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
+//                }
+//            ]
+//        }
+//    }
+//
+//}
 
 
-enum DragState {
-    case inactive
-    case dragging(translation: CGSize)
 
-    var translation: CGSize {
-        switch self {
-        case .inactive:
-            return .zero
-        case .dragging(let translation):
-            return translation
-        }
-    }
 
-    var isDragging: Bool {
-        switch self {
-        case .inactive:
-            return false
-        case .dragging:
-            return true
-        }
-    }
-}
+//struct ContentView: View {
+//    @GestureState private var dragState = DragState.inactive
+//    @State var position = CGFloat(0)
+//    @State var isSheetShown = false // 바텀 시트 표시 여부를 제어하는 변수
+//
+//    let maxHeight = CGFloat(50)
+//
+//    let imageURL = URL(string: "https://firebasestorage.googleapis.com:443/v0/b/music-app-62ca9.appspot.com/o/mumoryImages2%2F6F51D970-E066-4CD2-8874-B6E6B7328C7E.jpg?alt=media&token=43e9c3f2-3456-4bc4-b063-f3cecdb7013b")
+//
+//    var body: some View {
+//        let drag = DragGesture()
+//            .updating($dragState) { drag, state, transaction in
+//                var newTranslation = drag.translation
+//                if self.position + newTranslation.height < -maxHeight {  // 최대치를 넘지 않도록 제한
+//                    newTranslation.height = -maxHeight - self.position
+//                }
+//
+//                state = .dragging(translation: newTranslation)
+////                state = .dragging(translation: drag.translation)
+//            }
+//            .onEnded(onDragEnded)
+//
+//        return             ZStack(alignment: .bottom) {
+//
+//            Rectangle()
+//                .foregroundColor(.clear)
+//                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+//                .background(Color(red: 0.17, green: 0.17, blue: 0.17).opacity(0.2))
+//
+////            Rectangle()
+////                .foregroundColor(.clear)
+////                .frame(width: UIScreen.main.bounds.width, height: 64)
+////                .background(
+////                    LinearGradient(
+////                        stops: [
+////                            Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09), location: 0.38),
+////                            Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0), location: 0.59),
+////                        ],
+////                        startPoint: UnitPoint(x: 0.5, y: 1.28),
+////                        endPoint: UnitPoint(x: 0.5, y: 0.56)
+////                    )
+////                )
+//
+//        }
+//    }
+//
+//    private func onDragEnded(drag: DragGesture.Value) {
+//        print("drag.translation.height: \(drag.translation.height)")
+////        let verticalDirection = drag.predictedEndLocation.y - drag.location.y
+//        let cardDismiss = drag.translation.height > 100
+//        let offset = cardDismiss ? drag.translation.height : 0
+//        self.position = CGFloat(offset)
+//
+//        if cardDismiss {
+//            withAnimation(.easeInOut(duration: 0.2)) {
+//                self.isSheetShown = false
+//            }
+//        }
+//    }
+//}
+//
+//
+//enum DragState {
+//    case inactive
+//    case dragging(translation: CGSize)
+//
+//    var translation: CGSize {
+//        switch self {
+//        case .inactive:
+//            return .zero
+//        case .dragging(let translation):
+//            return translation
+//        }
+//    }
+//
+//    var isDragging: Bool {
+//        switch self {
+//        case .inactive:
+//            return false
+//        case .dragging:
+//            return true
+//        }
+//    }
+//}
 
 //
 //struct ContentView: View {

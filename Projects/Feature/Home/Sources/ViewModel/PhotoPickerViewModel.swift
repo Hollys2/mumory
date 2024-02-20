@@ -9,6 +9,7 @@
 
 import SwiftUI
 import PhotosUI
+import Combine
 
 @available(iOS 16.0, *)
 final class PhotoPickerViewModel: ObservableObject {
@@ -88,6 +89,24 @@ final class PhotoPickerViewModel: ObservableObject {
         imageSelections.removeAll()
     }
     
+    @MainActor
+    func convertDataToImage(imageURLs: [String]) {
+        selectedImages.removeAll()
+        
+        if !imageSelections.isEmpty {
+            for eachItem in imageSelections {
+                Task {
+                    if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
+                        if let image = UIImage(data: imageData) {
+                            selectedImages.append(image)
+                        }
+                    }
+                }
+            }
+        }
+        imageSelections.removeAll()
+    }
+    
     func removeImage(_ image: UIImage) {
         DispatchQueue.main.async {
             if let index = self.selectedImages.firstIndex(of: image) {
@@ -95,5 +114,28 @@ final class PhotoPickerViewModel: ObservableObject {
                 //                self.imageSelections.remove(at: index)
             }
         }
+    }
+    
+    func removeAll() {
+        selectedImages.removeAll()
+    }
+    
+    func downloadImage(from url: URL) -> AnyPublisher<UIImage?, Never> {
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map { UIImage(data: $0.data) }
+            .replaceError(with: nil)
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                let image = UIImage(data: data)
+                completion(image)
+            } else {
+                completion(nil)
+            }
+        }.resume()
     }
 }

@@ -24,13 +24,14 @@ public enum PopUpType {
         case .delete:
             return 217
         }
-        
     }
 }
 
 public struct PopUpView: View {
     
     @Binding private var isShown: Bool
+    
+    @State private var isButtonEnabled = true
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
@@ -127,9 +128,10 @@ public struct PopUpView: View {
                         }
                         
                         Button(action: {
+                            isButtonEnabled = false
                             self.buttonAction?()
                             
-                            self.isShown = false // 추후 성공했을 때만 팝업창이 사라지게 하기
+//                            self.isShown = false // 추후 성공했을 때만 팝업창이 사라지게 하기
                         }) {
                             ZStack {
                                 Rectangle()
@@ -148,20 +150,20 @@ public struct PopUpView: View {
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             }
                         }
+                        .disabled(!isButtonEnabled)
                     } // HStack
                 case .delete:
                     VStack(spacing: 0) {
                         
                         HStack(spacing: 0) {
                             Button(action: {
-                                self.isShown = false
+                                self.buttonAction?()
                                 
                                 withAnimation(.easeInOut(duration: 0.1)) {
                                     self.appCoordinator.isCreateMumorySheetShown = false
                                 }
                                 
-                                mumoryDataViewModel.choosedMusicModel = nil
-                                mumoryDataViewModel.choosedLocationModel = nil
+                                self.isShown = false
                             }) {
                                 ZStack {
                                     Rectangle()

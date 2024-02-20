@@ -85,7 +85,7 @@ public struct SearchLocationMapView: View {
                         .padding(.bottom, 13)
                     
                     HStack(alignment: .center, spacing: 6) {
-                        
+
                         SharedAsset.pencilIconCreateMumory.swiftUIImage
                             .resizable()
                             .frame(width: 12, height: 12)
@@ -131,11 +131,12 @@ public struct SearchLocationMapView: View {
                                     .foregroundColor(.black)
                             )
                             .padding(.horizontal, 20)
-                            .padding(.bottom, 51)
+                            .padding(.bottom, getUIScreenBounds().width == 375 ? 39 : 51)
                         
                     }
                 } // VStack
-                .frame(height: UIScreen.main.bounds.height * 0.308)
+//                .frame(height: UIScreen.main.bounds.height * 0.308)
+                .frame(height: UIScreen.main.bounds.height * 0.349)
                 .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             } // VStack
             .navigationBarBackButtonHidden(true)

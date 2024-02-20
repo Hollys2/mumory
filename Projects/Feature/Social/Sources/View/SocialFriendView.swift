@@ -390,11 +390,11 @@ public struct SocialFriendView: View {
                         }
                     }
                 
-                BottomSheetView(menuOptions: menuOptions) // 스크롤뷰만 제스처 추가해서 드래그 막음
-                    .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
-                    .simultaneousGesture(dragGesture)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
+//                BottomSheetView(menuOptions: menuOptions) // 스크롤뷰만 제스처 추가해서 드래그 막음
+//                    .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
+//                    .simultaneousGesture(dragGesture)
+//                    .transition(.move(edge: .bottom))
+//                    .zIndex(1)
             }
         }
     }

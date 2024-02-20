@@ -10,7 +10,7 @@
 import SwiftUI
 import Shared
 
-enum Tab {
+public enum Tab {
     case home
     case social
     case library
@@ -18,13 +18,17 @@ enum Tab {
 }
 
 @available(iOS 16.0, *)
-struct HomeTabView: View {
+public struct HomeTabView: View {
 
     @Binding var selectedTab: Tab
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     
-    var body: some View {
+    public init(selectedTab: Binding<Tab>) {
+        self._selectedTab = selectedTab
+    }
+    
+    public var body: some View {
         GeometryReader { geometry in
             
             HStack(alignment: .bottom, spacing: 0) {

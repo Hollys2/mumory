@@ -157,10 +157,12 @@ extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelega
         let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "UserLocationAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "UserLocationAnnotation")
         
         annotationView.image = SharedAsset.userLocation.image
+        annotationView.frame = CGRect(x: 0, y: 0, width: 47, height: 47)
+
         
-        if let image = annotationView.image {
-            annotationView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
-        }
+//        if let image = annotationView.image {
+//            annotationView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
+//        }
         
         return annotationView
     }

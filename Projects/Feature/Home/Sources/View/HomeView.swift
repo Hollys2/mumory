@@ -16,17 +16,6 @@ import PhotosUI
 import Core
 import Shared
 
-enum MumoryViewType {
-    case mumoryDetailView
-    case editMumoryView
-}
-
-struct MumoryView: Hashable {
-    
-    let type: MumoryViewType
-    let musicItemID: MusicItemID
-}
-
 
 @available(iOS 16.0, *)
 struct MumoryCarousel: UIViewRepresentable {
@@ -246,7 +235,7 @@ struct MumoryCard: View {
 //                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
 //                            appCoordinator.mumoryPopUpZIndex = 2
 //                        }
-                        appCoordinator.rootPath.append(mumoryAnnotation.id ?? "")
+                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, musicItemID: self.mumoryAnnotation.musicModel.songID))
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage
                             .resizable()
@@ -319,6 +308,7 @@ public struct HomeView: View {
                         homeView
                     case .social:
                         SocialView()
+//                            .zIndex(self.appCoordinator.isSocialMenuSheetViewShown ? 3 : 0)
                     case .library:
                         Text("The Third Tab")
                     case .notification:
@@ -329,9 +319,14 @@ public struct HomeView: View {
                     }
                     
                     HomeTabView(selectedTab: $selectedTab)
+//                        .zIndex(self.appCoordinator.isSocialMenuSheetViewShown ? 0 : 3)
                 }
                 
                 TestBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
+                
+//                if appCoordinator.isSocialMenuSheetViewShown {
+//                    BottomSheetUIViewRepresentable(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: .mumoryDetailView))
+//                }
                 
                 //                if appCoordinator.isCreateMumorySheetShown {
                 //                    Color.black.opacity(0.6)
@@ -408,10 +403,9 @@ public struct HomeView: View {
                         .zIndex(1)
                 }
                 
-                //                id self.appCoordinator.
-                
             } // ZStack
             .ignoresSafeArea()
+//            .bottomSheet(isShown: $appCoordinator.isCreateMumorySheetShown)
             .navigationDestination(for: Int.self) { i in
                 switch i {
                 case 0:
@@ -432,7 +426,8 @@ public struct HomeView: View {
             }
             .navigationDestination(for: String.self, destination: { i in
                 if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.id == i }) {
-                    MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
+                    Color.purple
+                        .ignoresSafeArea()
                 } else if i == "music" {
                     SearchMusicView()
                 } else if i == "location" {
@@ -456,18 +451,20 @@ public struct HomeView: View {
             .navigationDestination(for: MumoryView.self) { view in
                 switch view.type {
                 case .mumoryDetailView:
-//                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.id == i }) {
-//                        MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
-//                    }
-                    EmptyView()
+                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.musicModel.songID == view.songID }) {
+                        MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
+                    } else {
+                        Color.red
+                    }
                 case .editMumoryView:
-                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.musicModel.songID == view.musicItemID }) {
+                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.musicModel.songID == view.songID }) {
                         MumoryDetailEditView(mumoryAnnotation: mumoryAnnotation)
                     } else {
                         Color.blue
                     }
                 }
             }
+        
         } // NavigationStack
         .onAppear {
             print("HomeMapViewRepresentable onAppear")
@@ -530,8 +527,10 @@ public struct HomeView: View {
         }
     }
 }
+                          
+                          
 
-struct TestBottomSheetView: View {
+public struct TestBottomSheetView: View {
     
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
@@ -543,7 +542,6 @@ struct TestBottomSheetView: View {
     @State private var isDeletePopUpShown: Bool = false
     
     @GestureState private var dragState = DragState.inactive
-//    @State var offsetY = CGFloat(0)
     
     @State private var tags: [String] = []
     @State private var contentText: String = ""
@@ -552,6 +550,8 @@ struct TestBottomSheetView: View {
     @State private var isPublic: Bool = true
     @State private var calendarYOffset: CGFloat = .zero
     @State private var scrollViewOffset: CGFloat = 0
+    @State private var tagOffset: CGFloat = 0
+    @State private var contentOffset: CGFloat = 0
     @State private var tagContainerViewFrame: CGRect = .zero
 
     @State var date: Date = Date()
@@ -561,14 +561,17 @@ struct TestBottomSheetView: View {
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var dateManager: DateManager
     
-    init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
     }
+//    public init(isSheetShown: Binding<Bool>) {
+//        self._isSheetShown = isSheetShown
+//    }
     
     let maxHeight = CGFloat(16)
     
-    var body: some View {
+    public var body: some View {
         
         let drag = DragGesture()
             .updating($dragState) { drag, state, transaction in
@@ -601,12 +604,15 @@ struct TestBottomSheetView: View {
                                 .resizable()
                                 .frame(width: 25, height: 25)
                                 .gesture(TapGesture(count: 1).onEnded {
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     self.isDeletePopUpShown = true
                                 })
                             
                             Spacer()
                             
                             Button(action: {
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                
                                 if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
                                     self.isPublishPopUpShown = true
                                 } else {
@@ -635,29 +641,32 @@ struct TestBottomSheetView: View {
                     .padding(.bottom, 11)
                     .padding(.horizontal, 20)
                     
-                    ScrollView(showsIndicators: false) {
-        
+                    ScrollViewReader { reader in
+                        
+                        ScrollView(showsIndicators: false) {
+                            
                             VStack(spacing: 0) {
-        
+                                
                                 VStack(spacing: 16) {
-        
+                                    
                                     NavigationLink(value: "music") {
                                         ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
                                     }
-        
+                                    
                                     NavigationLink(value: "location") {
                                         ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                                     }
-        
-                                    CalendarContainerView(title: "\(dateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
+                                    
+                                    CalendarContainerView(title: "\(DateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
                                         .onTapGesture {
+                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                            
                                             withAnimation(.easeInOut(duration: 0.1)) {
                                                 self.showDatePicker.toggle()
                                             }
                                         }
                                         .background {
                                             GeometryReader { geometry in
-        
                                                 Color.clear
                                                     .onAppear {
                                                         self.calendarYOffset = geometry.frame(in: .global).maxY
@@ -668,33 +677,58 @@ struct TestBottomSheetView: View {
                                                     }
                                             }
                                         }
-        
+                                    
                                 }
                                 .padding(.horizontal, 20)
-        
+                                
                                 Rectangle()
                                     .foregroundColor(.clear)
                                     .frame(height: 6)
                                     .background(.black)
                                     .padding(.vertical, 18)
-        
+                                
                                 VStack(spacing: 16) {
-        
+                                    
                                     TagContainerView(tags: self.$tags)
+                                        .id(0)
                                         .background(GeometryReader { geometry -> Color in
                                             DispatchQueue.main.async {
                                                 self.tagContainerViewFrame = geometry.frame(in: .global)
                                             }
                                             return Color.clear
                                         })
-        
+                                        .background {
+                                            GeometryReader { geometry in
+                                                Color.clear
+                                                    .onAppear {
+                                                        self.tagOffset = geometry.frame(in: .global).maxY
+                                                    }
+                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                        self.tagOffset = newOffset
+                                                    }
+                                            }
+                                        }
+                                    
+                                    
                                     ContentContainerView(contentText: self.$contentText)
-        
+                                        .id(1)
+                                        .background {
+                                            GeometryReader { geometry in
+                                                Color.clear
+                                                    .onAppear {
+                                                        self.contentOffset = geometry.frame(in: .global).maxY
+                                                    }
+                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                        self.contentOffset = newOffset
+                                                    }
+                                            }
+                                        }
+
                                     HStack(spacing: 11) {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
                                                      maxSelectionCount: 3,
                                                      matching: .images) {
-        
+                                            
                                             Rectangle()
                                                 .foregroundColor(.clear)
                                                 .frame(width: 75, height: 75)
@@ -705,7 +739,7 @@ struct TestBottomSheetView: View {
                                                         (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
                                                             .resizable()
                                                             .frame(width: 25, height: 25)
-        
+                                                        
                                                         HStack(spacing: 0) {
                                                             Text("\(photoPickerViewModel.imageSelectionCount)")
                                                                 .font(Font.custom("Pretendard", size: 14).weight(.medium))
@@ -719,18 +753,18 @@ struct TestBottomSheetView: View {
                                                     }
                                                 )
                                         }
-        
+                                        
                                         if !photoPickerViewModel.selectedImages.isEmpty {
-        
+                                            
                                             ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
-        
+                                                
                                                 ZStack {
                                                     Image(uiImage: image)
                                                         .resizable()
                                                         .frame(width: 75, height: 75)
                                                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                                         .cornerRadius(10)
-        
+                                                    
                                                     Button(action: {
                                                         photoPickerViewModel.removeImage(image)
                                                     }) {
@@ -750,86 +784,97 @@ struct TestBottomSheetView: View {
                                 }
                                 .padding(.horizontal, 20)
                                 .padding(.bottom, 50)
-        
+                                
                             } // VStack
                             .padding(.top, 20)
                             .padding(.bottom, 50)
-        
-                    } // ScrollView
-                    .simultaneousGesture(DragGesture().onChanged { i in
-                        // 스크롤할 때 바텀시트 움직이는 것 방지?
-                        print("simultaneousGesture DragGesture")
-        
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    })
+//                            .offset(y : appCoordinator.keyboardHeight == .zero ? 0 : (getUIScreenBounds().height - self.tagOffset - appCoordinator.keyboardHeight - 55 - 17))
+//                            .offset(y : appCoordinator.keyboardHeight == .zero ? 0 : (getUIScreenBounds().height - self.contentOffset - appCoordinator.keyboardHeight - 55 - 17))
+                            .offset(y : appCoordinator.keyboardHeight == .zero ? 0 : -200)
+                            
+                        } // ScrollView
+                        .simultaneousGesture(DragGesture().onChanged { i in
+                            print("simultaneousGesture DragGesture")
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        })
+                    }
                     
-
                     ZStack(alignment: .topLeading) {
                         Rectangle()
                             .foregroundColor(Color(red: 0.12, green: 0.12, blue: 0.12))
-                            .frame(height: 72 + appCoordinator.safeAreaInsetsBottom)
-                            .overlay(
-                                Rectangle()
-                                    .inset(by: 0.15)
-                                    .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
-                                    .frame(height: 0.5)
-                                , alignment: .top
-                            )
+                            .frame(height: 55)
                         
-                        
-                            HStack(spacing: 0) {
-
-                                Group {
-                                    
-                                    Text("전체공개")
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                        .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-                                    
-                                    Spacer().frame(width: 7)
-                                    
-                                    Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
-                                        .frame(width: 17, height: 17)
-                                    
-                                    Spacer()
-                                }
-                                .gesture(TapGesture(count: 1)
-                                    .onEnded {
-                                        self.isPublic.toggle()
-                                    })
+                        HStack(spacing: 0) {
+                            
+                            Group {
+                                Text("전체공개")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                                    .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
                                 
+                                Spacer().frame(width: 7)
+                                
+                                Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
+                                    .frame(width: 17, height: 17)
+                                
+                            }
+                            .gesture(TapGesture(count: 1)
+                                .onEnded {
+                                    self.isPublic.toggle()
+                                })
+
+                            Spacer()
+                            
+                            Button(action: {
+                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            }) {
                                 SharedAsset.keyboardButtonCreateMumory.swiftUIImage
                                     .resizable()
                                     .frame(width: 26, height: 26)
                             }
-                            .padding(.top, 18)
-                            .padding(.horizontal, 20)
+                        }
+                        .padding(.vertical, 15)
+                        .padding(.horizontal, 20)
+                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                        .padding(.bottom, getUIScreenBounds().height == 667 || getUIScreenBounds().height == 736 ? 17 : 27)
+                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                        .overlay(
+                            Rectangle()
+                                .inset(by: 0.15)
+                                .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
+                                .frame(height: 0.5)
+                            , alignment: .top
+                        )
+                        .offset(y: -self.appCoordinator.keyboardHeight)
                     } // ZStack
-                    .offset(y: getUIScreenBounds().height == 667 || getUIScreenBounds().height == 736 ? -33  : -getSafeAreaInsets().bottom - 16)
-                    .offset(y: -self.appCoordinator.keyboardHeight)
+//                                        .offset(y: getUIScreenBounds().height == 667 || getUIScreenBounds().height == 736 ? -33  : -getSafeAreaInsets().bottom - 16)
                     .highPriorityGesture(DragGesture())
                     
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
                 .padding(.top, appCoordinator.safeAreaInsetsTop + 16)
-                .padding(.bottom, -appCoordinator.safeAreaInsetsTop - 16)
+//                .padding(.bottom, -appCoordinator.safeAreaInsetsTop - 16)
                 .offset(y: self.offsetY + self.dragState.translation.height)
                 .gesture(drag)
+                .gesture(TapGesture(count: 1).onEnded {
+//                    print("FUCK U")
+//                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                })
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
                 .calendarPopup(show: self.$showDatePicker, yOffset: self.calendarYOffset) {
-
+                    
                     DatePicker("", selection: self.$date, displayedComponents: [.date])
                         .datePickerStyle(.graphical)
                         .labelsHidden()
                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         .preferredColorScheme(.dark)
-//                        .onChange(of: self.date) { _ in
-//                            withAnimation(.easeInOut(duration: 0.1)) {
-//                                self.showDatePicker = false
-//                            }
-//                        }
+                    //                        .onChange(of: self.date) { _ in
+                    //                            withAnimation(.easeInOut(duration: 0.1)) {
+                    //                                self.showDatePicker = false
+                    //                            }
+                    //                        }
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하기겠습니까?", buttonTitle: "게시", buttonAction: {
@@ -873,11 +918,19 @@ struct TestBottomSheetView: View {
                             }
                             
                             group.notify(queue: .main) {
-                                let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: tags, content: contentText, imageURLs: self.imageURLs)
+                                let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: tags, content: contentText, imageURLs: self.imageURLs, isPublic: self.isPublic)
                                 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation)
+
+                                mumoryDataViewModel.choosedMusicModel = nil
+                                mumoryDataViewModel.choosedLocationModel = nil
+                                self.tags.removeAll()
+                                self.contentText.removeAll()
+                                photoPickerViewModel.removeAll()
+                                self.imageURLs.removeAll()
                                 
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
+                                    isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
                                 }
                             }
@@ -885,11 +938,6 @@ struct TestBottomSheetView: View {
                         else {
                             print("else 일리가 없지?")
                         }
-                        
-
-                        
-                        mumoryDataViewModel.choosedMusicModel = nil
-                        mumoryDataViewModel.choosedLocationModel = nil
                     })
                 })
                 .popup(show: self.$isPublishErrorPopUpShown, content: {
@@ -905,6 +953,13 @@ struct TestBottomSheetView: View {
                 })
                 .popup(show: self.$isDeletePopUpShown, content: {
                     PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
+                        mumoryDataViewModel.choosedMusicModel = nil
+                        mumoryDataViewModel.choosedLocationModel = nil
+                        self.tags.removeAll()
+                        self.contentText.removeAll()
+                        photoPickerViewModel.removeAll()
+                        self.imageURLs.removeAll()
+                        
                         self.isDeletePopUpShown = false
                     })
                     
@@ -913,18 +968,19 @@ struct TestBottomSheetView: View {
                     NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in
                         guard let keyboardSize = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
                         let keyboardHeight = keyboardSize.height
-                        
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            self.appCoordinator.keyboardHeight = keyboardSize.height
-//                            scrollViewOffset = tagContainerViewFrame.maxY - (getUIScreenBounds().height - keyboardHeight) + 16
+                        print("keyboard: \(keyboardHeight)")
+
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            self.appCoordinator.keyboardHeight = keyboardHeight
+                            self.scrollViewOffset = keyboardHeight
                         }
                     }
                     
                     NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { (notification) in
                         DispatchQueue.main.async{
-                            withAnimation(.easeInOut(duration: 0.25)) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
                                 self.appCoordinator.keyboardHeight = CGFloat.zero
-                                //                            scrollViewOffset = 0
+                                scrollViewOffset = 0
                             }
                         }
                     }
@@ -992,6 +1048,13 @@ struct TestBottomSheetView: View {
         
         if cardDismiss {
             withAnimation(.spring(response: 0.1)) {
+                mumoryDataViewModel.choosedMusicModel = nil
+                mumoryDataViewModel.choosedLocationModel = nil
+                self.tags.removeAll()
+                self.contentText.removeAll()
+                photoPickerViewModel.removeAll()
+                self.imageURLs.removeAll()
+                
                 self.isSheetShown = false
             }
         }
@@ -1020,3 +1083,186 @@ enum DragState {
         }
     }
 }
+
+
+
+//public struct CreateMumoryBottomSheetUIViewRepresentable: UIViewRepresentable {
+//
+//    //    typealias UIViewType = UIView
+//
+//    @Binding var isShown: Bool
+//
+//    public init(isShown: Binding<Bool>) {
+//        self._isShown = isShown
+//    }
+//
+//    public func makeUIView(context: Context) -> UIView {
+////        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+////              let topSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.top,
+////              let bottomSafeAreaHeight = windowScene.windows.first?.safeAreaInsets.bottom
+////        else { return UIView() }
+//
+//        let view = UIView()
+//
+//        let dimmingView = UIView(frame: UIScreen.main.bounds)
+//        dimmingView.backgroundColor = UIColor.black
+//        dimmingView.alpha = 0
+//        view.addSubview(dimmingView)
+//
+//        let tapGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture))
+//        dimmingView.addGestureRecognizer(tapGestureRecognizer)
+//
+//        let newView = UIView()
+//        newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 0)
+//        newView.backgroundColor = .clear
+//        view.addSubview(newView)
+//
+////        let hostingController = UIHostingController(rootView: BottomSheetView(isShown: $isShown, menuOptions: self.mumoryBottomSheet.menuOptions, action: {
+////            UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut], animations: {
+////
+////                newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height , width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
+////
+////                dimmingView.alpha = 0
+////            }) { (_) in
+////                newView.removeFromSuperview()
+////                dimmingView.removeFromSuperview()
+////                self.isShown = false
+////            }
+////
+////        }))
+//        let hostingController = UIHostingController(rootView: TestBottomSheetView(isSheetShown: $isShown).ignoresSafeArea())
+//        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+//        hostingController.view.backgroundColor = .clear
+//
+//        newView.addSubview(hostingController.view)
+//
+//        UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut]) {
+//
+//            dimmingView.alpha = 0.5
+//
+//            newView.frame = CGRect(x: 0, y: 36, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+//        }
+//
+//        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
+//        //        hostingController.view.addGestureRecognizer(panGesture)
+//        newView.addGestureRecognizer(panGesture)
+//
+//        context.coordinator.uiView = view
+//        context.coordinator.newView = newView
+//        context.coordinator.dimmingView = dimmingView
+//
+//        return view
+//    }
+//
+//    public func updateUIView(_ uiView: UIView, context: Context) {
+//
+//    }
+//
+//    public func makeCoordinator() -> Coordinator {
+//        return Coordinator(parent: self)
+//    }
+//
+//    public class Coordinator: NSObject {
+//        var parent: CreateMumoryBottomSheetUIViewRepresentable
+//        var uiView: UIView?
+//        var newView: UIView?
+//        var dimmingView: UIView?
+//
+//        init(parent: CreateMumoryBottomSheetUIViewRepresentable) {
+//            self.parent = parent
+//        }
+//
+//        @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+//
+//            guard let newView = newView, let dimmingView = dimmingView else { return }
+//
+//            var initialPosition: CGPoint = .zero
+//
+//            let translation = gesture.translation(in: newView)
+//
+//            switch gesture.state {
+//            case .began:
+//                print(".began: \(newView.frame.origin)")
+//
+//                initialPosition = newView.frame.origin
+//
+//            case .changed:
+//
+//                print(".changed")
+////                if translation.y > Double(-10) {
+//                    let newY = initialPosition.y + translation.y
+//
+////                    newView.frame.origin.y = newY + UIScreen.main.bounds.height - (54 * CGFloat(parent.mumoryBottomSheet.menuOptions.count) + 31) - 27
+////                }
+//
+//            case .ended, .cancelled:
+//                print(".ended")
+//
+//                if translation.y > Double(30) {
+//                    UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveEaseInOut], animations: {
+//                        newView.frame.origin.y = UIScreen.main.bounds.height
+//                        dimmingView.alpha = 0
+//                    }) { value in
+//
+//                        print("value: \(value)")
+//
+//                        newView.removeFromSuperview()
+//                        dimmingView.removeFromSuperview()
+//                        self.parent.isShown = false
+//
+//                    }
+//                } else {
+//                    UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveEaseInOut]) {
+////                        newView.frame.origin.y = UIScreen.main.bounds.height - (54 * CGFloat(self.parent.mumoryBottomSheet.menuOptions.count) + 31) - 27
+//                    }
+//                }
+//
+//            default:
+//                break
+//            }
+//
+//
+//        }
+//
+//        @objc func handleTapGesture() {
+//
+//            guard let newView = newView, let dimmingView = dimmingView else { return }
+//
+//            UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut], animations: {
+//
+////                newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height , width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.parent.mumoryBottomSheet.menuOptions.count) + 31)
+//
+//                dimmingView.alpha = 0
+//            }) { (_) in
+//                newView.removeFromSuperview()
+//                dimmingView.removeFromSuperview()
+//                self.parent.isShown = false
+//            }
+//        }
+//    }
+//}
+//
+//struct BottomSheetViewModifier2: ViewModifier {
+//
+//    @Binding var isShown: Bool
+//
+//    func body(content: Content) -> some View {
+//
+//        ZStack {
+//            SharedAsset.mainColor.swiftUIColor
+//
+//            content
+//
+//            if isShown {
+//                CreateMumoryBottomSheetUIViewRepresentable(isShown: $isShown)
+//            }
+//        }
+//        .zIndex(1)
+//    }
+//}
+//
+//extension View {
+//    public func bottomSheet(isShown: Binding<Bool>) -> some View {
+//        self.modifier(BottomSheetViewModifier2(isShown: isShown))
+//    }
+//}

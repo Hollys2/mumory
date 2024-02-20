@@ -20,10 +20,7 @@ struct TagView: View {
                 .frame(width: 14, height: 14)
 
             Text(text)
-                .font(
-                    Font.custom("Pretendard", size: 12)
-                        .weight(.semibold)
-                )
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                 .foregroundColor(.white)
         }
         .padding(.leading, 8)
@@ -83,25 +80,25 @@ struct MumoryDetailScrollContentView: View {
                         
                         VStack(spacing: 5.25) {
                             Text("이르음음음음음")
-                                .font(
-                                    Font.custom("Pretendard", size: 16)
-                                        .weight(.medium)
-                                )
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             HStack(spacing: 0) {
                                 
-                                Text("\(dateManager.formattedDate(date: self.mumoryAnnotation.date))")
+                                Text("\(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                    .lineLimit(1)
+                                    .fixedSize(horizontal: true, vertical: false)
 
+                                if !self.mumoryAnnotation.isPublic {
+                                    Image(uiImage: SharedAsset.lockMumoryDatail.image)
+                                        .resizable()
+                                        .frame(width: 18, height: 18)
+                                }
                                 
-                                Image(uiImage: SharedAsset.lockMumoryDatail.image)
-                                    .resizable()
-                                    .frame(width: 18, height: 18)
-                                
-                                Spacer(minLength: getUIScreenBounds().width * 0.217948)
+                                Spacer(minLength: 0)
                                 
                                 Image(uiImage: SharedAsset.locationMumoryDatail.image)
                                     .resizable()
@@ -112,9 +109,10 @@ struct MumoryDetailScrollContentView: View {
                                 Text("\(self.mumoryAnnotation.locationModel.locationTitle)")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                    .lineLimit(1)
-                                    .frame(height: 11, alignment: .trailing)
-                                    .fixedSize(horizontal: false, vertical: true)
+//                                    .lineLimit(1)
+                                    .frame(maxWidth: getUIScreenBounds().width * 0.27)
+                                    .frame(height: 11, alignment: .leading)
+                                    .fixedSize(horizontal: true, vertical: false)
                             } // HStack
                         } // VStack
                     } // HStack
@@ -163,6 +161,7 @@ struct MumoryDetailScrollContentView: View {
                 MumoryDetailReactionBarView(isOn: false)
                     .background(GeometryReader { geometry in
                         Color.clear.onChange(of: geometry.frame(in: .global).minY) { minY in
+//                            print("minY: \(minY)")
                             let isReactionBarShown = minY + 85 > UIScreen.main.bounds.height
                             
                             if appCoordinator.isReactionBarShown != isReactionBarShown {
