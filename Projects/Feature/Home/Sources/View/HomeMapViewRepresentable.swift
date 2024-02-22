@@ -19,6 +19,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     
     @State var count: Int = 1
     @Binding var annotationSelected: Bool
+    @Binding var region: MKCoordinateRegion?
     
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var locationManager: LocationManager
@@ -53,8 +54,29 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-        //        uiView.removeAnnotations(uiView.annotations)
-        uiView.addAnnotations(self.mumoryDataViewModel.mumoryAnnotations)
+//        uiView.removeAnnotations(uiView.annotations)
+
+        
+        let sortedAnnotations = self.mumoryDataViewModel.mumoryAnnotations.sorted(by: { $0.date > $1.date })
+        uiView.addAnnotations(sortedAnnotations)
+//        if mumoryDataViewModel.isFetchFinished {
+//            uiView.addAnnotations(mumoryDataViewModel.mumoryAnnotations)
+//        }
+        
+//        let groupedAnnotations = Dictionary(grouping: annotations, by: { $0.date })
+//
+//        // Add grouped annotations to the map
+//        for (_, groupedAnnotations) in groupedAnnotations {
+//            let cluster = MKClusterAnnotation(memberAnnotations: groupedAnnotations)
+//            uiView.addAnnotation(cluster)
+//        }
+        
+        if let newRegion = self.region {
+            uiView.setRegion(newRegion, animated: true)
+            DispatchQueue.main.async {
+                self.region = nil
+            }
+        }
     }
     
     func makeCoordinator() -> MapViewCoordinator {
@@ -160,8 +182,7 @@ extension HomeMapViewRepresentable {
             guard let mapView = mapView, let userLocation = mapView.userLocation.location else { return }
             
             let regionRadius: CLLocationDistance = 1000
-            let region = MKCoordinateRegion(center: userLocation.coordinate,
-                                            latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
+            let region = MKCoordinateRegion(center: userLocation.coordinate, latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
             mapView.setRegion(region, animated: true)
         }
         
@@ -219,15 +240,22 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             return annotationView
         } else if let cluster = annotation as? MKClusterAnnotation {
             
-            let topAnnotation = cluster.memberAnnotations.first
+//            let sortedAnnotations = cluster.memberAnnotations.sorted { ($0 as? MumoryAnnotation)?.date ?? Date() > ($1 as? MumoryAnnotation)?.date ?? Date() }
+            let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
+            let sortedAnnotations = memberAnnotations.sorted { $0.date > $1.date }
+            
+            let topAnnotation = sortedAnnotations.first
+//            let topAnnotation = cluster.memberAnnotations.first
             let clusterView = mapView.dequeueReusableAnnotationView(withIdentifier: "ClusterView") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "ClusterView")
             
             print("cluster.memberAnnotations.count: \(cluster.memberAnnotations.count)")
+            
             clusterView.isUserInteractionEnabled = true
             clusterView.image = SharedAsset.musicPin.image
             clusterView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
             if let mumoryAnnotation = topAnnotation as? MumoryAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
+                
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
                 artwork.layer.cornerRadius = 12
@@ -274,7 +302,10 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             self.parent.annotationSelected = true
             
             let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
-            self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = memberAnnotations
+            
+            let sortedAnnotations = memberAnnotations.sorted { $0.date > $1.date }
+            self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = sortedAnnotations
+                
             
             print("didSelect cluster: \(cluster)")
         }

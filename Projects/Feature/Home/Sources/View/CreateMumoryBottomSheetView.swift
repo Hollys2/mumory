@@ -131,25 +131,25 @@ public struct CreateMumoryBottomSheetView: View {
                                 ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                             }
 
-                            CalendarContainerView(title: "\(DateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.1)) {
-                                        self.showDatePicker.toggle()
-                                    }
-                                }
-                                .background {
-                                    GeometryReader { geometry in
-
-                                        Color.clear
-                                            .onAppear {
-                                                self.calendarYOffset = geometry.frame(in: .global).maxY
-                                            }
-                                            .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                // Update calendarYOffset when the offset changes
-                                                self.calendarYOffset = newOffset
-                                            }
-                                    }
-                                }
+//                            CalendarContainerView(title: "\(DateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
+//                                .onTapGesture {
+//                                    withAnimation(.easeInOut(duration: 0.1)) {
+//                                        self.showDatePicker.toggle()
+//                                    }
+//                                }
+//                                .background {
+//                                    GeometryReader { geometry in
+//
+//                                        Color.clear
+//                                            .onAppear {
+//                                                self.calendarYOffset = geometry.frame(in: .global).maxY
+//                                            }
+//                                            .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+//                                                // Update calendarYOffset when the offset changes
+//                                                self.calendarYOffset = newOffset
+//                                            }
+//                                    }
+//                                }
 
                         }
                         .padding(.horizontal, 20)
@@ -667,11 +667,11 @@ struct ContainerView: View {
 
 struct CalendarContainerView: View {
     
-    @State private var date = Date()
-    let title: String
+//    @State private var date = Date()
+    @Binding var title: String
 
-    init(title: String) {
-        self.title = title
+    init(title: Binding<String>) {
+        self._title = title
     }
     
     var body: some View {
@@ -790,7 +790,6 @@ struct TagContainerView: View {
                     .foregroundColor(self.isTagEditing ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .onChange(of: tags[index], perform: { newValue in
                         
-                        print("newValue: \(newValue)")
                         if newValue.count > 6 {
                             tags[index] = String(newValue.prefix(6))
                         }
@@ -850,7 +849,6 @@ struct ContentContainerView: View {
     @Binding var contentText: String
     @State private var textEditorHeight: CGFloat = .zero
 
-
     init(contentText: Binding<String>) {
         self._contentText = contentText
     }
@@ -890,8 +888,7 @@ struct ContentContainerView: View {
                         , alignment: .topLeading
                     )
                     .onChange(of: contentText) { newValue in
-                        print("newValue: \(newValue)@")
-                        
+//                        print("newValue: \(newValue)@")
                     }
                 
                 Spacer()
@@ -1013,25 +1010,25 @@ public struct CreateMumorySheet: View {
                                 ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                             }
 
-                            CalendarContainerView(title: "\(DateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
-                                .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.1)) {
-                                        self.showDatePicker.toggle()
-                                    }
-                                }
-                                .background {
-                                    GeometryReader { geometry in
-
-                                        Color.clear
-                                            .onAppear {
-                                                self.calendarYOffset = geometry.frame(in: .global).maxY
-                                            }
-                                            .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                // Update calendarYOffset when the offset changes
-                                                self.calendarYOffset = newOffset
-                                            }
-                                    }
-                                }
+//                            CalendarContainerView(title: "\(DateManager.formattedDate(date: self.date, dateFormat: "yyyy. MM. dd. EEEE"))")
+//                                .onTapGesture {
+//                                    withAnimation(.easeInOut(duration: 0.1)) {
+//                                        self.showDatePicker.toggle()
+//                                    }
+//                                }
+//                                .background {
+//                                    GeometryReader { geometry in
+//
+//                                        Color.clear
+//                                            .onAppear {
+//                                                self.calendarYOffset = geometry.frame(in: .global).maxY
+//                                            }
+//                                            .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+//                                                // Update calendarYOffset when the offset changes
+//                                                self.calendarYOffset = newOffset
+//                                            }
+//                                    }
+//                                }
 
                         }
                         .padding(.horizontal, 20)

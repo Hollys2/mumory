@@ -63,7 +63,7 @@ struct MumoryDetailMenuSheetView: View {
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, musicItemID: self.mumoryAnnotation.musicModel.songID))
+                            self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, mumoryAnnotation: self.mumoryAnnotation))
                         }
                     }
                     

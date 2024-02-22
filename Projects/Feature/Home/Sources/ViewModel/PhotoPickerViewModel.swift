@@ -13,6 +13,9 @@ import Combine
 
 @available(iOS 16.0, *)
 final class PhotoPickerViewModel: ObservableObject {
+    
+    @Published var isPhotoErrorPopUpShown: Bool = false
+    
     @Published private(set) var selectedImage: UIImage? = nil
     @Published var imageSelection: PhotosPickerItem? = nil {
         didSet {
@@ -30,6 +33,7 @@ final class PhotoPickerViewModel: ObservableObject {
     @Published var imageSelections: [PhotosPickerItem] = [] {
         didSet {
             print("imageSelections didSet")
+            self.imageSelectionCount = imageSelections.count
             //            setImages(from: imageSelections)
         }
     }
@@ -73,25 +77,30 @@ final class PhotoPickerViewModel: ObservableObject {
     
     @MainActor
     func convertDataToImage() {
-        selectedImages.removeAll()
+//        selectedImages.removeAll()
         
         if !imageSelections.isEmpty {
             for eachItem in imageSelections {
                 Task {
+//                    if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
+//                        if let image = UIImage(data: imageData) {
+//                            selectedImages.append(image)
+//                        }
+//                    }
                     if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
-                        if let image = UIImage(data: imageData) {
+                        if let image = UIImage(data: imageData), !selectedImages.contains(image) {
                             selectedImages.append(image)
                         }
                     }
                 }
             }
         }
+        
         imageSelections.removeAll()
     }
     
     @MainActor
-    func convertDataToImage(imageURLs: [String]) {
-        selectedImages.removeAll()
+    func convertDataToImage(imageURLsCount: Int) {
         
         if !imageSelections.isEmpty {
             for eachItem in imageSelections {
@@ -99,6 +108,11 @@ final class PhotoPickerViewModel: ObservableObject {
                     if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
                         if let image = UIImage(data: imageData) {
                             selectedImages.append(image)
+                            
+                            if selectedImages.count + imageURLsCount > 3 {
+                                selectedImages.removeLast()
+                                isPhotoErrorPopUpShown = true
+                            }
                         }
                     }
                 }
@@ -111,9 +125,13 @@ final class PhotoPickerViewModel: ObservableObject {
         DispatchQueue.main.async {
             if let index = self.selectedImages.firstIndex(of: image) {
                 self.selectedImages.remove(at: index)
-                //                self.imageSelections.remove(at: index)
+//                self.imageSelections.remove(at: index)
             }
         }
+    }
+    
+    func removeIndex(_ index: Int) {
+        
     }
     
     func removeAll() {

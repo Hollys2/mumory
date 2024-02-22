@@ -49,12 +49,15 @@ public class AppCoordinator: ObservableObject {
     @Published public var isAddFriendViewShown = false
     @Published public var isPopUpViewShown = false
     @Published public var isRewardPopUpViewShown = false
+    @Published public var isDeleteMumoryPopUpViewShown = false
+    @Published public var isLoading = false
     
     @Published public var isTestViewShown = true
     
     @Published public var isNavigationStackShown = false
     
     @Published public var choosedSongID: MusicItemID?
+    @Published public var choosedMumoryAnnotation: MumoryAnnotation?
     
     @Published public var page: Int = -1
     
@@ -63,6 +66,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var safeAreaInsetsTop: CGFloat = 0.0
     @Published public var safeAreaInsetsBottom: CGFloat = 0.0
     @Published public var keyboardHeight: CGFloat = 0.0
+    @Published public var isKeyboardButtonShown: Bool = false
     
     @Published public var selectedDate = Date()
     
@@ -122,9 +126,9 @@ public class DateManager: ObservableObject {
         
         if currentYear > targetYear {
             
-            dateFormatter.dateFormat = isPublic ? "yyyy년 MM월 dd일" : "yyyy년 MM월 dd일 ・ "
+            dateFormatter.dateFormat = isPublic ? "yyyy년 M월 d일" : "yyyy년 M월 d일 ・ "
         } else {
-            dateFormatter.dateFormat = isPublic ? "MM월 dd일" : "MM월 dd일 ・ "
+            dateFormatter.dateFormat = isPublic ? "M월 d일" : "M월 d일 ・ "
         }
         
         return dateFormatter.string(from: date)

@@ -37,22 +37,29 @@ struct MumoryDetailScrollContentView: View {
     
     @State private var tagWidth: CGFloat = .zero
 //    @State private var tags: [String] = ["기쁨기쁨기쁨",]
+
+    @State private var dateString: String = ""
     
     @StateObject var dateManager: DateManager = DateManager()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
+    
     var body: some View {
         
         VStack(spacing: 0) {
             
-            ZStack(alignment: .bottom) {
+            ZStack(alignment: .bottomLeading) {
                 
-                Rectangle()
-                    .foregroundColor(.clear)
+//                Rectangle()
+//                    .foregroundColor(.clear)
+//                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+//                    .background(Color(red: 0.17, green: 0.17, blue: 0.17).opacity(0.2))
+                
+                SharedAsset.albumFilterMumoryDetail.swiftUIImage
+                    .resizable()
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                    .background(Color(red: 0.17, green: 0.17, blue: 0.17).opacity(0.2))
                 
                 Rectangle()
                     .foregroundColor(.clear)
@@ -67,6 +74,24 @@ struct MumoryDetailScrollContentView: View {
                             endPoint: UnitPoint(x: 0.5, y: 0.56)
                         )
                     )
+                
+                
+                VStack(spacing: 23) {
+                    
+                    Text("\(mumoryAnnotation.musicModel.title)")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
+                        .lineLimit(2)
+                        .foregroundColor(.white)
+                        .frame(width: 301, alignment: .leading)
+                    
+                    Text("\(mumoryAnnotation.musicModel.artist)")
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
+                        .lineLimit(1)
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(width: 301, alignment: .leading)
+                }
+                .offset(y: -4)
+                .padding(.leading, 20)
             }
             
             VStack(spacing: 0) {
@@ -78,19 +103,29 @@ struct MumoryDetailScrollContentView: View {
                             .resizable()
                             .frame(width: 38, height: 38)
                         
-                        VStack(spacing: 5.25) {
+                        VStack(spacing: 0) {
                             Text("이르음음음음음")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
+                            Spacer(minLength: 0)
+                            
                             HStack(spacing: 0) {
                                 
-                                Text("\(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))")
+//                                Text("\(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))")
+                                Text(self.dateString)
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
+                                    .onAppear {
+                                        self.dateString = DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic)
+                                    }
+                                    .onChange(of: mumoryAnnotation.date) { newValue in
+                                        print("onChange: \(newValue)")
+                                        self.dateString = DateManager.formattedDate(date: newValue, isPublic: self.mumoryAnnotation.isPublic)
+                                    }
 
                                 if !self.mumoryAnnotation.isPublic {
                                     Image(uiImage: SharedAsset.lockMumoryDatail.image)
@@ -116,6 +151,7 @@ struct MumoryDetailScrollContentView: View {
                             } // HStack
                         } // VStack
                     } // HStack
+                    .frame(height: 38)
                     .padding(.vertical, 55)
                     
                     if let tags = self.mumoryAnnotation.tags {

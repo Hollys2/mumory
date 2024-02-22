@@ -17,7 +17,6 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     var content: () -> Content
     var onRefresh: () -> Void
-    let refreshControl = UIRefreshControl()
 
     @Binding var offsetY: CGFloat
     
@@ -31,14 +30,13 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         self.content = content
     }
     
-    
     func makeUIView(context: Context) -> UIScrollView {
         
         let scrollView = UIScrollView()
 
         scrollView.delegate = context.coordinator
 
-        scrollView.refreshControl = refreshControl
+        scrollView.refreshControl = UIRefreshControl()
         scrollView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
         
         scrollView.showsVerticalScrollIndicator = false
@@ -57,13 +55,12 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        print("updateUIView")
-//        let hostingController = UIHostingController(rootView: content().environmentObject(mumoryDataViewModel))
-//        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-//        hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
-//        uiView.contentSize = CGSize(width: 0, height: x)
+        print("updateUIView: SocialScrollViewRepresentable")
         
-//        uiView.subviews.forEach { $0.removeFromSuperview() }
+        let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
+        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        uiView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
+        hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
 //        uiView.addSubview(hostingController.view)
     }
     
@@ -259,7 +256,8 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
-                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, musicItemID: self.mumoryAnnotation.musicModel.songID))
+//                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, musicItemID: self.mumoryAnnotation.musicModel.songID))
+                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
                             }
                     )
                 
@@ -286,7 +284,8 @@ struct SocialItemView: View {
                     Spacer()
                     
                     Button(action: {
-                        self.appCoordinator.choosedSongID = self.mumoryAnnotation.musicModel.songID
+//                        self.appCoordinator.choosedSongID = self.mumoryAnnotation.musicModel.songID
+                        self.appCoordinator.choosedMumoryAnnotation = self.mumoryAnnotation
                         self.appCoordinator.isSocialMenuSheetViewShown = true
                     }, label: {
                         SharedAsset.menuButtonSocial.swiftUIImage
@@ -550,7 +549,10 @@ public struct SocialView: View {
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .preferredColorScheme(.dark)
-        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: .mumorySocialView, songID: self.appCoordinator.choosedSongID))
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation ?? MumoryAnnotation()))
+        .onAppear {
+            print("SocialView onAppear")
+        }
     }
 }
 

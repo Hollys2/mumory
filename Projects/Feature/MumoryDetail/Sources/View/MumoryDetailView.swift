@@ -180,25 +180,28 @@ public struct MumoryDetailView: View {
                 }
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                 
-                VStack(spacing: 23) {
-                    
-                    Text("\(mumoryAnnotation.musicModel.title)")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
-                        .lineLimit(2)
-                        .foregroundColor(.white)
-                        .frame(width: 301, alignment: .leading)
-                    
-                    Text("\(mumoryAnnotation.musicModel.artist)")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
-                        .lineLimit(1)
-                        .foregroundColor(.white.opacity(0.8))
-                        .frame(width: 301, alignment: .leading)
-                }
-                .offset(y: -4)
-                .padding(.leading, 20)
+//                VStack(spacing: 23) {
+//                    
+//                    Text("\(mumoryAnnotation.musicModel.title)")
+//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
+//                        .lineLimit(2)
+//                        .foregroundColor(.white)
+//                        .frame(width: 301, alignment: .leading)
+//                        .zIndex(1)
+//                    
+//                    Text("\(mumoryAnnotation.musicModel.artist)")
+//                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
+//                        .lineLimit(1)
+//                        .foregroundColor(.white.opacity(0.8))
+//                        .frame(width: 301, alignment: .leading)
+//                        .zIndex(1)
+//                }
+//                .offset(y: -4)
+//                .padding(.leading, 20)
             } // ZStack
             
             MumoryDetailScrollView(mumoryAnnotation: self.mumoryAnnotation)
+                .zIndex(0)
             
             HStack {
                 Button(action: {
@@ -209,6 +212,7 @@ public struct MumoryDetailView: View {
                     Image(uiImage: SharedAsset.closeButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 30, height: 30)
+                        .padding(20)
                 })
                 
                 Spacer()
@@ -221,12 +225,13 @@ public struct MumoryDetailView: View {
                     Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
                         .resizable()
                         .frame(width: 30, height: 30)
+                        .padding(20)
                 })
             }
-            .frame(width: UIScreen.main.bounds.width - 40)
-            .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
+//            .frame(width: UIScreen.main.bounds.width - 40)
+            .padding(.top, appCoordinator.safeAreaInsetsTop + 19 - 20)
             .padding(.bottom, 12)
-            .padding(.horizontal, 20)
+//            .padding(.horizontal, 20)
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
@@ -265,7 +270,14 @@ public struct MumoryDetailView: View {
 //            }
         } // ZStack
         .navigationBarBackButtonHidden(true)
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: .mumoryDetailView, songID: self.mumoryAnnotation.musicModel.songID, isPublic: self.$isPublic))
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation, isPublic: self.$isPublic))
+        .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown) {
+            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
+                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
+                appCoordinator.isDeleteMumoryPopUpViewShown = false
+                appCoordinator.rootPath.removeLast()
+            })
+        }
         .ignoresSafeArea()
     }
 }

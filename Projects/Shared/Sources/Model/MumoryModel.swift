@@ -20,11 +20,12 @@ public enum MumoryViewType {
 public struct MumoryView: Hashable {
     
     public let type: MumoryViewType
-    public let songID: MusicItemID?
+    public let mumoryAnnotation: MumoryAnnotation?
+//    public let songID: MusicItemID?
     
-    public init(type: MumoryViewType, musicItemID: MusicItemID? = nil) {
+    public init(type: MumoryViewType, mumoryAnnotation: MumoryAnnotation? = nil) {
         self.type = type
-        self.songID = musicItemID
+        self.mumoryAnnotation = mumoryAnnotation
     }
 }
 

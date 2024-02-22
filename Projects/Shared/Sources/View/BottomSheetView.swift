@@ -19,17 +19,20 @@ public enum MumoryBottomSheetType {
 public struct MumoryBottomSheet {
     
     @ObservedObject var appCoordinator: AppCoordinator
+    @ObservedObject var mumoryDataViewModel: MumoryDataViewModel
     
     public let type: MumoryBottomSheetType
     
     @Binding public var isPublic: Bool
     
-    public let songID: MusicItemID?
+    public let mumoryAnnotation: MumoryAnnotation
     
-    public init(appCoordinator: AppCoordinator, type: MumoryBottomSheetType, songID: MusicItemID? = nil, isPublic: Binding<Bool>? = nil) {
+    public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: MumoryAnnotation, isPublic: Binding<Bool>? = nil) {
         self.appCoordinator = appCoordinator
+        self.mumoryDataViewModel = mumoryDataViewModel
+        
         self.type = type
-        self.songID = songID
+        self.mumoryAnnotation = mumoryAnnotation
         self._isPublic = isPublic ?? Binding.constant(false)
     }
     
@@ -41,18 +44,21 @@ public struct MumoryBottomSheet {
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.editMumoryDetailMenu.swiftUIImage, title: "뮤모리 수정", action: {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, musicItemID: self.songID))
+                        self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, mumoryAnnotation: mumoryAnnotation)) // 추후 파이어스토어 ID로 수정
                         self.appCoordinator.isMumoryDetailMenuSheetShown = false
                     }
                 }),
                 BottemSheetMenuOption(iconImage: self.isPublic ? SharedAsset.unlockMumoryDatail.swiftUIImage : SharedAsset.lockMumoryDetailMenu.swiftUIImage, title: self.isPublic ? "전체 공개" : "나만 보기") {
                     self.isPublic.toggle()
+                    mumoryAnnotation.isPublic.toggle()
+                    mumoryDataViewModel.updateMumory(mumoryAnnotation)
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기") {
                     
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
-                    
+                    self.appCoordinator.isDeleteMumoryPopUpViewShown = true
+//                    self.mumoryDataViewModel.deleteMumory(mumoryAnnotation)
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
                     
@@ -65,7 +71,7 @@ public struct MumoryBottomSheet {
                 BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
 
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, musicItemID: self.songID))
+                        self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
                         self.appCoordinator.isSocialMenuSheetViewShown = false
                     }
                 }),

@@ -14,22 +14,23 @@ struct MumoryApp: App {
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     @StateObject var dateManager: DateManager = .init()
+    @StateObject var keyboardResponder: KeyboardResponder = .init()
     //    @StateObject var firebaseManager: FirebaseManager = .init()
     
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-                //                RewardView()
                 HomeView()
-                //                SearchLocationMapView()
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
                     .environmentObject(mumoryDataViewModel)
                     .environmentObject(dateManager)
+                    .environmentObject(keyboardResponder)
                 //                    .environmentObject(firebaseManager)
                     .onAppear {
                         print("MumoryApp onAppear")
+                        
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                     }

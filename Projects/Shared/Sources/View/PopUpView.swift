@@ -211,6 +211,13 @@ public struct PopUpView: View {
             } // VStack
             .frame(height: self.type.height)
             .cornerRadius(15)
+            
+            if self.appCoordinator.isLoading {
+                Color.black.opacity(0.5).ignoresSafeArea()
+                
+                ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+            }
         }
     }
 }
