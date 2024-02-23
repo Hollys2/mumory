@@ -23,4 +23,5 @@ public class ColorSet{
     public static let validGreen = Color(red: 0.33, green: 0.87, blue: 0.61)
     public static let skeleton = Color(red: 0.18, green: 0.18, blue: 0.18)
     public static let lineGray = Color(white: 0.65)
+    public static let D9Gray = Color(white: 0.85)
 }
