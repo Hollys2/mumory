@@ -13,6 +13,7 @@ import MusicKit
 struct ArtistOfSongView: View {
     @EnvironmentObject private var userManager: UserViewModel
     @EnvironmentObject private var manager: LibraryManageModel
+    @EnvironmentObject private var playerManager: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero
     @State private var contentSize: CGSize = .zero
@@ -72,6 +73,9 @@ struct ArtistOfSongView: View {
                                 .foregroundStyle(ColorSet.subGray)
                             Spacer()
                             PlayAllButton()
+                                .onTapGesture {
+                                    playerManager.playAll(songs: songs)
+                                }
                         })
                         .padding(.horizontal, 20)
                         .padding(.leading, 1)

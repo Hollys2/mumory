@@ -44,9 +44,6 @@ struct PlaylistBottomSheetView: View {
                 .onTapGesture {
                     dismiss()
                     manager.push(destination: .addSong(originPlaylist: playlist))
-                    withAnimation {
-                        appCoordinator.isHiddenTabBar = true
-                    }
                 }
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트에 삭제")

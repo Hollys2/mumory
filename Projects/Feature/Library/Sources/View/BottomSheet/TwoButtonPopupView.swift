@@ -11,13 +11,15 @@ import Shared
 
 struct TwoButtonPopupView: View {
     @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     
     private var lineGray = Color(red: 0.65, green: 0.65, blue: 0.65)
     
-    var positiveAction: () -> Void
     var title: String
     var positiveButtonTitle: String
+    var positiveAction: () -> Void
+  
     
     init( title: String, positiveButtonTitle: String, positiveAction: @escaping () -> Void) {
         self.title = title
@@ -45,7 +47,6 @@ struct TwoButtonPopupView: View {
                 
                 HStack(spacing: 0, content: {
                     Button(action: {
-                        UIView.setAnimationsEnabled(false)
                         dismiss()
                     }, label: {
                         Text("취소")
@@ -59,7 +60,10 @@ struct TwoButtonPopupView: View {
                         .background(lineGray)
                     
                     Button(action: {
-                        positiveAction()
+                        Task {
+                            positiveAction()
+                        }
+                        dismiss()
                     }, label: {
                         Text(positiveButtonTitle)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
@@ -74,12 +78,9 @@ struct TwoButtonPopupView: View {
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
             .padding(.horizontal, 40)
         }
-        .onAppear(perform: {
-            UIView.setAnimationsEnabled(false)
-        })
-        .onDisappear(perform: {
+        .onDisappear {
             UIView.setAnimationsEnabled(true)
-        })
+        }
 
     }
 }

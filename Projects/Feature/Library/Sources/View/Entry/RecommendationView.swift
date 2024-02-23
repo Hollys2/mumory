@@ -51,7 +51,7 @@ public struct RecommendationView: View {
                     }
                 
                 
-                //가로 페이징 스크롤 차트
+                //차트 - 가로 페이징
                 ChartPagingScrollView(musicChart: $musicChart, scrollViewHeight: $scrollViewHeight) {
                     LazyHGrid(rows: rows, spacing: 0,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
@@ -73,6 +73,10 @@ public struct RecommendationView: View {
                     .padding(.top, 15)
                 
                 FavoriteGenreRecommendationView()
+                
+                Rectangle()
+                    .foregroundStyle(Color.clear)
+                    .frame(height: 90)
                 
                 
             })

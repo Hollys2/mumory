@@ -14,19 +14,11 @@ struct SearchView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
-    @State var term: String = ""
-    @State var musicList: MusicItemCollection<Song> = []
-    @State var albumList: MusicItemCollection<Album> = []
-    @State var artistList: MusicItemCollection<Artist> = []
-    @State var playRate: CGFloat = 1
-    @State var songID: MusicItemID = MusicItemID(stringLiteral: "")
-    @State var playlist = []
-    private var player = ApplicationMusicPlayer.shared
     
-    init(term: String) {
-        self.term = term
-        print("init term:\(term)")
-    }
+    @State var term: String
+    @State var musicList: MusicItemCollection<Song> = []
+    @State var artistList: MusicItemCollection<Artist> = []
+   
         
     var body: some View {
         ZStack{
@@ -85,6 +77,7 @@ struct SearchView: View {
         }
         .navigationBarBackButtonHidden()
         .background(.black)
+
     }
 
     

@@ -115,11 +115,18 @@ struct SongSearchTextField: View {
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .foregroundStyle(Color.white)
             
-            SharedAsset.xWhiteCircle.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 23, height: 23)
-                .padding(.leading, 10)
+            Button {
+                term = ""
+            } label: {
+                SharedAsset.xWhiteCircle.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 23, height: 23)
+            }                    
+            .padding(.leading, 10)
+
+
+          
         })
         .padding(.leading, 25)
         .padding(.trailing, 17)
@@ -132,7 +139,7 @@ struct SongSearchTextField: View {
     
     
     private func getPrompt() -> Text {
-        return Text("음악 검색")
+        return Text("음악 또는 아티스트 검색")
             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
             .foregroundColor(ColorSet.subGray)
     }

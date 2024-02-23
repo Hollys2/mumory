@@ -13,26 +13,23 @@ import MusicKit
 
 struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var userManager: UserViewModel
-    @State var recommendationSongList: [Int: [Song]] = [:]
-    @State var recommendationIDList: [Int: [String]] = [:]
+    @EnvironmentObject var manager: LibraryManageModel
+//    @State var recommendationSongList: [Int: [Song]] = [:]
+//    @State var recommendationIDList: [Int: [String]] = [:]
     @State var isEditGenreViewPresent: Bool = false
     
     var body: some View {
         ZStack{
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(userManager.favoriteGenres, id: \.self){genreID in
-                    RecommendationScrollView(genreID: genreID, songs: $recommendationSongList )
+                    RecommendationScrollView(genreID: genreID)
+                        .environmentObject(manager)
                         .frame(height: 210)
                         .padding(.top, 35)
-                        .onAppear {
-                            DispatchQueue.global().async {
-                                getRecommendationSongIDs(genreID: genreID)
-                            }
-                        }
                 }
                 
-                //장르 변경 아이템들
                 
+                //내 선호 장르들 및 수정 버튼
                 ScrollView(.horizontal) {
                     HStack(spacing: 8) {
                         Text("장르")
@@ -46,7 +43,7 @@ struct FavoriteGenreRecommendationView: View {
                                     .stroke(Color.white, lineWidth: 1)
                             }
 
-                        
+                        //
                         ForEach(userManager.favoriteGenres, id: \.self){ genreID in
                             GenreItem(genreID: genreID)
                         }
@@ -77,65 +74,34 @@ struct FavoriteGenreRecommendationView: View {
             }
         }
         .onAppear {
-            recommendationIDList.removeAll()
-            recommendationSongList.removeAll()
+//            recommendationIDList.removeAll()
+//            recommendationSongList.removeAll()
 
         }
     }
     //애플뮤직 테스트
-    private func getRecommendationSongIDs(genreID: Int){
-        let appleMusicService = AppleMusicService.shared
-        appleMusicService.getRecommendationMusicIDList(genre: genreID, limit: 10, offset: 0) { result in
-            switch(result){
-            case .success(let data):
-                if let songs = data as? [song]{
-                    print("get song id success")
-                    let songIDs = songs.map({$0.id})
-                    recommendationIDList[genreID] = songIDs
-                    Task{
-                        recommendationSongList[genreID] = await fetchSongInfo(genreID:genreID, songIDs: songIDs)
-                    }
-                }
-            case .failure(_):
-                print("error")
-            }
-        }
-    }
-    
-    private func fetchSongInfo(genreID: Int, songIDs: [String]) async -> [Song] {
-        var songs: [Song] = []
-        
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                recommendationSongList[genreID]?.append(song)
-                songs.append(song)
-            } catch {
-                print("Error: \(error)")
-            }
-        }
-        return songs
-    }
+   
 }
 
 private struct RecommendationScrollView: View {
+    @EnvironmentObject var manager: LibraryManageModel
+    @State var songs: [Song] = []
+    @State var songIDs: [String] = []
     let genreID: Int
-    @Binding var songs: [Int: [Song]]
+    init(genreID: Int) {
+        self.genreID = genreID
+    }
+//    @Binding var songs: [Int: [Song]]
     var body: some View {
         VStack(spacing: 0) {
             GenreTitle(genreName: MusicGenreHelper().genreName(id: genreID))
+                .onTapGesture {
+                    manager.push(destination: .recommendation(genreID: genreID))
+                }
             
             ScrollView(.horizontal) {
                 LazyHStack (spacing: 0){
-                    ForEach(songs[genreID] ?? [], id: \.self){ song in
+                    ForEach(songs, id: \.self){ song in
                         RecommendationMusicItem(song: song)
                     }
                 }
@@ -144,6 +110,47 @@ private struct RecommendationScrollView: View {
             .padding(.top, 12)
             .scrollIndicators(.hidden)
             
+        }
+        .onAppear {
+            getRecommendationSongIDs(genreID: self.genreID)
+        }
+    }
+    
+    private func getRecommendationSongIDs(genreID: Int){
+        let appleMusicService = AppleMusicService.shared
+        appleMusicService.getRecommendationMusicIDList(genre: genreID, limit: 10, offset: 0) { result in
+            switch(result){
+            case .success(let data):
+                if let songs = data as? [song]{
+                    let songIDs = songs.map({$0.id})
+                    self.songIDs = songIDs
+                    Task{
+                        await fetchSongInfo(songIDs: songIDs)
+                    }
+                }
+            case .failure(_):
+                print("error")
+            }
+        }
+    }
+    
+    private func fetchSongInfo(songIDs: [String]) async {
+        for id in songIDs {
+            let musicItemID = MusicItemID(rawValue: id)
+            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            
+            do {
+                let response = try await request.response()
+                guard let song = response.items.first else {
+                    print("no song")
+                    continue
+                }
+                withAnimation {
+                    self.songs.append(song)
+                }
+            } catch {
+                print("Error: \(error)")
+            }
         }
     }
 }
@@ -165,6 +172,8 @@ struct GenreTitle: View {
         .padding(.top, 10)
         .padding(.bottom, 10)
     }
+    
+  
 }
 
 private struct GenreItem: View {

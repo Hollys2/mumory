@@ -561,6 +561,7 @@ public struct HomeView: View {
                 Spacer()
             }
         }
+        
     }
 }
 

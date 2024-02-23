@@ -9,38 +9,10 @@
 import SwiftUI
 import Shared
 
-class SnackBarViewModel: ObservableObject {
-    @Published var snackbarTitle: String = ""
-    @Published var isPresent: Bool = false
-    @Published var alreadExists: Bool = false
-    var snackbarTimer = 0.0
-    var timer: Timer?
-    init() {
-        self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true, block: { timer in
-            self.snackbarTimer += 0.2
-            
-            if self.snackbarTimer == 1.2 {
-                withAnimation {
-                    self.isPresent = false
-                }
-            }
-        })
-    }
-    public func setSnackBar(alreadExists: Bool) {
-        self.snackbarTimer = 0.0
-        self.alreadExists = alreadExists
-        withAnimation {
-            self.isPresent = true
-        }
-    }
-}
-
-
-
 struct AddPlaylistSongView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @StateObject var snackbarManager: SnackBarViewModel = SnackBarViewModel()
+    @EnvironmentObject var snackbarManager: SnackBarViewModel
     @EnvironmentObject var userManager: UserViewModel
     @State var originPlaylist: MusicPlaylist
     @State var isTapFavorite: Bool = true
@@ -139,40 +111,19 @@ struct AddPlaylistSongView: View {
                 
             })
             
-            VStack{
-                Spacer()
-                if snackbarManager.isPresent{
-                        HStack(spacing: 0) {
-                            Text(snackbarManager.alreadExists ?  "이미 플레이리스트 " : "플레이리스트")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color.black)
+        
                             
-                            Text("\"\(originPlaylist.title)\"")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color.black)
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                            
-                            Text(snackbarManager.alreadExists ? "에 존재 합니다." : "에 추가 되었습니다.")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color.black)
-                        }
-                        .padding(.horizontal, 20)
-                        .frame(height: 41)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, userManager.bottomInset + 2)
-                        .transition(.asymmetric(insertion: .offset(y: 100), removal: .offset(y: 100)))
-                    }
-         
-                   
-                    
-                }
 
             
         }
+        .onAppear(perform: {
+            appCoordinator.isHiddenTabBarWithoutAnimation = true
+            withAnimation {
+                appCoordinator.isHiddenTabBar = true
+            }
+        })
         .onDisappear(perform: {
+            appCoordinator.isHiddenTabBarWithoutAnimation = false
             withAnimation {
                 appCoordinator.isHiddenTabBar = false
             }

@@ -12,43 +12,53 @@ import MusicKit
 
 struct MiniPlayerView: View {
     @EnvironmentObject var playerManager: PlayerViewModel
-        
+    @State var isPresentPlayingView: Bool = false
     var body: some View {
   
                 HStack(spacing: 0, content: {
-                    AsyncImage(url: playerManager.playingSong?.artwork?.url(width: 100, height: 100), content: { image in
-                        image
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular))
-                    }, placeholder: {
-                        RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular)
-                            .fill(.gray)
-                            .frame(width: 40, height: 40)
-                    })
-                    .padding(.leading, 25)
-                    
-                    
-                    
-                    //노래 제목 밑 아티스트 이름 - 세로정렬
-                    VStack(spacing: 4, content: {
-                        Text(playerManager.playingSong?.title ?? "NO TITLE")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-              
+                    //재생 화면 나올 터치 뷰
+                    HStack(spacing: 0) {
+                        AsyncImage(url: playerManager.playingSong()?.artwork?.url(width: 100, height: 100), content: { image in
+                            image
+                                .resizable()
+                                .frame(width: 40, height: 40)
+                                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular))
+                        }, placeholder: {
+                            RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular)
+                                .fill(.gray)
+                                .frame(width: 40, height: 40)
+                        })
+                        .padding(.leading, 25)
                         
-                        Text(playerManager.playingSong?.artistName ?? "NO ARTIST")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                            .foregroundStyle(Color(red: 0.89, green: 0.89, blue: 0.89))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
                         
-                    })
-                    .padding(.leading, 8)
+                        
+                        //노래 제목 밑 아티스트 이름 - 세로정렬
+                        VStack(spacing: 4, content: {
+                            Text(playerManager.playingSong()?.title ?? "NO TITLE")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                  
+                            
+                            Text(playerManager.playingSong()?.artistName ?? "NO ARTIST")
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                                .foregroundStyle(Color(red: 0.89, green: 0.89, blue: 0.89))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            
+                        })
+                        .padding(.leading, 8)
+                    }
+                    .onTapGesture {
+                        isPresentPlayingView = true
+                    }
+                    .fullScreenCover(isPresented: $isPresentPlayingView) {
+                        NowPlayingView()
+                    }
+                  
                     Spacer()
                     
                     if playerManager.isPlaying{

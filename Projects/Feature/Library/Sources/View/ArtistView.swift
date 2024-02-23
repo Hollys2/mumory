@@ -13,6 +13,7 @@ import MusicKit
 struct ArtistView: View {
     @EnvironmentObject private var userManager: UserViewModel
     @EnvironmentObject private var manager: LibraryManageModel
+    @EnvironmentObject private var playerManager: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero
     @State private var contentSize: CGSize = .zero
@@ -69,6 +70,9 @@ struct ArtistView: View {
                                 .foregroundStyle(ColorSet.subGray)
                             Spacer()
                             PlayAllButton()
+                                .onTapGesture {
+                                    playerManager.playAll(songs: songs)
+                                }
                         })
                         .padding(.horizontal, 20)
                         .padding(.leading, 1)
@@ -139,7 +143,6 @@ struct ArtistView: View {
     private func requestArtistSongs(offset: Int) {
         print("request")
         let artistName = artist.name
-        var rr = MusicCatalogResourceRequest<Artist>(matching: \.id, equalTo: "")
         var request = MusicCatalogSearchRequest(term: artist.name, types: [Song.self])
         request.includeTopResults = true
         request.limit = 20

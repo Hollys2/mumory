@@ -13,12 +13,12 @@ import MusicKit
 struct ChartListView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var playerManager: PlayerViewModel
     @State var contentOffset: CGPoint = .zero
-    @State var changeDetectValue: Bool = false
     @State var viewWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
     @State var songs: [Song] = []
-    @State var searchOffset = 0
+    @State var searchIndex = 0
 //    let song = Musicit
     
     let dateTextColor = Color(red: 0.51, green: 0.51, blue: 0.51)
@@ -67,7 +67,8 @@ struct ChartListView: View {
                     PlayAllButton()
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            changeDetectValue = !changeDetectValue
+                            playerManager.playAll(songs: songs)
+                            requestTop100(startIndex: searchIndex + 1)
                         }
                 }
                 .padding(.top, 20)
@@ -78,7 +79,7 @@ struct ChartListView: View {
                     .background(ColorSet.subGray)
                     .padding(.top, 15)
                 
-                ScrollWrapperWithIndex(songs: $songs, index: $searchOffset,contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
+                ScrollWrapperWithIndex(songs: $songs, index: $searchIndex, contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
                     LazyVStack(spacing: 0, content: {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
@@ -94,9 +95,9 @@ struct ChartListView: View {
                         .foregroundStyle(.clear)
                         .frame(height: 87)
                 }
-                .onChange(of: searchOffset, perform: { value in
+                .onChange(of: searchIndex, perform: { value in
                     if value < 5 {
-                        requestChart(offset: value*20)
+                        requestChart(index: value)
                     }
                 })
                 
@@ -108,7 +109,7 @@ struct ChartListView: View {
         }
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
-            requestChart(offset: 0)
+            requestChart(index: 0)
         })
     }
     
@@ -116,14 +117,15 @@ struct ChartListView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM월 dd일에 업데이트됨"
         return dateFormatter.string(from: Date())
-        
     }
     
-    private func requestChart(offset: Int){
+    private func requestChart(index: Int){
+        searchIndex = index
         //offset: 시작하는 수. 20 입력시 20등부터 40등까지 보여줌(no limit)
         Task {
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-            request.offset = offset
+            request.limit = 20
+            request.offset = index * 20
             let response = try await request.response().songCharts
             
             print("검색 성공")
@@ -134,6 +136,28 @@ struct ChartListView: View {
             songs += chart
         }
 
+    }
+    
+    private func requestTop100(startIndex: Int) {
+        self.searchIndex = 5 //재생 후 스크롤 시 증가하는 것을 막기위함
+        
+        for index in startIndex  ..< 5 {
+            Task {
+                var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
+                request.limit = 20
+                request.offset = index * 20
+                let response = try await request.response().songCharts
+                
+                print("검색 성공")
+                guard let chart = response.first?.items else {
+                    print("chart error")
+                    return
+                }
+                songs += chart
+                print("song count: \(songs.count), index: \(index)")
+                playerManager.setQueue(songs: songs)
+            }
+        }
     }
 }
 

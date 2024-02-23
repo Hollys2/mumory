@@ -13,7 +13,7 @@ import MusicKit
 struct PlaylistMusicListItem: View {
     var song: Song
     @Binding var isEditing: Bool
-    @Binding var selectedSongsForDelete: [Song]
+    @Binding var selectedSongs: [Song]
     let title = "타이틀"
     let artist = "아티스트"
     
@@ -21,29 +21,24 @@ struct PlaylistMusicListItem: View {
         
         HStack(spacing: 0, content: {
             
-            if isEditing {
-                if selectedSongsForDelete.contains(song){
-                    SharedAsset.checkCircleFill.swiftUIImage
-                        .resizable()
-                        .frame(width: 28, height: 28)
-                        .padding(.trailing, 14)
-                        .onTapGesture {
-                            DispatchQueue.main.async {
-                                selectedSongsForDelete.removeAll(where: {$0 == song})
-                            }
-                        }
-                }else {
-                    SharedAsset.checkCircle.swiftUIImage
-                        .resizable()
-                        .frame(width: 28, height: 28)
-                        .padding(.trailing, 14)
-                        .onTapGesture {
-                            DispatchQueue.main.async {
-                                selectedSongsForDelete.append(song)
-                            }
-                        }
+            //편집시에만 체크박스가 보이도록함
+            if isEditing{
+                HStack{
+                    if selectedSongs.contains(song){
+                        SharedAsset.checkCircleFill.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                    }else {
+                        SharedAsset.checkCircleDefault.swiftUIImage
+                            .resizable()
+                            .scaledToFit()                            
+                    }
                 }
+                .frame(width: 28, height: 28)
+                .padding(.trailing, 14)
+                .animation(.default, value: isEditing)
             }
+            
             
             AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
                 image
@@ -56,7 +51,7 @@ struct PlaylistMusicListItem: View {
                     .frame(width: 40, height: 40)
             }
             .padding(.trailing, 13)
-
+            
             
             VStack(content: {
                 Text(song.title)
@@ -74,20 +69,26 @@ struct PlaylistMusicListItem: View {
                     .truncationMode(.tail)
             })
             
+            //편집아닐 때 나와야하는 북마크, 메뉴 버튼
             if !isEditing {
-                Spacer()
-                SharedAsset.bookmark.swiftUIImage
-                    .frame(width: 20, height: 20)
-                    .padding(.trailing, 23)
-                
-                SharedAsset.menu.swiftUIImage
-                    .frame(width: 22, height: 22)
+                HStack(spacing: 0) {
+                    Spacer()
+                    SharedAsset.bookmark.swiftUIImage
+                        .frame(width: 20, height: 20)
+                        .padding(.trailing, 23)
+                    
+                    SharedAsset.menu.swiftUIImage
+                        .frame(width: 22, height: 22)
+                }
+                .animation(.default, value: isEditing)
+              
             }
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 15)
         .padding(.horizontal, 20)
+        
     }
 }
 

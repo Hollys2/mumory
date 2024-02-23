@@ -15,14 +15,23 @@ import MusicKit
 struct PlaylistItem_Big: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var userManager: UserViewModel
+    
     @Binding var playlist: MusicPlaylist
-    var isAddSongItem: Bool
     @Binding var isEditing: Bool
-    var radius: CGFloat = 10
+    
     @State var isDeletePupupPresent: Bool = false
+    
+    var isAddSongItem: Bool
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     var favoriteEditingTitleTextColor = Color(red: 0.6, green: 0.6, blue: 0.6)
     var favoriteEditingSubTextColor = Color(red: 0.45, green: 0.45, blue: 0.45)
+    var radius: CGFloat = 10
+
+    init(playlist: Binding<MusicPlaylist>, isAddSongItem: Bool, isEditing: Binding<Bool>) {
+        self._playlist = playlist
+        self.isAddSongItem = isAddSongItem
+        self._isEditing = isEditing
+    }
 
     @State var songs: [Song] = []
     var body: some View {
@@ -264,7 +273,6 @@ private struct AddSongItem: View {
         })
         .frame(height: 220)
         .onTapGesture {
-            UIView.setAnimationsEnabled(true)
             isPresent = true
         }
         .fullScreenCover(isPresented: $isPresent, content: {

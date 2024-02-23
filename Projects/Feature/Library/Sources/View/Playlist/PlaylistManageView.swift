@@ -58,6 +58,7 @@ struct PlaylistManageView: View {
                         CompleteButton()
                             .transition(.opacity)
                             .onTapGesture {
+                                appCoordinator.isHiddenTabBarWithoutAnimation = false
                                 withAnimation {
                                     isEditing = false
                                     appCoordinator.isHiddenTabBar = false
@@ -70,7 +71,6 @@ struct PlaylistManageView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                UIView.setAnimationsEnabled(true)
                                 isShowCreatePopup = true
                             }
                     }
@@ -94,6 +94,7 @@ struct PlaylistManageView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .opacity(isEditing ? 0 : 1)
                     .onTapGesture {
+                        appCoordinator.isHiddenTabBarWithoutAnimation = true
                         withAnimation {
                             isEditing = true
                             appCoordinator.isHiddenTabBar = true

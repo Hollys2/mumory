@@ -75,7 +75,7 @@ struct AddMusicItem: View {
         let db = Firebase.db
         
         if !originPlaylist.songIDs.contains(songID) {
-//            선택한 곡이 기존 플리에 없을 때
+            //선택한 곡이 기존 플리에 없을 때 - 추가 진행
             originPlaylist.songIDs.append(songID)
             
             let songData: [String: Any] = [
@@ -84,12 +84,12 @@ struct AddMusicItem: View {
             
             db.collection("User").document(userManager.uid).collection("Playlist").document(originPlaylist.id).setData(songData, merge: true) { error in
                 if error == nil {
-                    snackbarManager.setSnackBar(alreadExists: false)
+                    snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
                 }
             }
         }else {
-//            선택한 곡이 기존 플리에 존재할 때
-            snackbarManager.setSnackBar(alreadExists: true)
+            //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함
+            snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: originPlaylist.title)
         }
     }
     

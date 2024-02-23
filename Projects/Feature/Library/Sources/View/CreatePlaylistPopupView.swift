@@ -32,7 +32,6 @@ struct CreatePlaylistPopupView: View {
                         .frame(width: 25, height: 25)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            UIView.setAnimationsEnabled(true)
                             backgroundOpacity = 0
                             dismiss()
                         }
@@ -167,7 +166,6 @@ struct CreatePlaylistPopupView: View {
         db.collection("User").document(userManager.uid).collection("Playlist").addDocument(data: data) { error in
             if error == nil {
                 print("success")
-                UIView.setAnimationsEnabled(true)
                 dismiss()
             }
         }

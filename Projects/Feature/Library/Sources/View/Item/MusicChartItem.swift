@@ -58,7 +58,6 @@ struct MusicChartItem: View {
                     .frame(width: 22, height: 22)
                     .padding(.trailing, 15)
                     .onTapGesture {
-                        UIView.setAnimationsEnabled(true)
                         isBottomSheerPresent = true
                     }
                     .fullScreenCover(isPresented: $isBottomSheerPresent, content: {

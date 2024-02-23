@@ -15,7 +15,7 @@ struct SearchResultView: View {
     @EnvironmentObject private var manager: LibraryManageModel
     @EnvironmentObject private var userManager: UserViewModel
     
-    @Binding private var term: String
+    @Binding var term: String
     @State private var musicList: MusicItemCollection<Song> = []
     @State private var artistList: MusicItemCollection<Artist> = []
     
@@ -27,26 +27,8 @@ struct SearchResultView: View {
     @State private var requestIndex = 0
     @State private var haveToLoadNextPage: Bool = false
     
-    init(term: Binding<String>){
-        self._term = term
-    }
-    
     var body: some View {
         ZStack{
-            //부모뷰의 검색 단어가 변경될 때 마다 검색 요청
-            Text(term)
-                .opacity(0)
-                .onChange(of: term, perform: { value in
-                    localTime = 0.0
-                    requestIndex = 0
-                })
-                .onChange(of: localTime, perform: { value in
-                    if localTime == 0.8 {
-                            requestArtist(term: term)
-                            requestSong(term: term, index: 0)
-                    }
-                })
-            
             ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize){
                 VStack(spacing: 0, content: {
                     if musicList.count == 0 && artistList.count == 0 {
@@ -54,6 +36,17 @@ struct SearchResultView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.top, 130)
+                            .onChange(of: term, perform: { value in
+                                localTime = 0.0
+                                requestIndex = 0
+                            })
+                            .onChange(of: localTime, perform: { value in
+                                if localTime == 0.8 {
+                                        requestArtist(term: term)
+                                        requestSong(term: term, index: 0)
+                                }
+                            })
+                        
                     }else {
                         LazyVStack(spacing: 0, content: {
                             Text("아티스트")

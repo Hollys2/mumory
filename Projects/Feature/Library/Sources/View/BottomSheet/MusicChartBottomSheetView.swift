@@ -11,6 +11,7 @@ import MusicKit
 import Shared
 
 struct MusicChartBottomSheetView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: LibraryManageModel
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -68,6 +69,7 @@ struct MusicChartBottomSheetView: View {
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가")
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                     .onTapGesture {
+                        dismiss()
                         manager.push(destination: .saveToPlaylist(song: song))
                     }
                 BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")

@@ -15,6 +15,7 @@ struct PlaylistView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerManager: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
@@ -24,6 +25,7 @@ struct PlaylistView: View {
     @State var selectedSongsForDelete: [Song] = []
     
     @State var playlist: MusicPlaylist
+    @State var isCompletedGetSongs: Bool = false
     
     init(playlist: MusicPlaylist){
         self.playlist = playlist
@@ -66,75 +68,78 @@ struct PlaylistView: View {
                         .padding(.top, 10)
                         .opacity(playlist.isPrivate ? 1 : 0)
                         
-                        HStack(spacing: 0, content: {
-                            if isEditing {
-                                HStack(alignment: .bottom, spacing: 0, content: {
-                                    if songs.count == selectedSongsForDelete.count {
-                                        SharedAsset.checkCircleFill.swiftUIImage
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 28, height: 28)
-                                            .padding(.trailing, 14)
-                                            .onTapGesture {
-                                                DispatchQueue.main.async {
-                                                    selectedSongsForDelete = []
-                                                }
-                                            }
-                                    }else {
-                                        SharedAsset.checkCircle.swiftUIImage
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 28, height: 28)
-                                            .padding(.trailing, 14)
-                                            .onTapGesture {
-                                                DispatchQueue.main.async {
-                                                    selectedSongsForDelete = songs
-                                                }
-                                            }
-                                    }
-                                    
-                                    Text("전체선택")
-                                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                                        .foregroundStyle(Color.white)
-                                    
-                                    Spacer()
-                                })
-                                .padding(.bottom, 17)
-                            }else {
-                                HStack(alignment: .bottom,spacing: 8, content: {
-                                    Text("\(playlist.songIDs.count)곡")
-                                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                                        .foregroundStyle(ColorSet.subGray)
-                                    Spacer()
-                                    
-                                    EditButton()
+                        ZStack(alignment: .bottom){
+                            HStack(spacing: 0, content: {
+                                if songs.count == selectedSongsForDelete.count {
+                                    SharedAsset.checkCircleFill.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 28, height: 28)
+                                        .padding(.trailing, 14)
                                         .onTapGesture {
                                             DispatchQueue.main.async {
-                                                withAnimation {
-                                                    selectedSongsForDelete.removeAll()
-                                                    isEditing = true
-                                                    appCoordinator.isHiddenTabBar = true
-                                                }
+                                                selectedSongsForDelete = []
                                             }
                                         }
-                                    
-                                    PlayAllButton()
-                                })
-                                .padding(.bottom, 15)
-                            }
-                        })
+                                }else {
+                                    SharedAsset.checkCircle.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 28, height: 28)
+                                        .padding(.trailing, 14)
+                                        .onTapGesture {
+                                            DispatchQueue.main.async {
+                                                selectedSongsForDelete = songs
+                                            }
+                                        }
+                                }
+                                
+                                Text("전체선택")
+                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                                    .foregroundStyle(Color.white)
+                                
+                                Spacer()
+                            })
+                            .padding(.bottom, 17)
+                            .opacity(isEditing ? 1 : 0)
+                            
+                            HStack(alignment: .bottom,spacing: 8, content: {
+                                Text("\(playlist.songIDs.count)곡")
+                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                                    .foregroundStyle(ColorSet.subGray)
+                                Spacer()
+                                
+                                EditButton()
+                                    .onTapGesture {
+                                        self.selectedSongsForDelete.removeAll()
+                                        setEditMode(isEditing: true)
+                                    }
+                                
+                                PlayAllButton()
+                                    .onTapGesture {
+                                        playerManager.playAll(songs: songs)
+                                    }
+                            })
+                            .padding(.bottom, 15)
+                            .opacity(isEditing ? 0 : 1)
+                        }
+                        .animation(.default, value: isEditing)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 74, alignment: .bottom)
+                        .frame(height: 74)
                         .padding(.horizontal, 20)
-                        
-                        //음악 추가 버튼 - UI깨짐 때문에 잠시 주석
-                        //AddSongButtonInPlaylistView()
-                        //.frame(height: isEditing ? 0 : nil)
-                        //.opacity(isEditing ? 0 : 1)
                         
                         //플레이리스트 곡 목록
                         ForEach(songs, id: \.self) { song in
-                            PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongsForDelete: $selectedSongsForDelete)
+                            PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongs: $selectedSongsForDelete)
+                                .animation(.default, value: isEditing)
+                                .onTapGesture {
+                                    if selectedSongsForDelete.contains(song) {
+                                        selectedSongsForDelete.removeAll(where: {$0.id == song.id})
+                                    }else {
+                                        selectedSongsForDelete.append(song)
+                                    }
+                                }
+                            
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
@@ -143,9 +148,10 @@ struct PlaylistView: View {
                         
                         
                         //플레이어에 가려지는 높이만큼 채워주기
+                        //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
                         Rectangle()
                             .foregroundStyle(.clear)
-                            .frame(height: 90)
+                            .frame(height: songs.count == 0 ? 1000 : isCompletedGetSongs ? 500 : 1000)
                         
                         
                     })
@@ -176,18 +182,13 @@ struct PlaylistView: View {
                 
                 if isEditing {
                     Button(action: {
-                        DispatchQueue.main.async {
-                            withAnimation {
-                                isEditing = false
-                                appCoordinator.isHiddenTabBar = false
-                            }
-                        }
+                        setEditMode(isEditing: false)
                     }, label: {
                         Text("완료")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                             .foregroundStyle(Color.white)
+                            .frame(width: 45, height: 45)
                     })
-                    .frame(width: 45, height: 45)
                     .padding(.trailing, 20)
                     
                 }else {
@@ -221,10 +222,12 @@ struct PlaylistView: View {
                         UIView.setAnimationsEnabled(false)
                         isSongDeletePopupPresent = true
                     }
-                    .padding(.bottom, userManager.bottomInset)
+                    .padding(.bottom, userManager.bottomInset-10)
                 }
+                .transition(.opacity)
                 .fullScreenCover(isPresented: $isSongDeletePopupPresent, content: {
                     TwoButtonPopupView(title: "\(selectedSongsForDelete.count)개의 음악을 삭제하시겠습니까?", positiveButtonTitle: "음악 삭제") {
+                        // 삭제버튼 action
                         deleteSongsFromPlaylist()
                     }
                     .background(TransparentBackground())
@@ -242,67 +245,13 @@ struct PlaylistView: View {
         
     }
     
-    private func fetchSongInfo(songIDs: [String]) async {
+    private func setEditMode(isEditing: Bool) {
+        appCoordinator.isHiddenTabBarWithoutAnimation = isEditing
         withAnimation {
-            self.songs = []
-        }
-        
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                
-                withAnimation {
-                    self.songs.append(song)
-                }
-                
-                
-            } catch {
-                print("Error: \(error)")
-            }
+            self.isEditing = isEditing
+            appCoordinator.isHiddenTabBar = isEditing
         }
     }
-    
-    private func deleteSongsFromPlaylist() {
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        
-        let newSongIDs = songs.filter{ !selectedSongsForDelete.contains($0) }.map { $0.id.rawValue }
-        
-        let newData = [
-            "song_IDs" : newSongIDs
-        ]
-        
-        db.collection("User").document(userManager.uid).collection("Playlist")
-            .document(playlist.id).setData(newData, merge: true) { error in
-                if error == nil {
-                    print("successful")
-                    
-                    DispatchQueue.main.async {
-                        isSongDeletePopupPresent = false
-                        isEditing = false
-                        
-                        songs.forEach { song in
-                            if selectedSongsForDelete.contains(song){
-                                withAnimation {
-                                    songs.removeAll(where: {$0==song})
-                                }
-                            }
-                        }
-                        
-                    }
-                }
-            }
-    }
-    
     private func getPlaylist() {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
@@ -331,6 +280,60 @@ struct PlaylistView: View {
             }
         }
     }
+    
+    private func fetchSongInfo(songIDs: [String]) async {
+        self.songs = []
+        
+        for id in songIDs {
+            let musicItemID = MusicItemID(rawValue: id)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
+            
+            do {
+                let response = try await request.response()
+                
+                guard let song = response.items.first else {
+                    print("no song")
+                    continue
+                }
+                
+                withAnimation {
+                    self.songs.append(song)
+                }
+                
+                
+            } catch {
+                print("Error: \(error)")
+            }
+        }
+        
+        isCompletedGetSongs = true
+    }
+    
+    private func deleteSongsFromPlaylist() {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        
+        var newSongs = songs.filter{ !selectedSongsForDelete.contains($0) }
+        
+        let newData = [
+            "song_IDs" : newSongs.map({$0.id.rawValue})
+        ]
+        
+        db.collection("User").document(userManager.uid).collection("Playlist")
+            .document(playlist.id).setData(newData, merge: true) { error in
+                if error == nil {
+                    print("successful")
+
+                    DispatchQueue.main.async {
+                        songs = newSongs
+                        setEditMode(isEditing: false)
+                    }
+                }
+            }
+    }
+    
+
 }
 
 
@@ -438,9 +441,7 @@ private struct PlaylistImage: View {
             })
         })
         .onAppear {
-            DispatchQueue.main.async {
-                self.imageWidth = userManager.width/2
-            }
+            self.imageWidth = userManager.width/2
         }
         
     }

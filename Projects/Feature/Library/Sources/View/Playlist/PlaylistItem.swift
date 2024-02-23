@@ -223,7 +223,6 @@ private struct AddSongItem: View {
         })
         .frame(height: 215)
         .onTapGesture {
-            UIView.setAnimationsEnabled(true)
             isPresent = true
         }
         .fullScreenCover(isPresented: $isPresent, content: {

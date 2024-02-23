@@ -8,6 +8,7 @@
 
 import Foundation
 import MusicKit
+import SwiftUI
 import Shared
 
 public class LibraryManageModel: ObservableObject{
@@ -32,6 +33,7 @@ public class LibraryManageModel: ObservableObject{
         case addSong(originPlaylist: MusicPlaylist)
         case play
         case saveToPlaylist(song: Song)
+        case recommendation(genreID: Int)
     }
     
     
@@ -39,11 +41,15 @@ public class LibraryManageModel: ObservableObject{
     @Published private var stack: [LibraryPage] = [.entry(.myMusic)]
     
     func pop() {
-        page = self.stack.popLast() ?? .entry(.myMusic)
+        withAnimation {
+            page = self.stack.popLast() ?? .entry(.myMusic)
+        }
     }
     
     func push(destination: LibraryPage) {
         self.stack.append(self.page)
-        self.page = destination
+        withAnimation {
+            self.page = destination
+        }
     }
 }

@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import MusicKit
+import MediaPlayer
 
 struct PlayingInfo {
     var playingTime: TimeInterval
@@ -17,25 +18,39 @@ struct PlayingInfo {
 public class PlayerViewModel: ObservableObject {
     public init() {}
     
-    @Published var playingSong: Song?
     @Published var isMiniPlayerPresent: Bool = true
     @Published var isPlayingViewPresent: Bool = false
     @Published var isPlaying: Bool = false
     
     @Published var playingInfo: PlayingInfo = PlayingInfo(playingTime: 0.0, playbackRate: 0.0)
-    
-    private var queue: [Song] = []
+    @Published var playQueue = ApplicationMusicPlayer.shared.queue
+    @Published var queue: [Song] = []
+        
     private var player = ApplicationMusicPlayer.shared
+
+    @Published var playingTime: TimeInterval = 0.0
 
     var timer: Timer?
     
+    public func changeCurrentEntry(song: Song){
+        player.queue.currentEntry = player.queue.entries.first(where: {$0.item?.id == song.id})
+        Task {
+            do{
+                try await player.play()
+            }catch{
+                print("fail to play song: \(error)")
+            }
+        }
+    }
+    
     public func playNewSong(song: Song) {
         player.queue = [song]
+        self.queue = [song]
+        
         Task {
             do {
                 try await player.play()
                 DispatchQueue.main.async {
-                    self.playingSong = song
                     self.isPlaying = true
                     self.setPlayingTime()
                 }
@@ -44,6 +59,64 @@ public class PlayerViewModel: ObservableObject {
             }
             
         }
+    }
+    public func playAll(songs: [Song]) {
+        self.player.queue = .init(for: songs)
+        self.queue = songs
+        
+        Task {
+            do {
+                try await player.play()
+                DispatchQueue.main.async {
+                    self.isPlaying = true
+                    self.setPlayingTime()
+                }
+            } catch {
+                print("Failed to prepare to play with error: \(error).")
+            }
+            
+        }
+    }
+    
+    public func skipToPrevious() {
+        if player.playbackTime > 5 {
+            player.restartCurrentEntry()
+        }else {
+            Task{
+                do{
+                    try await player.skipToPreviousEntry()
+                }catch {
+                    print("Failed to skip previous with error: \(error).")
+                }
+            }
+        }
+    }
+    
+    public func skipToNext() {
+        Task{
+            do{
+                try await player.skipToNextEntry()
+            }catch {
+                print("Failed to skip next with error: \(error).")
+            }
+        }
+    }
+    
+    public func setQueue(songs: [Song]) {
+        print("set queue")
+        self.queue = songs
+        self.player.queue = .init(for: songs)
+    }
+    
+    public func playingSong() -> Song? {
+        guard let songID = player.queue.currentEntry?.item?.id else {
+            return queue.first(where: {$0.title == player.queue.currentEntry?.title})
+        }
+        return queue.first(where: {$0.id == songID})
+    }
+    
+    public func playbackRate() -> Double {
+        return player.playbackTime == 0.0 ? 0.0 : self.player.playbackTime / (self.playingSong()?.duration ?? 0.0)
     }
     
     public func pause() {
@@ -72,17 +145,15 @@ public class PlayerViewModel: ObservableObject {
         self.timer?.invalidate()
     }
     
-    public func endEditingSlider() {
-        player.playbackTime = playingInfo.playingTime
+    public func updatePlaybackTime(to: TimeInterval) {
+        player.playbackTime = to
         setPlayingTime()
     }
     
     private func setPlayingTime() {
-        playingInfo.playingTime = player.playbackTime
         self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
             DispatchQueue.main.async {
-                self.playingInfo.playingTime = self.player.playbackTime
-                self.playingInfo.playbackRate = self.player.playbackTime / (self.playingSong?.duration ?? 0.0)
+                self.playingTime = self.player.playbackTime
             }
         })
     }

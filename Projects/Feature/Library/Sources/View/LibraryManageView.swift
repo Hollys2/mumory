@@ -17,12 +17,11 @@ public struct LibraryManageView: View {
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     @EnvironmentObject var userManager: UserViewModel
     @StateObject var manager: LibraryManageModel = LibraryManageModel()
+    @StateObject var snackbarManager: SnackBarViewModel = SnackBarViewModel()
     
     @State var isPlaying: Bool = true
-    @State var isNeedtoRemoveSafearea: Bool = false
-    public init() {
-        
-    }
+    @State var hasToRemoveSafeArea: Bool = false
+    public init() {}
     public var body: some View {
         ZStack(alignment:.top){
             LibraryColorSet.background.ignoresSafeArea()
@@ -44,19 +43,19 @@ public struct LibraryManageView: View {
                     ArtistView(artist: artist)
                         .environmentObject(manager)
                         .onAppear(perform: {
-                            isNeedtoRemoveSafearea = true
+                            hasToRemoveSafeArea = true
                         })
                         .onDisappear(perform: {
-                            isNeedtoRemoveSafearea = false
+                            hasToRemoveSafeArea = false
                         })
                 case .artist(.fromSong(data: let song)):
                     ArtistOfSongView(song: song)
                         .environmentObject(manager)
                         .onAppear(perform: {
-                            isNeedtoRemoveSafearea = true
+                            hasToRemoveSafeArea = true
                         })
                         .onDisappear(perform: {
-                            isNeedtoRemoveSafearea = false
+                            hasToRemoveSafeArea = false
                         })
                 case .playlistManage:
                     PlaylistManageView()
@@ -69,10 +68,10 @@ public struct LibraryManageView: View {
                     PlaylistView(playlist: playlist)
                         .environmentObject(manager)
                         .onAppear(perform: {
-                            isNeedtoRemoveSafearea = true
+                            hasToRemoveSafeArea = true
                         })
                         .onDisappear(perform: {
-                            isNeedtoRemoveSafearea = false
+                            hasToRemoveSafeArea = false
                         })
                 case .shazam:
                     ShazamView()
@@ -81,20 +80,74 @@ public struct LibraryManageView: View {
                 case .addSong(originPlaylist: let originPlaylist):
                     AddPlaylistSongView(originPlaylist: originPlaylist)
                         .environmentObject(manager)
+                        .environmentObject(snackbarManager)
                 case .play:
                     NowPlayingView()
                         .environmentObject(manager)
                 case .saveToPlaylist(song: let song):
                     SaveToPlaylistView(song: song)
                         .environmentObject(manager)
+                        .environmentObject(snackbarManager)
+                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
+                case .recommendation(genreID: let genreID):
+                    RecommendationListView(genreID: genreID)
+                        .environmentObject(manager) 
+                        .onAppear(perform: {
+                            hasToRemoveSafeArea = true
+                        })
+                        .onDisappear(perform: {
+                            hasToRemoveSafeArea = false
+                        })
                 }
             })
-            .padding(.top, isNeedtoRemoveSafearea ? 0 : userManager.topInset)
+            .padding(.top, hasToRemoveSafeArea ? 0 : userManager.topInset)
             
             ColorSet.background
                 .frame(maxWidth: .infinity)
                 .frame(height: userManager.topInset)
-                .opacity(isNeedtoRemoveSafearea ? 0 : 1)
+                .opacity(hasToRemoveSafeArea ? 0 : 1)
+            
+            VStack {
+                Spacer()
+                HStack {
+                    if snackbarManager.status == .success {
+                        HStack(spacing: 0) {
+                            Text("플레이리스트")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+
+                            Text("\"\(snackbarManager.title)\"")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                .truncationMode(.tail)
+
+                            Text("에 추가되었습니다.")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                        }
+                        .lineLimit(1)
+                    }else if snackbarManager.status == .failure{
+                        HStack(spacing: 0) {
+                            Text("이미 플레이리스트")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+
+                            Text("\"\(snackbarManager.title)\"")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+
+                            Text("에 존재합니다.")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                        }
+                        .lineLimit(1)
+                        
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 41)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+                .padding(.horizontal, 20)
+                .padding(.bottom, userManager.bottomInset + 2)
+            }
+            .offset(y: snackbarManager.isPresent ? 0 : 100)
 
         }
         .onAppear(perform: {

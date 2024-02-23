@@ -25,7 +25,7 @@ public struct PlayingMusicBarView: View {
             
             //재생페이지로 넘어가는 터치 영역
             HStack(spacing: 0, content: {
-                AsyncImage(url: playerManager.playingSong?.artwork?.url(width: 100, height: 100)) { image in
+                AsyncImage(url: playerManager.playingSong()?.artwork?.url(width: 100, height: 100)) { image in
                     image
                         .resizable()
                         .scaledToFill()
@@ -42,7 +42,7 @@ public struct PlayingMusicBarView: View {
                 .padding(.trailing, 13)
 
                 
-                if playerManager.playingSong == nil {
+                if playerManager.playingSong() == nil {
                     Text("재생 중인 음악이 없습니다.")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 11))
                         .foregroundColor(.white)
@@ -51,12 +51,12 @@ public struct PlayingMusicBarView: View {
                 }else {
                     ScrollView(.horizontal) {
                         HStack(spacing: 0){
-                            Text(playerManager.playingSong?.artistName ?? "")
+                            Text(playerManager.playingSong()?.artistName ?? "")
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                 .foregroundColor(artistTextColor)
                                 .lineLimit(1)
                             
-                            Text("  •  \(playerManager.playingSong?.title ?? "")" )
+                            Text("  •  \(playerManager.playingSong()?.title ?? "")" )
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundColor(Color.white)
                                 .lineLimit(1)
@@ -69,7 +69,6 @@ public struct PlayingMusicBarView: View {
                 }
             })
             .onTapGesture {
-                UIView.setAnimationsEnabled(true)
                 isPresentPlayingView = true
             }
             .fullScreenCover(isPresented: $isPresentPlayingView, content: {
@@ -79,7 +78,7 @@ public struct PlayingMusicBarView: View {
             
             //재생버튼. 재생 여부에 따라 다르게 보여야함
             Circle()
-                .trim(from: 0, to: playerManager.playingInfo.playbackRate) //재생률에 따라 변화해야함
+                .trim(from: 0, to: playerManager.playbackRate()) //재생률에 따라 변화해야함
                 .stroke(ColorSet.mainPurpleColor, lineWidth: 2)
                 .frame(width: 26, height: 26)
                 .rotationEffect(.degrees(-90))

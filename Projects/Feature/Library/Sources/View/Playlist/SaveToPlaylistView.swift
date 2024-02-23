@@ -22,8 +22,8 @@ struct SaveToPlaylistView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var snackbarManager: SnackBarViewModel
     
-    @State var selectedPlaylist: [MusicPlaylist] = []
     @State var playlistArray: [MusicPlaylist] = []
     @State var isCreatePopupPresent: Bool = false
     var song: Song
@@ -78,7 +78,6 @@ struct SaveToPlaylistView: View {
                 .frame(height: 70)
                 .padding(.horizontal, 20)
                 .onTapGesture {
-                    UIView.setAnimationsEnabled(true)
                     isCreatePopupPresent = true
                 }
                 .fullScreenCover(isPresented: $isCreatePopupPresent) {
@@ -107,13 +106,9 @@ struct SaveToPlaylistView: View {
                 
                 LazyVStack(spacing: 0, content: {
                     ForEach(playlistArray, id: \.id) { playlist in
-                        SaveToPlaylistItem(playlist: playlist, selectedPlaylists: $selectedPlaylist)
+                        SaveToPlaylistItem(playlist: playlist)
                             .onTapGesture {
-                                if selectedPlaylist.contains(where: {$0==playlist}) {
-                                    selectedPlaylist.removeAll(where: {$0==playlist})
-                                }else {
-                                    selectedPlaylist.append(playlist)
-                                }
+                                saveSongToPlaylist(to: playlist)
                             }
                     }
                 })
@@ -123,12 +118,13 @@ struct SaveToPlaylistView: View {
         }
         .onAppear(perform: {
             getUserPlaylist()
+            appCoordinator.isHiddenTabBarWithoutAnimation = true
             withAnimation {
                 appCoordinator.isHiddenTabBar = true
             }
         })
         .onDisappear(perform: {
-            saveSongToPlaylist()
+            appCoordinator.isHiddenTabBarWithoutAnimation = false
             withAnimation {
                 appCoordinator.isHiddenTabBar = false
             }
@@ -136,37 +132,30 @@ struct SaveToPlaylistView: View {
         })
     }
     
-    private func saveSongToPlaylist()  {
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        
-        let path = db.collection("User").document(userManager.uid).collection("Playlist")
-        
-        DispatchQueue.global().async {
+    private func saveSongToPlaylist(to: MusicPlaylist)  {
+            let Firebase = FirebaseManager.shared
+            let db = Firebase.db
             
-            //기존에 해당 곡이 포함되어있는 플레이리스트였는데, 현재 페이지에서 체크를 해제한(플리에서 곡을 삭제한) 경우
-            playlistArray.forEach { playlist in
-                if !selectedPlaylist.contains(where: {$0==playlist}) {
-                    if playlist.songIDs.contains(song.id.rawValue) {
-                        var data = playlist.songIDs
-                        data.removeAll(where: {$0 == song.id.rawValue})
-                        path.document(playlist.id).setData(["song_IDs" : data], merge: true)
-                        print("good1")
-                    }
+            let path = db.collection("User").document(userManager.uid).collection("Playlist")
+            var data = to.songIDs
+            data.append(self.song.id.rawValue)
+            
+            let uploadData = [
+                "song_IDs" : data
+            ]
+            
+            path.document(to.id).setData(uploadData, merge: true) { error in
+                if error == nil {
+                    //스넥바 처리하기
+                    print("success")
+                    snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                    manager.pop()
+                    
+                }else {
+                    print("error: \(error!)")
+                    snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
                 }
             }
-            
-            //기존에 없던 노래여서 새로 추가해야하는 경우(이미 해당 곡이 있는 플리면 다시 저장하지 않음)
-            selectedPlaylist.forEach { playlist in
-                if !playlist.songIDs.contains(song.id.rawValue) {
-                    var data = playlist.songIDs
-                    data.append(song.id.rawValue)
-                    path.document(playlist.id).setData(["song_IDs" : data], merge: true)
-                    print("good2")
-                }
-            }
-        }
-      
     }
     
     private func getUserPlaylist() {
@@ -206,14 +195,8 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
-                    if songIDs.contains(where: {$0 == song.id.rawValue}) {
-                        selectedPlaylist.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false))
-                    }
-                    
                     withAnimation {
-                        if isFavorite {
-                            self.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: 0)
-                        }else {
+                        if !isFavorite {
                             self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false))
                         }
                     }
