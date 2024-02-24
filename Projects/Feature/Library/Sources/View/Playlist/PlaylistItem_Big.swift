@@ -20,6 +20,7 @@ struct PlaylistItem_Big: View {
     @Binding var isEditing: Bool
     
     @State var isDeletePupupPresent: Bool = false
+
     
     var isAddSongItem: Bool
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)

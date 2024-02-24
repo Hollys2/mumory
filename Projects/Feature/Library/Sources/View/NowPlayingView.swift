@@ -18,8 +18,12 @@ struct NowPlayingView: View {
     let durationTextColor = Color(white: 0.83)
     @State var sliderValue: CGFloat = 0.0
     @State var isPresentQueue: Bool = false
-    
+    @State private var startAnimation : Bool = false
     @State var timer: Timer?
+    
+    var delay: Double = 1.0
+    @State var animationDuration: Double = 5.0
+    @State var titleWidth: CGFloat = 0
     
     init() {
         let thumbImage = UIImage(systemName: "circle.fill")?.withTintColor(.white).resized(to: CGSize(width: 11, height: 11))
@@ -118,7 +122,7 @@ struct NowPlayingView: View {
                         .padding(.top, 19)
                         
                         //선명한 앨범 커버(정방형)
-                        AsyncImage(url: playerManager.playingSong()?.artwork?.url(width: 1000, height: 1000)) { image in
+                        AsyncImage(url: playerManager.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
                             image
                                 .resizable()
                                 .scaledToFit()
@@ -134,18 +138,44 @@ struct NowPlayingView: View {
                         //아티스트 이름 및 노래 이름, 추가버튼
                         HStack(alignment: .top, spacing: 0, content: {
                             VStack(spacing: 6, content: {
-                                Text(playerManager.playingSong()?.artistName ?? " ")
+                                Text(playerManager.currentSong?.title ?? " ")
+                                    .fixedSize()
+                                    .frame(maxWidth: 280, alignment: startAnimation ? .leading : .trailing)
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 23))
+                                    .foregroundStyle(Color.white)
+                                    .clipped()
+                                    .onAppear { 
+                                        startAnimation = true
+                                        guard let title = playerManager.currentSong?.title else {
+                                            return
+                                        }
+                                        self.animationDuration = Double(title.count) * 0.1
+                                        self.titleWidth = getTextWidth(term: title)
+//                                        self.titleWidth = textWidth > 280 ? 280 : textWidth
+                                    }
+                                    .onDisappear {self.startAnimation = false}
+                                    .animation( self.titleWidth < 280 ? nil : Animation.linear(duration: animationDuration).delay(delay).repeatForever(autoreverses: true), value: startAnimation)
+                                    .onChange(of: playerManager.currentSong) { newValue in
+                                        guard let title = newValue?.title else {
+                                            return
+                                        }
+                                        self.animationDuration = Double(title.count) * 0.1
+                                        self.titleWidth = getTextWidth(term: title)
+//                                        let textWidth = getTextWidth(term: title)
+//                                        print("text width: \(textWidth)")
+//                                        self.titleWidth = textWidth > 280 ? 280 : textWidth
+                                        
+                                    }
+                                
+
+                                
+                                Text(playerManager.currentSong?.artistName ?? " ")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 20))
                                     .foregroundStyle(artistTextColor)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                
-                                
-                                Text(playerManager.playingSong()?.title ?? " ")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 23))
-                                    .foregroundStyle(Color.white)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .frame(height: 89, alignment: .top)
+                               
                             })
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             
                             SharedAsset.addPurpleCircleFilled.swiftUIImage
                                 .resizable()
@@ -297,6 +327,12 @@ struct NowPlayingView: View {
         }
         let tvm = timeval(tv_sec: Int(time), tv_usec: 0)
         return Duration(tvm).formatted(.time(pattern: .minuteSecond))
+    }
+    
+    private func getTextWidth(term: String) -> CGFloat {
+        let fontAttribute = [NSAttributedString.Key.font: SharedFontFamily.Pretendard.semiBold.font(size: 23)]
+        let width = (term as NSString).size(withAttributes: fontAttribute).width
+        return width
     }
     
     

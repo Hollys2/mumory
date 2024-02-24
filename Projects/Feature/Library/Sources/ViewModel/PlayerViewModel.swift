@@ -25,6 +25,7 @@ public class PlayerViewModel: ObservableObject {
     @Published var playingInfo: PlayingInfo = PlayingInfo(playingTime: 0.0, playbackRate: 0.0)
     @Published var playQueue = ApplicationMusicPlayer.shared.queue
     @Published var queue: [Song] = []
+    @Published var currentSong: Song?
         
     private var player = ApplicationMusicPlayer.shared
 
@@ -52,6 +53,7 @@ public class PlayerViewModel: ObservableObject {
                 try await player.play()
                 DispatchQueue.main.async {
                     self.isPlaying = true
+                    self.currentSong = song
                     self.setPlayingTime()
                 }
             } catch {
@@ -69,6 +71,7 @@ public class PlayerViewModel: ObservableObject {
                 try await player.play()
                 DispatchQueue.main.async {
                     self.isPlaying = true
+                    self.currentSong = self.playingSong()
                     self.setPlayingTime()
                 }
             } catch {
@@ -85,6 +88,9 @@ public class PlayerViewModel: ObservableObject {
             Task{
                 do{
                     try await player.skipToPreviousEntry()
+                    DispatchQueue.main.async {
+                        self.currentSong = self.playingSong()
+                    }
                 }catch {
                     print("Failed to skip previous with error: \(error).")
                 }
@@ -96,6 +102,10 @@ public class PlayerViewModel: ObservableObject {
         Task{
             do{
                 try await player.skipToNextEntry()
+                DispatchQueue.main.async {
+                    self.currentSong = self.playingSong()
+                }
+
             }catch {
                 print("Failed to skip next with error: \(error).")
             }
@@ -154,6 +164,9 @@ public class PlayerViewModel: ObservableObject {
         self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
             DispatchQueue.main.async {
                 self.playingTime = self.player.playbackTime
+            }
+            if Int(self.player.playbackTime) == 0 {
+                self.currentSong = self.playingSong()
             }
         })
     }

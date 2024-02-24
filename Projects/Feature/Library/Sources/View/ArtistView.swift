@@ -135,6 +135,7 @@ struct ArtistView: View {
                 .background(TransparentBackground())
             })
         }
+        .ignoresSafeArea()
         .onAppear(perform: {
             requestArtistSongs(offset: 0)
         })

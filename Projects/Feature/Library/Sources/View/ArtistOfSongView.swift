@@ -32,7 +32,6 @@ struct ArtistOfSongView: View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             
-            
             AsyncImage(url: artist?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()

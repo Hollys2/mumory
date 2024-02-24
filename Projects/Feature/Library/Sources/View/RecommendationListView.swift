@@ -29,9 +29,12 @@ struct RecommendationListView: View {
     }
     var body: some View {
         ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
+
             //이미지
             PlaylistImage(songs: $songs)
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+
             
             SimpleScrollView(contentOffset: $offset) {
                 
@@ -139,6 +142,7 @@ struct RecommendationListView: View {
             
             
         }
+        .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
         })

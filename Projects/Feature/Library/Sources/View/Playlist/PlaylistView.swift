@@ -33,6 +33,8 @@ struct PlaylistView: View {
     
     var body: some View {
         ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
+
             //이미지
             PlaylistImage(songs: $songs)
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
@@ -238,6 +240,7 @@ struct PlaylistView: View {
             
             
         }
+        .ignoresSafeArea()
         .onAppear(perform: {
             getPlaylist()
         })

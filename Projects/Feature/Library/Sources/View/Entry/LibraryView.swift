@@ -31,7 +31,7 @@ struct LibraryView: View {
                             
                             //마이뮤직버튼
                             Button(action: {
-                                manager.page = .entry(.myMusic)
+                                isTapMyMusic = true
                             }, label: {
                                 Text("마이뮤직")
                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
@@ -46,7 +46,7 @@ struct LibraryView: View {
                             
                             //추천버튼
                             Button(action: {
-                                manager.page = .entry(.recomendation)
+                                isTapMyMusic = false
                             }, label: {
                                 Text("추천")
                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
