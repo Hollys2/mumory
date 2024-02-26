@@ -133,29 +133,28 @@ struct SaveToPlaylistView: View {
     }
     
     private func saveSongToPlaylist(to: MusicPlaylist)  {
-            let Firebase = FirebaseManager.shared
-            let db = Firebase.db
-            
-            let path = db.collection("User").document(userManager.uid).collection("Playlist")
-            var data = to.songIDs
-            data.append(self.song.id.rawValue)
-            
-            let uploadData = [
-                "song_IDs" : data
-            ]
-            
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        
+        let path = db.collection("User").document(userManager.uid).collection("Playlist")
+        var data = to.songIDs
+        data.append(self.song.id.rawValue)
+        
+        let uploadData = [
+            "song_IDs" : data
+        ]
+        
+        //이미 해당 플리에 있는 노래인지 판단 후 적절한 행위
+        if to.songIDs.contains(self.song.id.rawValue) {
+            snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
+        }else {
             path.document(to.id).setData(uploadData, merge: true) { error in
                 if error == nil {
-                    //스넥바 처리하기
-                    print("success")
                     snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                     manager.pop()
-                    
-                }else {
-                    print("error: \(error!)")
-                    snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
                 }
             }
+        }
     }
     
     private func getUserPlaylist() {

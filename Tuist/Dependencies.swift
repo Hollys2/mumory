@@ -37,13 +37,16 @@ func makeFrameworkSettings() -> Settings {
 
 public func makeTargetSettings() -> [String: SettingsDictionary] {
     var settings: [String: SettingsDictionary] = [:]
-    let allYourDependencyNames  = ["FirebaseStorage"] // add all other dependency names here, this is at least what I am doing
+    let allYourDependencyNames  = ["FirebaseStorage"]
+    
     allYourDependencyNames.forEach { dependency in
         settings[dependency] = makeBaseSettings()
-        settings[dependency] = [
-            "HEADER_SEARCH_PATHS": "$(inherited) $(PROJECT_DIR)/../gtm-session-fetcher/Sources/Core/Public"
-        ]
     }
+    
+    settings["FirebaseStorage"] = [
+        "OTHER_LDFLAGS" : "-ObjC",
+        "HEADER_SEARCH_PATHS": "$(inherited) $(PROJECT_DIR)/../gtm-session-fetcher/Sources/Core/Public"
+    ]
 
     return settings
 }

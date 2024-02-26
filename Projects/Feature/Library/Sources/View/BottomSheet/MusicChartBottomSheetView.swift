@@ -61,19 +61,19 @@ struct MusicChartBottomSheetView: View {
                     .background(lineGray)
                     .padding(.horizontal, 4)
                 
-                BottomSheetItem(image: SharedAsset.artist.swiftUIImage, title: "아티스트 노래 목록 보기")
+                BottomSheetItem(image: SharedAsset.artist.swiftUIImage, title: "아티스트 노래 목록 보기", type: .normal)
                     .onTapGesture {
                         manager.push(destination: .artist(.fromSong(data: song)))
                     }
-                BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
-                BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가")
-                BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
+                BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가", type: .normal)
+                BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .normal)
+                BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가", type: .normal)
                     .onTapGesture {
                         dismiss()
                         manager.push(destination: .saveToPlaylist(song: song))
                     }
-                BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
-                BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기", type: .normal)
+                BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고", type: .normal)
                 
             })
             .padding(.bottom, 15)

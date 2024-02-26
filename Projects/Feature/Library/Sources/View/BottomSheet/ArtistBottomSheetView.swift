@@ -49,9 +49,9 @@ struct ArtistBottomSheetView: View {
                 .background(lineGray)
                 .padding(.horizontal, 4)
             
-            BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
-            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
-            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+            BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가", type: .normal)
+            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기", type: .normal)
+            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고", type: .normal)
            
         })
         .background(ColorSet.background)

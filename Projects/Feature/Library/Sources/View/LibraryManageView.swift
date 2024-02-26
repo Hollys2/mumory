@@ -115,15 +115,25 @@ public struct LibraryManageView: View {
                 HStack {
                     if snackbarManager.status == .success {
                         HStack(spacing: 0) {
-                            Text("플레이리스트")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            HStack(spacing: 0, content: {
+                                Text("플레이리스트")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                
+                                Text("\"\(snackbarManager.title)")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                
+                                Text("\"")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                
+                                Text("에 추가되었습니다.")
+                                    .fixedSize()
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            })
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
                             
-                            Text("\"\(snackbarManager.title)\"")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                .truncationMode(.tail)
-                            
-                            Text("에 추가되었습니다.")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             
                             Text("실행취소")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
@@ -131,20 +141,27 @@ public struct LibraryManageView: View {
                                 .foregroundStyle(ColorSet.mainPurpleColor)
                         }
                         .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
                     }else if snackbarManager.status == .failure{
                         HStack(spacing: 0) {
                             Text("이미 플레이리스트")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             
-                            Text("\"\(snackbarManager.title)\"")
+                            Text("\"\(snackbarManager.title)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                                 .lineLimit(1)
                                 .truncationMode(.tail)
                             
+                            Text("\"")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            
                             Text("에 존재합니다.")
+                                .fixedSize()
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                         }
                         .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         
                     }
                 }

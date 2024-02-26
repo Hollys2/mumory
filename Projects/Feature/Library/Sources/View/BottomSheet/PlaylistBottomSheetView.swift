@@ -38,16 +38,16 @@ struct PlaylistBottomSheetView: View {
                 .background(lineGray)
                 .padding(.horizontal, 4)
             
-            BottomSheetItem(image: SharedAsset.editPlaylist.swiftUIImage, title: "플레이리스트 이름 수정")
+            BottomSheetItem(image: SharedAsset.editPlaylist.swiftUIImage, title: "플레이리스트 이름 수정", type: .normal)
             
-            BottomSheetItem(image: SharedAsset.addMusic.swiftUIImage, title: "음악 추가")
+            BottomSheetItem(image: SharedAsset.addMusic.swiftUIImage, title: "음악 추가", type: .normal)
                 .onTapGesture {
                     dismiss()
                     manager.push(destination: .addSong(originPlaylist: playlist))
                 }
-            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
-            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트에 삭제")
-            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기", type: .normal)
+            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트에 삭제", type: .warning)
+            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고", type: .normal)
             
         })
         .padding(.bottom, 15)
