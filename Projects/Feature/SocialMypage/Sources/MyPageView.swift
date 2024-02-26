@@ -15,25 +15,28 @@ struct MyPageView: View {
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
-         
-            VStack(spacing: 0, content: {
-                UserInfoView()
-                
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(lineGray)
-                
-                FriendView()
-                
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(lineGray)
-                
-                
-                
-            })
+            ScrollView{
+                VStack(spacing: 0, content: {
+                    UserInfoView()
+                    
+                    Divider()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 0.5)
+                        .background(lineGray)
+                    
+                    FriendView()
+                    
+                    Divider()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 0.5)
+                        .background(lineGray)
+                    
+                    MyMumori()
+                    
+                    
+                    
+                })
+            }
             .ignoresSafeArea()
 
 
@@ -107,6 +110,7 @@ struct UserInfoView: View {
                 .foregroundStyle(ColorSet.subGray)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
+                .lineLimit(2)
             
             HStack(spacing: 8, content: {
                 SharedAsset.editProfile.swiftUIImage
@@ -150,15 +154,54 @@ struct FriendView: View {
             .frame(height: 67)
             
             ScrollView(.horizontal) {
-                LazyHStack(spacing: 12, content: {
+                HStack(spacing: 12, content: {
                     ForEach(0 ..< 10, id: \.self) { int in
                         FriendHorizontalItem()
                     }
                 })
                 .padding(.horizontal, 20)
             }
-            .frame(height: 90)
+            .scrollIndicators(.hidden)
             .padding(.bottom, 37)
+        })
+    }
+}
+
+struct MyMumori: View {
+    @State var list: [Int] = [1,1,1,1,1]
+    var body: some View {
+        VStack(spacing: 0, content: {
+            HStack(spacing: 0, content: {
+                Text("나의 뮤모리")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                    .foregroundStyle(Color.white)
+                
+                Spacer()
+                
+                Text("\(list.count)")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(ColorSet.charSubGray)
+                    .padding(.trailing, 3)
+                
+                SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .frame(width: 17, height: 17)
+                    .scaledToFit()
+            })
+            .padding(.horizontal, 20)
+            .frame(height: 67)
+            
+            ScrollView(.horizontal) {
+                HStack(spacing: 11, content: {
+                    ForEach(list, id: \.self) { index in
+                        MyMumoriItem()
+                    }
+                })
+                .padding(.horizontal, 20)
+
+            }
+            .scrollIndicators(.hidden)
+            .padding(.bottom, 40)
         })
     }
 }

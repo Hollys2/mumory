@@ -27,6 +27,7 @@ struct FriendHorizontalItem: View {
                     .frame(width: 55, height: 55)
                     .scaledToFill()
             }
+            
             Text(nickname)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                 .foregroundStyle(Color.white)
