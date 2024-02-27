@@ -14,8 +14,6 @@ import MusicKit
 struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
-//    @State var recommendationSongList: [Int: [Song]] = [:]
-//    @State var recommendationIDList: [Int: [String]] = [:]
     @State var isEditGenreViewPresent: Bool = false
     
     var body: some View {
@@ -85,6 +83,7 @@ struct FavoriteGenreRecommendationView: View {
 
 private struct RecommendationScrollView: View {
     @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var playerManager: PlayerViewModel
     @State var songs: [Song] = []
     @State var songIDs: [String] = []
     let genreID: Int
@@ -103,6 +102,9 @@ private struct RecommendationScrollView: View {
                 LazyHStack (spacing: 0){
                     ForEach(songs, id: \.self){ song in
                         RecommendationMusicItem(song: song)
+                            .onTapGesture {
+                                playerManager.playNewSong(song: song)
+                            }
                     }
                 }
                 .padding(.leading, 20)

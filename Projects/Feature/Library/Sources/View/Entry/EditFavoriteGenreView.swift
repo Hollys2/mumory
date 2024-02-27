@@ -13,60 +13,81 @@ import Core
 struct EditFavoriteGenreView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var userManager: UserViewModel
-    
     @State var selectedGenres: [Int] = []
+    
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
-            VStack(alignment:.center, spacing: 0) {
+            
+            ScrollView(.vertical) {
+                Text("선택항목 \(selectedGenres.count)개")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(ColorSet.subGray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20)
+                    .padding(.top, 30 + 118)
                 
-                TopBar(leftButton: nil, title: "장르", rightButton: SharedAsset.xWhite.swiftUIImage, leftButtonAction: nil ) {
-                    dismiss()
-                }
-                .frame(maxWidth: userManager.width)
-                
-                ScrollView(.vertical) {
-                    Text("선택항목 \(userManager.favoriteGenres.count)개")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .foregroundStyle(ColorSet.subGray)
+                VStack(spacing: 13, content: {
+                    ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: userManager.width), id: \.self){ genreList in
+                        HStack(spacing: 9, content: {
+                            ForEach(genreList, id: \.self){ genre in
+                                Text(genre.name)
+                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                                    .padding(.horizontal, 19)
+                                    .padding(.vertical, 8)
+                                    .background(contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
+                                    .foregroundStyle(contains(genre: genre) ? Color.black : ColorSet.lightGray)
+                                    .overlay(content: {
+                                        RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
+                                            .stroke(ColorSet.lightGray, lineWidth: contains(genre: genre) ? 0 : 1)
+                                    })
+                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
+                                    .onTapGesture {
+                                        addOrDelete(genre: genre)
+                                    }
+                                
+                            }
+                        })
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 20)
-                        .padding(.top, 30)
-                    
-                    VStack(spacing: 13, content: {
-                        ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: userManager.width), id: \.self){ genreList in
-                            HStack(spacing: 9, content: {
-                                ForEach(genreList, id: \.self){ genre in
-                                    Text(genre.name)
-                                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
-                                        .padding(.horizontal, 19)
-                                        .padding(.vertical, 8)
-                                        .background(contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-                                        .foregroundStyle(contains(genre: genre) ? Color.black : ColorSet.lightGray)
-                                        .overlay(content: {
-                                            RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                                .stroke(ColorSet.lightGray, lineWidth: contains(genre: genre) ? 0 : 1)
-                                        })
-                                        .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
-                                        .onTapGesture {
-                                            addOrDelete(genre: genre)
-                                        }
-                                    
-                                }
-                            })
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 20)
-                        }
-                    })
-                    .padding(.top, 30)
-                    
-                    Rectangle()
-                        .frame(height: 150)
-                        .foregroundStyle(.clear)
-                }
+                        .padding(.horizontal, 20)
+                    }
+                })
+                .padding(.top, 20)
                 
-                
+                Rectangle()
+                    .foregroundStyle(Color.clear)
+                    .frame(width: 10, height: 150)
             }
+            .ignoresSafeArea()
+                
+            
+            HStack(alignment: .center, spacing: 0) {
+                Rectangle()
+                    .foregroundStyle(Color.clear)
+                    .frame(width: 30, height: 30)
+                Spacer()
+                Text("장르")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                    .foregroundStyle(Color.white)
+                    
+                Spacer()
+                SharedAsset.xWhite.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        dismiss()
+                    }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 70, alignment: .center)
+            .padding(.horizontal, 20)
+            .padding(.top, userManager.topInset)
+            .background(ColorSet.background.opacity(0.9))
+            .padding(.bottom, 5)
+            .ignoresSafeArea()
+      
+            
             VStack{
                 Spacer()
                 Button {
@@ -93,7 +114,6 @@ struct EditFavoriteGenreView: View {
         ]
         
         db.collection("User").document(userManager.uid).setData(data, merge: true) { error in
-            
             if error == nil {
                 userManager.favoriteGenres = selectedGenres
                 dismiss()

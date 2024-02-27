@@ -52,6 +52,9 @@ struct PlayQueueTestView: View {
                                      Spacer()
  
                                      SharedAsset.downArrow.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 50, height: 30)
                                          .onTapGesture {
                                              withAnimation {
                                                  playlist[index].isClosed.toggle()

@@ -116,7 +116,9 @@ struct PlaylistManageView: View {
                 .padding(.top, isEditing ? 0 : 10)
                 .scrollIndicators(.hidden)
                 
-                Spacer()
+                Rectangle()
+                    .foregroundStyle(Color.clear)
+                    .frame(height: 90)
             }
 
         }

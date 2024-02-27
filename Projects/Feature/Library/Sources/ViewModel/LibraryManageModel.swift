@@ -12,44 +12,61 @@ import SwiftUI
 import Shared
 
 public class LibraryManageModel: ObservableObject{
-    public init(){}
-    enum entrySubView {
-        case myMusic
-        case recomendation
-    }
-    
-    enum artistParameter {
-        case fromArtist(data: Artist)
-        case fromSong(data: Song)
-    }
-    enum LibraryPage{
-        case entry(entrySubView)
-        case chart
-        case search(term: String)
-        case playlistManage
-        case artist(artistParameter)
-        case playlist(playlist: MusicPlaylist)
-        case shazam
-        case addSong(originPlaylist: MusicPlaylist)
-        case play
-        case saveToPlaylist(song: Song)
-        case recommendation(genreID: Int)
-    }
-    
-    
-    @Published var page: LibraryPage = .entry(.myMusic)
-    @Published private var stack: [LibraryPage] = [.entry(.myMusic)]
-    
+    @Published public var page: LibraryPage = .entry
+    @Published public var isPop: Bool = false
+    @Published public var stack: [LibraryPage] = [.entry]
+    @Published public var xOffset: CGFloat = .zero
+    public var width: CGFloat = .zero
+    public init() {}
     func pop() {
-        withAnimation {
-            page = self.stack.popLast() ?? .entry(.myMusic)
+        DispatchQueue.main.async {
+            withAnimation(.spring(duration: 0.2)){
+                self.xOffset = self.width
+            }
+        }
+
+        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+            DispatchQueue.main.async {
+                _ = self.stack.popLast()
+                self.xOffset = 0
+            }
         }
     }
     
     func push(destination: LibraryPage) {
-        self.stack.append(self.page)
-        withAnimation {
-            self.page = destination
+        DispatchQueue.main.async {
+            withAnimation(.spring(duration: 0.2)){
+                self.stack.append(destination)
+            }
         }
+
     }
 }
+
+enum entrySubView {
+    case myMusic
+    case recomendation
+}
+
+
+enum moveStatus {
+    case pop
+    case push
+}
+
+
+public enum LibraryPage{
+    
+    case entry
+    case chart
+    case search(term: String)
+    case playlistManage
+    case artist(artist: Artist)
+    case playlist(playlist: MusicPlaylist)
+    case shazam
+    case addSong(originPlaylist: MusicPlaylist)
+    case play
+    case saveToPlaylist(songs: [Song])
+    case recommendation(genreID: Int)
+}
+

@@ -10,23 +10,28 @@ import SwiftUI
 import Shared
 import MusicKit
 
-struct PlaylistBottomSheetView: View {
+struct RecommendationBottomSheetView: View {
+    var songs: [Song]
+    var title: String
+    init(songs: [Song], title: String) {
+        self.songs = songs
+        self.title = title
+    }
+    
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
-    @State var playlist: MusicPlaylist
-    @State var songs: [Song]
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(alignment: .center,spacing: 10,content: {
                 MiniPlaylistImage(songs: songs)
                 
-                
-                Text(playlist.title)
+                Text(title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
                     .truncationMode(.tail)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -38,15 +43,12 @@ struct PlaylistBottomSheetView: View {
                 .background(lineGray)
                 .padding(.horizontal, 4)
             
-            BottomSheetItem(image: SharedAsset.editPlaylist.swiftUIImage, title: "플레이리스트 이름 수정")
-            
-            BottomSheetItem(image: SharedAsset.addMusic.swiftUIImage, title: "음악 추가")
+            BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                 .onTapGesture {
                     dismiss()
-                    manager.push(destination: .addSong(originPlaylist: playlist))
+                    manager.push(destination: .saveToPlaylist(songs: songs))
                 }
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
-            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트에 삭제", type: .warning)
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
             
         })
@@ -54,10 +56,6 @@ struct PlaylistBottomSheetView: View {
         .background(ColorSet.background)
     }
 }
-
-//#Preview {
-//    PlaylistBottomSheetView()
-//}
 
 private struct MiniPlaylistImage: View {
     var songs: [Song]

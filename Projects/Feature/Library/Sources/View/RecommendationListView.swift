@@ -23,15 +23,20 @@ struct RecommendationListView: View {
     @State var songs: [Song] = []
     @State var isCompletedGetSongs: Bool = false
     let genreID: Int
+    let title: String
     
     init(genreID: Int) {
         self.genreID = genreID
+        self.title = "\(MusicGenreHelper().genreName(id: genreID)) 추천곡"
     }
     var body: some View {
         ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
+
             //이미지
             PlaylistImage(songs: $songs)
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+
             
             SimpleScrollView(contentOffset: $offset) {
                 
@@ -43,7 +48,7 @@ struct RecommendationListView: View {
                         .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
-                        Text("\(MusicGenreHelper().genreName(id: genreID)) 추천곡")
+                        Text(title)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                             .frame(width: userManager.width, alignment: .center)
                             .multilineTextAlignment(.center)
@@ -64,7 +69,7 @@ struct RecommendationListView: View {
                             
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(songs: songs)
+                                    playerManager.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
                                 }
                         })
                         .padding(.horizontal, 20)
@@ -74,7 +79,10 @@ struct RecommendationListView: View {
                         
                         //추천 곡 목록
                         ForEach(songs, id: \.self) { song in
-                            MusicListItem(song: song)
+                            MusicListItem(song: song, type: .normal)
+                                .onTapGesture {
+                                    playerManager.playNewSong(song: song)
+                                }
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
@@ -94,7 +102,6 @@ struct RecommendationListView: View {
                     .background(ColorSet.background)
                     
                     
-                    
                 })
                 .frame(width: userManager.width)
                 .frame(minHeight: userManager.height)
@@ -104,7 +111,7 @@ struct RecommendationListView: View {
             
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
-                SharedAsset.back.swiftUIImage
+                SharedAsset.backGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
@@ -115,30 +122,24 @@ struct RecommendationListView: View {
                 Spacer()
                 
                 
-                SharedAsset.menuWhite.swiftUIImage
+                SharedAsset.menuGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
                     .onTapGesture {
                         isBottomSheetPresent = true
                     }
-                
-                
             })
             .frame(height: 50)
             .padding(.top, userManager.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    //
+                    RecommendationBottomSheetView(songs: songs, title: title)
                 }
                 .background(TransparentBackground())
             })
-            
-            
-            
-            
-            
         }
+        .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
         })

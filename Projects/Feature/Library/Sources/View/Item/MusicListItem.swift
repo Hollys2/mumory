@@ -10,12 +10,26 @@ import SwiftUI
 import Shared
 import MusicKit
 
+enum SongItemType {
+    case normal
+    case artist
+}
 struct MusicListItem: View {
     var song: Song
-
-    let title = "타이틀"
-    let artist = "아티스트"
+    var type: SongItemType = .normal
     
+    init(song: Song, type: SongItemType) {
+        self.song = song
+        self.type = type
+    }
+    
+    init(song: Song){
+        self.song = song
+    }
+    
+    @State var isPresentBottomSheet: Bool = false
+
+        
     var body: some View {
         
         HStack(spacing: 0, content: {
@@ -55,6 +69,18 @@ struct MusicListItem: View {
             
             SharedAsset.menu.swiftUIImage
                 .frame(width: 22, height: 22)
+                .onTapGesture {
+                    isPresentBottomSheet = true
+                }
+                .fullScreenCover(isPresented: $isPresentBottomSheet) {
+                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                        //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거
+                        //현재 MusicListItem은 북마크 버튼이 있는 아이템이라 즐겨찾기 추가 버튼이 음악 아이템 내부에 원래 있음
+                        SongBottomSheetView(song: song,
+                                            types: type == .artist ? [.withoutArtist, .withoutBookmark] : [.withoutBookmark])
+                    }
+                    .background(TransparentBackground())
+                }
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -14,27 +14,31 @@ import KakaoSDKUser
 import KakaoSDKAuth
 import GoogleSignIn
 import FirebaseMessaging
+import Core
+//import RealmSwift
 
 public class AppDelegate: NSObject, UIApplicationDelegate{
 
     public func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        print("launch in appdelegate")
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
-
         
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-               UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, _ in
-                       if granted {
-                           print("알림 등록이 완료되었습니다.")
-                       }
-                   }
-               application.registerForRemoteNotifications()
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, _ in
+            if granted {
+                print("알림 등록이 완료되었습니다.")
+            }
+        }
+        application.registerForRemoteNotifications()
         
         //테스트용 키. 추후에 원본 키로 수정하기
         KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
+        
+        _ = RealmManager.init()
+        
+        
         return true
     }
     
