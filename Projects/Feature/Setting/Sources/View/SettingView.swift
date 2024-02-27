@@ -18,7 +18,8 @@ import Lottie
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject var manager: SettingViewModel = SettingViewModel()
+//    @StateObject var manager: SettingViewModel = SettingViewModel()
+    @EnvironmentObject var userManager: UserViewModel
     @StateObject var withdrawManager: WithdrawViewModel = WithdrawViewModel()
     @State var isLogout: Bool = false
     @State var isShowingWithdrawPopup = false
@@ -30,10 +31,6 @@ struct SettingView: View {
     
     var body: some View {
         //테스트때문에 navigationStack 추가함. 이후 삭제하기
-        
-        
-        
-        
         GeometryReader { geometry in
             
             ZStack{
@@ -43,7 +40,6 @@ struct SettingView: View {
                         //설정 버튼들
                         NavigationLink{
                             AccountManageView()
-                                .environmentObject(manager)
                         }label: {
                             SettingItem(title: "계정 정보 / 보안")
                                 .padding(.top, 12)
@@ -51,7 +47,6 @@ struct SettingView: View {
                         
                         NavigationLink {
                             NotificationView()
-                                .environmentObject(manager)
                             
                         } label: {
                             SettingItem(title: "알림")
@@ -59,7 +54,6 @@ struct SettingView: View {
                         
                         NavigationLink {
                             QuestionView()
-                                .environmentObject(manager)
                         } label: {
                             SettingItem(title: "1:1 문의")
                             
@@ -71,10 +65,13 @@ struct SettingView: View {
                         Spacer()
                         Button {
                             //로그아웃
-                            UserDefaults.standard.removeObject(forKey: "uid")
-                            try? FirebaseManager.shared.auth.signOut()
-                            print("로그아웃 완료")
-                            isLogout = true
+                            do {
+                                try FirebaseManager.shared.auth.signOut()
+                                print("로그아웃 완료")
+                                isLogout = true
+                            }catch {
+                                print("signout error: \(error)")
+                            }
                             
                         } label: {
                             Text("로그아웃")
@@ -113,7 +110,6 @@ struct SettingView: View {
                     .navigationDestination(isPresented: $isNeededEmailLogin, destination: {
                         EmailLoginForWithdrawView()
                             .environmentObject(withdrawManager)
-                            .environmentObject(manager)
                     })
                     .navigationDestination(isPresented: $isLogout, destination: {
                         LoginView()
@@ -164,7 +160,7 @@ struct SettingView: View {
                         
                     } positiveAction: {
                         //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
-                        withdraw(method: manager.signinMethod)
+                        withdraw(method: userManager.signInMethod)
                         
                     }
                 }
@@ -174,11 +170,7 @@ struct SettingView: View {
                     .opacity(isLoading ? 1 : 0)
                     .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
                 
-            }
-            .onAppear(perform: {
-                    getUserInfo()
-            })
-            
+            }            
             
             
             
@@ -225,17 +217,17 @@ struct SettingView: View {
     private func withdraw(method: String){
         isLoading = true
         isShowingWithdrawPopup = false
-        if manager.signinMethod == "Apple" {
+        if method == "Apple" {
             withdrawManager.AppleLogin()
-        }else if manager.signinMethod == "Google" {
-            withdrawManager.GoogleLogin(originalEmail: manager.email) { isSuccessful in
+        }else if method == "Google" {
+            withdrawManager.GoogleLogin(originalEmail: userManager.email) { isSuccessful in
                 deleteUser(isSuccessful: isSuccessful)
             }
-        }else if manager.signinMethod == "Kakao" {
-            withdrawManager.KakaoLogin(originalEmail: manager.email) { isSuccessful in
+        }else if method == "Kakao" {
+            withdrawManager.KakaoLogin(originalEmail: userManager.email) { isSuccessful in
                 deleteUser(isSuccessful: isSuccessful)
             }
-        }else if manager.signinMethod == "Email" {
+        }else if method == "Email" {
             isLoading = false
             isShowingWithdrawPopup = false
             isNeededEmailLogin = true
@@ -273,70 +265,6 @@ struct SettingView: View {
             
         }
     }
-    
-    private func getUserInfo(){
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        let auth = Firebase.auth
-        
-        if let currentUser = auth.currentUser {
-            let query = db.collection("User").document(currentUser.uid)
-            
-            query.getDocument { snapshot, error in
-                if let error = error {
-                    print("firestore error: \(error)")
-                }else if let snapshot = snapshot {
-                    guard let documentData = snapshot.data() else {
-                        print("no document")
-                        return
-                    }
-                    
-                    guard let email = documentData["email"] as? String else {
-                        print("no email")
-                        return
-                    }
-                    self.manager.email = email
-                    
-                    guard let method = documentData["signin_method"] as? String else {
-                        print("no method")
-                        return
-                    }
-                    self.manager.signinMethod = method
-                    
-                    guard let selectedTime = documentData["selected_notification_time"] as? Int else {
-                        print("no time")
-                        return
-                    }
-                    self.manager.selectedNotificationTime = selectedTime
-                    
-                    guard let isCheckdServiceNewsNotification = documentData["is_checked_service_news_notification"] as? Bool else {
-                        print("no service notification")
-                        return
-                    }
-                    self.manager.isCheckedServiceNewsNotification = isCheckdServiceNewsNotification
-                    
-                    guard let isCheckdSocialNotification = documentData["is_checked_social_notification"] as? Bool else {
-                        print("no social notification")
-                        return
-                    }
-                    self.manager.isCheckedSocialNotification = isCheckdSocialNotification
-                    
-                    guard let nickname = documentData["nickname"] as? String else {
-                        print("no nickname")
-                        return
-                    }
-                    self.manager.nickname = nickname
-                    
-                    
-                    
-                }
-            }
-            
-        }else {
-            //재로그인
-        }
-    }
-    
 }
 
 #Preview {

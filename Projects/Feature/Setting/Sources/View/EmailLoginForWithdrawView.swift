@@ -13,7 +13,7 @@ import Lottie
 
 struct EmailLoginForWithdrawView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @State var email: String = ""
     @State var password: String = ""

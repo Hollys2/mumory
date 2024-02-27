@@ -19,7 +19,7 @@ enum time{
 
 struct SelectNotificationTimeView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
 
     @State var selectIndex: Int = 0
     

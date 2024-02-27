@@ -17,7 +17,7 @@ enum notificationCategory {
 
 struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
 
     @State var isEntireButtonOn: Bool = false
     @State var isEntireOn: Bool = false
@@ -78,7 +78,6 @@ struct NotificationView: View {
                 //알림 시각 아이템
                 NavigationLink {
                     SelectNotificationTimeView()
-                        .environmentObject(manager)
                     
                 } label: {
                     HStack(spacing: 0, content: {
@@ -86,7 +85,7 @@ struct NotificationView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                             .foregroundStyle(.white)
                         Spacer()
-                        Text(manager.getNotificationTimeText())
+                        Text(getNotificationTimeText(timeRage: userManager.selectedNotificationTime))
                             .foregroundStyle(ColorSet.mainPurpleColor)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                     })
@@ -127,15 +126,91 @@ struct NotificationView: View {
             }
         }
         .onAppear(perform: {
-            isSocialOn = manager.isCheckedSocialNotification
-            isServiceOn = manager.isCheckedServiceNewsNotification
+            isSocialOn = userManager.isCheckedSocialNotification ?? false
+            isServiceOn = userManager.isCheckedServiceNewsNotification ?? false
         })
         .onDisappear(perform: {
-            manager.isCheckedSocialNotification = isSocialOn
-            manager.isCheckedServiceNewsNotification = isServiceOn
-            manager.subscribeTopicAndUpdateUserData()
+            userManager.isCheckedSocialNotification = isSocialOn
+            userManager.isCheckedServiceNewsNotification = isServiceOn
+            subscribeTopicAndUpdateUserData()
         })
     }
+    
+    public func getNotificationTimeText(timeRage: Int) -> String {
+        switch(timeRage){
+        case 1: return "아침  6:00AM ~ 11:00AM"
+        case 2: return "점심  11:00AM ~ 4:00PM"
+        case 3: return "저녁  4:00PM ~ 9:00PM"
+        case 4: return "밤  9:00PM ~ 2:00AM"
+        case 5: return "이용 시간대를 분석해 자동으로 설정"
+        default : return "시간을 설정해주세요"
+        }
+    }
+    
+    public func subscribeTopicAndUpdateUserData() {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let messaging = Firebase.messaging
+        let auth = Firebase.auth
+
+        guard let currentUser = auth.currentUser else {
+            print("no current user. please sign in again")
+            return
+        }
+        
+        //소셜 알림 설정
+        if userManager.isCheckedSocialNotification ?? false {
+            messaging.subscribe(toTopic: "SOCIAL") { error in
+                if let error = error {
+                    print("subscribe error: \(error)")
+                }else{
+                    print("'Social' subscribe successful")
+                }
+            }
+        }else {
+            messaging.unsubscribe(fromTopic: "SOCIAL") { error in
+                if let error = error {
+                    print("unsubscribe error: \(error)")
+                }else{
+                    print("'Social' unsubscribe successful")
+                }
+            }
+        }
+        
+        //서비스 소식 알림 설정
+        if userManager.isCheckedServiceNewsNotification ?? false{
+            messaging.subscribe(toTopic: "SERVICE") { error in
+                if let error = error {
+                    print("subscribe error: \(error)")
+                }else {
+                    print("'Service' subscribe successful")
+                }
+            }
+        }else {
+            messaging.unsubscribe(fromTopic: "SERVICE") { error in
+                if let error = error {
+                    print("unsubscribe error: \(error)")
+                }else{
+                    print("'Service' unsubscribe successful")
+                }
+            }
+        }
+        
+        let userData = [
+//            "is_checked_service_news_notification" : userManager.isCheckedServiceNewsNotification ?? false,
+//            "is_checked_social_notification": isCheckedSocialNotification
+        ]
+        
+        let query = db.collection("User").document(currentUser.uid)
+        query.setData(userData, merge: true) { error in
+            if let error = error {
+                print("set Data error: \(error)")
+            }
+        }
+        
+        
+    }
+
 }
 
 #Preview {

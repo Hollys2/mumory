@@ -12,7 +12,7 @@ import Core
 
 struct AccountManageView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
     var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()

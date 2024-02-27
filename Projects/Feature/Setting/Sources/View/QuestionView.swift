@@ -12,7 +12,7 @@ import Core
 import Lottie
 
 struct QuestionView: View {
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
     @Environment(\.dismiss) private var dismiss
     let placeHolder = "내용을 입력하세요."
     @State var title: String = ""
@@ -27,7 +27,6 @@ struct QuestionView: View {
     }
     
     var body: some View {
-        GeometryReader(content: { geometry in
             
             ZStack{
                 ColorSet.background.ignoresSafeArea()
@@ -41,7 +40,7 @@ struct QuestionView: View {
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                                 .foregroundStyle(.white)
                             
-                            Text(manager.nickname)
+                            Text(userManager.nickname)
                                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
                                 .foregroundStyle(ColorSet.charSubGray)
                                 .padding(.leading, 14)
@@ -57,7 +56,7 @@ struct QuestionView: View {
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                                 .foregroundStyle(.white)
                             
-                            Text(verbatim: manager.email)
+                            Text(verbatim: userManager.email)
                                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
                                 .foregroundStyle(ColorSet.charSubGray)
                                 .padding(.leading, 14)
@@ -80,7 +79,7 @@ struct QuestionView: View {
                             .padding(.leading, 20)
                             .padding(.trailing, 20)
                             .padding(.top, 20)
-                            
+                        
                         
                         
                         TextEditor(text: $content)
@@ -100,30 +99,30 @@ struct QuestionView: View {
                                     content = content.replacingOccurrences(of: placeHolder, with: "")
                                 }
                             }
-                       
-                           
-                           
-                           Button(action: {
-                        uploadQuestion()
-                    }, label: {
-                        WhiteButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0)
-                            .padding(.leading, 20)
-                            .padding(.trailing, 20)
+                        
+                        
+                        
+                        Button(action: {
+                            uploadQuestion()
+                        }, label: {
+                            WhiteButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0)
+                                .padding(.leading, 20)
+                                .padding(.trailing, 20)
+                        })
+                        .padding(.top, 87)
+                        .disabled(!(title.count > 0 && content.count > 0))
+                        
+                        
+                        
+                        
+                        Spacer()
                     })
-                            .padding(.top, 87)
-                            .disabled(!(title.count > 0 && content.count > 0))
-                           
-                           
-                           
-                           
-                           Spacer()
-                           })
                 }
                 
                 LottieView(animation: .named("loading", bundle: .module))
                     .looping()
                     .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                    .frame(width: userManager.width * 0.2, height: userManager.width * 0.2)
             }
             .navigationBarBackButtonHidden()
             .toolbarBackground(ColorSet.background, for: .navigationBar)
@@ -158,7 +157,6 @@ struct QuestionView: View {
             .onTapGesture {
                 hideKeyboard()
             }
-        })
     }
     
     private func getPrompt() -> Text {
