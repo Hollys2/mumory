@@ -122,11 +122,6 @@ struct SearchEntryView: View {
             recentSearchObject.recentSearchList = result
         })
     }
-    
-    private func Shazam() {
-        
-    }
-
 }
 
 //#Preview {
