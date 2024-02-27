@@ -67,7 +67,7 @@ struct ChartListView: View {
                     PlayAllButton()
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerManager.playAll(songs: songs)
+                            playerManager.playAll(title: "최신 인기곡", songs: songs)
                             requestTop100(startIndex: searchIndex + 1)
                         }
                 }

@@ -29,16 +29,18 @@ public struct LibraryManageView: View {
             LibraryColorSet.background.ignoresSafeArea()
             
             ForEach(0 ..< manager.stack.count, id: \.self) { index in
+                
                 VStack(spacing: 0, content: {
                     switch(manager.stack[index]){
                     case .entry:
                         LibraryView(isTapMyMusic: true)
                             .environmentObject(manager)
-
+                        
                     case .search(term: let term):
                         SearchView(term: term)
                             .environmentObject(manager)
-                    case .artist(.fromArtist(data: let artist)):
+                        
+                    case .artist(artist: let artist):
                         ArtistView(artist: artist)
                             .environmentObject(manager)
                             .onAppear(perform: {
@@ -47,22 +49,17 @@ public struct LibraryManageView: View {
                             .onDisappear(perform: {
                                 hasToRemoveSafeArea = false
                             })
-                    case .artist(.fromSong(data: let song)):
-                        ArtistOfSongView(song: song)
-                            .environmentObject(manager)
-                            .onAppear(perform: {
-                                hasToRemoveSafeArea = true
-                            })
-                            .onDisappear(perform: {
-                                hasToRemoveSafeArea = false
-                            })
+                        
                     case .playlistManage:
                         PlaylistManageView()
                             .environmentObject(manager)
+                        
+                        
                     case .chart:
                         ChartListView()
                             .environmentObject(manager)
                             .environmentObject(playerManager)
+                        
                     case .playlist(playlist: let playlist):
                         PlaylistView(playlist: playlist)
                             .environmentObject(manager)
@@ -77,17 +74,20 @@ public struct LibraryManageView: View {
                         ShazamView()
                             .environmentObject(manager)
                             .environmentObject(playerManager)
+                        
                     case .addSong(originPlaylist: let originPlaylist):
                         AddPlaylistSongView(originPlaylist: originPlaylist)
                             .environmentObject(manager)
                             .environmentObject(snackbarManager)
+                        
                     case .play:
                         NowPlayingView()
                             .environmentObject(manager)
-                    case .saveToPlaylist(song: let song):
-                        SaveToPlaylistView(song: song)
+                    case .saveToPlaylist(songs: let songs):
+                        SaveToPlaylistView(songs: songs)
                             .environmentObject(manager)
                             .environmentObject(snackbarManager)
+                        
                     case .recommendation(genreID: let genreID):
                         RecommendationListView(genreID: genreID)
                             .environmentObject(manager)

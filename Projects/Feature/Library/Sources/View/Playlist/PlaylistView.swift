@@ -37,6 +37,7 @@ struct PlaylistView: View {
 
             //이미지
             PlaylistImage(songs: $songs)
+                .ignoresSafeArea()
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
             
             SimpleScrollView(contentOffset: $offset) {
@@ -119,7 +120,7 @@ struct PlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerManager.playAll(songs: songs)
+                                        playerManager.playAll(title: playlist.title , songs: songs)
                                     }
                             })
                             .padding(.bottom, 15)
@@ -135,10 +136,14 @@ struct PlaylistView: View {
                             PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongs: $selectedSongsForDelete)
                                 .animation(.default, value: isEditing)
                                 .onTapGesture {
-                                    if selectedSongsForDelete.contains(song) {
-                                        selectedSongsForDelete.removeAll(where: {$0.id == song.id})
+                                    if isEditing{
+                                        if selectedSongsForDelete.contains(song) {
+                                            selectedSongsForDelete.removeAll(where: {$0.id == song.id})
+                                        }else {
+                                            selectedSongsForDelete.append(song)
+                                        }
                                     }else {
-                                        selectedSongsForDelete.append(song)
+                                        playerManager.playNewSong(song: song)
                                     }
                                 }
                             
@@ -171,7 +176,7 @@ struct PlaylistView: View {
             
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
-                SharedAsset.back.swiftUIImage
+                SharedAsset.backGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
@@ -194,7 +199,7 @@ struct PlaylistView: View {
                     .padding(.trailing, 20)
                     
                 }else {
-                    SharedAsset.menuWhite.swiftUIImage
+                    SharedAsset.menuGradient.swiftUIImage
                         .resizable()
                         .frame(width: 30, height: 30)
                         .padding(.trailing, 20)

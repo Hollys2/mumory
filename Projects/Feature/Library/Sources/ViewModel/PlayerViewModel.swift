@@ -26,6 +26,7 @@ public class PlayerViewModel: ObservableObject {
     @Published var playQueue = ApplicationMusicPlayer.shared.queue
     @Published var queue: [Song] = []
     @Published var currentSong: Song?
+    @Published var queueTitle: String = ""
         
     private var player = ApplicationMusicPlayer.shared
 
@@ -47,6 +48,7 @@ public class PlayerViewModel: ObservableObject {
     public func playNewSong(song: Song) {
         player.queue = [song]
         self.queue = [song]
+        self.queueTitle = ""
         
         Task {
             do {
@@ -62,10 +64,10 @@ public class PlayerViewModel: ObservableObject {
             
         }
     }
-    public func playAll(songs: [Song]) {
+    public func playAll(title: String, songs: [Song]) {
         self.player.queue = .init(for: songs)
         self.queue = songs
-        
+        self.queueTitle = title
         Task {
             do {
                 try await player.play()

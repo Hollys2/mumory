@@ -12,12 +12,13 @@ import Shared
 enum ItemType {
     case normal
     case warning
+    case accent
 }
 
 struct BottomSheetItem: View {
     var image: Image
     var title: String
-    var type: ItemType
+    var type: ItemType = .normal
     
     init(image: Image, title: String, type: ItemType) {
         self.image = image
@@ -25,20 +26,26 @@ struct BottomSheetItem: View {
         self.type = type
     }
     
+    init(image: Image, title: String) {
+        self.image = image
+        self.title = title
+    }
+    
     var body: some View {
         HStack(alignment: .center, spacing: 13, content: {
             image
                 .resizable()
+                .scaledToFit()
                 .frame(width: 30, height: 30)
             
             Text(title)
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                .foregroundStyle(type == .normal ? Color.white : ColorSet.accentRed)
+                .foregroundStyle(type == .normal ? Color.white : type == .accent ? ColorSet.mainPurpleColor : ColorSet.accentRed)
         })
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 12)
-        .background(ColorSet.background)
+        .frame(height: 54)
         .padding(.horizontal, 20)
+        .background(ColorSet.background)
     }
     
 }

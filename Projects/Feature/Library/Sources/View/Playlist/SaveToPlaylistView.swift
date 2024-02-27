@@ -26,10 +26,10 @@ struct SaveToPlaylistView: View {
     
     @State var playlistArray: [MusicPlaylist] = []
     @State var isCreatePopupPresent: Bool = false
-    var song: Song
-
-    init(song: Song) {
-        self.song = song
+    var songIDs: [String]
+    
+    init(songs: [Song]) {
+        self.songIDs = songs.map({$0.id.rawValue})
     }
     var body: some View {
         ZStack(alignment: .top){
@@ -44,7 +44,7 @@ struct SaveToPlaylistView: View {
                     Text("플레이리스트에 추가")
                         .foregroundStyle(Color.white)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-
+                    
                     Spacer()
                     Button {
                         manager.pop()
@@ -54,8 +54,8 @@ struct SaveToPlaylistView: View {
                             .scaledToFit()
                             .frame(width: 30, height: 30)
                     }
-
-             
+                    
+                    
                 })
                 .padding(.horizontal, 20)
                 .frame(height: 70)
@@ -112,7 +112,7 @@ struct SaveToPlaylistView: View {
                             }
                     }
                 })
-
+                
                 
             })
         }
@@ -137,24 +137,55 @@ struct SaveToPlaylistView: View {
         let db = Firebase.db
         
         let path = db.collection("User").document(userManager.uid).collection("Playlist")
-        var data = to.songIDs
-        data.append(self.song.id.rawValue)
+        var data = to.songIDs //기존 노래ID들
         
-        let uploadData = [
-            "song_IDs" : data
-        ]
-        
-        //이미 해당 플리에 있는 노래인지 판단 후 적절한 행위
-        if to.songIDs.contains(self.song.id.rawValue) {
-            snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
-        }else {
-            path.document(to.id).setData(uploadData, merge: true) { error in
-                if error == nil {
-                    snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
-                    manager.pop()
+        if self.songIDs.count > 1 {
+            //리스트로 저장할 때
+            DispatchQueue.global().async {
+                data += self.songIDs.filter({!data.contains($0)}) //중복 제거 후 업로드할 데이터에 추가
+                
+                let uploadData = [
+                    "song_IDs" : data
+                ]
+                
+                path.document(to.id).setData(uploadData, merge: true) { error in
+                    if error == nil {
+                        snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                    }
                 }
             }
+            
+            manager.pop()
+        }else {
+            //1곡씩 저장할 때
+            guard let song = self.songIDs.first else {
+                return
+            }
+            
+            if to.songIDs.contains(song) {
+                //이미 해당 플리에 존재할 때
+                snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
+            }else {
+                //새롭게 추가할 때
+                DispatchQueue.global().async {
+                    data.append(song)
+                    
+                    let uploadData = [
+                        "song_IDs" : data
+                    ]
+                    
+                    path.document(to.id).setData(uploadData, merge: true) { error in
+                        if error == nil {
+                            snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                        }
+                    }
+                }
+                manager.pop()
+            }
         }
+        
+        
+        
     }
     
     private func getUserPlaylist() {
@@ -163,7 +194,7 @@ struct SaveToPlaylistView: View {
         let db = Firebase.db
         
         let path = db.collection("User").document(userManager.uid).collection("Playlist")
-
+        
         path.getDocuments { snapshots, error in
             if error == nil {
                 guard let snapshots = snapshots else {
@@ -178,12 +209,12 @@ struct SaveToPlaylistView: View {
                     }
                     
                     let id = document.documentID
-
+                    
                     guard let isPrivate = document.data()["is_private"] as? Bool else {
                         print("no is Private")
                         return
                     }
-
+                    
                     guard let isFavorite = document.data()["is_favorite"] as? Bool else {
                         print("no is Favorite")
                         return
@@ -199,7 +230,7 @@ struct SaveToPlaylistView: View {
                             self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false))
                         }
                     }
-                  
+                    
                 }
                 
             }else {

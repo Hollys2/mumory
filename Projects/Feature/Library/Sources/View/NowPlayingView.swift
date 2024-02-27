@@ -338,14 +338,14 @@ struct QueueView: View {
             }
             
             HStack(content: {
-                Text("플레이리스트 이름")
+                Text(playerManager.queueTitle.isEmpty ? "재생중" : playerManager.queueTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
-                Text("목록 재생중 1/10")
+                Text(playerManager.queueTitle.isEmpty ? "" : "목록 재생중 1/\(playerManager.queue.count)")
                     .fixedSize()
                     .padding(.leading, 6)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))

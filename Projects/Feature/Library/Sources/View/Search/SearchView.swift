@@ -45,7 +45,8 @@ struct SearchView: View {
                             }
                     })
                     .frame(height: 45)
-                    .background(Color(red: 0.24, green: 0.24, blue: 0.24).clipShape(RoundedRectangle(cornerSize: CGSize(width: 22, height: 22))))
+                    .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .circular))
                     
                   
                         Text("취소")

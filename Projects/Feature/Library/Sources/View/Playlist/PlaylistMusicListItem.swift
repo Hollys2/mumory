@@ -11,11 +11,17 @@ import Shared
 import MusicKit
 
 struct PlaylistMusicListItem: View {
-    var song: Song
     @Binding var isEditing: Bool
     @Binding var selectedSongs: [Song]
-    let title = "타이틀"
-    let artist = "아티스트"
+    var song: Song
+    
+    @State var isPresentBottomSheet: Bool = false
+
+    init( song: Song, isEditing: Binding<Bool>, selectedSongs: Binding<[Song]>) {
+        self._isEditing = isEditing
+        self._selectedSongs = selectedSongs
+        self.song = song
+    }
     
     var body: some View {
         
@@ -74,11 +80,24 @@ struct PlaylistMusicListItem: View {
                 HStack(spacing: 0) {
                     Spacer()
                     SharedAsset.bookmark.swiftUIImage
+                        .resizable()
                         .frame(width: 20, height: 20)
+                        .scaledToFit()
                         .padding(.trailing, 23)
                     
                     SharedAsset.menu.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 22, height: 22)
+                        .onTapGesture {
+                            isPresentBottomSheet = true
+                        }
+                        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+                            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                                SongBottomSheetView(song: song, types: [.withoutBookmark])
+                            }
+                            .background(TransparentBackground())
+                        })
                 }
                 .animation(.default, value: isEditing)
               

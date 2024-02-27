@@ -11,11 +11,15 @@ import Shared
 import MusicKit
 
 struct ArtistBottomSheetView: View {
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var manager: LibraryManageModel
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     let artist: Artist
+    let songs: [Song]
     
-    init(artist: Artist) {
+    init(artist: Artist, songs: [Song]) {
         self.artist = artist
+        self.songs = songs
     }
     
     var body: some View {
@@ -48,10 +52,15 @@ struct ArtistBottomSheetView: View {
                 .frame(height: 0.5)
                 .background(lineGray)
                 .padding(.horizontal, 4)
+                .padding(.bottom, 10)
             
-            BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가", type: .normal)
-            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기", type: .normal)
-            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고", type: .normal)
+            BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
+                .onTapGesture {
+                    dismiss()
+                    manager.push(destination: .saveToPlaylist(songs: songs))
+                }
+            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
+            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
            
         })
         .background(ColorSet.background)

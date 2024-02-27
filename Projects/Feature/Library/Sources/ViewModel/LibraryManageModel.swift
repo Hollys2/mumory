@@ -48,10 +48,6 @@ enum entrySubView {
     case recomendation
 }
 
-public enum artistParameter {
-    case fromArtist(data: Artist)
-    case fromSong(data: Song)
-}
 
 enum moveStatus {
     case pop
@@ -65,48 +61,12 @@ public enum LibraryPage{
     case chart
     case search(term: String)
     case playlistManage
-    case artist(artistParameter)
+    case artist(artist: Artist)
     case playlist(playlist: MusicPlaylist)
     case shazam
     case addSong(originPlaylist: MusicPlaylist)
     case play
-    case saveToPlaylist(song: Song)
+    case saveToPlaylist(songs: [Song])
     case recommendation(genreID: Int)
 }
-//extension LibraryPage: Equatable {
-//    static func == (lhs: LibraryPage, rhs: LibraryPage) -> Bool {
-//        switch(lhs, rhs) {
-//        case (.entry(.myMusic), .entry(.myMusic)),
-//            (.entry(.recomendation), .entry(.recomendation)),
-//            (.chart, .chart),
-//            (.search(term: _), .search(term: _)),
-//            (.playlistManage, .playlistManage),
-//            (.artist(_), .artist(_)),
-//            (.playlist(playlist: _), .playlist(playlist: _)),
-//            (.shazam, .shazam),
-//            (.addSong(originPlaylist: _), .addSong(originPlaylist: _)),
-//            (.play, .play),
-//            (.saveToPlaylist(song: _), .saveToPlaylist(song: _)),
-//            (.recommendation(genreID: _), .recommendation(genreID: _)):
-//            return true
-//        default: return false
-//        }
-//    }
-//}
-//extension LibraryPage: Identifiable, Hashable {
-//    var id: ObjectIdentifier {
-//        //
-//    }
-//    
-//    var identifier: String {
-//        return UUID().uuidString
-//    }
-//    
-//    public func hash(into hasher: inout Hasher) {
-//        return hasher.combine(identifier)
-//    }
-//    
-//    public static func == (lhs: LibraryPage, rhs: LibraryPage) -> Bool {
-//        return lhs.identifier == rhs.identifier
-//    }
-//}
+

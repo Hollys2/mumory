@@ -62,7 +62,7 @@ struct MusicChartItem: View {
                     }
                     .fullScreenCover(isPresented: $isBottomSheerPresent, content: {
                         BottomSheetWrapper(isPresent: $isBottomSheerPresent) {
-                            MusicChartBottomSheetView(song: song)
+                            SongBottomSheetView(song: song)
                         }
                         .background(TransparentBackground())
                     })

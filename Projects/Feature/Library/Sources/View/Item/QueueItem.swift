@@ -12,6 +12,7 @@ import MusicKit
 
 struct QueueItem: View {
     @EnvironmentObject var playerManager: PlayerViewModel
+    @State var isPresentBottomSheet: Bool = false
     var song: Song
     var scrollProxy: ScrollViewProxy
     
@@ -52,8 +53,19 @@ struct QueueItem: View {
             
             Spacer()
             SharedAsset.menu.swiftUIImage
+                .resizable()
+                .scaledToFit()
                 .frame(width: 22, height: 22)
                 .padding(.trailing, 13)
+                .onTapGesture {
+                    isPresentBottomSheet = true
+                }
+                .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                        SongBottomSheetView(song: song)
+                    }
+                    .background(TransparentBackground())
+                })
 
             
         })

@@ -7,21 +7,24 @@
 //
 
 import Foundation
-//import RealmSwift
+import RealmSwift
 import MusicKit
 
-//class RealmManager: Object {
-//    
-//    func savePlaylist(playlist: PlaylistData) async {
-//        
-//        do {
-//            let realm = try await Realm()
-//        }catch {
-//            print("realm initial error: \(error)")
-//        }
-//    }
-//}
-//
+public class RealmManager {
+    public static let shared = RealmManager()
+    
+    public init() {
+        do {
+            let realm = try Realm()
+            print("realm init successful")
+        }catch {
+            print("realm init error: \(error)")
+        }
+    }
+}
+
+
+
 //public class PlaylistData: Object {
 //    @objc dynamic var id: String
 //    @objc dynamic var title: String

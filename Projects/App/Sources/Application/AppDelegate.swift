@@ -14,6 +14,7 @@ import KakaoSDKUser
 import KakaoSDKAuth
 import GoogleSignIn
 import FirebaseMessaging
+import Core
 //import RealmSwift
 
 public class AppDelegate: NSObject, UIApplicationDelegate{
@@ -35,13 +36,8 @@ public class AppDelegate: NSObject, UIApplicationDelegate{
         //테스트용 키. 추후에 원본 키로 수정하기
         KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
         
-//        Task {
-//            do {
-//                let realm = try await Realm()
-//            } catch {
-//                print("Error initialising new realm \(error)")
-//            }
-//        }
+        _ = RealmManager.init()
+        
         
         return true
     }

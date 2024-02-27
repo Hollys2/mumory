@@ -73,7 +73,7 @@ struct ArtistOfSongView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(songs: songs)
+                                    playerManager.playAll(title: artist?.name ?? "재생중", songs: songs)
                                 }
                         })
                         .padding(.horizontal, 20)
@@ -89,7 +89,10 @@ struct ArtistOfSongView: View {
                         
                         //노래 리스트
                         ForEach(songs, id: \.id){ song in
-                            MusicListItem(song: song)
+                            MusicListItem(song: song, type: .artist)
+                                .onTapGesture {
+                                    playerManager.playNewSong(song: song)
+                                }
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
@@ -109,7 +112,7 @@ struct ArtistOfSongView: View {
 
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
-                SharedAsset.back.swiftUIImage
+                SharedAsset.backGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
@@ -119,29 +122,31 @@ struct ArtistOfSongView: View {
                 
                 Spacer()
                 
-                SharedAsset.menuWhite.swiftUIImage
+                SharedAsset.menuGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
                     .onTapGesture {
                         isBottomSheetPresent = true
                     }
+                    .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+                        BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+//                           ArtistBottomSheetView(artist: artist, songs: songs)
+                        }
+                        .background(TransparentBackground())
+                    })
                 
             })
             .frame(height: 50)
             .padding(.top, userManager.topInset)
-//            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
-//                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-//                    ArtistBottomSheetView(artist: artist)
-//                }
-//                .background(TransparentBackground())
-//            })
+            
+
         }
+        .ignoresSafeArea()
         .onAppear(perform: {
             Task{
                 await requestDetailSongInfo()
             }
-//            requestArtistSongs(offset: 0)
             
         })
     }

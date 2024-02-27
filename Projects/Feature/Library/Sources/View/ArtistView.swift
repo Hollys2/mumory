@@ -71,7 +71,7 @@ struct ArtistView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(songs: songs)
+                                    playerManager.playAll(title: artist.name , songs: songs)
                                 }
                         })
                         .padding(.horizontal, 20)
@@ -87,7 +87,10 @@ struct ArtistView: View {
                         
                         //노래 리스트
                         ForEach(songs, id: \.id){ song in
-                            MusicListItem(song: song)
+                            MusicListItem(song: song, type: .artist)
+                                .onTapGesture {
+                                    playerManager.playNewSong(song: song)
+                                }
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
@@ -107,7 +110,7 @@ struct ArtistView: View {
 
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
-                SharedAsset.back.swiftUIImage
+                SharedAsset.backGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
@@ -117,7 +120,7 @@ struct ArtistView: View {
                 
                 Spacer()
                 
-                SharedAsset.menuWhite.swiftUIImage
+                SharedAsset.menuGradient.swiftUIImage
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
@@ -130,7 +133,7 @@ struct ArtistView: View {
             .padding(.top, userManager.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                   ArtistBottomSheetView(artist: artist)
+                   ArtistBottomSheetView(artist: artist, songs: songs)
                 }
                 .background(TransparentBackground())
             })
