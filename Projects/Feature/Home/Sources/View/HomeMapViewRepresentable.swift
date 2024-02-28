@@ -57,7 +57,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
 //        uiView.removeAnnotations(uiView.annotations)
 
         
-        let sortedAnnotations = self.mumoryDataViewModel.mumoryAnnotations.sorted(by: { $0.date > $1.date })
+        let sortedAnnotations = self.mumoryDataViewModel.homeMumoryAnnotations.sorted(by: { $0.date > $1.date })
         uiView.addAnnotations(sortedAnnotations)
 //        if mumoryDataViewModel.isFetchFinished {
 //            uiView.addAnnotations(mumoryDataViewModel.mumoryAnnotations)
@@ -92,7 +92,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     private func groupAndShowAnnotations(on mapView: MKMapView) {
         var groupedAnnotations: [[MumoryAnnotation]] = []
         
-        for annotation in mumoryDataViewModel.mumoryAnnotations {
+        for annotation in mumoryDataViewModel.homeMumoryAnnotations {
             var foundGroup = false
             
             for (index, group) in groupedAnnotations.enumerated() {

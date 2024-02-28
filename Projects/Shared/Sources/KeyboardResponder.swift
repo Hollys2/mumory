@@ -25,19 +25,25 @@ public class KeyboardResponder: ObservableObject {
                 
                 guard let duration: TimeInterval = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
                 
-                print("keyboardHeight: \(keyboardHeight)")
-                withAnimation(.spring(response: 0.45, dampingFraction: 1)) {
+//                print("keyboardHeight: \(keyboardHeight)")
+
+                DispatchQueue.main.async {
                     self.isKeyboardHiddenButtonShown = true
-                    self.keyboardHeight = keyboardHeight
+                    
+                    withAnimation(.spring(response: 0.45, dampingFraction: 1)) {
+                        self.keyboardHeight = keyboardHeight
+                    }
                 }
             }
 
         keyboardHideCancellable = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
             .sink { _ in
-                print("keyboardHeight Bye")
-                withAnimation(.spring(response: 0.45, dampingFraction: 1)) {
+                DispatchQueue.main.async {
                     self.isKeyboardHiddenButtonShown = false
-                    self.keyboardHeight = 0
+                    
+                    withAnimation(.spring(response: 0.45, dampingFraction: 1)) {
+                        self.keyboardHeight = 0
+                    }
                 }
             }
     }

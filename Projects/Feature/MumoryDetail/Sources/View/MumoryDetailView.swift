@@ -10,13 +10,15 @@
 import SwiftUI
 import Shared
 
-struct MumoryDetailScrollView: UIViewRepresentable {
+struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     //    typealias UIViewType = UIScrollView
     
-    @State var mumoryAnnotation: MumoryAnnotation
+    // Binding 해줘야 앨범 타이틀 바뀜
+    @Binding var mumoryAnnotation: MumoryAnnotation
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
@@ -28,11 +30,14 @@ struct MumoryDetailScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumoryAnnotation: self.mumoryAnnotation).environmentObject(appCoordinator))
+        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumoryAnnotation: self.$mumoryAnnotation)
+            .environmentObject(appCoordinator)
+            .environmentObject(mumoryDataViewModel)
+        )
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: 2300)
+        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
         
-        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: 2300)
+        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: x)
         
         scrollView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
@@ -50,14 +55,14 @@ struct MumoryDetailScrollView: UIViewRepresentable {
     }
 }
 
-extension MumoryDetailScrollView {
+extension MumoryDetailScrollViewRepresentable {
     
     class Coordinator: NSObject {
         
-        let parent: MumoryDetailScrollView
+        let parent: MumoryDetailScrollViewRepresentable
         //        var previousOffset: CGFloat = 0.0
         
-        init(parent: MumoryDetailScrollView) {
+        init(parent: MumoryDetailScrollViewRepresentable) {
             self.parent = parent
             super.init()
         }
@@ -96,7 +101,7 @@ enum ScrollBoundary {
     case below
 }
 
-extension MumoryDetailScrollView.Coordinator: UIScrollViewDelegate {
+extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
@@ -126,38 +131,9 @@ public struct MumoryDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State var mumoryAnnotation: MumoryAnnotation
-    @State private var isPublic: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
-    @GestureState var dragAmount = CGSize.zero
-    @State private var translation: CGSize = .zero
-    
-    var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                print("onChanged: \(value.translation.height)")
-                if value.translation.height > 0 {
-                    DispatchQueue.main.async {
-                        translation.height = value.translation.height
-                    }
-                }
-            }
-            .onEnded { value in
-                print("onEnded: \(value.translation.height)")
-                
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    //                    if value.translation.height > 130 {
-                    //                        appCoordinator.isCreateMumorySheetShown = false
-                    //
-                    //                        mumoryDataViewModel.choosedMusicModel = nil
-                    //                        mumoryDataViewModel.choosedLocationModel = nil
-                    //                    }
-                    translation.height = 0
-                }
-            }
-    }
     
     public var body: some View {
         
@@ -200,8 +176,7 @@ public struct MumoryDetailView: View {
 //                .padding(.leading, 20)
             } // ZStack
             
-            MumoryDetailScrollView(mumoryAnnotation: self.mumoryAnnotation)
-                .zIndex(0)
+            MumoryDetailScrollViewRepresentable(mumoryAnnotation: self.$mumoryAnnotation)
             
             HStack {
                 Button(action: {
@@ -269,8 +244,23 @@ public struct MumoryDetailView: View {
 //                    .zIndex(1)
 //            }
         } // ZStack
+        .onAppear {
+            Task {
+                do {
+                    if let fetchedAnnotation = try await mumoryDataViewModel.fetchMumoryAnnotation(mumoryID: mumoryAnnotation.id) {
+                        // Set the fetched MumoryAnnotation to the state variable
+                        self.mumoryAnnotation = fetchedAnnotation
+                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumoryAnnotation
+                    } else {
+                        print("MumoryAnnotation not found for ID: \(mumoryAnnotation.id)")
+                    }
+                } catch {
+                    print("Error fetching MumoryAnnotation: \(error.localizedDescription)")
+                }
+            }
+        }
         .navigationBarBackButtonHidden(true)
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation, isPublic: self.$isPublic))
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown) {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)

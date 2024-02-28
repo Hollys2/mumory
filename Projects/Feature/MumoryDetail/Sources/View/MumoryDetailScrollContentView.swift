@@ -33,18 +33,12 @@ struct TagView: View {
 
 struct MumoryDetailScrollContentView: View {
     
-    @State var mumoryAnnotation: MumoryAnnotation
+    @Binding var mumoryAnnotation: MumoryAnnotation
     
-    @State private var tagWidth: CGFloat = .zero
-//    @State private var tags: [String] = ["기쁨기쁨기쁨",]
-
     @State private var dateString: String = ""
-    
-    @StateObject var dateManager: DateManager = DateManager()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
     
     var body: some View {
         
@@ -123,8 +117,10 @@ struct MumoryDetailScrollContentView: View {
                                         self.dateString = DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic)
                                     }
                                     .onChange(of: mumoryAnnotation.date) { newValue in
-                                        print("onChange: \(newValue)")
                                         self.dateString = DateManager.formattedDate(date: newValue, isPublic: self.mumoryAnnotation.isPublic)
+                                    }
+                                    .onChange(of: mumoryAnnotation.isPublic) { newValue in
+                                        self.dateString = DateManager.formattedDate(date: mumoryAnnotation.date, isPublic: newValue)
                                     }
 
                                 if !self.mumoryAnnotation.isPublic {
@@ -184,9 +180,11 @@ struct MumoryDetailScrollContentView: View {
                     }
 
                     
-                    if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
+//                    if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
                         // MARK: Image
-                        MumoryDetailImageScrollView(imageURLs: imageURLs)
+//                    if let selectedMumoryAnnotaion = mumoryDataViewModel.selectedMumoryAnnotation, !(selectedMumoryAnnotaion.imageURLs ?? []).isEmpty {
+                    if !(self.mumoryAnnotation.imageURLs ?? []).isEmpty {
+                        MumoryDetailImageScrollView(mumoryAnnotation: self.mumoryAnnotation)
                             .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
                             .padding(.bottom, 25)
                     }
@@ -278,5 +276,6 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
+
     }
 }

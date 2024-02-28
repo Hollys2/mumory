@@ -320,6 +320,8 @@ public struct HomeView: View {
                 
                 TestBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
+                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? MumoryAnnotation(), comments: appCoordinator.comments)
+                
 //                if appCoordinator.isSocialMenuSheetViewShown {
 //                    BottomSheetUIViewRepresentable(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: .mumoryDetailView))
 //                }
@@ -378,32 +380,26 @@ public struct HomeView: View {
 //                        .zIndex(1)
 //                }
                 
-                if appCoordinator.isMumoryDetailCommentSheetViewShown {
-                    Color.black.opacity(0.5).ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(Animation.easeInOut(duration: 0.2)) {
-                                appCoordinator.isMumoryDetailCommentSheetViewShown = false
-                            }
-                        }
-                    
-                    MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
-                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
-                        .gesture(dragGesture)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
+//                if appCoordinator.isMumoryDetailCommentSheetViewShown {
+//                    Color.black.opacity(0.5).ignoresSafeArea()
+//                        .onTapGesture {
+//                            withAnimation(Animation.easeInOut(duration: 0.2)) {
+//                                appCoordinator.isMumoryDetailCommentSheetViewShown = false
+//                            }
+//                        }
+//
+//                    MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
+//                        .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
+//                        .gesture(dragGesture)
+//                        .transition(.move(edge: .bottom))
+//                        .zIndex(1)
+//                }
                 
                 if self.appCoordinator.isAddFriendViewShown {
                     SocialFriendView()
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
-                
-//                if self.appCoordinator.isLoading {
-//                    ProgressView("Uploading Images...")
-//                            .progressViewStyle(CircularProgressViewStyle())
-//                }
-                
             } // ZStack
             .ignoresSafeArea()
 //            .bottomSheet(isShown: $appCoordinator.isCreateMumorySheetShown)
@@ -426,7 +422,7 @@ public struct HomeView: View {
                 }
             }
             .navigationDestination(for: String.self, destination: { i in
-                if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.id == i }) {
+                if let mumoryAnnotation = self.mumoryDataViewModel.homeMumoryAnnotations.first(where: { $0.id == i }) {
                     Color.purple
                         .ignoresSafeArea()
                 } else if i == "music" {
@@ -452,14 +448,13 @@ public struct HomeView: View {
             .navigationDestination(for: MumoryView.self) { view in
                 switch view.type {
                 case .mumoryDetailView:
-                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.musicModel.songID == view.mumoryAnnotation?.musicModel.songID }) {
+                    if let mumoryAnnotation = self.mumoryDataViewModel.socialMumoryAnnotations.first(where: { $0.id == view.mumoryAnnotation?.id }) {
                         MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
-                            .onAppear {
-                                print("mumoryAnnotation: \(mumoryAnnotation.date)")
-                            }
+                    } else {
+                        Color.orange
                     }
                 case .editMumoryView:
-                    if let mumoryAnnotation = self.mumoryDataViewModel.mumoryAnnotations.first(where: { $0.musicModel.songID == view.mumoryAnnotation?.musicModel.songID }) {
+                    if let mumoryAnnotation = self.mumoryDataViewModel.socialMumoryAnnotations.first(where: { $0.id == view.mumoryAnnotation?.id }) {
                         MumoryDetailEditView(mumoryAnnotation: mumoryAnnotation)
                     } else {
                         Color.blue
@@ -469,13 +464,7 @@ public struct HomeView: View {
         
         } // NavigationStack
         .onAppear {
-            print("HomeMapViewRepresentable onAppear")
-            //                    Task {
-            print("1: \(mumoryDataViewModel.mumoryAnnotations)")
-            self.mumoryDataViewModel.fetchData()
-            print("2: \(mumoryDataViewModel.mumoryAnnotations)")
-            //                        await mumoryDataViewModel.loadMusics()
-            //                    }
+            print("HoweView onAppear")
         }
     }
     
@@ -484,6 +473,10 @@ public struct HomeView: View {
         ZStack {
             
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
+                .onAppear {
+                    print("HomeMapViewRepresentable onAppear")
+                    self.mumoryDataViewModel.fetchHomeMumory()
+                }
             
             VStack(spacing: 0) {
                 
@@ -553,11 +546,17 @@ public struct TestBottomSheetView: View {
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
     
+    
+    @FocusState private var focusedField: Field?
+
+    enum Field {
+        case tag, content
+    }
+    
     @State private var isPublic: Bool = true
     @State private var calendarYOffset: CGFloat = .zero
-    @State private var scrollViewOffset: CGFloat = 0
-    @State private var tagOffset: CGFloat = 0
     @State private var contentOffset: CGFloat = 0
+    @State private var bottomBarOffset: CGFloat = 0
     @State private var tagContainerViewFrame: CGRect = .zero
 
     @State var date: Date = Date()
@@ -601,6 +600,7 @@ public struct TestBottomSheetView: View {
                     .onTapGesture {
                         self.isDeletePopUpShown = true
                     }
+                
                 VStack(spacing: 0) {
                     
                     // MARK: -Top bar
@@ -647,7 +647,7 @@ public struct TestBottomSheetView: View {
                     .padding(.top, 26)
                     .padding(.bottom, 11)
                     .padding(.horizontal, 20)
-                    
+
                     ScrollViewReader { reader in
                         
                         ScrollView(showsIndicators: false) {
@@ -668,7 +668,7 @@ public struct TestBottomSheetView: View {
                                     CalendarContainerView(title: self.$dateString)
                                         .onTapGesture {
                                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                            
+
                                             withAnimation(.easeInOut(duration: 0.1)) {
                                                 self.showDatePicker.toggle()
                                             }
@@ -711,17 +711,6 @@ public struct TestBottomSheetView: View {
                                             }
                                             return Color.clear
                                         })
-                                        .background {
-                                            GeometryReader { geometry in
-                                                Color.clear
-                                                    .onAppear {
-                                                        self.tagOffset = geometry.frame(in: .global).maxY
-                                                    }
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                        self.tagOffset = newOffset
-                                                    }
-                                            }
-                                        }
                                     
                                     
                                     ContentContainerView(contentText: self.$contentText)
@@ -729,12 +718,12 @@ public struct TestBottomSheetView: View {
                                         .background {
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onAppear {
-                                                        self.contentOffset = geometry.frame(in: .global).maxY
+                                                    .onChange(of: geometry.frame(in: .global)) { i in
+//                                                        print("contentOffset minY: \(i.minY)")
+                                                        print("contentOffset maxY: \(i.maxY)")
+                                                        self.contentOffset = i.maxY
                                                     }
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                        
-                                                        self.contentOffset = newOffset
+                                                    .onChange(of: geometry.size.height) { newOffset in
                                                         print("newOffset: \(newOffset)")
                                                     }
                                             }
@@ -799,12 +788,9 @@ public struct TestBottomSheetView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                                 .padding(.horizontal, 20)
-                                .padding(.bottom, 50)
-                                
                             } // VStack
                             .padding(.top, 20)
-                            .padding(.bottom, 50)
-                            
+                            .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -200 : 0)
                         } // ScrollView
                         .simultaneousGesture(DragGesture().onChanged { i in
                             print("simultaneousGesture DragGesture")
@@ -885,6 +871,18 @@ public struct TestBottomSheetView: View {
                         .padding(.leading, 25)
                         .padding(.trailing, 20)
                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                        .background {
+                            GeometryReader { geometry in
+                                Color.red
+                                    .onChange(of: geometry.frame(in: .global)) { i in
+                                        print("bottmBoarOffset minY: \(i.minY)")
+                                        self.bottomBarOffset = i.minY
+                                    }
+                                    .onChange(of: geometry.size.height) { newOffset in
+    //                                                        print("newOffset: \(newOffset)")
+                                    }
+                            }
+                        }
                         .overlay(
                             Rectangle()
                                 .inset(by: 0.15)
@@ -892,9 +890,10 @@ public struct TestBottomSheetView: View {
                                 .frame(height: 0.5)
                             , alignment: .top
                         )
-                        .highPriorityGesture(DragGesture())
                         .offset(y: self.bottomBarHeight)
-                        .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight - self.bottomBarHeight: 0)
+                        .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight - self.bottomBarHeight : 0)
+                        .highPriorityGesture(DragGesture())
+                        
                     }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -925,8 +924,6 @@ public struct TestBottomSheetView: View {
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하기겠습니까?", buttonTitle: "게시", buttonAction: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                           
-                            appCoordinator.isLoading = true
                             
                             let group = DispatchGroup()
                             
@@ -966,11 +963,9 @@ public struct TestBottomSheetView: View {
                             }
                             
                             group.notify(queue: .main) {
-                                let newMumoryAnnotation = MumoryAnnotation(date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic)
+                                let newMumoryAnnotation = MumoryAnnotation(author: "tester", id: "", date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], comments: [])
                                 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation)
-                                
-                                appCoordinator.isLoading = false
 
                                 mumoryDataViewModel.choosedMusicModel = nil
                                 mumoryDataViewModel.choosedLocationModel = nil

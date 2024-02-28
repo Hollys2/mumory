@@ -212,7 +212,7 @@ public struct PopUpView: View {
             .frame(height: self.type.height)
             .cornerRadius(15)
             
-            if self.appCoordinator.isLoading {
+            if self.mumoryDataViewModel.isUpdating {
                 Color.black.opacity(0.5).ignoresSafeArea()
                 
                 ProgressView()

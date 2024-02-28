@@ -46,6 +46,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isMumoryPopUpShown = false
     @Published public var isSocialMenuSheetViewShown = false
     @Published public var isMumoryDetailCommentSheetViewShown = false
+    @Published public var comments: [Comment] = []
     @Published public var isAddFriendViewShown = false
     @Published public var isPopUpViewShown = false
     @Published public var isRewardPopUpViewShown = false

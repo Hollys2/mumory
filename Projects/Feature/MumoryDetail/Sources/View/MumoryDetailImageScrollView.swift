@@ -16,17 +16,18 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
 
 //    typealias UIViewType = UIScrollView
     
-    let imageURLs: [String]?
-//    @Binding var annotationSelected: Bool
+//    @State var imageURLs: [String]
+    @State var mumoryAnnotation: MumoryAnnotation
     
-//    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
+        
     func makeUIView(context: Context) -> UIScrollView {
+        
         let scrollView = UIScrollView()
-
         scrollView.delegate = context.coordinator
 
-        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(imageURLs?.count ?? 0)
+        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((mumoryAnnotation.imageURLs ?? []).count)
         scrollView.contentSize = CGSize(width: totalWidth, height: 1)
 
         scrollView.isPagingEnabled = true
@@ -37,18 +38,41 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
 
-        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
+//        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
+        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumoryAnnotation))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
 
-        //        scrollView.backgroundColor = .red
-        hostingController.view.backgroundColor = .clear
-
         scrollView.addSubview(hostingController.view)
+        
+        scrollView.backgroundColor = .clear
+        hostingController.view.backgroundColor = .clear
 
         return scrollView
     }
     
-    func updateUIView(_ uiView: UIScrollView, context: Context) {}
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+//        print("업데이트뷰: \(imageURLs.count)")
+        
+//        if context.coordinator.oldImageURLs != self.mumoryAnnotation.imageURLs {
+        if let selectedMumoryAnnotation = self.mumoryDataViewModel.selectedMumoryAnnotation {
+            print("self.mumoryAnnotation.imageURLs.count: \(selectedMumoryAnnotation.imageURLs?.count)")
+            let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((selectedMumoryAnnotation.imageURLs ?? []).count)
+            uiView.contentSize = CGSize(width: totalWidth, height: 1)
+            
+            //            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
+            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: selectedMumoryAnnotation))
+            hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
+            
+            uiView.subviews.forEach { $0.removeFromSuperview() }
+            uiView.addSubview(hostingController.view)
+            
+            uiView.backgroundColor = .clear
+            hostingController.view.backgroundColor = .clear
+            
+            //            context.coordinator.oldImageURLs = self.mumoryAnnotation.imageURLs ?? []
+            //        }
+        }
+    }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -60,6 +84,7 @@ extension MumoryDetailImageScrollView {
     class Coordinator: NSObject {
         
         let parent: MumoryDetailImageScrollView
+        var oldImageURLs: [String] = []
         
         init(parent: MumoryDetailImageScrollView) {
             self.parent = parent
@@ -90,15 +115,17 @@ extension MumoryDetailImageScrollView.Coordinator: UIScrollViewDelegate {
 @available(iOS 16.0, *)
 struct MumoryDetailImageScrollContentView: View {
     
-    let imageURLs: [String]?
+//    @State var imageURLs: [String]
+    var mumoryAnnotation: MumoryAnnotation
     
     var body: some View {
         HStack(spacing: 0) {
-            ForEach((imageURLs ?? []).indices, id: \.self) { index in
-                MumoryDetailImageView(url: (imageURLs ?? [])[index], count: imageURLs?.count ?? 0, index: Int(index))
+            ForEach((mumoryAnnotation.imageURLs ?? []).indices, id: \.self) { index in
+                MumoryDetailImageView(url: (mumoryAnnotation.imageURLs ?? [])[index], count: (mumoryAnnotation.imageURLs ?? []).count, index: Int(index))
                     .padding(.horizontal, 5)
             }
         }
+        .background(.clear)
     }
 }
 
@@ -123,8 +150,8 @@ struct MumoryDetailImageView: View {
                         case .success(let image):
                             image
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
                                 .frame(width: UIScreen.main.bounds.width - 40, height: UIScreen.main.bounds.width - 40)
+                                .aspectRatio(contentMode: .fill)
                                 .clipped()
                         case .failure:
                             Text("Failed to load image")
@@ -134,6 +161,7 @@ struct MumoryDetailImageView: View {
                     }
                 )
                 .background(Color(red: 0.184, green: 0.184, blue: 0.184))
+                
             
             HStack(alignment: .center, spacing: 10) {
                 Text("\(index + 1) / \(count)")
@@ -151,6 +179,6 @@ struct MumoryDetailImageView: View {
             .cornerRadius(14)
             .offset(x: -13, y: 15)
         }
+        .background(.red)
     }
 }
-

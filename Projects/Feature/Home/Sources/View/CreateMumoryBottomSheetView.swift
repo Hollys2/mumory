@@ -76,16 +76,16 @@ public struct CreateMumoryBottomSheetView: View {
                     Spacer()
                     
                     Button(action: {
-                        if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                            
-                            let db = FirebaseManager.shared.db
-                            let documentReference = db.collection("User").document("tester").collection("mumory").document()
-
-                            
-                            let newMumoryAnnotation = MumoryAnnotation(id: documentReference.documentID, date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, isPublic: self.isPublic)
-                            
-                            mumoryDataViewModel.createMumory(newMumoryAnnotation)
-                        }
+//                        if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel, let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+//                            
+//                            let db = FirebaseManager.shared.db
+//                            let documentReference = db.collection("User").document("tester").collection("mumory").document()
+//
+//                            
+//                            let newMumoryAnnotation = MumoryAnnotation(id: documentReference.documentID, date: self.date, musicModel: choosedMusicModel, locationModel: choosedLocationModel, isPublic: self.isPublic)
+//                            
+//                            mumoryDataViewModel.createMumory(newMumoryAnnotation)
+//                        }
                         
                         withAnimation(Animation.easeInOut(duration: 0.2)) { // 사라질 때 애니메이션 적용
                             appCoordinator.isCreateMumorySheetShown = false

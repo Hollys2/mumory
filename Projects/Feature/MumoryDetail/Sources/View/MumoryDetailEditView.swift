@@ -18,7 +18,7 @@ import Combine
 
 public struct MumoryDetailEditView: View {
     
-    var mumoryAnnotation: MumoryAnnotation
+    @State var mumoryAnnotation: MumoryAnnotation
 //    var cancellables: Set<AnyCancellable> = []
     
     @State private var selectedUIImages: [UIImage] = []
@@ -39,7 +39,7 @@ public struct MumoryDetailEditView: View {
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
     
-    @State private var isPublic: Bool = true
+    @State private var isPublic: Bool = false
     @State private var calendarYOffset: CGFloat = .zero
     @State private var scrollViewOffset: CGFloat = 0
     @State private var tagContainerViewFrame: CGRect = .zero
@@ -56,9 +56,10 @@ public struct MumoryDetailEditView: View {
     @Environment(\.dismiss) private var dismiss
     
     public init(mumoryAnnotation: MumoryAnnotation) {
-        self.mumoryAnnotation = mumoryAnnotation
+        self._mumoryAnnotation = State(initialValue: mumoryAnnotation)
         self._date = State(initialValue: mumoryAnnotation.date)
         self._imageURLs = State(initialValue: mumoryAnnotation.imageURLs ?? [])
+        self._isPublic = State(initialValue: mumoryAnnotation.isPublic)
     }
     
     public var body: some View {
@@ -403,6 +404,8 @@ public struct MumoryDetailEditView: View {
         .popup(show: self.$isPublishPopUpShown, content: {
             PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: {
                 
+                mumoryDataViewModel.isUpdating = true
+                
                 let group = DispatchGroup()
                     
                 for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
@@ -441,9 +444,16 @@ public struct MumoryDetailEditView: View {
                 }
                     
                 group.notify(queue: .main) {
-                    let newMumoryAnnotation = MumoryAnnotation(id: mumoryAnnotation.id, date: self.date, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: mumoryAnnotation.tags, content: mumoryAnnotation.content, imageURLs: self.imageURLs , isPublic: mumoryAnnotation.isPublic)
+                    let newMumoryAnnotation = MumoryAnnotation(author: "tester", id: mumoryAnnotation.id, date: self.date, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: mumoryAnnotation.tags, content: mumoryAnnotation.content, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, comments: mumoryAnnotation.comments)
                     
-                    mumoryDataViewModel.updateMumory(newMumoryAnnotation)
+                    mumoryDataViewModel.updateMumory(newMumoryAnnotation) {
+                        
+                        print("1.imageURLs: \(imageURLs)")
+                        if let updatedMumoryAnnotation = self.mumoryDataViewModel.homeMumoryAnnotations.first(where: { $0.id == mumoryAnnotation.id }) {
+                            self.mumoryAnnotation = updatedMumoryAnnotation
+                            print("2.imageURLs: \(mumoryAnnotation.imageURLs)")
+                        }
+                    }
 
                     mumoryDataViewModel.choosedMusicModel = nil
                     mumoryDataViewModel.choosedLocationModel = nil
