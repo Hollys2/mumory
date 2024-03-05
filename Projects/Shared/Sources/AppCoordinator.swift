@@ -58,6 +58,8 @@ public class AppCoordinator: ObservableObject {
     @Published public var safeAreaInsetsBottom: CGFloat = 0.0
     
     @Published public var selectedDate = Date()
+    @Published public var isHiddenTabBar: Bool = false
+    @Published public var isHiddenTabBarWithoutAnimation: Bool = false
     
     public var selectedYear: Int {
         Calendar.current.component(.year, from: self.selectedDate)

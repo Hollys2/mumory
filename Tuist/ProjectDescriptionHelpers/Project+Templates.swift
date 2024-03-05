@@ -119,7 +119,9 @@ extension Project {
                     "CFBundleURLName" : "fireBase-google",
                     "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
                 ]
-            ]
+            ],
+            "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한이 필요합니다",
+            "NSAppleMusicUsageDescription" : "애플 뮤직 권한 요청"
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in

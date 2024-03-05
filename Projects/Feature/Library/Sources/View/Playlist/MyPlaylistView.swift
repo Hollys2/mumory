@@ -11,6 +11,7 @@ import Shared
 import Core
 import MusicKit
 
+//라이브러리 첫 화면 - 최근 뮤모리 뮤직 하단 뷰
 struct MyPlaylistView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var userManager: UserViewModel
@@ -44,15 +45,14 @@ struct MyPlaylistView: View {
                 .padding(.trailing, 20)
                 .padding(.top, 10)
                 .padding(.bottom, 10)
-                
                 .onTapGesture {
-                    manager.page = .playlistManage
+                    manager.push(destination: .playlistManage)
                 }
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: 12, content: {
                         ForEach(userManager.playlistArray, id: \.title) { playlist in
-                            PlaylistItem(playlist: .constant(playlist), isAddSongItem: playlist.isAddItme)
+                            PlaylistItem(playlist: playlist, isAddSongItem: playlist.isAddItme)
                                 .environmentObject(manager)
                         }
                     })
@@ -60,11 +60,6 @@ struct MyPlaylistView: View {
                 }
                 .padding(.top, 16)
                 .scrollIndicators(.hidden)
-//                .onChange(of: playlistArray, perform: { value in
-//                    playlistArray = value.sorted(by: { playlist1, playlist2 in
-//                        return playlist1.isFavorite
-//                    })
-//                })
             })
             
             Spacer()
@@ -80,11 +75,10 @@ struct MyPlaylistView: View {
     func getPlayList(){
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        let auth = Firebase.auth
-        
-        //기본셋팅
-        
-        userManager.playlistArray = [MusicPlaylist(id: "favorite", title: "즐겨찾기 목록", songs: [], songIDs: [], isPrivate: true, isFavorite: true, isAddItme: false), MusicPlaylist(id: "addItem", title: "", songs: [], songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)]
+                
+        DispatchQueue.main.async {
+            userManager.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isAddItme: true)]
+        }
         
         let query = db.collection("User").document(userManager.uid).collection("Playlist")
         query.getDocuments { snapshot, error in
@@ -92,7 +86,6 @@ struct MyPlaylistView: View {
                 print(error)
             }else if let snapshot = snapshot {
                 snapshot.documents.forEach { snapshot in
-                    print("each")
                     guard let title = snapshot.data()["title"] as? String else {
                         print("no title")
                         return
@@ -101,34 +94,25 @@ struct MyPlaylistView: View {
                         print("no private thing")
                         return
                     }
-                    guard let isFavorite = snapshot.data()["is_favorite"] as? Bool else {
-                        print("no favorite thing")
-                        return
-                    }
                     guard let songIDs = snapshot.data()["song_IDs"] as? [String] else {
                         print("no id list")
                         return
                     }
                     let id = snapshot.reference.documentID
                     
-                    if isFavorite {
-                        withAnimation {
-                            userManager.playlistArray[0] = MusicPlaylist(id: id, title: title, songs: [], songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false)
-                        }
-                        Task{
-                            let songs = await fetchSongInfo(songIDs: songIDs)
-                            userManager.playlistArray[0].songs = songs
-                        }
-                    }else {
-                        let index = userManager.playlistArray.count - 1
-                        withAnimation {
-                            userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songs: [], songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: index)
-                        }
-                        Task{
-                            let songs = await fetchSongInfo(songIDs: songIDs)
-                            userManager.playlistArray[index].songs = songs
+                    DispatchQueue.main.async {
+                        if id == "favorite" {
+                            withAnimation {
+                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false), at: 0)
+                            }
+                        }else {
+                            let index = userManager.playlistArray.count - 1
+                            withAnimation {
+                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false), at: index)
+                            }
                         }
                     }
+          
 
                     
                 }
@@ -141,7 +125,8 @@ struct MyPlaylistView: View {
         
         for id in songIDs {
             let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
             
             do {
                 let response = try await request.response()

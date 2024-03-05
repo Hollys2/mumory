@@ -27,7 +27,28 @@ class CustomizationManageViewModel: ObservableObject{
     
     @Published var profileImageData: Data?
     @Published var profileImage: Image?
-    @Published var randomProfileImageIndex = Int.random(in: 0...3)
+    var randomProfileIndex: Int
+    var randomProfilePath: String
+    
+    init() {
+        switch(Int.random(in: 0...3)){
+        case 0:
+            self.randomProfileIndex = 0
+            self.randomProfilePath = "ProfileImage/profile_red.png"
+        case 1:
+            self.randomProfileIndex = 1
+            self.randomProfilePath = "ProfileImage/profile_purple.png"
+        case 2:
+            self.randomProfileIndex = 2
+            self.randomProfilePath = "ProfileImage/profile_yellow.png"
+        case 3:
+            self.randomProfileIndex = 3
+            self.randomProfilePath = "ProfileImage/profile_orange.png"
+        default:
+            self.randomProfileIndex = 1
+            self.randomProfilePath = "ProfileImage/profile_red.png"
+        }
+    }
     
     
     public func getNavigationTitle() -> String {
@@ -49,7 +70,6 @@ class CustomizationManageViewModel: ObservableObject{
         default: return false
         }
     }
-
     
     public func appendGenre(genre: MusicGenre){
         if selectedGenres.contains(where: {$0.id == genre.id}){
@@ -65,43 +85,32 @@ class CustomizationManageViewModel: ObservableObject{
         return selectedGenres.contains(where: {$0.id == genre.id})
     }
     
-    public func RandomSelectProfile() -> some View {
-        switch(randomProfileImageIndex){
-        case 0: return SharedAsset.profileSelectPurple.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
-        case 1: return SharedAsset.profileSelectRed.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
+    public func getSelectProfileImage() -> Image {
+        switch(self.randomProfileIndex) {
+        case 0: return SharedAsset.profileSelectRed.swiftUIImage
+        case 1: return SharedAsset.profileSelectPurple.swiftUIImage
         case 2: return SharedAsset.profileSelectYellow.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
         case 3: return SharedAsset.profileSelectOrange.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
         default: return SharedAsset.profileSelectRed.swiftUIImage
-                 .frame(width: 105, height: 105)
-                 .clipShape(Circle())
         }
     }
     
-    public func RandomProfile() -> some View {
-        switch(randomProfileImageIndex){
-        case 0: return SharedAsset.profilePurple.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
-        case 1: return SharedAsset.profileRed.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
-        case 2: return SharedAsset.profileYellow.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
-        case 3: return SharedAsset.profileOrange.swiftUIImage
-                .frame(width: 105, height: 105)
-                .clipShape(Circle())
-        default: return SharedAsset.profileSelectRed.swiftUIImage
-                 .frame(width: 105, height: 105)
-                 .clipShape(Circle())
+    public func getProfileImage() -> Image {
+        if let image = self.profileImage {
+            return image
+        }else {
+            switch(self.randomProfileIndex) {
+            case 0: return SharedAsset.profileRed.swiftUIImage
+            case 1: return SharedAsset.profilePurple.swiftUIImage
+            case 2: return SharedAsset.profileYellow.swiftUIImage
+            case 3: return SharedAsset.profileOrange.swiftUIImage
+            default: return SharedAsset.profileRed.swiftUIImage
+            }
         }
+    }
+    
+    public func removeProfileImage() {
+        self.profileImage = nil
+        self.profileImageData = nil
     }
 }

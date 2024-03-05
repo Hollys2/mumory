@@ -18,6 +18,7 @@ class SettingViewModel: ObservableObject{
     @Published var nickname: String = ""
 
     
+    
     public func getSignInMethodText() -> String {
         switch(signinMethod){
         case "Kakao":

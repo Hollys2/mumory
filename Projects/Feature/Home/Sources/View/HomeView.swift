@@ -255,11 +255,11 @@ public struct HomeView: View {
     
     @State private var selectedTab: Tab = .home
     
-    @StateObject private var playerManager = PlayerViewModel()
     @State private var translation: CGSize = .zero
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var playerManager: PlayerViewModel
     
     let customDetent = UISheetPresentationController.Detent.custom(identifier: nil) { context in
         let statusBarHeight = UIApplication.shared.connectedScenes
@@ -308,7 +308,6 @@ public struct HomeView: View {
                         SocialView()
                     case .library:
                         LibraryManageView()
-                            .environmentObject(playerManager)
                     case .notification:
                         VStack(spacing: 0){
                             Color.red
@@ -322,6 +321,7 @@ public struct HomeView: View {
                     MiniPlayerView()
                         .environmentObject(playerManager)
                         .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
+                        .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
             
                 
                 if appCoordinator.isCreateMumorySheetShown {
@@ -561,6 +561,7 @@ public struct HomeView: View {
                 Spacer()
             }
         }
+        
     }
 }
 

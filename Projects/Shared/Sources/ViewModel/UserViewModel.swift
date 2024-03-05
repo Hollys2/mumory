@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Core
 
 public class UserViewModel: ObservableObject {
     public init(){}
@@ -19,17 +20,36 @@ public class UserViewModel: ObservableObject {
     @Published public var favoriteGenres: [Int] = []
     @Published public var signInMethod: String = ""
     @Published public var selectedNotificationTime: Int = 0
-    @Published public var isCheckedServiceNewsNotification: Bool?
-    @Published public var isCheckedSocialNotification: Bool?
+    @Published public var isCheckedServiceNewsNotification: Bool = false
+    @Published public var isCheckedSocialNotification: Bool = false
+    @Published public var profileImageURL: URL?
+    @Published public var backgroundImageURL: URL?
+    @Published public var bio: String = ""
     
     @Published public var width: CGFloat = 0
     @Published public var height: CGFloat = 0
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
-    @Published public var customTopbarHeight: CGFloat = 68 //라이브러리, 소셜 상단 바 높이(safe area height 제외)
     
     @Published public var playlistArray: [MusicPlaylist] = [
-        MusicPlaylist(id: "favorite", title: "즐겨찾기 목록", songs: [], songIDs: [], isPrivate: true, isFavorite: true, isAddItme: false),
-        MusicPlaylist(id: "addItem", title: "", songs: [], songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)
+        MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isAddItme: true)
     ]
+    
+    public func getBackgroundURL() async -> URL? {
+        let db = FirebaseManager.shared.db
+        
+        guard let result = try? await db.collection("User").document(self.uid).getDocument() else {
+            return nil
+        }
+        
+        guard let data = result.data() else {
+            return nil
+        }
+        
+        guard let urlString = data["background_image_url"] as? String else {
+            return nil
+        }
+        
+        return URL(string: urlString)
+    }
 }

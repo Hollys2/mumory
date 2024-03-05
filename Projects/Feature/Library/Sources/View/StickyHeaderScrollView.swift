@@ -33,7 +33,6 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     }
 
     func makeUIViewController(context: Context) -> UIStickyScrollViewController {
-        print("make")
         let vc = UIStickyScrollViewController()
         vc.hostingController.rootView = AnyView(self.content())
         vc.scrollView.delegate = context.coordinator

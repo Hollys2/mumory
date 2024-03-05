@@ -8,7 +8,9 @@ let extendedInfo: [String: InfoPlist.Value] = [
 ]
 let project = Project(name: "Core",
                       organizationName: "hollys",
-                      packages: [],
+                      packages: [
+                       
+                      ],
                       targets: [Target(name: "Core",
                                        platform: .iOS,
                                        product: .framework,
@@ -27,10 +29,11 @@ let project = Project(name: "Core",
                                         .external(name: "KakaoSDKUser"),
                                         .external(name: "KakaoSDKAuth"),
                                         .external(name: "FirebaseMessaging"),
-                                        .external(name: "Alamofire")
+                                        .external(name: "Alamofire"),
+                                        .external(name: "RealmSwift")
                                        ],
                                        settings: Settings.settings(base: [
-                                        "HEADER_SEARCH_PATHS": "$(inherited) $(PROJECT_DIR)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
+                                        "HEADER_SEARCH_PATHS": "$(inherited) $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/realm-swift",
                                         "OTHER_LDFLAGS" : "-ObjC"
 
                                        ])

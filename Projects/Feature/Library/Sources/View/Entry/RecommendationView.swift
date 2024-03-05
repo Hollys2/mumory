@@ -47,12 +47,10 @@ public struct RecommendationView: View {
                 //최신 인기곡 타이틀
                 SubTitle()
                     .onTapGesture {
-                        manager.page = .chart
-                        manager.previousPage = .entry(.recomendation)
+                        manager.push(destination: .chart)
                     }
                 
-                
-                //가로 페이징 스크롤 차트
+                //차트 - 가로 페이징
                 ChartPagingScrollView(musicChart: $musicChart, scrollViewHeight: $scrollViewHeight) {
                     LazyHGrid(rows: rows, spacing: 0,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
@@ -60,7 +58,7 @@ public struct RecommendationView: View {
                             MusicChartItem(rank: index+1, song: song) //순위 곡 item
                                 .frame(width: userManager.width - 40)
                                 .onTapGesture {
-                                    playerManager.song = song
+                                    playerManager.playNewSong(song: song)
                                 }
                         }
                     })
@@ -75,6 +73,10 @@ public struct RecommendationView: View {
                 
                 FavoriteGenreRecommendationView()
                 
+                Rectangle()
+                    .foregroundStyle(Color.clear)
+                    .frame(height: 90)
+                
                 
             })
             
@@ -88,25 +90,7 @@ public struct RecommendationView: View {
     
     private func searchChart(offset: Int){
         
-        
-        //offset: 시작하는 수. 20 입력시 20등부터 40등까지 보여줌(no limit)
-        Task {
-            
-            //            switch(authRequest){
-            //            case .authorized:
-            //                do{
-            //                    print("허락됨")
-            //                    let request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-            //                    let response = try await request.response()
-            //                    print("검색 성공")
-            //                }catch{
-            //                    print("search error")
-            //                }
-            //
-            //            default:
-            //                print("안됨")
-            //            }
-            
+    Task {
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
             request.offset = offset
             let response = try await request.response().songCharts
@@ -114,10 +98,7 @@ public struct RecommendationView: View {
             print("검색 성공")
             musicChart = (response.first?.items)!
             chartChangeDetectValue = !chartChangeDetectValue
-            //            musicChart.forEach { song in
-            //                print(song.title)
-            //            }
-            //            print(musicChart.count)
+    
         }
         
         
@@ -129,43 +110,18 @@ private struct SubTitle: View {
     var body: some View {
         HStack(spacing: 0, content: {
             Text("최신 인기곡")
-                .foregroundStyle(.white)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                .foregroundStyle(.white)
             Spacer()
             SharedAsset.next.swiftUIImage
                 .resizable()
+                .scaledToFit()
                 .frame(width: 17, height: 17)
         })
-        .padding(.leading, 20)
-        .padding(.trailing, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
     }
 }
-
-//struct bottomView: View{
-//    @State var height: CGFloat = 300
-//    @Binding var isTouch: Bool
-//
-//    var body: some View{
-//        GeometryReader(content: { geometry in
-//            VStack{
-//                Text("아티스트페이지로 이동")
-//                    .onTapGesture {
-//                        setView.isSearchViewShowing = true
-//                        isTouch = false
-//                        print("tap 탭탭탭")
-//                        print("set view isShowing: \(setView.isSearchViewShowing)")
-//                    }
-//            }
-//            .frame(width: geometry.size.width, height: height)
-//        })
-//    }
-//}
-
-//#Preview {
-//    RecommendationView()
-//}
 
 
 

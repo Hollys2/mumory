@@ -16,83 +16,228 @@ public struct LibraryManageView: View {
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     @EnvironmentObject var userManager: UserViewModel
-    @StateObject var manager: LibraryManageModel = LibraryManageModel()
-
+    @EnvironmentObject var manager: LibraryManageModel
+    @StateObject var snackbarManager: SnackBarViewModel = SnackBarViewModel()
+    
     @State var isPlaying: Bool = true
-    @State var isNeedtoRemoveSafearea: Bool = false
-    public init() {
-        
-    }
+    @State var hasToRemoveSafeArea: Bool = false
+    @State var isDragging: Bool = false
+    @GestureState var dragState = CGSize.zero
+    public init() {}
     public var body: some View {
-        NavigationStack{
-            ZStack(alignment:.top){
-                LibraryColorSet.background.ignoresSafeArea()
+        ZStack(alignment:.top){
+            LibraryColorSet.background.ignoresSafeArea()
+            
+            ForEach(0 ..< manager.stack.count, id: \.self) { index in
+                
                 VStack(spacing: 0, content: {
-                    
-                 
-                    
-                    switch(manager.page){
-                    case .entry(.myMusic):
+                    switch(manager.stack[index]){
+                    case .entry:
                         LibraryView(isTapMyMusic: true)
-                            .environmentObject(manager)
-                    case .entry(.recomendation):
-                        LibraryView(isTapMyMusic: false)
-                            .environmentObject(manager)
-                    case .search:
-                        SearchView()
-                            .environmentObject(manager)
-                    case .artist:
-                        ArtistView()
-                            .environmentObject(manager)
-                    case .playlistManage:
-                        PlaylistManageView()
-                            .environmentObject(manager)
-                    case .chart:
-                        ChartListView()
-                            .environmentObject(manager)
-                            .environmentObject(playerManager)
-                    case .playlist(playlist: let playlist):
-                        PlaylistView(playlist: playlist)
-                            .environmentObject(manager)
+                        
+                    case .search(term: let term):
+                        SearchView(term: term)
+                        
+                    case .artist(artist: let artist):
+                        ArtistView(artist: artist)
                             .onAppear(perform: {
-                                isNeedtoRemoveSafearea = true
+                                hasToRemoveSafeArea = true
                             })
                             .onDisappear(perform: {
-                                isNeedtoRemoveSafearea = false
+                                hasToRemoveSafeArea = false
+                            })
+                        
+                    case .playlistManage:
+                        PlaylistManageView()
+                        
+                    case .chart:
+                        ChartListView()
+                        
+                    case .playlist(playlist: let playlist):
+                        PlaylistView(playlist: playlist)
+                            .onAppear(perform: {
+                                hasToRemoveSafeArea = true
+                            })
+                            .onDisappear(perform: {
+                                hasToRemoveSafeArea = false
+                            })
+                        
+                    case .shazam:
+                        ShazamView()
+                        
+                    case .addSong(originPlaylist: let originPlaylist):
+                        AddPlaylistSongView(originPlaylist: originPlaylist)
+                            .environmentObject(snackbarManager)
+                        
+                    case .play:
+                        NowPlayingView()
+                        
+                    case .saveToPlaylist(songs: let songs):
+                        SaveToPlaylistView(songs: songs)
+                            .environmentObject(snackbarManager)
+                        
+                    case .recommendation(genreID: let genreID):
+                        RecommendationListView(genreID: genreID)
+                            .onAppear(perform: {
+                                hasToRemoveSafeArea = true
+                            })
+                            .onDisappear(perform: {
+                                hasToRemoveSafeArea = false
                             })
                     }
                 })
-                .padding(.top, isNeedtoRemoveSafearea ? 0 : userManager.topInset)
-
-                ColorSet.background
-                    .frame(maxWidth: .infinity)
-                    .frame(height: userManager.topInset)
-                    .opacity(isNeedtoRemoveSafearea ? 0 : 1)
-  
-                
+                .padding(.top,  userManager.topInset)
+                .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/userManager.width) * manager.xOffset) - 70 : 0)
+                .simultaneousGesture(drag)
+                .transition(.move(edge: .trailing))
             }
-            .navigationBarBackButtonHidden()
-            .onAppear(perform: {
-                Task{
-//                    manager.page = .playlist(music)
-                    let authRequest = await MusicAuthorization.request() //음악 사용 동의 창-앱 시작할 때
+            
+            
+            
+            ColorSet.background
+                .frame(maxWidth: .infinity)
+                .frame(height: userManager.topInset)
+                .opacity(hasToRemoveSafeArea ? 0 : 1)
+            
+            //스낵바 - 추후 수정 예정
+            HStack {
+                if snackbarManager.status == .success {
+                    HStack(spacing: 0) {
+                        HStack(spacing: 0, content: {
+                            Text("플레이리스트")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            
+                            Text("\"\(snackbarManager.title)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            
+                            Text("\"")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            
+                            Text("에 추가되었습니다.")
+                                .fixedSize()
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        })
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        
+                        
+                        Text("실행취소")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                            .padding(.leading, 18)
+                            .foregroundStyle(ColorSet.mainPurpleColor)
+                    }
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                }else if snackbarManager.status == .failure{
+                    HStack(spacing: 0) {
+                        Text("이미 플레이리스트")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        
+                        Text("\"\(snackbarManager.title)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        
+                        Text("\"")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        
+                        Text("에 존재합니다.")
+                            .fixedSize()
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                    }
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
                 }
-            })
+            }
+            .ignoresSafeArea()
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .padding(.horizontal, 20)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+            .padding(.horizontal, 15)
+            .offset(y: snackbarManager.isPresent ? 53 : -50)
+            .opacity(snackbarManager.isPresent ? 1 : 0)
             
         }
-        
+        .onAppear(perform: {
+            Task{
+                await MusicAuthorization.request() //음악 사용 동의 창-앱 시작할 때
+            }
+        })
         
     }
     
+    private func isCurrentPage(index: Int) -> Bool {
+        if index == 0 {
+            return false
+        }else if index == manager.stack.count - 1 {
+            return true
+        }else {
+            return false
+        }
+    }
     
+    private func isPreviousPage(index: Int) -> Bool {
+        let length = manager.stack.count
+        if length > 1 && index == length - 2 {
+            return true
+        }else {
+            return false
+        }
+    }
+    
+    var drag: some Gesture {
+        DragGesture()
+            .onChanged({ drag in
+                if drag.startLocation.x > 20{
+                    return
+                }
+                isDragging = true
+                DispatchQueue.main.async {
+                    manager.xOffset = drag.location.x
+                }
+            })
+            .onEnded({ drag in
+                isDragging = false
+                if manager.stack.count < 1 || drag.startLocation.x > 20{
+                    return
+                }
+                
+                if drag.velocity.width > 1000.0{
+                    DispatchQueue.main.async {
+                        withAnimation(.spring(duration: 0.2)) {
+                            manager.xOffset = userManager.width
+                        }
+                    }
+                    Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+                        _ = manager.stack.popLast()
+                        manager.xOffset = 0
+                    }
+                    
+                }else if drag.location.x > userManager.width/2 {
+                    DispatchQueue.main.async {
+                        withAnimation(.spring(duration: 0.1)) {
+                            manager.xOffset = userManager.width
+                        }
+                    }
+                    Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in
+                        _ = manager.stack.popLast()
+                        manager.xOffset = 0
+                    }
+                }else{
+                    DispatchQueue.main.async {
+                        withAnimation(.spring(duration: 0.2)) {
+                            manager.xOffset = 0
+                        }
+                    }
+                }
+            })
+    }
     
     
 }
-
-
-
-//#Preview {
-//    LibraryView()
-//}
-
-

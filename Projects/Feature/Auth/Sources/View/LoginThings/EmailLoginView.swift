@@ -14,7 +14,6 @@ import Lottie
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var userManager: UserViewModel
-    
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State var email: String = ""
@@ -27,7 +26,6 @@ struct EmailLoginView: View {
 
     
     var body: some View {
-        GeometryReader(content: { geometry in
             NavigationStack{
                 ZStack{
                     LibraryColorSet.background.ignoresSafeArea()
@@ -67,8 +65,8 @@ struct EmailLoginView: View {
                             .padding(.trailing, 20)
                             .padding(.top, 20)
                             .onTapGesture {
-                                tapLoginButton(email: email, password: password) { isError in
-                                    isLoginError = isError
+                                Task{
+                                    await tapLoginButton(email: self.email, password: self.password)
                                 }
                             }
                             .disabled(!(email.count > 0 && password.count > 0))
@@ -88,10 +86,7 @@ struct EmailLoginView: View {
                     })
                     
                     
-                    LottieView(animation: .named("loading", bundle: .module))
-                        .looping()
-                        .opacity(isLoading ? 1 : 0)
-                        .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                    LoadingAnimationView(isLoading: $isLoading)
                 }
                 .navigationDestination(isPresented: $isCustomizationNotDone, destination: {
                     StartCostomizationView()
@@ -100,7 +95,6 @@ struct EmailLoginView: View {
                 .navigationDestination(isPresented: $isLoginSuccess, destination: {
                     HomeView()
                 })
-                .frame(width: geometry.size.width + 1)
                 .background(LibraryColorSet.background)
                 .navigationBarBackButtonHidden()
                 .toolbar(content: {
@@ -116,49 +110,51 @@ struct EmailLoginView: View {
                     self.hideKeyboard()
                 }
             }
-        })
     }
     
-    func tapLoginButton(email: String, password: String, completion: @escaping (Bool) -> Void){
-        //Core에 정의해둔 FirebaseAuth
+    func tapLoginButton(email: String, password: String) async{
         isLoading = true
         let Firebase = FirebaseManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
         
-        Auth.signIn(withEmail: email, password: password) { result, error in
-            if let error = error {
-                print("로그인 실패, \(error)")
-                completion(true) //isLoginError = true -> 오류발생
-            }else if let result = result{
-                print("login success")
-                db.collection("User").document(result.user.uid).getDocument { snapshot, error in
-                    if let error = error {
-                        
-                    }else if let snapshot = snapshot {
-                        guard let data = snapshot.data() else {
-                            print("no data")
-                            return
-                        }
-                        
-                        userManager.uid = result.user.uid
-                        userManager.id = data["id"] as? String ?? ""
-                        userManager.nickname = data["nickname"] as? String ?? ""
-                        userManager.email = data["email"] as? String ?? ""
-                        userManager.signInMethod = data["signin_method"] as? String ?? ""
-                        userManager.selectedNotificationTime = data["selected_notification_time"] as? Int ?? 0
-                        userManager.isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool ?? nil
-                        userManager.isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool ?? nil
-                        userManager.favoriteGenres = data["favorite_genres"] as? [Int] ?? []
-                        
-                        isCustomizationNotDone = userManager.id == ""
-                        isLoginSuccess = userManager.id != ""
-                        completion(false) //isLoginError = false -> 오류 미발생
-                    }
-                }
-            }
-            isLoading = false
+        guard let result = try? await Auth.signIn(withEmail: email, password: password),
+        let snapshot = try? await db.collection("User").document(result.user.uid).getDocument(),
+        let data = snapshot.data() else {
+            self.isLoginError = true
+            return
         }
+        
+        guard let id = data["id"] as? String,
+              let nickname = data["nickname"] as? String else {
+            self.isCustomizationNotDone = true
+            return
+        }
+        
+        guard let email = data["email"] as? String,
+              let signInMethod = data["sign_in_method"] as? String,
+              let selectedNotificationTime = data["selected_notification_time"] as? Int,
+              let isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool,
+              let isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool,
+              let favoriteGenres = data["favorite_genres"] as? [Int],
+              let profileImageURLString = data["profile_image_url"] as? String else {
+            return
+        }
+        
+        userManager.uid = result.user.uid
+        userManager.id = id
+        userManager.nickname = nickname
+        userManager.email = email
+        userManager.signInMethod = signInMethod
+        userManager.selectedNotificationTime = selectedNotificationTime
+        userManager.isCheckedSocialNotification = isCheckedSocialNotification
+        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
+        userManager.favoriteGenres = favoriteGenres
+        userManager.profileImageURL = URL(string: profileImageURLString)
+        
+      
+        isLoading = false
+        isLoginSuccess = true
     }
 }
 

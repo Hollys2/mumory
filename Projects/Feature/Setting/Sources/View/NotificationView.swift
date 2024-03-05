@@ -17,7 +17,8 @@ enum notificationCategory {
 
 struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
 
     @State var isEntireButtonOn: Bool = false
     @State var isEntireOn: Bool = false
@@ -29,6 +30,34 @@ struct NotificationView: View {
             ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
+                //상단바
+                HStack {
+                    SharedAsset.back.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            myPageCoordinator.pop()
+                        }
+                    Spacer()
+                    Text("알림")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        .foregroundStyle(Color.white)
+                    Spacer()
+                    SharedAsset.home.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            dismiss()
+                        }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .frame(height: 65)
+                .padding(.bottom, 7)
+                
+                
                 NotificationItem(title: "전체 알림", isOn: $isEntireButtonOn)
                     .padding(.top, 12)
                     .onChange(of: isEntireButtonOn, perform: { value in
@@ -59,6 +88,7 @@ struct NotificationView: View {
                         withAnimation {
                             isEntireOn = isSocialOn && isServiceOn
                         }
+                        subscribeSocial(isOn: value)
                     })
                 
                 NotificationItem(title: "서비스 소식 알림", isOn: $isServiceOn)
@@ -66,76 +96,89 @@ struct NotificationView: View {
                         withAnimation {
                             isEntireOn = isSocialOn && isServiceOn
                         }
+                        subscribeService(isOn: value)
+                        
                     })
                 
 
-                Rectangle()
-                    .frame(maxWidth: .infinity, maxHeight: 0.5)
-                    .foregroundStyle(ColorSet.subGray)
+                Divider()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 0.5)
+                    .background(ColorSet.subGray)
                     .padding(.top, 7)
                     .padding(.bottom, 7)
                 
-                //알림 시각 아이템
-                NavigationLink {
-                    SelectNotificationTimeView()
-                        .environmentObject(manager)
-                    
-                } label: {
-                    HStack(spacing: 0, content: {
-                        Text("알림 시각")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
-                            .foregroundStyle(.white)
-                        Spacer()
-                        Text(manager.getNotificationTimeText())
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                    })
-                    .padding(20)
+                
+                HStack(spacing: 0, content: {
+                    Text("알림 시각")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Text(getNotificationTimeText(timeRage: userManager.selectedNotificationTime))
+                        .foregroundStyle(ColorSet.mainPurpleColor)
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                })
+                .padding(20)
+                .background(ColorSet.background)
+                .onTapGesture {
+                    myPageCoordinator.push(destination: .selectNotificationTime)
                 }
      
                 Spacer()
             })
             
         }
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    SharedAsset.back.swiftUIImage
-                        .frame(width: 30, height: 30)
-                }
-                
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                
-                NavigationLink {
-                    HomeView()
-                } label: {
-                    SharedAsset.home.swiftUIImage
-                        .frame(width: 30, height: 30)
-                }
-                
-            }
-            
-            ToolbarItem(placement: .principal) {
-                Text("알림")
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                    .foregroundColor(.white)
-            }
-        }
         .onAppear(perform: {
-            isSocialOn = manager.isCheckedSocialNotification
-            isServiceOn = manager.isCheckedServiceNewsNotification
-        })
-        .onDisappear(perform: {
-            manager.isCheckedSocialNotification = isSocialOn
-            manager.isCheckedServiceNewsNotification = isServiceOn
-            manager.subscribeTopicAndUpdateUserData()
+            isSocialOn = userManager.isCheckedSocialNotification
+            isServiceOn = userManager.isCheckedServiceNewsNotification
         })
     }
+    
+    public func getNotificationTimeText(timeRage: Int) -> String {
+        switch(timeRage){
+        case 1: return "아침  6:00AM ~ 11:00AM"
+        case 2: return "점심  11:00AM ~ 4:00PM"
+        case 3: return "저녁  4:00PM ~ 9:00PM"
+        case 4: return "밤  9:00PM ~ 2:00AM"
+        case 5: return "이용 시간대를 분석해 자동으로 설정"
+        default : return "시간을 설정해주세요"
+        }
+    }
+    
+    public func subscribeSocial(isOn: Bool) {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let messaging = Firebase.messaging
+        
+        if isOn{
+            messaging.subscribe(toTopic: "SOCIAL")
+        }else {
+            messaging.unsubscribe(fromTopic: "SOCIAL")
+        }
+        let userData = [
+            "is_checked_social_notification" : isOn
+        ]
+        db.collection("User").document(userManager.uid).setData(userData, merge: true)
+        userManager.isCheckedSocialNotification = isOn
+    }
+    
+    public func subscribeService(isOn: Bool) {
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let messaging = Firebase.messaging
+        
+        if isOn{
+            messaging.subscribe(toTopic: "SERVICE")
+        }else {
+            messaging.unsubscribe(fromTopic: "SERVICE")
+        }
+        let userData = [
+            "is_checked_service_news_notification" : isOn
+        ]
+        db.collection("User").document(userManager.uid).setData(userData, merge: true)
+        userManager.isCheckedServiceNewsNotification = isOn
+    }
+    
 }
 
 #Preview {
@@ -154,10 +197,7 @@ struct NotificationItem: View {
             
             Spacer()
             
-            Toggle("social", isOn: $isOn)
-                .onTapGesture(perform: {
-                    print("tap")
-                })
+            Toggle("", isOn: $isOn)
                 .toggleStyle(CustomToggleStyle())
                 
         })

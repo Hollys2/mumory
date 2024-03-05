@@ -12,6 +12,7 @@ import MusicKit
 
 struct SearchSongItem: View {
     var song: Song
+    @State var isPresentBottomSheet: Bool = false
     var body: some View {
         HStack(spacing: 0, content: {
             AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
@@ -44,13 +45,23 @@ struct SearchSongItem: View {
             Spacer()
             
             SharedAsset.menu.swiftUIImage
+                .resizable()
+                .scaledToFit()
                 .frame(width: 30, height: 30)
                 .padding(.trailing, 16)
+                .onTapGesture {
+                    isPresentBottomSheet = true
+                }
+                .fullScreenCover(isPresented: $isPresentBottomSheet) {
+                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                        SongBottomSheetView(song: song)
+                    }
+                    .background(TransparentBackground())
+                }
         })
-        .padding(.top, 19)
-        .padding(.bottom, 19)
+        .padding(.vertical, 19)
         .padding(.leading, 20)
-        .background(.clear)
+        .background(ColorSet.background)
 
     }
     

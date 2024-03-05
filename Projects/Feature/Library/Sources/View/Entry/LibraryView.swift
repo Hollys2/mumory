@@ -19,6 +19,8 @@ struct LibraryView: View {
     @State var screenWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
     @State var scrollYOffset: CGFloat = 0
+    
+    let topBarHeight = 68.0
     var body: some View {
         ZStack(alignment: .top){
             StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, content: {
@@ -63,26 +65,25 @@ struct LibraryView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, 20)
                         .padding(.top, 17)
-                        .padding(.top, userManager.customTopbarHeight )//상단뷰높이
+                        .padding(.top, topBarHeight )//상단뷰높이
                         
                         //마이뮤직, 추천에 따라 바뀔 뷰
                         if isTapMyMusic{
                             MyMusicView()
                                 .environmentObject(playerManager)
                                 .environmentObject(manager)
-                                .padding(.top, 38)
+                                .padding(.top, 26)
                         }else {
                             RecommendationView()
                                 .environmentObject(playerManager)
                                 .environmentObject(manager)
-                                .padding(.top, 38)
+                                .padding(.top, 26)
 
                         }
                         
                         Rectangle()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 1000)
-                            .foregroundColor(.clear)
+                            .foregroundStyle(.clear)
+                            .frame(height: 87)
                         
                         
                         
@@ -111,19 +112,18 @@ struct LibraryView: View {
                     .padding(.trailing, 20)
                     .padding(.top, 5)
                     .onTapGesture {
-                        manager.page = .search
-                        manager.previousPage = .entry(isTapMyMusic ? .myMusic : .recomendation)
+                        manager.push(destination: .search(term: ""))
                     }
             }
-            .frame(height: userManager.customTopbarHeight, alignment: .center)
+            .frame(height: topBarHeight, alignment: .center)
             .background(ColorSet.background)
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
                 if newValue == .up {
                     //스크롤뷰는 safearea공간 내부부터 offset이 0임. 따라서 세이프공간을 무시하고 스크롤 시작하면 safearea 높이 만큼의 음수부터 시작임
                     //하지만 현재 상단뷰는 safearea를 무시해도 최상단이 0임. 따라서 스크롤뷰와 시작하는 offset이 다름
-                    if contentOffset.y >= userManager.customTopbarHeight/*상단뷰의 높이만큼의 여유 공간이 있는 경우*/{
-                        scrollYOffset = -userManager.customTopbarHeight/*-topbar height -safearea */
+                    if contentOffset.y >= topBarHeight/*상단뷰의 높이만큼의 여유 공간이 있는 경우*/{
+                        scrollYOffset = -topBarHeight/*-topbar height -safearea */
                     }
                 }
                 

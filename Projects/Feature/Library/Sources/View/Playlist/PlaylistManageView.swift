@@ -14,6 +14,8 @@ import FirebaseFirestore
 struct PlaylistManageView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
+
     @State var isCreatePlaylistCompleted: Bool = false
     @State var playlistArray: [MusicPlaylist] = []
     @State var isShowCreatePopup: Bool = false
@@ -39,7 +41,7 @@ struct PlaylistManageView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                manager.page = .entry(.myMusic)
+                                manager.pop()
                             }
                     }
                     
@@ -56,8 +58,10 @@ struct PlaylistManageView: View {
                         CompleteButton()
                             .transition(.opacity)
                             .onTapGesture {
+                                appCoordinator.isHiddenTabBarWithoutAnimation = false
                                 withAnimation {
                                     isEditing = false
+                                    appCoordinator.isHiddenTabBar = false
                                     editButtonHeight = nil
                                 }
                             }
@@ -67,7 +71,6 @@ struct PlaylistManageView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                UIView.setAnimationsEnabled(true)
                                 isShowCreatePopup = true
                             }
                     }
@@ -76,7 +79,7 @@ struct PlaylistManageView: View {
                 .padding(.horizontal, 20)
                 .frame(height: 40)
                 .fullScreenCover(isPresented: $isShowCreatePopup, content: {
-                    CreatePlaylistPopupView(isCreatePlaylistCompleted: $isCreatePlaylistCompleted)
+                    CreatePlaylistPopupView()
                         .background(TransparentBackground())
                 })
             
@@ -91,8 +94,10 @@ struct PlaylistManageView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .opacity(isEditing ? 0 : 1)
                     .onTapGesture {
+                        appCoordinator.isHiddenTabBarWithoutAnimation = true
                         withAnimation {
                             isEditing = true
+                            appCoordinator.isHiddenTabBar = true
                             editButtonHeight = 0
                         }
                     }
@@ -107,11 +112,15 @@ struct PlaylistManageView: View {
                                 .environmentObject(manager)
                         }
                     })
+                    
+                    Rectangle()
+                        .foregroundStyle(Color.clear)
+                        .frame(height: 90)
                 }
                 .padding(.top, isEditing ? 0 : 10)
                 .scrollIndicators(.hidden)
                 
-                Spacer()
+             
             }
 
         }
@@ -124,7 +133,8 @@ struct PlaylistManageView: View {
         
         for id in songIDs{
             let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
             let response = try await request.response()
             guard let song = response.items.first else {
                 throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
@@ -154,7 +164,7 @@ struct EditButton: View {
                 .foregroundStyle(ColorSet.subGray)
         })
         .padding(.horizontal, 13)
-        .padding(.vertical, 8)
+        .frame(height: 33)
         .overlay {
             RoundedRectangle(cornerRadius: 30, style: .circular)
                 .stroke(ColorSet.subGray, lineWidth: 1)
@@ -165,19 +175,8 @@ struct EditButton: View {
 struct CompleteButton: View {
     var body: some View {
         Text("완료")
-            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
             .foregroundStyle(Color.white)
     }
 }
 
-// 투명 fullScreenCover
-//extension View {
-//    func transparentFullScreenCover<Content: View>(isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View {
-//        fullScreenCover(isPresented: isPresented) {
-//            ZStack {
-//                content()
-//            }
-//            .background(TransparentBackground())
-//        }
-//    }
-//}

@@ -20,7 +20,6 @@ struct FindPWView: View {
     @State var infoText = "•  가입하신 이메일 주소를 입력하시면 비밀번호 재설정 지침을\n    보내드립니다."
     @State var isLoading = false
     var body: some View {
-        GeometryReader(content: { geometry in
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
             
@@ -80,13 +79,9 @@ struct FindPWView: View {
                 Spacer()
             })
             
-            LottieView(animation: .named("loading", bundle: .module))
-                .looping()
-                .opacity(isLoading ? 1 : 0)
-                .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+            LoadingAnimationView(isLoading: $isLoading)
             
         }
-        .frame(width: geometry.size.width + 1)
         .background(LibraryColorSet.background)
         .navigationBarBackButtonHidden()
         .toolbar(content: {
@@ -101,7 +96,6 @@ struct FindPWView: View {
         .onTapGesture {
             self.hideKeyboard()
         }
-        })
     }
 
     
@@ -113,7 +107,7 @@ struct FindPWView: View {
         
         let query = db.collection("User")
             .whereField("email", isEqualTo: email)
-            .whereField("signin_method", isEqualTo: "Email")
+            .whereField("sign_in_method", isEqualTo: "Email")
         
         query.getDocuments { snapshot, error in
             if let error = error {

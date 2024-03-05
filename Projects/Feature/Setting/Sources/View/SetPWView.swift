@@ -13,8 +13,8 @@ import Lottie
 
 struct SetPWView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
-
+    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @State var email: String = ""
     @State var errorText: String = ""
     @State var isError: Bool = false
@@ -22,31 +22,58 @@ struct SetPWView: View {
     @State var infoText = "•  가입하신 이메일 주소를 입력하시면 비밀번호 재설정 지침을\n    보내드립니다."
     @State var isLoading = false
     var body: some View {
-        GeometryReader(content: { geometry in
         ZStack{
-            LibraryColorSet.background.ignoresSafeArea()
+            ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-                //상단 타이틀
-                Text("비밀번호 재설정")
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
-                    .foregroundColor(.white)
-                    .padding(.top, 30)
+                //상단바
+                HStack {
+                    SharedAsset.back.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            myPageCoordinator.pop()
+                        }
+                    
+                    Spacer()
+                    
+                    Text("비밀번호 재설정")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        .foregroundStyle(Color.white)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .foregroundStyle(Color.clear)
+                        .frame(width: 30, height: 30)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .frame(height: 65)
+                .padding(.bottom, 7)
+                
+                Text("이메일")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                    .foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 25)
                 
                 //이메일 텍스트 필드(재사용)
                 AuthTextField(text: $email, prompt: "가입한 이메일을 입력해주세요")
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
-                    .padding(.top, 55)
+                    .padding(.top, 15)
                     
-                    Text(infoText)
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                        .foregroundStyle(isValidEmail ? ColorSet.mainPurpleColor : ColorSet.lightGray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 40)
-                        .padding(.trailing, 40)
-                        .padding(.top, 15)
-                        .lineSpacing(4)
+                Text(infoText)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                    .foregroundStyle(isValidEmail ? ColorSet.mainPurpleColor : ColorSet.lightGray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 40)
+                    .padding(.trailing, 40)
+                    .padding(.top, 15)
+                    .lineSpacing(4)
                 
                 Text(errorText)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
@@ -75,7 +102,7 @@ struct SetPWView: View {
                                 isValidEmail = false
                             }
                             
-                        }else if email != manager.email {
+                        }else if email != userManager.email {
                             withAnimation {
                                 errorText = "•  이메일 주소가 다릅니다. 다시 한 번 확인해 주세요."
                                 isError = true
@@ -89,28 +116,12 @@ struct SetPWView: View {
                 Spacer()
             })
             
-            LottieView(animation: .named("loading", bundle: .module))
-                .looping()
-                .opacity(isLoading ? 1 : 0)
-                .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+            LoadingAnimationView(isLoading: $isLoading)
             
         }
-        .frame(width: geometry.size.width + 1)
-        .background(LibraryColorSet.background)
-        .navigationBarBackButtonHidden()
-        .toolbar(content: {
-            ToolbarItem(placement: .topBarLeading) {
-                SharedAsset.back.swiftUIImage
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        dismiss()
-                    }
-            }
-        })
         .onTapGesture {
             self.hideKeyboard()
         }
-        })
     }
 
     
@@ -122,7 +133,7 @@ struct SetPWView: View {
         
         let query = db.collection("User")
             .whereField("email", isEqualTo: email)
-            .whereField("signin_method", isEqualTo: "Email")
+            .whereField("sign_in_method", isEqualTo: "Email")
         
         query.getDocuments { snapshot, error in
             if let error = error {

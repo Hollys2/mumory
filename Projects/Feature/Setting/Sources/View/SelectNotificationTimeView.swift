@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Core
 import Shared
 
 enum time{
@@ -19,7 +20,8 @@ enum time{
 
 struct SelectNotificationTimeView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
 
     @State var selectIndex: Int = 0
     
@@ -28,26 +30,52 @@ struct SelectNotificationTimeView: View {
             ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-                SelectTimeItem(time: .morning, index: $manager.selectedNotificationTime)
+                HStack {
+                    SharedAsset.back.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            myPageCoordinator.pop()
+                        }
+                    
+                    Spacer()
+                    
+                    Text("알림 시각")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        .foregroundStyle(Color.white)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .foregroundStyle(Color.clear)
+                        .frame(width: 30, height: 30)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .frame(height: 65)
+                .padding(.bottom, 7)
+                
+                SelectTimeItem(time: .morning, index: $userManager.selectedNotificationTime)
                     .onTapGesture {
-                        manager.selectedNotificationTime = 1
+                        setNotificationTime(timeRange: 1)
                     }
                 
-                SelectTimeItem(time: .afternoon, index: $manager.selectedNotificationTime)
+                SelectTimeItem(time: .afternoon, index: $userManager.selectedNotificationTime)
                     .onTapGesture {
-                        manager.selectedNotificationTime = 2
+                        setNotificationTime(timeRange: 2)
                     }
-                SelectTimeItem(time: .evening, index: $manager.selectedNotificationTime)
+                SelectTimeItem(time: .evening, index: $userManager.selectedNotificationTime)
                     .onTapGesture {
-                        manager.selectedNotificationTime = 3
+                        setNotificationTime(timeRange: 3)
                     }
-                SelectTimeItem(time: .night, index: $manager.selectedNotificationTime)
+                SelectTimeItem(time: .night, index: $userManager.selectedNotificationTime)
                     .onTapGesture {
-                        manager.selectedNotificationTime = 4
+                        setNotificationTime(timeRange: 4)
                     }
-                SelectTimeItem(time: .auto, index: $manager.selectedNotificationTime)
+                SelectTimeItem(time: .auto, index: $userManager.selectedNotificationTime)
                     .onTapGesture {
-                        manager.selectedNotificationTime = 5
+                        setNotificationTime(timeRange: 5)
                     }
                 
                 Spacer()
@@ -55,27 +83,25 @@ struct SelectNotificationTimeView: View {
             .padding(.top, 12)
 
         }
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    SharedAsset.back.swiftUIImage
-                        .frame(width: 30, height: 30)
-                }
-                
-            }
-            
-            ToolbarItem(placement: .principal) {
-                Text("알림")
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                    .foregroundColor(.white)
+    }
+    
+    public func setNotificationTime(timeRange: Int) {
+        userManager.selectedNotificationTime = timeRange
+        
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let auth = Firebase.auth
+        
+        let userData = [
+            "selected_notification_time" : timeRange
+        ]
+        
+        let query = db.collection("User").document(userManager.uid)
+        query.setData(userData, merge: true) { error in
+            if let error = error {
+                print("set Data error: \(error)")
             }
         }
-        .onDisappear(perform: {
-            manager.setNotificationTime()
-        })
     }
 }
 

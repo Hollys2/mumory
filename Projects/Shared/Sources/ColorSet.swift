@@ -20,5 +20,10 @@ public class ColorSet{
     public static let skeleton02 = Color(red: 0.25, green: 0.25, blue: 0.25)
     public static let charSubGray = Color(red: 0.76, green: 0.76, blue: 0.76)
     public static let errorRed = Color(red: 1.00, green: 0.34, blue: 0.34)
+    public static let accentRed = Color(red: 1.00, green: 0.25, blue: 0.25)
     public static let validGreen = Color(red: 0.33, green: 0.87, blue: 0.61)
+    public static let skeleton = Color(red: 0.18, green: 0.18, blue: 0.18)
+    public static let lineGray = Color(white: 0.65)
+    public static let D9Gray = Color(white: 0.85)
+    public static let D0Gray = Color(white: 0.82)
 }

@@ -46,12 +46,10 @@ struct SearchArtistItem: View {
             
             SharedAsset.next.swiftUIImage
                 .frame(width: 30, height: 30)
-                .padding(.trailing, 16)
         })
-        .padding(.top, 19)
-        .padding(.bottom, 19)
-        .padding(.leading, 20)
-        .background(.clear)
+        .padding(.vertical, 19)
+        .padding(.horizontal, 20)
+        .background(ColorSet.background)
     }
 }
 

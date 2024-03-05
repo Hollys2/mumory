@@ -12,7 +12,8 @@ import Core
 import Lottie
 
 struct QuestionView: View {
-    @EnvironmentObject var manager: SettingViewModel
+    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @Environment(\.dismiss) private var dismiss
     let placeHolder = "내용을 입력하세요."
     @State var title: String = ""
@@ -27,138 +28,131 @@ struct QuestionView: View {
     }
     
     var body: some View {
-        GeometryReader(content: { geometry in
             
             ZStack{
                 ColorSet.background.ignoresSafeArea()
-                
-                ScrollView{
-                    VStack(spacing: 0, content: {
-                        
-                        //닉네임 라인
-                        HStack(spacing: 0, content: {
-                            Text("닉네임")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
-                                .foregroundStyle(.white)
-                            
-                            Text(manager.nickname)
-                                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
-                                .foregroundStyle(ColorSet.charSubGray)
-                                .padding(.leading, 14)
-                            
-                            Spacer()
-                        })
-                        .padding(20)
-                        .padding(.top, 3)
-                        
-                        //이메일 라인
-                        HStack(spacing: 0, content: {
-                            Text("이메일")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
-                                .foregroundStyle(.white)
-                            
-                            Text(verbatim: manager.email)
-                                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
-                                .foregroundStyle(ColorSet.charSubGray)
-                                .padding(.leading, 14)
-                            
-                            Spacer()
-                        })
-                        .padding(20)
-                        .padding(.top, 3)
-                        
-                        
-                        TextField("", text: $title, prompt: getPrompt())
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(.white)
-                            .padding(.top, 17)
-                            .padding(.bottom, 17)
-                            .padding(.leading, 14)
-                            .padding(.trailing, 14)
-                            .background(darkGray)
-                            .clipShape(RoundedRectangle(cornerRadius: 13, style: .circular))
-                            .padding(.leading, 20)
-                            .padding(.trailing, 20)
-                            .padding(.top, 20)
-                            
-                        
-                        
-                        TextEditor(text: $content)
-                            .font(content == placeHolder ?  SharedFontFamily.Pretendard.light.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(content == placeHolder ? ColorSet.charSubGray : .white)
-                            .frame(height: 150)
-                            .padding(15)
-                            .background(darkGray)
-                            .clipShape(RoundedRectangle(cornerRadius: 13, style: .circular))
-                            .scrollContentBackground(.hidden)
-                            .padding(.top, 15)
-                            .padding(.leading, 20)
-                            .padding(.trailing, 20)
-                            .focused($isFocusOnContent)
-                            .onChange(of: isFocusOnContent) { value in
-                                if value {
-                                    content = content.replacingOccurrences(of: placeHolder, with: "")
-                                }
+                VStack(spacing: 0) {
+                    HStack {
+                        SharedAsset.back.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .onTapGesture {
+                                myPageCoordinator.pop()
                             }
-                       
-                           
-                           
-                           Button(action: {
-                        uploadQuestion()
-                    }, label: {
-                        WhiteButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0)
-                            .padding(.leading, 20)
-                            .padding(.trailing, 20)
-                    })
+                        
+                        Spacer()
+                        
+                        Text("1:1 문의")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                            .foregroundStyle(Color.white)
+                        
+                        Spacer()
+                        
+                        SharedAsset.home.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .onTapGesture {
+                                dismiss()
+                            }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 20)
+                    .frame(height: 65)
+                    .padding(.bottom, 7)
+                    
+                    ScrollView{
+                        VStack(spacing: 0, content: {
+                            
+                            //닉네임 라인
+                            HStack(spacing: 0, content: {
+                                Text("닉네임")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                                    .foregroundStyle(.white)
+                                
+                                Text(userManager.nickname)
+                                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
+                                    .foregroundStyle(ColorSet.charSubGray)
+                                    .padding(.leading, 14)
+                                
+                                Spacer()
+                            })
+                            .padding(20)
+                            .padding(.top, 3)
+                            
+                            //이메일 라인
+                            HStack(spacing: 0, content: {
+                                Text("이메일")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                                    .foregroundStyle(.white)
+                                
+                                Text(verbatim: userManager.email)
+                                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
+                                    .foregroundStyle(ColorSet.charSubGray)
+                                    .padding(.leading, 14)
+                                
+                                Spacer()
+                            })
+                            .padding(20)
+                            .padding(.top, 3)
+                            
+                            
+                            TextField("", text: $title, prompt: getPrompt())
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                .foregroundStyle(.white)
+                                .padding(.top, 17)
+                                .padding(.bottom, 17)
+                                .padding(.leading, 14)
+                                .padding(.trailing, 14)
+                                .background(darkGray)
+                                .clipShape(RoundedRectangle(cornerRadius: 13, style: .circular))
+                                .padding(.leading, 20)
+                                .padding(.trailing, 20)
+                                .padding(.top, 20)
+                            
+                            
+                            
+                            TextEditor(text: $content)
+                                .font(content == placeHolder ?  SharedFontFamily.Pretendard.light.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                .foregroundStyle(content == placeHolder ? ColorSet.charSubGray : .white)
+                                .frame(height: 150)
+                                .padding(15)
+                                .background(darkGray)
+                                .clipShape(RoundedRectangle(cornerRadius: 13, style: .circular))
+                                .scrollContentBackground(.hidden)
+                                .padding(.top, 15)
+                                .padding(.leading, 20)
+                                .padding(.trailing, 20)
+                                .focused($isFocusOnContent)
+                                .onChange(of: isFocusOnContent) { value in
+                                    if value {
+                                        content = content.replacingOccurrences(of: placeHolder, with: "")
+                                    }
+                                }
+                            
+                            
+                            Button(action: {
+                                uploadQuestion()
+                            }, label: {
+                                WhiteButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0)
+                                    .padding(.leading, 20)
+                                    .padding(.trailing, 20)
+                            })
                             .padding(.top, 87)
                             .disabled(!(title.count > 0 && content.count > 0))
-                           
-                           
-                           
-                           
-                           Spacer()
-                           })
-                }
-                
-                LottieView(animation: .named("loading", bundle: .module))
-                    .looping()
-                    .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
-            }
-            .navigationBarBackButtonHidden()
-            .toolbarBackground(ColorSet.background, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        SharedAsset.back.swiftUIImage
-                            .frame(width: 30, height: 30)
+                            
+                            Spacer()
+                        })
                     }
-                    
+
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    
-                    NavigationLink {
-                        HomeView()
-                    } label: {
-                        SharedAsset.home.swiftUIImage
-                            .frame(width: 30, height: 30)
-                    }
-                    
-                }
-                
-                ToolbarItem(placement: .principal) {
-                    Text("1:1 문의")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                        .foregroundColor(.white)
-                }
+                LoadingAnimationView(isLoading: $isLoading)
             }
             .onTapGesture {
                 hideKeyboard()
             }
-        })
     }
     
     private func getPrompt() -> Text {
@@ -189,7 +183,7 @@ struct QuestionView: View {
                 print("error: \(error)")
             }else {
                 isLoading = false
-                dismiss()
+                myPageCoordinator.pop()
             }
         }
         
