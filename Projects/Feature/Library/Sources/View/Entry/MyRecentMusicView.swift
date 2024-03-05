@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 import Core
 public struct MyRecentMusicView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var MusicList: [Song] = []
     @State var exists: Bool = false
@@ -57,7 +57,7 @@ public struct MyRecentMusicView: View {
         //임의로 즐겨찾기 목록이 나오게 함
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        let query = db.collection("User").document(userManager.uid).collection("Playlist").document("favorite")
+        let query = db.collection("User").document(currentUserData.uid).collection("Playlist").document("favorite")
         query.getDocument { snapshot, error in
             guard error == nil else {
                 return
@@ -66,7 +66,7 @@ public struct MyRecentMusicView: View {
                 return
             }
             
-            guard let songIDs = data["song_IDs"] as? [String] else {
+            guard let songIDs = data["songIdentifiers"] as? [String] else {
                 return
             }
             

@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct AddMusicItem: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackbarManager: SnackBarViewModel
 
     let songID: String
@@ -79,10 +79,10 @@ struct AddMusicItem: View {
             originPlaylist.songIDs.append(songID)
             
             let songData: [String: Any] = [
-                "song_IDs" : originPlaylist.songIDs
+                "songIdentifiers" : originPlaylist.songIDs
             ]
             
-            db.collection("User").document(userManager.uid).collection("Playlist").document(originPlaylist.id).setData(songData, merge: true) { error in
+            db.collection("User").document(currentUserData.uid).collection("Playlist").document(originPlaylist.id).setData(songData, merge: true) { error in
                 if error == nil {
                     snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
                 }

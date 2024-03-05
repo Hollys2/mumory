@@ -14,7 +14,7 @@ struct SearchResultView: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
     @EnvironmentObject private var playerManager: PlayerViewModel
     @EnvironmentObject private var manager: LibraryManageModel
-    @EnvironmentObject private var userManager: UserViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
     
     @Binding var term: String
     @State private var musicList: MusicItemCollection<Song> = []
@@ -104,7 +104,7 @@ struct SearchResultView: View {
                         
                     }
                 })
-                .frame(width: userManager.width)
+                .frame(width: currentUserData.width)
                 
                 
                 

@@ -20,8 +20,8 @@ enum time{
 
 struct SelectNotificationTimeView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var settingViewModel: SettingViewModel
 
     @State var selectIndex: Int = 0
     
@@ -56,51 +56,16 @@ struct SelectNotificationTimeView: View {
                 .frame(height: 65)
                 .padding(.bottom, 7)
                 
-                SelectTimeItem(time: .morning, index: $userManager.selectedNotificationTime)
-                    .onTapGesture {
-                        setNotificationTime(timeRange: 1)
-                    }
-                
-                SelectTimeItem(time: .afternoon, index: $userManager.selectedNotificationTime)
-                    .onTapGesture {
-                        setNotificationTime(timeRange: 2)
-                    }
-                SelectTimeItem(time: .evening, index: $userManager.selectedNotificationTime)
-                    .onTapGesture {
-                        setNotificationTime(timeRange: 3)
-                    }
-                SelectTimeItem(time: .night, index: $userManager.selectedNotificationTime)
-                    .onTapGesture {
-                        setNotificationTime(timeRange: 4)
-                    }
-                SelectTimeItem(time: .auto, index: $userManager.selectedNotificationTime)
-                    .onTapGesture {
-                        setNotificationTime(timeRange: 5)
-                    }
-                
+                SelectTimeItem(time: .morning, index: $settingViewModel.notificationTime)
+                SelectTimeItem(time: .afternoon, index: $settingViewModel.notificationTime)
+                SelectTimeItem(time: .evening, index: $settingViewModel.notificationTime)
+                SelectTimeItem(time: .night, index: $settingViewModel.notificationTime)
+                SelectTimeItem(time: .auto, index: $settingViewModel.notificationTime)
+                 
                 Spacer()
             })
             .padding(.top, 12)
 
-        }
-    }
-    
-    public func setNotificationTime(timeRange: Int) {
-        userManager.selectedNotificationTime = timeRange
-        
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        let auth = Firebase.auth
-        
-        let userData = [
-            "selected_notification_time" : timeRange
-        ]
-        
-        let query = db.collection("User").document(userManager.uid)
-        query.setData(userData, merge: true) { error in
-            if let error = error {
-                print("set Data error: \(error)")
-            }
         }
     }
 }
@@ -138,6 +103,10 @@ struct SelectTimeItem: View {
             .padding(.trailing, 20)
             .padding(.top, 18)
             .padding(.bottom, 18)
+            .background(ColorSet.background)
+            .onTapGesture {
+                index = 1
+            }
             
         case .afternoon:
             HStack(spacing: 0, content: {
@@ -160,6 +129,10 @@ struct SelectTimeItem: View {
             .padding(.trailing, 20)
             .padding(.top, 18)
             .padding(.bottom, 18)
+            .background(ColorSet.background)
+            .onTapGesture {
+                index = 2
+            }
             
         case .evening:
             HStack(spacing: 0, content: {
@@ -184,6 +157,10 @@ struct SelectTimeItem: View {
             .padding(.trailing, 20)
             .padding(.top, 18)
             .padding(.bottom, 18)
+            .background(ColorSet.background)
+            .onTapGesture {
+                index = 3
+            }
             
         case .night:
             HStack(spacing: 0, content: {
@@ -208,6 +185,10 @@ struct SelectTimeItem: View {
             .padding(.trailing, 20)
             .padding(.top, 18)
             .padding(.bottom, 18)
+            .background(ColorSet.background)
+            .onTapGesture {
+                index = 4
+            }
             
         case .auto:
             HStack(spacing: 0, content: {
@@ -226,6 +207,10 @@ struct SelectTimeItem: View {
             .padding(.trailing, 20)
             .padding(.top, 18)
             .padding(.bottom, 18)
+            .background(ColorSet.background)
+            .onTapGesture {
+                index = 5
+            }
         }
         
     }

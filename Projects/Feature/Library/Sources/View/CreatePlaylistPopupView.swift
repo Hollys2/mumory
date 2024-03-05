@@ -12,7 +12,7 @@ import Core
 
 struct CreatePlaylistPopupView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
@@ -158,11 +158,11 @@ struct CreatePlaylistPopupView: View {
         
         let data: [String: Any] = [
             "title": playlistTitle,
-            "is_private": !isTapPublic,
-            "song_IDs": []
+            "isPrivate": !isTapPublic,
+            "songIdentifiers": []
         ]
         
-        db.collection("User").document(userManager.uid).collection("Playlist").addDocument(data: data) { error in
+        db.collection("User").document(currentUserData.uid).collection("Playlist").addDocument(data: data) { error in
             if error == nil {
                 print("success")
                 dismiss()

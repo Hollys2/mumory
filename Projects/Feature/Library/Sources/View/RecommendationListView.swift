@@ -13,7 +13,7 @@ import Core
 
 struct RecommendationListView: View {
     @EnvironmentObject var manager: LibraryManageModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     
@@ -35,7 +35,7 @@ struct RecommendationListView: View {
 
             //이미지
             PlaylistImage(songs: $songs)
-                .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+                .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
                 }
@@ -46,14 +46,14 @@ struct RecommendationListView: View {
                 VStack(spacing: 0, content: {
                     SharedAsset.bottomGradient.swiftUIImage
                         .resizable()
-                        .frame(width: userManager.width, height: 45)
+                        .frame(width: currentUserData.width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, currentUserData.width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(title)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                            .frame(width: userManager.width, alignment: .center)
+                            .frame(width: currentUserData.width, alignment: .center)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
                             .foregroundStyle(.white)
@@ -106,8 +106,8 @@ struct RecommendationListView: View {
                     
                     
                 })
-                .frame(width: userManager.width)
-                .frame(minHeight: userManager.height)
+                .frame(width: currentUserData.width)
+                .frame(minHeight: currentUserData.height)
                 
             }
             
@@ -134,7 +134,7 @@ struct RecommendationListView: View {
                     }
             })
             .frame(height: 50)
-            .padding(.top, userManager.topInset)
+            .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
                     RecommendationBottomSheetView(songs: songs, title: title)
@@ -207,7 +207,7 @@ struct RecommendationListView: View {
 
 
 private struct PlaylistImage: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var imageWidth: CGFloat = 0
     @Binding var songs: [Song]
     
@@ -264,7 +264,7 @@ private struct PlaylistImage: View {
             
             //가로줄(구분선)
             Rectangle()
-                .frame(width: userManager.width, height: 1)
+                .frame(width: currentUserData.width, height: 1)
                 .foregroundStyle(ColorSet.background)
             
             HStack(spacing: 0,content: {
@@ -311,7 +311,7 @@ private struct PlaylistImage: View {
         })
         .onAppear {
             DispatchQueue.main.async {
-                self.imageWidth = userManager.width/2
+                self.imageWidth = currentUserData.width/2
             }
         }
         

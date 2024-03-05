@@ -14,7 +14,7 @@ import MusicKit
 //플레이리스트 아이템(플레이리스트 뷰)
 struct PlaylistItem_Big: View {
     @EnvironmentObject var manager: LibraryManageModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @Binding var playlist: MusicPlaylist
     @Binding var isEditing: Bool
@@ -217,11 +217,11 @@ struct PlaylistItem_Big: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        let ref = db.collection("User").document(userManager.uid).collection("Playlist").document(playlist.id)
+        let ref = db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id)
         ref.delete()
         
         withAnimation {
-            userManager.playlistArray.removeAll(where: {$0.id == playlist.id})
+            currentUserData.playlistArray.removeAll(where: {$0.id == playlist.id})
         }
     }
     

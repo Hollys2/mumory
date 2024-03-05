@@ -13,7 +13,7 @@ import MusicKit
 struct AddSongFromSearchView: View {
     @Binding var originPlaylist: MusicPlaylist
     
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackbarManager: SnackBarViewModel
 
     @State var term: String = ""
@@ -58,7 +58,7 @@ struct AddSongFromSearchView: View {
                                 .background(lineGray)
                         }
                     })
-                    .frame(width: userManager.width)
+                    .frame(width: currentUserData.width)
                 }        
                 .onChange(of: scrollOffset, perform: { value in
                     //아이템 높이: 70. 첫 페이지에서는 offset이 700일 때 다음 페이지 요청을 보내고, 두번째 페이지에서는 2100일 때 요청을 보냄...반복

@@ -18,7 +18,7 @@ public struct LoginView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
 
     @State var isLoginCompleted: Bool = false
     @State var goToCustomization: Bool = false
@@ -38,11 +38,11 @@ public struct LoginView: View {
                 VStack(spacing: 0){
                     
                     SharedAsset.logo.swiftUIImage
-                        .padding(.top, userManager.height > 700 ? 127 : 71)
+                        .padding(.top, currentUserData.height > 700 ? 127 : 71)
                     
                     //이메일 로그인 버튼
                     EmailLoginButton()
-                        .padding(.top, userManager.height > 700 ? 116 : 90)
+                        .padding(.top, currentUserData.height > 700 ? 116 : 90)
                         .onTapGesture {
                             isEmailLoginTapped = true
                         }
@@ -75,7 +75,7 @@ public struct LoginView: View {
                             Text("뮤모리 계정이 없으시다면?")
                                 .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                .padding(.top, userManager.height > 700 ? 68 : 51)
+                                .padding(.top, currentUserData.height > 700 ? 68 : 51)
                             
                             Text("이메일로 가입하기")
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
@@ -208,7 +208,7 @@ public struct LoginView: View {
                 //저장된 유저데이터에서 기존유저 판단 쿼리
                 let checkOldUserQuery = Firebase.db.collection("User")
                     .whereField("email", isEqualTo: email)
-                    .whereField("sign_in_method", isEqualTo: "Kakao")
+                    .whereField("signInMethod", isEqualTo: "Kakao")
                 
                 //쿼리 기반 데이터 가져오기
                 checkOldUserQuery.getDocuments { snapShot, error in
@@ -260,59 +260,46 @@ public struct LoginView: View {
         
         //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
         let query = Firebase.db.collection("User").document(uid)
+        
         guard let snapshot = try? await query.getDocument() else {
             self.isLoading = false
             return
         }
         
-        if !snapshot.exists{
+        if snapshot.exists {
+            guard let data = snapshot.data(),
+                  let uid = data["uid"] as? String else {
+                //로그인 오류 처리
+                self.isLoading = false
+                return
+            }
+            
+            guard let id = data["id"] as? String,
+                  let nickname = data["nickname"] as? String else {
+                //커스텀 마무리 안 한 기존 회원
+                self.goToCustomization = true
+                return
+            }
+
+            
+            currentUserData.uid = uid
+            currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
+     
+            isLoginCompleted = true
+        }else {
             //신규 회원
             let userData: [String: Any] = [
                 "uid": uid,
                 "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
-                "sign_in_method": method
+                "signInMethod": method
             ]
             try? await snapshot.reference.setData(userData)
             self.isLoading = false
             self.goToCustomization = true
         }
 
-        guard let data = snapshot.data(),
-              let uid = data["uid"] as? String,
-              let signInMethod = data["sign_in_method"] as? String,
-              let email = data["email"] as? String else {
-            //로그인 오류 처리
-            self.isLoading = false
-            return
-        }
-        userManager.uid = uid
-        userManager.email = email
-        userManager.signInMethod = signInMethod
-        
-        guard let id = data["id"] as? String,
-              let nickname = data["nickname"] as? String else {
-            //커스텀 마무리 안 한 기존 회원
-            self.goToCustomization = true
-            return
-        }
 
-        guard let selectedNotificationTime = data["selected_notification_time"] as? Int,
-              let isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool,
-              let isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool,
-              let favoriteGenres = data["favorite_genres"] as? [Int],
-              let profileImageURLString = data["profile_image_url"] as? String else {
-            return
-        }
-        
-        userManager.id = id
-        userManager.nickname = nickname
-        userManager.selectedNotificationTime = selectedNotificationTime
-        userManager.isCheckedSocialNotification = isCheckedSocialNotification
-        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
-        userManager.favoriteGenres = favoriteGenres
-        userManager.profileImageURL = URL(string: profileImageURLString)
-        
-        isLoginCompleted = true
+
      }
     
 }

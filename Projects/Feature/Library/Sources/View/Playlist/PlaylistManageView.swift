@@ -12,7 +12,7 @@ import MusicKit
 import FirebaseFirestore
 
 struct PlaylistManageView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 
@@ -106,7 +106,7 @@ struct PlaylistManageView: View {
                 //플레이리스트 스크롤뷰
                 ScrollView(.vertical) {
                     LazyVGrid(columns: cols, spacing: 30, content: {
-                        ForEach(userManager.playlistArray, id: \.title) { playlist in
+                        ForEach(currentUserData.playlistArray, id: \.title) { playlist in
                             PlaylistItem_Big(playlist: .constant(playlist), isAddSongItem: playlist.isAddItme, isEditing: $isEditing)
                                 .frame(minWidth: 170, minHeight: 215)
                                 .environmentObject(manager)

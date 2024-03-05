@@ -12,7 +12,7 @@ import Core
 
 struct AddSongFromFavoriteView: View {
     @Binding var originPlaylist: MusicPlaylist
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackbarManager: SnackBarViewModel
     @State var favoritePlaylist: MusicPlaylist?
     @State var favoriteSong = []
@@ -50,7 +50,7 @@ struct AddSongFromFavoriteView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        db.collection("User").document(userManager.uid).collection("Playlist").document("favorite").getDocument { snapshot, error in
+        db.collection("User").document(currentUserData.uid).collection("Playlist").document("favorite").getDocument { snapshot, error in
             if error == nil {
                 guard let snapshot = snapshot else {
                     print("no snapshot")
@@ -66,11 +66,11 @@ struct AddSongFromFavoriteView: View {
                     print("no title")
                     return
                 }
-                guard let isPrivate = data["is_private"] as? Bool else {
+                guard let isPrivate = data["isPrivate"] as? Bool else {
                     print("no private thing")
                     return
                 }
-                guard let songIDs = data["song_IDs"] as? [String] else {
+                guard let songIDs = data["songIdentifiers"] as? [String] else {
                     print("no id list")
                     return
                 }

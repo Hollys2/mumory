@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 //Deprecated
 struct ArtistOfSongView: View {
-    @EnvironmentObject private var userManager: UserViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var manager: LibraryManageModel
     @EnvironmentObject private var playerManager: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
@@ -36,14 +36,14 @@ struct ArtistOfSongView: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: userManager.width, height: userManager.width)
+                    .frame(width: currentUserData.width, height: currentUserData.width)
             } placeholder: {
                 SharedAsset.artistProfile.swiftUIImage
                     .resizable()
                     .scaledToFill()
-                    .frame(width: userManager.width, height: userManager.width)
+                    .frame(width: currentUserData.width, height: currentUserData.width)
             }
-            .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+            .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
 
 
         
@@ -54,8 +54,8 @@ struct ArtistOfSongView: View {
                     SharedAsset.bottomGradient.swiftUIImage
                         .resizable()
                         .scaledToFill()
-                        .frame(width: userManager.width, height: 45)
-                        .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .frame(width: currentUserData.width, height: 45)
+                        .padding(.top, currentUserData.width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     //그라데이션 하위
                     VStack(spacing: 0, content: {
@@ -106,7 +106,7 @@ struct ArtistOfSongView: View {
                     .offset(y: -33)
                     .background(ColorSet.background)
                 })
-                .frame(width: userManager.width)
+                .frame(width: currentUserData.width)
 
             }
 
@@ -138,7 +138,7 @@ struct ArtistOfSongView: View {
                 
             })
             .frame(height: 50)
-            .padding(.top, userManager.topInset)
+            .padding(.top, currentUserData.topInset)
             
 
         }

@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct SaveToPlaylistView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackbarManager: SnackBarViewModel
@@ -129,7 +129,7 @@ struct SaveToPlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        let path = db.collection("User").document(userManager.uid).collection("Playlist")
+        let path = db.collection("User").document(currentUserData.uid).collection("Playlist")
         var data = to.songIDs //기존 노래ID들
         
         if self.songIDs.count > 1 {
@@ -138,7 +138,7 @@ struct SaveToPlaylistView: View {
                 data += self.songIDs.filter({!data.contains($0)}) //중복 제거 후 업로드할 데이터에 추가
                 
                 let uploadData = [
-                    "song_IDs" : data
+                    "songIdentifiers" : data
                 ]
                 
                 path.document(to.id).setData(uploadData, merge: true) { error in
@@ -164,7 +164,7 @@ struct SaveToPlaylistView: View {
                     data.append(song)
                     
                     let uploadData = [
-                        "song_IDs" : data
+                        "songIdentifiers" : data
                     ]
                     
                     path.document(to.id).setData(uploadData, merge: true) { error in
@@ -186,7 +186,7 @@ struct SaveToPlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        let path = db.collection("User").document(userManager.uid).collection("Playlist")
+        let path = db.collection("User").document(currentUserData.uid).collection("Playlist")
         
         path.getDocuments { snapshots, error in
             if error == nil {
@@ -201,12 +201,12 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
-                    guard let isPrivate = document.data()["is_private"] as? Bool else {
+                    guard let isPrivate = document.data()["isPrivate"] as? Bool else {
                         print("no is Private")
                         return
                     }
                     
-                    guard let songIDs = document.data()["song_IDs"] as? [String] else {
+                    guard let songIDs = document.data()["songIdentifiers"] as? [String] else {
                         print("no song id")
                         return
                     }

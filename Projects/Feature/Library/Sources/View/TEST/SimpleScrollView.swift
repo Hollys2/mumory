@@ -12,7 +12,7 @@ import SwiftUI
 import MusicKit
 
 struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @Binding var contentOffset: CGPoint
 
     var content: () -> Content

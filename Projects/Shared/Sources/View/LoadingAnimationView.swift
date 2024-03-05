@@ -10,7 +10,7 @@ import SwiftUI
 import Lottie
 
 public struct LoadingAnimationView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @Binding var isLoading: Bool
     
     public init(isLoading: Binding<Bool>) {
@@ -22,7 +22,7 @@ public struct LoadingAnimationView: View {
             LottieView(animation: .named("loading", bundle: .module))
                 .looping()
                 .opacity(isLoading ? 1 : 0)
-                .frame(width: userManager.width * 0.16, height: userManager.width * 0.16)
+                .frame(width: currentUserData.width * 0.16, height: currentUserData.width * 0.16)
         }
         .ignoresSafeArea()
     }

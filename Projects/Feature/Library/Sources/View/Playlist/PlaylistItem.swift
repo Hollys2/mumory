@@ -12,7 +12,7 @@ import MusicKit
 
 struct PlaylistItem: View {
     @EnvironmentObject var manager: LibraryManageModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @State var playlist: MusicPlaylist
     @State var songs: [Song] = []

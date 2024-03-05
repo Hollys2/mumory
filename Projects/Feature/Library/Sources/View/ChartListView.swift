@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct ChartListView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var contentOffset: CGPoint = .zero
@@ -89,7 +89,7 @@ struct ChartListView: View {
                                 .background(ColorSet.subGray)
                         }
                     })
-                    .frame(width: userManager.width)
+                    .frame(width: currentUserData.width)
                     
                     Rectangle()
                         .foregroundStyle(.clear)

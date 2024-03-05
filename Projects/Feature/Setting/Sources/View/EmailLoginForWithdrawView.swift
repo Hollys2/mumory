@@ -13,8 +13,9 @@ import Lottie
 
 struct EmailLoginForWithdrawView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
+    @EnvironmentObject var settingViewModel: SettingViewModel
+
     @State var email: String = ""
     @State var password: String = ""
     @State var isLoginError: Bool = false
@@ -64,7 +65,7 @@ struct EmailLoginForWithdrawView: View {
                         .padding(.top, 20)
                         .onTapGesture {
                             isLoading = true
-                            if email == userManager.email{
+                            if email == settingViewModel.email{
                                 withdrawManager.EmailLogin(email: email, password: password) { isSuccessful in
                                     if isSuccessful {
                                         isWithdrawSuccess = true

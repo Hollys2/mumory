@@ -13,7 +13,7 @@ public struct MumoryApp: App {
     @StateObject var locationManager: LocationManager = .init() // 위치 권한
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
-    @StateObject var userManager: UserViewModel = UserViewModel()
+    @StateObject var currentUserData: CurrentUserData = CurrentUserData()
     @StateObject var playerManager = PlayerViewModel()
     @StateObject var libraryManager: LibraryManageModel = LibraryManageModel()
     public init(){}
@@ -30,7 +30,7 @@ public struct MumoryApp: App {
                             AuthController.handleOpenUrl(url: url)
                         }
                     })
-                    .environmentObject(userManager)
+                    .environmentObject(currentUserData)
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
@@ -42,10 +42,10 @@ public struct MumoryApp: App {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                         
-                        userManager.width = geometry.size.width
-                        userManager.height = geometry.size.height
-                        userManager.topInset = geometry.safeAreaInsets.top
-                        userManager.bottomInset = geometry.safeAreaInsets.bottom
+                        currentUserData.width = geometry.size.width
+                        currentUserData.height = geometry.size.height
+                        currentUserData.topInset = geometry.safeAreaInsets.top
+                        currentUserData.bottomInset = geometry.safeAreaInsets.bottom
                         
                         libraryManager.width = geometry.size.width
                     }

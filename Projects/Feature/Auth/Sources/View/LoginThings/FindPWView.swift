@@ -107,7 +107,7 @@ struct FindPWView: View {
         
         let query = db.collection("User")
             .whereField("email", isEqualTo: email)
-            .whereField("sign_in_method", isEqualTo: "Email")
+            .whereField("signInMethod", isEqualTo: "Email")
         
         query.getDocuments { snapshot, error in
             if let error = error {

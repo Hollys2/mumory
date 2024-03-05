@@ -13,7 +13,7 @@ import Core
 import FirebaseAuth
 
 public struct SplashView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var time = 0.0
     @State var isSignInCompleted: Bool = false
     @State var isPresent: Bool = false
@@ -32,7 +32,7 @@ public struct SplashView: View {
                     ColorSet.mainPurpleColor.ignoresSafeArea()
                     LottieView(animation: .named("splash", bundle: .module))
                         .looping()
-                        .padding(.top, userManager.height * 0.37) //0.37은 디자인의 상단 여백 비율
+                        .padding(.top, currentUserData.height * 0.37) //0.37은 디자인의 상단 여백 비율
             }
             .navigationDestination(isPresented: $isPresent) {
                 if !hasLoginHistory {
@@ -68,31 +68,15 @@ public struct SplashView: View {
               let snapshot = try? await db.collection("User").document(user.uid).getDocument(),
               let data = snapshot.data(),
               let id = data["id"] as? String,
-              let nickname = data["nickname"] as? String,
-              let email = data["email"] as? String,
-              let signInMethod = data["sign_in_method"] as? String,
-              let selectedNotificationTime = data["selected_notification_time"] as? Int,
-              let isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool,
-              let isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool,
-              let favoriteGenres = data["favorite_genres"] as? [Int],
-              let profileImageURLString = data["profile_image_url"] as? String else {
+              let isCheckedServiceNewsNotification = data["isSubscribedToService"] as? Bool,
+              let favoriteGenres = data["favoriteGenres"] as? [Int] else {
             isInitialSettingDone = true
             goToLoginView = true
             return
         }
         
-        userManager.uid = user.uid
-        userManager.id = id
-        userManager.nickname = nickname
-        userManager.email = email
-        userManager.signInMethod = signInMethod
-        userManager.selectedNotificationTime = selectedNotificationTime
-        userManager.isCheckedSocialNotification = isCheckedSocialNotification
-        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
-        userManager.favoriteGenres = favoriteGenres
-        userManager.profileImageURL = URL(string: profileImageURLString)
-        userManager.backgroundImageURL = URL(string: data["background_image_url"] as? String ?? "")
-        userManager.bio = data["bio"] as? String ?? ""
+        currentUserData.uid = user.uid
+        currentUserData.favoriteGenres = favoriteGenres
         
         isInitialSettingDone = true
     }

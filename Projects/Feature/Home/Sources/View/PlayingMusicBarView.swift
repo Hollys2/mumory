@@ -11,7 +11,7 @@ import SwiftUI
 import Shared
 
 public struct PlayingMusicBarView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var isPresentPlayingView: Bool = false
     @State var isPresentMyPage: Bool = false
@@ -110,7 +110,7 @@ public struct PlayingMusicBarView: View {
               .padding(.leading, 20)
             
             //사용자 프로필 이미지
-            AsyncImage(url: userManager.profileImageURL) { image in
+            AsyncImage(url: currentUserData.user.profileImageURL) { image in
                 image
                     .resizable()
                     .scaledToFill()

@@ -13,7 +13,7 @@ import Lottie
 
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State var email: String = ""
@@ -131,27 +131,7 @@ struct EmailLoginView: View {
             return
         }
         
-        guard let email = data["email"] as? String,
-              let signInMethod = data["sign_in_method"] as? String,
-              let selectedNotificationTime = data["selected_notification_time"] as? Int,
-              let isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool,
-              let isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool,
-              let favoriteGenres = data["favorite_genres"] as? [Int],
-              let profileImageURLString = data["profile_image_url"] as? String else {
-            return
-        }
-        
-        userManager.uid = result.user.uid
-        userManager.id = id
-        userManager.nickname = nickname
-        userManager.email = email
-        userManager.signInMethod = signInMethod
-        userManager.selectedNotificationTime = selectedNotificationTime
-        userManager.isCheckedSocialNotification = isCheckedSocialNotification
-        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
-        userManager.favoriteGenres = favoriteGenres
-        userManager.profileImageURL = URL(string: profileImageURLString)
-        
+        currentUserData.uid = result.user.uid
       
         isLoading = false
         isLoginSuccess = true

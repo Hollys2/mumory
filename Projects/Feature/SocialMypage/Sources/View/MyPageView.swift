@@ -8,12 +8,14 @@
 
 import SwiftUI
 import Shared
+import Core
 
 struct MyPageView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @StateObject var myPageCoordinator: MyPageCoordinator = MyPageCoordinator()
     @StateObject var withdrawManager: WithdrawViewModel = WithdrawViewModel()
+    @StateObject var settingViewModel: SettingViewModel = SettingViewModel()
     
     @State var isPresentEditProfile: Bool = false
     
@@ -64,7 +66,7 @@ struct MyPageView: View {
                 }
                 .padding(.horizontal, 20)
                 .frame(height: 44)
-                .padding(.top, userManager.topInset)
+                .padding(.top, currentUserData.topInset)
             }
             .ignoresSafeArea()
             .navigationDestination(for: MyPage.self) { myPage in
@@ -72,6 +74,10 @@ struct MyPageView: View {
                     .navigationBarBackButtonHidden()
                     .environmentObject(myPageCoordinator)
                     .environmentObject(withdrawManager)
+                    .environmentObject(settingViewModel)
+            }
+            .onAppear {
+                settingViewModel.uid = currentUserData.user.uid
             }
         }
         
@@ -83,22 +89,22 @@ struct MyPageView: View {
 }
 
 struct UserInfoView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentEditView: Bool = false
     
     var body: some View {
         
         VStack(spacing: 0, content: {
-            AsyncImage(url: userManager.backgroundImageURL) { image in
+            AsyncImage(url: currentUserData.user.backgroundImageURL) { image in
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: userManager.width, height: 150)
+                    .frame(width: currentUserData.width, height: 150)
                     .clipped()
             } placeholder: {
                 Rectangle()
                     .frame(maxWidth: .infinity)
-                    .frame(width: userManager.width)
+                    .frame(width: currentUserData.width)
                     .frame(height: 150)
                     .foregroundStyle(ColorSet.darkGray)
             }
@@ -107,18 +113,18 @@ struct UserInfoView: View {
             }
             
             VStack(alignment: .leading, spacing: 4, content: {
-                    Text(userManager.nickname)
+                Text(currentUserData.user.nickname)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 20)
 
-                    Text("@\(userManager.id)")
+                Text("@\(currentUserData.user.id)")
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.charSubGray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Text(userManager.bio)
+                Text(currentUserData.user.bio)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(ColorSet.subGray)
                         .frame(height: 52, alignment: .bottom)
@@ -128,7 +134,7 @@ struct UserInfoView: View {
 
                 })
                 .overlay {
-                    AsyncImage(url: userManager.profileImageURL) { image in
+                    AsyncImage(url: currentUserData.user.profileImageURL) { image in
                         image
                             .resizable()
                             .scaledToFill()
@@ -175,7 +181,8 @@ struct UserInfoView: View {
 }
 
 struct FriendView: View {
-    let friendArray: [Int] = [1,1]
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var friends: [MumoriUser] = []
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -184,7 +191,7 @@ struct FriendView: View {
                     .foregroundStyle(Color.white)
                 
                 Spacer()
-                Text("\(friendArray.count)")
+                Text("\(friends.count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.charSubGray)
                     .padding(.trailing, 3)
@@ -198,8 +205,8 @@ struct FriendView: View {
             
             ScrollView(.horizontal) {
                 HStack(spacing: 12, content: {
-                    ForEach(0 ..< 10, id: \.self) { int in
-                        FriendHorizontalItem()
+                    ForEach(friends, id: \.self) { friend in
+                        FriendHorizontalItem(user: friend)
                     }
                 })
                 .padding(.horizontal, 20)
@@ -207,6 +214,26 @@ struct FriendView: View {
             .scrollIndicators(.hidden)
             .padding(.bottom, 37)
         })
+        .onAppear {
+            let db = FirebaseManager.shared.db
+            Task {
+                guard let document = try? await db.collection("User").document(currentUserData.uid).getDocument() else {
+                    print("error1")
+                    return
+                }
+                guard let data = document.data() else {
+                    print("error2")
+                    return
+                }
+                let friendIDs = data["friends"] as? [String] ?? []
+                
+                friendIDs.forEach { id in
+                    Task{
+                        await self.friends.append(MumoriUser(uid: id))
+                    }
+                }
+            }
+        }
     }
 }
 

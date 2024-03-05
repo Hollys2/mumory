@@ -14,7 +14,7 @@ import Core
 
 struct SignUpManageView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @StateObject var manager: SignUpManageViewModel = SignUpManageViewModel()
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
@@ -39,7 +39,7 @@ struct SignUpManageView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: 1)
                             .foregroundColor(.white)
-                            .padding(.trailing, setPadding(screen: CGSize(width: userManager.width, height: userManager.height)))
+                            .padding(.trailing, setPadding(screen: CGSize(width: currentUserData.width, height: currentUserData.height)))
                     }
                     .padding(.top, 20)
                     
@@ -191,16 +191,16 @@ struct SignUpManageView: View {
         let userData: [String : Any] = [
             "uid": uid,
             "email": manager.email,
-            "sign_in_method": "Email",
-            "is_checked_service_news_notification": manager.isCheckedServiceNewsNotification,
-            "is_checked_social_notification": true
+            "signInMethod": "Email",
+            "isSubscribedToService": manager.isCheckedServiceNewsNotification,
+            "isSubscribedToSocial": true
         ]
         
         if manager.isCheckedServiceNewsNotification {
-            messaging.subscribe(toTopic: "SERVICE")
+            messaging.subscribe(toTopic: "Service")
         }
         
-        messaging.subscribe(toTopic: "SOCIAL")
+        messaging.subscribe(toTopic: "Social")
         
         query.setData(userData) { error in
             if let error = error {

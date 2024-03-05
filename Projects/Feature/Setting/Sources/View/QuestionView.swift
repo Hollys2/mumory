@@ -12,8 +12,8 @@ import Core
 import Lottie
 
 struct QuestionView: View {
-    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var settingViewModel: SettingViewModel
     @Environment(\.dismiss) private var dismiss
     let placeHolder = "내용을 입력하세요."
     @State var title: String = ""
@@ -71,7 +71,7 @@ struct QuestionView: View {
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                                     .foregroundStyle(.white)
                                 
-                                Text(userManager.nickname)
+                                Text(settingViewModel.nickname)
                                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
                                     .foregroundStyle(ColorSet.charSubGray)
                                     .padding(.leading, 14)
@@ -87,7 +87,7 @@ struct QuestionView: View {
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                                     .foregroundStyle(.white)
                                 
-                                Text(verbatim: userManager.email)
+                                Text(verbatim: settingViewModel.email)
                                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
                                     .foregroundStyle(ColorSet.charSubGray)
                                     .padding(.leading, 14)

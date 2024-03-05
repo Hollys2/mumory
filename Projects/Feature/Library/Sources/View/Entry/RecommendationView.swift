@@ -16,7 +16,7 @@ public struct RecommendationView: View {
     @State var isTouch: Bool = false
     @State private var path = NavigationPath()
     @EnvironmentObject var playerManager: PlayerViewModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryManageModel
     
     @State private var contentOffset: CGPoint = .zero
@@ -56,7 +56,7 @@ public struct RecommendationView: View {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
                             MusicChartItem(rank: index+1, song: song) //순위 곡 item
-                                .frame(width: userManager.width - 40)
+                                .frame(width: currentUserData.width - 40)
                                 .onTapGesture {
                                     playerManager.playNewSong(song: song)
                                 }

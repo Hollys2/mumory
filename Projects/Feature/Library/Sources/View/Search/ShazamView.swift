@@ -12,7 +12,7 @@ import Lottie
 
 struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryManageModel
     var body: some View {
         ZStack(alignment: .top){

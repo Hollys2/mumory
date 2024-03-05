@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct TwoButtonPopupView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     
