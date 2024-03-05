@@ -61,7 +61,7 @@ struct SearchSongItem: View {
         })
         .padding(.vertical, 19)
         .padding(.leading, 20)
-        .background(.clear)
+        .background(ColorSet.background)
 
     }
     

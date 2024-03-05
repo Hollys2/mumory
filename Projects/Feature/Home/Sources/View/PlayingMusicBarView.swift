@@ -11,11 +11,11 @@ import SwiftUI
 import Shared
 
 public struct PlayingMusicBarView: View {
+    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var playerManager: PlayerViewModel
-    @State var isProfileTapped = false
     @State var isPresentPlayingView: Bool = false
+    @State var isPresentMyPage: Bool = false
     
-    @State var isSliding: Bool = false
     let artistTextColor = Color(white: 0.89)
     public init() {}
     
@@ -42,31 +42,30 @@ public struct PlayingMusicBarView: View {
                 .padding(.trailing, 13)
 
                 
-                if playerManager.playingSong() == nil {
+                if let playingSong = playerManager.currentSong {
+                    VStack(spacing: 2) {
+                        Text(playingSong.title)
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(Color.white)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        
+                        Text(playingSong.artistName)
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(ColorSet.charSubGray)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }else {
                     Text("재생 중인 음악이 없습니다.")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 11))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.trailing, 21)
-                }else {
-                    ScrollView(.horizontal) {
-                        HStack(spacing: 0){
-                            Text(playerManager.playingSong()?.artistName ?? "")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                .foregroundColor(artistTextColor)
-                                .lineLimit(1)
-                            
-                            Text("  •  \(playerManager.playingSong()?.title ?? "")" )
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                .foregroundColor(Color.white)
-                                .lineLimit(1)
-                        }
-                    }
-                    .scrollIndicators(.hidden)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.trailing, 21)
-
                 }
+                
             })
             .onTapGesture {
                 isPresentPlayingView = true
@@ -110,19 +109,26 @@ public struct PlayingMusicBarView: View {
               .padding(.trailing, 17)
               .padding(.leading, 20)
             
-            //사용자 프로필 이미지 들어갈 곳
-            SharedAsset.profileTopbar.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 31, height: 31)
-                .clipShape(Circle())
-                .overlay {
-                    Circle()
-                        .stroke(Color.white, lineWidth: 0.5)
-                }
-                .padding(.trailing, 11)
-            
-            
+            //사용자 프로필 이미지
+            AsyncImage(url: userManager.profileImageURL) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 31, height: 31)
+                    .clipShape(Circle())
+            } placeholder: {
+                Circle()
+                    .fill(ColorSet.background)
+                    .frame(width: 31, height: 31)
+            }
+            .padding(.trailing, 11)
+            .onTapGesture {
+                isPresentMyPage = true
+            }
+            .fullScreenCover(isPresented: $isPresentMyPage) {
+                MyPageView()
+            }
+                        
         })
         .frame(maxWidth: .infinity)
         .frame(height: 56)

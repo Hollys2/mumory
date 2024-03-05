@@ -50,7 +50,6 @@ public struct RecommendationView: View {
                         manager.push(destination: .chart)
                     }
                 
-                
                 //차트 - 가로 페이징
                 ChartPagingScrollView(musicChart: $musicChart, scrollViewHeight: $scrollViewHeight) {
                     LazyHGrid(rows: rows, spacing: 0,content: {
@@ -91,25 +90,7 @@ public struct RecommendationView: View {
     
     private func searchChart(offset: Int){
         
-        
-        //offset: 시작하는 수. 20 입력시 20등부터 40등까지 보여줌(no limit)
-        Task {
-            
-            //            switch(authRequest){
-            //            case .authorized:
-            //                do{
-            //                    print("허락됨")
-            //                    let request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-            //                    let response = try await request.response()
-            //                    print("검색 성공")
-            //                }catch{
-            //                    print("search error")
-            //                }
-            //
-            //            default:
-            //                print("안됨")
-            //            }
-            
+    Task {
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
             request.offset = offset
             let response = try await request.response().songCharts
@@ -117,10 +98,7 @@ public struct RecommendationView: View {
             print("검색 성공")
             musicChart = (response.first?.items)!
             chartChangeDetectValue = !chartChangeDetectValue
-            //            musicChart.forEach { song in
-            //                print(song.title)
-            //            }
-            //            print(musicChart.count)
+    
         }
         
         
@@ -132,17 +110,16 @@ private struct SubTitle: View {
     var body: some View {
         HStack(spacing: 0, content: {
             Text("최신 인기곡")
-                .foregroundStyle(.white)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                .foregroundStyle(.white)
             Spacer()
             SharedAsset.next.swiftUIImage
                 .resizable()
+                .scaledToFit()
                 .frame(width: 17, height: 17)
         })
-        .padding(.leading, 20)
-        .padding(.trailing, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
     }
 }
 

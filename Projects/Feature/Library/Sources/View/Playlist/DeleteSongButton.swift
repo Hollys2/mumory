@@ -53,7 +53,7 @@ struct DeleteSongButton: View {
         .background(isEnabled ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
         .padding(20)
-        .shadow(color: .black, radius: 10, y: 8)
+        .shadow(color: Color.black.opacity(0.25), radius: 10, y: 6)
         .disabled(!isEnabled)
 
 

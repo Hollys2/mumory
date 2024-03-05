@@ -37,8 +37,15 @@ struct PlaylistView: View {
 
             //이미지
             PlaylistImage(songs: $songs)
-                .ignoresSafeArea()
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+                .overlay {
+                    LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
+                    ColorSet.background.opacity(offset.y/(userManager.width-50.0))
+                }
+
+            
+        
+            
             
             SimpleScrollView(contentOffset: $offset) {
                 
@@ -52,10 +59,10 @@ struct PlaylistView: View {
                     VStack(spacing: 0, content: {
                         Text(playlist.title)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                            .frame(width: userManager.width, alignment: .center)
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, 30)
                             .foregroundStyle(.white)
+//                            .background(Color.yellow)
                         
                         //나만보기 아이템
                         HStack(spacing: 5, content: {
@@ -85,7 +92,7 @@ struct PlaylistView: View {
                                             }
                                         }
                                 }else {
-                                    SharedAsset.checkCircle.swiftUIImage
+                                    SharedAsset.checkCircleDefault.swiftUIImage
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 28, height: 28)
@@ -163,6 +170,7 @@ struct PlaylistView: View {
                         
                     })
                     .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
+                    .frame(width: userManager.width, alignment: .center)
                     .background(ColorSet.background)
                     
                     
@@ -188,15 +196,26 @@ struct PlaylistView: View {
                 Spacer()
                 
                 if isEditing {
+                    
+//                    SharedAsset.completeLiterally.swiftUIImage
+//                        .resizable()
+//                        .scaledToFit()
+//                        .frame(width: 38, height: 43)
+//                        .padding(.trailing, 20)
+//                        .onTapGesture {
+//                            setEditMode(isEditing: false)
+//                        }
+                    
                     Button(action: {
                         setEditMode(isEditing: false)
                     }, label: {
                         Text("완료")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundStyle(Color.white)
                             .frame(width: 45, height: 45)
+                            .shadow(color: Color.black.opacity(0.5), radius: 5)
+                            .padding(.trailing, 20)
                     })
-                    .padding(.trailing, 20)
                     
                 }else {
                     SharedAsset.menuGradient.swiftUIImage

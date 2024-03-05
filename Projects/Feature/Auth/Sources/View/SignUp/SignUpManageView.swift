@@ -14,6 +14,7 @@ import Core
 
 struct SignUpManageView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var userManager: UserViewModel
     @StateObject var manager: SignUpManageViewModel = SignUpManageViewModel()
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
@@ -23,7 +24,6 @@ struct SignUpManageView: View {
     @State private var isTapBackButton: Bool = false
     
     var body: some View {
-        GeometryReader(content: { geometry in
             ZStack{
                 LibraryColorSet.background.ignoresSafeArea()
                 
@@ -39,7 +39,7 @@ struct SignUpManageView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: 1)
                             .foregroundColor(.white)
-                            .padding(.trailing, setPadding(screen: geometry.size))
+                            .padding(.trailing, setPadding(screen: CGSize(width: userManager.width, height: userManager.height)))
                     }
                     .padding(.top, 20)
                     
@@ -95,10 +95,7 @@ struct SignUpManageView: View {
                 }
                 
                 //로딩 애니메이션
-                LottieView(animation: .named("loading", bundle: .module))
-                    .looping()
-                    .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                LoadingAnimationView(isLoading: $isLoading)
                 
                 SignUpErrorPopup(isShowing: $isSignUpErrorShowing)
             }
@@ -152,7 +149,6 @@ struct SignUpManageView: View {
             .onTapGesture {
                 self.hideKeyboard()
             }
-        })
         
     }
     
@@ -195,7 +191,7 @@ struct SignUpManageView: View {
         let userData: [String : Any] = [
             "uid": uid,
             "email": manager.email,
-            "signin_method": "Email",
+            "sign_in_method": "Email",
             "is_checked_service_news_notification": manager.isCheckedServiceNewsNotification,
             "is_checked_social_notification": true
         ]

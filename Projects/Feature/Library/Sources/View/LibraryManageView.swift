@@ -34,15 +34,12 @@ public struct LibraryManageView: View {
                     switch(manager.stack[index]){
                     case .entry:
                         LibraryView(isTapMyMusic: true)
-                            .environmentObject(manager)
                         
                     case .search(term: let term):
                         SearchView(term: term)
-                            .environmentObject(manager)
                         
                     case .artist(artist: let artist):
                         ArtistView(artist: artist)
-                            .environmentObject(manager)
                             .onAppear(perform: {
                                 hasToRemoveSafeArea = true
                             })
@@ -52,45 +49,35 @@ public struct LibraryManageView: View {
                         
                     case .playlistManage:
                         PlaylistManageView()
-                            .environmentObject(manager)
-                        
                         
                     case .chart:
                         ChartListView()
-                            .environmentObject(manager)
-                            .environmentObject(playerManager)
                         
                     case .playlist(playlist: let playlist):
                         PlaylistView(playlist: playlist)
-                            .environmentObject(manager)
                             .onAppear(perform: {
                                 hasToRemoveSafeArea = true
                             })
                             .onDisappear(perform: {
                                 hasToRemoveSafeArea = false
                             })
-
+                        
                     case .shazam:
                         ShazamView()
-                            .environmentObject(manager)
-                            .environmentObject(playerManager)
                         
                     case .addSong(originPlaylist: let originPlaylist):
                         AddPlaylistSongView(originPlaylist: originPlaylist)
-                            .environmentObject(manager)
                             .environmentObject(snackbarManager)
                         
                     case .play:
                         NowPlayingView()
-                            .environmentObject(manager)
+                        
                     case .saveToPlaylist(songs: let songs):
                         SaveToPlaylistView(songs: songs)
-                            .environmentObject(manager)
                             .environmentObject(snackbarManager)
                         
                     case .recommendation(genreID: let genreID):
                         RecommendationListView(genreID: genreID)
-                            .environmentObject(manager)
                             .onAppear(perform: {
                                 hasToRemoveSafeArea = true
                             })
@@ -102,9 +89,9 @@ public struct LibraryManageView: View {
                 .padding(.top,  userManager.topInset)
                 .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/userManager.width) * manager.xOffset) - 70 : 0)
                 .simultaneousGesture(drag)
-                .transition(.push(from: .trailing))
+                .transition(.move(edge: .trailing))
             }
-           
+            
             
             
             ColorSet.background
@@ -112,40 +99,12 @@ public struct LibraryManageView: View {
                 .frame(height: userManager.topInset)
                 .opacity(hasToRemoveSafeArea ? 0 : 1)
             
-                HStack {
-                    if snackbarManager.status == .success {
-                        HStack(spacing: 0) {
-                            HStack(spacing: 0, content: {
-                                Text("플레이리스트")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                
-                                Text("\"\(snackbarManager.title)")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                
-                                Text("\"")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                
-                                Text("에 추가되었습니다.")
-                                    .fixedSize()
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            })
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                            
-                            
-                            Text("실행취소")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                                .padding(.leading, 18)
-                                .foregroundStyle(ColorSet.mainPurpleColor)
-                        }
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    }else if snackbarManager.status == .failure{
-                        HStack(spacing: 0) {
-                            Text("이미 플레이리스트")
+            //스낵바 - 추후 수정 예정
+            HStack {
+                if snackbarManager.status == .success {
+                    HStack(spacing: 0) {
+                        HStack(spacing: 0, content: {
+                            Text("플레이리스트")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             
                             Text("\"\(snackbarManager.title)")
@@ -156,31 +115,61 @@ public struct LibraryManageView: View {
                             Text("\"")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             
-                            Text("에 존재합니다.")
+                            Text("에 추가되었습니다.")
                                 .fixedSize()
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                        }
-                        .lineLimit(1)
+                        })
                         .frame(maxWidth: .infinity, alignment: .leading)
                         
+                        
+                        
+                        Text("실행취소")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                            .padding(.leading, 18)
+                            .foregroundStyle(ColorSet.mainPurpleColor)
                     }
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                }else if snackbarManager.status == .failure{
+                    HStack(spacing: 0) {
+                        Text("이미 플레이리스트")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        
+                        Text("\"\(snackbarManager.title)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        
+                        Text("\"")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        
+                        Text("에 존재합니다.")
+                            .fixedSize()
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                    }
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
                 }
-                .ignoresSafeArea()
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .padding(.horizontal, 20)
-                .background(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-                .padding(.horizontal, 15)
-                .offset(y: snackbarManager.isPresent ? 53 : -50)
-                .opacity(snackbarManager.isPresent ? 1 : 0)
+            }
+            .ignoresSafeArea()
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .padding(.horizontal, 20)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+            .padding(.horizontal, 15)
+            .offset(y: snackbarManager.isPresent ? 53 : -50)
+            .opacity(snackbarManager.isPresent ? 1 : 0)
+            
         }
         .onAppear(perform: {
             Task{
                 await MusicAuthorization.request() //음악 사용 동의 창-앱 시작할 때
             }
         })
-
+        
     }
     
     private func isCurrentPage(index: Int) -> Bool {
@@ -200,25 +189,22 @@ public struct LibraryManageView: View {
         }else {
             return false
         }
-
     }
     
     var drag: some Gesture {
         DragGesture()
             .onChanged({ drag in
-                if drag.startLocation.x > 10{
+                if drag.startLocation.x > 20{
                     return
                 }
                 isDragging = true
-                if drag.startLocation.x < 10 {
-                    DispatchQueue.main.async {
-                        manager.xOffset = drag.location.x
-                    }
+                DispatchQueue.main.async {
+                    manager.xOffset = drag.location.x
                 }
             })
             .onEnded({ drag in
                 isDragging = false
-                if manager.stack.count < 1 || drag.startLocation.x > 10{
+                if manager.stack.count < 1 || drag.startLocation.x > 20{
                     return
                 }
                 
@@ -255,11 +241,3 @@ public struct LibraryManageView: View {
     
     
 }
-
-
-
-//#Preview {
-//    LibraryView()
-//}
-
-

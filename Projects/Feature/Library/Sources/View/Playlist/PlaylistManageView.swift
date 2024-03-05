@@ -112,13 +112,15 @@ struct PlaylistManageView: View {
                                 .environmentObject(manager)
                         }
                     })
+                    
+                    Rectangle()
+                        .foregroundStyle(Color.clear)
+                        .frame(height: 90)
                 }
                 .padding(.top, isEditing ? 0 : 10)
                 .scrollIndicators(.hidden)
                 
-                Rectangle()
-                    .foregroundStyle(Color.clear)
-                    .frame(height: 90)
+             
             }
 
         }
@@ -173,19 +175,8 @@ struct EditButton: View {
 struct CompleteButton: View {
     var body: some View {
         Text("완료")
-            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
             .foregroundStyle(Color.white)
     }
 }
 
-// 투명 fullScreenCover
-//extension View {
-//    func transparentFullScreenCover<Content: View>(isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View {
-//        fullScreenCover(isPresented: isPresented) {
-//            ZStack {
-//                content()
-//            }
-//            .background(TransparentBackground())
-//        }
-//    }
-//}

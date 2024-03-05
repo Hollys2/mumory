@@ -71,7 +71,7 @@ struct QueueItem: View {
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 70)
-        .background(playerManager.playingSong() == self.song ? Color.black : .clear)
+        .background(playerManager.playingSong() == self.song ? Color.black : ColorSet.background)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .circular))
         .padding(.horizontal, 15)
     }

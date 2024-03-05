@@ -36,6 +36,9 @@ struct RecommendationListView: View {
             //이미지
             PlaylistImage(songs: $songs)
                 .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+                .overlay {
+                    LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
+                }
 
             
             SimpleScrollView(contentOffset: $offset) {

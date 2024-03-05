@@ -15,6 +15,8 @@ struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
     @State var isEditGenreViewPresent: Bool = false
+    @State var isEditGenreInfoPresent: Bool = false
+    @State var genreInfoTimer: Timer?
     
     var body: some View {
         ZStack{
@@ -29,7 +31,7 @@ struct FavoriteGenreRecommendationView: View {
                 
                 //내 선호 장르들 및 수정 버튼
                 ScrollView(.horizontal) {
-                    HStack(spacing: 8) {
+                    LazyHStack(alignment: .bottom, spacing: 8) {
                         Text("장르")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                             .padding(.leading, 14)
@@ -40,8 +42,7 @@ struct FavoriteGenreRecommendationView: View {
                                 RoundedRectangle(cornerRadius: 30, style: .circular)
                                     .stroke(Color.white, lineWidth: 1)
                             }
-
-                        //
+                        
                         ForEach(userManager.favoriteGenres, id: \.self){ genreID in
                             GenreItem(genreID: genreID)
                         }
@@ -52,7 +53,21 @@ struct FavoriteGenreRecommendationView: View {
                             .overlay {
                                 SharedAsset.addBlack.swiftUIImage
                                     .resizable()
+                                    .scaledToFit()
                                     .frame(width: 20, height: 20)
+                                
+                                if isEditGenreInfoPresent {
+                                    SharedAsset.speechBubblePurple.swiftUIImage
+                                        .overlay {
+                                            Text("관심 장르를 수정해보세요!")
+                                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 11))
+                                                .foregroundStyle(Color.black)
+                                                .padding(.bottom, 6)
+                                        }
+                                        .offset(y: -37)
+                                        .transition(.scale(scale: 0.0, anchor: .top))
+                                }
+                                
                             }
                             .onTapGesture {
                                 isEditGenreViewPresent = true
@@ -60,13 +75,29 @@ struct FavoriteGenreRecommendationView: View {
                             .fullScreenCover(isPresented: $isEditGenreViewPresent, content: {
                                 EditFavoriteGenreView()
                             })
+                            .onAppear(perform: {
+                                withAnimation(.bouncy) {
+                                    isEditGenreInfoPresent = true
+                                }
+                                genreInfoTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { timer in
+                                    withAnimation (.bouncy){
+                                        isEditGenreInfoPresent = false
+                                    }
+                                }
+                            })
+                            .onDisappear(perform: {
+                                isEditGenreInfoPresent = false
+                                genreInfoTimer?.invalidate()
+                            })
                         
                     }
-                    .padding(.vertical, 2)
-                    .padding(.horizontal, 20)
+                    .frame(height: 80)
+                    .padding(.vertical, 1)
+                    .padding(.leading, 20)
+                    .padding(.trailing, 60)
                 }
                 .scrollIndicators(.hidden)
-                .padding(.top, 75)
+                .padding(.top, 25)
                 
            
             }
@@ -169,10 +200,8 @@ struct GenreTitle: View {
             
             SharedAsset.next.swiftUIImage
         }
-        .padding(.leading, 20)
-        .padding(.trailing, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
     }
     
   

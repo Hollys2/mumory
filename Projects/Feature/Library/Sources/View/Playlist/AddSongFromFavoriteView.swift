@@ -70,17 +70,13 @@ struct AddSongFromFavoriteView: View {
                     print("no private thing")
                     return
                 }
-                guard let isFavorite = data["is_favorite"] as? Bool else {
-                    print("no favorite thing")
-                    return
-                }
                 guard let songIDs = data["song_IDs"] as? [String] else {
                     print("no id list")
                     return
                 }
                 let id = snapshot.reference.documentID
                 
-                self.favoritePlaylist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false)
+                self.favoritePlaylist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false)
             }
         }
     }

@@ -86,6 +86,7 @@ struct MusicListItem: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 15)
         .padding(.horizontal, 20)
+        .background(ColorSet.background)
     }
 }
 

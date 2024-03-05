@@ -143,7 +143,7 @@ struct PlaylistItem_Big: View {
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                                .opacity(playlist.isFavorite ? 1 : 0)
+                                .opacity(playlist.id == "favorite" ? 1 : 0)
                             
                             SharedAsset.lockPurple.swiftUIImage
                                 .resizable()
@@ -151,7 +151,7 @@ struct PlaylistItem_Big: View {
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                .opacity(playlist.isFavorite ? 0 : playlist.isPrivate ? 1 : 0)
+                                .opacity(playlist.id == "favorite" ? 0 : playlist.isPrivate ? 1 : 0)
                             
                             SharedAsset.deletePlaylist.swiftUIImage
                                 .resizable()
@@ -159,7 +159,7 @@ struct PlaylistItem_Big: View {
                                 .padding(.horizontal, 9)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                                 .offset(y: 11)
-                                .opacity(playlist.isFavorite ? 0 : isEditing ? 1 : 0) //기본 즐겨찾기 목록은 삭제 불가
+                                .opacity(playlist.id == "favorite" ? 0 : isEditing ? 1 : 0) //기본 즐겨찾기 목록은 삭제 불가
                                 .transition(.opacity)
                                 .onTapGesture {
                                     UIView.setAnimationsEnabled(false)
@@ -170,7 +170,7 @@ struct PlaylistItem_Big: View {
                             Color.black.opacity(0.4)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-                                .opacity(playlist.isFavorite && isEditing ? 1 : 0)
+                                .opacity(playlist.id == "favorite" && isEditing ? 1 : 0)
                         }
                         
                         
@@ -192,11 +192,11 @@ struct PlaylistItem_Big: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                         .padding(.top, 10)
-                        .foregroundStyle(playlist.isFavorite && isEditing ? favoriteEditingTitleTextColor : .white)
+                        .foregroundStyle(playlist.id == "favorite" && isEditing ? favoriteEditingTitleTextColor : .white)
                     
                     Text("\(playlist.songIDs.count)곡")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .foregroundStyle(playlist.isFavorite && isEditing ? favoriteEditingSubTextColor : .white)
+                        .foregroundStyle(playlist.id == "favorite" && isEditing ? favoriteEditingSubTextColor : .white)
                         .frame(maxWidth: 169, alignment: .leading)
                         .padding(.top, 5)
                     

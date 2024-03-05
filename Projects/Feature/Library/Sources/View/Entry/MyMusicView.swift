@@ -13,24 +13,19 @@ struct MyMusicView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
     var body: some View {
-        ZStack{
+        ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
                 MyRecentMusicView()
-                    .environmentObject(manager)
-                    .environmentObject(playerManager)
-                    .background()
+                    .frame(height: 250, alignment: .top)
                 
                 Divider()
                     .frame(maxWidth: .infinity)
                     .frame(height: 0.3)
                     .background(ColorSet.subGray)
-                    .padding(.top, 45)
                 
                 MyPlaylistView()
-                    .environmentObject(manager)
-                    .environmentObject(playerManager)
                     .padding(.top, 35)
 
                 

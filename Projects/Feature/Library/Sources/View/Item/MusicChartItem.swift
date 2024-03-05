@@ -67,12 +67,11 @@ struct MusicChartItem: View {
                         .background(TransparentBackground())
                     })
             }
-            .padding(.top, 15)
-            .padding(.bottom, 15)
+            .padding(.vertical, 15)
             
             Divider()
                 .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
+                .frame(height: 1)
                 .background(ColorSet.subGray)
                 .opacity(rank%4 == 0 ? 0 : 1)
         }

@@ -17,17 +17,24 @@ struct TwoButtonPopupView: View {
     private var lineGray = Color(red: 0.65, green: 0.65, blue: 0.65)
     
     var title: String
+    var subTitle: String = ""
     var positiveButtonTitle: String
     var positiveAction: () -> Void
   
     
-    init( title: String, positiveButtonTitle: String, positiveAction: @escaping () -> Void) {
+    init(title: String, positiveButtonTitle: String, positiveAction: @escaping () -> Void) {
         self.title = title
         self.positiveButtonTitle = positiveButtonTitle
         self.positiveAction = positiveAction
 
     }
-
+    
+    init(title: String, subTitle: String, positiveButtonTitle: String, positiveAction: @escaping () -> Void) {
+        self.title = title
+        self.subTitle = subTitle
+        self.positiveButtonTitle = positiveButtonTitle
+        self.positiveAction = positiveAction
+    }
         
     var body: some View {
         ZStack(alignment: .center){
@@ -37,8 +44,14 @@ struct TwoButtonPopupView: View {
                 Text(title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(.white)
-                    .padding(.top, 30)
-                    .padding(.bottom, 30)
+                    .padding(.top, subTitle.isEmpty ? 34 : 30)
+                    .padding(.bottom, subTitle.isEmpty ? 34 : 14)
+
+                Text(subTitle)
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                    .foregroundStyle(Color.white)
+                    .frame(height: subTitle.isEmpty ? 0 : nil)
+                    .padding(.bottom, subTitle.isEmpty ? 0 : 32)
                 
                 Divider()
                     .frame(height: 0.5)

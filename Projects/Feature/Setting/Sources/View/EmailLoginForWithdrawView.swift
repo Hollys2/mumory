@@ -63,14 +63,13 @@ struct EmailLoginForWithdrawView: View {
                         .padding(.trailing, 20)
                         .padding(.top, 20)
                         .onTapGesture {
-                            print("tapButton")
                             isLoading = true
-                            if email == manager.email{
-                                withdrawManager.EmailLogin(email: email, password: password) { isError in
-                                    if isError {
-                                        isLoginError = isError
-                                    }else {
+                            if email == userManager.email{
+                                withdrawManager.EmailLogin(email: email, password: password) { isSuccessful in
+                                    if isSuccessful {
                                         isWithdrawSuccess = true
+                                    }else {
+                                        isLoginError = !isSuccessful
                                     }
                                     isLoading = false
                                 }
@@ -88,10 +87,7 @@ struct EmailLoginForWithdrawView: View {
                 })
                     
                 
-                LottieView(animation: .named("loading", bundle: .module))
-                    .looping()
-                    .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                LoadingAnimationView(isLoading: $isLoading)
             }
             .navigationDestination(isPresented: $isWithdrawSuccess, destination: {
                 LoginView()

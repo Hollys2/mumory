@@ -13,11 +13,12 @@ import Shared
 
 public class LibraryManageModel: ObservableObject{
     @Published public var page: LibraryPage = .entry
-    @Published public var isPop: Bool = false
+//    @Published public var isPop: Bool = false
     @Published public var stack: [LibraryPage] = [.entry]
     @Published public var xOffset: CGFloat = .zero
     public var width: CGFloat = .zero
     public init() {}
+    
     func pop() {
         DispatchQueue.main.async {
             withAnimation(.spring(duration: 0.2)){

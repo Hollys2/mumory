@@ -11,13 +11,6 @@ import Shared
 import MusicKit
 import Core
 
-//struct SimplePlaylist: Equatable {
-//    var title: String
-//    var id: String
-//    var isFavorite: Bool
-//    var isPrivate: Bool
-//}
-
 struct SaveToPlaylistView: View {
     @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var manager: LibraryManageModel
@@ -208,15 +201,8 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
-                    let id = document.documentID
-                    
                     guard let isPrivate = document.data()["is_private"] as? Bool else {
                         print("no is Private")
-                        return
-                    }
-                    
-                    guard let isFavorite = document.data()["is_favorite"] as? Bool else {
-                        print("no is Favorite")
                         return
                     }
                     
@@ -225,9 +211,12 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
+                    let id = document.documentID
+
+                    
                     withAnimation {
-                        if !isFavorite {
-                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false))
+                        if !(id == "favorite") {
+                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false))
                         }
                     }
                     

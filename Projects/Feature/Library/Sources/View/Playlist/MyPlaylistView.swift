@@ -77,7 +77,7 @@ struct MyPlaylistView: View {
         let db = Firebase.db
                 
         DispatchQueue.main.async {
-            userManager.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isFavorite: false, isAddItme: true)]
+            userManager.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isAddItme: true)]
         }
         
         let query = db.collection("User").document(userManager.uid).collection("Playlist")
@@ -94,10 +94,6 @@ struct MyPlaylistView: View {
                         print("no private thing")
                         return
                     }
-                    guard let isFavorite = snapshot.data()["is_favorite"] as? Bool else {
-                        print("no favorite thing")
-                        return
-                    }
                     guard let songIDs = snapshot.data()["song_IDs"] as? [String] else {
                         print("no id list")
                         return
@@ -105,14 +101,14 @@ struct MyPlaylistView: View {
                     let id = snapshot.reference.documentID
                     
                     DispatchQueue.main.async {
-                        if isFavorite {
+                        if id == "favorite" {
                             withAnimation {
-                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: 0)
+                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false), at: 0)
                             }
                         }else {
                             let index = userManager.playlistArray.count - 1
                             withAnimation {
-                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isFavorite: isFavorite, isAddItme: false), at: index)
+                                userManager.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false), at: index)
                             }
                         }
                     }

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import _PhotosUI_SwiftUI
+import PhotosUI
 import Shared
 import Lottie
 import Core
@@ -24,7 +24,6 @@ struct ProfileSettingView: View {
     @State var idErrorString: String = ""
     
     @State var selectedItem: PhotosPickerItem?
-    @State var selectedImage: Image?
     
     @State var nicknameTimer: Timer?
     @State var nicknameTime = 0.0
@@ -33,12 +32,12 @@ struct ProfileSettingView: View {
     @State var isValidNicknameStyle: Bool = false
     @State var isValidIDStyle: Bool = false
     
+    @State var isPresentBottomSheet: Bool = false
     
     
-    var profileImageList: [Image] = [SharedAsset.profileSelectRed.swiftUIImage, SharedAsset.profileSelectGray.swiftUIImage, SharedAsset.profileSelectOrange.swiftUIImage, SharedAsset.profileSelectPurple.swiftUIImage, SharedAsset.profileSelectYellow.swiftUIImage]
-        
+    
+            
     var body: some View {
-        GeometryReader(content: { geometry in
             ZStack{
                 ColorSet.background.ignoresSafeArea()
                 ScrollView(.vertical) {
@@ -57,38 +56,37 @@ struct ProfileSettingView: View {
                             .padding(.top, 7)
                             .padding(.leading, 20)
                         
-                        PhotosPicker(selection: $selectedItem, matching: .images) {
-                            if let item = selectedItem{
-                                if let imageData = manager.profileImageData{
-                                    if let image = selectedImage{
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .clipShape(Circle())
-                                            .frame(width: 105, height: 105)
-                                    }
-                                    
-
-                                }
-                                
+                        VStack(spacing: 0){
+                            if let image = manager.profileImage{
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 105, height: 105)
+                                    .clipShape(Circle())
                             }else{
-                                manager.RandomSelectProfile()
+                                manager.getSelectProfileImage()
                             }
                         }
                         .frame(width: 140, height: 140)
                         .padding(.top, 25)
+                        .onTapGesture {
+                            isPresentBottomSheet = true
+                        }
                         .onChange(of: selectedItem, perform: { value in
+                            isPresentBottomSheet = false
                             Task{
-                                if let loaded = try? await selectedItem?.loadTransferable(type: Data.self) {
-                                    if let uiimage = UIImage(data: loaded){
-                                        selectedImage = Image(uiImage: uiimage)
-                                        manager.profileImage = selectedImage
-                                        manager.profileImageData = loaded
-                                    }
-                                } else {
-                                    print("Failed")
+                                guard let loaded = try? await selectedItem?.loadTransferable(type: Data.self),
+                                      let uiImage = UIImage(data: loaded) else {
+                                    manager.removeProfileImage()
+                                    return
                                 }
+                                manager.profileImage = Image(uiImage: uiImage)
+                                manager.profileImageData = uiImage.jpegData(compressionQuality: 0.1).unsafelyUnwrapped
                             }
+                        })
+                        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+                            PhotoSelectBottomSheet(isPresent: $isPresentBottomSheet, selectedItem: $selectedItem)
+                                .background(TransparentBackground())
                         })
                         
                         
@@ -123,6 +121,9 @@ struct ProfileSettingView: View {
                                 nicknameTime = 0
                                 nicknameErrorString = ""
                                 manager.isValidNickname = false
+                                if newValue.count > 7 {
+                                    nickname = String(newValue.prefix(7))
+                                }
                             }
                             .onChange(of: nicknameTime, perform: { value in
                                 //1초 지났을 때만 실행
@@ -134,6 +135,7 @@ struct ProfileSettingView: View {
                                     }
                                 }
                             })
+                       
 
                         Text(manager.isValidNickname ? "•  사용할 수 있는 닉네임 입니다." : nicknameErrorString)
                             .foregroundStyle(manager.isValidNickname ? ColorSet.validGreen : ColorSet.errorRed)
@@ -202,6 +204,9 @@ struct ProfileSettingView: View {
                             idTime = 0
                             idErrorString = ""
                             manager.isValidID = false
+                            if newValue.count > 15 {
+                                id = String(newValue.prefix(15))
+                            }
                         }
                         .onChange(of: idTime, perform: { value in
                             if idTime == 0.8 {
@@ -212,6 +217,7 @@ struct ProfileSettingView: View {
                                 }
                             }
                         })
+                   
                         
                         Text(manager.isValidID ? "•  사용할 수 있는 ID 입니다." : idErrorString)
                             .foregroundStyle(manager.isValidID ? ColorSet.validGreen : ColorSet.errorRed)
@@ -243,7 +249,6 @@ struct ProfileSettingView: View {
             .onTapGesture {
                 hideKeyboard()
             }
-        })
     }
     
     private func isValidIDStyle(id: String){

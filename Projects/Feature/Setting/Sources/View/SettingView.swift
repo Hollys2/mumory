@@ -18,168 +18,108 @@ import Lottie
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
-//    @StateObject var manager: SettingViewModel = SettingViewModel()
     @EnvironmentObject var userManager: UserViewModel
-    @StateObject var withdrawManager: WithdrawViewModel = WithdrawViewModel()
-    @State var isLogout: Bool = false
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var withdrawManager: WithdrawViewModel
+    
     @State var isShowingWithdrawPopup = false
-    @State var isDeleteUserDone: Bool = false
-    @State var isDeleteDocumentsDone: Bool = false //유저 관전 정보가 삭제 되었는지
-    @State var isUserDeleted: Bool = false //로그인 페이지로 넘어가는 조건
     @State var isLoading: Bool = false
-    @State var isNeededEmailLogin = false
     
     var body: some View {
         //테스트때문에 navigationStack 추가함. 이후 삭제하기
-        GeometryReader { geometry in
+        
+        ZStack{
+            ColorSet.background.ignoresSafeArea()
             
-            ZStack{
-                ColorSet.background.ignoresSafeArea()
-                NavigationStack{
-                    VStack(spacing: 0){
-                        //설정 버튼들
-                        NavigationLink{
-                            AccountManageView()
-                        }label: {
-                            SettingItem(title: "계정 정보 / 보안")
-                                .padding(.top, 12)
+            VStack(spacing: 0){
+                //상단바
+                HStack {
+                    SharedAsset.back.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            myPageCoordinator.pop()
                         }
-                        
-                        NavigationLink {
-                            NotificationView()
-                            
-                        } label: {
-                            SettingItem(title: "알림")
+                    Spacer()
+                    Text("설정")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        .foregroundStyle(Color.white)
+                    Spacer()
+                    SharedAsset.home.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            dismiss()
                         }
-                        
-                        NavigationLink {
-                            QuestionView()
-                        } label: {
-                            SettingItem(title: "1:1 문의")
-                            
-                        }
-                        
-                        SettingItem(title: "앱 리뷰 남기기")
-                        
-                        
-                        Spacer()
-                        Button {
-                            //로그아웃
-                            do {
-                                try FirebaseManager.shared.auth.signOut()
-                                print("로그아웃 완료")
-                                isLogout = true
-                            }catch {
-                                print("signout error: \(error)")
-                            }
-                            
-                        } label: {
-                            Text("로그아웃")
-                                .foregroundColor(.white)
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                                .padding(.top, 15)
-                                .padding(.bottom, 15)
-                                .padding(.trailing, 62)
-                                .padding(.leading, 62)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 30)
-                                        .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
-                                )
-                        }
-                        
-                        Text("계정 탈퇴")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                            .foregroundStyle(ColorSet.subGray)
-                            .underline()
-                            .padding(.bottom, 70)
-                            .padding(.top, 67)
-                            .onChange(of: withdrawManager.isAppleUserAuthenticated, perform: { value in
-                                if value{
-                                    //계정 탈퇴를 위한 애플 로그인 성공시
-                                    deleteAppleUser()
-                                }
-                            })
-                            .onTapGesture {
-                                isShowingWithdrawPopup = true
-                            }
-                        
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
+                .frame(height: 65)
+                .padding(.bottom, 7)
+                
+                
+                SettingItem(title: "계정 정보 / 보안")
+                    .onTapGesture {
+                        myPageCoordinator.push(destination: .account)
                     }
-                    .background(ColorSet.background)
-                    .navigationBarBackButtonHidden()
-                    .navigationBarTitleDisplayMode(.inline)
-                    .navigationDestination(isPresented: $isNeededEmailLogin, destination: {
-                        EmailLoginForWithdrawView()
-                            .environmentObject(withdrawManager)
-                    })
-                    .navigationDestination(isPresented: $isLogout, destination: {
-                        LoginView()
-                    })
-                    .navigationDestination(isPresented: $isUserDeleted, destination: {
-                        LoginView()
-                    })
-                    .onDisappear(perform: {
-                        isLoading = false
-                    })
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarLeading) {
-                            Button {
-                                dismiss()
-                            } label: {
-                                SharedAsset.back.swiftUIImage
-                                    .frame(width: 30, height: 30)
-                            }
-                            
-                        }
-                        
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            
-                            NavigationLink {
-                                HomeView()
-                            } label: {
-                                SharedAsset.home.swiftUIImage
-                                    .frame(width: 30, height: 30)
-                            }
-                            
-                        }
-                        
-                        ToolbarItem(placement: .principal) {
-                            Text("설정")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                                .foregroundColor(.white)
+                
+                SettingItem(title: "알림")
+                    .onTapGesture {
+                        myPageCoordinator.push(destination: .notification)
+                    }
+                
+                SettingItem(title: "1:1 문의")
+                    .onTapGesture {
+                        myPageCoordinator.push(destination: .question)
+                    }
+                
+                SettingItem(title: "앱 리뷰 남기기")
+                
+                
+                Spacer()
+                
+                
+                LogoutButton()
+                    .onTapGesture {
+                        do {
+                            try FirebaseManager.shared.auth.signOut()
+                            print("로그아웃 완료")
+                            myPageCoordinator.resetPath(destination: .login)
+                        }catch {
+                            print("signout error: \(error)")
                         }
                     }
-                }
-                if isShowingWithdrawPopup{
-                    Color.black.opacity(0.5).ignoresSafeArea()
-                }
                 
-                if isShowingWithdrawPopup{
-                    WithdrawPopupView {
-                        //취소버튼 클릭 action - 팝업 창 삭제
-                        isShowingWithdrawPopup = false
-                        
-                    } positiveAction: {
-                        //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
-                        withdraw(method: userManager.signInMethod)
-                        
+            
+                WithdrawButton()
+                    .onChange(of: withdrawManager.isAppleUserAuthenticated, perform: { value in
+                        if value{
+                            //계정 탈퇴를 위한 애플 로그인 성공시
+                            deleteAppleUser()
+                        }
+                    })
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isShowingWithdrawPopup = true
                     }
-                }
+                    .fullScreenCover(isPresented: $isShowingWithdrawPopup) {
+                        TwoButtonPopupView(title: "계정을 탈퇴하시겠습니까?", subTitle: "탈퇴하신 계정은 복구가 불가능합니다.", positiveButtonTitle: "탈퇴하기") {
+                            //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
+                            withdraw(method: userManager.signInMethod)
+                        }
+                        .background(TransparentBackground())
+                    }
                 
-                LottieView(animation: .named("loading", bundle: .module))
-                    .looping()
-                    .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
-                
-            }            
+            }
+            .onDisappear(perform: {
+                isLoading = false
+            })
             
-            
-            
-            
-            
+            LoadingAnimationView(isLoading: $isLoading)
             
         }
-        
-        
         
     }
     private func deleteAppleUser(){
@@ -199,15 +139,12 @@ struct SettingView: View {
                 //에러처리
             }else {
                 print("delete user successful")
-                isDeleteUserDone = true
-                
                 db.collection("User").document(currentUser.uid).delete { error in
                     if let error = error {
                         print("delete document error: \(error)")
-                        //에러처리
                     }else {
                         print("delete docs successful")
-                        isUserDeleted = true
+                        myPageCoordinator.resetPath(destination: .login)
                     }
                 }
             }
@@ -216,7 +153,6 @@ struct SettingView: View {
     }
     private func withdraw(method: String){
         isLoading = true
-        isShowingWithdrawPopup = false
         if method == "Apple" {
             withdrawManager.AppleLogin()
         }else if method == "Google" {
@@ -228,13 +164,8 @@ struct SettingView: View {
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if method == "Email" {
-            isLoading = false
-            isShowingWithdrawPopup = false
-            isNeededEmailLogin = true
+            myPageCoordinator.push(destination: .emailVerification)
         }
-        
-        
-        
     }
     
     private func deleteUser(isSuccessful: Bool){
@@ -256,8 +187,7 @@ struct SettingView: View {
                         if let error = error {
                             print("delete document error: \(error)")
                         }else {
-                            isLoading = false
-                            isUserDeleted = true
+                            myPageCoordinator.resetPath(destination: .login)
                         }
                     }
                 }
@@ -285,5 +215,32 @@ struct SettingItem: View {
                 .frame(width: 25, height: 25)
         }
         .padding(20)
+    }
+}
+
+private struct WithdrawButton: View {
+    var body: some View {
+        Text("계정 탈퇴")
+            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+            .foregroundStyle(ColorSet.subGray)
+            .underline()
+            .padding(.bottom, 70)
+            .padding(.top, 67)
+    }
+}
+
+private struct LogoutButton: View {
+    var body: some View {
+        Text("로그아웃")
+            .foregroundColor(.white)
+            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+            .padding(.top, 15)
+            .padding(.bottom, 15)
+            .padding(.trailing, 62)
+            .padding(.leading, 62)
+            .overlay(
+                RoundedRectangle(cornerRadius: 30, style: .circular)
+                    .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
+            )
     }
 }

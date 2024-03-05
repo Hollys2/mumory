@@ -49,7 +49,7 @@ struct SearchArtistItem: View {
         })
         .padding(.vertical, 19)
         .padding(.horizontal, 20)
-        .background(.clear)
+        .background(ColorSet.background)
     }
 }
 

@@ -15,20 +15,22 @@ import GoogleSignIn
 import Firebase
 
 public struct LoginView: View {
+    @Environment(\.presentationMode) var presentationMode
+
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @EnvironmentObject var userManager: UserViewModel
 
     @State var isLoginCompleted: Bool = false
-    @State var isCustomizationNotDone: Bool = false
+    @State var goToCustomization: Bool = false
     @State var isLoading: Bool = false
     @State var isEmailLoginTapped = false
     
     let Firebase = FirebaseManager.shared
     
-    public init() {}
+    public init() {
+    }
 
     public var body: some View {
-        GeometryReader(content: { geometry in
             
             ZStack{
                 LibraryColorSet.background.ignoresSafeArea()
@@ -36,11 +38,11 @@ public struct LoginView: View {
                 VStack(spacing: 0){
                     
                     SharedAsset.logo.swiftUIImage
-                        .padding(.top, geometry.size.height > 700 ? 127 : 71)
+                        .padding(.top, userManager.height > 700 ? 127 : 71)
                     
                     //이메일 로그인 버튼
                     EmailLoginButton()
-                        .padding(.top, geometry.size.height > 700 ? 116 : 90)
+                        .padding(.top, userManager.height > 700 ? 116 : 90)
                         .onTapGesture {
                             isEmailLoginTapped = true
                         }
@@ -59,7 +61,9 @@ public struct LoginView: View {
                         .onChange(of: signInWithAppleManager.isUserAuthenticated) { isUserAuthenticated in
                             if isUserAuthenticated{
                                 if let currentUser = Firebase.auth.currentUser {
-                                    checkInitialSetting(uid: currentUser.uid, email: currentUser.email, method: "Apple")
+                                    Task {
+                                        await checkInitialSetting(uid: currentUser.uid, email: currentUser.email, method: "Apple")
+                                    }
                                 }
                             }
                         }
@@ -71,7 +75,7 @@ public struct LoginView: View {
                             Text("뮤모리 계정이 없으시다면?")
                                 .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                .padding(.top, geometry.size.height > 700 ? 68 : 51)
+                                .padding(.top, userManager.height > 700 ? 68 : 51)
                             
                             Text("이메일로 가입하기")
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
@@ -88,14 +92,11 @@ public struct LoginView: View {
                 
                 
                 //로딩 로티 애니메이션 - Z스택 최상단
-                LottieView(animation: .named("loading", bundle: .module))
-                    .looping()
-                    .opacity(isLoading ? 1 : 0)
-                    .frame(width: geometry.size.width * 0.2, height: geometry.size.width * 0.2)
+                LoadingAnimationView(isLoading: $isLoading)
                 
             }
             .navigationBarBackButtonHidden()
-            .navigationDestination(isPresented: $isCustomizationNotDone, destination: {
+            .navigationDestination(isPresented: $goToCustomization, destination: {
                 TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
             })
             .navigationDestination(isPresented: $isLoginCompleted) {
@@ -103,12 +104,12 @@ public struct LoginView: View {
             }
             .onDisappear(perform: {
                 isLoading = false
-                
                 //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
                 signInWithAppleManager.isUserAuthenticated = false
             })
+    
+        
             
-        })
     }
     
     
@@ -172,7 +173,9 @@ public struct LoginView: View {
                         print("create user error: \(error)")
                     }else if let user = result?.user{
                         print("success creating or login user ")
-                        checkInitialSetting(uid: user.uid, email: user.email, method: "Google")
+                        Task {
+                            await checkInitialSetting(uid: user.uid, email: user.email, method: "Google")
+                        }
                     }
                 }
             }
@@ -205,7 +208,7 @@ public struct LoginView: View {
                 //저장된 유저데이터에서 기존유저 판단 쿼리
                 let checkOldUserQuery = Firebase.db.collection("User")
                     .whereField("email", isEqualTo: email)
-                    .whereField("signin_method", isEqualTo: "Kakao")
+                    .whereField("sign_in_method", isEqualTo: "Kakao")
                 
                 //쿼리 기반 데이터 가져오기
                 checkOldUserQuery.getDocuments { snapShot, error in
@@ -216,7 +219,6 @@ public struct LoginView: View {
                         if snapShot.isEmpty {
                             //이메일이 동일한 카카오 로그인 회원이 없으니 회원가입
                             print("no user")
-                            
                             //비밀번호 하드코딩한 거 수정하기
                             Firebase.auth.createUser(withEmail: "kakao/\(email)", password: "kakao/\(uid)"){result, error in
                                 if let error = error{
@@ -224,7 +226,9 @@ public struct LoginView: View {
                                 }else{
                                     guard let user = result?.user else {return}
                                     print("firebase sign up successful")
-                                    checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
+                                    Task {
+                                        await checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
+                                    }
                                 }
                                 
                             }
@@ -235,7 +239,9 @@ public struct LoginView: View {
                                     print("login error \(error)")
                                 }else if let user = result?.user{
                                     print("success login")
-                                    checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
+                                    Task {
+                                        await checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
+                                    }
                                 }
                             }
                         }
@@ -247,124 +253,67 @@ public struct LoginView: View {
         }
     }
         
-    private func checkInitialSetting(uid: String, email: String?, method: String){
+    private func checkInitialSetting(uid: String, email: String?, method: String) async{
         //로그인 기록 및 uid 셋팅
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         
         //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
         let query = Firebase.db.collection("User").document(uid)
-        
-        query.getDocument { snapshot, error in
-            if let error = error {
-                //업로드에러
-                //사용자 피드백
-                print("get document error: \(error)")
-            }else if let snapshot = snapshot {
-                if snapshot.exists {
-                    guard let data = snapshot.data() else {
-                        print("no data")
-                        return
-                    }
-                    userManager.uid = data["uid"] as? String ?? ""
-                    userManager.id = data["id"] as? String ?? ""
-                    userManager.nickname = data["nickname"] as? String ?? ""
-                    userManager.email = data["email"] as? String ?? ""
-                    userManager.signInMethod = data["signin_method"] as? String ?? ""
-                    userManager.selectedNotificationTime = data["selected_notification_time"] as? Int ?? 0
-                    userManager.favoriteGenres = data["favorite_genres"] as? [Int] ?? []
-                    userManager.isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool ?? nil
-                    userManager.isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool ?? nil
-
-                    isCustomizationNotDone = userManager.id == "" //저장된 아이디가 없으면 커스텀부터 시작
-                    isLoginCompleted = userManager.id != "" //저장된 아이디가 있으면 홈으로 이동
-                }else{
-                    print("기존유저X")
-                    
-                    let userData: [String: Any] = [
-                        "uid": uid,
-                        "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
-                        "signin_method": method
-                    ]
-                    
-                    snapshot.reference.setData(userData) { error in
-                        if let error = error {
-                            //업로드 에러 사용자 피드백
-                            print("add document error: \(error)")
-                        }else {
-                            print("upload user data successful")
-                            isCustomizationNotDone = true
-                        }
-                    }
-                }
-                
-                
-//                if snapshot.exists{
-//                    //기존 유저 O
-//                    print("기존유저O")
-//                    guard let userData = snapshot.data() else {
-//                        print("no data")
-//                        return
-//                    }
-//                    
-//                    //이용약관 동의 했는지 확인
-//                    if let isCheckedServiceNewsNotification = userData["is_checked_service_news_notification"]{
-//                        //이용약관 동의 O
-//                        
-//                        //커스텀 할 때 기입한 id 존재 유무 확인
-//                        if let id = userData["id"]{
-//                            //기존유저O, 이용약관동의O, 커스텀O -> 홈화면으로 이동
-//                            print("커스텀O")
-//                            isLoginCompleted = true
-//                        }else {
-//                            print("커스텀X")
-//                            //기존유저O, 커스텀X -> 커스텀 페이지로 이동
-//                            isCustomizationNotDone = true
-//                        }
-//                    }else {
-//                        //이용약관 동의X -> 이용약관 동의 페이지
-//                        isTermsOfServiceNotDone = true
-//                    }
-//                    
-//                }else{
-//                    //기존 유저 X, 유저 정보 업로드 후 custom페이지 이동
-//                    print("기존유저X")
-//                    
-//                    let userData: [String: Any] = [
-//                        "uid": uid,
-//                        "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
-//                        "signin_method": method
-//                    ]
-//                    
-//                    snapshot.reference.setData(userData) { error in
-//                        if let error = error {
-//                            //업로드 에러 사용자 피드백
-//                            print("add document error: \(error)")
-//                        }else {
-//                            print("upload user data successful")
-//                            isCustomizationNotDone = true
-//                        }
-//                    }
-//                }
-            }
+        guard let snapshot = try? await query.getDocument() else {
+            self.isLoading = false
+            return
         }
         
+        if !snapshot.exists{
+            //신규 회원
+            let userData: [String: Any] = [
+                "uid": uid,
+                "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
+                "sign_in_method": method
+            ]
+            try? await snapshot.reference.setData(userData)
+            self.isLoading = false
+            self.goToCustomization = true
+        }
+
+        guard let data = snapshot.data(),
+              let uid = data["uid"] as? String,
+              let signInMethod = data["sign_in_method"] as? String,
+              let email = data["email"] as? String else {
+            //로그인 오류 처리
+            self.isLoading = false
+            return
+        }
+        userManager.uid = uid
+        userManager.email = email
+        userManager.signInMethod = signInMethod
         
-        //        query.getDocuments { snapshot, error in
-        //            if let error = error {
-        //                //업로드에러
-        //                //사용자 피드백
-        //                print("error")
-        //            }else if let data = snapshot {
-        //                print("data count: \(data.count)")
-        //                if data.isEmpty{
-        //
-        //                }else{
-        //
-        //                }
-        //            }
-        //        }
-    }
+        guard let id = data["id"] as? String,
+              let nickname = data["nickname"] as? String else {
+            //커스텀 마무리 안 한 기존 회원
+            self.goToCustomization = true
+            return
+        }
+
+        guard let selectedNotificationTime = data["selected_notification_time"] as? Int,
+              let isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool,
+              let isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool,
+              let favoriteGenres = data["favorite_genres"] as? [Int],
+              let profileImageURLString = data["profile_image_url"] as? String else {
+            return
+        }
+        
+        userManager.id = id
+        userManager.nickname = nickname
+        userManager.selectedNotificationTime = selectedNotificationTime
+        userManager.isCheckedSocialNotification = isCheckedSocialNotification
+        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
+        userManager.favoriteGenres = favoriteGenres
+        userManager.profileImageURL = URL(string: profileImageURLString)
+        
+        isLoginCompleted = true
+     }
     
 }
 

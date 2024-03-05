@@ -12,15 +12,14 @@ import MusicKit
 
 public class RealmManager {
     public static let shared = RealmManager()
-    
     public init() {
-        do {
-            let realm = try Realm()
-            print("realm init successful")
-        }catch {
-            print("realm init error: \(error)")
+        guard let realm = try? Realm() else {
+            print("realm init fail")
+            return
         }
+        print("realm init successful")
     }
+    
 }
 
 

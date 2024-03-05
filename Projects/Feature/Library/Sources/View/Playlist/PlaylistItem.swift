@@ -132,7 +132,7 @@ struct PlaylistItem: View {
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                                .opacity(playlist.isFavorite ? 1 : 0)
+                                .opacity(playlist.id == "favorite" ? 1 : 0)
                             
                             SharedAsset.lockPurple.swiftUIImage
                                 .resizable()
@@ -140,7 +140,7 @@ struct PlaylistItem: View {
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                .opacity(playlist.isFavorite ? 0 : playlist.isPrivate ? 1 : 0)
+                                .opacity(playlist.id == "favorite" ? 0 : playlist.isPrivate ? 1 : 0)
                         }
                     }
                     

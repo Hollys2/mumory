@@ -37,17 +37,13 @@ struct LastOfCustomizationView: View {
                     VStack(spacing: 0, content: {
                         VStack(spacing: 0, content: {
                             
-                            if let image = manager.profileImage {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 105, height: 105)
-                                    .clipShape(Circle())
-                                    .padding(.top, 38)
-                            }else{
-                                manager.RandomProfile()
-                                    .padding(.top, 38)
-                            }
+                      
+                            manager.getProfileImage()
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 105, height: 105)
+                                .clipShape(Circle())
+                                .padding(.top, 38)
                                 
                             
                             Text(manager.nickname)

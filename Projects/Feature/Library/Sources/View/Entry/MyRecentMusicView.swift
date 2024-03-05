@@ -11,6 +11,7 @@ import Shared
 import MusicKit
 import Core
 public struct MyRecentMusicView: View {
+    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var MusicList: [Song] = []
     @State var exists: Bool = false
@@ -19,79 +20,72 @@ public struct MyRecentMusicView: View {
     }
     
     public var body: some View {
-        ZStack{
-            LibraryColorSet.background.ignoresSafeArea() //임시 배경 색. 나중에 삭제하기
-            Color.clear.ignoresSafeArea()
+        VStack(spacing: 0, content: {
+            HStack(spacing: 0, content: {
+                Text("나의 최근 뮤모리 뮤직")
+                    .foregroundStyle(.white)
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                Spacer()
+                SharedAsset.next.swiftUIImage
+            })
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
             
-            VStack(spacing: 0, content: {
-                HStack(spacing: 0, content: {
-                    Text("나의 최근 뮤모리 뮤직")
-                        .foregroundStyle(.white)
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                    
-                    Spacer()
-                    
-                    SharedAsset.next.swiftUIImage
-                })
-                .padding(.trailing, 20)
-                .padding(.leading, 20)
-                .padding(.top, 10)
-                .padding(.bottom, 10)
-                
-                if exists{
-                    //기록 존재O
-                    //나의 최근 뮤모리 뮤직 횡스크롤 아이템
-                    ScrollView(.horizontal) {
-                        LazyHStack(alignment: .top,spacing: 16,content: {
-                            ForEach(MusicList, id: \.title) { song in
-//                                RecentMusicItem(song: song)
-//                                    .onTapGesture {
-//                                        playerManager.song = song
-//                                    }
-                            }
-                        })
-                        .padding(.leading, 20)
-                    }
-                    .scrollIndicators(.hidden)
-                    .padding(.top, 14)
-                }else {
-                    //기록 존재 X
-                    NoMumoryView()
-                        .frame(height: 151)
+            if MusicList.isEmpty{
+                NoMumoryView()
+                    .frame(maxHeight: .infinity, alignment: .center)
+                    .padding(.bottom, 7)
+            }else {
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top,spacing: 8, content: {
+                        ForEach(MusicList, id: \.title) { song in
+                            RecentMusicItem(song: song)
+                        }
+                    })
+                    .padding(.horizontal, 20)
                 }
-                
-            })
-            .onAppear(perform: {
-                searchRecentMusicPost()
-            })
-        }
+                .scrollIndicators(.hidden)
+                .padding(.top, 12)
+            }
+        })
+        .onAppear(perform: {
+            searchRecentMusicPost()
+        })
     }
     
     private func searchRecentMusicPost(){
+        //임의로 즐겨찾기 목록이 나오게 함
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        let query = db.collection("Mumory").document("111")
-            query.getDocument { snaptshot, error in
-                if let error = error {
-                    print(error)
-                    exists = false
-                }else if let snapshot = snaptshot{
-                    exists = snapshot.exists
-                }
+        let query = db.collection("User").document(userManager.uid).collection("Playlist").document("favorite")
+        query.getDocument { snapshot, error in
+            guard error == nil else {
+                return
+            }
+            guard let data = snapshot?.data() else {
+                return
+            }
+            
+            guard let songIDs = data["song_IDs"] as? [String] else {
+                return
+            }
+            
+            fetchSongInfo(songIDs: songIDs)
         }
     }
     
-    func fetchSongInfo(songId: String) async throws -> Song {
-        let musicItemID = MusicItemID(rawValue: songId)
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        request.properties = [.genres, .artists]
-        let response = try await request.response()
-        guard let song = response.items.first else {
-            throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+    func fetchSongInfo(songIDs: [String]){
+        for id in songIDs {
+            let musicItemID = MusicItemID(rawValue: id)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            Task {
+                let response = try await request.response()
+                guard let song = response.items.first else {
+                    return
+                }
+                self.MusicList.append(song)
+            }
         }
-        
-        let artworkUrl = song.artwork?.url(width: 400, height: 400)
-        return song
     }
 }
 

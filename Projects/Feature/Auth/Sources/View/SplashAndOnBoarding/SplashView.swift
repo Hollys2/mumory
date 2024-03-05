@@ -13,100 +13,88 @@ import Core
 import FirebaseAuth
 
 public struct SplashView: View {
-    public init(){}
     @EnvironmentObject var userManager: UserViewModel
     @State var time = 0.0
     @State var isSignInCompleted: Bool = false
-    @State var hasLoginHistory: Bool?
     @State var isPresent: Bool = false
     @State var isInitialSettingDone = false
+    @State var goToLoginView: Bool = false
+
+    var hasLoginHistory: Bool
+    
+    public init() {
+        self.hasLoginHistory = (UserDefaults.standard.value(forKey: "loginHistory") != nil)
+    }
+    
     public var body: some View {
         NavigationStack{
-            ZStack{
-                GeometryReader(content: { geometry in
+            ZStack(alignment: .top){
                     ColorSet.mainPurpleColor.ignoresSafeArea()
                     LottieView(animation: .named("splash", bundle: .module))
                         .looping()
-                        .padding(.top, geometry.size.height * 0.37) //0.37은 디자인의 상단 여백 비율
-                })
+                        .padding(.top, userManager.height * 0.37) //0.37은 디자인의 상단 여백 비율
             }
-            .transition(.opacity)
             .navigationDestination(isPresented: $isPresent) {
-                if isPresent {
-                    if isSignInCompleted {
-                        if userManager.id == "" {
-                            LoginView()
-                        }else {
-                            HomeView()
-                        }
-                    }else if hasLoginHistory ?? false {
-                        LoginView()
-                    }else {
-                        OnBoardingManageView()
-                    }
+                if !hasLoginHistory {
+                    OnBoardingManageView()
+                }else if goToLoginView {
+                    LoginView()
+                }else {
+                    HomeView()
                 }
             }
             .onAppear(perform: {
-                checkCurrentUserAndGetUserData()
-                Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
-                    time += 0.5
-                    if time > 4 {
-                        isPresent = isInitialSettingDone
-                        if isPresent{
-                            //다음 화면으로 넘어갈 때 타이머 멈추기
-                            timer.invalidate()
-                        }
-                    }
+                time = 0.0
+                Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
+                    time = 4.0
+                    isPresent = isInitialSettingDone
                 }
-                
+                Task{
+                    await checkCurrentUserAndGetUserData()
+                }
+                isPresent = time == 4.0 ? true : false
             })
             
         }
     }
     
-    private func checkCurrentUserAndGetUserData(){
+    private func checkCurrentUserAndGetUserData() async{
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
-        
-        //로그인한 기록이 있는지 확인
-        hasLoginHistory = (UserDefaults.standard.value(forKey: "loginHistory") != nil)
-        
-        //파이어베이스 이용해서 로그인 한 계정 있는지 확인
-        if let user = auth.currentUser {
-            //로그인 한 계정이 있다면 유저 데이터 저장
-            print("로그인 계정 존재. email: \(user.email ?? "no mail")")
-            db.collection("User").document(user.uid).getDocument { snapshot, error in
-                if let error = error {
-                    print("error 발생: \(error)")
-                    isSignInCompleted = false
-                    isInitialSettingDone = true
-                }else if let snapshot = snapshot{
-                    guard let data = snapshot.data() else {
-                        print("no data")
-                        isSignInCompleted = false
-                        isInitialSettingDone = true
-                        return
-                    }
-                    userManager.uid = user.uid
-                    userManager.id = data["id"] as? String ?? ""
-                    userManager.nickname = data["nickname"] as? String ?? ""
-                    userManager.email = data["email"] as? String ?? ""
-                    userManager.signInMethod = data["signin_method"] as? String ?? ""
-                    userManager.selectedNotificationTime = data["selected_notification_time"] as? Int ?? 0
-                    userManager.isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool ?? nil
-                    userManager.isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool ?? nil
-                    userManager.favoriteGenres = data["favorite_genres"] as? [Int] ?? []
-                    
-                    isSignInCompleted = true
-                    isInitialSettingDone = true
-                }
-            }
-        }else{
-            print("로그인된 계정 존재 안 함")
-            isSignInCompleted = false
+                
+        //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
+        guard let user = auth.currentUser,
+              let snapshot = try? await db.collection("User").document(user.uid).getDocument(),
+              let data = snapshot.data(),
+              let id = data["id"] as? String,
+              let nickname = data["nickname"] as? String,
+              let email = data["email"] as? String,
+              let signInMethod = data["sign_in_method"] as? String,
+              let selectedNotificationTime = data["selected_notification_time"] as? Int,
+              let isCheckedSocialNotification = data["is_checked_social_notification"] as? Bool,
+              let isCheckedServiceNewsNotification = data["is_checked_service_news_notification"] as? Bool,
+              let favoriteGenres = data["favorite_genres"] as? [Int],
+              let profileImageURLString = data["profile_image_url"] as? String else {
             isInitialSettingDone = true
+            goToLoginView = true
+            return
         }
+        
+        userManager.uid = user.uid
+        userManager.id = id
+        userManager.nickname = nickname
+        userManager.email = email
+        userManager.signInMethod = signInMethod
+        userManager.selectedNotificationTime = selectedNotificationTime
+        userManager.isCheckedSocialNotification = isCheckedSocialNotification
+        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
+        userManager.favoriteGenres = favoriteGenres
+        userManager.profileImageURL = URL(string: profileImageURLString)
+        userManager.backgroundImageURL = URL(string: data["background_image_url"] as? String ?? "")
+        userManager.bio = data["bio"] as? String ?? ""
+        
+        isInitialSettingDone = true
     }
 }
 

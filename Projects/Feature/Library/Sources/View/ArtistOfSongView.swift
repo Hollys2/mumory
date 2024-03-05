@@ -9,7 +9,7 @@
 import SwiftUI
 import Shared
 import MusicKit
-
+//Deprecated
 struct ArtistOfSongView: View {
     @EnvironmentObject private var userManager: UserViewModel
     @EnvironmentObject private var manager: LibraryManageModel

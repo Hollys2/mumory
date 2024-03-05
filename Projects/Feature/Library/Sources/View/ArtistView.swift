@@ -42,6 +42,9 @@ struct ArtistView: View {
                     .frame(width: userManager.width, height: userManager.width)
             }
             .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+            .overlay {
+                ColorSet.background.opacity(offset.y/(userManager.width-50.0))
+            }
 
 
         
