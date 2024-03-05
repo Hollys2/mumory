@@ -13,7 +13,7 @@ import Core
 
 struct PlaylistView: View {
     @EnvironmentObject var manager: LibraryManageModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     
@@ -37,10 +37,10 @@ struct PlaylistView: View {
 
             //이미지
             PlaylistImage(songs: $songs)
-                .offset(y: offset.y < -userManager.topInset ? -(offset.y+userManager.topInset) : 0)
+                .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
-                    ColorSet.background.opacity(offset.y/(userManager.width-50.0))
+                    ColorSet.background.opacity(offset.y/(currentUserData.width-50.0))
                 }
 
             
@@ -52,9 +52,9 @@ struct PlaylistView: View {
                 VStack(spacing: 0, content: {
                     SharedAsset.bottomGradient.swiftUIImage
                         .resizable()
-                        .frame(width: userManager.width, height: 45)
+                        .frame(width: currentUserData.width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, userManager.width - userManager.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, currentUserData.width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(playlist.title)
@@ -170,14 +170,14 @@ struct PlaylistView: View {
                         
                     })
                     .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
-                    .frame(width: userManager.width, alignment: .center)
+                    .frame(width: currentUserData.width, alignment: .center)
                     .background(ColorSet.background)
                     
                     
                     
                 })
-                .frame(width: userManager.width)
-                .frame(minHeight: userManager.height)
+                .frame(width: currentUserData.width)
+                .frame(minHeight: currentUserData.height)
 
             }
             
@@ -230,7 +230,7 @@ struct PlaylistView: View {
                 
             })
             .frame(height: 50)
-            .padding(.top, userManager.topInset)
+            .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
                     PlaylistBottomSheetView(playlist: playlist, songs: songs)
@@ -248,7 +248,7 @@ struct PlaylistView: View {
                         UIView.setAnimationsEnabled(false)
                         isSongDeletePopupPresent = true
                     }
-                    .padding(.bottom, userManager.bottomInset-10)
+                    .padding(.bottom, currentUserData.bottomInset-10)
                 }
                 .transition(.opacity)
                 .fullScreenCover(isPresented: $isSongDeletePopupPresent, content: {
@@ -283,14 +283,14 @@ struct PlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        db.collection("User").document(userManager.uid).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
+        db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
             if error == nil {
                 guard let data = snapshot?.data() else {
                     print("no data")
                     return
                 }
                 
-                guard let songIDs = data["song_IDs"] as? [String] else {
+                guard let songIDs = data["songIdentifiers"] as? [String] else {
                     print("no song id")
                     return
                 }
@@ -344,10 +344,10 @@ struct PlaylistView: View {
         var newSongs = songs.filter{ !selectedSongsForDelete.contains($0) }
         
         let newData = [
-            "song_IDs" : newSongs.map({$0.id.rawValue})
+            "songIdentifiers" : newSongs.map({$0.id.rawValue})
         ]
         
-        db.collection("User").document(userManager.uid).collection("Playlist")
+        db.collection("User").document(currentUserData.uid).collection("Playlist")
             .document(playlist.id).setData(newData, merge: true) { error in
                 if error == nil {
                     print("successful")
@@ -365,7 +365,7 @@ struct PlaylistView: View {
 
 
 private struct PlaylistImage: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var imageWidth: CGFloat = 0
     @Binding var songs: [Song]
     
@@ -422,7 +422,7 @@ private struct PlaylistImage: View {
             
             //가로줄(구분선)
             Rectangle()
-                .frame(width: userManager.width, height: 1)
+                .frame(width: currentUserData.width, height: 1)
                 .foregroundStyle(ColorSet.background)
             
             HStack(spacing: 0,content: {
@@ -468,7 +468,7 @@ private struct PlaylistImage: View {
             })
         })
         .onAppear {
-            self.imageWidth = userManager.width/2
+            self.imageWidth = currentUserData.width/2
         }
         
     }

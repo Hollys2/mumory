@@ -13,14 +13,20 @@ struct FriendHorizontalItem: View {
     var defaultProfiles: [Image] = [SharedAsset.profileRed.swiftUIImage, SharedAsset.profilePurple.swiftUIImage, SharedAsset.profileOrange.swiftUIImage, SharedAsset.profileYellow.swiftUIImage]
     
     let nickname: String = "어쩔닉네임"
+    let user: MumoriUser
+    
+    init(user: MumoriUser) {
+        self.user = user
+    }
     
     var body: some View {
         VStack(spacing: 15, content: {
-            AsyncImage(url: URL(string: "")) { image in
+            AsyncImage(url: user.profileImageURL) { image in
                 image
                     .resizable()
-                    .frame(width: 55, height: 55)
                     .scaledToFill()
+                    .frame(width: 55, height: 55)
+                    .clipShape(Circle())
             } placeholder: {
                 defaultProfiles[Int.random(in: 0 ... 3)]
                     .resizable()
@@ -28,7 +34,7 @@ struct FriendHorizontalItem: View {
                     .scaledToFill()
             }
             
-            Text(nickname)
+            Text(user.nickname)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                 .foregroundStyle(Color.white)
                 .frame(width: 60)
@@ -39,6 +45,6 @@ struct FriendHorizontalItem: View {
     }
 }
 
-#Preview {
-    FriendHorizontalItem()
-}
+//#Preview {
+//    FriendHorizontalItem()
+//}

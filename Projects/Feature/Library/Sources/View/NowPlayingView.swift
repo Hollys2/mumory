@@ -12,7 +12,7 @@ import MusicKit
 
 struct NowPlayingView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
 
     @State var isPresentQueue: Bool = false
@@ -47,7 +47,7 @@ struct NowPlayingView: View {
                         .ignoresSafeArea()
                     
                 }
-                .frame(width: userManager.width)
+                .frame(width: currentUserData.width)
                 
                 LinearGradient(colors: [Color.black, .clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.85)).ignoresSafeArea()
                 

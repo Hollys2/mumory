@@ -13,8 +13,10 @@ import Lottie
 
 struct SetPWView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var settingViewModel: SettingViewModel
+
     @State var email: String = ""
     @State var errorText: String = ""
     @State var isError: Bool = false
@@ -102,7 +104,7 @@ struct SetPWView: View {
                                 isValidEmail = false
                             }
                             
-                        }else if email != userManager.email {
+                        }else if email != settingViewModel.email {
                             withAnimation {
                                 errorText = "•  이메일 주소가 다릅니다. 다시 한 번 확인해 주세요."
                                 isError = true
@@ -133,7 +135,7 @@ struct SetPWView: View {
         
         let query = db.collection("User")
             .whereField("email", isEqualTo: email)
-            .whereField("sign_in_method", isEqualTo: "Email")
+            .whereField("signInMethod", isEqualTo: "Email")
         
         query.getDocuments { snapshot, error in
             if let error = error {

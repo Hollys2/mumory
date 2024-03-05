@@ -12,7 +12,7 @@ import SwiftUI
 
 
 struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
 
     @Binding var contentOffset: CGPoint
     @Binding var changeDetectValue: Bool
@@ -51,7 +51,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator(contentOffset: self._contentOffset, scrollDirection: self._scrollDirection, topbarYoffset: self._topbarYoffset, topInset: userManager.topInset)
+        Coordinator(contentOffset: self._contentOffset, scrollDirection: self._scrollDirection, topbarYoffset: self._topbarYoffset, topInset: currentUserData.topInset)
     }
     
     public class Coordinator: NSObject, UIScrollViewDelegate {

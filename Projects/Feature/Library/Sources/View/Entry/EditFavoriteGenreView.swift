@@ -12,7 +12,7 @@ import Core
 
 struct EditFavoriteGenreView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var selectedGenres: [Int] = []
     
     var body: some View {
@@ -28,7 +28,7 @@ struct EditFavoriteGenreView: View {
                     .padding(.top, 30 + 118)
                 
                 VStack(spacing: 13, content: {
-                    ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: userManager.width), id: \.self){ genreList in
+                    ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: currentUserData.width), id: \.self){ genreList in
                         HStack(spacing: 9, content: {
                             ForEach(genreList, id: \.self){ genre in
                                 Text(genre.name)
@@ -82,7 +82,7 @@ struct EditFavoriteGenreView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 70, alignment: .center)
             .padding(.horizontal, 20)
-            .padding(.top, userManager.topInset)
+            .padding(.top, currentUserData.topInset)
             .background(ColorSet.background.opacity(0.9))
             .padding(.bottom, 5)
             .ignoresSafeArea()
@@ -102,7 +102,7 @@ struct EditFavoriteGenreView: View {
             }
         }
         .onAppear {
-            selectedGenres = userManager.favoriteGenres
+            selectedGenres = currentUserData.favoriteGenres
         }
     }
     
@@ -110,12 +110,12 @@ struct EditFavoriteGenreView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let data = [
-            "favorite_genres" : selectedGenres
+            "favoriteGenres" : selectedGenres
         ]
         
-        db.collection("User").document(userManager.uid).setData(data, merge: true) { error in
+        db.collection("User").document(currentUserData.uid).setData(data, merge: true) { error in
             if error == nil {
-                userManager.favoriteGenres = selectedGenres
+                currentUserData.favoriteGenres = selectedGenres
                 dismiss()
             }else {
                 print(error!)

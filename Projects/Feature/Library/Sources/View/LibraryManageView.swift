@@ -15,7 +15,7 @@ public struct LibraryManageView: View {
     @State private var path = NavigationPath()
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var recentSearchObject: RecentSearchObject
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryManageModel
     @StateObject var snackbarManager: SnackBarViewModel = SnackBarViewModel()
     
@@ -86,8 +86,8 @@ public struct LibraryManageView: View {
                             })
                     }
                 })
-                .padding(.top,  userManager.topInset)
-                .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/userManager.width) * manager.xOffset) - 70 : 0)
+                .padding(.top,  currentUserData.topInset)
+                .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/currentUserData.width) * manager.xOffset) - 70 : 0)
                 .simultaneousGesture(drag)
                 .transition(.move(edge: .trailing))
             }
@@ -96,7 +96,7 @@ public struct LibraryManageView: View {
             
             ColorSet.background
                 .frame(maxWidth: .infinity)
-                .frame(height: userManager.topInset)
+                .frame(height: currentUserData.topInset)
                 .opacity(hasToRemoveSafeArea ? 0 : 1)
             
             //스낵바 - 추후 수정 예정
@@ -211,7 +211,7 @@ public struct LibraryManageView: View {
                 if drag.velocity.width > 1000.0{
                     DispatchQueue.main.async {
                         withAnimation(.spring(duration: 0.2)) {
-                            manager.xOffset = userManager.width
+                            manager.xOffset = currentUserData.width
                         }
                     }
                     Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
@@ -219,10 +219,10 @@ public struct LibraryManageView: View {
                         manager.xOffset = 0
                     }
                     
-                }else if drag.location.x > userManager.width/2 {
+                }else if drag.location.x > currentUserData.width/2 {
                     DispatchQueue.main.async {
                         withAnimation(.spring(duration: 0.1)) {
-                            manager.xOffset = userManager.width
+                            manager.xOffset = currentUserData.width
                         }
                     }
                     Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in

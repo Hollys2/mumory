@@ -80,7 +80,6 @@ public struct ImageSelectBottomSheet: View {
                                 guard let data = try? await value?.loadTransferable(type: Data.self) else {
                                     imageBundle.image = nil
                                     imageBundle.data = nil
-//                                    profileData.backgroundURL = nil
                                     return
                                 }
                                 guard let uiImage = UIImage(data: data) else {

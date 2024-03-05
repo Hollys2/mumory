@@ -13,7 +13,7 @@ struct AddPlaylistSongView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackbarManager: SnackBarViewModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var originPlaylist: MusicPlaylist
     @State var isTapFavorite: Bool = true
     @State var selectLineWidth: CGFloat = 55

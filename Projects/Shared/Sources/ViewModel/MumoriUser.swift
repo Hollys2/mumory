@@ -14,12 +14,15 @@ public struct MumoriUser: Hashable{
         return lhs.uid == rhs.uid
     }
     
-    public var uid: String
+    public var uid: String = ""
     public var nickname: String = ""
     public var id: String = ""
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
     public var bio: String = ""
+    
+    public init() {
+    }
     
     public init(uid: String) async {
         self.uid = uid
@@ -35,8 +38,10 @@ public struct MumoriUser: Hashable{
         
         self.nickname = data["nickname"] as? String ?? ""
         self.id = data["id"] as? String ?? ""
-        self.profileImageURL = URL(string: data["profile_image_url"] as? String ?? "")
-        self.backgroundImageURL = URL(string: data["background_image_url"] as? String ?? "")
+        self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")
+        self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
         self.bio = data["bio"] as? String ?? ""
     }
+    
+
 }

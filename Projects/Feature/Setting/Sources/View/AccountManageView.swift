@@ -12,8 +12,9 @@ import Core
 
 struct AccountManageView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var settingViewModel: SettingViewModel
+
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -53,7 +54,7 @@ struct AccountManageView: View {
                     
                     Spacer()
                     
-                    Text(verbatim: userManager.email)
+                    Text(verbatim: settingViewModel.email)
                         .foregroundStyle(ColorSet.charSubGray)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                 }
@@ -67,7 +68,7 @@ struct AccountManageView: View {
                     
                     Spacer()
                     
-                    Text(getSignInMethodText(method: userManager.signInMethod))
+                    Text(settingViewModel.getSignInMethodText())
                         .foregroundStyle(ColorSet.charSubGray)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 }
@@ -75,7 +76,7 @@ struct AccountManageView: View {
 
                 
                 //이메일 가입 유저만 비밀번호 재설정 가능하=
-                if userManager.signInMethod == "Email"{
+                if settingViewModel.signinMethod == "Email"{
                     Divider()
                         .frame(maxWidth: .infinity, maxHeight: 0.5)
                         .frame(height: 0.5)

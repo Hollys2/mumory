@@ -17,13 +17,11 @@ enum notificationCategory {
 
 struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
-
-    @State var isEntireButtonOn: Bool = false
+    @EnvironmentObject var settingViewModel: SettingViewModel
+    
     @State var isEntireOn: Bool = false
-    @State var isSocialOn: Bool = false
-    @State var isServiceOn: Bool = false
+    @State var checkedResult = 0
 
     var body: some View {
         ZStack{
@@ -58,46 +56,25 @@ struct NotificationView: View {
                 .padding(.bottom, 7)
                 
                 
-                NotificationItem(title: "전체 알림", isOn: $isEntireButtonOn)
+                NotificationItem(title: "전체 알림", isOn: $isEntireOn)
                     .padding(.top, 12)
-                    .onChange(of: isEntireButtonOn, perform: { value in
-                        if value {
-                            withAnimation {
-                                isSocialOn = value
-                                isServiceOn = value
-                            }
-                        }else {
-                            if isEntireOn {
-                                withAnimation {
-                                    isSocialOn = value
-                                    isServiceOn = value
-                                }
-                            }
-                        }
-                    })
                     .onChange(of: isEntireOn, perform: { value in
-                        withAnimation {
-                            isEntireButtonOn = value
-                        }
-                    })
-           
-                    
-                
-                NotificationItem(title: "소셜 알림", isOn: $isSocialOn)
-                    .onChange(of: isSocialOn, perform: { value in
-                        withAnimation {
-                            isEntireOn = isSocialOn && isServiceOn
-                        }
-                        subscribeSocial(isOn: value)
+                        settingViewModel.isSubscribedToSocial = value
+                        settingViewModel.isSubscribedToService = value
                     })
                 
-                NotificationItem(title: "서비스 소식 알림", isOn: $isServiceOn)
-                    .onChange(of: isServiceOn, perform: { value in
+                NotificationItem(title: "소셜 알림", isOn: $settingViewModel.isSubscribedToSocial)
+                    .onChange(of: settingViewModel.isSubscribedToSocial, perform: { value in
                         withAnimation {
-                            isEntireOn = isSocialOn && isServiceOn
+                            isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
                         }
-                        subscribeService(isOn: value)
-                        
+                    })
+                
+                NotificationItem(title: "서비스 소식 알림", isOn: $settingViewModel.isSubscribedToService)
+                    .onChange(of: settingViewModel.isSubscribedToService, perform: { value in
+                        withAnimation {
+                            isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
+                        }
                     })
                 
 
@@ -114,7 +91,7 @@ struct NotificationView: View {
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                         .foregroundStyle(.white)
                     Spacer()
-                    Text(getNotificationTimeText(timeRage: userManager.selectedNotificationTime))
+                    Text(settingViewModel.getNotificationTimeText())
                         .foregroundStyle(ColorSet.mainPurpleColor)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                 })
@@ -128,55 +105,6 @@ struct NotificationView: View {
             })
             
         }
-        .onAppear(perform: {
-            isSocialOn = userManager.isCheckedSocialNotification
-            isServiceOn = userManager.isCheckedServiceNewsNotification
-        })
-    }
-    
-    public func getNotificationTimeText(timeRage: Int) -> String {
-        switch(timeRage){
-        case 1: return "아침  6:00AM ~ 11:00AM"
-        case 2: return "점심  11:00AM ~ 4:00PM"
-        case 3: return "저녁  4:00PM ~ 9:00PM"
-        case 4: return "밤  9:00PM ~ 2:00AM"
-        case 5: return "이용 시간대를 분석해 자동으로 설정"
-        default : return "시간을 설정해주세요"
-        }
-    }
-    
-    public func subscribeSocial(isOn: Bool) {
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        let messaging = Firebase.messaging
-        
-        if isOn{
-            messaging.subscribe(toTopic: "SOCIAL")
-        }else {
-            messaging.unsubscribe(fromTopic: "SOCIAL")
-        }
-        let userData = [
-            "is_checked_social_notification" : isOn
-        ]
-        db.collection("User").document(userManager.uid).setData(userData, merge: true)
-        userManager.isCheckedSocialNotification = isOn
-    }
-    
-    public func subscribeService(isOn: Bool) {
-        let Firebase = FirebaseManager.shared
-        let db = Firebase.db
-        let messaging = Firebase.messaging
-        
-        if isOn{
-            messaging.subscribe(toTopic: "SERVICE")
-        }else {
-            messaging.unsubscribe(fromTopic: "SERVICE")
-        }
-        let userData = [
-            "is_checked_service_news_notification" : isOn
-        ]
-        db.collection("User").document(userManager.uid).setData(userData, merge: true)
-        userManager.isCheckedServiceNewsNotification = isOn
     }
     
 }

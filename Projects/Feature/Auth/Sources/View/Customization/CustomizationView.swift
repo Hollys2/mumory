@@ -16,7 +16,7 @@ public struct CustomizationView: View {
     let imageModel: UIImage = UIImage()
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var manager: CustomizationManageViewModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @State var isUploadImageCompleted = false
     @State var isUploadUserDataCompleted = false
@@ -46,7 +46,7 @@ public struct CustomizationView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 1)
                         .foregroundColor(.white)
-                        .padding(.trailing, setPadding(screen: CGSize(width: userManager.width, height: userManager.height)))
+                        .padding(.trailing, setPadding(screen: CGSize(width: currentUserData.width, height: currentUserData.height)))
                 }
                 .padding(.top, 20)
                 
@@ -183,8 +183,8 @@ public struct CustomizationView: View {
         var userData: [String : Any] = [
             "id": manager.id,
             "nickname": manager.nickname,
-            "favorite_genres": manager.selectedGenres.map({$0.id}),
-            "selected_notification_time": manager.selectedTime
+            "favoriteGenres": manager.selectedGenres.map({$0.id}),
+            "notificationTime": manager.selectedTime
         ]
         
         userData.merge(await uploadProfileImage(uid: uid))
@@ -193,11 +193,8 @@ public struct CustomizationView: View {
         
         await uploadPlaylist(uid: uid)
         
-        userManager.uid = uid
-        userManager.id = manager.id
-        userManager.nickname = manager.nickname
-        userManager.favoriteGenres = manager.selectedGenres.map({$0.id})
-        userManager.selectedNotificationTime = manager.selectedTime
+        currentUserData.uid = uid
+        currentUserData.favoriteGenres = manager.selectedGenres.map({$0.id})
         
         isLoading = false
         isCustomizationDone = true
@@ -211,16 +208,13 @@ public struct CustomizationView: View {
             return [:]
         }
         if isCheckedServiceNewsNotification {
-            try? await messaging.subscribe(toTopic: "SERVICE")
+            try? await messaging.subscribe(toTopic: "Service")
         }
-        try? await messaging.subscribe(toTopic: "SOCIAL")
-        
-        userManager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
-        userManager.isCheckedSocialNotification = true
+        try? await messaging.subscribe(toTopic: "Social")
         
         return [
-            "is_checked_service_news_notification" : isCheckedServiceNewsNotification,
-            "is_checked_social_notification": true
+            "isSubscribedToService" : isCheckedServiceNewsNotification,
+            "isSubscribedToSocial": true
         ]
     }
     
@@ -228,8 +222,8 @@ public struct CustomizationView: View {
         let db = Firebase.db
         let playlist: [String: Any] = [
             "title": "즐겨찾기 목록",
-            "song_IDs": [],
-            "is_private": true,
+            "songIdentifiers": [],
+            "isPrivate": true,
         ]
         
         try? await db.collection("User").document(uid).collection("Playlist").document("favorite").setData(playlist)
@@ -246,29 +240,26 @@ public struct CustomizationView: View {
             
             
             guard let result = try? await ref.putDataAsync(data, metadata: metaData) else {
-                return ["profile_image_url": ""]
+                return ["profileImageURL": ""]
             }
             
             guard let url = try? await ref.downloadURL() else {
-                return ["profile_image_url": ""]
+                return ["profileImageURL": ""]
             }
             
             let userData: [String: Any] = [
-                "profile_image_url": url.absoluteString
+                "profileImageURL": url.absoluteString
             ]
-            userManager.profileImageURL = url
             return userData
         }else {
             let ref = storage.reference(withPath: manager.randomProfilePath)
             
             guard let url = try? await ref.downloadURL() else {
-                return ["profile_image_url": ""]
+                return ["profileImageURL": ""]
             }
             let userData: [String: Any] = [
-                "profile_image_url": url.absoluteString
+                "profileImageURL": url.absoluteString
             ]
-            
-            userManager.profileImageURL = url
             return userData
         }
         

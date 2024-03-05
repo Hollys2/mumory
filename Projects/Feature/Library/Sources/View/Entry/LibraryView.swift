@@ -12,7 +12,7 @@ import Shared
 struct LibraryView: View {
     @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var isTapMyMusic: Bool = true
     @State var changeDetectValue: Bool = false
     @State var contentOffset: CGPoint = .zero

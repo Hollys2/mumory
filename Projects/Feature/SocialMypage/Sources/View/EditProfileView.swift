@@ -13,7 +13,7 @@ import PhotosUI
 import FirebaseFirestore
 
 struct EditProfileView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State private var editProfileData: EditProfileData = EditProfileData()
     
     var body: some View {
@@ -34,11 +34,11 @@ struct EditProfileView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            editProfileData.nickname = userManager.nickname
-            editProfileData.id = userManager.id
-            editProfileData.bio = userManager.bio
-            editProfileData.profileURL = userManager.profileImageURL
-            editProfileData.backgroundURL = userManager.backgroundImageURL
+            editProfileData.nickname = currentUserData.user.nickname
+            editProfileData.id = currentUserData.user.id
+            editProfileData.bio = currentUserData.user.bio
+            editProfileData.profileURL = currentUserData.user.profileImageURL
+            editProfileData.backgroundURL = currentUserData.user.backgroundImageURL
         })
         
     }
@@ -54,7 +54,7 @@ public struct ImageBundle {
     public var data: Data?
 }
 private struct UserProfile: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @Environment(\.dismiss) var dismiss
     @State var isPresentBackgroundBottomSheet: Bool = false
     @State var isPresentProfileBottomSheet: Bool = false
@@ -143,17 +143,9 @@ private struct UserProfile: View {
                             .frame(maxWidth: .infinity)
                             .frame(width: 90, height: 90)
                     }else {
-                        AsyncImage(url: profileData.profileURL) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(maxWidth: .infinity)
-                                .frame(width: 90, height: 90)
-                        } placeholder: {
-                            Circle()
-                                .frame(width: 90, height: 90)
-                                .foregroundStyle(ColorSet.darkGray)
-                        }
+                        Circle()
+                            .fill(ColorSet.darkGray)
+                            .frame(width: 90, height: 90)
                     }
                 }
                 .overlay(content: {
@@ -228,7 +220,7 @@ private struct UserProfile: View {
             }
             .padding(.horizontal, 20)
             .frame(height: 44)
-            .padding(.top, userManager.topInset)
+            .padding(.top, currentUserData.topInset)
         }
         .onAppear {
             DispatchQueue.global().async {
@@ -250,6 +242,25 @@ private struct UserProfile: View {
                 }
             }
             
+            DispatchQueue.global().async {
+                guard let url = profileData.profileURL else {
+                    print("no url")
+                    return
+                }
+                guard let data = try? Data(contentsOf: url) else {
+                    print("no data")
+                    return
+                }
+                guard let uiImage = UIImage(data: data) else {
+                    print("no image")
+                    return
+                }
+                profileImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
+                DispatchQueue.main.async {
+                    profileImageBundle.image = Image(uiImage: uiImage)
+                }
+            }
+            
             
         }
     }
@@ -257,7 +268,7 @@ private struct UserProfile: View {
     private func saveUserProfile(profileData: EditProfileData) async {
         let db = Firebase.db
         let storage = Firebase.storage
-        let uid = userManager.uid
+        let uid = currentUserData.uid
         let query = db.collection("User").document(uid)
         
         var data: [String: Any] = [
@@ -274,13 +285,14 @@ private struct UserProfile: View {
             return
         }
         
-        userManager.nickname = profileData.nickname
-        userManager.id = profileData.id
-        userManager.bio = profileData.bio
+        currentUserData.user.nickname = profileData.nickname
+        currentUserData.user.id = profileData.id
+        currentUserData.user.bio = profileData.bio
     }
     
     private func uploadProfile(uid: String) async -> [String: Any] {
         let storage = Firebase.storage
+        let db = Firebase.db
         
         if let profileData = profileImageBundle.data {
             let metaData = Firebase.storageMetadata()
@@ -293,16 +305,18 @@ private struct UserProfile: View {
             guard let url = try? await reference.downloadURL() else {
                 return [:]
             }
-            userManager.profileImageURL = url
-            return ["profile_image_url": url.absoluteString ]
+            currentUserData.user.profileImageURL = url
+            return ["profileImageURL": url.absoluteString ]
         }else {
-            guard profileData.profileURL == nil else {
-                return [:]
-            }
             guard let result = try? await storage.reference(withPath: "ProfileImage/\(uid).jpg").delete() else {
+                print("3")
                 return [:]
             }
-            userManager.profileImageURL = nil
+            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["profileImageURL": Firebase.deleteFieldValue()]) else {
+                print("no delete")
+                return [:]
+            }
+            currentUserData.user.profileImageURL = nil
             return [:]
         }
     }
@@ -325,26 +339,26 @@ private struct UserProfile: View {
                 print("2")
                 return [:]
             }
-            userManager.backgroundImageURL = url
-            return ["background_image_url": url.absoluteString]
+            currentUserData.user.backgroundImageURL = url
+            return ["backgroundImageURL": url.absoluteString]
             
         }else {
             guard let result = try? await storage.reference(withPath: "BackgroundImage/\(uid).jpg").delete() else {
                 print("3")
                 return [:]
             }
-            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["background_image_url": Firebase.deleteFieldValue()]) else {
+            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["backgroundImageURL": Firebase.deleteFieldValue()]) else {
                 print("no delete")
                 return [:]
             }
-            userManager.backgroundImageURL = nil
+            currentUserData.user.backgroundImageURL = nil
             return [:]
         }
     }
 }
 
 private struct IdStackView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State private var isTappedInfo: Bool = false
     @State private var timer: Timer?
     let db = FirebaseManager.shared.db
@@ -408,7 +422,7 @@ private struct IdStackView: View {
                         profileData.id = String(value.prefix(15))
                     }
                     
-                    if value == userManager.id {
+                    if value == currentUserData.user.id {
                         withAnimation {
                             profileData.idStatus = .normal
                         }
@@ -467,7 +481,7 @@ private struct IdStackView: View {
 }
 
 private struct NicknameStackView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var timer: Timer?
     let db = FirebaseManager.shared.db
     
@@ -508,7 +522,7 @@ private struct NicknameStackView: View {
                         profileData.nickname =  String(value.prefix(7))
                     }
                     
-                    if value == userManager.nickname {
+                    if value == currentUserData.user.nickname {
                         withAnimation {
                             profileData.nicknameStatus = .normal
                         }
@@ -566,7 +580,7 @@ private struct NicknameStackView: View {
 
 
 struct BioStackView: View {
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @Binding private var profileData: EditProfileData
     init(profileData: Binding<EditProfileData>) {
         self._profileData = profileData
@@ -594,7 +608,7 @@ struct BioStackView: View {
                     if profileData.bio.count > 50 {
                         profileData.bio = String(value.prefix(50))
                     }
-                    profileData.bioStatus = (value == userManager.bio) ? .normal : .valid
+                    profileData.bioStatus = (value == currentUserData.user.bio) ? .normal : .valid
                 })
 
         })

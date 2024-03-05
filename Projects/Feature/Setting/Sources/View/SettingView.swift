@@ -18,9 +18,10 @@ import Lottie
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var userManager: UserViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @EnvironmentObject var withdrawManager: WithdrawViewModel
+    @EnvironmentObject var settingViewModel: SettingViewModel
     
     @State var isShowingWithdrawPopup = false
     @State var isLoading: Bool = false
@@ -107,7 +108,7 @@ struct SettingView: View {
                     .fullScreenCover(isPresented: $isShowingWithdrawPopup) {
                         TwoButtonPopupView(title: "계정을 탈퇴하시겠습니까?", subTitle: "탈퇴하신 계정은 복구가 불가능합니다.", positiveButtonTitle: "탈퇴하기") {
                             //탈퇴(확인)버튼 클릭 action - 회원가입 방식에 따라 재 로그인 진행
-                            withdraw(method: userManager.signInMethod)
+                            withdraw(method: settingViewModel.signinMethod)
                         }
                         .background(TransparentBackground())
                     }
@@ -156,11 +157,11 @@ struct SettingView: View {
         if method == "Apple" {
             withdrawManager.AppleLogin()
         }else if method == "Google" {
-            withdrawManager.GoogleLogin(originalEmail: userManager.email) { isSuccessful in
+            withdrawManager.GoogleLogin(originalEmail: settingViewModel.email) { isSuccessful in
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if method == "Kakao" {
-            withdrawManager.KakaoLogin(originalEmail: userManager.email) { isSuccessful in
+            withdrawManager.KakaoLogin(originalEmail: settingViewModel.email) { isSuccessful in
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if method == "Email" {

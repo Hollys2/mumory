@@ -27,6 +27,7 @@ class CustomizationManageViewModel: ObservableObject{
     
     @Published var profileImageData: Data?
     @Published var profileImage: Image?
+    
     var randomProfileIndex: Int
     var randomProfilePath: String
     
@@ -34,19 +35,19 @@ class CustomizationManageViewModel: ObservableObject{
         switch(Int.random(in: 0...3)){
         case 0:
             self.randomProfileIndex = 0
-            self.randomProfilePath = "ProfileImage/profile_red.png"
+            self.randomProfilePath = "ProfileImage/profile0.png"
         case 1:
             self.randomProfileIndex = 1
-            self.randomProfilePath = "ProfileImage/profile_purple.png"
+            self.randomProfilePath = "ProfileImage/profile1.png"
         case 2:
             self.randomProfileIndex = 2
-            self.randomProfilePath = "ProfileImage/profile_yellow.png"
+            self.randomProfilePath = "ProfileImage/profile2.png"
         case 3:
             self.randomProfileIndex = 3
-            self.randomProfilePath = "ProfileImage/profile_orange.png"
+            self.randomProfilePath = "ProfileImage/profile3.png"
         default:
             self.randomProfileIndex = 1
-            self.randomProfilePath = "ProfileImage/profile_red.png"
+            self.randomProfilePath = "ProfileImage/profile0.png"
         }
     }
     
