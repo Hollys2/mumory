@@ -46,7 +46,7 @@ public struct CustomizationView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 1)
                         .foregroundColor(.white)
-                        .padding(.trailing, setPadding(screen: CGSize(width: currentUserData.width, height: currentUserData.height)))
+                        .padding(.trailing, setPadding(screen: CGSize(width: getUIScreenBounds().width, height: getUIScreenBounds().height)))
                 }
                 .padding(.top, 20)
                 
@@ -223,7 +223,7 @@ public struct CustomizationView: View {
         let playlist: [String: Any] = [
             "title": "즐겨찾기 목록",
             "songIdentifiers": [],
-            "isPrivate": true,
+            "isPublic": false,
         ]
         
         try? await db.collection("User").document(uid).collection("Playlist").document("favorite").setData(playlist)

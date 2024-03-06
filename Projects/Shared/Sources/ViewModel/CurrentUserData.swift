@@ -25,12 +25,11 @@ public class CurrentUserData: ObservableObject {
     
     
     @Published public var favoriteGenres: [Int] = []
-    @Published public var width: CGFloat = 0
-    @Published public var height: CGFloat = 0
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
+    
     @Published public var playlistArray: [MusicPlaylist] = [
-        MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isAddItme: true)
+        MusicPlaylist(id: "addItem", title: "", songIDs: [], isPublic: true, isAddItme: true)
     ]
     
     public init(){

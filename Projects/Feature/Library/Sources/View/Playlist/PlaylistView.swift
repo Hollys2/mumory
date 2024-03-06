@@ -40,7 +40,7 @@ struct PlaylistView: View {
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
-                    ColorSet.background.opacity(offset.y/(currentUserData.width-50.0))
+                    ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
                 }
 
             
@@ -52,9 +52,9 @@ struct PlaylistView: View {
                 VStack(spacing: 0, content: {
                     SharedAsset.bottomGradient.swiftUIImage
                         .resizable()
-                        .frame(width: currentUserData.width, height: 45)
+                        .frame(width: getUIScreenBounds().width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, currentUserData.width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(playlist.title)
@@ -76,7 +76,7 @@ struct PlaylistView: View {
                                 .foregroundStyle(ColorSet.subGray)
                         })
                         .padding(.top, 10)
-                        .opacity(playlist.isPrivate ? 1 : 0)
+                        .opacity(playlist.isPublic ? 0 : 1)
                         
                         ZStack(alignment: .bottom){
                             HStack(spacing: 0, content: {
@@ -170,14 +170,14 @@ struct PlaylistView: View {
                         
                     })
                     .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
-                    .frame(width: currentUserData.width, alignment: .center)
+                    .frame(width: getUIScreenBounds().width, alignment: .center)
                     .background(ColorSet.background)
                     
                     
                     
                 })
-                .frame(width: currentUserData.width)
-                .frame(minHeight: currentUserData.height)
+                .frame(width: getUIScreenBounds().width)
+                .frame(minHeight: getUIScreenBounds().height)
 
             }
             
@@ -323,7 +323,7 @@ struct PlaylistView: View {
                     print("no song")
                     continue
                 }
-                
+            
                 withAnimation {
                     self.songs.append(song)
                 }
@@ -422,7 +422,7 @@ private struct PlaylistImage: View {
             
             //가로줄(구분선)
             Rectangle()
-                .frame(width: currentUserData.width, height: 1)
+                .frame(width: getUIScreenBounds().width, height: 1)
                 .foregroundStyle(ColorSet.background)
             
             HStack(spacing: 0,content: {
@@ -468,7 +468,7 @@ private struct PlaylistImage: View {
             })
         })
         .onAppear {
-            self.imageWidth = currentUserData.width/2
+            self.imageWidth = getUIScreenBounds().width/2
         }
         
     }

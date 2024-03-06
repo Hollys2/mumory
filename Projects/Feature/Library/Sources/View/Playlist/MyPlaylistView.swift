@@ -77,7 +77,7 @@ struct MyPlaylistView: View {
         let db = Firebase.db
                 
         DispatchQueue.main.async {
-            currentUserData.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPrivate: false, isAddItme: true)]
+            currentUserData.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPublic: false, isAddItme: true)]
         }
         
         let query = db.collection("User").document(currentUserData.uid).collection("Playlist")
@@ -90,7 +90,7 @@ struct MyPlaylistView: View {
                         print("no title")
                         return
                     }
-                    guard let isPrivate = snapshot.data()["isPrivate"] as? Bool else {
+                    guard let isPublic = snapshot.data()["isPublic"] as? Bool else {
                         print("no private thing")
                         return
                     }
@@ -103,12 +103,12 @@ struct MyPlaylistView: View {
                     DispatchQueue.main.async {
                         if id == "favorite" {
                             withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false), at: 0)
+                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false), at: 0)
                             }
                         }else {
                             let index = currentUserData.playlistArray.count - 1
                             withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false), at: index)
+                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false), at: index)
                             }
                         }
                     }

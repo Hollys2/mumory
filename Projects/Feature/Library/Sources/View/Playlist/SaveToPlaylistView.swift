@@ -201,7 +201,7 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
-                    guard let isPrivate = document.data()["isPrivate"] as? Bool else {
+                    guard let isPublic = document.data()["isPublic"] as? Bool else {
                         print("no is Private")
                         return
                     }
@@ -216,7 +216,7 @@ struct SaveToPlaylistView: View {
                     
                     withAnimation {
                         if !(id == "favorite") {
-                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPrivate: isPrivate, isAddItme: false))
+                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false))
                         }
                     }
                     

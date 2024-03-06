@@ -46,14 +46,14 @@ struct RecommendationListView: View {
                 VStack(spacing: 0, content: {
                     SharedAsset.bottomGradient.swiftUIImage
                         .resizable()
-                        .frame(width: currentUserData.width, height: 45)
+                        .frame(width: getUIScreenBounds().width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, currentUserData.width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(title)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                            .frame(width: currentUserData.width, alignment: .center)
+                            .frame(width: getUIScreenBounds().width, alignment: .center)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 20)
                             .foregroundStyle(.white)
@@ -106,8 +106,8 @@ struct RecommendationListView: View {
                     
                     
                 })
-                .frame(width: currentUserData.width)
-                .frame(minHeight: currentUserData.height)
+                .frame(width: getUIScreenBounds().width)
+                .frame(minHeight: getUIScreenBounds().height)
                 
             }
             
@@ -264,7 +264,7 @@ private struct PlaylistImage: View {
             
             //가로줄(구분선)
             Rectangle()
-                .frame(width: currentUserData.width, height: 1)
+                .frame(width: getUIScreenBounds().width, height: 1)
                 .foregroundStyle(ColorSet.background)
             
             HStack(spacing: 0,content: {
@@ -311,7 +311,7 @@ private struct PlaylistImage: View {
         })
         .onAppear {
             DispatchQueue.main.async {
-                self.imageWidth = currentUserData.width/2
+                self.imageWidth = getUIScreenBounds().width/2
             }
         }
         

@@ -32,7 +32,7 @@ public struct SplashView: View {
                     ColorSet.mainPurpleColor.ignoresSafeArea()
                     LottieView(animation: .named("splash", bundle: .module))
                         .looping()
-                        .padding(.top, currentUserData.height * 0.37) //0.37은 디자인의 상단 여백 비율
+                        .padding(.top, getUIScreenBounds().height * 0.37) //0.37은 디자인의 상단 여백 비율
             }
             .navigationDestination(isPresented: $isPresent) {
                 if !hasLoginHistory {
@@ -63,6 +63,14 @@ public struct SplashView: View {
         let db = Firebase.db
         let auth = Firebase.auth
                 
+//        if let result = try? await db.collection("User").document("tester").getDocument(){
+////            result.exists
+//            print("okok")
+//        }else {
+//            print("no internet")
+//        }
+        
+        
         //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
         guard let user = auth.currentUser,
               let snapshot = try? await db.collection("User").document(user.uid).getDocument(),
@@ -72,11 +80,13 @@ public struct SplashView: View {
               let favoriteGenres = data["favoriteGenres"] as? [Int] else {
             isInitialSettingDone = true
             goToLoginView = true
+            print("no user")
             return
         }
         
         currentUserData.uid = user.uid
         currentUserData.favoriteGenres = favoriteGenres
+        print("done111")
         
         isInitialSettingDone = true
     }

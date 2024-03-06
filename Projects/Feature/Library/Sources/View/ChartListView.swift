@@ -89,7 +89,7 @@ struct ChartListView: View {
                                 .background(ColorSet.subGray)
                         }
                     })
-                    .frame(width: currentUserData.width)
+                    .frame(width: getUIScreenBounds().width)
                     
                     Rectangle()
                         .foregroundStyle(.clear)

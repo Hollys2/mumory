@@ -158,7 +158,7 @@ struct CreatePlaylistPopupView: View {
         
         let data: [String: Any] = [
             "title": playlistTitle,
-            "isPrivate": !isTapPublic,
+            "isPublic": isTapPublic,
             "songIdentifiers": []
         ]
         

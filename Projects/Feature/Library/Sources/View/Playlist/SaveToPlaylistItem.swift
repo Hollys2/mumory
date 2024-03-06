@@ -30,7 +30,7 @@ struct SaveToPlaylistItem: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 20, height: 20)
-                    .opacity(playlist.isPrivate ? 1 : 0)
+                    .opacity(playlist.isPublic ? 0 : 1)
                     .padding(.leading, 15)
                 
                 Text("\(playlist.songIDs.count)")

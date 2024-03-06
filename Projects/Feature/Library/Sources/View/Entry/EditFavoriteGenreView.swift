@@ -28,7 +28,7 @@ struct EditFavoriteGenreView: View {
                     .padding(.top, 30 + 118)
                 
                 VStack(spacing: 13, content: {
-                    ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: currentUserData.width), id: \.self){ genreList in
+                    ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: getUIScreenBounds().width), id: \.self){ genreList in
                         HStack(spacing: 9, content: {
                             ForEach(genreList, id: \.self){ genre in
                                 Text(genre.name)
@@ -94,7 +94,6 @@ struct EditFavoriteGenreView: View {
                     saveGenre()
                 } label: {
                     WhiteButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6)
-                        .shadow(color: .black, radius: 10, y: 8)
                         .padding(.bottom, 20)
                         .padding(.horizontal, 20)
                 }

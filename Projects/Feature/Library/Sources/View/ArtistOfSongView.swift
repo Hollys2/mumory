@@ -36,12 +36,12 @@ struct ArtistOfSongView: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: currentUserData.width, height: currentUserData.width)
+                    .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().width)
             } placeholder: {
                 SharedAsset.artistProfile.swiftUIImage
                     .resizable()
                     .scaledToFill()
-                    .frame(width: currentUserData.width, height: currentUserData.width)
+                    .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().width)
             }
             .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
 
@@ -54,8 +54,8 @@ struct ArtistOfSongView: View {
                     SharedAsset.bottomGradient.swiftUIImage
                         .resizable()
                         .scaledToFill()
-                        .frame(width: currentUserData.width, height: 45)
-                        .padding(.top, currentUserData.width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .frame(width: getUIScreenBounds().width, height: 45)
+                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     //그라데이션 하위
                     VStack(spacing: 0, content: {
@@ -106,7 +106,7 @@ struct ArtistOfSongView: View {
                     .offset(y: -33)
                     .background(ColorSet.background)
                 })
-                .frame(width: currentUserData.width)
+                .frame(width: getUIScreenBounds().width)
 
             }
 
