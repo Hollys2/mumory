@@ -92,23 +92,6 @@ private struct UserProfile: View {
                             .foregroundStyle(ColorSet.darkGray)
                     }
                 }
-//                .onChange(of: backgroundImageBundle.item) { value in
-//                    Task {
-//                        profileData.backgroundStatus = .loading
-//                        guard let data = try? await value?.loadTransferable(type: Data.self) else {
-//                            backgroundImageBundle.image = nil
-//                            backgroundImageBundle.data = nil
-//                            profileData.backgroundURL = nil
-//                            return
-//                        }
-//                        guard let uiImage = UIImage(data: data) else {
-//                            return
-//                        }
-//                        backgroundImageBundle.image = Image(uiImage: uiImage)
-//                        backgroundImageBundle.data = uiImage.jpegData(compressionQuality: 0.2)
-//                        profileData.backgroundStatus = .valid
-//                    }
-//                }                
                 .overlay {
                     ColorSet.background.opacity(0.4)
 
@@ -130,6 +113,9 @@ private struct UserProfile: View {
                 .fullScreenCover(isPresented: $isPresentBackgroundBottomSheet) {
                     ImageSelectBottomSheet(isPresent: $isPresentBackgroundBottomSheet, imageBundle: $backgroundImageBundle, photoType: .background)
                         .background(TransparentBackground())
+                }
+                .onChange(of: backgroundImageBundle.image) { value in
+                    profileData.backgroundStatus = .valid
                 }
                 
                 
@@ -167,25 +153,9 @@ private struct UserProfile: View {
                     ImageSelectBottomSheet(isPresent: $isPresentProfileBottomSheet, imageBundle: $profileImageBundle)
                         .background(TransparentBackground())
                 }
-//                .onChange(of: profileImageBundle.item) { value in
-//                    Task {
-//                        profileData.profileStatus = .loading
-//                        guard let data = try? await value?.loadTransferable(type: Data.self) else {
-//                            profileImageBundle.image = nil
-//                            profileImageBundle.data = nil
-//                            profileData.profileURL = nil
-//                            print("error10")
-//                            return
-//                        }
-//                        guard let uiImage = UIImage(data: data) else {
-//                            print("error11")
-//                            return
-//                        }
-//                        profileImageBundle.image = Image(uiImage: uiImage)
-//                        profileImageBundle.data = uiImage.jpegData(compressionQuality: 0.2)
-//                        profileData.profileStatus = .valid
-//                    }
-//                }
+                .onChange(of: profileImageBundle.image) { value in
+                    profileData.profileStatus = .valid
+                }
                 
                 
             })
@@ -239,8 +209,11 @@ private struct UserProfile: View {
                 backgroundImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
                 DispatchQueue.main.async {
                     backgroundImageBundle.image = Image(uiImage: uiImage)
+                    profileData.backgroundStatus = .normal
                 }
-            }
+            }                    
+            
+
             
             DispatchQueue.global().async {
                 guard let url = profileData.profileURL else {
@@ -258,12 +231,14 @@ private struct UserProfile: View {
                 profileImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
                 DispatchQueue.main.async {
                     profileImageBundle.image = Image(uiImage: uiImage)
+                    profileData.profileStatus = .normal
                 }
             }
             
             
         }
     }
+    
     
     private func saveUserProfile(profileData: EditProfileData) async {
         let db = Firebase.db

@@ -45,6 +45,10 @@ extension View {
         //        return UIScreen.main.bounds
         UIScreen.main.bounds
     }
+    
+    public func getEdgeInsets() -> UIEdgeInsets? {
+        return UIApplication.shared.connectedScenes.first?.inputView?.safeAreaInsets
+    }
 }
 
 //

@@ -56,7 +56,7 @@ public struct RecommendationView: View {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
                             MusicChartItem(rank: index+1, song: song) //순위 곡 item
-                                .frame(width: currentUserData.width - 40)
+                                .frame(width: getUIScreenBounds().width - 40)
                                 .onTapGesture {
                                     playerManager.playNewSong(song: song)
                                 }

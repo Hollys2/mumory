@@ -140,7 +140,7 @@ struct PlaylistItem: View {
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 10)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                .opacity(playlist.id == "favorite" ? 0 : playlist.isPrivate ? 1 : 0)
+                                .opacity(playlist.id == "favorite" ? 0 : playlist.isPublic ? 0 : 1)
                         }
                     }
                     

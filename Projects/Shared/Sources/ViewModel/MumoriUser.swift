@@ -7,8 +7,8 @@
 //
 
 import Foundation
+import SwiftUI
 import Core
-
 public struct MumoriUser: Hashable{
     public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
         return lhs.uid == rhs.uid
@@ -21,8 +21,7 @@ public struct MumoriUser: Hashable{
     public var backgroundImageURL: URL?
     public var bio: String = ""
     
-    public init() {
-    }
+    public init() {}
     
     public init(uid: String) async {
         self.uid = uid

@@ -42,8 +42,6 @@ public struct MumoryApp: App {
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                         
-                        currentUserData.width = geometry.size.width
-                        currentUserData.height = geometry.size.height
                         currentUserData.topInset = geometry.safeAreaInsets.top
                         currentUserData.bottomInset = geometry.safeAreaInsets.bottom
                         

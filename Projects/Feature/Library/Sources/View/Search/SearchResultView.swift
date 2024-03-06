@@ -104,7 +104,7 @@ struct SearchResultView: View {
                         
                     }
                 })
-                .frame(width: currentUserData.width)
+                .frame(width: getUIScreenBounds().width)
                 
                 
                 

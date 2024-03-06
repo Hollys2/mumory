@@ -87,7 +87,7 @@ public struct LibraryManageView: View {
                     }
                 })
                 .padding(.top,  currentUserData.topInset)
-                .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/currentUserData.width) * manager.xOffset) - 70 : 0)
+                .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/getUIScreenBounds().width) * manager.xOffset) - 70 : 0)
                 .simultaneousGesture(drag)
                 .transition(.move(edge: .trailing))
             }
@@ -211,7 +211,7 @@ public struct LibraryManageView: View {
                 if drag.velocity.width > 1000.0{
                     DispatchQueue.main.async {
                         withAnimation(.spring(duration: 0.2)) {
-                            manager.xOffset = currentUserData.width
+                            manager.xOffset = getUIScreenBounds().width
                         }
                     }
                     Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
@@ -219,10 +219,10 @@ public struct LibraryManageView: View {
                         manager.xOffset = 0
                     }
                     
-                }else if drag.location.x > currentUserData.width/2 {
+                }else if drag.location.x > getUIScreenBounds().width/2 {
                     DispatchQueue.main.async {
                         withAnimation(.spring(duration: 0.1)) {
-                            manager.xOffset = currentUserData.width
+                            manager.xOffset = getUIScreenBounds().width
                         }
                     }
                     Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in

@@ -13,14 +13,14 @@ public struct MusicPlaylist: Equatable {
     public var id: String
     public var title: String
     public var songIDs: [String]
-    public var isPrivate: Bool
+    public var isPublic: Bool
     public var isAddItme: Bool
     
-    public init(id: String, title: String, songIDs: [String], isPrivate: Bool, isAddItme: Bool) {
+    public init(id: String, title: String, songIDs: [String], isPublic: Bool, isAddItme: Bool) {
         self.id = id
         self.title = title
         self.songIDs = songIDs
-        self.isPrivate = isPrivate
+        self.isPublic = isPublic
         self.isAddItme = isAddItme
     }
 }

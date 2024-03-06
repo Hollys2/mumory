@@ -58,7 +58,7 @@ struct AddSongFromSearchView: View {
                                 .background(lineGray)
                         }
                     })
-                    .frame(width: currentUserData.width)
+                    .frame(width: getUIScreenBounds().width)
                 }        
                 .onChange(of: scrollOffset, perform: { value in
                     //아이템 높이: 70. 첫 페이지에서는 offset이 700일 때 다음 페이지 요청을 보내고, 두번째 페이지에서는 2100일 때 요청을 보냄...반복
@@ -111,6 +111,12 @@ struct SongSearchTextField: View {
     let textfieldBackground = Color(white: 0.24)
     var body: some View {
         HStack(spacing: 0, content: {
+            SharedAsset.graySearch.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 23, height: 23)
+                .padding(.leading, 15)
+            
             TextField("", text: $term, prompt: getPrompt())
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .foregroundStyle(Color.white)

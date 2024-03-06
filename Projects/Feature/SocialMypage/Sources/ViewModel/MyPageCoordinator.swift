@@ -8,6 +8,8 @@
 
 import Foundation
 import SwiftUI
+import Shared
+
 public enum MyPage: Hashable {
 //    case myPage
     case setting
@@ -18,6 +20,7 @@ public enum MyPage: Hashable {
     case emailVerification
     case selectNotificationTime
     case login
+    case friendList(friends: [MumoriUser])
 }
 class MyPageCoordinator: ObservableObject {
     @Published public var stack: [MyPage] = []
@@ -62,6 +65,9 @@ class MyPageCoordinator: ObservableObject {
             
         case .login:
             LoginView()
+            
+        case .friendList(friends: let friends):
+            FriendListView(friends: friends)
         }
 
     }

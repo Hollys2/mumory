@@ -22,7 +22,7 @@ public struct LoadingAnimationView: View {
             LottieView(animation: .named("loading", bundle: .module))
                 .looping()
                 .opacity(isLoading ? 1 : 0)
-                .frame(width: currentUserData.width * 0.16, height: currentUserData.width * 0.16)
+                .frame(width: getUIScreenBounds().width * 0.16, height: getUIScreenBounds().width * 0.16)
         }
         .ignoresSafeArea()
     }

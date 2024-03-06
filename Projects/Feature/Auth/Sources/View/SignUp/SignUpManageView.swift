@@ -39,7 +39,7 @@ struct SignUpManageView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: 1)
                             .foregroundColor(.white)
-                            .padding(.trailing, setPadding(screen: CGSize(width: currentUserData.width, height: currentUserData.height)))
+                            .padding(.trailing, setPadding(screen: CGSize(width: getUIScreenBounds().width, height: getUIScreenBounds().height)))
                     }
                     .padding(.top, 20)
                     

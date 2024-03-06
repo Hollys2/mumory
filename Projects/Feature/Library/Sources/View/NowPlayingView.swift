@@ -47,7 +47,7 @@ struct NowPlayingView: View {
                         .ignoresSafeArea()
                     
                 }
-                .frame(width: currentUserData.width)
+                .frame(width: getUIScreenBounds().width)
                 
                 LinearGradient(colors: [Color.black, .clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.85)).ignoresSafeArea()
                 

@@ -35,6 +35,8 @@ struct MyPageView: View {
                             .background(lineGray)
                         
                         FriendView()
+                            .environmentObject(myPageCoordinator)
+
                         
                         Divider()
                             .frame(maxWidth: .infinity)
@@ -99,12 +101,12 @@ struct UserInfoView: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: currentUserData.width, height: 150)
+                    .frame(width: getUIScreenBounds().width, height: 150)
                     .clipped()
             } placeholder: {
                 Rectangle()
                     .frame(maxWidth: .infinity)
-                    .frame(width: currentUserData.width)
+                    .frame(width: getUIScreenBounds().width)
                     .frame(height: 150)
                     .foregroundStyle(ColorSet.darkGray)
             }
@@ -181,6 +183,7 @@ struct UserInfoView: View {
 }
 
 struct FriendView: View {
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var friends: [MumoriUser] = []
     var body: some View {
@@ -202,6 +205,10 @@ struct FriendView: View {
             })
             .padding(.horizontal, 20)
             .frame(height: 67)
+            .background(ColorSet.background)
+            .onTapGesture {
+                myPageCoordinator.push(destination: .friendList(friends: self.friends))
+            }
             
             ScrollView(.horizontal) {
                 HStack(spacing: 12, content: {
@@ -216,6 +223,7 @@ struct FriendView: View {
         })
         .onAppear {
             let db = FirebaseManager.shared.db
+            
             Task {
                 guard let document = try? await db.collection("User").document(currentUserData.uid).getDocument() else {
                     print("error1")

@@ -38,11 +38,11 @@ public struct LoginView: View {
                 VStack(spacing: 0){
                     
                     SharedAsset.logo.swiftUIImage
-                        .padding(.top, currentUserData.height > 700 ? 127 : 71)
+                        .padding(.top, getUIScreenBounds().height > 700 ? 127 : 71)
                     
                     //이메일 로그인 버튼
                     EmailLoginButton()
-                        .padding(.top, currentUserData.height > 700 ? 116 : 90)
+                        .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
                         .onTapGesture {
                             isEmailLoginTapped = true
                         }
@@ -75,7 +75,7 @@ public struct LoginView: View {
                             Text("뮤모리 계정이 없으시다면?")
                                 .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                .padding(.top, currentUserData.height > 700 ? 68 : 51)
+                                .padding(.top, getUIScreenBounds().height > 700 ? 68 : 51)
                             
                             Text("이메일로 가입하기")
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
