@@ -77,18 +77,28 @@ public struct SocialSearchView: View {
     @State private var isRecentSearch: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     public init() {}
     
     public var body: some View {
+        
         VStack(spacing: 0) {
+            
             Spacer().frame(height: self.appCoordinator.safeAreaInsetsTop + 12)
             
             HStack(spacing: 8) {
+                
                 ZStack(alignment: .leading) {
-                    TextField("", text: $searchText,
-                              prompt: Text("친구 및 게시물 검색").font(Font.custom("Pretendard", size: 16))
+                    
+                    TextField("", text: $searchText, prompt:
+                                Text("친구 및 게시물 검색")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
+                    .onSubmit {
+                        mumoryDataViewModel.searchMumoryByContent(searchText)
+                        searchText = ""
+                    }
                     .frame(maxWidth: .infinity)
                     .frame(height: 45)
                     .padding(.horizontal, 15 + 23 + 7)
@@ -161,8 +171,10 @@ public struct SocialSearchView: View {
                     
                     VStack(spacing: 0) {
                         
-                        ForEach(0..<3) { _ in
+                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { i in
+                            
                             HStack(spacing: 0) {
+                                
                                 Spacer().frame(width: 15)
                                 
                                 SharedAsset.profileMumoryDetail.swiftUIImage
@@ -269,9 +281,12 @@ public struct SocialSearchView: View {
                     .padding(.horizontal, 20)
                     
                     VStack(spacing: 0) {
-                        ForEach(0..<3) { _ in
+                        
+//                        ForEach(0..<3) { _ in
+                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { i in
                             
                             VStack(spacing: 0) {
+                        
                                 Spacer().frame(height: 15)
                                 
                                 HStack(alignment: .center, spacing: 0) {

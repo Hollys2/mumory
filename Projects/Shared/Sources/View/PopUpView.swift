@@ -218,6 +218,13 @@ public struct PopUpView: View {
                 ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
             }
+            
+            if self.mumoryDataViewModel.isCreating {
+                Color.black.opacity(0.5).ignoresSafeArea()
+                
+                ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+            }
         }
     }
 }

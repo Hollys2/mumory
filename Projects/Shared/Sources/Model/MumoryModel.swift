@@ -21,10 +21,10 @@ public enum MumoryViewType {
 public struct MumoryView: Hashable {
     
     public let type: MumoryViewType
-    public let mumoryAnnotation: MumoryAnnotation?
+    public let mumoryAnnotation: MumoryAnnotation
 //    public let songID: MusicItemID?
     
-    public init(type: MumoryViewType, mumoryAnnotation: MumoryAnnotation? = nil) {
+    public init(type: MumoryViewType, mumoryAnnotation: MumoryAnnotation) {
         self.type = type
         self.mumoryAnnotation = mumoryAnnotation
     }
@@ -83,19 +83,23 @@ public struct Comment: Codable, Hashable {
     public let date: Date
     public let content: String
     public let isPublic: Bool
+    public var replies: [Comment]
     
-    public init(author: String, date: Date, content: String, isPublic: Bool) {
-        self.author = author
-        self.date = date
-        self.content = content
-        self.isPublic = isPublic
-    }
+    public init(author: String, date: Date, content: String, isPublic: Bool, replies: [Comment] = []) {
+         self.author = author
+         self.date = date
+         self.content = content
+         self.isPublic = isPublic
+         self.replies = replies
+     }
     
     public init?(data: [String: Any]) {
         guard let author = data["author"] as? String,
               let date = data["date"] as? FirebaseManager.Timestamp,
               let content = data["content"] as? String,
-              let isPublic = data["isPublic"] as? Bool else {
+              let isPublic = data["isPublic"] as? Bool,
+              let repliesData = data["replies"] as? [[String: Any]]
+        else {
             return nil
         }
         
@@ -103,6 +107,7 @@ public struct Comment: Codable, Hashable {
         self.date = date.dateValue()
         self.content = content
         self.isPublic = isPublic
+        self.replies = repliesData.compactMap { Comment(data: $0) }
     }
 }
 
@@ -112,7 +117,8 @@ extension Comment {
             "author": author,
             "date": Timestamp(date: date),
             "content": content,
-            "isPublic": isPublic
+            "isPublic": isPublic,
+            "replies": replies.compactMap { $0.toDictionary() }
         ]
     }
 }

@@ -8,8 +8,6 @@
 
 
 import CoreLocation
-import MapKit
-import MusicKit
 import Combine
 
 
@@ -17,64 +15,52 @@ import Combine
 // 2. 현재 위치
 final public class LocationManager: NSObject, ObservableObject {
     
-    @Published public var locationManager: CLLocationManager = .init()
     @Published public var currentLocation: CLLocation?
     
+    private let locationManager: CLLocationManager = .init()
+    
     override public init() {
-        print("override public init in LocationManager")
         super.init()
         
         locationManager.delegate = self
         
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        //        locationManager.requestWhenInUseAuthorization()
-        locationManager.startUpdatingLocation()
+        
+        print("init LocationManager")
+    }
+}
+
+extension LocationManager: CLLocationManagerDelegate {
+
+    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+//        guard currentLocation == nil, let location = locations.last else { return }
+        
+        self.currentLocation = location
     }
     
-    func checkLocationAuthorization() {
-        switch locationManager.authorizationStatus {
+    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
         case .notDetermined:
             print(".notDetermined")
-            locationManager.requestWhenInUseAuthorization()
+            manager.requestWhenInUseAuthorization()
         case .restricted:
             print(".restricted")
         case .denied:
             print(".denied")
         case .authorizedAlways:
             print(".authorizedAlways")
-            locationManager.startUpdatingLocation()
+            manager.startUpdatingLocation()
         case .authorizedWhenInUse:
             print(".authorizedWhenInUse")
-            locationManager.startUpdatingLocation()
-            
-            break
+            manager.startUpdatingLocation()
         @unknown default:
             break
         }
     }
-}
-
-extension LocationManager: CLLocationManagerDelegate {
     
-    // 현재 위치
-    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        print("didUpdateLocations in CLLocationManagerDelegate")
-        guard let location = locations.last else { return }
-        
-        self.currentLocation = location
-    }
     
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("didFailWithError in CLLocationManagerDelegate")
-    }
-    
-    
-    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        print("locationManagerDidChangeAuthorization in LocationManager")
-        checkLocationAuthorization() // 있어야 권한 확인함
-    }
-    
-    func handleLocationManagerDidChangeAuthorizationError() {
-        
+        print("didFailWithError in CLLocationManagerDelegate: \(error)")
     }
 }

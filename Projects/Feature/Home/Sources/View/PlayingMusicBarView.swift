@@ -66,8 +66,8 @@ public struct PlayingMusicBarView: View {
                     .frame(width: 31, height: 31)
                     .padding(.leading, 17)
             }
-                .padding(.leading, 15)
-                .padding(.trailing, 11)
+            .padding(.leading, 15)
+            .padding(.trailing, 11)
         }
         .frame(width: getUIScreenBounds().width - 30)
     }

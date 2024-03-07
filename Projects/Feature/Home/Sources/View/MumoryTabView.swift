@@ -10,6 +10,7 @@
 import SwiftUI
 import Shared
 
+
 public enum Tab {
     case home
     case social
@@ -17,8 +18,8 @@ public enum Tab {
     case notification
 }
 
-@available(iOS 16.0, *)
-public struct HomeTabView: View {
+
+public struct MumoryTabView: View {
 
     @Binding var selectedTab: Tab
     
@@ -30,7 +31,6 @@ public struct HomeTabView: View {
     
     public var body: some View {
         GeometryReader { geometry in
-            
             HStack(alignment: .bottom, spacing: 0) {
                 
                 Button(action: {
@@ -51,12 +51,10 @@ public struct HomeTabView: View {
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
                         appCoordinator.offsetY = CGFloat.zero
-//                        appCoordinator.isTestViewShown = true
                     }
                 }) {
                     Image(asset: SharedAsset.createMumoryTabbar)
                 }
-//                .offset(y: -5)
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
@@ -79,10 +77,3 @@ public struct HomeTabView: View {
         .background(Color.black)
     }
 }
-
-
-//struct HomeTabView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        HomeTabView()
-//    }
-//}

@@ -17,28 +17,27 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     
     typealias UIViewType = MKMapView
     
-    @State var count: Int = 1
     @Binding var annotationSelected: Bool
     @Binding var region: MKCoordinateRegion?
     
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
-        print("@@makeUIView")
-        
         let mapView: MKMapView = .init()
         
         mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
         mapView.isPitchEnabled = false
-        //        mapView.userTrackingMode = .follow 권한 동의 후에
+        mapView.isRotateEnabled = false
         
         mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan), animated: true)
         
-        if let currentLocation = locationManager.currentLocation {
-            mapView.setRegion(MKCoordinateRegion(center: currentLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
+        if let encodedCoordinate = UserDefaults.standard.data(forKey: "lastCenterCoordinate"),
+           let decodedCoordinate = try? JSONDecoder().decode(CodableCoordinate.self, from: encodedCoordinate),
+           let encodedSpan = UserDefaults.standard.data(forKey: "lastCenterSpan"),
+           let decodedSpan = try? JSONDecoder().decode(CodableCoordinateSpan.self, from: encodedSpan) {
+            mapView.setRegion(MKCoordinateRegion(center: decodedCoordinate.toCoordinate, span: decodedSpan.toSpan), animated: true)
         }
         
         context.coordinator.mapView = mapView
@@ -54,23 +53,10 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-//        uiView.removeAnnotations(uiView.annotations)
-
         
-        let sortedAnnotations = self.mumoryDataViewModel.homeMumoryAnnotations.sorted(by: { $0.date > $1.date })
+        let sortedAnnotations = self.mumoryDataViewModel.myMumoryAnnotations.sorted(by: { $0.date > $1.date })
         uiView.addAnnotations(sortedAnnotations)
-//        if mumoryDataViewModel.isFetchFinished {
-//            uiView.addAnnotations(mumoryDataViewModel.mumoryAnnotations)
-//        }
-        
-//        let groupedAnnotations = Dictionary(grouping: annotations, by: { $0.date })
-//
-//        // Add grouped annotations to the map
-//        for (_, groupedAnnotations) in groupedAnnotations {
-//            let cluster = MKClusterAnnotation(memberAnnotations: groupedAnnotations)
-//            uiView.addAnnotation(cluster)
-//        }
-        
+
         if let newRegion = self.region {
             uiView.setRegion(newRegion, animated: true)
             DispatchQueue.main.async {
@@ -79,61 +65,18 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
         }
     }
     
-    func makeCoordinator() -> MapViewCoordinator {
-        MapViewCoordinator(parent: self)
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
     }
-    
-    func distanceBetweenCoordinates(_ coord1: CLLocationCoordinate2D, _ coord2: CLLocationCoordinate2D) -> CLLocationDistance {
-        let location1 = CLLocation(latitude: coord1.latitude, longitude: coord1.longitude)
-        let location2 = CLLocation(latitude: coord2.latitude, longitude: coord2.longitude)
-        return location1.distance(from: location2)
-    }
-    
-    private func groupAndShowAnnotations(on mapView: MKMapView) {
-        var groupedAnnotations: [[MumoryAnnotation]] = []
-        
-        for annotation in mumoryDataViewModel.homeMumoryAnnotations {
-            var foundGroup = false
-            
-            for (index, group) in groupedAnnotations.enumerated() {
-                if let firstAnnotation = group.first,
-                   distanceBetweenCoordinates(firstAnnotation.coordinate, annotation.coordinate) < 100 {
-                    groupedAnnotations[index].append(annotation)
-                    foundGroup = true
-                    break
-                }
-            }
-            
-            if !foundGroup {
-                groupedAnnotations.append([annotation])
-            }
-        }
-        
-        for group in groupedAnnotations {
-            if group.count > 1 {
-                // Add logic to display number on the map
-                let numberAnnotation = MKPointAnnotation()
-                numberAnnotation.coordinate = group[0].coordinate // Use the coordinate of the first annotation in the group
-                numberAnnotation.title = "\(group.count)"
-                
-                mapView.addAnnotation(numberAnnotation)
-                
-                print("count: \(group.count)")
-                DispatchQueue.main.async {
-                    self.count = group.count
-                }
-            }
-        }
-    }
-    
 }
 
 extension HomeMapViewRepresentable {
     
-    class MapViewCoordinator: NSObject {
+    class Coordinator: NSObject {
         
         let parent: HomeMapViewRepresentable
         var mapView: MKMapView?
+        var isRegionUpdated: Bool = false
         
         init(parent: HomeMapViewRepresentable) {
             self.parent = parent
@@ -196,15 +139,23 @@ extension HomeMapViewRepresentable {
     }
 }
 
-extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
+extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
     
-    // 사용자의 현재 위치가 변할 때
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        print("didUpdate in MKMapViewDelegate")
-        
-        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        
-        //        mapView.setRegion(region, animated: true)
+        if !isRegionUpdated {
+            mapView.setRegion(MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
+            isRegionUpdated = true
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        let coordinate = CodableCoordinate(coordinate: mapView.centerCoordinate)
+        let span = CodableCoordinateSpan(span: mapView.region.span)
+
+        let encodedCoordinate = try? JSONEncoder().encode(coordinate)
+        let encodedSpan = try? JSONEncoder().encode(span)
+        UserDefaults.standard.set(encodedCoordinate, forKey: "lastCenterCoordinate")
+        UserDefaults.standard.set(encodedSpan, forKey: "lastCenterSpan")
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -232,7 +183,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
                 artwork.loadImage(from: url)
                 annotationView.addSubview(artwork)
             } else {
-                print("ERROR: NO URL222")
+                print("ERROR: NO URL")
             }
 
             annotationView.clusteringIdentifier = "ClusterView"
@@ -240,12 +191,10 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             return annotationView
         } else if let cluster = annotation as? MKClusterAnnotation {
             
-//            let sortedAnnotations = cluster.memberAnnotations.sorted { ($0 as? MumoryAnnotation)?.date ?? Date() > ($1 as? MumoryAnnotation)?.date ?? Date() }
             let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
             let sortedAnnotations = memberAnnotations.sorted { $0.date > $1.date }
             
             let topAnnotation = sortedAnnotations.first
-//            let topAnnotation = cluster.memberAnnotations.first
             let clusterView = mapView.dequeueReusableAnnotationView(withIdentifier: "ClusterView") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "ClusterView")
             
             print("cluster.memberAnnotations.count: \(cluster.memberAnnotations.count)")
@@ -254,7 +203,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             clusterView.image = SharedAsset.musicPin.image
             clusterView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
-            if let mumoryAnnotation = topAnnotation as? MumoryAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
+            if let mumoryAnnotation = topAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
                 
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
@@ -263,7 +212,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
                 artwork.loadImage(from: url)
                 clusterView.addSubview(artwork)
             } else {
-                print("ERROR: NO URL222")
+                print("ERROR: NO URL2")
             }
             
             if cluster.memberAnnotations.count > 1 {
@@ -278,23 +227,13 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
         return nil
     }
     
-    //    func mapView(_ mapView: MKMapView, clusterAnnotationForMemberAnnotations memberAnnotations: [MKAnnotation]) -> MKClusterAnnotation {
-    //        let nonUserLocationAnnotations = memberAnnotations.filter { !($0 is MKUserLocation) }
-    //
-    //        let cluster = MKClusterAnnotation(memberAnnotations: nonUserLocationAnnotations)
-    //        return cluster
-    //    }
-    
-    
     func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
-        //        if annotation is MumoryAnnotation {
-        //            self.parent.annotationSelected = true
-        //            print("didSelect: \(annotation)")
-        //        }
-        
         if let mumoryAnnotation = annotation as? MumoryAnnotation {
+            let region = MKCoordinateRegion(center: annotation.coordinate, span: MapConstant.defaultSpan)
+            mapView.setRegion(region, animated: true)
             self.parent.annotationSelected = true
             self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = [mumoryAnnotation]
+            
             print("didSelect MumoryAnnotation: \(mumoryAnnotation)")
         } else if annotation is MKUserLocation {
             print("didSelect User Location")
@@ -306,7 +245,6 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
             let sortedAnnotations = memberAnnotations.sorted { $0.date > $1.date }
             self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = sortedAnnotations
                 
-            
             print("didSelect cluster: \(cluster)")
         }
         
@@ -319,6 +257,7 @@ extension HomeMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
 }
 
 class AsyncImageView: UIImageView {
+    
     func loadImage(from url: URL) {
         URLSession.shared.dataTask(with: url) { (data, response, error) in
             if let data = data {
@@ -385,4 +324,32 @@ struct CountView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {}
+}
+
+struct CodableCoordinate: Codable {
+    var latitude: CLLocationDegrees
+    var longitude: CLLocationDegrees
+
+    init(coordinate: CLLocationCoordinate2D) {
+        latitude = coordinate.latitude
+        longitude = coordinate.longitude
+    }
+    
+    var toCoordinate: CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+}
+
+struct CodableCoordinateSpan: Codable {
+    var latitudeDelta: CLLocationDegrees
+    var longitudeDelta: CLLocationDegrees
+
+    init(span: MKCoordinateSpan) {
+        latitudeDelta = span.latitudeDelta
+        longitudeDelta = span.longitudeDelta
+    }
+
+    var toSpan: MKCoordinateSpan {
+        return MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+    }
 }

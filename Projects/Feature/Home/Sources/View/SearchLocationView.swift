@@ -66,23 +66,14 @@ struct AddressRow: View {
 
 struct SearchLocationView: View {
     
-    @State private var text = ""
-    @State private var recentSearches: [String] = []
-    
-    @FocusState private var isFocusedTextField: Bool
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var locationManager: LocationManager
     @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
+        
         VStack(spacing: 0) {
-//            Image(uiImage: SharedAsset.dragIndicator.image)
-//                .frame(maxWidth: .infinity)
-//                .padding(.top, 14)
-//                .padding(.bottom, 14)
-//                .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
             
             HStack {
                 ZStack(alignment: .leading) {
@@ -223,10 +214,7 @@ struct SearchLocationView: View {
                                         self.localSearchViewModel.clearRecentSearches()
                                     }) {
                                         Text("전체삭제")
-                                            .font(
-                                                Font.custom("Pretendard", size: 12)
-                                                    .weight(.medium)
-                                            )
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                             .multilineTextAlignment(.trailing)
                                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     }
@@ -241,10 +229,7 @@ struct SearchLocationView: View {
                                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                         
                                         Text("\(value)")
-                                            .font(
-                                                Font.custom("Pretendard", size: 14)
-                                                    .weight(.semibold)
-                                            )
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                             .foregroundColor(.white)
                                         
                                         Spacer()
@@ -268,6 +253,7 @@ struct SearchLocationView: View {
                         }
                         
                         if !self.localSearchViewModel.popularSearches.isEmpty {
+                            
                             VStack(alignment: .leading, spacing: 0) {
                                 
                                 HStack {
@@ -280,25 +266,25 @@ struct SearchLocationView: View {
                                 }
                                 .padding(20)
                                 
-                                    HStack(spacing: 8) {
-                                        ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
-                                            Text(searchTerm)
-                                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                                .frame(height: 33)
-                                                .padding(.horizontal, 16)
-                                                .background(SharedAsset.mainColor.swiftUIColor)
-                                                .cornerRadius(35)
-                                        }
+                                HStack(spacing: 8) {
+                                    ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
+                                        Text(searchTerm)
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                            .frame(height: 33)
+                                            .padding(.horizontal, 16)
+                                            .background(SharedAsset.mainColor.swiftUIColor)
+                                            .cornerRadius(35)
                                     }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.horizontal, 20)
-                                    .background(.pink)
-                                    
-                                    Spacer().frame(height: 12)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 20)
+                                .background(.pink)
+                                
+                                Spacer().frame(height: 12)
                             }
                             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                             .cornerRadius(15)
-
+                            
                         }
                         
                     } // VStack
@@ -308,17 +294,17 @@ struct SearchLocationView: View {
                 .cornerRadius(15)
             } else {
                 ScrollView {
+                    
                     VStack(spacing: 0) {
+                        
                         ForEach(self.localSearchViewModel.results, id: \.self) { result in
                             AddressRow(result: result)
                         }
                     } // VStack
                     .padding(.bottom, 66)
                 } // ScrollView
-                .scrollIndicators(.hidden)
-                
+                .scrollIndicators(.hidden)   
             }
-            
         } // VStack
         .navigationBarBackButtonHidden(true)
         .padding(.horizontal, 21)
@@ -331,10 +317,3 @@ struct SearchLocationView: View {
         }
     }
 }
-
-//@available(iOS 16.0, *)
-//struct SearchLocationView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SearchLocationView()
-//    }
-//}

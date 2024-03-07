@@ -57,10 +57,10 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("updateUIView: SocialScrollViewRepresentable")
         
-        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.socialMumoryAnnotations {
+        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumoryAnnotations {
             
             DispatchQueue.main.async {
-                self.mumoryDataViewModel.socialMumoryAnnotations = self.mumoryDataViewModel.socialMumoryAnnotations.sorted(by: { $0.date > $1.date })
+                self.mumoryDataViewModel.everyMumoryAnnotations = self.mumoryDataViewModel.everyMumoryAnnotations.sorted(by: { $0.date > $1.date })
             }
             
             let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
@@ -74,7 +74,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
             uiView.refreshControl = UIRefreshControl()
             uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
             
-            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.socialMumoryAnnotations
+            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumoryAnnotations
         }
     }
     
@@ -101,6 +101,8 @@ extension SocialScrollViewRepresentable {
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
             print("handleRefreshControl")
+            
+            parent.mumoryDataViewModel.fetchEveryMumory()
 
             let hostingController = UIHostingController(rootView: parent.content().environmentObject(parent.mumoryDataViewModel))
             let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
@@ -138,7 +140,9 @@ extension SocialScrollViewRepresentable {
                 topBarOffsetY = limitHeight
             }
 
-            parent.offsetY = topBarOffsetY
+            DispatchQueue.main.async {
+                self.parent.offsetY = self.topBarOffsetY
+            }
 
             preOffsetY = offsetY
         }
@@ -158,9 +162,8 @@ struct SocialScrollCotentView: View {
             
             LazyVStack(spacing: 0) {
                 
-                ForEach(self.mumoryDataViewModel.socialMumoryAnnotations, id: \.self) { i in
+                ForEach(self.mumoryDataViewModel.everyMumoryAnnotations, id: \.self) { i in
                     SocialItemView(mumoryAnnotation: i)
-                        .environmentObject(self.mumoryDataViewModel)
                 }
             }
             .frame(width: UIScreen.main.bounds.width - 20)
@@ -178,7 +181,7 @@ struct SocialItemView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
-    @State var mumoryAnnotation: MumoryAnnotation
+    let mumoryAnnotation: MumoryAnnotation
     
     var body: some View {
         
@@ -274,7 +277,7 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
-//                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, musicItemID: self.mumoryAnnotation.musicModel.songID))
+                                print("self.mumoryAnnotation: \(self.mumoryAnnotation.id)")
                                 self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
                             }
                     )
@@ -435,7 +438,15 @@ struct SocialItemView: View {
                     Button(action: {
                         mumoryDataViewModel.likeMumory(mumoryAnnotation: mumoryAnnotation, loginUserID: "tester")
                     }, label: {
-                        SharedAsset.heartButtonSocial.swiftUIImage
+                        mumoryAnnotation.likes.contains("tester") ?
+                        SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
+                            .resizable()
+                            .frame(width: 42, height: 42)
+                            .background(
+                                .white.opacity(0.1)
+                            )
+                            .mask {Circle()}
+                        : SharedAsset.heartOffButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
                             .background(
@@ -455,6 +466,7 @@ struct SocialItemView: View {
                     Button(action: {
                         withAnimation(Animation.easeInOut(duration: 0.2)) {
                             self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumoryAnnotation
+//                            self.appCoordinator.comments = self.mumoryAnnotation.comments
                             self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
                             appCoordinator.offsetY = CGFloat.zero
                         }
@@ -468,10 +480,12 @@ struct SocialItemView: View {
                             .mask {Circle()}
                     })
                     
-                    Text("\(mumoryAnnotation.comments.count)")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.white)
+                    if mumoryAnnotation.comments.count != 0 {
+                        Text("\(mumoryAnnotation.comments.count)")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.white)
+                    }
                     
                 }
                 .offset(x: UIScreen.main.bounds.width - 20 - 42 - 17)
@@ -489,26 +503,22 @@ public struct SocialView: View {
     
     @State private var offsetY: CGFloat = 0
     @State private var isAddFriendNotification: Bool = false
+    @State private var friendRequests: [String] = []
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+//    @EnvironmentObject var firebaseManager: FirebaseManager
+    @ObservedObject var firebaseManager = FirebaseManager.shared
+
     
     @State private var translation: CGSize = .zero
     
-    public init() {}
+    public init(){}
     
     public var body: some View {
         
         ZStack(alignment: .top) {
-            
-//            if mumoryDataViewModel.isFetchFinished {
-//                SocialScrollViewRepresentable(offsetY: self.$offsetY, onRefresh: {
-//                    print("onRefresh!")
-//                }) {
-//                    SocialScrollCotentView()
-//                }
-//            }
-            
+
             if mumoryDataViewModel.isSocialFetchFinished {
                 SocialScrollViewRepresentable(offsetY: self.$offsetY, onRefresh: {
                     print("onRefresh!")
@@ -530,7 +540,7 @@ public struct SocialView: View {
 
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
-                        self.appCoordinator.rootPath.append(4)
+                        self.appCoordinator.rootPath.append("search-social")
                     }
                 }) {
                     SharedAsset.searchButtonSocial.swiftUIImage
@@ -545,7 +555,7 @@ public struct SocialView: View {
                         self.appCoordinator.isAddFriendViewShown = true
                     }
                 }) {
-                    (self.isAddFriendNotification ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
+                    (firebaseManager.friendRequests != [] ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
@@ -577,13 +587,27 @@ public struct SocialView: View {
             .padding(.bottom, 15)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
+            
+//            if self.mumoryDataViewModel.isUpdating {
+//                Color.black.opacity(0.5).ignoresSafeArea()
+//
+//                ProgressView()
+//                        .progressViewStyle(CircularProgressViewStyle())
+//            }
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .preferredColorScheme(.dark)
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation ?? MumoryAnnotation()))
         .onAppear {
-            mumoryDataViewModel.fetchSocialMumory()
+            mumoryDataViewModel.fetchEveryMumory()
+            FirebaseManager.shared.observeFriendRequests()
             print("SocialView onAppear")
+        }
+        .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
+            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
+//                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
+                appCoordinator.isDeleteCommentPopUpViewShown = false
+            })
         }
     }
 }

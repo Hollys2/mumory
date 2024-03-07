@@ -28,13 +28,14 @@ public struct StackView: Hashable {
 
 @available(iOS 16.0, *)
 public class AppCoordinator: ObservableObject {
+    
+    @Published public var currentUserID: String = ""
 
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var createMumoryPath: NavigationPath = NavigationPath()
     
-    
     @Published public var offsetY: CGFloat = .zero
-    @Published public var isCreateMumorySheetShown = false
+    @Published public var isCreateMumorySheetShown: Bool = false
     @Published public var isSearchLocationViewShown = false
     @Published public var isSearchLocationMapViewShown = false
     @Published public var isMumoryDetailShown = false
@@ -47,6 +48,8 @@ public class AppCoordinator: ObservableObject {
     @Published public var isSocialMenuSheetViewShown = false
     @Published public var isMumoryDetailCommentSheetViewShown = false
     @Published public var comments: [Comment] = []
+    @Published public var isCommentBottomSheetShown = false
+    @Published public var isDeleteCommentPopUpViewShown = false
     @Published public var isAddFriendViewShown = false
     @Published public var isPopUpViewShown = false
     @Published public var isRewardPopUpViewShown = false
@@ -133,6 +136,27 @@ public class DateManager: ObservableObject {
         }
         
         return dateFormatter.string(from: date)
+    }
+    
+    public static func formattedCommentDate(date: Date) -> String {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .weekOfYear, .day, .hour, .minute], from: date, to: Date())
+        
+        if let year = components.year, year > 0 {
+            return "\(year)년 전"
+        } else if let month = components.month, month > 0 {
+            return "\(month)개월 전"
+        } else if let week = components.weekOfYear, week > 0 {
+            return "\(week)주 전"
+        } else if let day = components.day, day > 0 {
+            return "\(day)일 전"
+        } else if let hour = components.hour, hour > 0 {
+            return "\(hour)시간 전"
+        } else if let minute = components.minute, minute > 0 {
+            return "\(minute)분 전"
+        } else {
+            return "방금 전"
+        }
     }
 }
     

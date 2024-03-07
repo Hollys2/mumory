@@ -55,7 +55,6 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
         
 //        if context.coordinator.oldImageURLs != self.mumoryAnnotation.imageURLs {
         if let selectedMumoryAnnotation = self.mumoryDataViewModel.selectedMumoryAnnotation {
-            print("self.mumoryAnnotation.imageURLs.count: \(selectedMumoryAnnotation.imageURLs?.count)")
             let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((selectedMumoryAnnotation.imageURLs ?? []).count)
             uiView.contentSize = CGSize(width: totalWidth, height: 1)
             

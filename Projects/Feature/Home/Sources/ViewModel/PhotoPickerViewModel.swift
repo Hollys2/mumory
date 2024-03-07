@@ -11,7 +11,7 @@ import SwiftUI
 import PhotosUI
 import Combine
 
-@available(iOS 16.0, *)
+
 final class PhotoPickerViewModel: ObservableObject {
     
     @Published var isPhotoErrorPopUpShown: Bool = false
@@ -57,7 +57,6 @@ final class PhotoPickerViewModel: ObservableObject {
     }
     
     private func setImages(from selections: [PhotosPickerItem]) {
-        //        selectedImages = []
         selectedImages.removeAll()
         
         if !imageSelections.isEmpty {
@@ -77,16 +76,9 @@ final class PhotoPickerViewModel: ObservableObject {
     
     @MainActor
     func convertDataToImage() {
-//        selectedImages.removeAll()
-        
         if !imageSelections.isEmpty {
             for eachItem in imageSelections {
                 Task {
-//                    if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
-//                        if let image = UIImage(data: imageData) {
-//                            selectedImages.append(image)
-//                        }
-//                    }
                     if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
                         if let image = UIImage(data: imageData), !selectedImages.contains(image) {
                             selectedImages.append(image)
@@ -134,7 +126,7 @@ final class PhotoPickerViewModel: ObservableObject {
         
     }
     
-    func removeAll() {
+    func removeAllSelectedImages() {
         selectedImages.removeAll()
     }
     

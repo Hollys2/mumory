@@ -48,10 +48,12 @@ public struct SearchLocationMapView: View {
     
     public var body: some View {
         ZStack(alignment: .bottom) {
+            
             VStack(spacing: 0) {
+                
                 ZStack(alignment: .topLeading) {
+                    
                     SearchLocationMapViewRepresentable(locationModel: $locationModel)
-                    //                    .statusBarHidden(true)
                     
                     Button(action: {
                         withAnimation {
@@ -135,12 +137,10 @@ public struct SearchLocationMapView: View {
                         
                     }
                 } // VStack
-//                .frame(height: UIScreen.main.bounds.height * 0.308)
                 .frame(height: UIScreen.main.bounds.height * 0.349)
                 .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             } // VStack
             .navigationBarBackButtonHidden(true)
-            //        .padding(.horizontal, 21)
             .frame(width: UIScreen.main.bounds.width + 1)
             
             if self.isBottomSheetShown {
@@ -150,7 +150,7 @@ public struct SearchLocationMapView: View {
                             self.isBottomSheetShown = false
                         }}
                 
-                SecondBottomSheetView(isShown: self.$isBottomSheetShown, locationTitleText: $locationModel.locationTitle, searchText: locationModel.locationTitle)
+                LocationInputBottomSheetView(isShown: self.$isBottomSheetShown, locationTitleText: $locationModel.locationTitle, searchText: locationModel.locationTitle)
                     .offset(y: self.translation.height)
                     .gesture(dragGesture)
                     .transition(.move(edge: .bottom))
@@ -178,11 +178,4 @@ public struct SearchLocationMapView: View {
         .ignoresSafeArea()
     }
 }
-
-//@available(iOS 16.0, *)
-//struct SearchLocationMapVIew_Previews: PreviewProvider {
-//    static var previews: some View {
-//        SearchLocationMapView()
-//    }
-//}
 

@@ -63,14 +63,13 @@ struct MusicRow: View {
 @available(iOS 16.0, *)
 struct SearchMusicView: View {
     
-//    @Binding var translation: CGSize
+    //    @Binding var translation: CGSize
     
     @State private var searchText = ""
     
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var locationManager: LocationManager
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @GestureState var dragAmount = CGSize.zero
@@ -102,7 +101,7 @@ struct SearchMusicView: View {
                     .foregroundColor(.white)
                     .onChange(of: searchText){ newValue in
                         if !searchText.isEmpty {
-//                            mumoryDataViewModel.musicModels = searchAppleMusic()
+                            //                            mumoryDataViewModel.musicModels = searchAppleMusic()
                         } else {
                             mumoryDataViewModel.musicModels = []
                         }
@@ -179,7 +178,7 @@ struct SearchMusicView: View {
             case .authorized:
                 do {
                     let response = try await requestSearch.response()
-
+                    
                     self.mumoryDataViewModel.musicModels = response.songs.compactMap({
                         .init(songID: $0.id, title: $0.title, artist: $0.artistName, artworkUrl: $0.artwork?.url(width: 500, height: 500))
                     })
@@ -192,26 +191,6 @@ struct SearchMusicView: View {
             }
         }
     }
-//
-//    private func searchAppleMusic() -> [MusicModel] {
-//        mumoryDataViewModel.musicModels = []
-//
-//        Task {
-//            do {
-//                var request = MusicCatalogSearchRequest(term: searchText, types: [Song.self])
-//                request.limit = 10
-//                let response = try await request.response()
-//
-//                response.songs.forEach { song in
-//                    let newMusicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
-//                    mumoryDataViewModel.musicModels.append(newMusicModel)
-//                }
-//            } catch {
-//                print("에러2: \(error)")
-//            }
-//        }
-//        return mumoryDataViewModel.musicModels
-//    }
     
     func fetchSongInfo(songId: String) async throws -> MusicModel {
         let musicItemID = MusicItemID(rawValue: songId)
@@ -223,148 +202,4 @@ struct SearchMusicView: View {
         let artworkUrl = song.artwork?.url(width: 500, height: 500)
         return MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: artworkUrl)
     }
-
-//    private func loadSongs() {
-//        db.collection("favorite").document("musicIDs").getDocument { (document, error) in
-//            if let error = error {
-//                print("Error getting document: \(error)")
-//            } else if let document = document, document.exists {
-//                if let musicIDs = document.data()?["IDs"] as? [String] {
-//                    print("Music IDs: \(musicIDs)")
-//                    songIDs = musicIDs
-//                    
-//                    Task {
-//                        for songId in musicIDs {
-//                            do {
-//                                let songItem = try await fetchSongInfo(songId: songId)
-//                                songs.append(songItem)
-//                            } catch {
-//                                print("Error fetching song info for ID \(songId): \(error)")
-//                            }
-//                        }
-//                    }
-//                } else {
-//                    print("No Music IDs")
-//                }
-//            } else {
-//                print("Document does not exist")
-//            }
-//        }
-//    }
 }
-
-
-//@available(iOS 16.0, *)
-//struct SearchMusicView_Previews: PreviewProvider {
-//    @State static var x: CGSize = CGSize(width: 100, height: 100)
-//    
-//    static var previews: some View {
-//        SearchMusicView(translation: $x)
-//    }
-//}
-
-
-
-//            if self.musicViewModel.musicModels.isEmpty {
-//                ScrollView {
-//                    VStack(spacing: 15) {
-//                        VStack(spacing: 0) {
-//                            Button(action: {
-//                                if let currentLocation = locationManager.currentLocation {
-//                                    mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
-//                                        mumoryDataViewModel.choosedMumoryModel = model
-//                                    }
-//                                    appCoordinator.path.removeLast()
-//                                } else {
-//                                    print("ERROR: locationManager.userLocation is nil")
-//                                }
-//                            }) {
-//                                ZStack {
-//                                    Rectangle()
-//                                        .foregroundColor(.clear)
-//                                        .frame(maxWidth: .infinity)
-//                                        .frame(height: 55)
-//                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-//
-//                                    HStack(spacing: 10) {
-//                                        Image(uiImage: SharedAsset.userSearchLocation.image)
-//                                            .resizable()
-//                                            .frame(width: 29, height: 29)
-//
-//                                        Text("음악 인식")
-//                                            .font(
-//                                                Font.custom("Apple SD Gothic Neo", size: 14)
-//                                                    .weight(.medium)
-//                                            )
-//                                            .foregroundColor(.white)
-//
-//                                        Spacer()
-//                                    }
-//                                    .padding(.leading, 20)
-//                                }
-//                            }
-//                        }
-//                        .cornerRadius(15)
-//                        .background(SharedAsset.backgroundColor.swiftUIColor)
-//
-//                        VStack(spacing: 0) {
-//                            HStack {
-//                                Text("최근 검색")
-//                                    .font(
-//                                        Font.custom("Pretendard", size: 13)
-//                                            .weight(.medium)
-//                                    )
-//                                    .foregroundColor(.white)
-//
-//                                Spacer()
-//
-//                                Button(action: {
-//
-//                                }) {
-//                                    Text("전체삭제")
-//                                        .font(
-//                                            Font.custom("Pretendard", size: 12)
-//                                                .weight(.medium)
-//                                        )
-//                                        .multilineTextAlignment(.trailing)
-//                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-//                                }
-//                            }
-//                            .padding([.horizontal, .top], 20)
-//                            .padding(.bottom, 11)
-//
-//                            ForEach(1...10, id: \.self) { index in
-//                                HStack {
-//                                    Image(systemName: "magnifyingglass")
-//                                        .frame(width: 23, height: 23)
-//                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-//
-//                                    Text("검색검색 \(index)")
-//                                        .font(
-//                                            Font.custom("Pretendard", size: 14)
-//                                                .weight(.semibold)
-//                                        )
-//                                        .foregroundColor(.white)
-//
-//                                    Spacer()
-//
-//                                    Button(action: {}) {
-//                                        Image(systemName: "xmark")
-//                                            .frame(width: 19, height: 19)
-//                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-//                                    }
-//                                }
-//                                .frame(maxWidth: .infinity)
-//                                .frame(height: 50)
-//                                .padding(.leading, 15)
-//                                .padding(.trailing, 20)
-//                            }
-//                        }
-//                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-//                        .cornerRadius(15)
-//                    } // VStack
-//                    .padding(.bottom, 66)
-//                } // ScrollView
-//                .scrollIndicators(.hidden)
-//                .cornerRadius(15)
-//            } else {

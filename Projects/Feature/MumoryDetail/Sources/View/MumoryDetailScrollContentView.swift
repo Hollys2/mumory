@@ -192,7 +192,7 @@ struct MumoryDetailScrollContentView: View {
                 
                 Spacer().frame(height: 25)
                 
-                MumoryDetailReactionBarView(isOn: false)
+                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumoryAnnotation, isOn: false)
                     .background(GeometryReader { geometry in
                         Color.clear.onChange(of: geometry.frame(in: .global).minY) { minY in
 //                            print("minY: \(minY)")
@@ -276,6 +276,5 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
-
     }
 }

@@ -9,6 +9,7 @@
 
 import SwiftUI
 import FirebaseCore
+import FirebaseAuth
 
 class AppDelegate: NSObject, UIApplicationDelegate{
 
@@ -18,8 +19,6 @@ class AppDelegate: NSObject, UIApplicationDelegate{
         print("AppDelegate Start")
 
         FirebaseApp.configure()
-                         
-//        UIScrollView.appearance().bounces = false
         
         print("AppDelegate End")
         return true
