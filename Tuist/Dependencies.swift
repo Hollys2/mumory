@@ -19,8 +19,8 @@ let dependencie = Dependencies(
         .remote(url: "https://github.com/realm/realm-swift.git", requirement: .exact("10.45.0"))
     ]
                                                          
-                                                         ,baseSettings: makeFrameworkSettings(),
-                                                         targetSettings: makeTargetSettings()
+//                                                         ,baseSettings: makeFrameworkSettings(),
+//                                                         targetSettings: makeTargetSettings()
                                                         ),
     platforms: [.iOS]
     
