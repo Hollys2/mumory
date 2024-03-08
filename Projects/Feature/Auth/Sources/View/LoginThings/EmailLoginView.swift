@@ -31,6 +31,19 @@ struct EmailLoginView: View {
                     LibraryColorSet.background.ignoresSafeArea()
                     
                     VStack(spacing: 0, content: {
+                        HStack{
+                            SharedAsset.xWhite.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 30, height: 30)
+                                .onTapGesture {
+                                    dismiss()
+                                }
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        .frame(height: 63)
+                        
                         //상단 타이틀
                         Text("이메일로 로그인 하기")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
@@ -97,15 +110,6 @@ struct EmailLoginView: View {
                 })
                 .background(LibraryColorSet.background)
                 .navigationBarBackButtonHidden()
-                .toolbar(content: {
-                    ToolbarItem(placement: .topBarLeading) {
-                        SharedAsset.xWhite.swiftUIImage
-                            .frame(width: 30, height: 30)
-                            .onTapGesture {
-                                dismiss()
-                            }
-                    }
-                })
                 .onTapGesture {
                     self.hideKeyboard()
                 }
@@ -138,6 +142,6 @@ struct EmailLoginView: View {
     }
 }
 
-#Preview {
-    EmailLoginView()
-}
+//#Preview {
+//    EmailLoginView()
+//}

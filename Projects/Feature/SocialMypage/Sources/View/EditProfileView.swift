@@ -44,9 +44,9 @@ struct EditProfileView: View {
     }
 }
 
-#Preview {
-    EditProfileView()
-}
+//#Preview {
+//    EditProfileView()
+//}
 
 public struct ImageBundle {
     public var item: PhotosPickerItem?

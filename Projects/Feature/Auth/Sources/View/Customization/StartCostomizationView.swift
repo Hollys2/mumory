@@ -68,6 +68,6 @@ struct StartCostomizationView: View {
     }
 }
 
-#Preview {
-    StartCostomizationView()
-}
+//#Preview {
+//    StartCostomizationView()
+//}

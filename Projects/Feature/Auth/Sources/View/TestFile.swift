@@ -33,6 +33,6 @@ struct TestFile: View {
         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30)))    }
 }
 
-#Preview {
-    TestFile()
-}
+//#Preview {
+//    TestFile()
+//}

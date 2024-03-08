@@ -32,6 +32,6 @@ struct OnBoarding3View_big: View {
     }
 }
 
-#Preview {
-    OnBoarding3View_big()
-}
+//#Preview {
+//    OnBoarding3View_big()
+//}

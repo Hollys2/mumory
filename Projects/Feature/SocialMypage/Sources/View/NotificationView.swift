@@ -109,9 +109,9 @@ struct NotificationView: View {
     
 }
 
-#Preview {
-    NotificationView()
-}
+//#Preview {
+//    NotificationView()
+//}
 
 struct NotificationItem: View {
     @State var title: String
@@ -153,7 +153,7 @@ struct CustomToggleStyle: ToggleStyle {
                         .offset(x: configuration.isOn ? 10 : -10)
                 })
                 .onTapGesture {
-                    withAnimation(.smooth(duration: 0.2)) {
+                    withAnimation(.easeOut(duration: 0.2)) {
                         configuration.isOn.toggle()
                     }
                 }

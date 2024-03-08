@@ -165,6 +165,6 @@ struct EditFavoriteGenreView: View {
     }
 }
 
-#Preview {
-    EditFavoriteGenreView()
-}
+//#Preview {
+//    EditFavoriteGenreView()
+//}

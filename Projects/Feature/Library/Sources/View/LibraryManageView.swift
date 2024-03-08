@@ -88,7 +88,7 @@ public struct LibraryManageView: View {
                 })
                 .padding(.top,  currentUserData.topInset)
                 .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/getUIScreenBounds().width) * manager.xOffset) - 70 : 0)
-                .simultaneousGesture(drag)
+//                .simultaneousGesture(drag)
                 .transition(.move(edge: .trailing))
             }
             
@@ -191,53 +191,53 @@ public struct LibraryManageView: View {
         }
     }
     
-    var drag: some Gesture {
-        DragGesture()
-            .onChanged({ drag in
-                if drag.startLocation.x > 20{
-                    return
-                }
-                isDragging = true
-                DispatchQueue.main.async {
-                    manager.xOffset = drag.location.x
-                }
-            })
-            .onEnded({ drag in
-                isDragging = false
-                if manager.stack.count < 1 || drag.startLocation.x > 20{
-                    return
-                }
-                
-                if drag.velocity.width > 1000.0{
-                    DispatchQueue.main.async {
-                        withAnimation(.spring(duration: 0.2)) {
-                            manager.xOffset = getUIScreenBounds().width
-                        }
-                    }
-                    Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
-                        _ = manager.stack.popLast()
-                        manager.xOffset = 0
-                    }
-                    
-                }else if drag.location.x > getUIScreenBounds().width/2 {
-                    DispatchQueue.main.async {
-                        withAnimation(.spring(duration: 0.1)) {
-                            manager.xOffset = getUIScreenBounds().width
-                        }
-                    }
-                    Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in
-                        _ = manager.stack.popLast()
-                        manager.xOffset = 0
-                    }
-                }else{
-                    DispatchQueue.main.async {
-                        withAnimation(.spring(duration: 0.2)) {
-                            manager.xOffset = 0
-                        }
-                    }
-                }
-            })
-    }
+//    var drag: some Gesture {
+//        DragGesture()
+//            .onChanged({ drag in
+//                if drag.startLocation.x > 20{
+//                    return
+//                }
+//                isDragging = true
+//                DispatchQueue.main.async {
+//                    manager.xOffset = drag.location.x
+//                }
+//            })
+//            .onEnded({ drag in
+//                isDragging = false
+//                if manager.stack.count < 1 || drag.startLocation.x > 20{
+//                    return
+//                }
+//
+//                if drag.velocity.width > 1000.0{
+//                    DispatchQueue.main.async {
+//                        withAnimation(.spring(duration: 0.2)) {
+//                            manager.xOffset = getUIScreenBounds().width
+//                        }
+//                    }
+//                    Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+//                        _ = manager.stack.popLast()
+//                        manager.xOffset = 0
+//                    }
+//
+//                }else if drag.location.x > getUIScreenBounds().width/2 {
+//                    DispatchQueue.main.async {
+//                        withAnimation(.spring(duration: 0.1)) {
+//                            manager.xOffset = getUIScreenBounds().width
+//                        }
+//                    }
+//                    Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in
+//                        _ = manager.stack.popLast()
+//                        manager.xOffset = 0
+//                    }
+//                }else{
+//                    DispatchQueue.main.async {
+//                        withAnimation(.spring(duration: 0.2)) {
+//                            manager.xOffset = 0
+//                        }
+//                    }
+//                }
+//            })
+//    }
     
     
 }

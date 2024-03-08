@@ -14,8 +14,15 @@ let project = Project(name: "Shared",
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
                                        dependencies: [
-                                        .project(target: "Core", path: "../Core")
+                                        .project(target: "Core", path: "../Core"),
+                                        .external(name: "Lottie")
+                                       ],
+                                       settings: Settings.settings(base: [
+                                        "HEADER_SEARCH_PATHS": "$(inherited) $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/realm-swift",
+                                        "OTHER_LDFLAGS" : "-ObjC"
+
                                        ])
+                                      )
                       ])
 
 

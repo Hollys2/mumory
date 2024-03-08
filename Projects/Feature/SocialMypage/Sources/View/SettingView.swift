@@ -198,9 +198,9 @@ struct SettingView: View {
     }
 }
 
-#Preview {
-    SettingView()
-}
+//#Preview {
+//    SettingView()
+//}
 
 struct SettingItem: View {
     @State var title: String

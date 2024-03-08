@@ -70,9 +70,9 @@ struct SelectNotificationTimeView: View {
     }
 }
 
-#Preview {
-    SelectNotificationTimeView()
-}
+//#Preview {
+//    SelectNotificationTimeView()
+//}
 
 struct SelectTimeItem: View {
     @State var time: time = .morning

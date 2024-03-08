@@ -158,30 +158,16 @@ public struct ImageSelectBottomSheet: View {
                 }
             })
             .onEnded({ drag in
-                if drag.startLocation.y < 30 {
-                    if drag.velocity.height < 0 {
-                        //위로 올리는 제스처
-                        withAnimation(.linear(duration: 0.2)) {
-                            yOffset = 0
-                        }
-                    }else if drag.velocity.height > 500{
-                        //아래로 빠르게 내리는 제스처
-                        backgroundOpacity = 0
-                        dismiss()
-                    }else {
-                        //아래로 천천히 내리는 제스처
-                        if drag.location.y > 200 {
-                            backgroundOpacity = 0
-                            dismiss()
-                        }else {
-                            withAnimation(.linear(duration: 0.2)) {
-                                yOffset = 0
-                            }
-                        }
-                    }
-                }
-                
-            })
+                  if drag.location.y - drag.startLocation.y < 65  {
+                      withAnimation(.linear(duration: 0.2)) {
+                          yOffset = 0
+                      }
+                  }else {
+                      backgroundOpacity = 0
+                      dismiss()
+                  }
+                  
+              })
         
     }
 }

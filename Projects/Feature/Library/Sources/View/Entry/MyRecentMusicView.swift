@@ -117,6 +117,6 @@ struct NoMumoryView: View {
         })
     }
 }
-#Preview {
-    NoMumoryView()
-}
+//#Preview {
+//    NoMumoryView()
+//}

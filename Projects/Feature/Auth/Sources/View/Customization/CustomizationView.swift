@@ -35,6 +35,24 @@ public struct CustomizationView: View {
             
             //Step indicator
             VStack(spacing: 0, content: {
+                HStack{
+                    Button(action: {
+                        isTapBackButton = true
+                        if manager.step == 0 {
+                            dismiss()
+                        }else{
+                            withAnimation {
+                                manager.step -= 1
+                            }
+                        }
+                    }, label: {
+                        SharedAsset.back.swiftUIImage
+                    })
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 63)
+                
                 ZStack{
                     Rectangle()
                         .frame(maxWidth: .infinity)
@@ -120,23 +138,6 @@ public struct CustomizationView: View {
                 .environmentObject(manager)
         })
         .navigationBarBackButtonHidden()
-        .toolbar(content: {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: {
-                    isTapBackButton = true
-                    if manager.step == 0 {
-                        dismiss()
-                    }else{
-                        withAnimation {
-                            manager.step -= 1
-                        }
-                    }
-                }, label: {
-                    SharedAsset.back.swiftUIImage
-                })
-                
-            }
-        })
         .gesture(DragGesture().onEnded({ gesture in
             if gesture.location.x - gesture.startLocation.x > 80 {
                 isTapBackButton = true

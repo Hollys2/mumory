@@ -26,6 +26,6 @@ struct imageTestview: View {
     }
 }
 
-#Preview {
-    imageTestview()
-}
+//#Preview {
+//    imageTestview()
+//}

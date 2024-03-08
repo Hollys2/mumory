@@ -67,6 +67,6 @@ struct MyMumoriItem: View {
     }
 }
 
-#Preview {
-    MyMumoriItem()
-}
+//#Preview {
+//    MyMumoriItem()
+//}

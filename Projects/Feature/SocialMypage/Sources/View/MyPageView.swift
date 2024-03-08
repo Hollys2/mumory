@@ -86,9 +86,9 @@ struct MyPageView: View {
     }
 }
 
-#Preview {
-    MyPageView()
-}
+//#Preview {
+//    MyPageView()
+//}
 
 struct UserInfoView: View {
     @EnvironmentObject var currentUserData: CurrentUserData

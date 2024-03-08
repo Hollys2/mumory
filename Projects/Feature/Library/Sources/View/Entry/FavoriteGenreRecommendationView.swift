@@ -76,11 +76,11 @@ struct FavoriteGenreRecommendationView: View {
                                 EditFavoriteGenreView()
                             })
                             .onAppear(perform: {
-                                withAnimation(.bouncy) {
+                                withAnimation(.spring()) {
                                     isEditGenreInfoPresent = true
                                 }
                                 genreInfoTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { timer in
-                                    withAnimation (.bouncy){
+                                    withAnimation (.spring()){
                                         isEditGenreInfoPresent = false
                                     }
                                 }
@@ -240,7 +240,7 @@ private struct test: View {
 }
 
 
-#Preview {
-    test()
-        
-}
+//#Preview {
+//    test()
+//        
+//}

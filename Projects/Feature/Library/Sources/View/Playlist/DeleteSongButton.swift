@@ -60,9 +60,9 @@ struct DeleteSongButton: View {
     }
 }
 
-#Preview {
-    DeleteSongButton(title: "삭제", isEnabled: true, deleteSongCount: 1) {
-        print("aaa")
-    }
-    
-}
+//#Preview {
+//    DeleteSongButton(title: "삭제", isEnabled: true, deleteSongCount: 1) {
+//        print("aaa")
+//    }
+//    
+//}
