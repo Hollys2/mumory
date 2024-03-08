@@ -19,7 +19,6 @@ let project = Project(name: "Core",
                                        infoPlist: .extendingDefault(with: extendedInfo),
                                        sources: ["Sources/**"],
                                        dependencies: [
-                                        .external(name: "Moya"),
                                         .external(name: "FirebaseAuth"),
                                         .external(name: "FirebaseFirestore"),
                                         .external(name: "FirebaseStorage"),
