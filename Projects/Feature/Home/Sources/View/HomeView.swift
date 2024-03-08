@@ -53,6 +53,12 @@ public struct HomeView: View {
                 
                 MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? MumoryAnnotation())
                     .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: MumoryAnnotation()))
+                    .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
+                        PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
+            //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
+                            appCoordinator.isDeleteCommentPopUpViewShown = false
+                        })
+                    }
                 
                 if self.appCoordinator.isMumoryPopUpShown {
                     

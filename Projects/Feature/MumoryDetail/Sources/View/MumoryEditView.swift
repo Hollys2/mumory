@@ -25,6 +25,7 @@ public struct MumoryEditView: View {
     @State private var isTagErrorPopUpShown: Bool = false
     @State private var isDeletePopUpShown: Bool = false
     
+    @State private var calendarDate: Date
     @State private var tags: [String]
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
@@ -34,8 +35,6 @@ public struct MumoryEditView: View {
     @State private var scrollViewOffset: CGFloat = 0
     @State private var tagContainerViewFrame: CGRect = .zero
     
-    @State var calendarDate: Date = Date()
-    @State var dateString: String = ""
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
@@ -51,6 +50,7 @@ public struct MumoryEditView: View {
         self._imageURLs = State(initialValue: mumoryAnnotation.imageURLs ?? [])
         self._isPublic = State(initialValue: mumoryAnnotation.isPublic)
         self._tags = State(initialValue: mumoryAnnotation.tags ?? [])
+        self._contentText = State(initialValue: mumoryAnnotation.content ?? "NO CONTENT")
     }
     
     public var body: some View {
@@ -67,6 +67,8 @@ public struct MumoryEditView: View {
                         .gesture(TapGesture(count: 1).onEnded {
                             //                            self.isDeletePopUpShown = true
                             self.appCoordinator.rootPath.removeLast()
+                            self.mumoryDataViewModel.choosedMusicModel = nil
+                            self.mumoryDataViewModel.choosedLocationModel = nil
                         })
                     
                     Spacer()
@@ -111,7 +113,7 @@ public struct MumoryEditView: View {
                             ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumoryAnnotation)
                         }
                         
-                        CalendarContainerView(title: self.$dateString)
+                        CalendarContainerView(date: self.$calendarDate)
                             .onTapGesture {
                                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                 
@@ -132,13 +134,6 @@ public struct MumoryEditView: View {
                                         }
                                 }
                             }
-                            .onAppear {
-                                self.dateString = DateManager.formattedDate(date: self.calendarDate, dateFormat: "yyyy. M. d. EEEE")
-                            }
-                            .onChange(of: self.calendarDate) { newValue in
-                                self.dateString = DateManager.formattedDate(date: newValue, dateFormat: "yyyy. M. d. EEEE")
-                            }
-                        
                     }
                     .padding(.horizontal, 20)
                     
@@ -158,10 +153,7 @@ public struct MumoryEditView: View {
                                 return Color.clear
                             })
                         
-                        ContentContainerView(contentText: Binding(
-                            get: { mumoryAnnotation.content ?? "" },
-                            set: { mumoryAnnotation.content = $0 }
-                        ))
+                        ContentContainerView(contentText: self.$contentText)
                         
                         HStack(spacing: 11) {
                             PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -373,9 +365,6 @@ public struct MumoryEditView: View {
                 .accentColor(SharedAsset.mainColor.swiftUIColor)
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .preferredColorScheme(.dark)
-                .onChange(of: self.calendarDate) { newValue in
-                    mumoryAnnotation.date = newValue
-                }
         }
         .popup(show: self.$isPublishPopUpShown, content: {
             PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: {
@@ -420,10 +409,13 @@ public struct MumoryEditView: View {
                 }
                 
                 group.notify(queue: .main) {
-                    let newMumoryAnnotation = MumoryAnnotation(author: "tester", id: mumoryAnnotation.id, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: mumoryAnnotation.content, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, comments: mumoryAnnotation.comments)
+                    let newMumoryAnnotation = MumoryAnnotation(author: "tester", id: mumoryAnnotation.id, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, comments: mumoryAnnotation.comments)
                     
                     mumoryDataViewModel.updateMumory(newMumoryAnnotation) {
 
+                        mumoryDataViewModel.isUpdating = false
+                        mumoryDataViewModel.selectedMumoryAnnotation = newMumoryAnnotation
+                        
                         mumoryDataViewModel.choosedMusicModel = nil
                         mumoryDataViewModel.choosedLocationModel = nil
                         self.tags.removeAll()

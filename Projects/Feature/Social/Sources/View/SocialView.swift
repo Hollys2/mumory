@@ -277,7 +277,6 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
-                                print("self.mumoryAnnotation: \(self.mumoryAnnotation.id)")
                                 self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
                             }
                     )
@@ -575,7 +574,7 @@ public struct SocialView: View {
                                 .clipped()
                         )
                         .overlay(
-                            Rectangle()
+                            Circle()
                                 .stroke(.white, lineWidth: 1)
                         )
                 }
@@ -587,13 +586,6 @@ public struct SocialView: View {
             .padding(.bottom, 15)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
-            
-//            if self.mumoryDataViewModel.isUpdating {
-//                Color.black.opacity(0.5).ignoresSafeArea()
-//
-//                ProgressView()
-//                        .progressViewStyle(CircularProgressViewStyle())
-//            }
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .preferredColorScheme(.dark)
@@ -603,19 +595,12 @@ public struct SocialView: View {
             FirebaseManager.shared.observeFriendRequests()
             print("SocialView onAppear")
         }
-        .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
-            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-//                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
-                appCoordinator.isDeleteCommentPopUpViewShown = false
-            })
-        }
-    }
-}
-
-struct SocialView_Previews: PreviewProvider {
-    static var previews: some View {
-        SocialView()
-            .environmentObject(AppCoordinator())
+//        .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
+//            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
+////                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
+//                appCoordinator.isDeleteCommentPopUpViewShown = false
+//            })
+//        }
     }
 }
 

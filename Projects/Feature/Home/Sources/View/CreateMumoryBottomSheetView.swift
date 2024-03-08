@@ -30,9 +30,7 @@ public struct CreateMumoryBottomSheetView: View {
     
     @GestureState private var dragState = DragState.inactive
     
-    @State var calendarDate: Date = Date()
-    
-    @State private var dateString: String = ""
+    @State private var calendarDate: Date = Date()
     @State private var tags: [String] = []
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
@@ -46,7 +44,6 @@ public struct CreateMumoryBottomSheetView: View {
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var dateManager: DateManager
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?> ) {
@@ -142,7 +139,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                                     }
                                     
-                                    CalendarContainerView(title: self.$dateString)
+                                    CalendarContainerView(date: self.$calendarDate)
                                         .onTapGesture {
                                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                             
@@ -162,13 +159,6 @@ public struct CreateMumoryBottomSheetView: View {
                                                     }
                                             }
                                         }
-                                        .onAppear {
-                                            self.dateString = DateManager.formattedDate(date: self.calendarDate, dateFormat: "yyyy. M. d. EEEE")
-                                        }
-                                        .onChange(of: self.calendarDate) { newValue in
-                                            self.dateString = DateManager.formattedDate(date: newValue, dateFormat: "yyyy. M. d. EEEE")
-                                        }
-                                    
                                 }
                                 .padding(.horizontal, 20)
                                 
@@ -473,6 +463,8 @@ public struct CreateMumoryBottomSheetView: View {
                     PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
                         mumoryDataViewModel.choosedMusicModel = nil
                         mumoryDataViewModel.choosedLocationModel = nil
+                        
+                        self.calendarDate = Date()
                         self.tags.removeAll()
                         self.contentText.removeAll()
                         photoPickerViewModel.removeAllSelectedImages()
@@ -803,10 +795,11 @@ struct ContainerView: View {
 
 struct CalendarContainerView: View {
     
-    @Binding var title: String
     
-    init(title: Binding<String>) {
-        self._title = title
+    @Binding var date: Date
+    
+    init(date: Binding<Date>) {
+        self._date = date
     }
     
     var body: some View {
@@ -827,7 +820,7 @@ struct CalendarContainerView: View {
                 
                 Spacer().frame(width: 17)
                 
-                Text("\(title)")
+                Text(DateManager.formattedDate(date: self.date, dateFormat: "yyyy. M. d. EEEE"))
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(.white)
                 
@@ -937,7 +930,6 @@ struct TagContainerView: View {
 struct ContentContainerView: View {
     
     @Binding var contentText: String
-    @State private var textEditorHeight: CGFloat = .zero
     
     init(contentText: Binding<String>) {
         self._contentText = contentText

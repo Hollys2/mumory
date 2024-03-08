@@ -41,10 +41,10 @@ public class FirebaseManager: ObservableObject {
         let year = calendar.component(.year, from: date)
         let month = calendar.component(.month, from: date)
         let day = calendar.component(.day, from: date)
-        let hour = calendar.component(.hour, from: date)
-        let minute = calendar.component(.minute, from: date)
-        let second = calendar.component(.second, from: date)
-        let weekday = calendar.component(.weekday, from: date)
+//        let hour = calendar.component(.hour, from: date)
+//        let minute = calendar.component(.minute, from: date)
+//        let second = calendar.component(.second, from: date)
+//        let weekday = calendar.component(.weekday, from: date)
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "EEEE"
@@ -85,12 +85,9 @@ public class FirebaseManager: ObservableObject {
             if let friendRequestData = snapshot.value as? [String: Any] {
                 let senderUID = friendRequestData["senderID"] as? String
                 let nickname = friendRequestData["nickname"] as? String
-                
-                //                self.friendRequests.append(FriendSearch(nickname: nickname!, id: senderUID!))
+
                 let newFriendRequest = FriendSearch(nickname: nickname!, id: senderUID!)
                 
-                print("self.friendRequests: \(self.friendRequests)")
-                // Check if the friend request already exists in the set
                 if !self.friendRequests.contains(newFriendRequest) {
                     self.friendRequests.append(newFriendRequest)
                     print("New friend request from sender \(senderUID ?? "") with nickname \(nickname ?? "")")
@@ -138,8 +135,6 @@ public class FirebaseManager: ObservableObject {
                 print("Error getting documents: \(error)")
             } else {
                 if let documents = querySnapshot?.documents {
-                    
-                    self.searchedFriend = FriendSearch(nickname: "", id: "")
                     
                     for document in documents {
                         

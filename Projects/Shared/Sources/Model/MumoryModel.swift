@@ -32,7 +32,7 @@ public struct MumoryView: Hashable {
 
 public struct MusicModel: Identifiable, Hashable, Codable {
 
-    public let id = UUID()
+    public var id = UUID()
     
 //    public var song: Song
 
@@ -51,7 +51,7 @@ public struct MusicModel: Identifiable, Hashable, Codable {
 
 public struct LocationModel: Identifiable, Codable {
     
-    public let id = UUID()
+    public var id = UUID()
     
     public var locationTitle: String
     public var locationSubtitle: String

@@ -193,7 +193,6 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchEveryMumory() {
-        
         self.isSocialFetchFinished = false
         let db = FirebaseManager.shared.db
         
@@ -398,7 +397,6 @@ final public class MumoryDataViewModel: ObservableObject {
             } else {
                 print("Document updated successfully! : \(documentReference.documentID)")
                 
-                self.isUpdating = false
                 // If you need to update the local array of annotations, you can find the index of the annotation and replace it
                 if let index = self.myMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
                     self.myMumoryAnnotations[index] = mumoryAnnotation
@@ -426,23 +424,17 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("Error deleting document: \(error.localizedDescription)")
             } else {
                 if let index = self.myMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                    print("FUCK1")
                     self.myMumoryAnnotations.remove(at: index)
                 }
                 
                 if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                    print("FUCK2")
                     self.everyMumoryAnnotations.remove(at: index)
                 }
-                
+
                 completion()
                 print("Document deleted successfully!")
-                
             }
         }
-        
-        
-        
     }
     
     public func likeMumory(mumoryAnnotation: MumoryAnnotation, loginUserID: String) {
@@ -618,7 +610,7 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let db = FirebaseManager.shared.db
         
-        var newData: [String: Any] = [
+        let newData: [String: Any] = [
             "friends": FieldValue.arrayUnion([ID])
         ]
         
@@ -640,7 +632,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document("tester3").collection("mumory")
         
-        let dispatchGroup = DispatchGroup()
+//        let dispatchGroup = DispatchGroup()
         
         collectionReference.getDocuments { (querySnapshot, error) in
             if let error = error {

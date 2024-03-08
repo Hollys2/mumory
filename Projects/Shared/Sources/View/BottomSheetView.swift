@@ -54,10 +54,11 @@ public struct MumoryBottomSheet {
         case .mumoryDetailView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.editMumoryDetailMenu.swiftUIImage, title: "뮤모리 수정", action: {
+                    self.appCoordinator.isMumoryDetailMenuSheetShown = false
+                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                         self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, mumoryAnnotation: mumoryAnnotation)) // 추후 파이어스토어 ID로 수정
-                        self.appCoordinator.isMumoryDetailMenuSheetShown = false
                     }
                 }),
                 BottemSheetMenuOption(iconImage: mumoryAnnotation.isPublic ? SharedAsset.lockMumoryDetailMenu.swiftUIImage : SharedAsset.unlockMumoryDetailMenu.swiftUIImage, title: mumoryAnnotation.isPublic ? "나만보기" : "전체공개") {

@@ -115,15 +115,6 @@ extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate 
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-        //        print("offsetY: \(offsetY)")
-        
-        //        let scrollDirection: ScrollDirection = (offsetY < previousOffset) ? .up : .down
-        //        let scrollBoundary: ScrollBoundary = (offsetY < UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20) ? .above : .below
-        
-        //        DispatchQueue.main.async {
-        //            self.handleScrollDirection(scrollDirection)
-        //            self.handleScrollBoundary(scrollBoundary)
-        //        }
         
         let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
         
@@ -227,23 +218,8 @@ public struct MumoryDetailView: View {
 
         } // ZStack
         .onAppear {
-            
             if let m = mumoryDataViewModel.selectedMumoryAnnotation {
                 self.mumoryAnnotation = m
-            }
-            
-            Task {
-                do {
-                    if let fetchedAnnotation = try await mumoryDataViewModel.fetchMumoryAnnotation(mumoryID: mumoryAnnotation.id) {
-                        // Set the fetched MumoryAnnotation to the state variable
-//                        self.mumoryAnnotation = fetchedAnnotation
-//                        self.mumoryDataViewModel.selectedMumoryAnnotation = fetchedAnnotation
-                    } else {
-                        print("MumoryAnnotation not found for ID: \(mumoryAnnotation.id)")
-                    }
-                } catch {
-                    print("Error fetching MumoryAnnotation: \(error.localizedDescription)")
-                }
             }
         }
         .navigationBarBackButtonHidden(true)

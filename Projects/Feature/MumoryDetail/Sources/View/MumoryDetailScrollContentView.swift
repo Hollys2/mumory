@@ -35,8 +35,6 @@ struct MumoryDetailScrollContentView: View {
     
     @Binding var mumoryAnnotation: MumoryAnnotation
     
-    @State private var dateString: String = ""
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
@@ -106,21 +104,16 @@ struct MumoryDetailScrollContentView: View {
                             Spacer(minLength: 0)
                             
                             HStack(spacing: 0) {
-                                
-//                                Text("\(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))")
-                                Text(self.dateString)
+
+                                Text(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
                                     .onAppear {
-                                        self.dateString = DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic)
-                                    }
-                                    .onChange(of: mumoryAnnotation.date) { newValue in
-                                        self.dateString = DateManager.formattedDate(date: newValue, isPublic: self.mumoryAnnotation.isPublic)
                                     }
                                     .onChange(of: mumoryAnnotation.isPublic) { newValue in
-                                        self.dateString = DateManager.formattedDate(date: mumoryAnnotation.date, isPublic: newValue)
+//                                        self.dateString = DateManager.formattedDate(date: mumoryAnnotation.date, isPublic: newValue)
                                     }
 
                                 if !self.mumoryAnnotation.isPublic {
