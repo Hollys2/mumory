@@ -34,7 +34,7 @@ struct MyPageView: View {
                             .frame(height: 0.5)
                             .background(lineGray)
                         
-                        FriendView()
+                        SimpleFriendView()
                             .environmentObject(myPageCoordinator)
 
                         
@@ -182,7 +182,7 @@ struct UserInfoView: View {
     }
 }
 
-struct FriendView: View {
+struct SimpleFriendView: View {
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var friends: [MumoriUser] = []
@@ -200,8 +200,8 @@ struct FriendView: View {
                     .padding(.trailing, 3)
                 SharedAsset.next.swiftUIImage
                     .resizable()
-                    .frame(width: 17, height: 17)
                     .scaledToFit()
+                    .frame(width: 17, height: 17)
             })
             .padding(.horizontal, 20)
             .frame(height: 67)
@@ -214,14 +214,19 @@ struct FriendView: View {
                 HStack(spacing: 12, content: {
                     ForEach(friends, id: \.self) { friend in
                         FriendHorizontalItem(user: friend)
+                            .onTapGesture {
+                                myPageCoordinator.push(destination: .friendPage(friend: friend))
+                            }
                     }
                 })
+                .fixedSize()
                 .padding(.horizontal, 20)
             }
             .scrollIndicators(.hidden)
             .padding(.bottom, 37)
         })
         .onAppear {
+            self.friends.removeAll()
             let db = FirebaseManager.shared.db
             
             Task {
@@ -247,6 +252,7 @@ struct FriendView: View {
 
 struct MyMumori: View {
     @State var list: [Int] = [1,2,3,4,5]
+//    @State var mumoris: [Mymori]
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {

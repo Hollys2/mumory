@@ -30,7 +30,8 @@ let project = Project(name: "Core",
                                         .external(name: "KakaoSDKAuth"),
                                         .external(name: "FirebaseMessaging"),
                                         .external(name: "Alamofire"),
-                                        .external(name: "RealmSwift")
+                                        .external(name: "RealmSwift"),
+                                        .external(name: "GTMSessionFetcherCore")
                                        ],
                                        settings: Settings.settings(base: [
                                         "HEADER_SEARCH_PATHS": "$(inherited) $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/realm-swift",

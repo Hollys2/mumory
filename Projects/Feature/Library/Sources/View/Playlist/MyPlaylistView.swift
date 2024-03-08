@@ -52,8 +52,10 @@ struct MyPlaylistView: View {
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: 12, content: {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
-                            PlaylistItem(playlist: playlist, isAddSongItem: playlist.isAddItme)
-                                .environmentObject(manager)
+                            PlaylistItem(playlist: playlist, itemSize: 81, isAddSongItem: playlist.isAddItme)
+                                .onTapGesture {
+                                    manager.push(destination: .playlist(playlist: playlist))
+                                }
                         }
                     })
                     .padding(.horizontal, 20)

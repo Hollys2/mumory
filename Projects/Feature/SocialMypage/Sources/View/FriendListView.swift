@@ -10,6 +10,7 @@ import SwiftUI
 import Shared
 
 struct FriendListView: View {
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     private let lineGray = Color(white: 0.48)
     @State var term: String = ""
     @State var friends: [MumoriUser]
@@ -28,6 +29,9 @@ struct FriendListView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            myPageCoordinator.pop()
+                        }
                     Spacer()
                     Text("친구")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
@@ -73,7 +77,10 @@ struct FriendListView: View {
                             .padding(.bottom, 15)
                         
                         ForEach(results, id: \.uid) { friend in
-                            FriendListItem(user: friend)
+                            FriendListItem(friend: friend)
+                                .onTapGesture {
+                                    myPageCoordinator.push(destination: .friendPage(friend: friend))
+                                }
                         }
                             
                     })
