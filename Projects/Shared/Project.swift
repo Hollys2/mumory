@@ -23,7 +23,7 @@ let project = Project(name: "Shared",
                                        settings: Settings.settings(base: [
                                         "HEADER_SEARCH_PATHS": "$(inherited) $(PROJECT_DIR)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public",
                                         "OTHER_LDFLAGS" : "-ObjC"
-
+                                        
                                        ])
                                       )
                                 

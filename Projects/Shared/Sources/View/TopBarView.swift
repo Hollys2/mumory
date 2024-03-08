@@ -1,5 +1,5 @@
 //
-//  TobBarView.swift
+//  TopBarView.swift
 //  Shared
 //
 //  Created by 다솔 on 2024/01/30.
