@@ -10,15 +10,15 @@ import SwiftUI
 import Shared
 
 struct FriendListItem: View {
-    let user: MumoriUser
+    let friend: MumoriUser
     
-    init(user: MumoriUser) {
-        self.user = user
+    init(friend: MumoriUser) {
+        self.friend = friend
     }
     
     var body: some View {
         HStack(spacing: 13, content: {
-            AsyncImage(url: user.profileImageURL) { image in
+            AsyncImage(url: friend.profileImageURL) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -31,11 +31,11 @@ struct FriendListItem: View {
             }
             
             VStack(alignment: .leading, spacing: 1, content: {
-                Text(user.nickname)
+                Text(friend.nickname)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(Color.white)
                 
-                Text("@\(user.id)")
+                Text("@\(friend.id)")
                     .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 12))
                     .foregroundStyle(ColorSet.charSubGray)
             })

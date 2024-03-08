@@ -11,143 +11,152 @@ import Shared
 import MusicKit
 
 struct PlaylistItem: View {
-    @EnvironmentObject var manager: LibraryManageModel
-    @EnvironmentObject var currentUserData: CurrentUserData
-    
     @State var playlist: MusicPlaylist
     @State var songs: [Song] = []
-
-    var isAddSongItem: Bool
+    
+    var isAddSongItem: Bool = false
     var radius: CGFloat = 10
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
+    let itemSize: CGFloat
     
-    init(playlist: MusicPlaylist, isAddSongItem: Bool){
+    init(playlist: MusicPlaylist,itemSize: CGFloat, isAddSongItem: Bool){
         self.playlist = playlist
         self.isAddSongItem = isAddSongItem
+        self.itemSize = itemSize
+    }
+    
+    init(playlist: MusicPlaylist, itemSize: CGFloat) {
+        self.playlist = playlist
+        self.itemSize = itemSize
     }
     
     var body: some View {
-        ZStack{
+        ZStack(alignment: .top){
             if isAddSongItem {
                 AddSongItem()
             }else{
                 VStack(spacing: 0){
-                    ZStack(alignment: .bottom){
-                        VStack(spacing: 0, content: {
-                            HStack(spacing: 0, content: {
-                                //1번째 이미지
-                                if songs.count < 1 {
-                                    Rectangle()
-                                        .frame(width: 81, height: 81)
-                                        .foregroundStyle(emptyGray)
-                                }else{
-                                    AsyncImage(url: songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                                        image
-                                            .resizable()
-                                            .frame(width: 81, height: 81)
-                                    } placeholder: {
-                                        Rectangle()
-                                            .frame(width: 81, height: 81)
-                                            .foregroundStyle(emptyGray)
-                                    }
-                                }
-                                
-                                //세로줄(구분선)
+                    VStack(spacing: 0, content: {
+                        HStack(spacing: 0, content: {
+                            //1번째 이미지
+                            if songs.count < 1 {
                                 Rectangle()
-                                    .frame(width: 1, height: 81)
-                                    .foregroundStyle(ColorSet.background)
-                                
-                                //2번째 이미지
-                                if songs.count < 2{
+                                    .fill(emptyGray)
+                                    .frame(width: itemSize, height: itemSize)
+                            }else{
+                                AsyncImage(url: songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                } placeholder: {
                                     Rectangle()
-                                        .frame(width: 81, height: 81)
                                         .foregroundStyle(emptyGray)
-                                }else{
-                                    AsyncImage(url: songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                                        image
-                                            .resizable()
-                                            .frame(width: 81, height: 81)
-                                    } placeholder: {
-                                        Rectangle()
-                                            .frame(width: 81, height: 81)
-                                            .foregroundStyle(emptyGray)
-                                    }
                                 }
+                                .frame(width: itemSize, height: itemSize)
                                 
-                                
-                            })
+                            }
                             
-                            //가로줄(구분선)
+                            //세로줄(구분선)
                             Rectangle()
-                                .frame(width: 163, height: 1)
+                                .frame(width: 1)
+                                .frame(maxHeight: .infinity)
                                 .foregroundStyle(ColorSet.background)
                             
-                            HStack(spacing: 0,content: {
-                                //3번째 이미지
-                                if songs.count < 3 {
-                                    Rectangle()
-                                        .frame(width: 81, height: 81)
-                                        .foregroundStyle(emptyGray)
-                                }else{
-                                    AsyncImage(url: songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                                        image
-                                            .resizable()
-                                            .frame(width: 81, height: 81)
-                                    } placeholder: {
-                                        Rectangle()
-                                            .frame(width: 81, height: 81)
-                                            .foregroundStyle(emptyGray)
-                                    }
-                                }
-                                
-                                //세로줄 구분선
+                            //2번째 이미지
+                            if songs.count < 2{
                                 Rectangle()
-                                    .frame(width: 1, height: 81)
-                                    .foregroundStyle(ColorSet.background)
-                                
-                                //4번째 이미지
-                                if songs.count <  4 {
+                                    .fill(emptyGray)
+                                    .frame(width: itemSize, height: itemSize)
+                            }else{
+                                AsyncImage(url: songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                } placeholder: {
                                     Rectangle()
-                                        .frame(width: 81, height: 81)
                                         .foregroundStyle(emptyGray)
-                                }else{
-                                    AsyncImage(url: songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                                        image
-                                            .resizable()
-                                            .frame(width: 81, height: 81)
-                                    } placeholder: {
-                                        Rectangle()
-                                            .frame(width: 81, height: 81)
-                                            .foregroundStyle(emptyGray)
-                                    }
                                 }
+                                .frame(width: itemSize, height: itemSize)
                                 
-                            })
-                        })
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-                        .overlay {
-                            SharedAsset.bookmarkWhite.swiftUIImage
-                                .resizable()
-                                .frame(width: 24, height: 24)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                                .opacity(playlist.id == "favorite" ? 1 : 0)
+                            }
                             
-                            SharedAsset.lockPurple.swiftUIImage
-                                .resizable()
-                                .frame(width: 23, height: 23)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                .opacity(playlist.id == "favorite" ? 0 : playlist.isPublic ? 0 : 1)
-                        }
+                            
+                        })
+                        
+                        //가로줄(구분선)
+                        Rectangle()
+                            .frame(height: 1)
+                            .frame(maxWidth: .infinity)
+                            .foregroundStyle(ColorSet.background)
+                        
+                        HStack(spacing: 0,content: {
+                            //3번째 이미지
+                            if songs.count < 3 {
+                                Rectangle()
+                                    .fill(emptyGray)
+                                    .frame(width: itemSize, height: itemSize)
+                            }else{
+                                AsyncImage(url: songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                } placeholder: {
+                                    Rectangle()
+                                        .foregroundStyle(emptyGray)
+                                }
+                                .frame(width: itemSize, height: itemSize)
+                                
+                            }
+                            
+                            //세로줄 구분선
+                            Rectangle()
+                                .frame(width: 1)
+                                .frame(maxHeight: .infinity)
+                                .foregroundStyle(ColorSet.background)
+                            
+                            //4번째 이미지
+                            if songs.count <  4 {
+                                Rectangle()
+                                    .fill(emptyGray)
+                                    .frame(width: itemSize, height: itemSize)
+                            }else{
+                                AsyncImage(url: songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                } placeholder: {
+                                    Rectangle()
+                                        .foregroundStyle(emptyGray)
+                                }
+                                .frame(width: itemSize, height: itemSize)
+                                
+                            }
+                            
+                        })
+                    })
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                    .overlay {
+                        SharedAsset.bookmarkWhite.swiftUIImage
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                            .opacity(playlist.id == "favorite" ? 1 : 0)
+                        
+                        SharedAsset.lockPurple.swiftUIImage
+                            .resizable()
+                            .frame(width: 23, height: 23)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                            .opacity(playlist.id == "favorite" ? 0 : playlist.isPublic ? 0 : 1)
                     }
                     
                     
                     Text(playlist.title)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                        .frame(maxWidth: 163, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .lineLimit(1)
                         .truncationMode(.tail)
                         .padding(.top, 10)
@@ -156,44 +165,39 @@ struct PlaylistItem: View {
                     Text("\(playlist.songIDs.count)곡")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(LibraryColorSet.lightGrayTitle)
-                        .frame(maxWidth: 163, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 5)
                     
                 }
-                .onTapGesture {
-                    manager.push(destination: .playlist(playlist: playlist))
-                }
+                
             }
-
+            
         }
         .onAppear(perform: {
             Task{
-                await fetchSongInfo(songIDs: playlist.songIDs)
+                self.songs = await fetchSongInfo(songIDs: playlist.songIDs)
             }
         })
     }
     
-    private func fetchSongInfo(songIDs: [String]) async {
-        songs = []
-        
+    private func fetchSongInfo(songIDs: [String]) async -> [Song]{
+        var songs: [Song] = []
+        var count: Int = 0
         for id in songIDs {
+            if count > 3 {
+                break
+            }
             let musicItemID = MusicItemID(rawValue: id)
             var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
             request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                
-                self.songs.append(song)
-            } catch {
-                print("Error: \(error)")
+            let response = try? await request.response()
+            guard let song = response?.items.first else {
+                continue
             }
+            songs.append(song)
+            count += 1
         }
+        return songs
     }
     
 }
