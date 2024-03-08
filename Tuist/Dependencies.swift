@@ -11,7 +11,6 @@ import ProjectDescription
 let dependencie = Dependencies(
     swiftPackageManager: SwiftPackageManagerDependencies([
         .remote(url: "https://github.com/firebase/firebase-ios-sdk.git", requirement: .exact("10.18.0")),
-        .remote(url: "https://github.com/Moya/Moya.git", requirement: .upToNextMajor(from: "15.0.0")),
         .remote(url: "https://github.com/kakao/kakao-ios-sdk", requirement: .upToNextMajor(from: "2.11.0")),
         .remote(url: "https://github.com/google/GoogleSignIn-iOS.git", requirement: .upToNextMajor(from: "7.0.0")),
         .remote(url: "https://github.com/airbnb/lottie-ios.git", requirement: .upToNextMajor(from: "4.4.0")),
