@@ -85,7 +85,7 @@ struct SettingView: View {
                 LogoutButton()
                     .onTapGesture {
                         do {
-                            try FirebaseManager.shared.auth.signOut()
+                            try FBManager.shared.auth.signOut()
                             print("로그아웃 완료")
                             myPageCoordinator.resetPath(destination: .login)
                         }catch {
@@ -125,7 +125,7 @@ struct SettingView: View {
     }
     private func deleteAppleUser(){
         print("in delete apple user")
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         
@@ -171,7 +171,7 @@ struct SettingView: View {
     
     private func deleteUser(isSuccessful: Bool){
         if isSuccessful {
-            let Firebase = FirebaseManager.shared
+            let Firebase = FBManager.shared
             let db = Firebase.db
             let auth = Firebase.auth
             
@@ -198,9 +198,9 @@ struct SettingView: View {
     }
 }
 
-#Preview {
-    SettingView()
-}
+//#Preview {
+//    SettingView()
+//}
 
 struct SettingItem: View {
     @State var title: String

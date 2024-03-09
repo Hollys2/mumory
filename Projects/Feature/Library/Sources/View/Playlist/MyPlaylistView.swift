@@ -75,7 +75,7 @@ struct MyPlaylistView: View {
     }
     
     func getPlayList(){
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
                 
         DispatchQueue.main.async {

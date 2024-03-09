@@ -29,16 +29,4 @@ public class FirebaseManager {
         app = FirebaseApp.app()
         messaging = Messaging.messaging()
     }
-    
-    public func getGoogleCredential(idToken: String, accessToken: String) -> AuthCredential {
-        return GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
-    }
-    
-    public func storageMetadata() -> StorageMetadata {
-        return StorageMetadata()
-    }
-    
-    public func deleteFieldValue() -> FieldValue {
-        return FieldValue.delete()
-    }
 }

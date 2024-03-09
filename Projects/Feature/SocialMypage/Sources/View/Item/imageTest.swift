@@ -52,8 +52,8 @@ struct imageTest: View {
     }
 }
 
-#Preview {
-    imageTest()
-        .frame(width: 200, height: 200)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
-}
+//#Preview {
+//    imageTest()
+//        .frame(width: 200, height: 200)
+//        .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
+//}

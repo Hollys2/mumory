@@ -50,6 +50,6 @@ struct BottomSheetItem: View {
     
 }
 
-#Preview {
-    BottomSheetItem(image: SharedAsset.bookmarkFilled.swiftUIImage, title: "즐겨찾기하기", type: .normal)
-}
+//#Preview {
+//    BottomSheetItem(image: SharedAsset.bookmarkFilled.swiftUIImage, title: "즐겨찾기하기", type: .normal)
+//}

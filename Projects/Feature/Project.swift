@@ -31,7 +31,7 @@ let project = Project(name: "Feature",
                                        product: .framework,
                                        bundleId: Project.bundleId + ".feature",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
-                                       infoPlist: .extendingDefault(with: expendedInfo),
+                                       infoPlist: .default,
                                        sources: ["**/Sources/**"],
                                        resources: ["Resources/**"],
                                        dependencies: [

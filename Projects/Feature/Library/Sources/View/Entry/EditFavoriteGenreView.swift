@@ -106,7 +106,7 @@ struct EditFavoriteGenreView: View {
     }
     
     private func saveGenre() {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let data = [
             "favoriteGenres" : selectedGenres
@@ -165,6 +165,6 @@ struct EditFavoriteGenreView: View {
     }
 }
 
-#Preview {
-    EditFavoriteGenreView()
-}
+//#Preview {
+//    EditFavoriteGenreView()
+//}

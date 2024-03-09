@@ -10,7 +10,7 @@ import Foundation
 import AuthenticationServices
 import CryptoKit
 import FirebaseAuth
-import Core
+import Shared
 import KakaoSDKAuth
 import KakaoSDKUser
 import Firebase
@@ -33,7 +33,7 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
     
     func EmailLogin(email: String, password: String, completion: @escaping (_ isSuccessful: Bool) -> Void){
         //Core에 정의해둔 FirebaseAuth
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
         

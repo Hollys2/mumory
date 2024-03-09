@@ -20,6 +20,6 @@ struct LottieTestView: View {
     }
 }
 
-#Preview {
-    LottieTestView()
-}
+//#Preview {
+//    LottieTestView()
+//}

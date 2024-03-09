@@ -70,11 +70,11 @@ struct WithdrawPopupView: View {
     }
 }
 
-#Preview {
-    WithdrawPopupView {
-        //
-    } positiveAction: {
-        //
-    }
-
-}
+//#Preview {
+//    WithdrawPopupView {
+//        //
+//    } positiveAction: {
+//        //
+//    }
+//
+//}

@@ -126,7 +126,7 @@ struct SaveToPlaylistView: View {
     }
     
     private func saveSongToPlaylist(to: MusicPlaylist)  {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         let path = db.collection("User").document(currentUserData.uid).collection("Playlist")
@@ -183,7 +183,7 @@ struct SaveToPlaylistView: View {
     
     private func getUserPlaylist() {
         self.playlistArray = []
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         let path = db.collection("User").document(currentUserData.uid).collection("Playlist")

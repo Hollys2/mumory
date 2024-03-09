@@ -28,6 +28,6 @@ struct WhiteButton: View {
     }
 }
 
-#Preview {
-    WhiteButton()
-}
+//#Preview {
+//    WhiteButton()
+//}

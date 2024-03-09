@@ -59,7 +59,7 @@ public struct SplashView: View {
     }
     
     private func checkCurrentUserAndGetUserData() async{
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
                 

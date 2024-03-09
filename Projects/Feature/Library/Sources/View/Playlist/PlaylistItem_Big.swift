@@ -214,7 +214,7 @@ struct PlaylistItem_Big: View {
     }
     
     private func deletePlaylist() {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         let ref = db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id)

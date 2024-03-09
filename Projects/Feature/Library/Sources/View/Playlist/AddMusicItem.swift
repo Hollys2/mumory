@@ -71,7 +71,7 @@ struct AddMusicItem: View {
         })
     }
     private func addMusicToPlaylist() {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         if !originPlaylist.songIDs.contains(songID) {

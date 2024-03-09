@@ -153,7 +153,7 @@ struct CreatePlaylistPopupView: View {
     }
     
     private func createPlaylist() {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         let data: [String: Any] = [

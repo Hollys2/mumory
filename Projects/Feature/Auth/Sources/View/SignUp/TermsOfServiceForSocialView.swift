@@ -29,6 +29,18 @@ struct TermsOfServiceForSocialView: View {
                 LibraryColorSet.background.ignoresSafeArea()
                 
                 VStack(spacing: 0){
+                    HStack{
+                        SharedAsset.back.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .onTapGesture {
+                                dismiss()
+                            }
+                        
+                        Spacer()
+                    }
+                    .frame(height: 63)
                     
                     Text("서비스 이용약관에\n동의해주세요")
                         .foregroundColor(.white)
@@ -105,20 +117,12 @@ struct TermsOfServiceForSocialView: View {
                     .environmentObject(manager)
             })
             .navigationBarBackButtonHidden()
-            .toolbar(content: {
-                ToolbarItem(placement: .topBarLeading) {
-                    SharedAsset.back.swiftUIImage
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            dismiss()
-                        }
-                }
-            })
+ 
         })
     }
 
 }
 
-#Preview {
-    TermsOfServiceForSocialView()
-}
+//#Preview {
+//    TermsOfServiceForSocialView()
+//}

@@ -86,9 +86,9 @@ struct MyPageView: View {
     }
 }
 
-#Preview {
-    MyPageView()
-}
+//#Preview {
+//    MyPageView()
+//}
 
 struct UserInfoView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -227,7 +227,7 @@ struct SimpleFriendView: View {
         })
         .onAppear {
             self.friends.removeAll()
-            let db = FirebaseManager.shared.db
+            let db = FBManager.shared.db
             
             Task {
                 guard let document = try? await db.collection("User").document(currentUserData.uid).getDocument() else {

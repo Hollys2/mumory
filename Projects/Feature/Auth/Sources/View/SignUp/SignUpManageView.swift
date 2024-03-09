@@ -28,6 +28,38 @@ struct SignUpManageView: View {
                 LibraryColorSet.background.ignoresSafeArea()
                 
                 VStack{
+                    HStack{
+                        Button(action: {
+                            //뒤로 가기 눌렀을 때 실행되는 애니메이션을 위한 현재 페이지 조건 셋팅
+                            isTapBackButton = true
+                            if manager.step == 0 {
+                                dismiss()
+                            }else{
+                                withAnimation {
+                                    manager.step -= 1
+                                }
+                            }
+                            
+                        }, label: {
+                            SharedAsset.back.swiftUIImage
+                                .frame(width: 30, height: 30)
+                        })
+                        
+                        Spacer()
+                        
+                        Text(manager.getNavigationTitle())
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        
+                            .foregroundColor(.white)
+                        Spacer()
+
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(width: 30, height: 30)
+                        
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(height: 63)
                     //가입 절차 인디케이터(회색, 흰색 라인)
                     ZStack{
                         Rectangle()
@@ -101,33 +133,6 @@ struct SignUpManageView: View {
             }
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()
-            .toolbar(content: {
-                //네비게이션 바 좌측 버튼
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(action: {
-                        //뒤로 가기 눌렀을 때 실행되는 애니메이션을 위한 현재 페이지 조건 셋팅
-                        isTapBackButton = true
-                        if manager.step == 0 {
-                            dismiss()
-                        }else{
-                            withAnimation {
-                                manager.step -= 1
-                            }
-                        }
-                        
-                    }, label: {
-                        SharedAsset.back.swiftUIImage
-                            .frame(width: 30, height: 30)
-                    })
-                }
-                
-                //네비게이션 바 타이틀
-                ToolbarItem(placement: .principal) {
-                    Text(manager.getNavigationTitle())
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                        .foregroundColor(.white)
-                }
-            })
             //회원가입이 완료 되었을 때 다음 화면으로 이동
             .navigationDestination(isPresented: $isSignUpCompleted) {
                 StartCostomizationView()
@@ -163,7 +168,7 @@ struct SignUpManageView: View {
     }
     
     private func createUser(email: String, password: String){
-        let auth = FirebaseManager.shared.auth
+        let auth = FBManager.shared.auth
         auth.createUser(withEmail: email, password: password) { data, error in
             if let error = error {
                 print("create user error: \(error)")
@@ -182,7 +187,7 @@ struct SignUpManageView: View {
     }
     
     private func uploadUserData(uid: String){
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let messaging = Firebase.messaging
         let query = db.collection("User").document(uid)
@@ -217,6 +222,6 @@ struct SignUpManageView: View {
     }
 }
 
-#Preview {
-    SignUpManageView()
-}
+//#Preview {
+//    SignUpManageView()
+//}

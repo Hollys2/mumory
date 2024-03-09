@@ -10,7 +10,6 @@ import SwiftUI
 import Core
 import Shared
 import Lottie
-import FirebaseStorage
 
 public struct CustomizationView: View {
     let imageModel: UIImage = UIImage()
@@ -26,7 +25,7 @@ public struct CustomizationView: View {
     @State var isLoading: Bool = false
     @State var isTapBackButton: Bool = false
     
-    let Firebase = FirebaseManager.shared
+    let Firebase = FBManager.shared
     
     public init(){}
     
@@ -36,6 +35,24 @@ public struct CustomizationView: View {
             
             //Step indicator
             VStack(spacing: 0, content: {
+                HStack{
+                    Button(action: {
+                        isTapBackButton = true
+                        if manager.step == 0 {
+                            dismiss()
+                        }else{
+                            withAnimation {
+                                manager.step -= 1
+                            }
+                        }
+                    }, label: {
+                        SharedAsset.back.swiftUIImage
+                    })
+                    Spacer()
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 63)
+                
                 ZStack{
                     Rectangle()
                         .frame(maxWidth: .infinity)
@@ -121,23 +138,6 @@ public struct CustomizationView: View {
                 .environmentObject(manager)
         })
         .navigationBarBackButtonHidden()
-        .toolbar(content: {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: {
-                    isTapBackButton = true
-                    if manager.step == 0 {
-                        dismiss()
-                    }else{
-                        withAnimation {
-                            manager.step -= 1
-                        }
-                    }
-                }, label: {
-                    SharedAsset.back.swiftUIImage
-                })
-                
-            }
-        })
         .gesture(DragGesture().onEnded({ gesture in
             if gesture.location.x - gesture.startLocation.x > 80 {
                 isTapBackButton = true
@@ -233,7 +233,7 @@ public struct CustomizationView: View {
         let storage = Firebase.storage
  
         if let data = manager.profileImageData {
-            let metaData = StorageMetadata()
+            let metaData = Firebase.storageMetadata()
             metaData.contentType = "image/jpeg"
             let path: String = "ProfileImage/\(uid).jpg"
             let ref = storage.reference().child(path)

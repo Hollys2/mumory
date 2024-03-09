@@ -55,7 +55,7 @@ public struct MyRecentMusicView: View {
     
     private func searchRecentMusicPost(){
         //임의로 즐겨찾기 목록이 나오게 함
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let query = db.collection("User").document(currentUserData.uid).collection("Playlist").document("favorite")
         query.getDocument { snapshot, error in
@@ -117,6 +117,6 @@ struct NoMumoryView: View {
         })
     }
 }
-#Preview {
-    NoMumoryView()
-}
+//#Preview {
+//    NoMumoryView()
+//}

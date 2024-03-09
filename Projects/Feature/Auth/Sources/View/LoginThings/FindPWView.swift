@@ -24,6 +24,17 @@ struct FindPWView: View {
             LibraryColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
+                HStack{
+                    SharedAsset.back.swiftUIImage
+                        .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            dismiss()
+                        }
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .frame(height: 63)
+                
                 //상단 타이틀
                 Text("비밀번호 재설정")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
@@ -84,15 +95,6 @@ struct FindPWView: View {
         }
         .background(LibraryColorSet.background)
         .navigationBarBackButtonHidden()
-        .toolbar(content: {
-            ToolbarItem(placement: .topBarLeading) {
-                SharedAsset.back.swiftUIImage
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        dismiss()
-                    }
-            }
-        })
         .onTapGesture {
             self.hideKeyboard()
         }
@@ -101,7 +103,7 @@ struct FindPWView: View {
     
     private func checkValidEmail(email: String) {
         isLoading = true
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         
@@ -144,6 +146,6 @@ struct FindPWView: View {
     
 }
 
-#Preview {
-    FindPWView()
-}
+//#Preview {
+//    FindPWView()
+//}

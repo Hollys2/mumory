@@ -21,7 +21,7 @@ public class LibraryManageModel: ObservableObject{
     
     func pop() {
         DispatchQueue.main.async {
-            withAnimation(.spring(duration: 0.2)){
+            withAnimation(.easeOut(duration: 0.2)){
                 self.xOffset = self.width
             }
         }
@@ -36,7 +36,7 @@ public class LibraryManageModel: ObservableObject{
     
     func push(destination: LibraryPage) {
         DispatchQueue.main.async {
-            withAnimation(.spring(duration: 0.2)){
+            withAnimation(.easeOut(duration: 0.2)){
                 self.stack.append(destination)
             }
         }

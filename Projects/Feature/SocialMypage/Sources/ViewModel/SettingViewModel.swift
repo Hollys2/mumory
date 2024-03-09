@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Core
+import Shared
 
 class SettingViewModel: ObservableObject{
     @Published var email: String = ""
@@ -68,8 +68,8 @@ class SettingViewModel: ObservableObject{
             }
         }
     }
-    let db = FirebaseManager.shared.db
-    let messaging = FirebaseManager.shared.messaging
+    let db = FBManager.shared.db
+    let messaging = FBManager.shared.messaging
     
     public init() {}
 

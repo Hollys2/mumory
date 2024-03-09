@@ -14,8 +14,23 @@ let project = Project(name: "Shared",
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
                                        dependencies: [
-                                        .project(target: "Core", path: "../Core")
+                                        .external(name: "FirebaseAuth"),
+                                        .external(name: "FirebaseFirestore"),
+                                        .external(name: "FirebaseStorage"),
+                                        .external(name: "FirebaseMessaging"),
+                                        .external(name: "GoogleSignIn"),
+                                        .external(name: "KakaoSDKUser"),
+                                        .external(name: "KakaoSDKAuth"),
+                                        .external(name: "Alamofire"),
+                                        .external(name: "RealmSwift"),
+                                        .external(name: "Lottie")
+                                       ],
+                                       settings: Settings.settings(base: [
+                                        "HEADER_SEARCH_PATHS": "$(inherited) $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/realm-swift",
+                                        "OTHER_LDFLAGS" : "-ObjC"
+
                                        ])
+                                      )
                       ])
 
 

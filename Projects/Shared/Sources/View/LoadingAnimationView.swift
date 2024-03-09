@@ -28,6 +28,6 @@ public struct LoadingAnimationView: View {
     }
 }
 
-#Preview {
-    LoadingAnimationView(isLoading: .constant(true))
-}
+//#Preview {
+//    LoadingAnimationView(isLoading: .constant(true))
+//}

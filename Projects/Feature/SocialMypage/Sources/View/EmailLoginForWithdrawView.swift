@@ -30,6 +30,19 @@ struct EmailLoginForWithdrawView: View {
                 LibraryColorSet.background.ignoresSafeArea()
                 
                 VStack(spacing: 0, content: {
+                    HStack {
+                        SharedAsset.xWhite.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .onTapGesture {
+                                dismiss()
+                            }
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .frame(height: 63)
+                    
                     //상단 타이틀
                     Text("계정 인증 하기")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
@@ -96,15 +109,6 @@ struct EmailLoginForWithdrawView: View {
             .frame(width: geometry.size.width + 1)
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()
-            .toolbar(content: {
-                ToolbarItem(placement: .topBarLeading) {
-                    SharedAsset.xWhite.swiftUIImage
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            dismiss()
-                        }
-                }
-            })
             .onTapGesture {
                 self.hideKeyboard()
             }
@@ -112,6 +116,6 @@ struct EmailLoginForWithdrawView: View {
     }
 }
 
-#Preview {
-    EmailLoginForWithdrawView()
-}
+//#Preview {
+//    EmailLoginForWithdrawView()
+//}

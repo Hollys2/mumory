@@ -54,6 +54,6 @@ struct SlideTestView: View {
     
 }
 
-#Preview {
-    SlideTestView()
-}
+//#Preview {
+//    SlideTestView()
+//}
