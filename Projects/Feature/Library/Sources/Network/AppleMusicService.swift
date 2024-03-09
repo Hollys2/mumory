@@ -8,7 +8,7 @@
 
 import Foundation
 import Alamofire
-import Core
+import Shared
 
 enum NetworkResult{
     case success(Any)
@@ -36,7 +36,7 @@ public class AppleMusicService {
     
     func getRecommendationMusicIDList(genre: Int, limit: Int, offset: Int, completion: @escaping(NetworkResult) -> Void){
         let url = baseURL + chartURL
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         db.collection("Admin").document("Key").getDocument { snapshot, error in

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import Core
+import Shared
 
 public struct test2222: View {
     @State var id: String = "default"
@@ -16,7 +16,7 @@ public struct test2222: View {
         VStack{
             Button {
                 Task {
-                    let Firebase = FirebaseManager.shared
+                    let Firebase = FBManager.shared
                     let db = Firebase.db
                     let auth = Firebase.auth
                     

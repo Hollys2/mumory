@@ -180,7 +180,7 @@ struct FriendPlaylistView: View {
         self.friend = friend
     }
     
-    let db = FirebaseManager.shared.db
+    let db = FBManager.shared.db
     
     @State var playlists: [MusicPlaylist] = []
     var body: some View {

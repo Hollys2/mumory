@@ -118,7 +118,7 @@ struct EmailLoginView: View {
     
     func tapLoginButton(email: String, password: String) async{
         isLoading = true
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
         

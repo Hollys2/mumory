@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import Core
+import Shared
 
 public struct FireStoreTest: View {
     public init(){}
@@ -19,7 +19,7 @@ public struct FireStoreTest: View {
     }
     
     private func test(){
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         

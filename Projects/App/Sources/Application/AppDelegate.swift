@@ -14,7 +14,7 @@ import KakaoSDKUser
 import KakaoSDKAuth
 import GoogleSignIn
 import FirebaseMessaging
-import Core
+import Shared
 //import RealmSwift
 
 public class AppDelegate: NSObject, UIApplicationDelegate{

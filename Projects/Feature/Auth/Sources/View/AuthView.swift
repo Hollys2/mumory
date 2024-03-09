@@ -8,12 +8,12 @@
 
 
 import SwiftUI
-import Core
+import Shared
 
 
 public struct AuthView: View {
     
-    let db = FirebaseManager.shared.db
+    let db = FBManager.shared.db
     
     public init() {
     }

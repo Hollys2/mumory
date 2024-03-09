@@ -280,7 +280,7 @@ struct PlaylistView: View {
         }
     }
     private func getPlaylist() {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
@@ -338,7 +338,7 @@ struct PlaylistView: View {
     }
     
     private func deleteSongsFromPlaylist() {
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         
         var newSongs = songs.filter{ !selectedSongsForDelete.contains($0) }

@@ -26,7 +26,7 @@ public struct MumoriUser: Hashable{
     public init(uid: String) async {
         self.uid = uid
         
-        let db = FirebaseManager.shared.db
+        let db = FBManager.shared.db
         
         guard let document = try? await db.collection("User").document(uid).getDocument() else {
             return

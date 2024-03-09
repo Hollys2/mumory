@@ -163,7 +163,7 @@ struct QuestionView: View {
     
     private func uploadQuestion(){
         isLoading = true
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         

@@ -168,7 +168,7 @@ struct SignUpManageView: View {
     }
     
     private func createUser(email: String, password: String){
-        let auth = FirebaseManager.shared.auth
+        let auth = FBManager.shared.auth
         auth.createUser(withEmail: email, password: password) { data, error in
             if let error = error {
                 print("create user error: \(error)")
@@ -187,7 +187,7 @@ struct SignUpManageView: View {
     }
     
     private func uploadUserData(uid: String){
-        let Firebase = FirebaseManager.shared
+        let Firebase = FBManager.shared
         let db = Firebase.db
         let messaging = Firebase.messaging
         let query = db.collection("User").document(uid)

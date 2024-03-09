@@ -25,7 +25,7 @@ public struct LoginView: View {
     @State var isLoading: Bool = false
     @State var isEmailLoginTapped = false
     
-    let Firebase = FirebaseManager.shared
+    let Firebase = FBManager.shared
     
     public init() {
     }

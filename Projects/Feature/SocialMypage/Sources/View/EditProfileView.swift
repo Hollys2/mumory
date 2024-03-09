@@ -59,7 +59,7 @@ private struct UserProfile: View {
     @State var isPresentBackgroundBottomSheet: Bool = false
     @State var isPresentProfileBottomSheet: Bool = false
 
-    let Firebase = FirebaseManager.shared
+    let Firebase = FBManager.shared
     
     @Binding private var profileData: EditProfileData
     
@@ -336,7 +336,7 @@ private struct IdStackView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State private var isTappedInfo: Bool = false
     @State private var timer: Timer?
-    let db = FirebaseManager.shared.db
+    let db = FBManager.shared.db
     
     @Binding private var profileData: EditProfileData
     init(profileData: Binding<EditProfileData>) {
@@ -458,7 +458,7 @@ private struct IdStackView: View {
 private struct NicknameStackView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var timer: Timer?
-    let db = FirebaseManager.shared.db
+    let db = FBManager.shared.db
     
     @Binding private var profileData: EditProfileData
     init(profileData: Binding<EditProfileData>) {
