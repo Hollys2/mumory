@@ -1,28 +1,6 @@
 import ProjectDescription
 import ProjectDescriptionHelpers
 
-let expendedInfo: [String : InfoPlist.Value] = [
-    
-    "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
-    "CFBundleURLTypes" : [
-        [
-            "CFBundleTypeRole" : "Editor",
-            "CFBundleURLName" : "kakao1",
-            "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
-        ],
-        [
-            "CFBundleTypeRole" : "Editor",
-            "CFBundleURLName" : "kakao2",
-            "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260:ouath"]
-        ],
-        [
-            "CFBundleTypeRole" : "Editor",
-            "CFBundleURLName" : "fireBase-google",
-            "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
-        ]
-    ]
-]
-
 let project = Project(name: "Feature",
                       organizationName: "hollys",
                       packages: [],
@@ -37,7 +15,12 @@ let project = Project(name: "Feature",
                                        dependencies: [
                                         .project(target: "Core", path: "../Core"),
                                         .project(target: "Shared", path: "../Shared"),
-                                       ])
+                                       ],
+                                       settings: Settings.settings(base: [
+                                        "HEADER_SEARCH_PATHS": "$(inherited) $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/gtm-session-fetcher/Sources/Core/Public $(SRCROOT)/../../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/realm-swift",
+                                        "OTHER_LDFLAGS" : "-ObjC"
+
+                                       ]))
                       ])
 
 

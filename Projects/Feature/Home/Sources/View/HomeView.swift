@@ -309,10 +309,7 @@ public struct HomeView: View {
                     case .library:
                         LibraryManageView()
                     case .notification:
-                        VStack(spacing: 0){
-                            Color.red
-                            Color.blue
-                        }
+                        NotifyView()
                     }
                     
                     HomeTabView(selectedTab: $selectedTab)

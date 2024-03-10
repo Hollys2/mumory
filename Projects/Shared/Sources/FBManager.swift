@@ -21,6 +21,7 @@ public class FBManager {
     public let auth: Auth
     public let app: FirebaseApp?
     public let messaging: Messaging
+    public typealias TimeStamp = Timestamp
     
     private init() {
         db = Firestore.firestore()
