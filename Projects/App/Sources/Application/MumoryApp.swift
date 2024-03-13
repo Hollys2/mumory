@@ -1,7 +1,6 @@
 import SwiftUI
 import Feature
 import KakaoSDKAuth
-import GoogleSignIn
 import Core
 import Shared
 

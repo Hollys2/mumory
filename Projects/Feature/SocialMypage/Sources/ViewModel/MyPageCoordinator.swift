@@ -22,6 +22,7 @@ public enum MyPage: Hashable {
     case login
     case friendList(friends: [MumoriUser])
     case friendPage(friend: MumoriUser)
+    case activityList
 }
 class MyPageCoordinator: ObservableObject {
     @Published public var stack: [MyPage] = []
@@ -72,6 +73,9 @@ class MyPageCoordinator: ObservableObject {
             
         case .friendPage(friend: let friend):
             FriendPageView(friend: friend)
+            
+        case .activityList:
+            ActivityListView()
         }
 
     }

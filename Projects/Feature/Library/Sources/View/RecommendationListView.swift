@@ -145,6 +145,7 @@ struct RecommendationListView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
+            
         })
         
         

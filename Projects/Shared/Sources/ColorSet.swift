@@ -26,4 +26,6 @@ public class ColorSet{
     public static let lineGray = Color(white: 0.65)
     public static let D9Gray = Color(white: 0.85)
     public static let D0Gray = Color(white: 0.82)
+    public static let A6Gray = Color(white: 0.65)
+    public static let Gray34 = Color(white: 0.2)
 }

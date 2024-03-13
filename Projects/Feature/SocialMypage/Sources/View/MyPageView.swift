@@ -44,6 +44,13 @@ struct MyPageView: View {
                             .background(lineGray)
                         
                         MyMumori()
+                        
+                        SubFunctionView()
+                            .environmentObject(myPageCoordinator)
+                        
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(height: 200)
                     })
                 }
                 
@@ -291,3 +298,86 @@ struct MyMumori: View {
     }
 }
 
+struct SubFunctionView: View {
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+
+    let lineGray = Color(white: 0.37)
+
+    var body: some View {
+        VStack(spacing: 0) {
+            
+            Divider()
+                .frame(maxWidth: .infinity)
+                .frame(height: 0.5)
+                .background(lineGray)
+            
+            HStack(spacing: 0, content: {
+                Text("리워드")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                    .foregroundStyle(Color.white)
+                
+                Spacer()
+                
+                SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 17, height: 17)
+            })
+            .padding(.horizontal, 20)
+            .frame(height: 67)
+            .background(ColorSet.background)
+            
+            
+            Divider()
+                .frame(maxWidth: .infinity)
+                .frame(height: 0.5)
+                .background(lineGray)
+            
+            HStack(spacing: 0, content: {
+                Text("월간 통계")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                    .foregroundStyle(Color.white)
+                
+                Spacer()
+                
+                SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 17, height: 17)
+            })
+            .padding(.horizontal, 20)
+            .frame(height: 67)
+            .background(ColorSet.background)
+            
+            
+            Divider()
+                .frame(maxWidth: .infinity)
+                .frame(height: 0.5)
+                .background(lineGray)
+            
+            HStack(spacing: 0, content: {
+                Text("활동 내역")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                    .foregroundStyle(Color.white)
+                
+                Text("좋아요, 댓글, 친구")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
+                    .foregroundStyle(ColorSet.charSubGray)
+                    .padding(.leading, 8)
+                
+                Spacer()
+                
+                SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 17, height: 17)
+            })
+            .padding(.horizontal, 20)
+            .frame(height: 67)
+            .background(ColorSet.background)
+            .onTapGesture {
+                myPageCoordinator.push(destination: .activityList)
+            }
+        }
+    }
+}

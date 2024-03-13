@@ -134,7 +134,7 @@ struct SaveToPlaylistView: View {
         
         if self.songIDs.count > 1 {
             //리스트로 저장할 때
-            DispatchQueue.global().async {
+            DispatchQueue.global(qos: .background ).async {
                 data += self.songIDs.filter({!data.contains($0)}) //중복 제거 후 업로드할 데이터에 추가
                 
                 let uploadData = [

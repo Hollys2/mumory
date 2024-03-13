@@ -189,6 +189,7 @@ public struct CustomizationView: View {
         
         userData.merge(await uploadProfileImage(uid: uid))
         userData.merge(await subscribeTOS(uid: uid))
+        //위에 두개 동시 실행
         try? await db.collection("User").document(uid).setData(userData, merge: true)
         
         await uploadPlaylist(uid: uid)
