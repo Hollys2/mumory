@@ -80,8 +80,11 @@ struct ProfileSettingView: View {
                                     manager.removeProfileImage()
                                     return
                                 }
-                                manager.profileImage = Image(uiImage: uiImage)
-                                manager.profileImageData = uiImage.jpegData(compressionQuality: 0.1).unsafelyUnwrapped
+                                DispatchQueue.main.async {
+                                    manager.profileImage = Image(uiImage: uiImage)
+                                    manager.profileImageData = uiImage.jpegData(compressionQuality: 0.1).unsafelyUnwrapped
+                                }
+                            
                             }
                         })
                         .fullScreenCover(isPresented: $isPresentBottomSheet, content: {

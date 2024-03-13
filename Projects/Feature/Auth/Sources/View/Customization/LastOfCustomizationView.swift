@@ -11,7 +11,7 @@ import Shared
 
 struct LastOfCustomizationView: View {
     @EnvironmentObject var manager: CustomizationManageViewModel
-    
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var firstYOffset: CGFloat = 0
     @State var firstOpacity: CGFloat = 0
     @State var secondYOffset: CGFloat = 0
@@ -141,15 +141,13 @@ struct LastOfCustomizationView: View {
                 
                 VStack{
                     Spacer()
-                    NavigationLink {
-                        HomeView()
-                            .navigationBarBackButtonHidden()
-                    } label: {
-                        WhiteButton(title: "시작하기", isEnabled: true)
-                            .padding(.bottom, 20)
-                            .padding(.leading, 20)
-                            .padding(.trailing, 20)
-                    }
+                    WhiteButton(title: "시작하기", isEnabled: true)
+                        .padding(.bottom, 20)
+                        .padding(.leading, 20)
+                        .padding(.trailing, 20)
+                        .onTapGesture {
+                            appCoordinator.rootPath = NavigationPath([LoginPage.home])
+                        }
                 }
             })
         }

@@ -30,7 +30,6 @@ public struct HomeView: View {
     
     public var body: some View {
         
-        NavigationStack(path: $appCoordinator.rootPath) {
             
             ZStack(alignment: .bottom) {
                 
@@ -98,38 +97,43 @@ public struct HomeView: View {
                 }
             } // ZStack
             .ignoresSafeArea()
-            .navigationDestination(for: String.self, destination: { i in
-                if i == "music" {
-                    SearchMusicView()
-                } else if i == "location" {
-                    SearchLocationView()
-                } else if i == "map" {
-                    SearchLocationMapView()
-                } else if i == "search-social" {
-                    SocialSearchView()
-                } else {
-                    Color.gray
-                }
-            })
-            .navigationDestination(for: SearchFriendType.self, destination: { type in
-                switch type {
-                case .cancelRequestFriend:
-                    FriendMenuView(type: .cancelRequestFriend)
-                case .unblockFriend:
-                    FriendMenuView(type: .unblockFriend)
-                default:
-                    Color.pink
-                }
-            })
-            .navigationDestination(for: MumoryView.self) { view in
-                switch view.type {
-                case .mumoryDetailView:
-                    MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
-                case .editMumoryView:
-                    MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
-                }
+            .navigationBarBackButtonHidden()
+            .onAppear {
+//                if appCoordinator.rootPath.count > 0{
+//                    appCoordinator.rootPath = NavigationPath.init([LoginPage.home])
+//                }
             }
-        } // NavigationStack
+//            .navigationDestination(for: String.self, destination: { i in
+//                if i == "music" {
+//                    SearchMusicView()
+//                } else if i == "location" {
+//                    SearchLocationView()
+//                } else if i == "map" {
+//                    SearchLocationMapView()
+//                } else if i == "search-social" {
+//                    SocialSearchView()
+//                } else {
+//                    Color.gray
+//                }
+//            })
+//            .navigationDestination(for: SearchFriendType.self, destination: { type in
+//                switch type {
+//                case .cancelRequestFriend:
+//                    FriendMenuView(type: .cancelRequestFriend)
+//                case .unblockFriend:
+//                    FriendMenuView(type: .unblockFriend)
+//                default:
+//                    Color.pink
+//                }
+//            })
+//            .navigationDestination(for: MumoryView.self) { view in
+//                switch view.type {
+//                case .mumoryDetailView:
+//                    MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
+//                case .editMumoryView:
+//                    MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
+//                }
+//            }
     }
     
     var mapView: some View {

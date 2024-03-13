@@ -13,8 +13,8 @@ import Lottie
 
 struct TermsOfServiceForSocialView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject var manager: CustomizationManageViewModel = CustomizationManageViewModel()
-    
+    @EnvironmentObject var manager: CustomizationManageViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var isEntireChecked: Bool = false
     @State var isCheckedFirstItem: Bool = false
     @State var isCheckedSecondItem: Bool = false
@@ -102,6 +102,7 @@ struct TermsOfServiceForSocialView: View {
                     Button(action: {
                         manager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
                         isTOSDone = true
+                        appCoordinator.rootPath.append(LoginPage.startCustomization)
                     }, label: {
                         WhiteButton(title: "회원가입", isEnabled: isCheckedFirstItem && isCheckedSecondItem)
                             .padding(.bottom, 20)
@@ -112,10 +113,10 @@ struct TermsOfServiceForSocialView: View {
                     
                 }
             }
-            .navigationDestination(isPresented: $isTOSDone, destination: {
-                StartCostomizationView()
-                    .environmentObject(manager)
-            })
+//            .navigationDestination(isPresented: $isTOSDone, destination: {
+//                StartCostomizationView()
+//                    .environmentObject(manager)
+//            })
             .navigationBarBackButtonHidden()
  
         })

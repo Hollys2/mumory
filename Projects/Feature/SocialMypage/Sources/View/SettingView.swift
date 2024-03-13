@@ -18,6 +18,7 @@ import Lottie
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @EnvironmentObject var withdrawManager: WithdrawViewModel
@@ -87,7 +88,14 @@ struct SettingView: View {
                         do {
                             try FBManager.shared.auth.signOut()
                             print("로그아웃 완료")
-                            myPageCoordinator.resetPath(destination: .login)
+                            let keyWindow = UIApplication.shared.connectedScenes
+                                        .filter({$0.activationState == .foregroundActive})
+                                        .compactMap({$0 as? UIWindowScene})
+                                        .first?.windows
+                                        .filter({$0.isKeyWindow}).first
+                              findNavigationController(viewController: keyWindow?.rootViewController)?
+                                .popToRootViewController(animated: false)
+                            
                         }catch {
                             print("signout error: \(error)")
                         }
@@ -122,6 +130,22 @@ struct SettingView: View {
             
         }
         
+    }
+    
+    func findNavigationController(viewController: UIViewController?) -> UINavigationController? {
+      guard let viewController = viewController else {
+        return nil
+      }
+   
+      if let navigationController = viewController as? UINavigationController {
+        return navigationController
+      }
+   
+      for childViewController in viewController.children {
+        return findNavigationController(viewController: childViewController)
+      }
+   
+      return nil
     }
     private func deleteAppleUser(){
         print("in delete apple user")

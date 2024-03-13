@@ -10,7 +10,7 @@ import Foundation
 import Shared
 import SwiftUI
 
-class CustomizationManageViewModel: ObservableObject{
+public class CustomizationManageViewModel: ObservableObject{
     @Published var step: Int = 0
     
     @Published var isCheckedRequiredItems: Bool?
@@ -111,7 +111,9 @@ class CustomizationManageViewModel: ObservableObject{
     }
     
     public func removeProfileImage() {
-        self.profileImage = nil
-        self.profileImageData = nil
+        DispatchQueue.main.async {
+            self.profileImage = nil
+            self.profileImageData = nil
+        }
     }
 }
