@@ -349,6 +349,9 @@ public struct SocialFriendView: View {
             }
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .ignoresSafeArea()
+            .onDisappear {
+                firebaseManager.searchedFriend = nil
+            }
             
             //            if self.appCoordinator.isPopUpViewShown {
             //                ZStack {
@@ -361,10 +364,10 @@ public struct SocialFriendView: View {
             //                }
             //            }
         }
-        .bottomSheet(isShown: self.$isMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .addFriend, mumoryAnnotation: MumoryAnnotation()))
+        .bottomSheet(isShown: self.$isMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .addFriend, mumoryAnnotation: Mumory()))
         .popup(show: self.$isSendFriendRequestPopUpShown, content: {
             PopUpView(isShown: self.$isSendFriendRequestPopUpShown, type: .twoButton, title: "친구 요청을 보내시겠습니까?", buttonTitle: "친구 요청", buttonAction: {
-                FirebaseManager.shared.sendFriendRequest(receiverUserID: "JJS")
+                FirebaseManager.shared.sendFriendRequest(receiverUserID: "tester")
             })
         })
         .popup(show: self.$isAcceptFriendRequestPopUpShown, content: {
@@ -375,7 +378,7 @@ public struct SocialFriendView: View {
         .popup(show: self.$isDeleteFriendRequestPopUpShown, content: {
             PopUpView(isShown: self.$isDeleteFriendRequestPopUpShown, type: .twoButton, title: "친구 요청을 삭제하시겠습니까?", buttonTitle: "요청 삭제", buttonAction: {
                 print(firebaseManager.friendRequests[0].nickname)
-                FirebaseManager.shared.deleteFriendRequest(receiverUserID: "JJS")
+                FirebaseManager.shared.deleteFriendRequest(receiverUserID: "tester")
             })
         })
     }

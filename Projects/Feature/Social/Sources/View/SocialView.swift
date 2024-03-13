@@ -92,7 +92,7 @@ extension SocialScrollViewRepresentable {
         var scrollView: UIScrollView?
         var preOffsetY: CGFloat = 0.0
         var topBarOffsetY: CGFloat = 0.0
-        var oldMumoryAnnotations: [MumoryAnnotation] = []
+        var oldMumoryAnnotations: [Mumory] = []
         
         init(parent: SocialScrollViewRepresentable) {
             self.parent = parent
@@ -181,7 +181,7 @@ struct SocialItemView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
-    let mumoryAnnotation: MumoryAnnotation
+    let mumoryAnnotation: Mumory
     
     var body: some View {
         
@@ -589,7 +589,7 @@ public struct SocialView: View {
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .preferredColorScheme(.dark)
-        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation ?? MumoryAnnotation()))
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation ?? Mumory()))
         .onAppear {
             mumoryDataViewModel.fetchEveryMumory()
             FirebaseManager.shared.observeFriendRequests()

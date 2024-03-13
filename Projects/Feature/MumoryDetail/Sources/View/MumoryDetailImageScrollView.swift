@@ -17,7 +17,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
 //    typealias UIViewType = UIScrollView
     
 //    @State var imageURLs: [String]
-    @State var mumoryAnnotation: MumoryAnnotation
+    @State var mumoryAnnotation: Mumory
     
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
@@ -115,7 +115,7 @@ extension MumoryDetailImageScrollView.Coordinator: UIScrollViewDelegate {
 struct MumoryDetailImageScrollContentView: View {
     
 //    @State var imageURLs: [String]
-    var mumoryAnnotation: MumoryAnnotation
+    var mumoryAnnotation: Mumory
     
     var body: some View {
         HStack(spacing: 0) {

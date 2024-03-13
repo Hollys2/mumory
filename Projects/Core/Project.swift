@@ -19,5 +19,7 @@ let project = Project(name: "Core",
 //                                        .external(name: "Moya"),
 //                                        .external(name: "FirebaseAuth"),
 //                                        .external(name: "FirebaseFirestore"),
-                                       ])
+                                       ]
+                                      )
+                                
                       ])

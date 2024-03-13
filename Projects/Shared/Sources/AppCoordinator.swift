@@ -11,25 +11,10 @@ import SwiftUI
 import Foundation
 import MusicKit
 
-public enum StackViewType {
-    case firstView
-    case secondView
-}
 
-public struct StackView: Hashable {
-    public let type: StackViewType
-//    let content: String
-    
-//    public init() {
-//        self.type = .firstView
-//    }
-}
-
-
-@available(iOS 16.0, *)
 public class AppCoordinator: ObservableObject {
     
-    @Published public var currentUserID: String = ""
+    @Published public var currentUser: UserModel = UserModel()
 
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var createMumoryPath: NavigationPath = NavigationPath()
@@ -61,7 +46,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isNavigationStackShown = false
     
     @Published public var choosedSongID: MusicItemID?
-    @Published public var choosedMumoryAnnotation: MumoryAnnotation?
+    @Published public var choosedMumoryAnnotation: Mumory?
     
     @Published public var page: Int = -1
     

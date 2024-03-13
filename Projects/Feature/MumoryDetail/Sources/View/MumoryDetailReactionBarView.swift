@@ -12,7 +12,7 @@ import Shared
 
 struct MumoryDetailReactionBarView: View {
     
-    @Binding var mumoryAnnotation: MumoryAnnotation
+    @Binding var mumoryAnnotation: Mumory
     
     @State var isOn: Bool
     @EnvironmentObject var appCoordinator: AppCoordinator

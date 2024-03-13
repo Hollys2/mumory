@@ -33,7 +33,7 @@ struct TagView: View {
 
 struct MumoryDetailScrollContentView: View {
     
-    @Binding var mumoryAnnotation: MumoryAnnotation
+    @Binding var mumoryAnnotation: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel

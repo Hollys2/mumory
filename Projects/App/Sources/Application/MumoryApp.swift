@@ -30,11 +30,12 @@ struct MumoryApp: App {
                     .environmentObject(keyboardResponder)
                     .onAppear {
                         print("MumoryApp onAppear")
+
+                        appCoordinator.currentUser = UserModel(documentID: "tester", nickname: "솔다", id: "solda")
                         
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                         
-                        appCoordinator.currentUserID = "tester"
                     }
             }
         }

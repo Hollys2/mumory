@@ -12,11 +12,14 @@ import MapKit
 import Core
 import Shared
 
+import Firebase
+
 
 public struct HomeView: View {
     
     @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
+    @State private var listener: ListenerRegistration?
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -51,8 +54,8 @@ public struct HomeView: View {
                 
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
-                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? MumoryAnnotation())
-                    .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: MumoryAnnotation()))
+                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory())
+                    .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
                     .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
                         PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
             //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
@@ -131,8 +134,14 @@ public struct HomeView: View {
             
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
-                    print("HomeMapViewRepresentable onAppear")
-                    self.mumoryDataViewModel.fetchMyMumory()
+                    Task {
+                        print("HomeMapViewRepresentable onAppear")
+                    }
+//                    self.mumoryDataViewModel.fetchMyMumory(userDocumentID: self.appCoordinator.currentUser.documentID)
+                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.documentID)
+                }
+                .onDisappear {
+                    print("HomeMapViewRepresentable onDisappear")
                 }
             
             VStack(spacing: 0) {

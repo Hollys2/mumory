@@ -17,7 +17,7 @@ import Shared
 
 public struct MumoryEditView: View {
     
-    @State var mumoryAnnotation: MumoryAnnotation
+    @State var mumoryAnnotation: Mumory
     
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
@@ -44,7 +44,7 @@ public struct MumoryEditView: View {
     
     let bottomBarHeight: CGFloat = 55
     
-    public init(mumoryAnnotation: MumoryAnnotation) {
+    public init(mumoryAnnotation: Mumory) {
         self._mumoryAnnotation = State(initialValue: mumoryAnnotation)
         self._calendarDate = State(initialValue: mumoryAnnotation.date)
         self._imageURLs = State(initialValue: mumoryAnnotation.imageURLs ?? [])
@@ -409,7 +409,7 @@ public struct MumoryEditView: View {
                 }
                 
                 group.notify(queue: .main) {
-                    let newMumoryAnnotation = MumoryAnnotation(author: "tester", id: mumoryAnnotation.id, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, comments: mumoryAnnotation.comments)
+                    let newMumoryAnnotation = Mumory(id: mumoryAnnotation.id, userDocumentID: "tester", date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, comments: mumoryAnnotation.comments)
                     
                     mumoryDataViewModel.updateMumory(newMumoryAnnotation) {
 

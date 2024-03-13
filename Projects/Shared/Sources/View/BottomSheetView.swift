@@ -36,9 +36,9 @@ public struct MumoryBottomSheet {
     
     @Binding public var isPublic: Bool
     
-    public let mumoryAnnotation: MumoryAnnotation
+    public let mumoryAnnotation: Mumory
     
-    public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: MumoryAnnotation, isPublic: Binding<Bool>? = nil) {
+    public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: Mumory, isPublic: Binding<Bool>? = nil) {
         self.appCoordinator = appCoordinator
         self.mumoryDataViewModel = mumoryDataViewModel
         

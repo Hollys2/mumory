@@ -211,7 +211,7 @@ public struct MumoryCommentSheetView: View {
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
 
-    let mumoryAnnotation: MumoryAnnotation
+    let mumoryAnnotation: Mumory
 //    var comments: [Comment]
     
     @State private var commentText: String = ""
@@ -231,7 +231,7 @@ public struct MumoryCommentSheetView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, mumoryAnnotation: MumoryAnnotation) {
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, mumoryAnnotation: Mumory) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
         
@@ -351,7 +351,7 @@ public struct MumoryCommentSheetView: View {
                                         .cornerRadius(22.99999)
                                     
                                     Button(action: {
-                                        mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? MumoryAnnotation(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
+                                        mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
                                         commentText = ""
                                     }, label: {
                                         commentText.isEmpty ?
@@ -534,7 +534,7 @@ public struct MumoryCommentSheetView: View {
                                             
 
                                         Button(action: {
-                                            mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? MumoryAnnotation(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
+                                            mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
                                             commentText = ""
                                         }, label: {
                                             commentText.isEmpty ?

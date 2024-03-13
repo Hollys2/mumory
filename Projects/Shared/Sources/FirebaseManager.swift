@@ -58,13 +58,13 @@ public class FirebaseManager: ObservableObject {
     public func sendFriendRequest(receiverUserID: String) {
         
         let friendRequestData = [
-            "senderID": "tester",
-            "nickname": "테스터",
+            "senderID": "MMMMMM",
+            "nickname": "뮤모링",
             "timestamp": ServerValue.timestamp()
         ] as [String : Any]
         
         let databaseRef = Database.database().reference()
-        let friendRequestsRef = databaseRef.child("users").child(receiverUserID).child("friendRequests").child("tester")
+        let friendRequestsRef = databaseRef.child("users").child(receiverUserID).child("friendRequests").child(receiverUserID)
         
         
         friendRequestsRef.setValue(friendRequestData) { (error, ref) in
@@ -78,7 +78,7 @@ public class FirebaseManager: ObservableObject {
     
     public func observeFriendRequests() {
         let databaseRef = Database.database().reference()
-        let friendRequestsRef = databaseRef.child("users").child("JJS").child("friendRequests")
+        let friendRequestsRef = databaseRef.child("users").child("tester").child("friendRequests")
         
         friendRequestsRef.observe(.childAdded) { (snapshot) in
             

@@ -182,7 +182,7 @@ struct SearchMusicView: View {
                     self.mumoryDataViewModel.musicModels = response.songs.compactMap({
                         .init(songID: $0.id, title: $0.title, artist: $0.artistName, artworkUrl: $0.artwork?.url(width: 500, height: 500))
                     })
-                    print("do: \(self.mumoryDataViewModel.musicModels)")
+//                    print("do: \(self.mumoryDataViewModel.musicModels)")
                 } catch {
                     print("catch: \(String(describing: error))")
                 }

@@ -53,6 +53,25 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
+        // Remove annotations that are no longer in myMumoryAnnotations
+//        let currentAnnotationIDs = Set(uiView.annotations.compactMap { ($0 as? Mumory)?.id })
+        let newAnnotationIDs = Set(self.mumoryDataViewModel.myMumoryAnnotations.map { $0.id })
+        let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !newAnnotationIDs.contains($0.id) }
+        uiView.removeAnnotations(annotationsToRemove)
+        
+        for annotation in self.mumoryDataViewModel.myMumoryAnnotations {
+            // Find the corresponding annotation in the map view
+            if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
+                // Compare properties of the annotation in the map view with the updated annotation
+                if existingAnnotation != annotation {
+                    // Remove the existing annotation from the map view
+                    uiView.removeAnnotation(existingAnnotation)
+                    
+                    // Add the updated annotation to the map view
+//                    uiView.addAnnotation(annotation)
+                }
+            }
+        }
         
         let sortedAnnotations = self.mumoryDataViewModel.myMumoryAnnotations.sorted(by: { $0.date > $1.date })
         uiView.addAnnotations(sortedAnnotations)
@@ -169,13 +188,13 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             annotationView.zPriority = .max
             
             return annotationView
-        } else if annotation is MumoryAnnotation {
+        } else if annotation is Mumory {
             let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "MumoryAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "MumoryAnnotation")
             
             annotationView.image = SharedAsset.musicPin.image
             annotationView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
-            if let mumoryAnnotation = annotation as? MumoryAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
+            if let mumoryAnnotation = annotation as? Mumory, let url = mumoryAnnotation.musicModel.artworkUrl {
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
                 artwork.layer.cornerRadius = 12
@@ -191,7 +210,7 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             return annotationView
         } else if let cluster = annotation as? MKClusterAnnotation {
             
-            let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
+            let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? Mumory }
             let sortedAnnotations = memberAnnotations.sorted { $0.date > $1.date }
             
             let topAnnotation = sortedAnnotations.first
@@ -228,7 +247,7 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
-        if let mumoryAnnotation = annotation as? MumoryAnnotation {
+        if let mumoryAnnotation = annotation as? Mumory {
             let region = MKCoordinateRegion(center: annotation.coordinate, span: MapConstant.defaultSpan)
             mapView.setRegion(region, animated: true)
             self.parent.annotationSelected = true
@@ -240,7 +259,7 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
         } else if let cluster = annotation as? MKClusterAnnotation {
             self.parent.annotationSelected = true
             
-            let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? MumoryAnnotation }
+            let memberAnnotations = cluster.memberAnnotations.compactMap { $0 as? Mumory }
             
             let sortedAnnotations = memberAnnotations.sorted { $0.date > $1.date }
             self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = sortedAnnotations
@@ -252,7 +271,9 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
         print("didDeselect")
-        self.parent.annotationSelected = false
+        DispatchQueue.main.async {
+            self.parent.annotationSelected = false
+        }
     }
 }
 

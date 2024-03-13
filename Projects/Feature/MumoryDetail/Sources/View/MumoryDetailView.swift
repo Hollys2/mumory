@@ -15,7 +15,7 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     //    typealias UIViewType = UIScrollView
     
     // Binding 해줘야 앨범 타이틀 바뀜
-    @Binding var mumoryAnnotation: MumoryAnnotation
+    @Binding var mumoryAnnotation: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -131,7 +131,7 @@ public struct MumoryDetailView: View {
     
     @Environment(\.presentationMode) var presentationMode
     
-    @State var mumoryAnnotation: MumoryAnnotation
+    @State var mumoryAnnotation: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -142,8 +142,8 @@ public struct MumoryDetailView: View {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
-            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? MumoryAnnotation())
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: MumoryAnnotation()))
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory())
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
             
             ZStack(alignment: .bottomLeading) {
                 

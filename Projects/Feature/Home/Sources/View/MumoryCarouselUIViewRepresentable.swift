@@ -14,7 +14,7 @@ import Shared
 
 struct MumoryCarouselUIViewRepresentable: UIViewRepresentable {
     
-    @Binding var mumoryAnnotations: [MumoryAnnotation]
+    @Binding var mumoryAnnotations: [Mumory]
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
@@ -65,7 +65,7 @@ extension MumoryCarouselUIViewRepresentable.Coordinator: UIScrollViewDelegate {}
 
 struct MumoryList: View {
     
-    @Binding var mumoryAnnotations: [MumoryAnnotation]
+    @Binding var mumoryAnnotations: [Mumory]
     
     var body: some View {
         HStack(spacing: 0) {
@@ -80,7 +80,7 @@ struct MumoryList: View {
 
 struct MumoryCard: View {
     
-    @Binding var mumoryAnnotation: MumoryAnnotation
+    @Binding var mumoryAnnotation: Mumory
     //    @Binding var annotationSelected: bool
     
     let selectedIndex: Int

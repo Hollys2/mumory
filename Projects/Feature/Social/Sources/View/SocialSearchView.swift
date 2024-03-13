@@ -171,7 +171,7 @@ public struct SocialSearchView: View {
                     
                     VStack(spacing: 0) {
                         
-                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { i in
+                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { m in
                             
                             HStack(spacing: 0) {
                                 
@@ -211,7 +211,7 @@ public struct SocialSearchView: View {
                             .frame(height: 70)
                         }
                     }
-                    .frame(height: 70 * 3 + 30)
+                    .frame(height: 70 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
                     .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                     .cornerRadius(15)
                     .padding(.top, 18)
@@ -283,7 +283,7 @@ public struct SocialSearchView: View {
                     VStack(spacing: 0) {
                         
 //                        ForEach(0..<3) { _ in
-                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { i in
+                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { m in
                             
                             VStack(spacing: 0) {
                         
@@ -296,16 +296,15 @@ public struct SocialSearchView: View {
                                     
                                     Spacer().frame(width: 7)
                                     
-                                    Text("이르음음음음음")
-                                        .font(
-                                            SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14)
-//                                            Font.custom("Pretendard", size: 14)
-//                                                .weight(.semibold)
-                                        )
+                                    Text("\(m.userDocumentID)")
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                         .foregroundColor(.white)
-                                        .frame(width: 75, height: 10, alignment: .leading)
+                                        .frame(maxWidth: 75)
+                                        .frame(height: 10, alignment: .leading)
+                                        .fixedSize(horizontal: true, vertical: false)
                                     
-                                    Text(" ・ 10월 2일")
+                                    
+                                    Text(" ・ \(DateManager.formattedDate(date: m.date, dateFormat: "M월 d일"))")
                                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     
@@ -316,7 +315,7 @@ public struct SocialSearchView: View {
                                     
                                     Spacer().frame(width: 4)
                                     
-                                    Text("반포한강공원반포한강공원")
+                                    Text("\(m.locationModel.locationTitle)")
                                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                         .lineLimit(1)
                                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
@@ -328,67 +327,73 @@ public struct SocialSearchView: View {
                                 HStack(spacing: 0) {
                                     
                                     VStack(alignment: .leading, spacing: 0) {
-                                        Text("내용내 용내 용내용옹내 용일 상일 상일상내용내용내용 내용옹내용일상 일상일상 내용내용내용 내용옹 내용 일상내용 내용옹내용 일상일상일상내용내용내용")
-                                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-//                                            .lineLimit(2)
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                            .background(.blue)
+                                        if let content = m.content {
+                                            Text(content)
+                                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                                                .foregroundColor(.white)
+                                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+//                                                .background(.blue)
+                                        }
                                         
 //                                        Spacer()
                                         
-                                        
                                         HStack(spacing: 10) {
-                                            Text("#태그태그태그")
-                                              .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                              .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                              .fixedSize(horizontal: true, vertical: false)
-
-                                            Text("#태그태그태그")
-                                              .font(Font.custom("Pretendard", size: 13))
-                                              .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                              .fixedSize(horizontal: true, vertical: false)
-
-                                            Text("#태그태그태그")
-                                              .font(Font.custom("Pretendard", size: 13))
-                                              .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+                                            if let tags = m.tags {
+//                                                ForEach(tags.indices, id: \.self) { tag in
+                                                    Text("#\(tags[0])")
+                                                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                                                        .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+                                                        .fixedSize(horizontal: true, vertical: false)
+//                                                }
+                                            }
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading) // HStack 정렬
                                         .padding(.vertical, 5)
-                                        .background(.pink)
-                                        
+//                                        .background(.pink)
                                         
                                         HStack(spacing: 0) {
                                             Image(uiImage: SharedAsset.musicIconMumoryDetail.image)
+                                                .resizable()
                                                 .frame(width: 14, height: 14)
                                             
                                             Spacer().frame(width: 5)
                                             
-//                                            Text("What Was I Made For?")
-                                            Text("Super Shy")
+                                            Text(m.musicModel.title)
                                                 .font(Font.custom("Pretendard", size: 14).weight(.semibold))
                                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                                                 .fixedSize(horizontal: true, vertical: false)
                                             
                                             Spacer().frame(width: 6)
                                             
-//                                            Text("[From The Motion Picture \"Barbie\"]")
-                                            Text("NewJeans")
+                                            Text(m.musicModel.artist)
                                                 .font(Font.custom("Pretendard", size: 14))
                                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                                                 .lineLimit(1)
                                             
                                         }
                                         .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(.orange)
                                     } // VStack
                                     
-                                    Rectangle()
+                                    if let urls = m.imageURLs {
+                                        AsyncImage(url: URL(string: urls[0])) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                //                                                    .resizable()
+                                                //                                                    .aspectRatio(contentMode: .fit)
+                                                //                                                    .frame(width: 36, height: 36)
+                                            default:
+                                                Color(red: 0.85, green: 0.85, blue: 0.85)
+                                                //                                                    .frame(width: 36, height: 36)
+                                            }
+                                        }
+                                        //                                        Rectangle()
                                         .foregroundColor(.clear)
                                         .frame(width: 75, height: 75)
                                         .background(Color(red: 0.85, green: 0.85, blue: 0.85))
                                         .cornerRadius(5)
                                         .padding(.leading, 20)
+                                    }
                                 } // HStack
                                 
                                 Spacer().frame(height: 17)
@@ -403,7 +408,7 @@ public struct SocialSearchView: View {
                             )
                         }
                     }
-                    .frame(height: 148 * 3 + 30)
+                    .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
                     .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                     .cornerRadius(15)
                     .padding(.top, 24)
@@ -423,6 +428,9 @@ public struct SocialSearchView: View {
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
+        .onDisappear {
+            self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
+        }
     }
 }
 
@@ -436,9 +444,3 @@ struct TabWidthPreferenceKey: PreferenceKey {
     }
 }
 
-struct SocialSearchView_Previews: PreviewProvider {
-    static var previews: some View {
-        SocialSearchView()
-            .environmentObject(AppCoordinator())
-    }
-}
