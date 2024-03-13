@@ -40,15 +40,14 @@ struct NotifyView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(notifications, id: \.id) { notification in
-                            
-                            switch(notification.type) {
+                        ForEach(notifications.indices, id: \.self) { index in
+                            switch(notifications[index].type) {
                             case .like:
-                                NotifyLikeItem(notification: notification)
+                                NotifyLikeItem(notification: $notifications[index])
                             case .comment, .reply:
-                                NotifyCommentItem(notification: notification)
+                                NotifyCommentItem(notification: $notifications[index])
                             case .friendAccept, .friendRequest:
-                                NotifyFriendItem(notification: notification)
+                                NotifyFriendItem(notification: $notifications[index])
                             case .none:
                                 EmptyView()
                             }
@@ -57,8 +56,8 @@ struct NotifyView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
                                 .background(ColorSet.subGray)
-                            
                         }
+               
                     })
                 }
 
@@ -132,10 +131,12 @@ struct UnreadText: View {
 
 struct NotifyLikeItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    let notification: Notification
-    init(notification: Notification) {
-        self.notification = notification
+    @Binding var notification: Notification
+    init(notification: Binding<Notification>) {
+        self._notification = notification
     }
+    let db = FBManager.shared.db
+    
     var body: some View {
         HStack(spacing: 0, content: {
             Circle()
@@ -185,6 +186,15 @@ struct NotifyLikeItem: View {
         .frame(height: 90)
         .frame(maxWidth: .infinity)
         .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
+        .onTapGesture {
+            if !notification.isRead {
+                DispatchQueue.global().async {
+                    db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                }
+                self.notification.isRead = true
+            }
+            //해당 알림과 관련된 페이지로 넘어가기
+        }
     }
     
 
@@ -192,11 +202,12 @@ struct NotifyLikeItem: View {
 
 struct NotifyCommentItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    var notification: Notification
-    init(notification: Notification) {
-        self.notification = notification
+    @Binding var notification: Notification
+    init(notification: Binding<Notification>) {
+        self._notification = notification
     }
-    
+    let db = FBManager.shared.db
+
     var body: some View {
         HStack(spacing: 0, content: {
             Circle()
@@ -252,15 +263,25 @@ struct NotifyCommentItem: View {
         .padding(.horizontal, 15)
         .frame(height: 90)
         .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
+        .onTapGesture {
+            if !notification.isRead {
+                DispatchQueue.global().async {
+                    db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                }
+                self.notification.isRead = true
+            }
+            //해당 알림과 관련된 페이지로 넘어가기
+        }
     }
 }
 
 struct NotifyFriendItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    var notification: Notification
-    init(notification: Notification) {
-        self.notification = notification
+    @Binding var notification: Notification
+    init(notification: Binding<Notification>) {
+        self._notification = notification
     }
+    let db = FBManager.shared.db
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -303,10 +324,18 @@ struct NotifyFriendItem: View {
                 .frame(width: 22, height: 22)
                 .padding(.leading, 10)
         })
-        
         .padding(.horizontal, 15)
         .frame(height: 90)
         .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
+        .onTapGesture {
+            if !notification.isRead {
+                DispatchQueue.global().async {
+                    db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                }
+                self.notification.isRead = true
+            }
+            //해당 알림과 관련된 페이지로 넘어가기
+        }
     }
 }
 

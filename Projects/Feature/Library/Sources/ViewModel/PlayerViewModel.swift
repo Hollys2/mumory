@@ -16,7 +16,7 @@ struct PlayingInfo {
 }
 
 public class PlayerViewModel: ObservableObject {
-    public init() {}
+
     
     @Published var isMiniPlayerPresent: Bool = true
     @Published var isPlayingViewPresent: Bool = false
@@ -33,6 +33,7 @@ public class PlayerViewModel: ObservableObject {
     @Published var playingTime: TimeInterval = 0.0
 
     var timer: Timer?
+    public init() {}
     
     public func changeCurrentEntry(song: Song){
         player.queue.currentEntry = player.queue.entries.first(where: {$0.item?.id == song.id})

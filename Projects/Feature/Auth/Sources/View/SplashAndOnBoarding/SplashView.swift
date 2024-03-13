@@ -70,6 +70,14 @@ public struct SplashView: View {
 //            print("no internet")
 //        }
         
+        let query = db.collection("Comment").whereField("mumoriID", isEqualTo: "mumoriii")
+        
+        
+        guard let snapshot = try? await db.collection("Mumory").getDocuments() else {
+            return
+        }
+        
+        
         
         //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
         guard let user = auth.currentUser,

@@ -103,6 +103,7 @@ extension Project {
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
             "NSLocationWhenInUseUsageDescription": "지도를 주세요.",
             "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
+            "FirebaseAppDelegateProxyEnabled": false,
             "CFBundleURLTypes" : [
                 [
                     "CFBundleTypeRole" : "Editor",

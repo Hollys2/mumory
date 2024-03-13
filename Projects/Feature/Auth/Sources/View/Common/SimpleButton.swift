@@ -13,6 +13,7 @@ import Shared
 struct WhiteButton: View {
     var title: String = ""
     var isEnabled: Bool = false
+    var showShadow: Bool = true
     var body: some View {
         VStack{
             Text(title)
@@ -23,7 +24,7 @@ struct WhiteButton: View {
         .foregroundColor(.black)
         .background(isEnabled ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
-        .shadow(color: Color.black.opacity(0.25), radius: 10, y: 6)
+        .shadow(color: showShadow ? Color.black.opacity(0.25) : Color.clear, radius: 10, y: 6)
 
     }
 }

@@ -1,13 +1,11 @@
 import SwiftUI
 import Feature
 import KakaoSDKAuth
-import GoogleSignIn
 import Core
 import Shared
 
-@available(iOS 16.4, *)
 @main
-public struct MumoryApp: App {
+struct MumoryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var appCoordinator: AppCoordinator = .init()
     @StateObject var locationManager: LocationManager = .init() // 위치 권한
@@ -16,9 +14,8 @@ public struct MumoryApp: App {
     @StateObject var currentUserData: CurrentUserData = CurrentUserData()
     @StateObject var playerManager = PlayerViewModel()
     @StateObject var libraryManager: LibraryManageModel = LibraryManageModel()
-    public init(){}
     
-    public var body: some Scene {
+    var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
                 //                CreateMumoryBottomSheetView()

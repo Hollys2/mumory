@@ -260,7 +260,7 @@ public struct LoginView: View {
         
         //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
         let query = Firebase.db.collection("User").document(uid)
-        
+        let fcmToken = Firebase.messaging.fcmToken ?? ""
         guard let snapshot = try? await query.getDocument() else {
             self.isLoading = false
             return
@@ -284,15 +284,18 @@ public struct LoginView: View {
             
             currentUserData.uid = uid
             currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
-     
+            try? await query.updateData(["fcmToken": fcmToken])
             isLoginCompleted = true
         }else {
             //신규 회원
-            let userData: [String: Any] = [
+            
+            var userData: [String: Any] = [
                 "uid": uid,
                 "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
-                "signInMethod": method
+                "signInMethod": method,
+                "fcmToken": fcmToken
             ]
+            
             try? await snapshot.reference.setData(userData)
             self.isLoading = false
             self.goToCustomization = true

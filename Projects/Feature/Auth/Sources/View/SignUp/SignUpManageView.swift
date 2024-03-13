@@ -198,7 +198,8 @@ struct SignUpManageView: View {
             "email": manager.email,
             "signInMethod": "Email",
             "isSubscribedToService": manager.isCheckedServiceNewsNotification,
-            "isSubscribedToSocial": true
+            "isSubscribedToSocial": true,
+            "fcmToken": messaging.fcmToken ?? ""
         ]
         
         if manager.isCheckedServiceNewsNotification {
@@ -206,6 +207,7 @@ struct SignUpManageView: View {
         }
         
         messaging.subscribe(toTopic: "Social")
+        
         
         query.setData(userData) { error in
             if let error = error {
