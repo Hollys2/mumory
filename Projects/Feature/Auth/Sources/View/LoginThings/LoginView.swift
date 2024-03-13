@@ -101,6 +101,7 @@ public struct LoginView: View {
             })
             .navigationDestination(isPresented: $isLoginCompleted) {
                 HomeView() //로그인 완료시 홈 화면으로 이동
+                    .navigationBarBackButtonHidden()
             }
             .onDisappear(perform: {
                 isLoading = false
