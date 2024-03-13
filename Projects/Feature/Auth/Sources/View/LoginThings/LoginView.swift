@@ -13,19 +13,32 @@ import KakaoSDKUser
 import Lottie
 import GoogleSignIn
 import Firebase
+public enum LoginPage: Hashable {
+    case customization
+    case startCustomization
+    case signUp
+    case home
+    case emailLogin
+    case lastOfCustomization
+    case login
 
+}
 public struct LoginView: View {
     @Environment(\.presentationMode) var presentationMode
 
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
 
-    @State var isLoginCompleted: Bool = false
-    @State var goToCustomization: Bool = false
+
+//    @State var isLoginCompleted: Bool = false
+//    @State var goToCustomization: Bool = false
     @State var isLoading: Bool = false
     @State var isEmailLoginTapped = false
     
     let Firebase = FBManager.shared
+    
+
     
     public init() {
     }
@@ -44,11 +57,14 @@ public struct LoginView: View {
                     EmailLoginButton()
                         .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
                         .onTapGesture {
-                            isEmailLoginTapped = true
+                            appCoordinator.rootPath.append(LoginPage.emailLogin)
                         }
-                        .fullScreenCover(isPresented: $isEmailLoginTapped, content: {
-                            EmailLoginView()
-                        })
+//                        .onTapGesture {
+//                            isEmailLoginTapped = true
+//                        }
+//                        .fullScreenCover(isPresented: $isEmailLoginTapped, content: {
+//                            EmailLoginView()
+//                        })
                     
                     //카카오 로그인 버튼
                     LoginButtonItem(type: .kakao, action: tapKakaoButton)
@@ -67,26 +83,25 @@ public struct LoginView: View {
                                 }
                             }
                         }
+
                     
-                    NavigationLink {
-                        SignUpManageView()
-                    } label: {
-                        VStack(spacing: 0){
-                            Text("뮤모리 계정이 없으시다면?")
-                                .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                .padding(.top, getUIScreenBounds().height > 700 ? 68 : 51)
-                            
-                            Text("이메일로 가입하기")
-                                .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                .padding(.top, 8)
-                            
-                            Spacer()
-                            
-                        }
+                    VStack(spacing: 0){
+                        Text("뮤모리 계정이 없으시다면?")
+                            .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .padding(.top, getUIScreenBounds().height > 700 ? 68 : 51)
+                        
+                        Text("이메일로 가입하기")
+                            .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                            .padding(.top, 8)
+                        
+                        Spacer()
+                        
                     }
-                    .buttonStyle(EmpeyActionStyle()) //터치 애니메이션 삭제
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(LoginPage.signUp)
+                    }
                     
                 }
                 
@@ -96,13 +111,6 @@ public struct LoginView: View {
                 
             }
             .navigationBarBackButtonHidden()
-            .navigationDestination(isPresented: $goToCustomization, destination: {
-                TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
-            })
-            .navigationDestination(isPresented: $isLoginCompleted) {
-                HomeView() //로그인 완료시 홈 화면으로 이동
-                    .navigationBarBackButtonHidden()
-            }
             .onDisappear(perform: {
                 isLoading = false
                 //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
@@ -278,7 +286,10 @@ public struct LoginView: View {
             guard let id = data["id"] as? String,
                   let nickname = data["nickname"] as? String else {
                 //커스텀 마무리 안 한 기존 회원
-                self.goToCustomization = true
+//                self.goToCustomization = true
+                
+                //루트패스 수정
+                appCoordinator.rootPath.append(LoginPage.customization)
                 return
             }
 
@@ -286,7 +297,10 @@ public struct LoginView: View {
             currentUserData.uid = uid
             currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
             try? await query.updateData(["fcmToken": fcmToken])
-            isLoginCompleted = true
+            
+            //루트패스 수정
+//            isLoginCompleted = true
+            appCoordinator.rootPath = NavigationPath([LoginPage.home])
         }else {
             //신규 회원
             
@@ -299,7 +313,9 @@ public struct LoginView: View {
             
             try? await snapshot.reference.setData(userData)
             self.isLoading = false
-            self.goToCustomization = true
+//            self.goToCustomization = true
+            //루트패스
+            appCoordinator.rootPath.append(LoginPage.customization)
         }
 
 

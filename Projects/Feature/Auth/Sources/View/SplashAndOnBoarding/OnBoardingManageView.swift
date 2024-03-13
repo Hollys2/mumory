@@ -10,7 +10,9 @@ import SwiftUI
 import Shared
 
 struct OnBoardingManageView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var isPresentNextView = false
+    
     var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
@@ -37,16 +39,11 @@ struct OnBoardingManageView: View {
             
             VStack{
                 Spacer()
-                NavigationLink {
-                    LoginView()
-                } label: {
-                    WhiteButton(title: "시작하기", isEnabled: true)
-                        .padding(20)
-                }
-                .buttonStyle(EmpeyActionStyle())
-                
-                
-                
+                WhiteButton(title: "시작하기", isEnabled: true)
+                    .padding(20)
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(LoginPage.login)
+                    }
             }
             
         }

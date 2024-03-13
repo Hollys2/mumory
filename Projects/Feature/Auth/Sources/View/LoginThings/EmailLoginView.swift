@@ -15,18 +15,17 @@ struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
-
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var email: String = ""
     @State var password: String = ""
     @State var isLoginError: Bool = false
     @State var isLoading: Bool = false
-    @State var isCustomizationNotDone: Bool = false
-    @State var isLoginSuccess: Bool = false
+//    @State var isCustomizationNotDone: Bool = false
+//    @State var isLoginSuccess: Bool = false
     @State var isPresent: Bool = false
 
     
     var body: some View {
-            NavigationStack{
                 ZStack{
                     LibraryColorSet.background.ignoresSafeArea()
                     
@@ -37,7 +36,7 @@ struct EmailLoginView: View {
                                 .scaledToFit()
                                 .frame(width: 30, height: 30)
                                 .onTapGesture {
-                                    dismiss()
+                                    appCoordinator.rootPath.removeLast()
                                 }
                             Spacer()
                         }
@@ -101,20 +100,19 @@ struct EmailLoginView: View {
                     
                     LoadingAnimationView(isLoading: $isLoading)
                 }
-                .navigationDestination(isPresented: $isCustomizationNotDone, destination: {
-                    StartCostomizationView()
-                        .environmentObject(customManager)
-                })
-                .navigationDestination(isPresented: $isLoginSuccess, destination: {
-                    HomeView()
-                        .navigationBarBackButtonHidden()
-                })
+//                .navigationDestination(isPresented: $isCustomizationNotDone, destination: {
+//                    StartCostomizationView()
+//                        .environmentObject(customManager)
+//                })
+//                .navigationDestination(isPresented: $isLoginSuccess, destination: {
+//                    HomeView()
+//                        .navigationBarBackButtonHidden()
+//                })
                 .background(LibraryColorSet.background)
                 .navigationBarBackButtonHidden()
                 .onTapGesture {
                     self.hideKeyboard()
                 }
-            }
     }
     
     func tapLoginButton(email: String, password: String) async{
@@ -132,14 +130,17 @@ struct EmailLoginView: View {
         
         guard let id = data["id"] as? String,
               let nickname = data["nickname"] as? String else {
-            self.isCustomizationNotDone = true
+            appCoordinator.rootPath.append(LoginPage.startCustomization)
+//            self.isCustomizationNotDone = true
             return
         }
         
         currentUserData.uid = result.user.uid
       
         isLoading = false
-        isLoginSuccess = true
+//        appCoordinator.rootPath.append(LoginPage.home)
+        appCoordinator.rootPath = NavigationPath([LoginPage.home])
+//        isLoginSuccess = true
     }
 }
 

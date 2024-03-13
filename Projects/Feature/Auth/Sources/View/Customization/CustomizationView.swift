@@ -16,6 +16,7 @@ public struct CustomizationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var manager: CustomizationManageViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isUploadImageCompleted = false
     @State var isUploadUserDataCompleted = false
@@ -133,10 +134,10 @@ public struct CustomizationView: View {
             LoadingAnimationView(isLoading: $isLoading)
             
         }
-        .navigationDestination(isPresented: $isCustomizationDone, destination: {
-            LastOfCustomizationView()
-                .environmentObject(manager)
-        })
+//        .navigationDestination(isPresented: $isCustomizationDone, destination: {
+//            LastOfCustomizationView()
+//                .environmentObject(manager)
+//        })
         .navigationBarBackButtonHidden()
         .gesture(DragGesture().onEnded({ gesture in
             if gesture.location.x - gesture.startLocation.x > 80 {
@@ -199,6 +200,7 @@ public struct CustomizationView: View {
         
         isLoading = false
         isCustomizationDone = true
+        appCoordinator.rootPath.append(LoginPage.lastOfCustomization)
     }
 
     

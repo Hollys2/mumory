@@ -15,8 +15,10 @@ import Core
 struct SignUpManageView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
+
     @StateObject var manager: SignUpManageViewModel = SignUpManageViewModel()
-    @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
+//    @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State private var isSignUpCompleted = false
     @State private var isLoading = false
@@ -134,10 +136,10 @@ struct SignUpManageView: View {
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()
             //회원가입이 완료 되었을 때 다음 화면으로 이동
-            .navigationDestination(isPresented: $isSignUpCompleted) {
-                StartCostomizationView()
-                    .environmentObject(customManager)
-            }
+//            .navigationDestination(isPresented: $isSignUpCompleted) {
+//                StartCostomizationView()
+//                    .environmentObject(customManager)
+//            }
             .gesture(DragGesture().onEnded({ gesture in
                 if gesture.location.x - gesture.startLocation.x > 80 {
                     isTapBackButton = true
@@ -218,6 +220,7 @@ struct SignUpManageView: View {
                 print("firestore upload user data successful")
                 isLoading = false
                 isSignUpCompleted = true
+                appCoordinator.rootPath.append(LoginPage.startCustomization)
             }
         }
 
