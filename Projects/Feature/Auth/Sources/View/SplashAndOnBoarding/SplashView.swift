@@ -41,6 +41,7 @@ public struct SplashView: View {
                     LoginView()
                 }else {
                     HomeView()
+                        .navigationBarBackButtonHidden()
                 }
             }
             .onAppear(perform: {
