@@ -36,12 +36,6 @@ public struct MyMumoryView: View {
             .onEnded { value in
                 
                 withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    //                    if value.translation.height > 130 {
-                    //                        appCoordinator.isCreateMumorySheetShown = false
-                    //
-                    //                        mumoryDataViewModel.choosedMusicModel = nil
-                    //                        mumoryDataViewModel.choosedLocationModel = nil
-                    //                    }
                     translation.height = 0
                 }
             }

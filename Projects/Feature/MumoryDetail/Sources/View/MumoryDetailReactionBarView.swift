@@ -12,8 +12,11 @@ import Shared
 
 struct MumoryDetailReactionBarView: View {
     
+    @Binding var mumoryAnnotation: Mumory
+    
     @State var isOn: Bool
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -30,20 +33,21 @@ struct MumoryDetailReactionBarView: View {
         
             HStack(alignment: .center) {
                 Button(action: {
-                    
+                    mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, loginUserID: "tester")
                 }, label: {
-                    Image(uiImage: SharedAsset.heartButtonMumoryDetail.image)
+                    mumoryAnnotation.likes.contains("tester") ?
+                    Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
+                        .resizable()
+                        .frame(width: 42, height: 42)
+                    : Image(uiImage: SharedAsset.heartOffButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
                 })
                 
                 Spacer().frame(width: 4)
                 
-                Text("10")
-                    .font(
-                        Font.custom("Pretenard", size: 16)
-                            .weight(.medium)
-                    )
+                Text("\(mumoryAnnotation.likes.count)")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(.white)
                 
                 Spacer().frame(width: 12)
@@ -60,11 +64,8 @@ struct MumoryDetailReactionBarView: View {
                 
                 Spacer().frame(width: 4)
                 
-                Text("3")
-                    .font(
-                        Font.custom("Pretendard", size: 16)
-                            .weight(.medium)
-                    )
+                Text("\(mumoryAnnotation.comments.count)")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(.white)
                 
                 Spacer()
@@ -81,12 +82,6 @@ struct MumoryDetailReactionBarView: View {
             .padding(.top, 11)
         }
         .offset(y: self.isOn ? UIScreen.main.bounds.height - 64 - appCoordinator.safeAreaInsetsBottom : 0)
-    }
-}
-
-struct MumoryDetailReactionBarVIew_Previews: PreviewProvider {
-    static var previews: some View {
-        MumoryDetailReactionBarView(isOn: false)
     }
 }
 

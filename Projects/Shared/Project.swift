@@ -13,6 +13,7 @@ let project = Project(name: "Shared",
                                        infoPlist: .default,
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
+
                                        dependencies: [
                                         .external(name: "FirebaseAuth"),
                                         .external(name: "FirebaseFirestore"),

@@ -10,7 +10,6 @@
 import SwiftUI
 import Shared
 
-
 public struct AuthView: View {
     
     let db = FBManager.shared.db

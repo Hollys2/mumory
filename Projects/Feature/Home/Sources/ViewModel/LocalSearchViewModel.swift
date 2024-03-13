@@ -16,6 +16,10 @@ import Core
 
 public class LocalSearchViewModel: NSObject, ObservableObject {
     
+    @Published var recentSearches: [String] = UserDefaults.standard.stringArray(forKey: "recentLocationSearch") ?? []
+    @Published var popularSearches: [String] = []
+//    ["망원한강", "망원한강공원공원", "망원한강공원공원", "망원한강공원", "망원한강공원공원공원", "망원한강공원"]
+    
     @Published var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
     @Published var queryFragment: String = "" {
         didSet {
@@ -28,12 +32,8 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
     var cancellable: AnyCancellable?
     private var cancellables: Set = [""]
     
-    private let locationManager = CLLocationManager()
-    
     public override init() {
         super.init()
-        locationManager.delegate = self
-        locationManager.requestWhenInUseAuthorization()
         
         searchCompleter.delegate = self
 //        searchCompleter.region = MKCoordinateRegion(MKMapRect.world)
@@ -80,6 +80,30 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
             }
         }
     }
+    
+    func addRecentSearch(_ searchTerm: String) {
+        recentSearches.insert(searchTerm, at: 0)
+        
+        // Limit the number of recent searches to, for example, 10
+        recentSearches = Array(recentSearches.prefix(10))
+        
+        // Update UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+    }
+    
+    func removeRecentSearch(_ searchTerm: String) {
+        recentSearches.removeAll { $0 == searchTerm }
+        
+        // Update UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+    }
+    
+    func clearRecentSearches() {
+        recentSearches = []
+        
+        // Update UserDefaults
+        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+    }
 }
 
 extension LocalSearchViewModel: MKLocalSearchCompleterDelegate {
@@ -88,21 +112,4 @@ extension LocalSearchViewModel: MKLocalSearchCompleterDelegate {
         
         print("results = \(self.results)")
     }
-}
-
-extension LocalSearchViewModel: CLLocationManagerDelegate {
-    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-//            if let userLocation = locations.first?.coordinate {
-//                print("userLocation is not nil")
-//                // 사용자의 위치가 업데이트되면 해당 위치를 기반으로 region 설정
-//                searchCompleter.region = MKCoordinateRegion(center: userLocation, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
-//            }
-        }
-        
-        // CLLocationManagerDelegate에서 권한 변경 처리
-    public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-            if manager.authorizationStatus == .authorizedWhenInUse {
-                locationManager.startUpdatingLocation() // 권한이 승인되면 위치 업데이트 시작
-            }
-        }
 }

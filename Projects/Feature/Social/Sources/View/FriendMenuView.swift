@@ -31,6 +31,12 @@ struct FriendMenuView: View {
     
     @State private var type: SearchFriendType
     
+    @State private var isSendFriendRequestPopUpShown: Bool = false
+    @State private var isAcceptFriendRequestPopUpShown: Bool = false
+    @State private var isDeleteFriendRequestPopUpShown: Bool = false
+    @State private var isCancelFriendRequestPopUpShown: Bool = false
+    @State private var isUnblockFriendPopUpShown: Bool = false
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     init(type: SearchFriendType) {
@@ -88,24 +94,24 @@ struct FriendMenuView: View {
                 case .requestFriend:
                     EmptyView()
                 case .cancelRequestFriend:
-                    FriendItemView(type: .cancelRequestFriend)
+                    FriendItemView(type: .cancelRequestFriend, friend: FriendSearch(nickname: "", id: ""), isSendFriendRequestPopUpShown: self.$isSendFriendRequestPopUpShown, isAcceptFriendRequestPopUpShown: self.$isAcceptFriendRequestPopUpShown, isDeleteFriendRequestPopUpShown: self.$isDeleteFriendRequestPopUpShown, isCancelFriendRequestPopUpShown: self.$isCancelFriendRequestPopUpShown, isUnblockFriendPopUpShown: self.$isUnblockFriendPopUpShown)
                 case .unblockFriend:
-                    FriendItemView(type: .unblockFriend)
+                    FriendItemView(type: .unblockFriend, friend: FriendSearch(nickname: "", id: ""), isSendFriendRequestPopUpShown: self.$isSendFriendRequestPopUpShown, isAcceptFriendRequestPopUpShown: self.$isAcceptFriendRequestPopUpShown, isDeleteFriendRequestPopUpShown: self.$isDeleteFriendRequestPopUpShown, isCancelFriendRequestPopUpShown: self.$isCancelFriendRequestPopUpShown, isUnblockFriendPopUpShown: self.$isUnblockFriendPopUpShown)
                 }
             }
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
+        .popup(show: self.$isCancelFriendRequestPopUpShown, content: {
+            PopUpView(isShown: self.$isCancelFriendRequestPopUpShown, type: .twoButton, title: "친구 요청을 취소하시겠습니까?", buttonTitle: "요청 취소", buttonAction: {
+
+            })
+        })
+        .popup(show: self.$isUnblockFriendPopUpShown, content: {
+            PopUpView(isShown: self.$isUnblockFriendPopUpShown, type: .twoButton, title: "차단을 해제 하시겠습니까?", buttonTitle: "차단 해제", buttonAction: {
+
+            })
+        })
     }
 }
-
-
-
-
-//struct RequestFriendView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FriendMenuView(type: .addFriend)
-//            .environmentObject(AppCoordinator())
-//    }
-//}
