@@ -904,7 +904,7 @@ extension MumoryDataViewModel {
         }
     }
     
-    public func createReply(mumoryAnnotation: Mumory, loginUserID: String, parentCommentIndex: Int, reply: Comment) {
+    public func createReply2(mumoryAnnotation: Mumory, loginUserID: String, parentCommentIndex: Int, reply: Comment) {
         
 //        let db = FirebaseManager.shared.db
 //

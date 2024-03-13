@@ -24,14 +24,14 @@ struct MumoryApp: App {
         WindowGroup {
             GeometryReader { geometry in
                 //                CreateMumoryBottomSheetView()
-//                HomeView()
+                HomeView()
                 //충독나서 스플래시 화면으로 수정함
-                SplashView()
-                    .onOpenURL(perform: { url in
-                        if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                            AuthController.handleOpenUrl(url: url)
-                        }
-                    })
+//                SplashView()
+//                    .onOpenURL(perform: { url in
+//                        if (AuthApi.isKakaoTalkLoginUrl(url)) {
+//                            AuthController.handleOpenUrl(url: url)
+//                        }
+//                    })
                     .environmentObject(appCoordinator)
                     .environmentObject(locationManager)
                     .environmentObject(localSearchViewModel)
