@@ -10,11 +10,15 @@
 import SwiftUI
 import Shared
 
-struct MumoryDetailScrollView: UIViewRepresentable {
+struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     //    typealias UIViewType = UIScrollView
     
+    // Binding 해줘야 앨범 타이틀 바뀜
+    @Binding var mumoryAnnotation: Mumory
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
@@ -26,11 +30,14 @@ struct MumoryDetailScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView().environmentObject(appCoordinator))
+        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumoryAnnotation: self.$mumoryAnnotation)
+            .environmentObject(appCoordinator)
+            .environmentObject(mumoryDataViewModel)
+        )
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: 2300)
+        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
         
-        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: 2300)
+        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: x)
         
         scrollView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
@@ -41,21 +48,31 @@ struct MumoryDetailScrollView: UIViewRepresentable {
     }
     
     
-    func updateUIView(_ uiView: UIScrollView, context: Context) {}
+    func updateUIView(_ uiView: UIScrollView, context: Context) {
+        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumoryAnnotation: self.$mumoryAnnotation)
+            .environmentObject(appCoordinator)
+            .environmentObject(mumoryDataViewModel)
+        )
+        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
+        
+        uiView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: x)
+    }
     
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
 }
 
-extension MumoryDetailScrollView {
+extension MumoryDetailScrollViewRepresentable {
     
     class Coordinator: NSObject {
         
-        let parent: MumoryDetailScrollView
-//        var previousOffset: CGFloat = 0.0
+        let parent: MumoryDetailScrollViewRepresentable
+        //        var previousOffset: CGFloat = 0.0
         
-        init(parent: MumoryDetailScrollView) {
+        init(parent: MumoryDetailScrollViewRepresentable) {
             self.parent = parent
             super.init()
         }
@@ -94,114 +111,76 @@ enum ScrollBoundary {
     case below
 }
 
-extension MumoryDetailScrollView.Coordinator: UIScrollViewDelegate {
+extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-//        print("offsetY: \(offsetY)")
-
-//        let scrollDirection: ScrollDirection = (offsetY < previousOffset) ? .up : .down
-//        let scrollBoundary: ScrollBoundary = (offsetY < UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20) ? .above : .below
-
-//        DispatchQueue.main.async {
-//            self.handleScrollDirection(scrollDirection)
-//            self.handleScrollBoundary(scrollBoundary)
-//        }
-
+        
         let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
-
+        
         DispatchQueue.main.async {
             if self.parent.appCoordinator.isNavigationBarColored != isNavigationBarColored {
                 self.parent.appCoordinator.isNavigationBarColored = isNavigationBarColored
             }
         }
-//        previousOffset = offsetY
+        //        previousOffset = offsetY
     }
 }
 
 public struct MumoryDetailView: View {
     
     @Environment(\.presentationMode) var presentationMode
-
-    @State var mumoryAnnotation: MumoryAnnotation
+    
+    @State var mumoryAnnotation: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    @GestureState var dragAmount = CGSize.zero
-    @State private var translation: CGSize = .zero
-    
-    var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                print("onChanged: \(value.translation.height)")
-                if value.translation.height > 0 {
-                    DispatchQueue.main.async {
-                        translation.height = value.translation.height
-                    }
-                }
-            }
-            .onEnded { value in
-                print("onEnded: \(value.translation.height)")
-                
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-//                    if value.translation.height > 130 {
-//                        appCoordinator.isCreateMumorySheetShown = false
-//
-//                        mumoryDataViewModel.choosedMusicModel = nil
-//                        mumoryDataViewModel.choosedLocationModel = nil
-//                    }
-                        translation.height = 0
-                }
-            }
-    }
-    
     public var body: some View {
+        
         ZStack(alignment: .top) {
+            
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory())
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
+            
             ZStack(alignment: .bottomLeading) {
-                AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.2))) { phase in
+                
+                AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                     switch phase {
                     case .success(let image):
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .transition(.move(edge: .trailing))
+//                            .transition(.move(edge: .trailing))
                     default:
                         Color(red: 0.18, green: 0.18, blue: 0.18)
                     }
                 }
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                 
-                VStack(spacing: 23) {
-                    Text("\(mumoryAnnotation.musicModel.title)")
-//                    Text("What Was I Made For? [From The Motion Picture \"Barbie\"]")
-                        .font(
-                            SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24)
-//                            Font.custom("Pretendard", size: 24)
-//                                .weight(.medium)
-                        )
-                        .lineLimit(2)
-                        .foregroundColor(.white)
-                        .frame(width: 301, alignment: .leading)
-                        .background(.pink)
-                    
-                    Text("\(mumoryAnnotation.musicModel.artist)")
-                        .font(
-                            SharedFontFamily.Pretendard.light.swiftUIFont(size: 20)
-//                            Font.custom("Pretendard", size: 20)
-//                                .weight(.light)
-                        )
-                        .lineLimit(1)
-                        .foregroundColor(.white.opacity(0.8))
-                        .frame(width: 301, alignment: .leading)
-                }
-                .offset(y: -4)
-                .padding(.leading, 20)
+//                VStack(spacing: 23) {
+//                    
+//                    Text("\(mumoryAnnotation.musicModel.title)")
+//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
+//                        .lineLimit(2)
+//                        .foregroundColor(.white)
+//                        .frame(width: 301, alignment: .leading)
+//                        .zIndex(1)
+//                    
+//                    Text("\(mumoryAnnotation.musicModel.artist)")
+//                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
+//                        .lineLimit(1)
+//                        .foregroundColor(.white.opacity(0.8))
+//                        .frame(width: 301, alignment: .leading)
+//                        .zIndex(1)
+//                }
+//                .offset(y: -4)
+//                .padding(.leading, 20)
             } // ZStack
             
-            MumoryDetailScrollView()
+            MumoryDetailScrollViewRepresentable(mumoryAnnotation: self.$mumoryAnnotation)
             
             HStack {
                 Button(action: {
@@ -212,6 +191,7 @@ public struct MumoryDetailView: View {
                     Image(uiImage: SharedAsset.closeButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 30, height: 30)
+                        .padding(20)
                 })
                 
                 Spacer()
@@ -224,58 +204,35 @@ public struct MumoryDetailView: View {
                     Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
                         .resizable()
                         .frame(width: 30, height: 30)
+                        .padding(20)
                 })
             }
-            .frame(width: UIScreen.main.bounds.width - 40)
-            .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
+            .padding(.top, appCoordinator.safeAreaInsetsTop + 19 - 20)
             .padding(.bottom, 12)
-            .padding(.horizontal, 20)
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
-            //            .transition(.move(edge: .top))
             
             if appCoordinator.isReactionBarShown {
-                MumoryDetailReactionBarView(isOn: true)
+                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumoryAnnotation, isOn: true)
                 //                    .transition(.move(edge: .bottom))
             }
-            
-            if appCoordinator.isMumoryDetailMenuSheetShown {
-                Color.black.opacity(0.5).ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isMumoryDetailMenuSheetShown = false
-                        }
-                    }
-                
-                MumoryDetailMenuSheetView(translation: $translation)
-                    .offset(y: self.translation.height + UIScreen.main.bounds.height - 361 - appCoordinator.safeAreaInsetsBottom)
-                    .simultaneousGesture(dragGesture)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(3)
-            }
-            
-            if appCoordinator.isMumoryDetailCommentSheetViewShown {
-                Color.black.opacity(0.5).ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
-                        }
-                    }
 
-                MumoryDetailCommentSheetView() // 스크롤뷰만 제스처 추가해서 드래그 막음
-                    .offset(y: self.translation.height + UIScreen.main.bounds.height - (UIScreen.main.bounds.height * 0.84) - appCoordinator.safeAreaInsetsBottom)
-                    .gesture(dragGesture)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
-            }
         } // ZStack
+        .onAppear {
+            if let m = mumoryDataViewModel.selectedMumoryAnnotation {
+                self.mumoryAnnotation = m
+            }
+        }
         .navigationBarBackButtonHidden(true)
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
+        .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown) {
+            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
+                
+                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation) {
+                    appCoordinator.isDeleteMumoryPopUpViewShown = false
+                    appCoordinator.rootPath.removeLast()
+                }
+            })
+        }
         .ignoresSafeArea()
     }
 }
-
-//struct MumoryDetail_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let mumoryAnnotation = MumoryAnnotation()
-//        MumoryDetailView(mumoryAnnotation: mumoryAnnotation)
-//    }
-//}

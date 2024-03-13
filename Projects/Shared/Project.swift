@@ -13,11 +13,13 @@ let project = Project(name: "Shared",
                                        infoPlist: .default,
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
+
                                        dependencies: [
                                         .external(name: "FirebaseAuth"),
                                         .external(name: "FirebaseFirestore"),
                                         .external(name: "FirebaseStorage"),
                                         .external(name: "FirebaseMessaging"),
+                                        .external(name: "FirebaseDatabase"),
                                         .external(name: "GoogleSignIn"),
                                         .external(name: "KakaoSDKUser"),
                                         .external(name: "KakaoSDKAuth"),

@@ -143,6 +143,7 @@ struct LastOfCustomizationView: View {
                     Spacer()
                     NavigationLink {
                         HomeView()
+                            .navigationBarBackButtonHidden()
                     } label: {
                         WhiteButton(title: "시작하기", isEnabled: true)
                             .padding(.bottom, 20)

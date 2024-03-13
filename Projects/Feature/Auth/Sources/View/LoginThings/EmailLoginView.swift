@@ -107,6 +107,7 @@ struct EmailLoginView: View {
                 })
                 .navigationDestination(isPresented: $isLoginSuccess, destination: {
                     HomeView()
+                        .navigationBarBackButtonHidden()
                 })
                 .background(LibraryColorSet.background)
                 .navigationBarBackButtonHidden()

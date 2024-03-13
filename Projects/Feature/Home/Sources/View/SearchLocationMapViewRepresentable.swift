@@ -18,28 +18,23 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
     
     @Binding var locationModel: LocationModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
 
         mapView.mapType = .mutedStandard
+        mapView.showsUserLocation = true
         mapView.showsCompass = false
         mapView.isPitchEnabled = false
-        mapView.showsUserLocation = true
-//        mapView.userTrackingMode = .follow 권한 동의 후에
+        mapView.isRotateEnabled = false
         
-        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan), animated: true)
-        
-        if let currentLocation: CLLocation = locationManager.currentLocation {
-            mapView.setRegion(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: currentLocation.coordinate.latitude, longitude: currentLocation.coordinate.longitude), span: MapConstant.defaultSpan), animated: true)
-        }
+        mapView.setRegion(MKCoordinateRegion(center: mapView.userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
         
         context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
         context.coordinator.setCompassButton()
         context.coordinator.setPin()
-        mapView.overrideUserInterfaceStyle = .light // 라이트 테마
+        mapView.overrideUserInterfaceStyle = .light
         
         mapView.delegate = context.coordinator
         
@@ -49,17 +44,16 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
     func updateUIView(_ uiView: UIViewType, context: Context) {
     }
     
-    func makeCoordinator() -> MapViewCoordinator {
-        MapViewCoordinator(parent: self)
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
     }
 }
 
 extension SearchLocationMapViewRepresentable {
     
-    class MapViewCoordinator: NSObject {
+    class Coordinator: NSObject {
         
         let parent: SearchLocationMapViewRepresentable
-        
         var mapView: MKMapView?
         var isChanging: Bool = false {
             didSet {
@@ -124,7 +118,7 @@ extension SearchLocationMapViewRepresentable {
     }
 }
 
-extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelegate {
+extension SearchLocationMapViewRepresentable.Coordinator: MKMapViewDelegate {
     
     // 사용자가 지도를 움직일 때
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
@@ -133,10 +127,6 @@ extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelega
     
     // 사용자의 현재 위치가 변할 때
     func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        print("didUpdate in MKMapViewDelegate")
-        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: userLocation.coordinate.latitude, longitude: userLocation.coordinate.longitude), span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05))
-        
-        mapView.setRegion(region, animated: true)
     }
 
     // 사용자가 지도를 움직이고 난 후
@@ -157,18 +147,8 @@ extension SearchLocationMapViewRepresentable.MapViewCoordinator: MKMapViewDelega
         let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "UserLocationAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "UserLocationAnnotation")
         
         annotationView.image = SharedAsset.userLocation.image
-        
-        if let image = annotationView.image {
-            annotationView.frame = CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height)
-        }
-        
+        annotationView.frame = CGRect(x: 0, y: 0, width: 47, height: 47)
+
         return annotationView
     }
-    
-    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        print("didSelect")
-//        mapView.deselectAnnotation(view.annotation, animated: false)
-    }
-
-
 }
