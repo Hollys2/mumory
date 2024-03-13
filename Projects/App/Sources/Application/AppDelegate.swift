@@ -12,6 +12,7 @@ import FirebaseCore
 import KakaoSDKCommon
 import KakaoSDKUser
 import KakaoSDKAuth
+import GoogleSignIn
 import FirebaseMessaging
 import Shared
 //import RealmSwift

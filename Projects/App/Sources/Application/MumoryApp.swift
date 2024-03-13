@@ -17,6 +17,8 @@ struct MumoryApp: App {
     @StateObject var dateManager: DateManager = .init()
     @StateObject var firebaseManager: FirebaseManager = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
+    @StateObject var currentUserData: CurrentUserData = .init()
+    @StateObject var libraryManager: LibraryManageModel = .init()
     
     var body: some Scene {
         WindowGroup {
