@@ -73,7 +73,7 @@ public struct MumoryTabView: View {
             }
             .padding(.top, 2)
         }
-        .frame(height: 89)
+        .frame(height: appCoordinator.isHiddenTabBar ? 0 : 89)
         .background(Color.black)
     }
 }

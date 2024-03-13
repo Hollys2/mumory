@@ -218,9 +218,7 @@ public struct MumoryDetailView: View {
 
         } // ZStack
         .onAppear {
-            if let m = mumoryDataViewModel.selectedMumoryAnnotation {
-                self.mumoryAnnotation = m
-            }
+            mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
         }
         .navigationBarBackButtonHidden(true)
         .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))

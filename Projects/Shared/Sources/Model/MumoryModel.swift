@@ -70,47 +70,68 @@ public struct LocationModel: Identifiable, Codable {
 }
 
 public struct Comment: Codable, Hashable {
-    public let author: String
+    public let mumoryDocumentID: String
+    public let userDocumentID: String
+    public let parentDocumentID: String?
     public let date: Date
     public let content: String
     public let isPublic: Bool
-    public var replies: [Comment]
     
-    public init(author: String, date: Date, content: String, isPublic: Bool, replies: [Comment] = []) {
-         self.author = author
+    public init(mumoryDocumentID: String, userDocumentID: String, parentDocumentID: String? = nil, date: Date, content: String, isPublic: Bool) {
+         self.mumoryDocumentID = mumoryDocumentID
+         self.userDocumentID = userDocumentID
+         self.parentDocumentID = parentDocumentID
          self.date = date
          self.content = content
          self.isPublic = isPublic
-         self.replies = replies
      }
     
     public init?(data: [String: Any]) {
-        guard let author = data["author"] as? String,
+        guard let mumoryDocumentID = data["mumoryDocumentID"] as? String,
+              let userDocumentID = data["userDocumentID"] as? String,
+//              let parentDocumentID = data["parentDocumentID"] as? String,
               let date = data["date"] as? FirebaseManager.Timestamp,
               let content = data["content"] as? String,
-              let isPublic = data["isPublic"] as? Bool,
-              let repliesData = data["replies"] as? [[String: Any]]
+              let isPublic = data["isPublic"] as? Bool
         else {
+            print("Something is nil!")
             return nil
         }
         
-        self.author = author
+        if let parentDocumentID = data["parentDocumentID"] as? String {
+            self.parentDocumentID = parentDocumentID
+        } else {
+            self.parentDocumentID = nil
+        }
+
+        self.mumoryDocumentID = mumoryDocumentID
+        self.userDocumentID = userDocumentID
         self.date = date.dateValue()
         self.content = content
         self.isPublic = isPublic
-        self.replies = repliesData.compactMap { Comment(data: $0) }
     }
 }
 
 extension Comment {
     public func toDictionary() -> [String: Any] {
-        return [
-            "author": author,
-            "date": Timestamp(date: date),
-            "content": content,
-            "isPublic": isPublic,
-            "replies": replies.compactMap { $0.toDictionary() }
-        ]
+        if let parentDocumentID = parentDocumentID {
+            return [
+                "mumoryDocumentID": mumoryDocumentID,
+                "userDocumentID": userDocumentID,
+                "parentDocumentID": parentDocumentID,
+                "date": FirebaseManager.Timestamp(date: date),
+                "content": content,
+                "isPublic": isPublic
+            ]
+        } else {
+            return [
+                "mumoryDocumentID": mumoryDocumentID,
+                "userDocumentID": userDocumentID,
+                "date": FirebaseManager.Timestamp(date: date),
+                "content": content,
+                "isPublic": isPublic
+            ]
+        }
     }
 }
 

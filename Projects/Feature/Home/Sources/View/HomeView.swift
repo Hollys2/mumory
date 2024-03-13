@@ -48,13 +48,14 @@ public struct HomeView: View {
                     }
                     
                     MumoryTabView(selectedTab: $selectedTab)
+                        
                 }
                 
-                    MiniPlayerView()
-                        .environmentObject(playerManager)
-                        .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
-                        .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
-            
+                MiniPlayerView()
+                    .environmentObject(playerManager)
+                    .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
+                    .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
+                
                 
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
@@ -62,7 +63,7 @@ public struct HomeView: View {
                     .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
                     .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
                         PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-            //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
+                            //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
                             appCoordinator.isDeleteCommentPopUpViewShown = false
                         })
                     }
@@ -141,7 +142,7 @@ public struct HomeView: View {
                     Task {
                         print("HomeMapViewRepresentable onAppear")
                     }
-//                    self.mumoryDataViewModel.fetchMyMumory(userDocumentID: self.appCoordinator.currentUser.documentID)
+                    //                    self.mumoryDataViewModel.fetchMyMumory(userDocumentID: self.appCoordinator.currentUser.documentID)
                     self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.documentID)
                 }
                 .onDisappear {

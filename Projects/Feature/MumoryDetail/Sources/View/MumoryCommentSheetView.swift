@@ -112,10 +112,10 @@ struct CommentView: View {
         
         // MARK: Reply
         
-        ForEach(self.comment.replies, id: \.self) { reply in
-            Reply(comment: reply)
-            Spacer().frame(height: 10)
-        }
+//        ForEach(self.comment.replies, id: \.self) { reply in
+//            Reply(comment: reply)
+//            Spacer().frame(height: 10)
+//        }
         
         Spacer().frame(height: 5)
         
@@ -149,7 +149,7 @@ struct Reply: View {
                 Spacer().frame(height: 13)
                 
                 HStack(spacing: 5) {
-                    Text("\(comment.author)")
+                    Text("\(comment.userDocumentID)")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                         .foregroundColor(.white)
                     
@@ -351,7 +351,7 @@ public struct MumoryCommentSheetView: View {
                                         .cornerRadius(22.99999)
                                     
                                     Button(action: {
-                                        mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
+//                                        mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
                                         commentText = ""
                                     }, label: {
                                         commentText.isEmpty ?
@@ -449,7 +449,8 @@ public struct MumoryCommentSheetView: View {
                                                 .cornerRadius(22.99999)
 
                                             Button(action: {
-                                                mumoryDataViewModel.createReply(mumoryAnnotation: mumoryAnnotation, loginUserID: "tester", parentCommentIndex: selectedIndex, reply: Comment(author: "tester", date: Date(), content: replyText, isPublic: self.isPublic))
+//                                                mumoryDataViewModel.createReply(mumoryAnnotation: mumoryAnnotation, loginUserID: "tester", parentCommentIndex: selectedIndex, reply: Comment(author: "tester", date: Date(), content: replyText, isPublic: self.isPublic))
+//                                                mumoryDataViewModel.createReply(commentDocumentID: <#T##String#>, reply: <#T##Comment#>)
                                                 replyText = ""
                                             }, label: {
                                                 replyText.isEmpty ?
@@ -534,7 +535,13 @@ public struct MumoryCommentSheetView: View {
                                             
 
                                         Button(action: {
-                                            mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
+//                                            mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
+                                            guard let mumory = mumoryDataViewModel.selectedMumoryAnnotation else {
+                                                print("mumoryDataViewModel.selectedMumoryAnnotation is nil!")
+                                                return
+                                            }
+                                            
+                                            mumoryDataViewModel.createComment(comment: Comment(mumoryDocumentID: mumory.id, userDocumentID: appCoordinator.currentUser.documentID, date: Date(), content: commentText, isPublic: self.isPublic))
                                             commentText = ""
                                         }, label: {
                                             commentText.isEmpty ?

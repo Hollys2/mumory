@@ -89,6 +89,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let collectionReference = db.collection("Mumory")
         let query = collectionReference.whereField("userDocumentID", isEqualTo: userDocumentID)
         
+        
         let listener = query.addSnapshotListener { snapshot, error in
             Task {
                 guard let snapshot = snapshot, error == nil else {
@@ -648,120 +649,37 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func createComment(mumoryAnnotation: Mumory, loginUserID: String, comment: Comment) {
-        
+    public func createComment(comment: Comment) {
         let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Comment")
         
-        let commentsRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
+        let newData: [String: Any] = comment.toDictionary()
         
-        db.runTransaction({ (transaction, errorPointer) -> Any? in
-            
-            let postDocument: DocumentSnapshot
-            
-            do {
-                try postDocument = transaction.getDocument(commentsRef)
-            } catch let fetchError as NSError {
-                errorPointer?.pointee = fetchError
-                return nil
-            }
-            
-            guard var oldComments = postDocument.data()?["comments"] as? [[String: Any]] else {
-                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
-                ])
-                errorPointer?.pointee = error
-                return nil
-            }
-            
-            let commentData = comment.toDictionary()
-            print("commentData: \(commentData)")
-
-            oldComments.append(commentData) // : [String: Any]
-            mumoryAnnotation.comments.append(comment) // : Comment
-            
-            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                DispatchQueue.main.async {
-                    self.everyMumoryAnnotations[index] = mumoryAnnotation
-                }
-            }
-            
-            transaction.updateData(["comments": oldComments], forDocument: commentsRef)
-            return nil
-        }) { (object, error) in
+        collectionReference.addDocument(data: newData) { error in
             if let error = error {
-                print("Transaction failed: \(error)")
+                print("Error adding document: \(error)")
             } else {
-                self.fetchEveryMumory()
-                print("Transaction successfully committed!")
+                print("createComment Document added with ID: \(collectionReference.document().documentID)")
             }
         }
     }
     
-    public func createReply(mumoryAnnotation: Mumory, loginUserID: String, parentCommentIndex: Int, reply: Comment) {
-        
+    public func createReply(commentDocumentID: String, reply: Comment) {
         let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Comment").document(commentDocumentID).collection("Reply")
         
-        let commentsRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
+        let newData: [String: Any] = reply.toDictionary()
         
-        db.runTransaction({ (transaction, errorPointer) -> Any? in
-            
-            let postDocument: DocumentSnapshot
-            
-            do {
-                try postDocument = transaction.getDocument(commentsRef)
-            } catch let fetchError as NSError {
-                errorPointer?.pointee = fetchError
-                return nil
-            }
-            
-            guard var commentsData = postDocument.data()?["comments"] as? [[String: Any]] else {
-                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
-                ])
-                errorPointer?.pointee = error
-                return nil
-            }
-            
-            guard parentCommentIndex >= 0 && parentCommentIndex < commentsData.count else {
-                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-                    NSLocalizedDescriptionKey: "Invalid parentCommentIndex"
-                ])
-                errorPointer?.pointee = error
-                return nil
-            }
-            
-            let replyData = reply.toDictionary()
-            print("replyData: \(replyData)")
-
-            if var replies = commentsData[parentCommentIndex]["replies"] as? [[String: Any]] {
-                replies.append(replyData)
-                commentsData[parentCommentIndex]["replies"] = replies
-            } else {
-                let replies = [replyData]
-                commentsData[parentCommentIndex]["replies"] = replies
-            }
-            
-            mumoryAnnotation.comments[parentCommentIndex].replies.append(reply)
-            
-            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                DispatchQueue.main.async {
-                    self.everyMumoryAnnotations[index] = mumoryAnnotation
-                }
-            }
-            
-            transaction.updateData(["comments": commentsData], forDocument: commentsRef)
-            
-            return nil
-        }) { (object, error) in
+        collectionReference.addDocument(data: newData) { error in
             if let error = error {
-                print("Transaction failed: \(error)")
+                print("Error adding document: \(error)")
             } else {
-                self.fetchEveryMumory()
-                print("Transaction successfully committed!")
+                print("createReply Document added with ID: \(collectionReference.document().documentID)")
             }
         }
     }
     
+        
     public func acceptFriendReqeust(ID : String) {
         
         let db = FirebaseManager.shared.db
@@ -937,4 +855,118 @@ extension MumoryDataViewModel {
         }
     }
     
+    public func createComment2(mumoryAnnotation: Mumory, loginUserID: String, comment: Comment) {
+        
+        let db = FirebaseManager.shared.db
+        
+        let commentsRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
+        
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            
+            let postDocument: DocumentSnapshot
+            
+            do {
+                try postDocument = transaction.getDocument(commentsRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+            
+            guard var oldComments = postDocument.data()?["comments"] as? [[String: Any]] else {
+                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
+                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
+                ])
+                errorPointer?.pointee = error
+                return nil
+            }
+            
+            let commentData = comment.toDictionary()
+            print("commentData: \(commentData)")
+
+            oldComments.append(commentData) // : [String: Any]
+            mumoryAnnotation.comments.append(comment) // : Comment
+            
+            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
+                DispatchQueue.main.async {
+                    self.everyMumoryAnnotations[index] = mumoryAnnotation
+                }
+            }
+            
+            transaction.updateData(["comments": oldComments], forDocument: commentsRef)
+            return nil
+        }) { (object, error) in
+            if let error = error {
+                print("Transaction failed: \(error)")
+            } else {
+                self.fetchEveryMumory()
+                print("Transaction successfully committed!")
+            }
+        }
+    }
+    
+    public func createReply(mumoryAnnotation: Mumory, loginUserID: String, parentCommentIndex: Int, reply: Comment) {
+        
+//        let db = FirebaseManager.shared.db
+//
+//        let commentsRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
+//
+//        db.runTransaction({ (transaction, errorPointer) -> Any? in
+//
+//            let postDocument: DocumentSnapshot
+//
+//            do {
+//                try postDocument = transaction.getDocument(commentsRef)
+//            } catch let fetchError as NSError {
+//                errorPointer?.pointee = fetchError
+//                return nil
+//            }
+//
+//            guard var commentsData = postDocument.data()?["comments"] as? [[String: Any]] else {
+//                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
+//                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
+//                ])
+//                errorPointer?.pointee = error
+//                return nil
+//            }
+//
+//            guard parentCommentIndex >= 0 && parentCommentIndex < commentsData.count else {
+//                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
+//                    NSLocalizedDescriptionKey: "Invalid parentCommentIndex"
+//                ])
+//                errorPointer?.pointee = error
+//                return nil
+//            }
+//
+//            let replyData = reply.toDictionary()
+//            print("replyData: \(replyData)")
+//
+//            if var replies = commentsData[parentCommentIndex]["replies"] as? [[String: Any]] {
+//                replies.append(replyData)
+//                commentsData[parentCommentIndex]["replies"] = replies
+//            } else {
+//                let replies = [replyData]
+//                commentsData[parentCommentIndex]["replies"] = replies
+//            }
+//
+//            mumoryAnnotation.comments[parentCommentIndex].replies.append(reply)
+//
+//            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
+//                DispatchQueue.main.async {
+//                    self.everyMumoryAnnotations[index] = mumoryAnnotation
+//                }
+//            }
+//
+//            transaction.updateData(["comments": commentsData], forDocument: commentsRef)
+//
+//            return nil
+//        }) { (object, error) in
+//            if let error = error {
+//                print("Transaction failed: \(error)")
+//            } else {
+//                self.fetchEveryMumory()
+//                print("Transaction successfully committed!")
+//            }
+//        }
+    }
+
 }
