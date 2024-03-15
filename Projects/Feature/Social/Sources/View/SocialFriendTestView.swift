@@ -18,6 +18,8 @@ struct SocialFriendTestView: View {
     @State private var friendSearchResult: MumoriUser?
     @State private var friendRequestList: [MumoriUser] = []
     
+    @State private var isPresentFriendBottomSheet: Bool = false
+    
     let db = FBManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
@@ -26,6 +28,9 @@ struct SocialFriendTestView: View {
                 //상단바
                 HStack(spacing: 0) {
                     Button(action: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            self.appCoordinator.isAddFriendViewShown = false
+                        }
                     }, label: {
                         SharedAsset.closeButtonSearchFriend.swiftUIImage
                             .resizable()
@@ -43,6 +48,7 @@ struct SocialFriendTestView: View {
                     Spacer()
                     
                     Button(action: {
+                        isPresentFriendBottomSheet = true
                     }, label: {
                         SharedAsset.menuButtonSearchFriend.swiftUIImage
                             .resizable()
@@ -111,7 +117,7 @@ struct SocialFriendTestView: View {
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
                             ForEach(friendRequestList, id: \.self) { friend in
-                                FriendRequestItem(friend: friend)
+                                FriendRequestItem(friend: friend, friendRequestList: $friendRequestList)
                             }
                         })
                     }
@@ -140,6 +146,12 @@ struct SocialFriendTestView: View {
        
         }
         .padding(.top, appCoordinator.safeAreaInsetsTop)
+        .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
+   
+            }
+            .background(TransparentBackground())
+        })
 
     }
 }
@@ -221,6 +233,7 @@ struct FriendAddItem: View {
         self.friend = friend
     }
     let Firebase = FBManager.shared
+    @State var isPresentRequestPopup: Bool = false
     
     var body: some View {
         HStack(spacing: 13, content: {
@@ -279,10 +292,16 @@ struct FriendAddItem: View {
 }
 
 struct FriendRequestItem: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
     let friend: MumoriUser
-    init(friend: MumoriUser) {
+    @Binding var friendRequestList: [MumoriUser]
+    init(friend: MumoriUser, friendRequestList: Binding<[MumoriUser]>) {
         self.friend = friend
+        self._friendRequestList = friendRequestList
     }
+    @State var isPresentDeletePopup: Bool = false
+    @State var isPresentAcceptPopup: Bool = false
+    let db = FBManager.shared.db
     
     var body: some View {
         HStack(spacing: 13, content: {
@@ -302,10 +321,12 @@ struct FriendRequestItem: View {
                 Text(friend.nickname)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                     .foregroundStyle(Color.white)
+                    .truncationMode(.tail)
                 
                 Text("@\(friend.id)")
                     .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 13))
                     .foregroundStyle(ColorSet.charSubGray)
+                    .truncationMode(.tail)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             
@@ -336,10 +357,50 @@ struct FriendRequestItem: View {
                  .frame(height: 33)
                  .background(ColorSet.subGray)
                  .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
+                 .onTapGesture {
+                     print("delete tap")
+                     UIView.setAnimationsEnabled(false)
+                     isPresentDeletePopup = true
+                 }
+                 .fullScreenCover(isPresented: $isPresentDeletePopup) {
+                     TwoButtonPopupView(title: "친구 요청을 삭제하시겠습니까?", positiveButtonTitle: "요청 삭제") {
+                         let query = db.collection("User").document(currentUserData.uid).collection("Friend")
+                             .whereField("uId", isEqualTo: friend.uid)
+                             .whereField("type", isEqualTo: "recieve")
+                         Task {
+                             guard let snapshot = try? await query.getDocuments() else {
+                                 return
+                             }
+                             guard let result = try? await snapshot.documents.first?.reference.delete() else {
+                                 return
+                             }
+                             friendRequestList.removeAll(where: {$0.uid == friend.uid})
+                         }
+                     }
+                     .background(TransparentBackground())
+                 }
 
         })
         .padding(.horizontal, 20)
         .background(ColorSet.background)
         .frame(height: 84)
+    }
+}
+
+struct FriendViewBottomSheet: View {
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    var body: some View {
+        BottomSheetItem(image: SharedAsset.requestFriendSocial.swiftUIImage, title: "내가 보낸 요청")
+            .onTapGesture {
+                dismiss()
+                appCoordinator.rootPath.append(MumoryPage.requestFriend)
+            }
+        BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "차단친구 관리")
+            .onTapGesture {
+                dismiss()
+                appCoordinator.rootPath.append(MumoryPage.blockFriend)
+            }
     }
 }

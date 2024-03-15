@@ -56,12 +56,12 @@ public struct SplashView: View {
                     }
                 }
                 .onAppear(perform: {
-                    
+                    checkCurrentUserAndGetUserData()
                     Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
                         withAnimation {
                             isEndSplash = true
-                        }                    }
-                    checkCurrentUserAndGetUserData()
+                        }
+                    }
                 })
                 .navigationDestination(for: String.self, destination: { i in
                     if i == "music" {
@@ -94,7 +94,7 @@ public struct SplashView: View {
                         MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
                     }
                 }
-                .navigationDestination(for: LoginPage.self) { page in
+                .navigationDestination(for: MumoryPage.self) { page in
                     switch(page){
                     case .customization:
                         TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
@@ -113,6 +113,10 @@ public struct SplashView: View {
                             .environmentObject(customizationManageViewModel)
                     case .login:
                         LoginView()
+                    case .requestFriend:
+                        MyRequestFriendListView()
+                    case .blockFriend:
+                        EmptyView()
                     }
                 }
                 
@@ -136,7 +140,7 @@ public struct SplashView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
-        
+        let messaging = Firebase.messaging
         print("111")
         if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
             page = .onBoarding
@@ -146,6 +150,7 @@ public struct SplashView: View {
             return
         }
         print("2222")
+        
         Task {
             //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
             guard let user = auth.currentUser,
@@ -159,6 +164,10 @@ public struct SplashView: View {
                     isInitialSettingDone = true
                 }
                 print("333")
+                return
+            }
+            guard let fcmToken = data["fcmToken"] else {
+                page = .login
                 return
             }
             

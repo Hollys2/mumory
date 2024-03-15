@@ -200,7 +200,7 @@ public struct CustomizationView: View {
         
         isLoading = false
         isCustomizationDone = true
-        appCoordinator.rootPath.append(LoginPage.lastOfCustomization)
+        appCoordinator.rootPath.append(MumoryPage.lastOfCustomization)
     }
 
     

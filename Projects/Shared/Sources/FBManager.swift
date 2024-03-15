@@ -25,7 +25,8 @@ public class FBManager {
     public let functions: Functions
     public typealias TimeStamp = Timestamp
     public typealias Document = DocumentSnapshot
-
+    public typealias Fieldvalue = FieldValue
+    
     private init() {
         db = Firestore.firestore()
         storage = Storage.storage()

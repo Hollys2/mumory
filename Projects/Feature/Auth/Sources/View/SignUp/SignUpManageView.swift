@@ -220,7 +220,7 @@ struct SignUpManageView: View {
                 print("firestore upload user data successful")
                 isLoading = false
                 isSignUpCompleted = true
-                appCoordinator.rootPath.append(LoginPage.startCustomization)
+                appCoordinator.rootPath.append(MumoryPage.startCustomization)
             }
         }
 

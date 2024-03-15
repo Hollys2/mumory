@@ -28,6 +28,14 @@ public struct PagingTestView: View {
                     }
                 }
                 
+                functions.httpsCallable("like").call(["mumoryId": "뮤모리아이디변수"]) { result, error in
+                    if let result = result {
+                        print(result.description)
+                    }else if let error = error {
+                        print(error.localizedDescription)
+                    }
+                }
+                
                 //친구 수락할 때, uId에 상대방 uId넣기
 //                functions.httpsCallable("friendAcceptNotification").call(["uId": "jRc5GsRl77Mu3gwbGcuHdgyvBqz2"]) { result, error in
 //                    if let result = result {

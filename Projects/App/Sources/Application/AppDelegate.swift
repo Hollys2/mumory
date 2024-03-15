@@ -15,6 +15,7 @@ import KakaoSDKAuth
 import GoogleSignIn
 import FirebaseMessaging
 import Shared
+
 //import RealmSwift
 
  class AppDelegate: NSObject, UIApplicationDelegate{
@@ -60,11 +61,21 @@ import Shared
 extension AppDelegate: MessagingDelegate {
      func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("fcm token: \(fcmToken ?? "no fcm token")")
+        let Firebase = FBManager.shared
+         let db = Firebase.db
+         let auth = Firebase.auth
+         
+         if let user = auth.currentUser {
+             guard let fcmToken = fcmToken else {
+                 return
+             }
+             db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
+         }
     }
 }
 extension AppDelegate: UNUserNotificationCenterDelegate{
      func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Messaging.messaging().apnsToken = deviceToken
+         Messaging.messaging().apnsToken = deviceToken
     }
 
     // foreground 상에서 알림이 보이게끔 해준다.

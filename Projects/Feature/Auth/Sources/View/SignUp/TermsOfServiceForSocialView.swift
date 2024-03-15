@@ -102,7 +102,7 @@ struct TermsOfServiceForSocialView: View {
                     Button(action: {
                         manager.isCheckedServiceNewsNotification = isCheckedServiceNewsNotification
                         isTOSDone = true
-                        appCoordinator.rootPath.append(LoginPage.startCustomization)
+                        appCoordinator.rootPath.append(MumoryPage.startCustomization)
                     }, label: {
                         WhiteButton(title: "회원가입", isEnabled: isCheckedFirstItem && isCheckedSecondItem)
                             .padding(.bottom, 20)

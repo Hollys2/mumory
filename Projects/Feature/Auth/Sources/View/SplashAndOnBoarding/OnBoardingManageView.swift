@@ -42,7 +42,7 @@ struct OnBoardingManageView: View {
                 WhiteButton(title: "시작하기", isEnabled: true)
                     .padding(20)
                     .onTapGesture {
-                        appCoordinator.rootPath.append(LoginPage.login)
+                        appCoordinator.rootPath.append(MumoryPage.login)
                     }
             }
             
