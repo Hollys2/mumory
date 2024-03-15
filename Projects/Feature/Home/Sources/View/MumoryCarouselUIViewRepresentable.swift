@@ -86,6 +86,7 @@ struct MumoryCard: View {
     let selectedIndex: Int
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
         

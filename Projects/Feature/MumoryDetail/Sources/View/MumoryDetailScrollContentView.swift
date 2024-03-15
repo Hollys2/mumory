@@ -68,13 +68,14 @@ struct MumoryDetailScrollContentView: View {
                     )
                 
                 
-                VStack(spacing: 23) {
+                VStack(spacing: 10) {
                     
                     Text("\(mumoryAnnotation.musicModel.title)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                         .lineLimit(2)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
+                        
                     
                     Text("\(mumoryAnnotation.musicModel.artist)")
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
@@ -96,7 +97,7 @@ struct MumoryDetailScrollContentView: View {
                             .frame(width: 38, height: 38)
                         
                         VStack(spacing: 0) {
-                            Text("이르음음음음음")
+                            Text("\(appCoordinator.currentUser.nickname)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -141,7 +142,7 @@ struct MumoryDetailScrollContentView: View {
                         } // VStack
                     } // HStack
                     .frame(height: 38)
-                    .padding(.vertical, 55)
+                    .padding(.vertical, 50)
                     
                     if let tags = self.mumoryAnnotation.tags {
                         // MARK: Tag
@@ -158,7 +159,7 @@ struct MumoryDetailScrollContentView: View {
                             
                             Spacer(minLength: 0)
                         } // HStack
-                        .padding(.bottom, 25)
+                        .padding(.bottom, 20)
                     }
                     
                     if let content = self.mumoryAnnotation.content, !content.isEmpty {
@@ -169,7 +170,7 @@ struct MumoryDetailScrollContentView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                             .fixedSize(horizontal: false, vertical: true)
-                            .padding(.bottom, 25)
+                            .padding(.bottom, 20)
                     }
 
                     

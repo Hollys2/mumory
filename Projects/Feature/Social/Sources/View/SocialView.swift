@@ -41,7 +41,9 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
 
-        let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
+        let hostingController = UIHostingController(rootView: self.content()
+            .environmentObject(self.mumoryDataViewModel)
+        )
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
         
         scrollView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
@@ -56,24 +58,23 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("updateUIView: SocialScrollViewRepresentable")
-        
+
         if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumoryAnnotations {
-            
             DispatchQueue.main.async {
                 self.mumoryDataViewModel.everyMumoryAnnotations = self.mumoryDataViewModel.everyMumoryAnnotations.sorted(by: { $0.date > $1.date })
             }
-            
+
             let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
             let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-            
+
             uiView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
             hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
-            
+
             uiView.subviews.forEach { $0.removeFromSuperview() }
             uiView.addSubview(hostingController.view)
             uiView.refreshControl = UIRefreshControl()
             uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
-            
+
             context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumoryAnnotations
         }
     }
@@ -153,6 +154,7 @@ struct SocialScrollCotentView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+
     
     var body: some View {
         
@@ -181,7 +183,7 @@ struct SocialItemView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
-    let mumoryAnnotation: Mumory
+    var mumoryAnnotation: Mumory
     
     var body: some View {
         
@@ -195,7 +197,7 @@ struct SocialItemView: View {
                 
                 VStack(alignment: .leading, spacing: 5.25) {
                     
-                    Text("이르음음음음음")
+                    Text("\(appCoordinator.currentUser.nickname)")
                         .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -277,6 +279,7 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
+                                mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                                 self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
                             }
                     )
@@ -465,7 +468,7 @@ struct SocialItemView: View {
                     Button(action: {
                         withAnimation(Animation.easeInOut(duration: 0.2)) {
                             self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumoryAnnotation
-//                            self.appCoordinator.comments = self.mumoryAnnotation.comments
+                            print("self.mumoryAnnotation.id: \(self.mumoryAnnotation.id)")
                             self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
                             appCoordinator.offsetY = CGFloat.zero
                         }
@@ -479,11 +482,13 @@ struct SocialItemView: View {
                             .mask {Circle()}
                     })
                     
-                    if mumoryAnnotation.comments.count != 0 {
-                        Text("\(mumoryAnnotation.comments.count)")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.white)
+                    if let c = mumoryAnnotation.commentCount {
+                        if c != 0 {
+                            Text("\(c)")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.white)
+                        }
                     }
                     
                 }
@@ -506,9 +511,7 @@ public struct SocialView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-//    @EnvironmentObject var firebaseManager: FirebaseManager
     @ObservedObject var firebaseManager = FirebaseManager.shared
-
     
     @State private var translation: CGSize = .zero
     
@@ -523,6 +526,7 @@ public struct SocialView: View {
                     print("onRefresh!")
                 }) {
                     SocialScrollCotentView()
+                        .environmentObject(self.appCoordinator)
                 }
             }
             

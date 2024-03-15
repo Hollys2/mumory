@@ -24,6 +24,7 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var musicModels: [MusicModel] = []
     @Published public var myMumoryAnnotations: [Mumory] = []
     @Published public var everyMumoryAnnotations: [Mumory] = []
+    @Published public var mumoryComments: [Comment] = []
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
     @Published public var searchedMumoryAnnotations: [Mumory] = []
     
@@ -87,8 +88,7 @@ final public class MumoryDataViewModel: ObservableObject {
     public func fetchMyMumoryListener(userDocumentID: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
-        let query = collectionReference.whereField("userDocumentID", isEqualTo: userDocumentID)
-        
+        let query = collectionReference.whereField("uId", isEqualTo: userDocumentID)
         
         let listener = query.addSnapshotListener { snapshot, error in
             Task {
@@ -102,22 +102,24 @@ final public class MumoryDataViewModel: ObservableObject {
                     case .added:
                         let documentData = documentChange.document.data()
                         
-                        guard let newMumory = await Mumory.fromDocumentData(documentData, documentID: documentChange.document.documentID) else { return }
+                        guard let newMumory = await Mumory.fromDocumentData(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
                         
                         if !self.myMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
                             DispatchQueue.main.async {
                                 self.myMumoryAnnotations.append(newMumory)
                                 self.myMumoryAnnotations.sort { $0.date > $1.date }
+//                                self.fetchCommentReply(mumoryDocumentID: newMumory.id)
                             }
                             print("Document added: \(documentChange.document.documentID)")
                         }
-
+                        
+                        
                     case .modified:
                         let documentData = documentChange.document.data()
                         
                         let modifiedDocumentID = documentChange.document.documentID
                         if let index = self.myMumoryAnnotations.firstIndex(where: { $0.id == modifiedDocumentID }),
-                           let updatedMumory = await self.myMumoryAnnotations[index].convertDataToMumory(with: documentData) {
+                           let updatedMumory = await Mumory.fromDocumentData(documentData, mumoryDocumentID: self.myMumoryAnnotations[index].id) {
                             DispatchQueue.main.async {
                                 self.myMumoryAnnotations[index] = updatedMumory
                             }
@@ -145,7 +147,7 @@ final public class MumoryDataViewModel: ObservableObject {
         return listener
     }
     
-    public func fetchMumory(documentID: String) async {
+    public func fetchMumory(documentID: String) async -> Mumory? {
         let db = FirebaseManager.shared.db
         let docRef = db.collection("Mumory").document(documentID)
         
@@ -155,7 +157,9 @@ final public class MumoryDataViewModel: ObservableObject {
             if documentSnapshot.exists {
                 do {
                     
-                    guard let documentData = documentSnapshot.data(), let newMumory = await Mumory.fromDocumentData(documentData, documentID: documentSnapshot.documentID) else { return }
+                    guard let documentData = documentSnapshot.data(), let newMumory = await Mumory.fromDocumentData(documentData, mumoryDocumentID: documentSnapshot.documentID) else { return nil }
+                    
+                    return newMumory
                 } catch {
                     print(error)
                 }
@@ -165,205 +169,44 @@ final public class MumoryDataViewModel: ObservableObject {
         } catch {
             print("Error fetching document: \(error.localizedDescription)")
         }
+        
+        return nil
     }
     
-    public func fetchMumorys(userDocumentID: String, completionHandler: @escaping (Result<[Mumory?], Error>) -> Void) {
+    public func fetchMumorys() {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
         
-        let dispatchGroup = DispatchGroup()
-        
         Task {
             do {
-                let snapshot = try await collectionReference.whereField("userDocumentID", isEqualTo: userDocumentID).getDocuments()
-                
-                var documentIDs: [String] = []
+                let snapshot = try await collectionReference.getDocuments()
                 
                 for document in snapshot.documents {
                     
-                    dispatchGroup.enter()
-                    
                     let documentData = document.data()
-                    
-                    if let userDocumentID = documentData["userDocumentID"] as? String,
-                       let songID = documentData["songID"] as? String,
-                       let latitude = documentData["latitude"] as? CLLocationDegrees,
-                       let longitude = documentData["longitude"] as? CLLocationDegrees,
-                       let date = documentData["timeStamp"] as? FirebaseManager.Timestamp,
-                       let tags = documentData["tags"] as? [String],
-                       let content = documentData["content"] as? String,
-                       let imageURLs = documentData["imageURLs"] as? [String],
-                        let isPublic = documentData["isPublic"] as? Bool,
-                       let likes = documentData["likes"] as? [String],
-                       let comments = documentData["comments"] as? [[String: Any]]
-                    {
-                        do {
-                            let musicModel = try await self.fetchMusic(musicID: songID)
-                            let location = CLLocation(latitude: latitude, longitude: longitude)
-                            self.locationToLocationModel(location: location) { locationModel in
-                                if let locationModel  = locationModel {
-                                    
-                                    let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-                                    
-                                    let newMumory = Mumory(id: document.documentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: [], content: "", imageURLs: [], isPublic: isPublic, likes: likes, comments: commentsData)
-                                    
-                                    DispatchQueue.main.async {
-                                        if !self.myMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
-                                            self.myMumoryAnnotations.append(newMumory)
-                                            self.myMumoryAnnotations.sort { $0.date > $1.date }
-                                        }
-                                        dispatchGroup.leave()
-                                    }
-                                } else {
-                                    print("위치 정보를 가져오는데 실패했습니다.")
-                                    dispatchGroup.leave()
-                                }
-                            }
-                        } catch {
-                            print("Error fetchMyMumory: \(error.localizedDescription)")
-                            dispatchGroup.leave()
+                    guard let newMumory = await Mumory.fromDocumentData(documentData, mumoryDocumentID: document.documentID) else {return}
+                    if !self.everyMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
+                        DispatchQueue.main.async {
+                            self.everyMumoryAnnotations.append(newMumory)
+                            self.everyMumoryAnnotations.sort { $0.date > $1.date }
                         }
+//                        self.fetchCommentReply2(mumoryDocumentID: newMumory.id)
                     }
                 }
                 
-                dispatchGroup.notify(queue: .main) {
-                    print("fetchMumorys successfully!")
-                }
+                print("fetchMumorys successfully!")
             } catch {
                 print("Error fetching playlist documents: \(error.localizedDescription)")
             }
         }
-        
-    }
-
-    public func fetchMyMumory2(userDocumentID: String) {
- 
-        let db = FirebaseManager.shared.db
-        
-        let mumoryCollectionRef = db.collection("User").document(userDocumentID).collection("mumory")
-            .order(by: "date", descending: true)
-        
-        let dispatchGroup = DispatchGroup()
-        
-        Task {
-            do {
-                let snapshot = try await mumoryCollectionRef.getDocuments()
-                
-                for document in snapshot.documents {
-                    
-                    dispatchGroup.enter()
-                    
-                    let documentData = document.data()
-                    
-                    if let author = documentData["author"] as? String,
-                       let musicItemIDString = documentData["MusicItemID"] as? String,
-                       let locationTitle = documentData["locationTitle"] as? String,
-                       let locationSubtitle = documentData["locationSubtitle"] as? String,
-                       let latitude = documentData["latitude"] as? Double,
-                       let longitude = documentData["longitude"] as? Double,
-                       let date = documentData["date"] as? FirebaseManager.Timestamp,
-                       let tags = documentData["tags"] as? [String],
-                       let content = documentData["content"] as? String,
-                       let imageURLs = documentData["imageURLs"] as? [String],
-                       let isPublic = documentData["isPublic"] as? Bool,
-                       let likes = documentData["likes"] as? [String],
-                       let comments = documentData["comments"] as? [[String: Any]]
-                    {
-                        do {
-                            let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
-                            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
-                            
-                            let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-                            
-                            let newMumoryAnnotation = Mumory(id: document.documentID, userDocumentID: author, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-                            
-                            DispatchQueue.main.async {
-                                if !self.myMumoryAnnotations.contains(where: { $0.id == newMumoryAnnotation.id }) {
-                                    self.myMumoryAnnotations.append(newMumoryAnnotation)
-                                    self.myMumoryAnnotations.sort { $0.date > $1.date }
-                                }
-                                dispatchGroup.leave()
-                            }
-                        } catch {
-                            print("Error fetchMyMumory: \(error.localizedDescription)")
-                            dispatchGroup.leave()
-                        }
-                    }
-                }
-                
-                dispatchGroup.notify(queue: .main) {
-                    print("fetchMyMumory successfully!")
-                }
-            } catch {
-                print("Error fetching playlist documents: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    public func fetchMumoryAnnotation(mumoryID id: String) async throws -> Mumory? {
-        
-        let db = FirebaseManager.shared.db
-        
-        let mumoryDocumentRef = db.collectionGroup("mumory")
-        
-        do {
-            let snapshot = try await mumoryDocumentRef.getDocuments()
-            
-            for document in snapshot.documents {
-                
-                let documentData = document.data()
-                
-                if let author = documentData["author"] as? String,
-                   let musicItemIDString = documentData["MusicItemID"] as? String,
-                   let locationTitle = documentData["locationTitle"] as? String,
-                   let locationSubtitle = documentData["locationSubtitle"] as? String,
-                   let latitude = documentData["latitude"] as? Double,
-                   let longitude = documentData["longitude"] as? Double,
-                   let date = documentData["date"] as? FirebaseManager.Timestamp,
-                   let tags = documentData["tags"] as? [String],
-                   let content = documentData["content"] as? String,
-                   let imageURLs = documentData["imageURLs"] as? [String],
-                   let isPublic = documentData["isPublic"] as? Bool,
-                   let likes = documentData["likes"] as? [String],
-                   let comments = documentData["comments"] as? [[String: Any]]
-                {
-                    do {
-                        let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
-                        let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
-                        
-                        let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-                        
-                        let newMumoryAnnotation = Mumory(id: document.documentID, userDocumentID: author, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-                        
-                        //                        DispatchQueue.main.async {
-                        //                            if !self.socialMumoryAnnotations.contains(where: { $0.id == newMumoryAnnotation.id }) {
-                        //                                self.socialMumoryAnnotations.append(newMumoryAnnotation)
-                        //                                self.socialMumoryAnnotations.sort { $0.date > $1.date }
-                        //                            }
-                        //                        }
-                        print("fetchMumoryAnnotation successfully")
-                        
-                        return newMumoryAnnotation
-                    } catch {
-                        print("Error fetching music: \(error.localizedDescription)")
-                    }
-                }
-            }
-            
-        } catch {
-            print("Error fetching mumory document: \(error.localizedDescription)")
-            return nil
-        }
-        
-        return nil
     }
     
     public func fetchEveryMumory() {
         self.isSocialFetchFinished = false
         let db = FirebaseManager.shared.db
         
-        let mumoryCollectionRef = db.collectionGroup("mumory")
-        //            .order(by: "date", descending: true)
+        let mumoryCollectionRef = db.collection("Mumory")
+//            .order(by: "date", descending: true)
         
         let dispatchGroup = DispatchGroup()
         
@@ -377,40 +220,16 @@ final public class MumoryDataViewModel: ObservableObject {
                     
                     let documentData = document.data()
                     
-                    if let author = documentData["author"] as? String,
-                       let musicItemIDString = documentData["MusicItemID"] as? String,
-                       let locationTitle = documentData["locationTitle"] as? String,
-                       let locationSubtitle = documentData["locationSubtitle"] as? String,
-                       let latitude = documentData["latitude"] as? Double,
-                       let longitude = documentData["longitude"] as? Double,
-                       let date = documentData["date"] as? FirebaseManager.Timestamp,
-                       let tags = documentData["tags"] as? [String],
-                       let content = documentData["content"] as? String,
-                       let imageURLs = documentData["imageURLs"] as? [String],
-                       let isPublic = documentData["isPublic"] as? Bool,
-                       let likes = documentData["likes"] as? [String],
-                       let comments = documentData["comments"] as? [[String: Any]]
-                    {
-                        do {
-                            let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
-                            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
-                            
-                            let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-                            
-                            let newMumoryAnnotation = Mumory(id: document.documentID, userDocumentID: author, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-                            
-                            DispatchQueue.main.async {
-                                if !self.everyMumoryAnnotations.contains(where: { $0.id == newMumoryAnnotation.id }) {
-                                    self.everyMumoryAnnotations.append(newMumoryAnnotation)
-                                    self.everyMumoryAnnotations.sort { $0.date > $1.date }
-                                }
-                                dispatchGroup.leave()
-                            }
-                        } catch {
-                            print("Error fetchSocialMumory: \(error.localizedDescription)")
-                            dispatchGroup.leave()
+                    guard let newMumory: Mumory = await Mumory.fromDocumentData(documentData, mumoryDocumentID: document.documentID) else {return}
+
+                    if !self.everyMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
+                        DispatchQueue.main.async {
+                            self.everyMumoryAnnotations.append(newMumory)
+                            self.everyMumoryAnnotations.sort { $0.date > $1.date }
                         }
                     }
+                        
+                    dispatchGroup.leave()
                 }
                 
                 dispatchGroup.notify(queue: .main) {
@@ -424,82 +243,40 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchMumoryAnnotation(mumoryAnnotation: Mumory) {
-        
+//    public static func fetchCommentCount(mumoryId: String, completion: @escaping (Int?) -> Void) {
+//        let db = FirebaseManager.shared.db
+//        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
+//
+//        collectionReference.getDocuments { (querySnapshot, error) in
+//            if let error = error {
+//                print("Error fetching documents: \(error)")
+//                completion(nil)
+//            } else {
+//                let count = querySnapshot?.documents.count ?? 0
+//                completion(count)
+//            }
+//        }
+//    }
+    
+    public static func fetchCommentCount(mumoryId: String) async -> Int {
         let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
         
-        let mumoryCollectionRef = db.collectionGroup("mumory")
-        //            .order(by: "date", descending: true)
-        
-        let dispatchGroup = DispatchGroup()
-        
-        Task {
-            do {
-                let snapshot = try await mumoryCollectionRef.getDocuments()
-                
-                for document in snapshot.documents {
-                    
-                    dispatchGroup.enter()
-                    
-                    let documentData = document.data()
-                    
-                    print("FUCK1")
-                    
-                    if document.documentID == mumoryAnnotation.id,
-                       let author = documentData["author"] as? String,
-                       let musicItemIDString = documentData["MusicItemID"] as? String,
-                       let locationTitle = documentData["locationTitle"] as? String,
-                       let locationSubtitle = documentData["locationSubtitle"] as? String,
-                       let latitude = documentData["latitude"] as? Double,
-                       let longitude = documentData["longitude"] as? Double,
-                       let date = documentData["date"] as? FirebaseManager.Timestamp,
-                       let tags = documentData["tags"] as? [String],
-                       let content = documentData["content"] as? String,
-                       let imageURLs = documentData["imageURLs"] as? [String],
-                       let isPublic = documentData["isPublic"] as? Bool,
-                       let likes = documentData["likes"] as? [String],
-                       let comments = documentData["comments"] as? [[String: Any]]
-                    {
-                        print("FUCK2")
-                        do {
-                            let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
-                            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
-                            
-                            let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-                            
-                            let newMumoryAnnotation = Mumory(id: document.documentID, userDocumentID: author, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-                            
-                            DispatchQueue.main.async {
-                                if !self.everyMumoryAnnotations.contains(where: { $0.id == newMumoryAnnotation.id }) {
-                                    self.everyMumoryAnnotations.append(newMumoryAnnotation)
-                                    self.everyMumoryAnnotations.sort { $0.date > $1.date }
-                                }
-                                dispatchGroup.leave()
-                            }
-                        } catch {
-                            print("Error fetching music: \(error.localizedDescription)")
-                            dispatchGroup.leave()
-                        }
-                    }
-                }
-                
-                dispatchGroup.notify(queue: .main) {
-                    self.selectedMumoryAnnotation = mumoryAnnotation
-                    print("fetchMumoryAnnotation successfully!")
-                }
-            } catch {
-                print("Error fetching playlist documents: \(error.localizedDescription)")
-            }
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            return querySnapshot.documents.count
+        } catch {
+            print("Error fetching documents: \(error)")
+            return -1
         }
     }
-
     
     public func createMumory(_ mumory : Mumory, completionHandler: @escaping (Result<Void, Error>) -> Void)  {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
 
         let newData: [String: Any] = [
-            "userDocumentID": mumory.userDocumentID,
+            "uId": mumory.userDocumentID,
             "date": FirebaseManager.Timestamp(date: mumory.date),
             "songID": String(describing: mumory.musicModel.songID),
             "latitude": mumory.locationModel.coordinate.latitude,
@@ -509,7 +286,7 @@ final public class MumoryDataViewModel: ObservableObject {
             "imageURLs": mumory.imageURLs ?? [],
             "isPublic": mumory.isPublic,
             "likes": mumory.likes,
-            "comments": mumory.comments
+            "commentCount": mumory.commentCount
         ]
         
         collectionReference.addDocument(data: newData) { error in
@@ -532,7 +309,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let documentReference = db.collection("Mumory").document(mumory.id)
 
         let updatedData: [String: Any] = [
-            "userDocumentID": mumory.userDocumentID,
+            "uId": mumory.userDocumentID,
             "date": FirebaseManager.Timestamp(date: mumory.date),
             "songID": String(describing: mumory.musicModel.songID),
             "latitude": mumory.locationModel.coordinate.latitude,
@@ -600,7 +377,7 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let db = FirebaseManager.shared.db
 
-        let postRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
+        let postRef = db.collection("Mumory").document(mumoryAnnotation.id)
         
         db.runTransaction({ (transaction, errorPointer) -> Any? in
             
@@ -649,9 +426,73 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func createComment(comment: Comment) {
+    public func fetchCommentReply(mumoryDocumentID: String) {
         let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("Comment")
+        let collectionReference = db.collection("Mumory").document(mumoryDocumentID).collection("Comment")
+        
+        collectionReference.getDocuments { (querySnapshot, error)  in
+            if let error = error {
+                print("Error getting documents: \(error)")
+            } else {
+                for document in querySnapshot!.documents {
+                    let commentID = document.documentID
+                    let commentData: [String: Any] = document.data()
+                    
+                    guard let newComment: Comment = Comment.fromDocumentData(commentData, commentDocumentID: commentID, comments: []) else {return}
+                    
+                    if !self.mumoryComments.contains(where: { $0.id == commentID }) {
+                        DispatchQueue.main.async {
+                            self.mumoryComments.append(newComment)
+                            self.mumoryComments.sort { $0.date > $1.date }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public static func fetchComment(mumoryId: String) async -> [Comment]? {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
+            .order(by: "date", descending: true)
+        
+        var comments: [Comment] = []
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            for document in querySnapshot.documents {
+                let commentID = document.documentID
+                let commentData: [String: Any] = document.data()
+                
+                guard let newComment: Comment = Comment.fromDocumentData(commentData, commentDocumentID: commentID, comments: []) else {return nil}
+                
+                comments.append(newComment)
+            }
+            print("fetchComment 성공: \(comments)")
+            return comments
+        } catch {
+            print("Error fetching documents: \(error)")
+            return nil
+        }
+    }
+
+    //                    let replyRef = db.collection("Comment").document(commentID).collection("Reply")
+    //
+    //                    replyRef.getDocuments { (replyQuerySnapshot, replyError) in
+    //                        if let replyError = replyError {
+    //                            print("Error getting replies: \(replyError)")
+    //                        } else {
+    //                            for replyDocument in replyQuerySnapshot!.documents {
+    //                                let replyData = replyDocument.data()
+    //                                print("Reply data: \(replyData)")
+    //                            }
+    //                        }
+    //                    }
+    
+    public func createComment(mumoryDocumentID: String, comment: Comment) {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory").document(mumoryDocumentID).collection("Comment")
+        let mumoryDocReference = db.collection("Mumory").document(mumoryDocumentID)
         
         let newData: [String: Any] = comment.toDictionary()
         
@@ -659,16 +500,27 @@ final public class MumoryDataViewModel: ObservableObject {
             if let error = error {
                 print("Error adding document: \(error)")
             } else {
-                print("createComment Document added with ID: \(collectionReference.document().documentID)")
+                print("createComment Document added: \(comment)")
+                Task {
+                    let c = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumoryDocumentID)
+                    try await mumoryDocReference.updateData(["commentCount": c])
+                }
+//                if let index = self.myMumoryAnnotations.firstIndex(where: { $0.id == mumoryDocumentID }) {
+//                    DispatchQueue.main.async {
+//                        self.myMumoryAnnotations[index].comments.append(comment)
+//                        self.myMumoryAnnotations[index].comments.sort { $0.date > $1.date }
+//                    }
+//                }
             }
         }
     }
     
-    public func createReply(commentDocumentID: String, reply: Comment) {
+    public func createReply(mumoryId: String, commentId: String, reply: Comment) {
         let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("Comment").document(commentDocumentID).collection("Reply")
+        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
         
-        let newData: [String: Any] = reply.toDictionary()
+        var newData: [String: Any] = reply.toDictionary()
+        newData["parentId"] = commentId
         
         collectionReference.addDocument(data: newData) { error in
             if let error = error {
@@ -679,7 +531,6 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-        
     public func acceptFriendReqeust(ID : String) {
         
         let db = FirebaseManager.shared.db
@@ -732,6 +583,7 @@ final public class MumoryDataViewModel: ObservableObject {
                            let imageURLs = documentData["imageURLs"] as? [String],
                            let isPublic = documentData["isPublic"] as? Bool,
                            let likes = documentData["likes"] as? [String],
+                           let commentCount = documentData["commentCount"] as? Int,
                            let comments = documentData["comments"] as? [[String: Any]]
                         {
                             
@@ -739,9 +591,9 @@ final public class MumoryDataViewModel: ObservableObject {
                                 let musicModel = try await self.fetchMusic(musicID: musicItemIDString)
                                 let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: CLLocationCoordinate2D(latitude: latitude, longitude: longitude))
                                 
-                                let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
+                                let commentsData = comments.compactMap { Comment(id: "", data: $0) } // : [Comment]
                                 
-                                let newMumoryAnnotation = Mumory(id: document.documentID, userDocumentID: author, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
+                                let newMumoryAnnotation = Mumory(id: document.documentID, userDocumentID: author, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: commentCount, comments: commentsData)
                                 
                                 DispatchQueue.main.async {
                                     self.searchedMumoryAnnotations.append(newMumoryAnnotation)                                    
@@ -793,42 +645,6 @@ final public class MumoryDataViewModel: ObservableObject {
 }
 
 extension MumoryDataViewModel {
-    
-    public func createMumory2(_ mumoryAnnotation : Mumory, completionHandler: @escaping (Result<Void, Error>) -> Void)  {
-        let db = FirebaseManager.shared.db
-        
-        let newData: [String: Any] = [
-            "author": "tester",
-            "MusicItemID": String(describing: mumoryAnnotation.musicModel.songID),
-            "locationTitle": mumoryAnnotation.locationModel.locationTitle,
-            "locationSubtitle": mumoryAnnotation.locationModel.locationSubtitle,
-            "latitude": mumoryAnnotation.locationModel.coordinate.latitude,
-            "longitude": mumoryAnnotation.locationModel.coordinate.longitude,
-            "date": FirebaseManager.Timestamp(date: mumoryAnnotation.date),
-            "tags": mumoryAnnotation.tags ?? [],
-            "content": mumoryAnnotation.content ?? "",
-            "imageURLs": mumoryAnnotation.imageURLs ?? [],
-            "isPublic": mumoryAnnotation.isPublic,
-            "likes": mumoryAnnotation.likes,
-            "comments": mumoryAnnotation.comments
-        ]
-        
-        
-        let documentReference = db.collection("User").document("tester").collection("mumory")
-
-        documentReference.addDocument(data: newData) { error in
-            if let error = error {
-                print("Error adding tester document: \(error.localizedDescription)")
-                completionHandler(.failure(error))
-            } else {
-                let newMumoryAnnotation = Mumory(id: documentReference.document().documentID, userDocumentID: "tester", date: mumoryAnnotation.date, musicModel: mumoryAnnotation.musicModel, locationModel: mumoryAnnotation.locationModel, tags: mumoryAnnotation.tags, content: mumoryAnnotation.content, imageURLs: mumoryAnnotation.imageURLs, isPublic: mumoryAnnotation.isPublic, likes: mumoryAnnotation.likes, comments: mumoryAnnotation.comments)
-                
-                self.myMumoryAnnotations.append(newMumoryAnnotation)
-                self.isCreating = false
-                completionHandler(.success(()))
-            }
-        }
-    }
     
     public func deleteMumory2(_ mumoryAnnotation: Mumory, completion: @escaping () -> Void) {
         

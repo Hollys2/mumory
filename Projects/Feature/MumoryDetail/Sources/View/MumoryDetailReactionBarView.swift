@@ -33,7 +33,7 @@ struct MumoryDetailReactionBarView: View {
         
             HStack(alignment: .center) {
                 Button(action: {
-                    mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, loginUserID: "tester")
+                    mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, loginUserID: appCoordinator.currentUser.documentID)
                 }, label: {
                     mumoryAnnotation.likes.contains("tester") ?
                     Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
@@ -53,6 +53,8 @@ struct MumoryDetailReactionBarView: View {
                 Spacer().frame(width: 12)
                 
                 Button(action: {
+                    mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
+                    print("self.mumoryAnnotation.id: \(self.mumoryAnnotation.id)")
                     withAnimation(.easeInOut(duration: 0.2)) {
                         self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
                     }
@@ -64,9 +66,12 @@ struct MumoryDetailReactionBarView: View {
                 
                 Spacer().frame(width: 4)
                 
-                Text("\(mumoryAnnotation.comments.count)")
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundColor(.white)
+//                Text("\(mumoryAnnotation.comments.count)")
+                if let c = mumoryAnnotation.commentCount {
+                    Text("\(c)")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundColor(.white)
+                }
                 
                 Spacer()
                 

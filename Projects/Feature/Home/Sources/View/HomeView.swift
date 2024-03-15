@@ -20,6 +20,7 @@ public struct HomeView: View {
     @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
+    @State private var mumory: Mumory = Mumory()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -30,7 +31,7 @@ public struct HomeView: View {
     
     public var body: some View {
         
-            
+        NavigationStack(path: $appCoordinator.rootPath) {
             ZStack(alignment: .bottom) {
                 
                 VStack(spacing: 0) {
@@ -47,7 +48,7 @@ public struct HomeView: View {
                     }
                     
                     MumoryTabView(selectedTab: $selectedTab)
-                        
+                    
                 }
                 
                 MiniPlayerView()
@@ -58,7 +59,7 @@ public struct HomeView: View {
                 
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
-                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory())
+                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumory: self.$mumory)
                     .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
                     .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
                         PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
@@ -66,6 +67,7 @@ public struct HomeView: View {
                             appCoordinator.isDeleteCommentPopUpViewShown = false
                         })
                     }
+     
                 
                 if self.appCoordinator.isMumoryPopUpShown {
                     
@@ -100,41 +102,43 @@ public struct HomeView: View {
             .ignoresSafeArea()
             .navigationBarBackButtonHidden()
             .onAppear {
-//                if appCoordinator.rootPath.count > 0{
-//                    appCoordinator.rootPath = NavigationPath.init([LoginPage.home])
-//                }
+                //                if appCoordinator.rootPath.count > 0{
+                //                    appCoordinator.rootPath = NavigationPath.init([LoginPage.home])
+                //                }
             }
-//            .navigationDestination(for: String.self, destination: { i in
-//                if i == "music" {
-//                    SearchMusicView()
-//                } else if i == "location" {
-//                    SearchLocationView()
-//                } else if i == "map" {
-//                    SearchLocationMapView()
-//                } else if i == "search-social" {
-//                    SocialSearchView()
-//                } else {
-//                    Color.gray
-//                }
-//            })
-//            .navigationDestination(for: SearchFriendType.self, destination: { type in
-//                switch type {
-//                case .cancelRequestFriend:
-//                    FriendMenuView(type: .cancelRequestFriend)
-//                case .unblockFriend:
-//                    FriendMenuView(type: .unblockFriend)
-//                default:
-//                    Color.pink
-//                }
-//            })
-//            .navigationDestination(for: MumoryView.self) { view in
-//                switch view.type {
-//                case .mumoryDetailView:
-//                    MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
-//                case .editMumoryView:
-//                    MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
-//                }
-//            }
+            
+            .navigationDestination(for: String.self, destination: { i in
+                if i == "music" {
+                    SearchMusicView()
+                } else if i == "location" {
+                    SearchLocationView()
+                } else if i == "map" {
+                    SearchLocationMapView()
+                } else if i == "search-social" {
+                    SocialSearchView()
+                } else {
+                    Color.gray
+                }
+            })
+            .navigationDestination(for: SearchFriendType.self, destination: { type in
+                switch type {
+                case .cancelRequestFriend:
+                    FriendMenuView(type: .cancelRequestFriend)
+                case .unblockFriend:
+                    FriendMenuView(type: .unblockFriend)
+                default:
+                    Color.pink
+                }
+            })
+            .navigationDestination(for: MumoryView.self) { view in
+                switch view.type {
+                case .mumoryDetailView:
+                    MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
+                case .editMumoryView:
+                    MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
+                }
+            }
+        }
     }
     
     var mapView: some View {
@@ -143,10 +147,7 @@ public struct HomeView: View {
             
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
-                    Task {
-                        print("HomeMapViewRepresentable onAppear")
-                    }
-                    //                    self.mumoryDataViewModel.fetchMyMumory(userDocumentID: self.appCoordinator.currentUser.documentID)
+                    print("HomeMapViewRepresentable onAppear")
                     self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.documentID)
                 }
                 .onDisappear {

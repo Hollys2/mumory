@@ -20,6 +20,7 @@ struct CommentView: View {
     
     @Binding var isWritingReply: Bool
     @Binding var selectedIndex: Int
+    @Binding var commentDocumentID: String
     
     @State private var isSecretComment: Bool = false
     @State private var isSelectedComment: Bool = false
@@ -93,6 +94,7 @@ struct CommentView: View {
                 Button(action: {
                     selectedIndex = index
                     isFocused.wrappedValue = true
+                    commentDocumentID = comment.id
                     isWritingReply = true
                 }, label: {
                     Text("답글 달기")
@@ -211,13 +213,15 @@ public struct MumoryCommentSheetView: View {
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
 
-    let mumoryAnnotation: Mumory
-//    var comments: [Comment]
+    @Binding var mumoryAnnotation: Mumory
+    @State var comments: [Comment] = []
+    @State var replies: [Comment] = []
     
     @State private var commentText: String = ""
     @State private var replyText: String = ""
     @State private var isWritingReply: Bool = false
     @State private var selectedIndex: Int = -1
+    @State private var commentId: String = ""
     
     @State private var isPublic: Bool = false
 
@@ -231,11 +235,10 @@ public struct MumoryCommentSheetView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, mumoryAnnotation: Mumory) {
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, mumory: Binding<Mumory>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
-        
-        self.mumoryAnnotation = mumoryAnnotation
+        self._mumoryAnnotation = mumory
     }
     
     public var body: some View {
@@ -279,7 +282,8 @@ public struct MumoryCommentSheetView: View {
                             
                             Spacer().frame(width: 5)
                             
-                            Text("\(mumoryAnnotation.comments.count)")
+//                            Text("\(self.comments.count)")
+                            Text("\(self.mumoryAnnotation.commentCount)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             
@@ -300,8 +304,8 @@ public struct MumoryCommentSheetView: View {
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 0) {
                             // MARK: Comment
-                            ForEach(Array(self.mumoryAnnotation.comments.enumerated()), id: \.element) { index, comment in
-                                CommentView(index: index, comment: comment, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedIndex: $selectedIndex)
+                            ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
+                                CommentView(index: index, comment: comment, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedIndex: $selectedIndex, commentDocumentID: $commentId)
                             }
                         }
                     }
@@ -389,7 +393,7 @@ public struct MumoryCommentSheetView: View {
 
                                 HStack(spacing: 5) {
 
-                                    Text("닉네임임임임임")
+                                    Text("\(appCoordinator.currentUser.nickname)")
                                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                         .foregroundColor(.white) +
                                     Text("님에게 답글 남기는 중")
@@ -450,7 +454,10 @@ public struct MumoryCommentSheetView: View {
 
                                             Button(action: {
 //                                                mumoryDataViewModel.createReply(mumoryAnnotation: mumoryAnnotation, loginUserID: "tester", parentCommentIndex: selectedIndex, reply: Comment(author: "tester", date: Date(), content: replyText, isPublic: self.isPublic))
-//                                                mumoryDataViewModel.createReply(commentDocumentID: <#T##String#>, reply: <#T##Comment#>)
+                                                
+                                                if let m = mumoryDataViewModel.selectedMumoryAnnotation {
+                                                    mumoryDataViewModel.createReply(mumoryId: m.id, commentId: commentId, reply: Comment(id: "", userDocumentID: appCoordinator.currentUser.documentID, date: Date(), content: replyText, isPublic: self.isPublic))
+                                                }
                                                 replyText = ""
                                             }, label: {
                                                 replyText.isEmpty ?
@@ -536,13 +543,22 @@ public struct MumoryCommentSheetView: View {
 
                                         Button(action: {
 //                                            mumoryDataViewModel.createComment(mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory(), loginUserID: "tester", comment: Comment(author: "tester", date: Date(), content: commentText, isPublic: self.isPublic))
-                                            guard let mumory = mumoryDataViewModel.selectedMumoryAnnotation else {
-                                                print("mumoryDataViewModel.selectedMumoryAnnotation is nil!")
-                                                return
+                                            Task {
+                                                guard let mumory = mumoryDataViewModel.selectedMumoryAnnotation else {
+                                                    print("mumoryDataViewModel.selectedMumoryAnnotation is nil!")
+                                                    return
+                                                }
+                                                
+                                                mumoryDataViewModel.createComment(mumoryDocumentID: mumory.id, comment: Comment(id: "", userDocumentID: appCoordinator.currentUser.documentID, date: Date(), content: commentText, isPublic: self.isPublic))
+                                                commentText = ""
+                                                
+                                                self.comments = await MumoryDataViewModel.fetchComment(mumoryId: mumory.id) ?? []
+                                                
+                                                mumoryAnnotation.commentCount = self.comments.count
+                                                
+                                                mumoryDataViewModel.fetchEveryMumory()
+                                                
                                             }
-                                            
-                                            mumoryDataViewModel.createComment(comment: Comment(mumoryDocumentID: mumory.id, userDocumentID: appCoordinator.currentUser.documentID, date: Date(), content: commentText, isPublic: self.isPublic))
-                                            commentText = ""
                                         }, label: {
                                             commentText.isEmpty ?
                                             SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
@@ -590,11 +606,27 @@ public struct MumoryCommentSheetView: View {
                     GeometryReader{ g in
                         Color.clear
                             .onAppear {
-                                print("g.size.width: \(g.size.width)")
+//                                print("g.size.width: \(g.size.width)")
                             }
                     }
                 )
+                .onAppear {
+                    if let m = mumoryDataViewModel.selectedMumoryAnnotation {
+                        Task {
+                            let x = await MumoryDataViewModel.fetchComment(mumoryId: m.id) ?? []
+                            for i in x {
+                                if i.parentDocumentID == nil {
+                                    self.comments.append(i)
+                                } else {
+                                    self.replies.append(i)
+                                }
+                            }
+                        }
+                    }
+                }
                 .onDisappear {
+                    self.comments = []
+                    self.replies = []
                     self.appCoordinator.isMumoryDetailCommentSheetViewShown = false
                 }
             }
@@ -617,9 +649,3 @@ public struct MumoryCommentSheetView: View {
         }
     }
 }
-
-//struct MumoryDetailCommentSheetView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MumoryDetailCommentSheetView()
-//    }
-//}

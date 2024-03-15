@@ -142,8 +142,14 @@ public struct MumoryDetailView: View {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
-            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory())
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumory: self.$mumoryAnnotation)
                 .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
+                .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
+                    PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
+                        //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
+                        appCoordinator.isDeleteCommentPopUpViewShown = false
+                    })
+                }
             
             ZStack(alignment: .bottomLeading) {
                 
@@ -217,9 +223,6 @@ public struct MumoryDetailView: View {
             }
 
         } // ZStack
-        .onAppear {
-            mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
-        }
         .navigationBarBackButtonHidden(true)
         .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown) {

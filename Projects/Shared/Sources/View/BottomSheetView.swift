@@ -83,7 +83,7 @@ public struct MumoryBottomSheet {
         case .mumorySocialView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
-                    
+                    mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
                         self.appCoordinator.isSocialMenuSheetViewShown = false
