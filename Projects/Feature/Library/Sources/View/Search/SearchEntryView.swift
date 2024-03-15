@@ -14,7 +14,7 @@ import AVFAudio
 struct SearchEntryView: View {
     @Binding var term: String
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
 //    @State var recentSearchList: [String] = []
 
     var body: some View {

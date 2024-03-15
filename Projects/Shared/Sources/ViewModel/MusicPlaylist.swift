@@ -9,7 +9,7 @@
 import Foundation
 import MusicKit
 
-public struct MusicPlaylist: Equatable {
+public struct MusicPlaylist: Equatable, Hashable {
     public var id: String
     public var title: String
     public var songIDs: [String]
@@ -23,4 +23,6 @@ public struct MusicPlaylist: Equatable {
         self.isPublic = isPublic
         self.isAddItme = isAddItme
     }
+    
+
 }

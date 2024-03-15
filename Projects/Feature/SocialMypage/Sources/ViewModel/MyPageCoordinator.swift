@@ -75,7 +75,7 @@ class MyPageCoordinator: ObservableObject {
             FriendPageView(friend: friend)
             
         case .activityList:
-            ActivityListView()
+            ActivityListView() 
         }
 
     }

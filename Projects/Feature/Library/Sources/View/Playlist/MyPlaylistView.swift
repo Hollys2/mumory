@@ -13,7 +13,7 @@ import MusicKit
 
 //라이브러리 첫 화면 - 최근 뮤모리 뮤직 하단 뷰
 struct MyPlaylistView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     
     

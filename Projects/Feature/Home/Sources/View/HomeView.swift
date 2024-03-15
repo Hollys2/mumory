@@ -41,7 +41,7 @@ public struct HomeView: View {
                     case .social:
                         SocialView()
                     case .library:
-                        LibraryManageView()
+                        LibraryView()
                     case .notification:
                         NotifyView()
                     }
@@ -91,7 +91,7 @@ public struct HomeView: View {
                 }
                 
                 if self.appCoordinator.isAddFriendViewShown {
-                    SocialFriendView()
+                    SocialFriendTestView()
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }

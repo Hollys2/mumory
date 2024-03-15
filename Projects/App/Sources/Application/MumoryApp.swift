@@ -17,7 +17,7 @@ struct MumoryApp: App {
     @StateObject var firebaseManager: FirebaseManager = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var currentUserData: CurrentUserData = .init()
-    @StateObject var libraryManager: LibraryManageModel = .init()
+    @StateObject var libraryCoordinator: LibraryCoordinator = .init()
     @StateObject var playerManager: PlayerViewModel = .init()
     
     var body: some Scene {
@@ -40,7 +40,7 @@ struct MumoryApp: App {
                     .environmentObject(firebaseManager)
                     .environmentObject(keyboardResponder)
                     .environmentObject(currentUserData)
-                    .environmentObject(libraryManager)
+                    .environmentObject(libraryCoordinator)
                     .environmentObject(playerManager)
                     .onAppear {
                         print("MumoryApp onAppear")
@@ -53,7 +53,7 @@ struct MumoryApp: App {
                         currentUserData.topInset = geometry.safeAreaInsets.top
                         currentUserData.bottomInset = geometry.safeAreaInsets.bottom
                         
-                        libraryManager.width = geometry.size.width
+                        libraryCoordinator.width = geometry.size.width
                         
                     }
             }

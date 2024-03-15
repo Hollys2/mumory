@@ -120,6 +120,7 @@ struct EmailLoginView: View {
         let Firebase = FBManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
+        let messaging = Firebase.messaging
         
         guard let result = try? await Auth.signIn(withEmail: email, password: password),
         let snapshot = try? await db.collection("User").document(result.user.uid).getDocument(),
@@ -134,7 +135,7 @@ struct EmailLoginView: View {
 //            self.isCustomizationNotDone = true
             return
         }
-        
+        try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
         currentUserData.uid = result.user.uid
       
         isLoading = false

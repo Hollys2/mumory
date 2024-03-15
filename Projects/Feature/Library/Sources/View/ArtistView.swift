@@ -12,7 +12,7 @@ import MusicKit
 
 struct ArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
-    @EnvironmentObject private var manager: LibraryManageModel
+    @EnvironmentObject private var manager: LibraryCoordinator
     @EnvironmentObject private var playerManager: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero

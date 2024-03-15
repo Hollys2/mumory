@@ -8,15 +8,22 @@
 
 import SwiftUI
 import Shared
-
+enum ActivityType {
+    case all
+    case like
+    case comment
+    case friend
+}
 struct ActivityListView: View {
-    @State var selection: String = "all"
+    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @State var selection: ActivityType = .all
     @State var date: Date = Date()
     @State var isPresentDatePicker: Bool = false
-    
     @State var activityList: [String: [Any]] = [:]
     
     let db = FBManager.shared.db
+    
+    @State var pagingCursor: FBManager.Document?
     
     var body: some View {
         ZStack(alignment: .top){
@@ -27,10 +34,14 @@ struct ActivityListView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            myPageCoordinator.pop()
+                        }
                     Spacer()
                     Text("활동 내역")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundStyle(Color.white)
+                        
                     Spacer()
                     Rectangle()
                         .fill(Color.clear)
@@ -39,13 +50,19 @@ struct ActivityListView: View {
                 .padding(.horizontal, 20)
                 .frame(height: 63)
                 HStack(spacing: 6, content: {
-                    SelectionButtonView(id: "all", title: "전체", selection: $selection)
-                    SelectionButtonView(id: "like", title: "좋아요", selection: $selection)
-                    SelectionButtonView(id: "comment", title: "댓글", selection: $selection)
-                    SelectionButtonView(id: "friend", title: "친구", selection: $selection)
+                    SelectionButtonView(type: .all, title: "전체", selection: $selection)
+                    SelectionButtonView(type: .like, title: "좋아요", selection: $selection)
+                    SelectionButtonView(type: .comment, title: "댓글", selection: $selection)
+                    SelectionButtonView(type: .friend, title: "친구", selection: $selection)
                 })
                 .padding(.leading, 20)
                 .padding(.bottom, 31)
+                .onChange(of: selection) { newValue in
+                    pagingCursor = nil
+                    Task {
+                        await getActivity(type: newValue, date: self.date, pagingCorsor: self.$pagingCursor)
+                    }
+                }
                 
                 Divider()
                     .frame(maxWidth: .infinity)
@@ -74,8 +91,9 @@ struct ActivityListView: View {
                     .background(TransparentBackground())
                 })
                 .onChange(of: date, perform: { value in
+                    pagingCursor = nil
                     Task {
-                        await getActivity(date: value)
+                        await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor)
                     }
                 })
                 
@@ -86,7 +104,7 @@ struct ActivityListView: View {
                 
                 ScrollView {
                     VStack(spacing: 0, content: {
-                        ForEach(activityList.keys.sorted(), id: \.self) { date in
+                        ForEach(activityList.keys.sorted(by: > ), id: \.self) { date in
                             Section {
                                 ForEach((activityList[date] as? [String]) ?? [] , id: \.self) { title in
                                    ActivityTestItem(title: title)
@@ -112,9 +130,15 @@ struct ActivityListView: View {
             })
         }
         .onAppear{
-            Task {
-                await getActivity(date: self.date)
-            }
+            let calendar = Calendar.current
+            let components: Set<Calendar.Component> = [.year, .month]
+            let originDate = calendar.dateComponents(components, from: self.date)
+            
+            var resetDate = DateComponents()
+            resetDate.year = originDate.year
+            resetDate.month = originDate.month
+            
+            self.date = calendar.date(from: resetDate) ?? Date()
         }
     }
     
@@ -138,14 +162,17 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
     
-    private func getActivity(date: Date) async {
+    private func getActivity(type: ActivityType, date: Date, pagingCorsor: Binding<FBManager.Document?>) async {
         activityList.removeAll()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일"
+        guard let targetDate = Calendar.current.date(byAdding: .month, value: 1, to: date) else {
+            return
+        }
         Task {
             let query = db.collection("User").document("s61sCSHlZQRfzeDOmG3sDt6saGI2").collection("Notification")
-                .whereField("date", isGreaterThanOrEqualTo: date)
-                .order(by: "date")
+                .whereField("date", isLessThan: targetDate)
+                .order(by: "date", descending: true)
             
             guard let snapshots = try? await query.getDocuments() else {
                 print("error1")
@@ -182,25 +209,25 @@ struct ActivityListView: View {
 //}
 
 struct SelectionButtonView: View {
-    let id: String
+    let type: ActivityType
     let title: String
-    @Binding var selection: String
+    @Binding var selection: ActivityType
     
-    init(id: String, title: String, selection: Binding<String>) {
+    init(type: ActivityType, title: String, selection: Binding<ActivityType>) {
         self.title = title
         self._selection = selection
-        self.id = id
+        self.type = type
     }
     var body: some View {
         Text(title)
             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-            .foregroundStyle(selection == id ? Color.black : Color.white)
+            .foregroundStyle(selection == type ? Color.black : Color.white)
             .padding(.horizontal, 16)
             .frame(height: 33)
-            .background(selection == id ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+            .background(selection == type ? ColorSet.mainPurpleColor : ColorSet.darkGray)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
             .onTapGesture {
-                self.selection = self.id
+                self.selection = self.type
             }
         
     }

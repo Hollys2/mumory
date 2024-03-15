@@ -17,7 +17,7 @@ public struct RecommendationView: View {
     @State private var path = NavigationPath()
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     
     @State private var contentOffset: CGPoint = .zero
     @State private var scrollViewHeight: CGFloat = .zero

@@ -16,7 +16,7 @@ public struct LibraryManageView: View {
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @StateObject var snackbarManager: SnackBarViewModel = SnackBarViewModel()
     
     @State var isPlaying: Bool = true
@@ -31,60 +31,60 @@ public struct LibraryManageView: View {
             ForEach(0 ..< manager.stack.count, id: \.self) { index in
                 
                 VStack(spacing: 0, content: {
-                    switch(manager.stack[index]){
-                    case .entry:
-                        LibraryView(isTapMyMusic: true)
-                        
-                    case .search(term: let term):
-                        SearchView(term: term)
-                        
-                    case .artist(artist: let artist):
-                        ArtistView(artist: artist)
-                            .onAppear(perform: {
-                                hasToRemoveSafeArea = true
-                            })
-                            .onDisappear(perform: {
-                                hasToRemoveSafeArea = false
-                            })
-                        
-                    case .playlistManage:
-                        PlaylistManageView()
-                        
-                    case .chart:
-                        ChartListView()
-                        
-                    case .playlist(playlist: let playlist):
-                        PlaylistView(playlist: playlist)
-                            .onAppear(perform: {
-                                hasToRemoveSafeArea = true
-                            })
-                            .onDisappear(perform: {
-                                hasToRemoveSafeArea = false
-                            })
-                        
-                    case .shazam:
-                        ShazamView()
-                        
-                    case .addSong(originPlaylist: let originPlaylist):
-                        AddPlaylistSongView(originPlaylist: originPlaylist)
-                            .environmentObject(snackbarManager)
-                        
-                    case .play:
-                        NowPlayingView()
-                        
-                    case .saveToPlaylist(songs: let songs):
-                        SaveToPlaylistView(songs: songs)
-                            .environmentObject(snackbarManager)
-                        
-                    case .recommendation(genreID: let genreID):
-                        RecommendationListView(genreID: genreID)
-                            .onAppear(perform: {
-                                hasToRemoveSafeArea = true
-                            })
-                            .onDisappear(perform: {
-                                hasToRemoveSafeArea = false
-                            })
-                    }
+//                    switch(manager.stack[index]){
+//                    case .entry:
+//                        LibraryView(isTapMyMusic: true)
+//                        
+//                    case .search(term: let term):
+//                        SearchView(term: term)
+//                        
+//                    case .artist(artist: let artist):
+//                        ArtistView(artist: artist)
+//                            .onAppear(perform: {
+//                                hasToRemoveSafeArea = true
+//                            })
+//                            .onDisappear(perform: {
+//                                hasToRemoveSafeArea = false
+//                            })
+//                        
+//                    case .playlistManage:
+//                        PlaylistManageView()
+//                        
+//                    case .chart:
+//                        ChartListView()
+//                        
+//                    case .playlist(playlist: let playlist):
+//                        PlaylistView(playlist: playlist)
+//                            .onAppear(perform: {
+//                                hasToRemoveSafeArea = true
+//                            })
+//                            .onDisappear(perform: {
+//                                hasToRemoveSafeArea = false
+//                            })
+//                        
+//                    case .shazam:
+//                        ShazamView()
+//                        
+//                    case .addSong(originPlaylist: let originPlaylist):
+//                        AddPlaylistSongView(originPlaylist: originPlaylist)
+//                            .environmentObject(snackbarManager)
+//                        
+//                    case .play:
+//                        NowPlayingView()
+//                        
+//                    case .saveToPlaylist(songs: let songs):
+//                        SaveToPlaylistView(songs: songs)
+//                            .environmentObject(snackbarManager)
+//                        
+//                    case .recommendation(genreID: let genreID):
+//                        RecommendationListView(genreID: genreID)
+//                            .onAppear(perform: {
+//                                hasToRemoveSafeArea = true
+//                            })
+//                            .onDisappear(perform: {
+//                                hasToRemoveSafeArea = false
+//                            })
+//                    }
                 })
                 .padding(.top,  currentUserData.topInset)
                 .offset(x: isCurrentPage(index: index) ? manager.xOffset : isPreviousPage(index: index) ? ((70/getUIScreenBounds().width) * manager.xOffset) - 70 : 0)

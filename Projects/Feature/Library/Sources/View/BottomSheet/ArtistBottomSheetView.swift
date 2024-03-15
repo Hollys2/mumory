@@ -12,7 +12,7 @@ import MusicKit
 
 struct ArtistBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     let artist: Artist
     let songs: [Song]

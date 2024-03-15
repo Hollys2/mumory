@@ -12,12 +12,20 @@ import MusicKit
 
 struct PlaylistBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
-    @State var playlist: MusicPlaylist
-    @State var songs: [Song]
+    var playlist: MusicPlaylist
+    var songs: [Song]
+    var editPlaylistNameAction: () -> Void
+    
+    init(playlist: MusicPlaylist, songs: [Song], editPlaylistNameAction: @escaping () -> Void) {
+        self.playlist = playlist
+        self.songs = songs
+        self.editPlaylistNameAction = editPlaylistNameAction
+    }
+    
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(alignment: .center,spacing: 10,content: {
@@ -39,6 +47,9 @@ struct PlaylistBottomSheetView: View {
                 .padding(.horizontal, 4)
             
             BottomSheetItem(image: SharedAsset.editPlaylist.swiftUIImage, title: "플레이리스트 이름 수정")
+                .onTapGesture {
+                    editPlaylistNameAction()
+                }
             
             BottomSheetItem(image: SharedAsset.addMusic.swiftUIImage, title: "음악 추가")
                 .onTapGesture {

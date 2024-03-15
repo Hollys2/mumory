@@ -13,7 +13,7 @@ import MusicKit
 
 struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @State var isEditGenreViewPresent: Bool = false
     @State var isEditGenreInfoPresent: Bool = false
     @State var genreInfoTimer: Timer?
@@ -65,7 +65,7 @@ struct FavoriteGenreRecommendationView: View {
                                                 .padding(.bottom, 6)
                                         }
                                         .offset(y: -37)
-                                        .transition(.scale(scale: 0.0, anchor: .top))
+                                        .transition(.scale(scale: 0.0, anchor: .top).combined(with: .opacity))
                                 }
                                 
                             }
@@ -103,6 +103,7 @@ struct FavoriteGenreRecommendationView: View {
             }
         }
         .onAppear {
+//            let db = FBManager.shared.db.coll
 //            recommendationIDList.removeAll()
 //            recommendationSongList.removeAll()
 
@@ -113,7 +114,7 @@ struct FavoriteGenreRecommendationView: View {
 }
 
 private struct RecommendationScrollView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var songs: [Song] = []
     @State var songIDs: [String] = []

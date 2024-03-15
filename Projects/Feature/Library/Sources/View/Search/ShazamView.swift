@@ -13,7 +13,7 @@ import Lottie
 struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()

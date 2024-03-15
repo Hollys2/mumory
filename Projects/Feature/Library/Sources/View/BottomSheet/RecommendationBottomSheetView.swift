@@ -19,7 +19,7 @@ struct RecommendationBottomSheetView: View {
     }
     
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     

@@ -13,6 +13,8 @@ struct NotifyView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var notifications: [Notification] = []
     
+    
+    
     let db = FBManager.shared.db
 
     var body: some View {
@@ -75,6 +77,7 @@ struct NotifyView: View {
     private func getNotification() async {
         let query = db.collection("User").document(currentUserData.uid).collection("Notification")
             .order(by: "date", descending: true)
+        
         //페이징기능 만들기
         //페이징기능때문에 안 본 알림이 몇개인지 알 수 있기는 한가..? 고민해보기
             
@@ -190,10 +193,12 @@ struct NotifyLikeItem: View {
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    
                 }
                 self.notification.isRead = true
             }
             //해당 알림과 관련된 페이지로 넘어가기
+  
         }
     }
     

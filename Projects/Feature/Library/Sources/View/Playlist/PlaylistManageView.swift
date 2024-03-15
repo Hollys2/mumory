@@ -13,7 +13,7 @@ import FirebaseFirestore
 
 struct PlaylistManageView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var isCreatePlaylistCompleted: Bool = false

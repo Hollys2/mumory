@@ -13,7 +13,7 @@ import Core
 
 struct SaveToPlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackbarManager: SnackBarViewModel
     

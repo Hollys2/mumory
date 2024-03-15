@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct AddPlaylistSongView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackbarManager: SnackBarViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -111,19 +111,16 @@ struct AddPlaylistSongView: View {
                 
             })
             
-        
-                            
-
-            
         }
         .onAppear(perform: {
-            appCoordinator.isHiddenTabBarWithoutAnimation = true
+//            appCoordinator.isHiddenTabBarWithoutAnimation = true
             withAnimation {
                 appCoordinator.isHiddenTabBar = true
             }
+            
         })
         .onDisappear(perform: {
-            appCoordinator.isHiddenTabBarWithoutAnimation = false
+//            appCoordinator.isHiddenTabBarWithoutAnimation = false
             withAnimation {
                 appCoordinator.isHiddenTabBar = false
             }

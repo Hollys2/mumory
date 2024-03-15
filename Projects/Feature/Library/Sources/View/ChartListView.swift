@@ -12,7 +12,7 @@ import MusicKit
 
 struct ChartListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var contentOffset: CGPoint = .zero
     @State var viewWidth: CGFloat = .zero

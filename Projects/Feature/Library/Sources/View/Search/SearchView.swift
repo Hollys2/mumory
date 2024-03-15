@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct SearchView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
     

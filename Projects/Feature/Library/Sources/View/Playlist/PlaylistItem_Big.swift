@@ -13,7 +13,7 @@ import MusicKit
 
 //플레이리스트 아이템(플레이리스트 뷰)
 struct PlaylistItem_Big: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     
     @Binding var playlist: MusicPlaylist

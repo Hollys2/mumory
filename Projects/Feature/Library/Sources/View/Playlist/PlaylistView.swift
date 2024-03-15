@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct PlaylistView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
@@ -26,6 +26,8 @@ struct PlaylistView: View {
     
     @State var playlist: MusicPlaylist
     @State var isCompletedGetSongs: Bool = false
+    
+    @State var isPresentModifyPlaylistView: Bool = false
     
     init(playlist: MusicPlaylist){
         self.playlist = playlist
@@ -42,8 +44,6 @@ struct PlaylistView: View {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
                     ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
                 }
-
-            
         
             
             
@@ -233,11 +233,18 @@ struct PlaylistView: View {
             .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    PlaylistBottomSheetView(playlist: playlist, songs: songs)
-                        .environmentObject(manager)
+                    PlaylistBottomSheetView(playlist: playlist, songs: songs, editPlaylistNameAction: {
+                        isBottomSheetPresent = false
+                            isPresentModifyPlaylistView = true
+                    })
+                    .environmentObject(manager)
                 }
                 .background(TransparentBackground())
             })
+            .fullScreenCover(isPresented: $isPresentModifyPlaylistView) {
+                ModifyPlaylistPopupView(playlist: $playlist)
+                    .background(TransparentBackground())
+            }
             
             
             //삭제버튼

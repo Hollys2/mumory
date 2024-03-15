@@ -56,6 +56,7 @@ public struct SplashView: View {
                     }
                 }
                 .onAppear(perform: {
+                    
                     Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
                         withAnimation {
                             isEndSplash = true
@@ -135,6 +136,7 @@ public struct SplashView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
+        
         print("111")
         if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
             page = .onBoarding
