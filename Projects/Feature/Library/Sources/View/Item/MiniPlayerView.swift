@@ -108,7 +108,7 @@ struct MiniPlayerView: View {
                         .frame(width: 20, height: 20)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerManager.isMiniPlayerPresent = false
+                            playerManager.isShown = false
                         }
                     
                     
@@ -125,7 +125,7 @@ struct MiniPlayerView: View {
                 )
                 .padding(.bottom, 10)
                 .padding(.horizontal, 8)
-                .opacity(playerManager.isMiniPlayerPresent ? 1 : 0)
+                .opacity(playerManager.isShown ? 1 : 0)
 
         }
         

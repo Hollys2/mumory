@@ -13,7 +13,7 @@ import MusicKit
 
 //라이브러리 첫 화면 - 최근 뮤모리 뮤직 하단 뷰
 struct MyPlaylistView: View {
-    @EnvironmentObject var manager: LibraryCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     
     
@@ -46,7 +46,7 @@ struct MyPlaylistView: View {
                 .padding(.top, 10)
                 .padding(.bottom, 10)
                 .onTapGesture {
-                    manager.push(destination: .playlistManage)
+                    appCoordinator.rootPath.append(LibraryPage.playlistManage)
                 }
                 
                 ScrollView(.horizontal) {
@@ -54,7 +54,7 @@ struct MyPlaylistView: View {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
                             PlaylistItem(playlist: playlist, itemSize: 81, isAddSongItem: playlist.isAddItme)
                                 .onTapGesture {
-                                    manager.push(destination: .playlist(playlist: playlist))
+                                    appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
                                 }
                         }
                     })

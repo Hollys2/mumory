@@ -47,27 +47,30 @@ struct MyRequestFriendListView: View {
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
                         ForEach(myRequestFriendList, id: \.uid){ friend in
-                            MyRequestFriendItem(friend: friend)
+                            MyRequestFriendItem(friend: friend, myRequestFriendList: $myRequestFriendList)
                         }
                     })
                 }
                 
             }
         }
-        .onTapGesture {
-            let query = db.collection("User").document(currentUserData.uid).collection("Friend")
-                .whereField("type", isEqualTo: "request")
-            Task {
-                guard let snapshot = try? await query.getDocuments() else {
+        .onAppear {
+            getMyRequestFriendList()
+        }
+    }
+    private func getMyRequestFriendList(){
+        let query = db.collection("User").document(currentUserData.uid).collection("Friend")
+            .whereField("type", isEqualTo: "request")
+        Task {
+            guard let snapshot = try? await query.getDocuments() else {
+                return
+            }
+            snapshot.documents.forEach { document in
+                guard let uid = document.data()["uId"] as? String else {
                     return
                 }
-                snapshot.documents.forEach { document in
-                    guard let uid = document.data()["uid"] as? String else {
-                        return
-                    }
-                    Task {
-                        myRequestFriendList.append(await MumoriUser(uid: uid))
-                    }
+                Task {
+                    myRequestFriendList.append(await MumoriUser(uid: uid))
                 }
             }
         }
@@ -77,11 +80,14 @@ struct MyRequestFriendListView: View {
 
 struct MyRequestFriendItem: View {
     let friend: MumoriUser
-    init(friend: MumoriUser) {
+    @Binding var myRequestFriendList: [MumoriUser]
+    init(friend: MumoriUser, myRequestFriendList: Binding<[MumoriUser]>) {
         self.friend = friend
+        self._myRequestFriendList = myRequestFriendList
     }
     let Firebase = FBManager.shared
-    @State var isPresentRequestPopup: Bool = false
+    @State var isPresentDeletePopup: Bool = false
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
         HStack(spacing: 13, content: {
@@ -94,7 +100,7 @@ struct MyRequestFriendItem: View {
             } placeholder: {
                 Circle()
                     .fill(ColorSet.darkGray)
-                    .frame(width: 55)
+                    .frame(width: 50)
             }
             
             VStack(alignment: .leading, spacing: 1, content: {
@@ -110,7 +116,7 @@ struct MyRequestFriendItem: View {
             
             
             
-            Text("친구추가")
+            Text("요청 취소")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 .foregroundColor(.black)
                 .padding(.horizontal, 16)
@@ -118,12 +124,50 @@ struct MyRequestFriendItem: View {
                 .background(ColorSet.subGray)
                 .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
                 .onTapGesture {
-             
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeletePopup = true
                 }
         })
         .padding(.horizontal, 20)
         .background(ColorSet.background)
         .frame(height: 84)
+        .fullScreenCover(isPresented: $isPresentDeletePopup) {
+            TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
+                deleteRequest()
+            }
+            .background(TransparentBackground())
+        }
+    }
+    
+    private func deleteRequest() {
+        let db = Firebase.db
+        let deleteMyQuery = db.collection("User").document(currentUserData.uid).collection("Friend")
+            .whereField("uId", isEqualTo: friend.uid)
+            .whereField("type", isEqualTo: "request")
+        
+        let deleteFriendQuery = db.collection("User").document(friend.uid).collection("Friend")
+            .whereField("uId", isEqualTo: currentUserData.uid)
+            .whereField("type", isEqualTo: "recieve")
+        
+        Task {
+            guard let result = try? await deleteMyQuery.getDocuments() else {
+                return
+            }
+            guard let deleteResult = try? await result.documents.first?.reference.delete() else {
+                return
+            }
+            myRequestFriendList.removeAll(where: {$0.uid == friend.uid})
+        }
+        Task {
+            guard let resultFriend = try? await deleteFriendQuery.getDocuments() else {
+                return
+            }
+            guard let deleteResultFriend = try? await resultFriend.documents.first?.reference.delete() else {
+                return
+            }
+        }
+        
+        
     }
 }
 

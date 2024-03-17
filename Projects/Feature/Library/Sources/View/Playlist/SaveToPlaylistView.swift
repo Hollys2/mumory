@@ -13,7 +13,6 @@ import Core
 
 struct SaveToPlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackbarManager: SnackBarViewModel
     
@@ -40,7 +39,7 @@ struct SaveToPlaylistView: View {
                     
                     Spacer()
                     Button {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     } label: {
                         SharedAsset.xWhite.swiftUIImage
                             .resizable()
@@ -147,8 +146,7 @@ struct SaveToPlaylistView: View {
                     }
                 }
             }
-            
-            manager.pop()
+            appCoordinator.rootPath.removeLast()
         }else {
             //1곡씩 저장할 때
             guard let song = self.songIDs.first else {
@@ -173,7 +171,7 @@ struct SaveToPlaylistView: View {
                         }
                     }
                 }
-                manager.pop()
+                appCoordinator.rootPath.removeLast()
             }
         }
         

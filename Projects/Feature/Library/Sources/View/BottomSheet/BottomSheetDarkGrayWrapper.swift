@@ -36,13 +36,18 @@ public struct BottomSheetDarkGrayWrapper: View {
                         .scaledToFit()
                         .frame(width: 47)
                         .padding(.top, 11)
-                        .padding(.bottom, 4)
+                        .padding(.bottom, 11)
+                    
                     AnyView(content())
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+                        .padding(.horizontal, 7)
+                        .padding(.bottom, 7)
+
                     
                     
                 })
                 .frame(maxWidth: .infinity)
-                .background(ColorSet.darkGray)
+                .background(ColorSet.moreDeepGray)
                 .cornerRadius(15, corners: [.allCorners])
                 .padding(.horizontal, 7)
                 .offset(y: yOffset)

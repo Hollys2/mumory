@@ -85,19 +85,18 @@ struct SettingView: View {
                 
                 LogoutButton()
                     .onTapGesture {
+                        let Firebase = FBManager.shared
                         do {
-                            try FBManager.shared.auth.signOut()
+                            try Firebase.auth.signOut()
                             print("로그아웃 완료")
-                            let keyWindow = UIApplication.shared.connectedScenes
-                                        .filter({$0.activationState == .foregroundActive})
-                                        .compactMap({$0 as? UIWindowScene})
-                                        .first?.windows
-                                        .filter({$0.isKeyWindow}).first
-                              findNavigationController(viewController: keyWindow?.rootViewController)?
-                                .popToRootViewController(animated: false)
+                            myPageCoordinator.push(destination: .login)
                             
                         }catch {
                             print("signout error: \(error)")
+                        }
+                        
+                        Firebase.messaging.deleteToken { error in
+                            print(error?.localizedDescription)
                         }
                     }
                 

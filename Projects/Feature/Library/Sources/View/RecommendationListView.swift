@@ -12,7 +12,6 @@ import MusicKit
 import Core
 
 struct RecommendationListView: View {
-    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
@@ -119,7 +118,7 @@ struct RecommendationListView: View {
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
                     .onTapGesture {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()

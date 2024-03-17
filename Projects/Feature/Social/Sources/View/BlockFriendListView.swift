@@ -54,19 +54,23 @@ struct BlockFriendListView: View {
                 
             }
         }
-        .onTapGesture {
-            let query = db.collection("User").document(currentUserData.uid)
-            Task {
-                guard let data = try? await query.getDocument().data() else {
-                    return
-                }
-                guard let blockFriends = data["blockFriends"] as? [String] else {
-                    return
-                }
-                blockFriends.forEach { uid in
-                    Task{
-                        self.blockFriendList.append(await MumoriUser(uid: uid))
-                    }
+        .onAppear {
+            getBlockFriendList()
+        }
+    }
+    
+    private func getBlockFriendList() {
+        let query = db.collection("User").document(currentUserData.uid)
+        Task {
+            guard let data = try? await query.getDocument().data() else {
+                return
+            }
+            guard let blockFriends = data["blockFriends"] as? [String] else {
+                return
+            }
+            blockFriends.forEach { uid in
+                Task{
+                    self.blockFriendList.append(await MumoriUser(uid: uid))
                 }
             }
         }
@@ -95,7 +99,7 @@ struct BlockFriendItem: View {
             } placeholder: {
                 Circle()
                     .fill(ColorSet.darkGray)
-                    .frame(width: 55)
+                    .frame(width: 50)
             }
             
             VStack(alignment: .leading, spacing: 1, content: {

@@ -13,7 +13,7 @@ import Core
 public struct MyRecentMusicView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
-    @State var MusicList: [Song] = []
+    @State var musicList: [Song] = []
     @State var exists: Bool = false
     public init() {
         
@@ -31,14 +31,14 @@ public struct MyRecentMusicView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             
-            if MusicList.isEmpty{
+            if musicList.isEmpty{
                 NoMumoryView()
                     .frame(maxHeight: .infinity, alignment: .center)
                     .padding(.bottom, 7)
             }else {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top,spacing: 8, content: {
-                        ForEach(MusicList, id: \.title) { song in
+                        ForEach(musicList, id: \.title) { song in
                             RecentMusicItem(song: song)
                         }
                     })
@@ -57,35 +57,36 @@ public struct MyRecentMusicView: View {
         //임의로 즐겨찾기 목록이 나오게 함
         let Firebase = FBManager.shared
         let db = Firebase.db
-        let query = db.collection("User").document(currentUserData.uid).collection("Playlist").document("favorite")
-        query.getDocument { snapshot, error in
-            guard error == nil else {
-                return
+        //        let uid = currentUserData.uid
+        let uid = "tester" //테스트용도
+        let query = db.collection("Mumory")
+            .whereField("uId", isEqualTo: uid)
+            .order(by: "date", descending: true)
+        
+        query.getDocuments { snapshot, error in
+            guard let snapshot = snapshot else {return}
+            snapshot.documents.forEach { doc in
+                let data = doc.data()
+                guard let songID = data["songID"] as? String else {return}
+                Task {
+                    if let song = await fetchSong(songID: songID) {
+                        musicList.append(song)
+                    }
+                }
             }
-            guard let data = snapshot?.data() else {
-                return
-            }
-            
-            guard let songIDs = data["songIdentifiers"] as? [String] else {
-                return
-            }
-            
-            fetchSongInfo(songIDs: songIDs)
         }
     }
     
-    func fetchSongInfo(songIDs: [String]){
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            Task {
-                let response = try await request.response()
-                guard let song = response.items.first else {
-                    return
-                }
-                self.MusicList.append(song)
-            }
+    private func fetchSong(songID: String) async -> Song? {
+        let musicItemID = MusicItemID(rawValue: songID)
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        guard let response = try? await request.response() else {
+            return nil
         }
+        guard let song = response.items.first else {
+            return nil
+        }
+        return song
     }
 }
 

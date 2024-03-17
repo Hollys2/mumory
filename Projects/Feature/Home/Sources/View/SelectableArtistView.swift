@@ -1,38 +1,36 @@
 //
-//  ArtistView.swift
+//  SelectableArtistView.swift
 //  Feature
 //
-//  Created by 제이콥 on 2/14/24.
+//  Created by 제이콥 on 3/16/24.
 //  Copyright © 2024 hollys. All rights reserved.
 //
 
 import SwiftUI
 import Shared
 import MusicKit
-//Deprecated
-struct ArtistOfSongView: View {
+
+struct SelectableArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerManager: PlayerViewModel
-    @State private var isBottomSheetPresent: Bool = false
+    
     @State private var offset: CGPoint = .zero
     @State private var contentSize: CGSize = .zero
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
-    @State var artist: Artist?
-    let song: Song
-
-    init(song: Song){
-        self.song = song
+    let artist: Artist
+    
+    init(artist: Artist) {
+        self.artist = artist
     }
-
     
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             
-            AsyncImage(url: artist?.artwork?.url(width: 1000, height: 1000)) { image in
+            AsyncImage(url: artist.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -44,6 +42,9 @@ struct ArtistOfSongView: View {
                     .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().width)
             }
             .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
+            .overlay {
+                ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
+            }
 
 
         
@@ -59,27 +60,21 @@ struct ArtistOfSongView: View {
                     
                     //그라데이션 하위
                     VStack(spacing: 0, content: {
-                        Text(artist?.name ?? "ARTIST")
+                        Text(artist.name)
                             .foregroundStyle(.white)
                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 40))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 20)
                         
                         //곡 개수와 전체 재생 버튼
-                        HStack(alignment: .bottom, spacing: 0, content: {
-                            Text(songs.count > 0 ? "\(songs.count)곡" : "")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                                .foregroundStyle(ColorSet.subGray)
-                            Spacer()
-                            PlayAllButton()
-                                .onTapGesture {
-                                    playerManager.playAll(title: artist?.name ?? "재생중", songs: songs)
-                                }
-                        })
-                        .padding(.horizontal, 20)
-                        .padding(.leading, 1)
-                        .padding(.top, 39)
-                        .padding(.bottom, 18)
+                        Text(songs.count > 0 ? "\(songs.count)곡" : "")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                            .foregroundStyle(ColorSet.subGray)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                            .padding(.leading, 1)
+                            .padding(.top, 39)
+                            .padding(.bottom, 18)
                         
                         //구분선
                         Divider()
@@ -89,10 +84,8 @@ struct ArtistOfSongView: View {
                         
                         //노래 리스트
                         ForEach(songs, id: \.id){ song in
-                            MusicListItem(song: song, type: .artist)
-                                .onTapGesture {
-                                    playerManager.playNewSong(song: song)
-                                }
+                            SelectableMusicListItem(song: song)
+                        
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
@@ -126,66 +119,29 @@ struct ArtistOfSongView: View {
                     .resizable()
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
-                    .onTapGesture {
-                        isBottomSheetPresent = true
-                    }
-                    .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
-                        BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-//                           ArtistBottomSheetView(artist: artist, songs: songs)
-                        }
-                        .background(TransparentBackground())
-                    })
                 
             })
             .frame(height: 50)
             .padding(.top, currentUserData.topInset)
-            
-
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            Task{
-                await requestDetailSongInfo()
-            }
-            
+            requestArtistSongs(offset: 0)
         })
     }
     
-    private func requestDetailSongInfo() async {
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
-        request.properties = [.artists, .genres]
-        
-        do{
-            let response = try await request.response().items
-            guard let song = response.first else {
-                print("no song")
-                return
-            }
-            
-            guard let artist = song.artists?.first else {
-                print("no artist")
-                return
-            }
-            self.artist = artist
-            requestArtistSongs(artistName: artist.name, offset: 0)
-            
-        }catch(let error) {
-            print("error: \(error.localizedDescription)")
-        }
-        
-    }
-    
-    private func requestArtistSongs(artistName: String, offset: Int) {
-        var request = MusicCatalogSearchRequest(term: artistName, types: [Song.self])
+    private func requestArtistSongs(offset: Int) {
+        print("request")
+        let artistName = artist.name
+        var request = MusicCatalogSearchRequest(term: artist.name, types: [Song.self])
         request.includeTopResults = true
         request.limit = 20
         request.offset = offset * 20
-    
         Task{
             do {
                 let response = try await request.response()
                 if response.songs.count > 0 {
-                    requestArtistSongs(artistName: artistName, offset: offset + 1)
+                    requestArtistSongs(offset: offset + 1)
                 }
                 
                 DispatchQueue.main.async {
@@ -198,17 +154,65 @@ struct ArtistOfSongView: View {
         }
         
     }
-    
-    private func getTopSongs(artist: Artist) {
-        var request = MusicCatalogResourceRequest<Artist>(matching: \.id, equalTo: artist.id)
-        request.properties = [.topSongs]
-        
-        
-    }
 }
 
+struct SelectableMusicListItem: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    var song: Song
+    init(song: Song) {
+        self.song = song
+    }
+        
+    var body: some View {
+        
+        HStack(spacing: 0, content: {
+            AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
+                image
+                    .resizable()
+                    .frame(width: 40, height: 40)
+                    .clipShape(RoundedRectangle(cornerRadius: 5,style: .circular))
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .foregroundStyle(.gray)
+                    .frame(width: 40, height: 40)
+            }
+            .padding(.trailing, 13)
 
-
-//#Preview {
-//    ArtistView()
-//}
+            
+            VStack(content: {
+                Text(song.title)
+                    .frame(maxWidth: .infinity,alignment: .leading)
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Text(song.artistName)
+                    .frame(maxWidth: .infinity,alignment: .leading)
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(LibraryColorSet.lightGrayTitle)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            })
+            
+            Spacer()
+            
+            SharedAsset.addWhiteCircle.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .onTapGesture {    
+                    let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    mumoryDataViewModel.choosedMusicModel = musicModel
+                    appCoordinator.rootPath.removeLast()
+                    appCoordinator.rootPath.removeLast()
+                }
+        })
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 15)
+        .padding(.horizontal, 20)
+        .background(ColorSet.background)
+    }
+}

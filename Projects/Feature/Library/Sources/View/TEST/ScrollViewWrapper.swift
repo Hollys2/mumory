@@ -62,8 +62,6 @@ public struct ScrollViewWrapper<Content: View>: UIViewRepresentable {
                     hostedView.widthAnchor.constraint(equalTo: uiView.widthAnchor)  // Ensures the width matches the scroll view
                 ])
                 print("2set auto layout again")
-
-                
             }
         }
     }

@@ -13,6 +13,7 @@ import Shared
 public struct PlayingMusicBarView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var isPresentPlayingView: Bool = false
     @State var isPresentMyPage: Bool = false
     
@@ -68,11 +69,9 @@ public struct PlayingMusicBarView: View {
                 
             })
             .onTapGesture {
-                isPresentPlayingView = true
+                appCoordinator.setBottomAnimationPage(page: .play)
             }
-            .fullScreenCover(isPresented: $isPresentPlayingView, content: {
-                NowPlayingView()
-            })
+ 
             
             
             //재생버튼. 재생 여부에 따라 다르게 보여야함
@@ -123,11 +122,9 @@ public struct PlayingMusicBarView: View {
             }
             .padding(.trailing, 11)
             .onTapGesture {
-                isPresentMyPage = true
+                appCoordinator.setBottomAnimationPage(page: .myPage)
             }
-            .fullScreenCover(isPresented: $isPresentMyPage) {
-                MyPageView()
-            }
+     
                         
         })
         .frame(maxWidth: .infinity)

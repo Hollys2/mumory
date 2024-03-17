@@ -14,17 +14,6 @@ import Lottie
 import GoogleSignIn
 import Firebase
 
-public enum MumoryPage: Hashable {
-    case customization
-    case startCustomization
-    case signUp
-    case home
-    case emailLogin
-    case lastOfCustomization
-    case login
-    case requestFriend
-    case blockFriend
-}
 public struct LoginView: View {
     @Environment(\.presentationMode) var presentationMode
 

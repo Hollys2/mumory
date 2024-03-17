@@ -15,7 +15,7 @@ enum bottomSheetType {
 }
 struct SongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var manager: LibraryCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
     var types: [bottomSheetType] = []
@@ -84,7 +84,7 @@ struct SongBottomSheetView: View {
                         .onTapGesture {
                             dismiss()
                             getArtist(song: song) { artist in
-                                manager.push(destination: .artist(artist: artist))
+                                appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
                             }
                         }
                 }
@@ -97,7 +97,7 @@ struct SongBottomSheetView: View {
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                     .onTapGesture {
                         dismiss()
-                        manager.push(destination: .saveToPlaylist(songs: [song]))
+                        appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
                     }
                 BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
@@ -108,26 +108,23 @@ struct SongBottomSheetView: View {
         }
     
     private func getArtist(song: Song, completion: @escaping (Artist) -> ())  {
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
-        request.properties = [.artists]
+    
         Task{
-            do{
-                let response = try await request.response().items
-                guard let song = response.first else {
-                    print("no song")
-                    return
-                }
-                
-                guard let artist = song.artists?.first else {
-                    print("no artist")
-                    return
-                }
-                
-                completion(artist)
-                
-            }catch(let error) {
-                print("error: \(error.localizedDescription)")
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
+            request.properties = [.artists]
+            guard let response = try? await request.response().items else {
+                return
             }
+            guard let song = response.first else {
+                print("no song")
+                return
+            }
+            guard let artist = song.artists?.first else {
+                print("no artist")
+                return
+            }
+            
+            completion(artist)
         }
     }
 

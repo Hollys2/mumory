@@ -13,7 +13,6 @@ import FirebaseFirestore
 
 struct PlaylistManageView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var isCreatePlaylistCompleted: Bool = false
@@ -41,7 +40,7 @@ struct PlaylistManageView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                manager.pop()
+                                appCoordinator.rootPath.removeLast()
                             }
                     }
                     
@@ -94,10 +93,10 @@ struct PlaylistManageView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .opacity(isEditing ? 0 : 1)
                     .onTapGesture {
-                        appCoordinator.isHiddenTabBarWithoutAnimation = true
+//                        appCoordinator.isHiddenTabBarWithoutAnimation = true
                         withAnimation {
                             isEditing = true
-                            appCoordinator.isHiddenTabBar = true
+//                            appCoordinator.isHiddenTabBar = true
                             editButtonHeight = 0
                         }
                     }
@@ -109,7 +108,6 @@ struct PlaylistManageView: View {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
                             PlaylistItem_Big(playlist: .constant(playlist), isAddSongItem: playlist.isAddItme, isEditing: $isEditing)
                                 .frame(minWidth: 170, minHeight: 215)
-                                .environmentObject(manager)
                         }
                     })
                     

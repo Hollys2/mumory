@@ -12,7 +12,6 @@ import MusicKit
 import Core
 
 struct PlaylistView: View {
-    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
@@ -190,7 +189,7 @@ struct PlaylistView: View {
                     .padding(.leading, 20)
                     .opacity(isEditing ? 0 : 1)
                     .onTapGesture {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()
@@ -237,7 +236,6 @@ struct PlaylistView: View {
                         isBottomSheetPresent = false
                             isPresentModifyPlaylistView = true
                     })
-                    .environmentObject(manager)
                 }
                 .background(TransparentBackground())
             })

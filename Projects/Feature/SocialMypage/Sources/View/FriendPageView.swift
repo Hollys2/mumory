@@ -18,6 +18,10 @@ struct FriendPageView: View {
     init(friend: MumoriUser) {
         self.friend = friend
     }
+    init(uId: String) async {
+        self.friend = await MumoriUser(uid: uId)
+    }
+    
     let lineGray = Color(white: 0.37)
 
     var body: some View {

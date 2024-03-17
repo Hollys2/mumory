@@ -20,11 +20,13 @@ public struct HomeView: View {
     @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
-    
+
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var keyboardResponder: KeyboardResponder
+    
+    @State var myPageStack: [MyPage] = []
     
     public init() {}
     
@@ -34,7 +36,6 @@ public struct HomeView: View {
             ZStack(alignment: .bottom) {
                 
                 VStack(spacing: 0) {
-                    
                     switch selectedTab {
                     case .home:
                         mapView
@@ -45,16 +46,20 @@ public struct HomeView: View {
                     case .notification:
                         NotifyView()
                     }
-                    
-                    MumoryTabView(selectedTab: $selectedTab)
                 }
+                .padding(.bottom, 89)
                 
-                    MiniPlayerView()
-                        .environmentObject(playerManager)
-                        .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
-                        .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
+                BottomAnimationView()
+                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+                
+                MumoryTabView(selectedTab: $selectedTab)
+                
+                
+                MiniPlayerView()
+                    .padding(.bottom, 89)
+                    .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
+                
             
-                
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
                 MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumoryAnnotation: mumoryDataViewModel.selectedMumoryAnnotation ?? Mumory())
@@ -95,45 +100,13 @@ public struct HomeView: View {
                         .transition(.move(edge: .bottom))
                         .zIndex(1)
                 }
+                
             } // ZStack
             .ignoresSafeArea()
             .navigationBarBackButtonHidden()
             .onAppear {
-//                if appCoordinator.rootPath.count > 0{
-//                    appCoordinator.rootPath = NavigationPath.init([LoginPage.home])
-//                }
+                playerViewModel.isShown = false
             }
-//            .navigationDestination(for: String.self, destination: { i in
-//                if i == "music" {
-//                    SearchMusicView()
-//                } else if i == "location" {
-//                    SearchLocationView()
-//                } else if i == "map" {
-//                    SearchLocationMapView()
-//                } else if i == "search-social" {
-//                    SocialSearchView()
-//                } else {
-//                    Color.gray
-//                }
-//            })
-//            .navigationDestination(for: SearchFriendType.self, destination: { type in
-//                switch type {
-//                case .cancelRequestFriend:
-//                    FriendMenuView(type: .cancelRequestFriend)
-//                case .unblockFriend:
-//                    FriendMenuView(type: .unblockFriend)
-//                default:
-//                    Color.pink
-//                }
-//            })
-//            .navigationDestination(for: MumoryView.self) { view in
-//                switch view.type {
-//                case .mumoryDetailView:
-//                    MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
-//                case .editMumoryView:
-//                    MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
-//                }
-//            }
     }
     
     var mapView: some View {
@@ -193,6 +166,21 @@ public struct HomeView: View {
                 
                 Spacer()
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func BottomAnimationView() -> some View{
+        switch appCoordinator.bottomAnimationViewStatus {
+        case .myPage:
+            MyPageView()
+            
+        case .play:
+            PlayingView()
+
+        case .remove:
+            EmptyView()
+
         }
     }
 }

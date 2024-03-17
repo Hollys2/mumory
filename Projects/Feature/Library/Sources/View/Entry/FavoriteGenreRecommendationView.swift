@@ -13,7 +13,6 @@ import MusicKit
 
 struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryCoordinator
     @State var isEditGenreViewPresent: Bool = false
     @State var isEditGenreInfoPresent: Bool = false
     @State var genreInfoTimer: Timer?
@@ -23,7 +22,6 @@ struct FavoriteGenreRecommendationView: View {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(currentUserData.favoriteGenres, id: \.self){genreID in
                     RecommendationScrollView(genreID: genreID)
-                        .environmentObject(manager)
                         .frame(height: 210)
                         .padding(.top, 35)
                 }
@@ -114,7 +112,7 @@ struct FavoriteGenreRecommendationView: View {
 }
 
 private struct RecommendationScrollView: View {
-    @EnvironmentObject var manager: LibraryCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var songs: [Song] = []
     @State var songIDs: [String] = []
@@ -122,12 +120,11 @@ private struct RecommendationScrollView: View {
     init(genreID: Int) {
         self.genreID = genreID
     }
-//    @Binding var songs: [Int: [Song]]
     var body: some View {
         VStack(spacing: 0) {
             GenreTitle(genreName: MusicGenreHelper().genreName(id: genreID))
                 .onTapGesture {
-                    manager.push(destination: .recommendation(genreID: genreID))
+                    appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: genreID))
                 }
             
             ScrollView(.horizontal) {

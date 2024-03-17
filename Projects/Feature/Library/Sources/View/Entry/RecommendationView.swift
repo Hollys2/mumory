@@ -17,7 +17,7 @@ public struct RecommendationView: View {
     @State private var path = NavigationPath()
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State private var contentOffset: CGPoint = .zero
     @State private var scrollViewHeight: CGFloat = .zero
@@ -47,7 +47,7 @@ public struct RecommendationView: View {
                 //최신 인기곡 타이틀
                 SubTitle()
                     .onTapGesture {
-                        manager.push(destination: .chart)
+                        appCoordinator.rootPath.append(LibraryPage.chart)
                     }
                 
                 //차트 - 가로 페이징

@@ -9,8 +9,7 @@
 import SwiftUI
 import Shared
 
-struct AddPlaylistSongView: View {
-    @EnvironmentObject var manager: LibraryCoordinator
+struct AddSongView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackbarManager: SnackBarViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -35,7 +34,7 @@ struct AddPlaylistSongView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                manager.pop()
+                                appCoordinator.rootPath.removeLast()
                             }
 
                     Spacer()
@@ -112,24 +111,19 @@ struct AddPlaylistSongView: View {
             })
             
         }
-        .onAppear(perform: {
-//            appCoordinator.isHiddenTabBarWithoutAnimation = true
-            withAnimation {
-                appCoordinator.isHiddenTabBar = true
-            }
-            
-        })
-        .onDisappear(perform: {
-//            appCoordinator.isHiddenTabBarWithoutAnimation = false
-            withAnimation {
-                appCoordinator.isHiddenTabBar = false
-            }
-        })
+//        .onAppear(perform: {
+//            withAnimation {
+//                appCoordinator.isHiddenTabBar = true
+//            }
+//            
+//        })
+//        .onDisappear(perform: {
+//            withAnimation {
+//                appCoordinator.isHiddenTabBar = false
+//            }
+//        })
     }
 }
 
-//#Preview {
-//    AddPlaylistSongView()
-//}
 
 

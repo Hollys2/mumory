@@ -90,7 +90,4 @@ struct MusicListItem: View {
     }
 }
 
-//#Preview {
-//    MusicChartDetailItem()
-//}
 

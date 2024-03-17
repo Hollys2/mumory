@@ -13,7 +13,7 @@ import MusicKit
 
 //플레이리스트 아이템(플레이리스트 뷰)
 struct PlaylistItem_Big: View {
-    @EnvironmentObject var manager: LibraryCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     
     @Binding var playlist: MusicPlaylist
@@ -202,7 +202,7 @@ struct PlaylistItem_Big: View {
                     
                 }
                 .onTapGesture {
-                    manager.push(destination: .playlist(playlist: playlist))
+                    appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
                 }
             }
         }

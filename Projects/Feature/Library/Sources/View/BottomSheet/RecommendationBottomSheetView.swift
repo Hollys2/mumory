@@ -19,7 +19,6 @@ struct RecommendationBottomSheetView: View {
     }
     
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var manager: LibraryCoordinator
     @EnvironmentObject var appCoordinator: AppCoordinator
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
@@ -46,7 +45,7 @@ struct RecommendationBottomSheetView: View {
             BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                 .onTapGesture {
                     dismiss()
-                    manager.push(destination: .saveToPlaylist(songs: songs))
+                    appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: songs))
                 }
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")

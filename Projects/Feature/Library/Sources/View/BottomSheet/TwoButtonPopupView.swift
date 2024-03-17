@@ -39,6 +39,9 @@ struct TwoButtonPopupView: View {
     var body: some View {
         ZStack(alignment: .center){
             Color.black.opacity(0.7).ignoresSafeArea()
+                .onTapGesture {
+                    dismiss()
+                }
             
             VStack(alignment: .center, spacing: 0, content: {
                 Text(title)

@@ -13,11 +13,15 @@ import Core
 import FirebaseAuth
 
 public struct SplashView: View {
+    enum initPage {
+        case login
+        case onBoarding
+        case home
+    }
+    
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
     @StateObject var customizationManageViewModel: CustomizationManageViewModel = CustomizationManageViewModel()
-
     
     @State var time = 0.0
     @State var isSignInCompleted: Bool = false
@@ -25,19 +29,9 @@ public struct SplashView: View {
     @State var isInitialSettingDone = false
     @State var goToLoginView: Bool = false
     @State var isEndSplash: Bool = false
-    
-    enum initPage {
-        case login
-        case onBoarding
-        case home
-    }
-    
- 
-        
     @State var page: initPage = .login
     
-    public init() {
-    }
+    public init() {}
     
     public var body: some View {
         ZStack(alignment: .top){
@@ -115,12 +109,57 @@ public struct SplashView: View {
                         LoginView()
                     case .requestFriend:
                         MyRequestFriendListView()
+                            .navigationBarBackButtonHidden()
                     case .blockFriend:
-                        EmptyView()
+                        BlockFriendListView()
+                            .navigationBarBackButtonHidden()
+                    case .friend(friend: let friend):
+                        FriendPageView(friend: friend)
+                            .navigationBarBackButtonHidden()
                     }
                 }
-                
-                
+                .navigationDestination(for: LibraryPage.self) { page in
+                    switch(page){
+                    case .search(term: let term):
+                        SearchView(term: term)
+                        
+                    case .artist(artist: let artist):
+                        ArtistView(artist: artist)
+                            .navigationBarBackButtonHidden()
+
+                    case .playlistManage:
+                        PlaylistManageView()
+                            .navigationBarBackButtonHidden()
+                    case .chart:
+                        ChartListView()
+                        
+                    case .playlist(playlist: let playlist):
+                        PlaylistView(playlist: playlist)
+                            .navigationBarBackButtonHidden()
+
+                    case .shazam:
+                        ShazamView()
+                            .navigationBarBackButtonHidden()
+
+                    case .addSong(originPlaylist: let originPlaylist):
+                        AddSongView(originPlaylist: originPlaylist)
+                        
+                    case .play:
+                        NowPlayingView()
+                        
+                    case .saveToPlaylist(songs: let songs):
+                        SaveToPlaylistView(songs: songs)
+                        
+                    case .recommendation(genreID: let genreID):
+                        RecommendationListView(genreID: genreID)
+                            .navigationBarBackButtonHidden()
+                        
+                    case .selectableArtist(artist: let artist):
+                        SelectableArtistView(artist: artist)
+                            .navigationBarBackButtonHidden()
+
+                    }
+                }
             }
             
             //스플래시 뷰
@@ -128,7 +167,6 @@ public struct SplashView: View {
                 .overlay {
                     LottieView(animation: .named("splash", bundle: .module))
                         .looping()
-                        //.padding(.top, getUIScreenBounds().height * 0.37) //0.37은 디자인의 상단 여백 비율
                 }
                 .opacity(isEndSplash && isInitialSettingDone ? 0 : 1)
                 .transition(.opacity)
@@ -141,7 +179,7 @@ public struct SplashView: View {
         let db = Firebase.db
         let auth = Firebase.auth
         let messaging = Firebase.messaging
-        print("111")
+        
         if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
             page = .onBoarding
             withAnimation {
@@ -149,7 +187,6 @@ public struct SplashView: View {
             }
             return
         }
-        print("2222")
         
         Task {
             //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
@@ -163,7 +200,6 @@ public struct SplashView: View {
                 withAnimation {
                     isInitialSettingDone = true
                 }
-                print("333")
                 return
             }
             guard let fcmToken = data["fcmToken"] else {
@@ -173,7 +209,6 @@ public struct SplashView: View {
             
             currentUserData.uid = user.uid
             currentUserData.favoriteGenres = favoriteGenres
-            print("444")
             page = .home
             withAnimation {
                 isInitialSettingDone = true
@@ -181,7 +216,3 @@ public struct SplashView: View {
         }
     }
 }
-
-//#Preview {
-//    SplashView()
-//}

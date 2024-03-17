@@ -12,7 +12,7 @@ import MusicKit
 
 struct ArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
-    @EnvironmentObject private var manager: LibraryCoordinator
+    @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerManager: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero
@@ -118,7 +118,7 @@ struct ArtistView: View {
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
                     .onTapGesture {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()
