@@ -57,7 +57,6 @@ public struct MumoryBottomSheet {
                     self.appCoordinator.isMumoryDetailMenuSheetShown = false
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                         self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, mumoryAnnotation: mumoryAnnotation)) // 추후 파이어스토어 ID로 수정
                     }
                 }),
@@ -186,7 +185,6 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
                 dimmingView.removeFromSuperview()
                 self.isShown = false
             }
-
         }))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
         hostingController.view.backgroundColor = .clear

@@ -383,7 +383,7 @@ public struct CreateMumoryBottomSheetView: View {
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
-                            let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+                           let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                             mumoryDataViewModel.isCreating = true
                             
                             let dispatchGroup = DispatchGroup()
@@ -420,7 +420,7 @@ public struct CreateMumoryBottomSheetView: View {
                             }
                             
                             dispatchGroup.notify(queue: .main) {
-                                let newMumoryAnnotation = Mumory(id: "", userDocumentID: "tester", date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0, comments: [])
+                                let newMumoryAnnotation = Mumory(id: "", userDocumentID: appCoordinator.currentUser.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0)
                                 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                     switch result {
@@ -463,7 +463,6 @@ public struct CreateMumoryBottomSheetView: View {
                     PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
                         mumoryDataViewModel.choosedMusicModel = nil
                         mumoryDataViewModel.choosedLocationModel = nil
-                        
                         self.calendarDate = Date()
                         self.tags.removeAll()
                         self.contentText.removeAll()
@@ -471,6 +470,10 @@ public struct CreateMumoryBottomSheetView: View {
                         self.imageURLs.removeAll()
                         
                         self.isDeletePopUpShown = false
+                        
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            self.appCoordinator.isCreateMumorySheetShown = false
+                        }
                     })
                     
                 })
@@ -745,7 +748,7 @@ struct ContainerView: View {
                         
                         if let choosed = self.mumoryDataViewModel.choosedLocationModel {
                             VStack(spacing: 5) {
-                                
+
                                 Text("\(choosed.locationTitle)")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                     .foregroundColor(.white)

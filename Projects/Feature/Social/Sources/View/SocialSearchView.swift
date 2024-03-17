@@ -223,18 +223,14 @@ public struct SocialSearchView: View {
                 ScrollView(showsIndicators: false) {
                     
                     HStack(spacing: 0) {
-                        Text("검색 결과 00건")
+                        Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
                           .font(Font.custom("Pretendard", size: 12))
                           .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
                         
                         Spacer()
                         
                         Text("정확도")
-                          .font(
-                            SharedFontFamily.Pretendard.light.swiftUIFont(size: 14)
-//                            Font.custom("Apple SD Gothic Neo", size: 14)
-//                              .weight(.light)
-                          )
+                          .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                           .multilineTextAlignment(.trailing)
                           .foregroundColor(self.isRecentSearch ? Color(red: 0.65, green: 0.65, blue: 0.65) : Color(red: 0.64, green: 0.51, blue: 0.99))
                           .overlay(
@@ -282,8 +278,7 @@ public struct SocialSearchView: View {
                     
                     VStack(spacing: 0) {
                         
-//                        ForEach(0..<3) { _ in
-                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations) { m in
+                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { m in
                             
                             VStack(spacing: 0) {
                         
@@ -326,65 +321,59 @@ public struct SocialSearchView: View {
                                 
                                 HStack(spacing: 0) {
                                     
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        if let content = m.content {
+                                    if let tags = m.tags, let content = m.content, let urls = m.imageURLs, !urls.isEmpty {
+                                        
+                                        VStack(alignment: .leading, spacing: 0) {
                                             Text(content)
                                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                                 .foregroundColor(.white)
                                                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-//                                                .background(.blue)
-                                        }
-                                        
-//                                        Spacer()
-                                        
-                                        HStack(spacing: 10) {
-                                            if let tags = m.tags {
-//                                                ForEach(tags.indices, id: \.self) { tag in
-                                                    Text("#\(tags[0])")
+                                            
+                                            //                                        Spacer()
+                                            
+                                            HStack(spacing: 10) {
+                                                ForEach(tags, id: \.self) { tag in
+                                                    Text(tag)
                                                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                                         .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                                         .fixedSize(horizontal: true, vertical: false)
-//                                                }
+                                                }
                                             }
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading) // HStack 정렬
-                                        .padding(.vertical, 5)
-//                                        .background(.pink)
+                                            .frame(maxWidth: .infinity, alignment: .leading) // HStack 정렬
+                                            .padding(.vertical, 5)
+                                            
+                                            
+                                            HStack(spacing: 0) {
+                                                Image(uiImage: SharedAsset.musicIconMumoryDetail.image)
+                                                    .resizable()
+                                                    .frame(width: 14, height: 14)
+                                                
+                                                Spacer().frame(width: 5)
+                                                
+                                                Text(m.musicModel.title)
+                                                    .font(Font.custom("Pretendard", size: 14).weight(.semibold))
+                                                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                                    .fixedSize(horizontal: true, vertical: false)
+                                                
+                                                Spacer().frame(width: 6)
+                                                
+                                                Text(m.musicModel.artist)
+                                                    .font(Font.custom("Pretendard", size: 14))
+                                                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                                    .lineLimit(1)
+                                                
+                                            }
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        } // VStack
                                         
-                                        HStack(spacing: 0) {
-                                            Image(uiImage: SharedAsset.musicIconMumoryDetail.image)
-                                                .resizable()
-                                                .frame(width: 14, height: 14)
-                                            
-                                            Spacer().frame(width: 5)
-                                            
-                                            Text(m.musicModel.title)
-                                                .font(Font.custom("Pretendard", size: 14).weight(.semibold))
-                                                .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                                .fixedSize(horizontal: true, vertical: false)
-                                            
-                                            Spacer().frame(width: 6)
-                                            
-                                            Text(m.musicModel.artist)
-                                                .font(Font.custom("Pretendard", size: 14))
-                                                .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                                .lineLimit(1)
-                                            
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    } // VStack
-                                    
-                                    if let urls = m.imageURLs {
                                         AsyncImage(url: URL(string: urls[0])) { phase in
                                             switch phase {
                                             case .success(let image):
                                                 image
                                                 //                                                    .resizable()
                                                 //                                                    .aspectRatio(contentMode: .fit)
-                                                //                                                    .frame(width: 36, height: 36)
                                             default:
                                                 Color(red: 0.85, green: 0.85, blue: 0.85)
-                                                //                                                    .frame(width: 36, height: 36)
                                             }
                                         }
                                         //                                        Rectangle()

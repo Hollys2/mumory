@@ -45,7 +45,7 @@ struct MumoryApp: App {
                     .onAppear {
                         print("MumoryApp onAppear")
 
-                        appCoordinator.currentUser = UserModel(documentID: "tester", nickname: "솔다", id: "solda")
+                        appCoordinator.currentUser = UserModel(uId: "UWLDLoVav0UKcEKDV4y22adxrl23", nickname: "솔다", id: "solda")
                         
                         appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                         appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom

@@ -9,12 +9,15 @@
 
 import SwiftUI
 import Shared
+import FirebaseFunctions
 
 struct MumoryDetailReactionBarView: View {
     
     @Binding var mumoryAnnotation: Mumory
     
     @State var isOn: Bool
+    @State private var isButtonDisabled = false
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
@@ -33,9 +36,24 @@ struct MumoryDetailReactionBarView: View {
         
             HStack(alignment: .center) {
                 Button(action: {
-                    mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, loginUserID: appCoordinator.currentUser.documentID)
+                    isButtonDisabled = true
+
+                    Task {
+                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, uId: appCoordinator.currentUser.uId)
+                        
+                        lazy var functions = Functions.functions()
+                        functions.httpsCallable("like").call(["mumoryId": mumoryAnnotation.id]) { result, error in
+                            if let error = error {
+                                print("Error Functions \(error.localizedDescription)")
+                            } else {
+                                self.mumoryAnnotation.likes = self.mumoryDataViewModel.selectedMumoryAnnotation.likes
+                                print("라이크 성공: \(mumoryAnnotation.likes.count)")
+                                isButtonDisabled = false
+                            }
+                        }
+                    }
                 }, label: {
-                    mumoryAnnotation.likes.contains("tester") ?
+                    mumoryAnnotation.likes.contains(appCoordinator.currentUser.uId) ?
                     Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
@@ -43,6 +61,7 @@ struct MumoryDetailReactionBarView: View {
                         .resizable()
                         .frame(width: 42, height: 42)
                 })
+                .disabled(isButtonDisabled)
                 
                 Spacer().frame(width: 4)
                 
@@ -54,8 +73,7 @@ struct MumoryDetailReactionBarView: View {
                 
                 Button(action: {
                     mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
-                    print("self.mumoryAnnotation.id: \(self.mumoryAnnotation.id)")
-                    withAnimation(.easeInOut(duration: 0.2)) {
+                    withAnimation(.easeInOut(duration: 0.1)) {
                         self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
                     }
                 }, label: {
@@ -66,12 +84,9 @@ struct MumoryDetailReactionBarView: View {
                 
                 Spacer().frame(width: 4)
                 
-//                Text("\(mumoryAnnotation.comments.count)")
-                if let c = mumoryAnnotation.commentCount {
-                    Text("\(c)")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                        .foregroundColor(.white)
-                }
+                Text("\(mumoryAnnotation.commentCount)")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .foregroundColor(.white)
                 
                 Spacer()
                 

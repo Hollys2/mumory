@@ -20,7 +20,6 @@ public struct HomeView: View {
     @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
-    @State private var mumory: Mumory = Mumory()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -32,6 +31,7 @@ public struct HomeView: View {
     public var body: some View {
         
         NavigationStack(path: $appCoordinator.rootPath) {
+            
             ZStack(alignment: .bottom) {
                 
                 VStack(spacing: 0) {
@@ -47,8 +47,8 @@ public struct HomeView: View {
                         NotifyView()
                     }
                     
-                    MumoryTabView(selectedTab: $selectedTab)
                     
+                    MumoryTabView(selectedTab: $selectedTab)
                 }
                 
                 MiniPlayerView()
@@ -56,18 +56,10 @@ public struct HomeView: View {
                     .padding(.bottom, 89 + appCoordinator.safeAreaInsetsBottom)
                     .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
                 
-                
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
-                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumory: self.$mumory)
+                MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
                     .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
-                    .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
-                        PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-                            //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
-                            appCoordinator.isDeleteCommentPopUpViewShown = false
-                        })
-                    }
-     
                 
                 if self.appCoordinator.isMumoryPopUpShown {
                     
@@ -101,12 +93,6 @@ public struct HomeView: View {
             } // ZStack
             .ignoresSafeArea()
             .navigationBarBackButtonHidden()
-            .onAppear {
-                //                if appCoordinator.rootPath.count > 0{
-                //                    appCoordinator.rootPath = NavigationPath.init([LoginPage.home])
-                //                }
-            }
-            
             .navigationDestination(for: String.self, destination: { i in
                 if i == "music" {
                     SearchMusicView()
@@ -148,10 +134,11 @@ public struct HomeView: View {
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear")
-                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.documentID)
+                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
                 }
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")
+                    self.listener?.remove()
                 }
             
             VStack(spacing: 0) {

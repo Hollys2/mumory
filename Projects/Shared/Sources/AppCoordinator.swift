@@ -14,7 +14,7 @@ import MusicKit
 
 public class AppCoordinator: ObservableObject {
     
-    @Published public var currentUser: UserModel = UserModel()
+    @Published public var currentUser: UserModel = UserModel(uId: "UNKNOWN", nickname: "UNKNOWN", id: "UNKNOWN")
 
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var createMumoryPath: NavigationPath = NavigationPath()
@@ -32,6 +32,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isMumoryPopUpShown = false
     @Published public var isSocialMenuSheetViewShown = false
     @Published public var isMumoryDetailCommentSheetViewShown = false
+    @Published public var isSocialCommentSheetViewShown: Bool = false
     @Published public var comments: [Comment] = []
     @Published public var isCommentBottomSheetShown = false
     @Published public var isDeleteCommentPopUpViewShown = false

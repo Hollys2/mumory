@@ -20,7 +20,7 @@ public class KeyboardResponder: ObservableObject {
     public init() {
         keyboardShowCancellable = NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
             .sink { notification in
-                print("keyboardWillShowNotification")
+//                print("keyboardWillShowNotification")
                 let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
                 let keyboardHeight = keyboardSize?.height ?? 0
                 
@@ -39,7 +39,7 @@ public class KeyboardResponder: ObservableObject {
 
         keyboardHideCancellable = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
             .sink { _ in
-                print("keyboardWillHideNotification")
+//                print("keyboardWillHideNotification")
                 DispatchQueue.main.async {
                     self.isKeyboardHiddenButtonShown = false
                     
