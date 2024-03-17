@@ -35,6 +35,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isSocialCommentSheetViewShown: Bool = false
     @Published public var comments: [Comment] = []
     @Published public var isCommentBottomSheetShown = false
+    @Published public var isMyMumoryBottomSheetShown = false
     @Published public var isDeleteCommentPopUpViewShown = false
     @Published public var isAddFriendViewShown = false
     @Published public var isPopUpViewShown = false
@@ -47,7 +48,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isNavigationStackShown = false
     
     @Published public var choosedSongID: MusicItemID?
-    @Published public var choosedMumoryAnnotation: Mumory?
+    @Published public var choosedMumoryAnnotation: Mumory = Mumory()
     
     @Published public var page: Int = -1
     
@@ -77,15 +78,6 @@ public class AppCoordinator: ObservableObject {
 
         self.selectedDate = Calendar.current.date(from: components) ?? Date()
      }
-
-    public func formattedDate(date: Date, dateFormat: String) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = dateFormat
-        return dateFormatter.string(from: date)
-        
-        //        let date = Calendar.current.date(from: DateComponents(year: selectedYear, month: selectedMonth, day: 1)) ?? Date()
-        //        return dateFormatter.string(from: date)
-    }
     
     public static func getYearMonthDate(year: Int, month: Int) -> Date {
         var components = DateComponents()

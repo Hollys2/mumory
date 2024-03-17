@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "edit-mumory-detail-menu.png",
+      "filename" : "music-pin-private.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "edit-mumory-detail-menu@2x.png",
+      "filename" : "music-pin-private@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "edit-mumory-detail-menu@3x.png",
+      "filename" : "music-pin-private@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -124,13 +124,13 @@ public class FirebaseManager: ObservableObject {
     }
     
     
-    public func searchFriend(ID: String) {
+    public func searchFriend(Id: String) {
         
         let db = FirebaseManager.shared.db
         
         let userCollection = db.collection("User")
         
-        userCollection.whereField("id", isEqualTo: ID).getDocuments { (querySnapshot, error) in
+        userCollection.whereField("id", isEqualTo: Id).getDocuments { (querySnapshot, error) in
             if let error = error {
                 print("Error getting documents: \(error)")
             } else {

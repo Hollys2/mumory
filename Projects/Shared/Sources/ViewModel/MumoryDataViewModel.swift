@@ -117,12 +117,12 @@ final public class MumoryDataViewModel: ObservableObject {
                             DispatchQueue.main.async {
                                 self.myMumoryAnnotations[index] = updatedMumory
                             }
-                            print("Document modified: \(modifiedDocumentID)")
                         }
+                        print("Document modified: \(modifiedDocumentID)")
                         
                     case .removed:
                         let documentData = documentChange.document.data()
-                        print("Document removed: \(documentData)")
+                        print("Document removed: \(documentChange.document.documentID)")
                         
                         let removedDocumentID = documentChange.document.documentID
                         DispatchQueue.main.async {
@@ -331,8 +331,25 @@ final public class MumoryDataViewModel: ObservableObject {
             if let error = error {
                 print("Error deleting document: \(error.localizedDescription)")
             } else {
-                completion()
-                print("Document deleted successfully!")
+                // Mumory 문서가 성공적으로 삭제된 경우 Comment 컬렉션 레퍼런스 가져오기
+                let commentsRef = db.collection("Mumory").document(mumory.id).collection("Comment")
+                
+                // Comment 컬렉션의 모든 문서 가져오기 및 삭제
+                commentsRef.getDocuments { (snapshot, error) in
+                    if let error = error {
+                        print("Error getting documents from Comment collection: \(error.localizedDescription)")
+                        completion()
+                        return
+                    }
+                    
+                    // 가져온 문서들을 순회하면서 삭제
+                    for document in snapshot!.documents {
+                        let commentRef = commentsRef.document(document.documentID)
+                        commentRef.delete()
+                    }
+                    
+                    completion()
+                }
             }
         }
     }
@@ -550,6 +567,8 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
+            .whereField("content", isGreaterThanOrEqualTo: searchString)
+            .whereField("content", isLessThan: searchString + "\u{f8ff}")
         
         collectionReference.getDocuments { (querySnapshot, error) in
             if let error = error {
@@ -558,22 +577,23 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 for document in querySnapshot!.documents {
                     
-                    if let content = document.data()["content"] as? String, content.contains(where: { $0.lowercased() == searchString.lowercased() }) {
-                        print("searchMumoryByContent successfully! : \(document.documentID)")
-                        
-                        let documentData = document.data()
-                        Task {
-                            guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else { return }
-                            DispatchQueue.main.async {
-                                self.searchedMumoryAnnotations.append(newMumory)
-                            }
+                    //                    if let content = document.data()["content"] as? String, content.contains(where: { $0.lowercased() == searchString.lowercased() }) {
+                    print("searchMumoryByContent successfully! : \(document.documentID)")
+                    
+                    let documentData = document.data()
+                    Task {
+                        guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else { return }
+                        DispatchQueue.main.async {
+                            self.searchedMumoryAnnotations.append(newMumory)
                         }
-                    } else {
-                        print("searchMumoryByContent fail")
                     }
                 }
+                
+                self.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                    guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
+                    return content1.count < content2.count
+                }
             }
-            
         }
     }
     
@@ -615,31 +635,6 @@ final public class MumoryDataViewModel: ObservableObject {
 }
 
 extension MumoryDataViewModel {
-    
-    public func deleteMumory2(_ mumoryAnnotation: Mumory, completion: @escaping () -> Void) {
-        
-        let db = FirebaseManager.shared.db
-        
-        let documentReference = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
-        
-        // 문서 삭제
-        documentReference.delete { error in
-            if let error = error {
-                print("Error deleting document: \(error.localizedDescription)")
-            } else {
-                if let index = self.myMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                    self.myMumoryAnnotations.remove(at: index)
-                }
-                
-                if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                    self.everyMumoryAnnotations.remove(at: index)
-                }
-
-                completion()
-                print("Document deleted successfully!")
-            }
-        }
-    }
     
     public func createComment2(mumoryAnnotation: Mumory, loginUserID: String, comment: Comment) {
         

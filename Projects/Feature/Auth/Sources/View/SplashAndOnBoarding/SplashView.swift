@@ -85,14 +85,14 @@ public struct SplashView: View {
                         Color.pink
                     }
                 })
-                .navigationDestination(for: MumoryView.self) { view in
-                    switch view.type {
-                    case .mumoryDetailView:
-                        MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
-                    case .editMumoryView:
-                        MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
-                    }
-                }
+//                .navigationDestination(for: MumoryView.self) { view in
+//                    switch view.type {
+//                    case .mumoryDetailView:
+//                        MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
+//                    case .editMumoryView:
+//                        MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
+//                    }
+//                }
                 .navigationDestination(for: LoginPage.self) { page in
                     switch(page){
                     case .customization:

@@ -12,6 +12,7 @@ import Foundation
 public enum MumoryViewType {
     case mumoryDetailView
     case editMumoryView
+    case myMumoryView
 }
 
 public struct MumoryView: Hashable {

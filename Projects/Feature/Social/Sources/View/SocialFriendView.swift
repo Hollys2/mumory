@@ -303,7 +303,7 @@ public struct SocialFriendView: View {
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                                 .onSubmit {
-                                    firebaseManager.searchFriend(ID: self.searchText)
+                                    firebaseManager.searchFriend(Id: self.searchText)
                                     //                                    self.searchText = ""
                                 }
                                 .padding(.leading, 45)

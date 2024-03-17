@@ -33,7 +33,7 @@ public struct HomeView: View {
         NavigationStack(path: $appCoordinator.rootPath) {
             
             ZStack(alignment: .bottom) {
-                
+
                 VStack(spacing: 0) {
                     
                     switch selectedTab {
@@ -46,7 +46,6 @@ public struct HomeView: View {
                     case .notification:
                         NotifyView()
                     }
-                    
                     
                     MumoryTabView(selectedTab: $selectedTab)
                 }
@@ -62,7 +61,6 @@ public struct HomeView: View {
                     .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
                 
                 if self.appCoordinator.isMumoryPopUpShown {
-                    
                     ZStack {
                         
                         Color.black.opacity(0.6)
@@ -91,8 +89,8 @@ public struct HomeView: View {
                         .zIndex(1)
                 }
             } // ZStack
-            .ignoresSafeArea()
             .navigationBarBackButtonHidden()
+            .ignoresSafeArea()
             .navigationDestination(for: String.self, destination: { i in
                 if i == "music" {
                     SearchMusicView()
@@ -119,9 +117,11 @@ public struct HomeView: View {
             .navigationDestination(for: MumoryView.self) { view in
                 switch view.type {
                 case .mumoryDetailView:
-                    MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
+                    MumoryDetailView(mumory: view.mumoryAnnotation)
                 case .editMumoryView:
                     MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
+                case .myMumoryView:
+                    MyMumoryView()
                 }
             }
         }
@@ -138,7 +138,7 @@ public struct HomeView: View {
                 }
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")
-                    self.listener?.remove()
+//                    self.listener?.remove()
                 }
             
             VStack(spacing: 0) {

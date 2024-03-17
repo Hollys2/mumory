@@ -201,6 +201,13 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
                 artwork.clipsToBounds = true
                 artwork.loadImage(from: url)
                 annotationView.addSubview(artwork)
+                
+                if !mumoryAnnotation.isPublic {
+                    let imageView = UIImageView(frame: CGRect(x: (annotationView.frame.width - 34) / 2, y: (annotationView.frame.width - 34) / 2, width: 34, height: 34))
+                    let lockImage: UIImage = SharedAsset.musicPinPrivate.image
+                    imageView.image = lockImage
+                    annotationView.addSubview(imageView)
+                }
             } else {
                 print("ERROR: NO URL")
             }

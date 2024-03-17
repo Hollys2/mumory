@@ -111,7 +111,6 @@ extension MumoryDetailImageScrollView.Coordinator: UIScrollViewDelegate {
 
 }
 
-@available(iOS 16.0, *)
 struct MumoryDetailImageScrollContentView: View {
     
 //    @State var imageURLs: [String]
@@ -162,21 +161,23 @@ struct MumoryDetailImageView: View {
                 .background(Color(red: 0.184, green: 0.184, blue: 0.184))
                 
             
-            HStack(alignment: .center, spacing: 10) {
-                Text("\(index + 1) / \(count)")
-                  .font(
-                    Font.custom("Pretendard", size: 12)
-                      .weight(.semibold)
-                  )
-                  .multilineTextAlignment(.center)
-                  .foregroundColor(.white)
+            if count != 1 {
+                HStack(alignment: .center, spacing: 10) {
+                    Text("\(index + 1) / \(count)")
+                        .font(
+                            Font.custom("Pretendard", size: 12)
+                                .weight(.semibold)
+                        )
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .background(.black.opacity(0.7))
+                .cornerRadius(10.5)
+                .cornerRadius(14)
+                .offset(x: -13, y: 15)
             }
-            .padding(.horizontal, 9)
-            .padding(.vertical, 6)
-            .background(.black.opacity(0.7))
-            .cornerRadius(10.5)
-            .cornerRadius(14)
-            .offset(x: -13, y: 15)
         }
         .background(.red)
     }

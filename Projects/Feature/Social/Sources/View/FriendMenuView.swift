@@ -17,10 +17,7 @@ struct TopBarTitleView: View {
     
     var body: some View {
         Text(title)
-            .font(
-                Font.custom("Pretendard", size: 18)
-                    .weight(.semibold)
-            )
+            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
             .multilineTextAlignment(.center)
             .foregroundColor(.white)
     }

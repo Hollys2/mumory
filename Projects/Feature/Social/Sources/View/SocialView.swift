@@ -360,7 +360,7 @@ struct SocialItemView: View {
                             // MARK: Tag
                             if let tags = self.mumoryAnnotation.tags {
                                 
-                                ForEach(tags, id: \.self) { i in
+                                ForEach(tags, id: \.self) { tag in
                                     
                                     HStack(alignment: .center, spacing: 5) {
                                     
@@ -368,7 +368,7 @@ struct SocialItemView: View {
                                             .resizable()
                                             .frame(width: 14, height: 14)
                                         
-                                        Text(i)
+                                        Text(tag)
                                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                             .foregroundColor(.white)
                                             .lineLimit(1)
@@ -537,6 +537,8 @@ public struct SocialView: View {
     public var body: some View {
         
         ZStack(alignment: .top) {
+            
+            Color(red: 0.09, green: 0.09, blue: 0.09)
 
             if mumoryDataViewModel.isSocialFetchFinished {
                 SocialScrollViewRepresentable(offsetY: self.$offsetY, onRefresh: {
@@ -546,8 +548,6 @@ public struct SocialView: View {
                         .environmentObject(self.appCoordinator)
                 }
             }
-            
-            Color.clear
         
             HStack(alignment: .top, spacing: 0) {
                 Spacer().frame(width: 10)
@@ -608,9 +608,8 @@ public struct SocialView: View {
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
         }
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation))
         .preferredColorScheme(.dark)
-        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation ?? Mumory()))
         .onAppear {
             mumoryDataViewModel.fetchEveryMumory()
             FirebaseManager.shared.observeFriendRequests()
