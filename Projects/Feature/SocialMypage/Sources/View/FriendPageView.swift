@@ -12,7 +12,7 @@ import Core
 import MusicKit
 
 struct FriendPageView: View {
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     let friend: MumoriUser
     init(friend: MumoriUser) {
@@ -56,7 +56,7 @@ struct FriendPageView: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
-                        myPageCoordinator.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()
@@ -233,11 +233,11 @@ struct FriendPlaylistView: View {
                     guard let title = data["title"] as? String else {
                         return
                     }
-                    guard let songIdentifiers = data["songIdentifiers"] as? [String] else {
+                    guard let songIdentifiers = data["songIds"] as? [String] else {
                         return
                     }
                     let id = document.documentID
-                    self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, isAddItme: false))
+                    self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic))
                 }
           
             }

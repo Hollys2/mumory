@@ -25,6 +25,9 @@ public struct HomeView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var keyboardResponder: KeyboardResponder
+    @EnvironmentObject var settingViewModel: SettingViewModel
+    @EnvironmentObject var withdrawViewModel: WithdrawViewModel
+    
     
     @State var myPageStack: [MyPage] = []
     
@@ -49,8 +52,8 @@ public struct HomeView: View {
                 }
                 .padding(.bottom, 89)
                 
-                BottomAnimationView()
-                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+                //마이페이지
+                MyPageBottomAnimationView()
                 
                 MumoryTabView(selectedTab: $selectedTab)
                 
@@ -105,7 +108,7 @@ public struct HomeView: View {
             .ignoresSafeArea()
             .navigationBarBackButtonHidden()
             .onAppear {
-                playerViewModel.isShown = false
+                playerViewModel.isShownMiniPlayer = false
             }
     }
     
@@ -170,17 +173,26 @@ public struct HomeView: View {
     }
     
     @ViewBuilder
-    private func BottomAnimationView() -> some View{
-        switch appCoordinator.bottomAnimationViewStatus {
-        case .myPage:
-            MyPageView()
-            
-        case .play:
-            PlayingView()
+    private func MyPageBottomAnimationView() -> some View{
+        VStack {
+            if appCoordinator.bottomAnimationViewStatus == .myPage {
+                MyPageView()
+                    .environmentObject(withdrawViewModel)
+                    .environmentObject(settingViewModel)
+                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+                    
+            }
+        }
 
-        case .remove:
-            EmptyView()
-
+    }
+    @ViewBuilder
+    private func PlayBottomAnimationView() -> some View {
+        VStack {
+            if appCoordinator.bottomAnimationViewStatus == .play {
+                NowPlayingView()
+                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+            }
         }
     }
+
 }

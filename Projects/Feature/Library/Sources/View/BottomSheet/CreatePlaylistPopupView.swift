@@ -166,7 +166,8 @@ struct CreatePlaylistPopupView: View {
         let data: [String: Any] = [
             "title": playlistTitle,
             "isPublic": isTapPublic,
-            "songIdentifiers": []
+            "songIds": [],
+            "date": Date()
         ]
         
         db.collection("User").document(currentUserData.uid).collection("Playlist").addDocument(data: data) { error in

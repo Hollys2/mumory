@@ -12,9 +12,9 @@ import Core
 
 struct AccountManageView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
-
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -27,7 +27,7 @@ struct AccountManageView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            myPageCoordinator.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                     Spacer()
                     Text("계정 정보 / 보안")
@@ -39,7 +39,8 @@ struct AccountManageView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            dismiss()
+                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.rootPath.removeLast(2)
                         }
                 }
                 .frame(maxWidth: .infinity)
@@ -86,7 +87,7 @@ struct AccountManageView: View {
                     
                     SettingItem(title: "비밀번호 재설정")
                         .onTapGesture {
-                            myPageCoordinator.push(destination: .setPW)
+                            appCoordinator.rootPath.append(MyPage.setPW)
                         }
                 }
 

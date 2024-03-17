@@ -14,6 +14,7 @@ struct NowPlayingView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var isPresentQueue: Bool = false
     
@@ -60,12 +61,10 @@ struct NowPlayingView: View {
                 }else {
                     PlayingView()
                 }
-                
                 PlayControlView(isPresentQueue: $isPresentQueue)
             })
             
         }
-        
     }
 }
 
@@ -179,7 +178,7 @@ struct PlayControlView: View {
 struct PlayingView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var playerManager: PlayerViewModel
-    
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var animationDuration: Double = 5.0
     @State var titleWidth: CGFloat = 0
     @State private var startAnimation : Bool = false
@@ -192,8 +191,11 @@ struct PlayingView: View {
     var body: some View {
         VStack(spacing: 0) {
             //일반 재생화면
+            
+            //상단바
             HStack(alignment: .bottom, content: {
                 Button(action: {
+//                    appCoordinator.bottomAnimationViewStatus = .remove
                     dismiss()
                 }, label: {
                     SharedAsset.downArrow.swiftUIImage

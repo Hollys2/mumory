@@ -20,9 +20,9 @@ struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isShowingWithdrawPopup = false
     @State var isLoading: Bool = false
@@ -41,7 +41,7 @@ struct SettingView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            myPageCoordinator.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                     Spacer()
                     Text("설정")
@@ -53,7 +53,8 @@ struct SettingView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            dismiss()
+                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.rootPath.removeLast()
                         }
                 }
                 .frame(maxWidth: .infinity)
@@ -64,17 +65,17 @@ struct SettingView: View {
                 
                 SettingItem(title: "계정 정보 / 보안")
                     .onTapGesture {
-                        myPageCoordinator.push(destination: .account)
+                        appCoordinator.rootPath.append(MyPage.account)
                     }
                 
                 SettingItem(title: "알림")
                     .onTapGesture {
-                        myPageCoordinator.push(destination: .notification)
+                        appCoordinator.rootPath.append(MyPage.notification)
                     }
                 
                 SettingItem(title: "1:1 문의")
                     .onTapGesture {
-                        myPageCoordinator.push(destination: .question)
+                        appCoordinator.rootPath.append(MyPage.question)
                     }
                 
                 SettingItem(title: "앱 리뷰 남기기")
@@ -89,7 +90,8 @@ struct SettingView: View {
                         do {
                             try Firebase.auth.signOut()
                             print("로그아웃 완료")
-                            myPageCoordinator.push(destination: .login)
+                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.rootPath = NavigationPath()
                             
                         }catch {
                             print("signout error: \(error)")
@@ -168,7 +170,8 @@ struct SettingView: View {
                         print("delete document error: \(error)")
                     }else {
                         print("delete docs successful")
-                        myPageCoordinator.resetPath(destination: .login)
+                        appCoordinator.bottomAnimationViewStatus = .remove
+                        appCoordinator.rootPath = NavigationPath()
                     }
                 }
             }
@@ -188,7 +191,7 @@ struct SettingView: View {
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if method == "Email" {
-            myPageCoordinator.push(destination: .emailVerification)
+            appCoordinator.rootPath.append(MyPage.emailVerification)
         }
     }
     
@@ -211,7 +214,8 @@ struct SettingView: View {
                         if let error = error {
                             print("delete document error: \(error)")
                         }else {
-                            myPageCoordinator.resetPath(destination: .login)
+                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.rootPath = NavigationPath()
                         }
                     }
                 }

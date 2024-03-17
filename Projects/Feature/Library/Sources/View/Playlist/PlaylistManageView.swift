@@ -93,10 +93,8 @@ struct PlaylistManageView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .opacity(isEditing ? 0 : 1)
                     .onTapGesture {
-//                        appCoordinator.isHiddenTabBarWithoutAnimation = true
                         withAnimation {
                             isEditing = true
-//                            appCoordinator.isHiddenTabBar = true
                             editButtonHeight = 0
                         }
                     }
@@ -106,9 +104,11 @@ struct PlaylistManageView: View {
                 ScrollView(.vertical) {
                     LazyVGrid(columns: cols, spacing: 30, content: {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
-                            PlaylistItem_Big(playlist: .constant(playlist), isAddSongItem: playlist.isAddItme, isEditing: $isEditing)
+                            PlaylistItem_Big(playlist: .constant(playlist), isEditing: $isEditing)
                                 .frame(minWidth: 170, minHeight: 215)
                         }
+                        AddSongItemBig()
+                            .opacity(isEditing ? 0 : 1)
                     })
                     
                     Rectangle()

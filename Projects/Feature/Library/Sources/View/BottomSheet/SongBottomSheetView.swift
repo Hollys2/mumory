@@ -16,6 +16,9 @@ enum bottomSheetType {
 struct SongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
+    
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
     var types: [bottomSheetType] = []
@@ -83,6 +86,7 @@ struct SongBottomSheetView: View {
                     BottomSheetItem(image: SharedAsset.artist.swiftUIImage, title: "아티스트 노래 목록 보기")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             getArtist(song: song) { artist in
                                 appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
                             }
@@ -90,7 +94,21 @@ struct SongBottomSheetView: View {
                 }
                 
                 if !types.contains(.withoutBookmark){
-                    BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
+                    if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                        BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
+                            .onTapGesture {
+                                playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                                dismiss()
+                                //snackbar present true
+                            }
+                    }else{
+                        BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
+                            .onTapGesture {
+                                playerViewModel.addToFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                                dismiss()
+                                //snackbar present true
+                            }
+                    }
                 }
                 
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)

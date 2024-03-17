@@ -16,7 +16,6 @@ struct MyPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     
-    
     var rows: [GridItem] = [
         GridItem(.fixed(215), spacing: 23),
         GridItem(.fixed(215), spacing: 23)
@@ -52,11 +51,13 @@ struct MyPlaylistView: View {
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: 12, content: {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
-                            PlaylistItem(playlist: playlist, itemSize: 81, isAddSongItem: playlist.isAddItme)
+                            PlaylistItem(playlist: playlist, itemSize: 81)
                                 .onTapGesture {
                                     appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
                                 }
                         }
+                        AddSongItem()
+
                     })
                     .padding(.horizontal, 20)
                 }
@@ -77,12 +78,12 @@ struct MyPlaylistView: View {
     func getPlayList(){
         let Firebase = FBManager.shared
         let db = Firebase.db
-                
-        DispatchQueue.main.async {
-            currentUserData.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPublic: false, isAddItme: true)]
-        }
+        
+        currentUserData.playlistArray.removeAll()
         
         let query = db.collection("User").document(currentUserData.uid).collection("Playlist")
+            .order(by: "date", descending: true)
+        
         query.getDocuments { snapshot, error in
             if let error = error {
                 print(error)
@@ -96,7 +97,7 @@ struct MyPlaylistView: View {
                         print("no private thing")
                         return
                     }
-                    guard let songIDs = snapshot.data()["songIdentifiers"] as? [String] else {
+                    guard let songIDs = snapshot.data()["songIds"] as? [String] else {
                         print("no id list")
                         return
                     }
@@ -105,12 +106,11 @@ struct MyPlaylistView: View {
                     DispatchQueue.main.async {
                         if id == "favorite" {
                             withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false), at: 0)
+                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic), at: 0)
                             }
                         }else {
-                            let index = currentUserData.playlistArray.count - 1
                             withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false), at: index)
+                                currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
                             }
                         }
                     }

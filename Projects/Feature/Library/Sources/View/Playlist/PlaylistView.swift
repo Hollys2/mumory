@@ -295,7 +295,7 @@ struct PlaylistView: View {
                     return
                 }
                 
-                guard let songIDs = data["songIdentifiers"] as? [String] else {
+                guard let songIDs = data["songIds"] as? [String] else {
                     print("no song id")
                     return
                 }
@@ -346,23 +346,14 @@ struct PlaylistView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        var newSongs = songs.filter{ !selectedSongsForDelete.contains($0) }
-        
-        let newData = [
-            "songIdentifiers" : newSongs.map({$0.id.rawValue})
-        ]
-        
-        db.collection("User").document(currentUserData.uid).collection("Playlist")
-            .document(playlist.id).setData(newData, merge: true) { error in
-                if error == nil {
-                    print("successful")
+        let songIdsForDelete = selectedSongsForDelete.map{$0.id.rawValue}
 
-                    DispatchQueue.main.async {
-                        songs = newSongs
-                        setEditMode(isEditing: false)
-                    }
-                }
-            }
+        
+        db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id)
+            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(songIdsForDelete)])
+        
+        songs.removeAll(where: {selectedSongsForDelete.contains($0)})
+        setEditMode(isEditing: false)
     }
     
 

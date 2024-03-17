@@ -17,7 +17,7 @@ enum notificationCategory {
 
 struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
     
     @State var isEntireOn: Bool = false
@@ -35,7 +35,7 @@ struct NotificationView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            myPageCoordinator.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                     Spacer()
                     Text("알림")
@@ -47,7 +47,8 @@ struct NotificationView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            dismiss()
+                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.rootPath.removeLast(2)
                         }
                 }
                 .frame(maxWidth: .infinity)
@@ -98,7 +99,7 @@ struct NotificationView: View {
                 .padding(20)
                 .background(ColorSet.background)
                 .onTapGesture {
-                    myPageCoordinator.push(destination: .selectNotificationTime)
+                    appCoordinator.rootPath.append(MyPage.selectNotificationTime)
                 }
      
                 Spacer()

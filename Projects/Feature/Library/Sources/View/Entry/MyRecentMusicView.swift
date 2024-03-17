@@ -67,7 +67,7 @@ public struct MyRecentMusicView: View {
             guard let snapshot = snapshot else {return}
             snapshot.documents.forEach { doc in
                 let data = doc.data()
-                guard let songID = data["songID"] as? String else {return}
+                guard let songID = data["songIds"] as? String else {return}
                 Task {
                     if let song = await fetchSong(songID: songID) {
                         musicList.append(song)

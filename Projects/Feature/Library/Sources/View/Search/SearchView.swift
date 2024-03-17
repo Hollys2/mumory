@@ -40,6 +40,7 @@ struct SearchView: View {
                         SharedAsset.xWhiteCircle.swiftUIImage
                             .frame(width: 23, height: 23)
                             .padding(.trailing, 17)
+                            .opacity(term.isEmpty ? 0 : 1)
                             .onTapGesture {
                                 term = ""
                             }

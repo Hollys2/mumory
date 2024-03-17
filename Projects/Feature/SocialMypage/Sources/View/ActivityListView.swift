@@ -15,7 +15,7 @@ enum ActivityType {
     case friend
 }
 struct ActivityListView: View {
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var selection: ActivityType = .all
     @State var date: Date = Date()
     @State var isPresentDatePicker: Bool = false
@@ -35,7 +35,7 @@ struct ActivityListView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            myPageCoordinator.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                     Spacer()
                     Text("활동 내역")

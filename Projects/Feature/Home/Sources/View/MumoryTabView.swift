@@ -35,7 +35,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .home
-                    playerViewModel.isShown = false
+                    playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
                 }
@@ -43,7 +43,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .social
-                    playerViewModel.isShown = false
+                    playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
                 }
@@ -61,7 +61,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .library
-                    playerViewModel.isShown = true
+                    playerViewModel.isShownMiniPlayer = true
                 }) {
                     Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
                 }
@@ -69,7 +69,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .notification
-                    playerViewModel.isShown = false
+                    playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
                 }

@@ -21,8 +21,11 @@ public struct SplashView: View {
     
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject var customizationManageViewModel: CustomizationManageViewModel = CustomizationManageViewModel()
-    
+    @StateObject var withdrawViewModel: WithdrawViewModel = WithdrawViewModel()
+    @StateObject var settingViewModel: SettingViewModel = SettingViewModel()
+
     @State var time = 0.0
     @State var isSignInCompleted: Bool = false
     @State var isPresent: Bool = false
@@ -45,6 +48,8 @@ public struct SplashView: View {
                             OnBoardingManageView()
                         case .home:
                             HomeView()
+                                .environmentObject(settingViewModel)
+                                .environmentObject(withdrawViewModel)
                                 .navigationBarBackButtonHidden()
                         }
                     }
@@ -95,6 +100,8 @@ public struct SplashView: View {
                             .environmentObject(customizationManageViewModel)
                     case .home:
                         HomeView()
+                            .environmentObject(settingViewModel)
+                            .environmentObject(withdrawViewModel)
                     case .signUp:
                         SignUpManageView()
                     case .startCustomization:
@@ -143,7 +150,7 @@ public struct SplashView: View {
 
                     case .addSong(originPlaylist: let originPlaylist):
                         AddSongView(originPlaylist: originPlaylist)
-                        
+                            .navigationBarBackButtonHidden()
                     case .play:
                         NowPlayingView()
                         
@@ -159,6 +166,67 @@ public struct SplashView: View {
                             .navigationBarBackButtonHidden()
 
                     }
+                }
+                .navigationDestination(for: MyPage.self) { page in
+                    switch(page){
+                    case .myPage:
+                        MyPageView()
+                        
+                    case .setting:
+                        SettingView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+                            .environmentObject(withdrawViewModel)
+              
+                    case .account:
+                        AccountManageView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+                     
+                    case .notification:
+                        NotificationView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+                         
+                    case .setPW:
+                        SetPWView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+
+                    case .question:
+                        QuestionView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+
+                    case .emailVerification:
+                        EmailLoginForWithdrawView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+                            .environmentObject(withdrawViewModel)
+
+                    case .selectNotificationTime:
+                        SelectNotificationTimeView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+                        
+                    case .login:
+                        LoginView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(settingViewModel)
+                        
+                    case .friendList(friends: let friends):
+                        FriendListView(friends: friends)
+                            .navigationBarBackButtonHidden()
+                        
+                    case .friendPage(friend: let friend):
+                        FriendPageView(friend: friend)
+                            .navigationBarBackButtonHidden()
+                    
+                    case .activityList:
+                        ActivityListView()
+                            .navigationBarBackButtonHidden()
+                    }
+
                 }
             }
             
@@ -207,12 +275,20 @@ public struct SplashView: View {
                 return
             }
             
+       
+            
             currentUserData.uid = user.uid
             currentUserData.favoriteGenres = favoriteGenres
             page = .home
             withAnimation {
                 isInitialSettingDone = true
             }
+            
+            guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {
+                return
+            }
+            
+            playerViewModel.favoriteSongIds = favoriteData["songIds"] as? [String] ?? []
         }
     }
 }

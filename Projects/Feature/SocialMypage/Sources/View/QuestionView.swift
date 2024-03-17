@@ -12,7 +12,7 @@ import Core
 import Lottie
 
 struct QuestionView: View {
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
     @Environment(\.dismiss) private var dismiss
     let placeHolder = "내용을 입력하세요."
@@ -38,7 +38,7 @@ struct QuestionView: View {
                             .scaledToFit()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                myPageCoordinator.pop()
+                                appCoordinator.rootPath.removeLast()
                             }
                         
                         Spacer()
@@ -54,7 +54,8 @@ struct QuestionView: View {
                             .scaledToFit()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                dismiss()
+                                appCoordinator.bottomAnimationViewStatus = .remove
+                                appCoordinator.rootPath.removeLast(2)
                             }
                     }
                     .frame(maxWidth: .infinity)
@@ -183,7 +184,7 @@ struct QuestionView: View {
                 print("error: \(error)")
             }else {
                 isLoading = false
-                myPageCoordinator.pop()
+                appCoordinator.rootPath.removeLast()
             }
         }
         

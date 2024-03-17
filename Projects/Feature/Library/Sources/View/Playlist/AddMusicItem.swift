@@ -79,14 +79,12 @@ struct AddMusicItem: View {
             originPlaylist.songIDs.append(songID)
             
             let songData: [String: Any] = [
-                "songIdentifiers" : originPlaylist.songIDs
+                "songIds" : FBManager.Fieldvalue.arrayUnion([songID])
             ]
-            
-            db.collection("User").document(currentUserData.uid).collection("Playlist").document(originPlaylist.id).setData(songData, merge: true) { error in
-                if error == nil {
-                    snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
-                }
-            }
+            db.collection("User").document(currentUserData.uid).collection("Playlist").document(originPlaylist.id)
+                .updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songID])])
+            snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
+
         }else {
             //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함
             snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: originPlaylist.title)

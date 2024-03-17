@@ -28,9 +28,7 @@ public class CurrentUserData: ObservableObject {
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
     
-    @Published public var playlistArray: [MusicPlaylist] = [
-        MusicPlaylist(id: "addItem", title: "", songIDs: [], isPublic: true, isAddItme: true)
-    ]
+    @Published public var playlistArray: [MusicPlaylist] = []
     
     public init(){
     }

@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 import MusicKit
 import MediaPlayer
+import Shared
 
 struct PlayingInfo {
     var playingTime: TimeInterval
@@ -16,9 +17,7 @@ struct PlayingInfo {
 }
 
 public class PlayerViewModel: ObservableObject {
-
-    
-    @Published var isShown: Bool = true
+    @Published var isShownMiniPlayer: Bool = true
     @Published var isPlayingViewPresent: Bool = false
     @Published var isPlaying: Bool = false
     
@@ -27,11 +26,17 @@ public class PlayerViewModel: ObservableObject {
     @Published var queue: [Song] = []
     @Published var currentSong: Song?
     @Published var queueTitle: String = ""
+    
+    @Published var favoriteSongIds: [String] = []
+    @Published public var playlistArray: [MusicPlaylist] = []
+
+    @Published var isPresentNowPlayingView: Bool = false
         
     private var player = ApplicationMusicPlayer.shared
 
     @Published var playingTime: TimeInterval = 0.0
 
+    let db = FBManager.shared.db
     var timer: Timer?
     public init() {}
     
@@ -174,6 +179,17 @@ public class PlayerViewModel: ObservableObject {
         })
     }
     
+    public func addToFavorite(uid: String, songId: String) {
+        let query = db.collection("User").document(uid).collection("Playlist").document("favorite")
+        query.updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songId])])
+        self.favoriteSongIds.append(songId)
+    }
+    
+    public func removeFromFavorite(uid: String, songId: String) {
+        let query = db.collection("User").document(uid).collection("Playlist").document("favorite")
+        query.updateData(["songIds": FBManager.Fieldvalue.arrayRemove([songId])])
+        self.favoriteSongIds.removeAll(where: {$0 == songId})
+    }
     
 
  
