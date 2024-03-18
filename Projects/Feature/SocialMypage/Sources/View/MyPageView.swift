@@ -250,12 +250,19 @@ struct MumorySample: Hashable{
 }
 
 struct MyMumori: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    
     @State var mumoryList: [MumorySample] = []
+
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var currentUserData: CurrentUserData
+
     let Firebase = FBManager.shared
+
     var body: some View {
         VStack(spacing: 0, content: {
+            
             HStack(spacing: 0, content: {
+                
                 Text("나의 뮤모리")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundStyle(Color.white)
@@ -274,6 +281,9 @@ struct MyMumori: View {
             })
             .padding(.horizontal, 20)
             .frame(height: 67)
+            .onTapGesture {
+                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
+            }
             
             ScrollView(.horizontal) {
                 HStack(spacing: 11, content: {

@@ -55,8 +55,6 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-//                    self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory())) // 추후 파이어스토어 ID로 수정
-
                     selectedTab = .library
                     playerViewModel.isShownMiniPlayer = true
                 }) {
