@@ -52,11 +52,6 @@ struct MumoryDetailScrollContentView: View {
                 SharedAsset.albumFilterMumoryDetail.swiftUIImage
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                    .background(.orange)
-                    .overlay(
-                        Rectangle()
-                            .stroke(.white, lineWidth: 10)
-                    )
                 
                 Rectangle()
                     .foregroundColor(.clear)

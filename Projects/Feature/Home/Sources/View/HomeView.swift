@@ -53,7 +53,7 @@ public struct HomeView: View {
             }
 //            .padding(.bottom, 89)
             
-            MyPageBottomAnimationView()
+//            MyPageBottomAnimationView()
             
 //            MumoryTabView(selectedTab: $selectedTab)
             
@@ -92,6 +92,8 @@ public struct HomeView: View {
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
             }
+            
+            MyPageBottomAnimationView()
             
         } // ZStack
         .ignoresSafeArea()
@@ -158,6 +160,8 @@ public struct HomeView: View {
                 
                 Spacer()
             }
+            
+//            MyPageBottomAnimationView()
         }
     }
 

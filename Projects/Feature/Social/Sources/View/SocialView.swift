@@ -592,7 +592,7 @@ public struct SocialView: View {
                 Spacer().frame(width: 12)
 
                 Button(action: {
-
+                    appCoordinator.setBottomAnimationPage(page: .myPage)
                 }) {
                     AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
                         switch phase {

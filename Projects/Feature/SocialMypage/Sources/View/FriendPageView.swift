@@ -19,9 +19,11 @@ struct FriendPageView: View {
     @State var isPresentBlockConfirmPopup: Bool = false
 
     let friend: MumoriUser
+    
     init(friend: MumoriUser) {
         self.friend = friend
     }
+    
     init(uId: String) async {
         self.friend = await MumoriUser(uId: uId)
     }
