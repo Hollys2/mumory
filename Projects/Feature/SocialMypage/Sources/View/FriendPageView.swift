@@ -15,6 +15,7 @@ struct FriendPageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isStranger: Bool = false
+    @State var isPresentFriendBottomSheet: Bool = false
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
@@ -49,6 +50,10 @@ struct FriendPageView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentFriendBottomSheet = true
+                    }
             }
             .padding(.horizontal, 20)
             .frame(height: 44)
@@ -56,9 +61,14 @@ struct FriendPageView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            isStranger = true
-//            isStranger = currentUserData.friends.contains(friend.uid)
+            isStranger = !currentUserData.friends.contains(friend.uid)
         }
+        .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
+                FriendPageCommonBottomSheetView(friend: self.friend)
+            }
+            .background(TransparentBackground())
+        })
     }
 }
 
@@ -79,6 +89,7 @@ struct KnownFriendPageView: View {
                     .frame(height: 0.5)
                     .background(lineGray)
                 
+                //맵뷰 들어갈 공간
                 Rectangle()
                     .fill(Color.clear)
                     .frame(maxWidth: .infinity)
@@ -476,105 +487,54 @@ struct FriendPlaylistView: View {
     }
 }
 
+struct FriendBottomSheetView: View {
+    let friend: MumoriUser
+    init(friend: MumoriUser) {
+        self.friend = friend
+    }
+    var body: some View {
+        VStack(spacing: 0, content: {
+            BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단")
+            Line5()
+            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+        })
+    }
+}
+
+struct FriendPageCommonBottomSheetView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @Environment(\.dismiss) var dismiss
+    let friend: MumoriUser
+    init(friend: MumoriUser) {
+        self.friend = friend
+    }
+    var body: some View {
+        VStack(spacing: 0, content: {
+            BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단")
+                .onTapGesture {
+                    dismiss()
+                    blockFriend(uId: currentUserData.uid, friendUId: friend.uid)
+                }
+            Line5()
+            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+        })
+    }
+    
+    private func blockFriend(uId: String, friendUId: String) {
+        let db = FBManager.shared.db
+        let query = db.collection("User").document(uId)
+        query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+        query.updateData(["blockedFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
+    }
+}
+
+public struct Line5: View {
+    public var body: some View {
+        Divider()
+            .frame(height: 0.5)
+            .frame(maxWidth: .infinity)
+            .background(ColorSet.subGray)
+    }
+}
 
 
-//#Preview {
-//    UnkownFriendPageView()
-//}
-
-
-//struct UnknownFriendInfo: View {
-//    @State var isPresentBottomSheet: Bool = false
-//    let friend: MumoriUser
-//    let secretId: String
-//    init(friend: MumoriUser) {
-//        self.friend = friend
-//        secretId = String(friend.id.prefix(2)) + String(repeating: "*", count: friend.id.count-2)
-//    }
-//    
-//    var body: some View {
-//        
-//        VStack(spacing: 0, content: {
-// 
-//            AsyncImage(url: friend.backgroundImageURL) { image in
-//                image
-//                    .resizable()
-//                    .scaledToFill()
-//                    .frame(width: getUIScreenBounds().width, height: 150)
-//                    .clipped()
-//            } placeholder: {
-//                Rectangle()
-//                    .frame(maxWidth: .infinity)
-//                    .frame(width: getUIScreenBounds().width)
-//                    .frame(height: 150)
-//                    .foregroundStyle(ColorSet.darkGray)
-//            }
-//            .overlay {
-//                LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
-//            }
-//            
-//            VStack(alignment: .leading, spacing: 4, content: {
-//                Text(friend.nickname)
-//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
-//                        .foregroundStyle(Color.white)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                        .padding(.top, 20)
-//
-//                Text("@\(secretId)")
-//                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
-//                        .foregroundStyle(ColorSet.charSubGray)
-//                        .frame(maxWidth: .infinity, alignment: .leading)
-//                 
-//                //자기소개
-//                Text(friend.bio)
-//                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-//                        .foregroundStyle(ColorSet.subGray)
-//                        .frame(height: 52, alignment: .bottom)
-//                        .padding(.bottom, 18)
-//                })
-//                .overlay {
-//                    AsyncImage(url: friend.profileImageURL) { image in
-//                        image
-//                            .resizable()
-//                            .scaledToFill()
-//                            .frame(width: 90, height: 90)
-//                            .clipShape(Circle())
-//                    } placeholder: {
-//                        SharedAsset.profileRed.swiftUIImage
-//                            .resizable()
-//                            .scaledToFill()
-//                            .frame(width: 90, height: 90)
-//                            .clipShape(Circle())
-//                    }
-//                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-//                    .offset(y: -50)
-//
-//                }
-//                .padding(.horizontal, 20)
-//
-//            HStack(spacing: 4, content: {
-//                SharedAsset.friendIconSocial.swiftUIImage
-//                    .resizable()
-//                    .scaledToFit()
-//                    .frame(width: 22, height: 22)
-//                
-//                Text("친구 추가")
-//                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-//                    .foregroundStyle(Color.black)
-//                  
-//            })
-//            .frame(maxWidth: .infinity)
-//            .frame(height: 45)
-//            .background(ColorSet.mainPurpleColor)
-//            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-//            .padding(.horizontal, 20)
-//            .padding(.bottom, 22)
-//            .onTapGesture {
-//                isPresentBottomSheet = true
-//            }
-//            .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-//                
-//            })
-//        })
-//    }
-//}

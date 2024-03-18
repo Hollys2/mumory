@@ -47,7 +47,7 @@ public struct BottomSheetDarkGrayWrapper: View {
                             .padding(.bottom, 7)
                     })
                     .frame(maxWidth: .infinity)
-                    .background(ColorSet.background)
+                    .background(ColorSet.darkGray)
                     .cornerRadius(15, corners: [.allCorners])
                     .padding(.horizontal, 7)
                     .offset(y: yOffset)
@@ -93,6 +93,5 @@ public struct BottomSheetDarkGrayWrapper: View {
                   }
                   
               })
-        
     }
 }

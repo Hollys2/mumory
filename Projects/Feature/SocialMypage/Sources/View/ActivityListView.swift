@@ -244,7 +244,7 @@ struct DatePickerView: View {
         self.selectDate = date.wrappedValue
         
         let calendar = Calendar.current
-        let startDateComponents = DateComponents(year: 2024, month: 1)
+        let startDateComponents = DateComponents(year: 2023, month: 1)
         let endDateComponents = DateComponents(year: 2026, month: 12)
         
         guard let startDate = calendar.date(from: startDateComponents),
@@ -261,7 +261,6 @@ struct DatePickerView: View {
     }
     
     var body: some View {
-        
         ZStack(alignment: .top) {
             VStack(spacing: 0, content: {
                 Picker("date", selection: $selectDate) {

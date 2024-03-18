@@ -18,6 +18,7 @@ public enum SnackbarStatus {
 public enum SnackbarType {
     case playlist
     case favorite
+    case copy
 }
 public class SnackBarViewModel: ObservableObject {
     @Published public var isPresent: Bool = false
@@ -105,8 +106,11 @@ public struct SnackBarView: View {
                 FavoriteDeleteView
                     .offset(y: snackBarViewModel.isPresent ? 53 : -70)
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
-                
-            case (.favorite, .failure), (.playlist, .delete):
+            case (.copy, .success):
+                CopySongURLView
+                    .offset(y: snackBarViewModel.isPresent ? 53 : -70)
+                    .opacity(snackBarViewModel.isPresent ? 1 : 0)
+            default:
                 EmptyView()
             }
             Spacer()
@@ -238,5 +242,26 @@ public struct SnackBarView: View {
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
         .padding(.horizontal, 15)
    
+    }
+    
+    var CopySongURLView: some View {
+        HStack(spacing: 0) {
+            SharedAsset.checkFill.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 17, height: 17)
+                .padding(.trailing, 8)
+            
+            Text("음악 URL 링크가 복사 되었습니다.")
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+            
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 48)
+        .padding(.horizontal, 20)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+        .padding(.horizontal, 15)
     }
 }

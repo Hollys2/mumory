@@ -119,6 +119,11 @@ struct SongBottomSheetView: View {
                         appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
                     }
                 BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
+                    .onTapGesture {
+                        dismiss()
+                        UIPasteboard.general.string = song.url?.absoluteString
+                        snackBarViewModel.setSnackBar(type: .copy, status: .success)
+                    }
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                 
             })
