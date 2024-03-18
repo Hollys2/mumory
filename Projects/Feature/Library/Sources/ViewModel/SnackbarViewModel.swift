@@ -81,6 +81,7 @@ public class SnackBarViewModel: ObservableObject {
 public struct SnackBarView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    
     public init(){}
     
     public var body: some View {
