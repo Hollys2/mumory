@@ -56,11 +56,8 @@ struct MumoryApp: App {
                     SnackBarView()
                         .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)
-
-                    
                 }
             }
- 
         }
     }
 }
