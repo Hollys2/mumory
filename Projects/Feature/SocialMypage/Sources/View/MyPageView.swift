@@ -76,7 +76,7 @@ public struct MyPageView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            settingViewModel.uid = currentUserData.user.uid
+            settingViewModel.uid = currentUserData.user.uId
         }
     }
 }
@@ -221,7 +221,7 @@ struct SimpleFriendView: View {
             let db = FBManager.shared.db
             
             Task {
-                guard let document = try? await db.collection("User").document(currentUserData.uid).getDocument() else {
+                guard let document = try? await db.collection("User").document(currentUserData.uId).getDocument() else {
                     print("error1")
                     return
                 }
@@ -233,7 +233,7 @@ struct SimpleFriendView: View {
                 
                 friendIDs.forEach { id in
                     Task{
-                        await self.friends.append(MumoriUser(uid: id))
+                        await self.friends.append(MumoriUser(uId: id))
                     }
                 }
             }
@@ -294,7 +294,7 @@ struct MyMumori: View {
     
     private func getMyMumory(){
         let db = Firebase.db
-        let uid = "tester"
+        let uid = currentUserData.uId
         let query = db.collection("Mumory").order(by: "date", descending: true).whereField("uId", isEqualTo: uid)
         
         query.getDocuments { snapshot, error in

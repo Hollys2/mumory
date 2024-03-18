@@ -45,7 +45,3 @@ struct SnackBarTestView: View {
         }
     }
 }
-
-#Preview {
-    SnackBarTestView()
-}

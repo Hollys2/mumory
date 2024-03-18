@@ -112,7 +112,7 @@ struct EditFavoriteGenreView: View {
             "favoriteGenres" : selectedGenres
         ]
         
-        db.collection("User").document(currentUserData.uid).setData(data, merge: true) { error in
+        db.collection("User").document(currentUserData.uId).setData(data, merge: true) { error in
             if error == nil {
                 currentUserData.favoriteGenres = selectedGenres
                 dismiss()

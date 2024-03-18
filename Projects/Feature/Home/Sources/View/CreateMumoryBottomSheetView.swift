@@ -595,7 +595,7 @@ struct ContainerView: View {
                                                 .aspectRatio(contentMode: .fit)
                                                 .frame(width: 36, height: 36)
                                         default:
-                                            Color.purple
+                                            Color.clear
                                                 .frame(width: 36, height: 36)
                                         }
                                     }

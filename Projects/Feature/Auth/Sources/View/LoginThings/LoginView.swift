@@ -285,7 +285,7 @@ public struct LoginView: View {
             }
 
             
-            currentUserData.uid = uid
+            currentUserData.uId = uid
             currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
             try? await query.updateData(["fcmToken": fcmToken])
             

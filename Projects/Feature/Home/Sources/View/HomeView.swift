@@ -35,80 +35,74 @@ public struct HomeView: View {
     
     public var body: some View {
         
-        NavigationStack(path: $appCoordinator.rootPath) {
+        ZStack(alignment: .bottom) {
             
-            ZStack(alignment: .bottom) {
-                
-                VStack(spacing: 0) {
-                    switch selectedTab {
-                    case .home:
-                        mapView
-                    case .social:
-                        SocialView()
-                    case .library:
-                        LibraryView()
-                    case .notification:
-                        NotifyView()
-                    }
-                    
+            VStack(spacing: 0) {
+                switch selectedTab {
+                case .home:
+                    mapView
+                case .social:
+                    SocialView()
+                case .library:
+                    LibraryView()
+                case .notification:
+                    NotifyView()
                 }
-                .padding(.bottom, 89)
-                
-                //마이페이지
-                MyPageBottomAnimationView()
                 
                 MumoryTabView(selectedTab: $selectedTab)
-                
-                
-                MiniPlayerView()
-                
-                CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
-                
-                MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                    .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
-                
-                if self.appCoordinator.isMumoryPopUpShown {
-                    ZStack {
-                        
-                        Color.black.opacity(0.6)
-                            .onTapGesture {
-                                self.appCoordinator.isMumoryPopUpShown = false
-                            }
-                        
-                        MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
-                            .frame(height: 418)
-                            .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
-                        
-                        Button(action: {
-                            self.appCoordinator.isMumoryPopUpShown = false
-                        }, label: {
-                            SharedAsset.closeButtonMumoryPopup.swiftUIImage
-                                .resizable()
-                                .frame(width: 26, height: 26)
-                        })
-                        .offset(y: 209 + 13 + 25)
-                    }
-                }
-                
-                if self.appCoordinator.isAddFriendViewShown {
-                    SocialFriendTestView()
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                }
-                
-            } // ZStack
-            .navigationBarBackButtonHidden()
-            .onAppear {
-                playerViewModel.isShownMiniPlayer = false
-                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
-                
             }
+//            .padding(.bottom, 89)
+            
+            MyPageBottomAnimationView()
+            
+//            MumoryTabView(selectedTab: $selectedTab)
+            
+            MiniPlayerView()
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
+            
+            if self.appCoordinator.isMumoryPopUpShown {
+                ZStack {
+                    
+                    Color.black.opacity(0.6)
+                        .onTapGesture {
+                            self.appCoordinator.isMumoryPopUpShown = false
+                        }
+                    
+                    MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
+                        .frame(height: 418)
+                        .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
+                    
+                    Button(action: {
+                        self.appCoordinator.isMumoryPopUpShown = false
+                    }, label: {
+                        SharedAsset.closeButtonMumoryPopup.swiftUIImage
+                            .resizable()
+                            .frame(width: 26, height: 26)
+                    })
+                    .offset(y: 209 + 13 + 25)
+                }
+            }
+            
+            if self.appCoordinator.isAddFriendViewShown {
+                SocialFriendTestView()
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
+            
+        } // ZStack
+        .ignoresSafeArea()
+        .navigationBarBackButtonHidden()
+        .onAppear {
+            playerViewModel.isShownMiniPlayer = false
+            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+            
         }
-        
-        
-   
-        
     }
+    
     var mapView: some View {
         
         ZStack {

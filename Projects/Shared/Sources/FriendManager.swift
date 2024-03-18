@@ -36,7 +36,7 @@ public class FriendManager: ObservableObject {
                         
                         DispatchQueue.main.async {
                             Task {
-                                self.searchedFriends.append(await MumoriUser(uid: document.documentID))
+                                self.searchedFriends.append(await MumoriUser(uId: document.documentID))
                             }
                         }
                     }

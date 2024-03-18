@@ -29,7 +29,7 @@ struct AddressRow: View {
                         let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
                         mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
                         
-                        self.localSearchViewModel.addRecentSearch(result.title)
+                        self.localSearchViewModel.addRecentSearch(RecentLocationSearch(locationTitle: result.title, locationSubTitle: result.subtitle, latitude: region.center.longitude, longitude: region.center.latitude))
                     }
                 } else {
                     print("ERROR: 해당하는 주소가 없습니다.")
@@ -78,7 +78,7 @@ struct SearchLocationView: View {
             HStack {
                 ZStack(alignment: .leading) {
                     TextField("", text: $localSearchViewModel.queryFragment,
-                              prompt: Text("위치 검색").font(Font.custom("Pretendard", size: 16))
+                              prompt: Text("위치 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .frame(maxWidth: .infinity)
                     .frame(height: 45)
@@ -112,10 +112,7 @@ struct SearchLocationView: View {
                     appCoordinator.rootPath.removeLast()
                 }) {
                     Text("취소")
-                        .font(
-                            Font.custom("Pretendard", size: 16)
-                                .weight(.medium)
-                        )
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                         .multilineTextAlignment(.trailing)
                         .foregroundColor(.white)
                 }
@@ -226,14 +223,14 @@ struct SearchLocationView: View {
                                             .frame(width: 23, height: 23)
                                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                         
-                                        Text("\(value)")
+                                        Text("\(value.locationTitle)")
                                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                             .foregroundColor(.white)
                                         
                                         Spacer()
                                         
                                         Button(action: {
-                                            self.localSearchViewModel.removeRecentSearch("\(value)")
+                                            self.localSearchViewModel.removeRecentSearch(value)
                                         }) {
                                             Image(systemName: "xmark")
                                                 .frame(width: 19, height: 19)
@@ -244,6 +241,11 @@ struct SearchLocationView: View {
                                     .frame(height: 50)
                                     .padding(.leading, 15)
                                     .padding(.trailing, 20)
+                                    .onTapGesture {
+                                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, coordinate: CLLocationCoordinate2D(latitude: value.latitude, longitude: value.longitude))
+                                        
+                                        appCoordinator.rootPath.removeLast()
+                                    }
                                 }
                             } else {
                                 Text("최근 검색내역이 없습니다.")

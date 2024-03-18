@@ -212,7 +212,7 @@ struct PlaylistItem_Big: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        let ref = db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id)
+        let ref = db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
         ref.delete()
         
         withAnimation {

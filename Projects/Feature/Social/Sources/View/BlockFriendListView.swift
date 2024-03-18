@@ -46,7 +46,7 @@ struct BlockFriendListView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(blockFriendList, id: \.uid){ friend in
+                        ForEach(blockFriendList, id: \.uId){ friend in
                             BlockFriendItem(friend: friend, blockFriendList: $blockFriendList)
                         }
                     })
@@ -60,7 +60,7 @@ struct BlockFriendListView: View {
     }
     
     private func getBlockFriendList() {
-        let query = db.collection("User").document(currentUserData.uid)
+        let query = db.collection("User").document(currentUserData.uId)
         Task {
             guard let data = try? await query.getDocument().data() else {
                 return
@@ -70,7 +70,7 @@ struct BlockFriendListView: View {
             }
             blockFriends.forEach { uid in
                 Task{
-                    self.blockFriendList.append(await MumoriUser(uid: uid))
+                    self.blockFriendList.append(await MumoriUser(uId: uid))
                 }
             }
         }
@@ -123,9 +123,9 @@ struct BlockFriendItem: View {
                 .background(ColorSet.subGray)
                 .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
                 .onTapGesture {
-                    let query = Firebase.db.collection("User").document(currentUserData.uid)
-                    query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uid])])
-                    self.blockFriendList.removeAll(where: {$0.uid == self.friend.uid})
+                    let query = Firebase.db.collection("User").document(currentUserData.uId)
+                    query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
+                    self.blockFriendList.removeAll(where: {$0.uId == self.friend.uId})
                 }
         })
         .padding(.horizontal, 20)

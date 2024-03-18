@@ -52,6 +52,11 @@ struct MumoryDetailScrollContentView: View {
                 SharedAsset.albumFilterMumoryDetail.swiftUIImage
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                    .background(.orange)
+                    .overlay(
+                        Rectangle()
+                            .stroke(.white, lineWidth: 10)
+                    )
                 
                 Rectangle()
                     .foregroundColor(.clear)
@@ -75,7 +80,7 @@ struct MumoryDetailScrollContentView: View {
                         .lineLimit(2)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
-                        
+
                     
                     Text("\(mumoryAnnotation.musicModel.artist)")
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
@@ -83,7 +88,6 @@ struct MumoryDetailScrollContentView: View {
                         .foregroundColor(.white.opacity(0.8))
                         .frame(width: 301, alignment: .leading)
                 }
-                .offset(y: -4)
                 .padding(.leading, 20)
             }
             
@@ -92,9 +96,17 @@ struct MumoryDetailScrollContentView: View {
                 Group {
                     // MARK: Profile & Info
                     HStack(spacing: 8) {
-                        Image(uiImage: SharedAsset.profileMumoryDetail.image)
-                            .resizable()
-                            .frame(width: 38, height: 38)
+                        AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                            default:
+                                Color(red: 0.184, green: 0.184, blue: 0.184)
+                            }
+                        }
+                        .frame(width: 38, height: 38)
+                        .mask {Circle()}
                         
                         VStack(spacing: 0) {
                             Text("\(appCoordinator.currentUser.nickname)")
@@ -111,11 +123,6 @@ struct MumoryDetailScrollContentView: View {
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
-                                    .onAppear {
-                                    }
-                                    .onChange(of: mumoryAnnotation.isPublic) { newValue in
-//                                        self.dateString = DateManager.formattedDate(date: mumoryAnnotation.date, isPublic: newValue)
-                                    }
 
                                 if !self.mumoryAnnotation.isPublic {
                                     Image(uiImage: SharedAsset.lockMumoryDatail.image)

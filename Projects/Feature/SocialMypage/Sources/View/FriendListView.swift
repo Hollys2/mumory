@@ -76,7 +76,7 @@ struct FriendListView: View {
                             .padding(.leading, 20)
                             .padding(.bottom, 15)
                         
-                        ForEach(results, id: \.uid) { friend in
+                        ForEach(results, id: \.uId) { friend in
                             FriendListItem(friend: friend)
                                 .onTapGesture {
                                     appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))

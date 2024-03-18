@@ -139,7 +139,7 @@ struct EmailLoginView: View {
             return
         }
         try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
-        currentUserData.uid = result.user.uid
+        currentUserData.uId = result.user.uid
         
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")

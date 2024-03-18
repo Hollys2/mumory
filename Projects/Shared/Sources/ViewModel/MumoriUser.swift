@@ -13,10 +13,10 @@ import Core
 
 public struct MumoriUser: Hashable{
     public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
-        return lhs.uid == rhs.uid
+        return lhs.uId == rhs.uId
     }
     
-    public var uid: String = ""
+    public var uId: String = ""
     public var nickname: String = ""
     public var id: String = ""
     public var profileImageURL: URL?
@@ -25,12 +25,12 @@ public struct MumoriUser: Hashable{
     
     public init() {}
     
-    public init(uid: String) async {
-        self.uid = uid
+    public init(uId: String) async {
+        self.uId = uId
         
         let db = FBManager.shared.db
         
-        guard let document = try? await db.collection("User").document(uid).getDocument() else {
+        guard let document = try? await db.collection("User").document(uId).getDocument() else {
             return
         }
         guard let data = document.data() else {

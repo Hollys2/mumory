@@ -150,7 +150,7 @@ struct SocialFriendTestView: View {
             
             let blockFriends = (doc.data()["blockFriends"] as? [String]) ?? []
             
-            if blockFriends.contains(currentUserData.uid){
+            if blockFriends.contains(currentUserData.uId){
                 return
             }
             
@@ -158,14 +158,14 @@ struct SocialFriendTestView: View {
                 return
             }
             
-            self.friendSearchResult = await MumoriUser(uid: friendUID)
+            self.friendSearchResult = await MumoriUser(uId: friendUID)
         }
     }
     
     private func getFriendRequest(){
         self.friendRequestList.removeAll()
         Task{
-            let query = db.collection("User").document(currentUserData.uid).collection("Friend")
+            let query = db.collection("User").document(currentUserData.uId).collection("Friend")
                 .whereField("type", isEqualTo: "recieve")
         
             guard let docs = try? await query.getDocuments() else {
@@ -176,15 +176,11 @@ struct SocialFriendTestView: View {
                     return
                 }
                 Task {
-                    friendRequestList.append(await MumoriUser(uid: uid))
+                    friendRequestList.append(await MumoriUser(uId: uid))
                 }
             }
         }
     }
-}
-
-#Preview {
-    SocialFriendTestView()
 }
 
 struct FindFriendSelectItem: View {
@@ -322,7 +318,7 @@ struct FriendAddItem: View {
     private func request(){
         let functions = Firebase.functions
         Task {
-            guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uid]) else {
+            guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
                 print("network error")
                 return
             }
@@ -420,8 +416,8 @@ struct FriendRequestItem: View {
     }
     
     private func deleteRequest() {
-        let query = db.collection("User").document(currentUserData.uid).collection("Friend")
-            .whereField("uId", isEqualTo: friend.uid)
+        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
+            .whereField("uId", isEqualTo: friend.uId)
             .whereField("type", isEqualTo: "recieve")
         Task {
             guard let snapshot = try? await query.getDocuments() else {
@@ -430,7 +426,7 @@ struct FriendRequestItem: View {
             guard let result = try? await snapshot.documents.first?.reference.delete() else {
                 return
             }
-            friendRequestList.removeAll(where: {$0.uid == friend.uid})
+            friendRequestList.removeAll(where: {$0.uId == friend.uId})
         }
     }
     
@@ -438,12 +434,12 @@ struct FriendRequestItem: View {
         let functions = FBManager.shared.functions
 
         Task {
-            guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uid]) else {
+            guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
                 print("network error")
                 return
             }
-            friendRequestList.removeAll(where: {$0.uid == friend.uid})
-            currentUserData.friends.append(friend.uid)
+            friendRequestList.removeAll(where: {$0.uId == friend.uId})
+            currentUserData.friends.append(friend.uId)
         }
     }
 }

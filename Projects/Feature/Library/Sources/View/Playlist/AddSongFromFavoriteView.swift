@@ -48,7 +48,7 @@ struct AddSongFromFavoriteView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        db.collection("User").document(currentUserData.uid).collection("Playlist").document("favorite").getDocument { snapshot, error in
+        db.collection("User").document(currentUserData.uId).collection("Playlist").document("favorite").getDocument { snapshot, error in
             if error == nil {
                 guard let snapshot = snapshot else {
                     print("no snapshot")

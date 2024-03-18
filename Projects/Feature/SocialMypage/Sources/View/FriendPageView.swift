@@ -23,7 +23,7 @@ struct FriendPageView: View {
         self.friend = friend
     }
     init(uId: String) async {
-        self.friend = await MumoriUser(uid: uId)
+        self.friend = await MumoriUser(uId: uId)
     }
     
 
@@ -63,7 +63,7 @@ struct FriendPageView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            isStranger = !currentUserData.friends.contains(friend.uid)
+            isStranger = !currentUserData.friends.contains(friend.uId)
         }
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
@@ -264,24 +264,26 @@ struct UnkownFriendPageView: View {
     
     //친구 요청, 삭제 팝업
     var PopupView: some View {
-        if isRequested {
-            TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
-                Task{
-                    guard let result = await deleteFriendRequest(uId: currentUserData.uid, friendUId: self.friend.uid) else {
-                        return
+        VStack {
+            if isRequested {
+                TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
+                    Task{
+                        guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: self.friend.uId) else {
+                            return
+                        }
+                        isRequested = false
                     }
-                    isRequested = false
                 }
-            }
-        }else {
-            TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구 요청") {
-                let functions = FBManager.shared.functions
-                Task {
-                    guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uid]) else {
-                        print("network error")
-                        return
+            } else {
+                TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구 요청") {
+                    let functions = FBManager.shared.functions
+                    Task {
+                        guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
+                            print("network error")
+                            return
+                        }
+                        isRequested = true
                     }
-                    isRequested = true
                 }
             }
         }
@@ -290,7 +292,7 @@ struct UnkownFriendPageView: View {
     //내가 보낸 친구 요청 리스트 받아오기
     private func getMyRequestList(){
         let db = FBManager.shared.db
-        let query = db.collection("User").document(currentUserData.uid).collection("Friend")
+        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
             .whereField("type", isEqualTo: "request")
         query.getDocuments { snapshot, error in
             Task {
@@ -299,7 +301,7 @@ struct UnkownFriendPageView: View {
                 snapshot.documents.forEach { doc in
                     guard let uId = doc.data()["uId"] as? String else {return}
                     self.myRequestList.append(uId)
-                    if uId == friend.uid {
+                    if uId == friend.uId {
                         self.isRequested = true
                     }
                 }
@@ -417,7 +419,7 @@ struct FriendInfoView: View {
             //친구 끊기 확인 팝업
             .fullScreenCover(isPresented: $isPresentConfirmPopup, content: {
                 TwoButtonPopupView(title: "\(friend.nickname)님과 친구를 끊겠습니까?", positiveButtonTitle: "친구 끊기") {
-                    deleteFriend(uId: currentUserData.uid, friendUId: friend.uid)
+                    deleteFriend(uId: currentUserData.uId, friendUId: friend.uId)
                 }
                 .background(TransparentBackground())
             })
@@ -467,7 +469,7 @@ struct FriendPlaylistView: View {
         }
         .onAppear {
             Task {
-                guard let snapshot = try? await db.collection("User").document(friend.uid).collection("Playlist").getDocuments() else {
+                guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
                     print("error")
                     return
                 }
@@ -523,7 +525,7 @@ struct FriendPageCommonBottomSheetView: View {
             BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
                 .onTapGesture {
                     dismiss()
-                    blockFriend(uId: currentUserData.uid, friendUId: friend.uid)
+                    blockFriend(uId: currentUserData.uId, friendUId: friend.uId)
                 }
             Line5()
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")

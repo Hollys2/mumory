@@ -73,7 +73,7 @@ struct MusicListItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
@@ -83,7 +83,7 @@ struct MusicListItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
-                        playerViewModel.addToFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }

@@ -128,7 +128,7 @@ struct SaveToPlaylistView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        let path = db.collection("User").document(currentUserData.uid).collection("Playlist")
+        let path = db.collection("User").document(currentUserData.uId).collection("Playlist")
         
         if self.songIDs.count > 1 {
             //리스트로 저장할 때
@@ -172,7 +172,7 @@ struct SaveToPlaylistView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        let path = db.collection("User").document(currentUserData.uid).collection("Playlist")
+        let path = db.collection("User").document(currentUserData.uId).collection("Playlist")
         
         path.getDocuments { snapshots, error in
             if error == nil {

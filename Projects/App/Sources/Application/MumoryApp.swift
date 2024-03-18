@@ -19,13 +19,14 @@ struct MumoryApp: App {
     @StateObject var currentUserData: CurrentUserData = .init()
     @StateObject var playerManager: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
+    
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
                 //                CreateMumoryBottomSheetView()
-                HomeView()
+//                HomeView()
                 //충독나서 스플래시 화면으로 수정함
-                ZStack{
+                ZStack {
                     SplashView()
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
@@ -44,8 +45,6 @@ struct MumoryApp: App {
                         .environmentObject(snackBarViewModel)
                         .onAppear {
                             print("MumoryApp onAppear")
-                            
-                            appCoordinator.currentUser = UserModel(documentID: "tester", nickname: "솔다", id: "solda")
                             
                             appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                             appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom

@@ -77,7 +77,7 @@ struct NotifyView: View {
     
     private func getNotification() async {
         self.notifications.removeAll()
-        let query = db.collection("User").document(currentUserData.uid).collection("Notification")
+        let query = db.collection("User").document(currentUserData.uId).collection("Notification")
             .order(by: "date", descending: true)
         
         //페이징기능 만들기
@@ -193,7 +193,7 @@ struct NotifyLikeItem: View {
         .onTapGesture {
             if !notification.isRead {
                 DispatchQueue.global().async {
-                    db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                     
                 }
                 self.notification.isRead = true
@@ -272,7 +272,7 @@ struct NotifyCommentItem: View {
         .onTapGesture {
             if !notification.isRead {
                 DispatchQueue.global().async {
-                    db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                 }
                 self.notification.isRead = true
             }
@@ -337,12 +337,12 @@ struct NotifyFriendItem: View {
         .onTapGesture {
             print("friend")
             Task {
-                let friend = await MumoriUser(uid: notification.friendUId)
+                let friend = await MumoriUser(uId: notification.friendUId)
                 appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
             }
             if !notification.isRead {
                 DispatchQueue.global().async {
-                    db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                 }
                 self.notification.isRead = true
             }

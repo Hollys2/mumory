@@ -85,7 +85,7 @@ struct MyPlaylistView: View {
         
         currentUserData.playlistArray.removeAll()
         
-        let query = db.collection("User").document(currentUserData.uid).collection("Playlist")
+        let query = db.collection("User").document(currentUserData.uId).collection("Playlist")
             .order(by: "date", descending: true)
         
         query.getDocuments { snapshot, error in

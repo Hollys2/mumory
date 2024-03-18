@@ -329,9 +329,20 @@ struct SearchedMumoryItemView: View {
             Spacer().frame(height: 15)
             
             HStack(alignment: .center, spacing: 0) {
-                Image(uiImage: SharedAsset.profileMumoryDetail.image)
-                    .resizable()
-                    .frame(width: 24, height: 24)
+                
+                AsyncImage(url: user.profileImageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                    default:
+                        Color(red: 0.184, green: 0.184, blue: 0.184)
+                    }
+                }
+                .frame(width: 24, height: 24)
+                .mask {
+                    Circle()
+                }
                 
                 Spacer().frame(width: 7)
                 
@@ -350,6 +361,7 @@ struct SearchedMumoryItemView: View {
                 Spacer()
                 
                 Image(uiImage: SharedAsset.locationMumoryDatail.image)
+                    .resizable()
                     .frame(width: 15, height: 15)
                 
                 Spacer().frame(width: 4)
@@ -358,7 +370,9 @@ struct SearchedMumoryItemView: View {
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .lineLimit(1)
                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                    .frame(width: 99, height: 12, alignment: .leading)
+                    .frame(maxWidth: 99)
+                    .frame(height: 12, alignment: .leading)
+                    .fixedSize(horizontal: true, vertical: false)
             } // HStack
             
             Spacer().frame(height: 15)
@@ -442,14 +456,14 @@ struct SearchedMumoryItemView: View {
                 .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
             , alignment: .top
         )
-        .background(.clear)
+        .background(Color(red: 0.165, green: 0.165, blue: 0.165))
         .simultaneousGesture(TapGesture(count: 1).onEnded({
             self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
             self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
         }))
         .onAppear {
             Task {
-                self.user = await MumoriUser(uid: self.mumory.userDocumentID)
+                self.user = await MumoriUser(uId: self.mumory.userDocumentID)
             }
         }
     }

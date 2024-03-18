@@ -292,7 +292,7 @@ struct PlaylistView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
+        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
             if error == nil {
                 guard let data = snapshot?.data() else {
                     print("no data")
@@ -353,7 +353,7 @@ struct PlaylistView: View {
         let songIdsForDelete = selectedSongsForDelete.map{$0.id.rawValue}
 
         
-        db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id)
+        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
             .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(songIdsForDelete)])
         
         songs.removeAll(where: {selectedSongsForDelete.contains($0)})

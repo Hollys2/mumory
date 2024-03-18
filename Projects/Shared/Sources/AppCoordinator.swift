@@ -14,7 +14,7 @@ import MusicKit
 
 public class AppCoordinator: ObservableObject {
     
-    @Published public var currentUser: UserModel = UserModel(uId: "UNKNOWN", nickname: "UNKNOWN", id: "UNKNOWN")
+    @Published public var currentUser: MumoriUser = MumoriUser()
 
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var createMumoryPath: NavigationPath = NavigationPath()

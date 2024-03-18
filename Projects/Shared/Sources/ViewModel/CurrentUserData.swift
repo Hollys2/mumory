@@ -11,14 +11,14 @@ import Core
 
 public class CurrentUserData: ObservableObject {
     //사용자 정보 및 디바이스 크기 정보
-    @Published public var uid: String = "" {
+    @Published public var uId: String = "" {
         didSet {
             DispatchQueue.main.async {
                 Task{
-                    self.user = await MumoriUser(uid: self.uid)
+                    self.user = await MumoriUser(uId: self.uId)
                 }
                 Task {
-                    let query = FBManager.shared.db.collection("User").document(self.uid)
+                    let query = FBManager.shared.db.collection("User").document(self.uId)
                     guard let data = try? await query.getDocument().data() else {return}
                     guard let friends = data["friends"] as? [String] else {return}
                     self.friends = friends
@@ -26,6 +26,7 @@ public class CurrentUserData: ObservableObject {
             }
         }
     }
+    
     @Published public var user: MumoriUser = MumoriUser()
     @Published public var friends: [String] = []
     

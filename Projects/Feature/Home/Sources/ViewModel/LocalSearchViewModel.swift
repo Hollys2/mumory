@@ -14,12 +14,33 @@ import Shared
 import Core
 
 
+struct RecentLocationSearch: Codable, Hashable {
+    
+    var locationTitle: String
+    var locationSubTitle: String
+    var latitude: CLLocationDegrees
+    var longitude: CLLocationDegrees
+    
+    static func == (lhs: RecentLocationSearch, rhs: RecentLocationSearch) -> Bool {
+        return lhs.locationTitle == rhs.locationTitle &&
+               lhs.locationSubTitle == rhs.locationSubTitle &&
+               lhs.latitude == rhs.latitude &&
+               lhs.longitude == rhs.longitude
+    }
+}
+
 public class LocalSearchViewModel: NSObject, ObservableObject {
     
-    @Published var recentSearches: [String] = UserDefaults.standard.stringArray(forKey: "recentLocationSearch") ?? []
+//    @Published var recentSearches: [RecentLocationSearch] = UserDefaults.standard.array(forKey: "recentLocationSearch") ?? []
+    @Published var recentSearches: [RecentLocationSearch] = {
+        if let savedData = UserDefaults.standard.data(forKey: "recentLocationSearch"),
+           let loadedRecentSearches = try? JSONDecoder().decode([RecentLocationSearch].self, from: savedData) {
+            return loadedRecentSearches
+        } else {
+            return []
+        }
+    }()
     @Published var popularSearches: [String] = []
-//    ["망원한강", "망원한강공원공원", "망원한강공원공원", "망원한강공원", "망원한강공원공원공원", "망원한강공원"]
-    
     @Published var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
     @Published var queryFragment: String = "" {
         didSet {
@@ -81,29 +102,42 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
         }
     }
     
-    func addRecentSearch(_ searchTerm: String) {
-        recentSearches.insert(searchTerm, at: 0)
-        
-        // Limit the number of recent searches to, for example, 10
+    func addRecentSearch(_ locationSearch: RecentLocationSearch) {
+        recentSearches.insert(locationSearch, at: 0)
         recentSearches = Array(recentSearches.prefix(10))
         
-        // Update UserDefaults
-        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(recentSearches) // RecentLocationSearch 배열을 Data 객체로 인코딩합니다.
+            UserDefaults.standard.set(data, forKey: "recentLocationSearch")
+        } catch {
+            print("Encoding Error: \(error)")
+        }
     }
     
-    func removeRecentSearch(_ searchTerm: String) {
-        recentSearches.removeAll { $0 == searchTerm }
-        
-        // Update UserDefaults
-        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+    func removeRecentSearch(_ locationSearch: RecentLocationSearch) {
+        recentSearches.removeAll { $0 == locationSearch }
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(recentSearches) // RecentLocationSearch 배열을 Data 객체로 인코딩합니다.
+            UserDefaults.standard.set(data, forKey: "recentLocationSearch")
+        } catch {
+            print("Encoding Error: \(error)")
+        }
     }
     
     func clearRecentSearches() {
         recentSearches = []
-        
-        // Update UserDefaults
-        UserDefaults.standard.set(recentSearches, forKey: "recentLocationSearch")
+        do {
+            let encoder = JSONEncoder()
+            let data = try encoder.encode(recentSearches) // RecentLocationSearch 배열을 Data 객체로 인코딩합니다.
+            UserDefaults.standard.set(data, forKey: "recentLocationSearch")
+        } catch {
+            print("Encoding Error: \(error)")
+        }
     }
+    
+    
 }
 
 extension LocalSearchViewModel: MKLocalSearchCompleterDelegate {

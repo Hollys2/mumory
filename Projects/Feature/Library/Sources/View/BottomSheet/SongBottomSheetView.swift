@@ -98,14 +98,14 @@ struct SongBottomSheetView: View {
                     if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
                         BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
                             .onTapGesture {
-                                playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                                playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
                                 dismiss()
                                 snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                             }
                     }else{
                         BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                             .onTapGesture {
-                                playerViewModel.addToFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                                playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
                                 dismiss()
                                 snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                             }

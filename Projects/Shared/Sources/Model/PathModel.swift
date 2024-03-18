@@ -87,6 +87,7 @@ public enum MyPage: Hashable {
     case friendPage(friend: MumoriUser)
     case activityList
 }
+
 public enum Tab {
     case home
     case social

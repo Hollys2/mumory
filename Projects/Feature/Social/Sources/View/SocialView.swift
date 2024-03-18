@@ -194,9 +194,19 @@ struct SocialItemView: View {
             // MARK: Profile
             HStack(spacing: 8) {
                 
-                Image(uiImage: SharedAsset.profileMumoryDetail.image)
-                    .resizable()
-                    .frame(width: 38, height: 38)
+                AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                    default:
+                        Color(red: 0.184, green: 0.184, blue: 0.184)
+                    }
+                }
+                .frame(width: 38, height: 38)
+                .mask {
+                    Circle()
+                }
                 
                 VStack(alignment: .leading, spacing: 5.25) {
                     
@@ -550,7 +560,6 @@ public struct SocialView: View {
             }
         
             HStack(alignment: .top, spacing: 0) {
-                Spacer().frame(width: 10)
 
                 Text("소셜")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
@@ -585,26 +594,27 @@ public struct SocialView: View {
                 Button(action: {
 
                 }) {
-                    Image("UserProfile_BT")
-                        .frame(width: 30, height: 30)
-                        .background(
-                            Image("PATH_TO_IMAGE")
+                    AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
                                 .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 30, height: 30)
-                                .clipped()
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(.white, lineWidth: 1)
-                        )
+                        default:
+                            Color(red: 0.184, green: 0.184, blue: 0.184)
+                        }
+                    }
+                    .frame(width: 30, height: 30)
+                    .mask {Circle()}
+                    .overlay(
+                        Circle()
+                            .stroke(.white, lineWidth: 1)
+                    )
                 }
-
-                Spacer().frame(width: 10)
             } // HStack
-            .padding(.horizontal, 10)
-            .padding(.top, 19 + appCoordinator.safeAreaInsetsTop)
-            .padding(.bottom, 15)
+            .frame(height: 68)
+            .padding(.horizontal, 20)
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
+//            .padding(.bottom, 15)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
         }

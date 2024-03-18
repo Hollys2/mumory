@@ -210,7 +210,7 @@ public struct MumoryDetailView: View {
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
-                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumory, isOn: true)
+//                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumory, isOn: true)
 //                    .transition(.move(edge: .bottom))
             }
         } // ZStack

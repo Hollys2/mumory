@@ -46,7 +46,7 @@ struct MyRequestFriendListView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(myRequestFriendList, id: \.uid){ friend in
+                        ForEach(myRequestFriendList, id: \.uId){ friend in
                             MyRequestFriendItem(friend: friend, myRequestFriendList: $myRequestFriendList)
                         }
                     })
@@ -59,7 +59,7 @@ struct MyRequestFriendListView: View {
         }
     }
     private func getMyRequestFriendList(){
-        let query = db.collection("User").document(currentUserData.uid).collection("Friend")
+        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
             .whereField("type", isEqualTo: "request")
         Task {
             guard let snapshot = try? await query.getDocuments() else {
@@ -70,7 +70,7 @@ struct MyRequestFriendListView: View {
                     return
                 }
                 Task {
-                    myRequestFriendList.append(await MumoriUser(uid: uid))
+                    myRequestFriendList.append(await MumoriUser(uId: uid))
                 }
             }
         }
@@ -134,10 +134,10 @@ struct MyRequestFriendItem: View {
         .fullScreenCover(isPresented: $isPresentDeletePopup) {
             TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
                 Task {
-                    guard let result = await deleteFriendRequest(uId: currentUserData.uid, friendUId: friend.uid) else {
+                    guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
                         return
                     }
-                    myRequestFriendList.removeAll(where: {$0.uid == friend.uid})
+                    myRequestFriendList.removeAll(where: {$0.uId == friend.uId})
                     
                 }
             }

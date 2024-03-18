@@ -82,7 +82,7 @@ struct AddMusicItem: View {
             let songData: [String: Any] = [
                 "songIds" : FBManager.Fieldvalue.arrayUnion([songID])
             ]
-            db.collection("User").document(currentUserData.uid).collection("Playlist").document(originPlaylist.id)
+            db.collection("User").document(currentUserData.uId).collection("Playlist").document(originPlaylist.id)
                 .updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songID])])
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
 

@@ -139,7 +139,7 @@ struct FavoriteSongItem: View {
                     .padding(.trailing, 20)
                     .onTapGesture {
                         bookmark = SharedAsset.bookmark.swiftUIImage
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
                         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
                             withAnimation {
                                 list.removeAll(where: {$0 == song})

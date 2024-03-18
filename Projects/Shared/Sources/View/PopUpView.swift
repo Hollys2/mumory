@@ -211,20 +211,8 @@ public struct PopUpView: View {
             } // VStack
             .frame(height: self.type.height)
             .cornerRadius(15)
-            
-            if self.mumoryDataViewModel.isUpdating {
-                Color.black.opacity(0.5).ignoresSafeArea()
-                
-                ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-            }
-            
-            if self.mumoryDataViewModel.isCreating {
-                Color.black.opacity(0.5).ignoresSafeArea()
-                
-                ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-            }
+
+            LoadingAnimationView(isLoading: .constant(self.mumoryDataViewModel.isUpdating || self.mumoryDataViewModel.isCreating))
         }
     }
 }

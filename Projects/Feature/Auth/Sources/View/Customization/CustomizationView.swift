@@ -195,7 +195,7 @@ public struct CustomizationView: View {
         
         await uploadPlaylist(uid: uid)
         
-        currentUserData.uid = uid
+        currentUserData.uId = uid
         currentUserData.favoriteGenres = manager.selectedGenres.map({$0.id})
         
         isLoading = false

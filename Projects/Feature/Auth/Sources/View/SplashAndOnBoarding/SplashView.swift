@@ -56,7 +56,7 @@ public struct SplashView: View {
                 }
                 .onAppear(perform: {
                     checkCurrentUserAndGetUserData()
-                    Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
+                    Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in
                         withAnimation {
                             isEndSplash = true
                         }
@@ -88,9 +88,11 @@ public struct SplashView: View {
                 .navigationDestination(for: MumoryView.self) { view in
                     switch view.type {
                     case .mumoryDetailView:
-                        MumoryDetailView(mumoryAnnotation: view.mumoryAnnotation)
+                        MumoryDetailView(mumory: view.mumoryAnnotation)
                     case .editMumoryView:
                         MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
+                    case .myMumoryView:
+                        MyMumoryView()
                     }
                 }
                 .navigationDestination(for: MumoryPage.self) { page in
@@ -252,13 +254,13 @@ public struct SplashView: View {
         let auth = Firebase.auth
         let messaging = Firebase.messaging
         
-        if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
-            page = .onBoarding
-            withAnimation {
-                isInitialSettingDone = true
-            }
-            return
-        }
+//        if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
+//            page = .onBoarding
+//            withAnimation {
+//                isInitialSettingDone = true
+//            }
+//            return
+//        }
         
         Task {
             //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
@@ -274,14 +276,16 @@ public struct SplashView: View {
                 }
                 return
             }
+            
             guard let fcmToken = data["fcmToken"] else {
                 page = .login
                 return
             }
+
+            currentUserData.uId = user.uid
             
-       
-            
-            currentUserData.uid = user.uid
+            appCoordinator.currentUser = await MumoriUser(uId: user.uid)
+
             currentUserData.favoriteGenres = favoriteGenres
             page = .home
             withAnimation {

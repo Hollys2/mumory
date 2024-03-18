@@ -170,7 +170,7 @@ struct CreatePlaylistPopupView: View {
             "date": Date()
         ]
         
-        db.collection("User").document(currentUserData.uid).collection("Playlist").addDocument(data: data) { error in
+        db.collection("User").document(currentUserData.uId).collection("Playlist").addDocument(data: data) { error in
             if error == nil {
                 print("success")
                 dismiss()

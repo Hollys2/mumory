@@ -243,7 +243,7 @@ private struct UserProfile: View {
     private func saveUserProfile(profileData: EditProfileData) async {
         let db = Firebase.db
         let storage = Firebase.storage
-        let uid = currentUserData.uid
+        let uid = currentUserData.uId
         let query = db.collection("User").document(uid)
         
         var data: [String: Any] = [
