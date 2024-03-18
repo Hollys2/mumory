@@ -53,24 +53,24 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("업데이트뷰: \(imageURLs.count)")
         
-//        if context.coordinator.oldImageURLs != self.mumoryAnnotation.imageURLs {
-        if let selectedMumoryAnnotation = self.mumoryDataViewModel.selectedMumoryAnnotation {
-            let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((selectedMumoryAnnotation.imageURLs ?? []).count)
-            uiView.contentSize = CGSize(width: totalWidth, height: 1)
-            
-            //            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
-            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: selectedMumoryAnnotation))
-            hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
-            
-            uiView.subviews.forEach { $0.removeFromSuperview() }
-            uiView.addSubview(hostingController.view)
-            
-            uiView.backgroundColor = .clear
-            hostingController.view.backgroundColor = .clear
-            
-            //            context.coordinator.oldImageURLs = self.mumoryAnnotation.imageURLs ?? []
-            //        }
-        }
+        //        if context.coordinator.oldImageURLs != self.mumoryAnnotation.imageURLs {
+        
+        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((self.mumoryDataViewModel.selectedMumoryAnnotation.imageURLs ?? []).count)
+        uiView.contentSize = CGSize(width: totalWidth, height: 1)
+        
+        //            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
+        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumoryDataViewModel.selectedMumoryAnnotation))
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
+        
+        uiView.subviews.forEach { $0.removeFromSuperview() }
+        uiView.addSubview(hostingController.view)
+        
+        uiView.backgroundColor = .clear
+        hostingController.view.backgroundColor = .clear
+        
+        //            context.coordinator.oldImageURLs = self.mumoryAnnotation.imageURLs ?? []
+        //        }
+        
     }
     
     func makeCoordinator() -> Coordinator {
@@ -111,7 +111,6 @@ extension MumoryDetailImageScrollView.Coordinator: UIScrollViewDelegate {
 
 }
 
-@available(iOS 16.0, *)
 struct MumoryDetailImageScrollContentView: View {
     
 //    @State var imageURLs: [String]
@@ -162,21 +161,23 @@ struct MumoryDetailImageView: View {
                 .background(Color(red: 0.184, green: 0.184, blue: 0.184))
                 
             
-            HStack(alignment: .center, spacing: 10) {
-                Text("\(index + 1) / \(count)")
-                  .font(
-                    Font.custom("Pretendard", size: 12)
-                      .weight(.semibold)
-                  )
-                  .multilineTextAlignment(.center)
-                  .foregroundColor(.white)
+            if count != 1 {
+                HStack(alignment: .center, spacing: 10) {
+                    Text("\(index + 1) / \(count)")
+                        .font(
+                            Font.custom("Pretendard", size: 12)
+                                .weight(.semibold)
+                        )
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .background(.black.opacity(0.7))
+                .cornerRadius(10.5)
+                .cornerRadius(14)
+                .offset(x: -13, y: 15)
             }
-            .padding(.horizontal, 9)
-            .padding(.vertical, 6)
-            .background(.black.opacity(0.7))
-            .cornerRadius(10.5)
-            .cornerRadius(14)
-            .offset(x: -13, y: 15)
         }
         .background(.red)
     }

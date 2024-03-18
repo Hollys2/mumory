@@ -55,11 +55,11 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     func updateUIView(_ uiView: UIViewType, context: Context) {
         // Remove annotations that are no longer in myMumoryAnnotations
 //        let currentAnnotationIDs = Set(uiView.annotations.compactMap { ($0 as? Mumory)?.id })
-        let newAnnotationIDs = Set(self.mumoryDataViewModel.myMumoryAnnotations.map { $0.id })
+        let newAnnotationIDs = Set(self.mumoryDataViewModel.myMumorys.map { $0.id })
         let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !newAnnotationIDs.contains($0.id) }
         uiView.removeAnnotations(annotationsToRemove)
         
-        for annotation in self.mumoryDataViewModel.myMumoryAnnotations {
+        for annotation in self.mumoryDataViewModel.myMumorys {
             // Find the corresponding annotation in the map view
             if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
                 // Compare properties of the annotation in the map view with the updated annotation
@@ -73,7 +73,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
             }
         }
         
-        let sortedAnnotations = self.mumoryDataViewModel.myMumoryAnnotations.sorted(by: { $0.date > $1.date })
+        let sortedAnnotations = self.mumoryDataViewModel.myMumorys.sorted(by: { $0.date > $1.date })
         uiView.addAnnotations(sortedAnnotations)
 
         if let newRegion = self.region {
@@ -201,6 +201,13 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
                 artwork.clipsToBounds = true
                 artwork.loadImage(from: url)
                 annotationView.addSubview(artwork)
+                
+                if !mumoryAnnotation.isPublic {
+                    let imageView = UIImageView(frame: CGRect(x: (annotationView.frame.width - 34) / 2, y: (annotationView.frame.width - 34) / 2, width: 34, height: 34))
+                    let lockImage: UIImage = SharedAsset.musicPinPrivate.image
+                    imageView.image = lockImage
+                    annotationView.addSubview(imageView)
+                }
             } else {
                 print("ERROR: NO URL")
             }

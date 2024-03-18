@@ -20,12 +20,6 @@ public struct HomeView: View {
     @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
-<<<<<<< HEAD
-
-=======
-    @State private var mumory: Mumory = Mumory()
-    
->>>>>>> 28-refactor/comment-and-friend
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -42,6 +36,7 @@ public struct HomeView: View {
     public var body: some View {
         
         NavigationStack(path: $appCoordinator.rootPath) {
+            
             ZStack(alignment: .bottom) {
                 
                 VStack(spacing: 0) {
@@ -55,6 +50,7 @@ public struct HomeView: View {
                     case .notification:
                         NotifyView()
                     }
+                    
                 }
                 .padding(.bottom, 89)
                 
@@ -65,23 +61,13 @@ public struct HomeView: View {
                 
                 
                 MiniPlayerView()
-           
                 
-            
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
                 
-                MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumory: self.$mumory)
+                MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
                     .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
-                    .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
-                        PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-                            //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
-                            appCoordinator.isDeleteCommentPopUpViewShown = false
-                        })
-                    }
-     
                 
                 if self.appCoordinator.isMumoryPopUpShown {
-                    
                     ZStack {
                         
                         Color.black.opacity(0.6)
@@ -111,13 +97,18 @@ public struct HomeView: View {
                 }
                 
             } // ZStack
-            .ignoresSafeArea()
             .navigationBarBackButtonHidden()
             .onAppear {
                 playerViewModel.isShownMiniPlayer = false
+                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+                
             }
+        }
+        
+        
+   
+        
     }
-    
     var mapView: some View {
         
         ZStack {
@@ -125,10 +116,11 @@ public struct HomeView: View {
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear")
-                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.documentID)
+                    //                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
                 }
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")
+                    //                    self.listener?.remove()
                 }
             
             VStack(spacing: 0) {
@@ -174,19 +166,20 @@ public struct HomeView: View {
             }
         }
     }
+
     
     @ViewBuilder
-    private func MyPageBottomAnimationView() -> some View{
+    private func MyPageBottomAnimationView() -> some View {
         VStack {
             if appCoordinator.bottomAnimationViewStatus == .myPage {
                 MyPageView()
                     .environmentObject(withdrawViewModel)
                     .environmentObject(settingViewModel)
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-                    
+                
             }
         }
-
+        
     }
     @ViewBuilder
     private func PlayBottomAnimationView() -> some View {
@@ -197,5 +190,4 @@ public struct HomeView: View {
             }
         }
     }
-
 }

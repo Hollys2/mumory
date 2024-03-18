@@ -13,24 +13,7 @@ import MusicKit
 import FirebaseFirestore
 
 
-public enum MumoryViewType {
-    case mumoryDetailView
-    case editMumoryView
-}
-
-public struct MumoryView: Hashable {
-    
-    public let type: MumoryViewType
-    public let mumoryAnnotation: Mumory
-//    public let songID: MusicItemID?
-    
-    public init(type: MumoryViewType, mumoryAnnotation: Mumory) {
-        self.type = type
-        self.mumoryAnnotation = mumoryAnnotation
-    }
-}
-
-public struct MusicModel: Identifiable, Hashable, Codable {
+public struct MusicModel: Identifiable, Hashable {
 
     public var id = UUID()
 
@@ -45,105 +28,29 @@ public struct MusicModel: Identifiable, Hashable, Codable {
         self.artist = artist
         self.artworkUrl = artworkUrl
     }
+    
+    public init() {
+        self.songID = "UNKNOWN"
+        self.title = "UNKNOWN"
+        self.artist = "UNKNOWN"
+        self.artworkUrl = nil
+    }
 }
 
-public struct LocationModel: Identifiable, Codable {
+public struct LocationModel: Identifiable {
     
     public var id = UUID()
     
     public var locationTitle: String
     public var locationSubtitle: String
-    
-    private var latitude: CLLocationDegrees
-    private var longitude: CLLocationDegrees
-    
-    public var coordinate: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-    }
+    public var coordinate: CLLocationCoordinate2D
     
     public init(locationTitle: String, locationSubtitle: String, coordinate: CLLocationCoordinate2D) {
         self.locationTitle = locationTitle
         self.locationSubtitle = locationSubtitle
-        self.latitude = coordinate.latitude
-        self.longitude = coordinate.longitude
+        self.coordinate = coordinate
     }
 }
-
-public struct Comment: Codable, Hashable {
-    
-    public var id: String
-    
-    public let userDocumentID: String
-    public let parentDocumentID: String?
-    public let date: Date
-    public let content: String
-    public let isPublic: Bool
-    
-    public init(id: String, userDocumentID: String, parentDocumentID: String? = nil, date: Date, content: String, isPublic: Bool) {
-        self.id = id
-        self.userDocumentID = userDocumentID
-        self.parentDocumentID = parentDocumentID
-        self.date = date
-        self.content = content
-        self.isPublic = isPublic
-    }
-    
-    public init?(id: String, data: [String: Any]) {
-        guard let userDocumentID = data["uId"] as? String,
-              let date = data["date"] as? FirebaseManager.Timestamp,
-              let content = data["content"] as? String,
-              let isPublic = data["isPublic"] as? Bool
-        else {
-            print("Something is nil in Comment")
-            return nil
-        }
-
-        if let parentDocumentID = data["parentID"] as? String {
-            self.parentDocumentID = parentDocumentID
-        } else {
-            self.parentDocumentID = nil
-        }
-
-        self.id = id
-        self.userDocumentID = userDocumentID
-        self.date = date.dateValue()
-        self.content = content
-        self.isPublic = isPublic
-    }
-}
-
-extension Comment {
-    public func toDictionary() -> [String: Any] {
-        if let parentDocumentID = parentDocumentID {
-            return [
-                "uId": userDocumentID,
-                "parentId": parentDocumentID,
-                "date": FirebaseManager.Timestamp(date: date),
-                "content": content,
-                "isPublic": isPublic
-            ]
-        } else {
-            return [
-                "uId": userDocumentID,
-                "date": FirebaseManager.Timestamp(date: date),
-                "content": content,
-                "isPublic": isPublic
-            ]
-        }
-    }
-    
-    static func fromDocumentData(_ documentData: [String: Any], commentDocumentID: String, comments: [Comment]) -> Comment? {
-        guard let userDocumentID = documentData["uId"] as? String,
-              let date = documentData["date"] as? FirebaseManager.Timestamp,
-              let content = documentData["content"] as? String,
-              let isPublic = documentData["isPublic"] as? Bool else {
-            return nil
-        }
-        
-        return Comment(id: commentDocumentID, userDocumentID: userDocumentID, date: date.dateValue(), content: content, isPublic: isPublic)
-    }
-}
-
 
 public class Mumory: NSObject, MKAnnotation, Identifiable {
     
@@ -160,23 +67,8 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     public var isPublic: Bool
     public var likes: [String]
     public var commentCount: Int
-    public var comments: [Comment]
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case userDocumentID
-        case date
-        case musicModel
-        case locationModel
-        case tags
-        case content
-        case imageURLs
-        case isPublic
-        case likes
-        case comments
-    }
 
-    public init(id: String, userDocumentID: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int, comments: [Comment]) {
+    public init(id: String, userDocumentID: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int) {
         self.id = id
         self.userDocumentID = userDocumentID
         self.date = date
@@ -188,11 +80,10 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
         self.isPublic = isPublic
         self.likes = likes
         self.commentCount = commentCount
-        self.comments = comments
     }
     
     public override convenience init() {
-        self.init(id: "", userDocumentID: "UNKNOWN", date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: -1, comments: [])
+        self.init(id: "UNKNOWN", userDocumentID: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: 0)
     }
     
     func copy(from other: Mumory) {
@@ -204,16 +95,16 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
         self.imageURLs = other.imageURLs
         self.isPublic = other.isPublic
         self.likes = other.likes
-        self.comments = other.comments
     }
 }
 
 extension Mumory {
     
-    static func fromDocumentData(_ documentData: [String: Any], mumoryDocumentID: String) async -> Mumory? {
+    static func fromDocumentDataToMumory(_ documentData: [String: Any], mumoryDocumentID: String) async -> Mumory? {
         
         guard let userDocumentID = documentData["uId"] as? String,
-              let songID = documentData["songID"] as? String,
+              let songID = documentData["songId"] as? String,
+              let locationTitle = documentData["locationTitle"] as? String,
               let latitude = documentData["latitude"] as? CLLocationDegrees,
               let longitude = documentData["longitude"] as? CLLocationDegrees,
               let date = documentData["date"] as? FirebaseManager.Timestamp,
@@ -223,34 +114,24 @@ extension Mumory {
               let isPublic = documentData["isPublic"] as? Bool,
               let likes = documentData["likes"] as? [String],
               let count = documentData["commentCount"] as? Int else {
+            print("something is nil in Mumory")
             return nil
         }
         
         do {
             let musicItemID = MusicItemID(rawValue: songID)
             let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            
             async let musicResponse = request.response()
-            let location = CLLocation(latitude: latitude, longitude: longitude)
-            async let placemarkResults = CLGeocoder().reverseGeocodeLocation(location)
-            async let commentCountResult = MumoryDataViewModel.fetchCommentCount(mumoryId: mumoryDocumentID)
-            
-            let (response, placemarks, commentCount) = await (try musicResponse, try placemarkResults, commentCountResult)
-            
+            let response = await (try musicResponse)
             guard let song = response.items.first else {
-                throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+                throw NSError(domain: "MMR", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song or Placemark not found"])
             }
             let musicModel = MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
             
-            guard let placemark = placemarks.first else {
-                return nil as Mumory?
-            }
-            let locationTitle = placemark.name ?? ""
-            let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
-            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: location.coordinate)
+            let location = CLLocation(latitude: latitude, longitude: longitude)
+            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "로케이션서브타이틀", coordinate: location.coordinate)
             
-
-            return Mumory(id: mumoryDocumentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count, comments: [])
+            return Mumory(id: mumoryDocumentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count)
             
         } catch {
             print("Error fetching music or location:", error.localizedDescription)
@@ -259,103 +140,18 @@ extension Mumory {
     }
 }
 
-//public class MumoryData: Codable {
-//
-//    public var userDocumentID: String
-//    public var date: FirebaseManager.Timestamp
-//    public var songID: String
-//    public var latitude: CLLocationDegrees
-//    public var longitude: CLLocationDegrees
-//    public var tags: [String]?
-//    public var content: String?
-//    public var imageURLs: [String]?
-//    public var isPublic: Bool
-//    public var likes: [String]
-//    public var comments: [String]?
-//
-//    enum CodingKeys: String, CodingKey {
-//        case userDocumentID
-//        case timeStamp
-//        case songID
-//        case latitude
-//        case longitude
-//        case tags
-//        case content
-//        case imageURLs
-//        case isPublic
-//        case likes
-//        case comments
-//    }
-//
-//    public init(userDocumentID: String, date: FirebaseManager.Timestamp, songID: String, latitude: CLLocationDegrees, longitude: CLLocationDegrees, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], comments: [String]? = nil) {
-//        self.userDocumentID = userDocumentID
-//        self.date = date
-//        self.songID = songID
-//        self.latitude = latitude
-//        self.longitude = longitude
-//        self.tags = tags
-//        self.content = content
-//        self.imageURLs = imageURLs
-//        self.isPublic = isPublic
-//        self.likes = likes
-//        self.comments = comments
-//    }
-//
-//    // Codable을 위한 커스텀 init 구현
-//    public required init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        userDocumentID = try container.decode(String.self, forKey: .userDocumentID)
-//        let dateSeconds = try container.decode(Double.self, forKey: .timeStamp)
-//        date = Timestamp(seconds: Int64(dateSeconds), nanoseconds: 0)
-//        songID = try container.decode(String.self, forKey: .songID)
-//        latitude = try container.decode(CLLocationDegrees.self, forKey: .latitude)
-//        longitude = try container.decode(CLLocationDegrees.self, forKey: .longitude)
-//        tags = try container.decodeIfPresent([String].self, forKey: .tags)
-//        content = try container.decodeIfPresent(String.self, forKey: .content)
-//        imageURLs = try container.decodeIfPresent([String].self, forKey: .imageURLs)
-//        isPublic = try container.decode(Bool.self, forKey: .isPublic)
-//        likes = try container.decode([String].self, forKey: .likes)
-//        comments = try container.decodeIfPresent([String].self, forKey: .comments)
-//    }
-//
-//    // Codable을 위한 커스텀 encode 구현
-//    public func encode(to encoder: Encoder) throws {
-//        var container = encoder.container(keyedBy: CodingKeys.self)
-//        try container.encode(userDocumentID, forKey: .userDocumentID)
-//        try container.encode(date.seconds, forKey: .timeStamp)
-//        try container.encode(songID, forKey: .songID)
-//        try container.encode(latitude, forKey: .latitude)
-//        try container.encode(longitude, forKey: .longitude)
-//        try container.encode(tags, forKey: .tags)
-//        try container.encode(content, forKey: .content)
-//        try container.encode(imageURLs, forKey: .imageURLs)
-//        try container.encode(isPublic, forKey: .isPublic)
-//        try container.encode(likes, forKey: .likes)
-//        try container.encode(comments, forKey: .comments)
-//    }
-//}
-
-
 public struct UserModel {
-//    public var id = UUID()
 
-    public var documentID: String
+    public var uId: String
     public var nickname: String
     public var id: String
     public var profileURL: URL?
     
-    public init(documentID: String, nickname: String, id: String, profileURL: URL? = nil) {
-        self.documentID = documentID
+    public init(uId: String, nickname: String, id: String, profileURL: URL? = nil) {
+        self.uId = uId
         self.nickname = nickname
         self.id = id
         self.profileURL = profileURL
-    }
-    
-    public init() {
-        self.documentID = ""
-        self.nickname = ""
-        self.id = ""
-//        self.profileURL = nil
     }
 }
 

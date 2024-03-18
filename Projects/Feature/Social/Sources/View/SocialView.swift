@@ -10,6 +10,8 @@
 import SwiftUI
 import Shared
 
+import FirebaseFunctions
+
 
 struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
@@ -59,9 +61,9 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("updateUIView: SocialScrollViewRepresentable")
 
-        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumoryAnnotations {
+        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
             DispatchQueue.main.async {
-                self.mumoryDataViewModel.everyMumoryAnnotations = self.mumoryDataViewModel.everyMumoryAnnotations.sorted(by: { $0.date > $1.date })
+                self.mumoryDataViewModel.everyMumorys = self.mumoryDataViewModel.everyMumorys.sorted(by: { $0.date > $1.date })
             }
 
             let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
@@ -75,7 +77,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
             uiView.refreshControl = UIRefreshControl()
             uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
 
-            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumoryAnnotations
+            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumorys
         }
     }
     
@@ -164,7 +166,7 @@ struct SocialScrollCotentView: View {
             
             LazyVStack(spacing: 0) {
                 
-                ForEach(self.mumoryDataViewModel.everyMumoryAnnotations, id: \.self) { i in
+                ForEach(self.mumoryDataViewModel.everyMumorys, id: \.self) { i in
                     SocialItemView(mumoryAnnotation: i)
                 }
             }
@@ -177,6 +179,7 @@ struct SocialScrollCotentView: View {
 struct SocialItemView: View {
     
     @State private var isTruncated: Bool = false
+    @State private var isButtonDisabled: Bool = false
     
     @StateObject private var dateManager: DateManager = DateManager()
     
@@ -357,7 +360,7 @@ struct SocialItemView: View {
                             // MARK: Tag
                             if let tags = self.mumoryAnnotation.tags {
                                 
-                                ForEach(tags, id: \.self) { i in
+                                ForEach(tags, id: \.self) { tag in
                                     
                                     HStack(alignment: .center, spacing: 5) {
                                     
@@ -365,7 +368,7 @@ struct SocialItemView: View {
                                             .resizable()
                                             .frame(width: 14, height: 14)
                                         
-                                        Text(i)
+                                        Text(tag)
                                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                             .foregroundColor(.white)
                                             .lineLimit(1)
@@ -438,9 +441,24 @@ struct SocialItemView: View {
                 VStack(spacing: 12) {
                     
                     Button(action: {
-                        mumoryDataViewModel.likeMumory(mumoryAnnotation: mumoryAnnotation, loginUserID: "tester")
+                        isButtonDisabled = true
+
+                        Task {
+                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, uId: appCoordinator.currentUser.uId)
+                            
+                            lazy var functions = Functions.functions()
+                            functions.httpsCallable("like").call(["mumoryId": mumoryAnnotation.id]) { result, error in
+                                if let error = error {
+                                    print("Error Functions \(error.localizedDescription)")
+                                } else {
+                                    self.mumoryAnnotation.likes = self.mumoryDataViewModel.selectedMumoryAnnotation.likes
+                                    print("라이크 성공: \(mumoryAnnotation.likes.count)")
+                                    isButtonDisabled = false
+                                }
+                            }
+                        }
                     }, label: {
-                        mumoryAnnotation.likes.contains("tester") ?
+                        mumoryAnnotation.likes.contains(appCoordinator.currentUser.uId) ?
                         SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
@@ -456,6 +474,7 @@ struct SocialItemView: View {
                             )
                             .mask {Circle()}
                     })
+                    .disabled(isButtonDisabled)
                     
                     
                     if mumoryAnnotation.likes.count != 0 {
@@ -466,10 +485,10 @@ struct SocialItemView: View {
                     }
                     
                     Button(action: {
-                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-                            self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumoryAnnotation
-                            print("self.mumoryAnnotation.id: \(self.mumoryAnnotation.id)")
-                            self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
+                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumoryAnnotation
+                        
+                        withAnimation(Animation.easeInOut(duration: 0.1)) {
+                            self.appCoordinator.isSocialCommentSheetViewShown = true
                             appCoordinator.offsetY = CGFloat.zero
                         }
                     }, label: {
@@ -482,13 +501,11 @@ struct SocialItemView: View {
                             .mask {Circle()}
                     })
                     
-                    if let c = mumoryAnnotation.commentCount {
-                        if c != 0 {
-                            Text("\(c)")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.white)
-                        }
+                    if mumoryAnnotation.commentCount != 0 {
+                        Text("\(mumoryAnnotation.commentCount)")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.white)
                     }
                     
                 }
@@ -520,6 +537,8 @@ public struct SocialView: View {
     public var body: some View {
         
         ZStack(alignment: .top) {
+            
+            Color(red: 0.09, green: 0.09, blue: 0.09)
 
             if mumoryDataViewModel.isSocialFetchFinished {
                 SocialScrollViewRepresentable(offsetY: self.$offsetY, onRefresh: {
@@ -529,8 +548,6 @@ public struct SocialView: View {
                         .environmentObject(self.appCoordinator)
                 }
             }
-            
-            Color.clear
         
             HStack(alignment: .top, spacing: 0) {
                 Spacer().frame(width: 10)
@@ -591,20 +608,16 @@ public struct SocialView: View {
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
         }
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation))
         .preferredColorScheme(.dark)
-        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation ?? Mumory()))
         .onAppear {
             mumoryDataViewModel.fetchEveryMumory()
             FirebaseManager.shared.observeFriendRequests()
             print("SocialView onAppear")
         }
-//        .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
-//            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-////                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
-//                appCoordinator.isDeleteCommentPopUpViewShown = false
-//            })
-//        }
+        .onDisappear {
+            print("SocialView onDisappear")
+        }
     }
 }
 

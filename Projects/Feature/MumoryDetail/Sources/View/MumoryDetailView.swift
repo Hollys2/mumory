@@ -131,7 +131,7 @@ public struct MumoryDetailView: View {
     
     @Environment(\.presentationMode) var presentationMode
     
-    @State var mumoryAnnotation: Mumory
+    @State var mumory: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -142,18 +142,12 @@ public struct MumoryDetailView: View {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
-            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY, mumory: self.$mumoryAnnotation)
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
                 .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView, mumoryAnnotation: Mumory()))
-                .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
-                    PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-                        //                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation)
-                        appCoordinator.isDeleteCommentPopUpViewShown = false
-                    })
-                }
             
             ZStack(alignment: .bottomLeading) {
                 
-                AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                AsyncImage(url: mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -186,7 +180,7 @@ public struct MumoryDetailView: View {
 //                .padding(.leading, 20)
             } // ZStack
             
-            MumoryDetailScrollViewRepresentable(mumoryAnnotation: self.$mumoryAnnotation)
+            MumoryDetailScrollViewRepresentable(mumoryAnnotation: self.$mumory)
             
             HStack {
                 Button(action: {
@@ -203,9 +197,7 @@ public struct MumoryDetailView: View {
                 Spacer()
                 
                 Button(action: {
-                    withAnimation(Animation.easeInOut(duration: 0.2)) {
-                        appCoordinator.isMumoryDetailMenuSheetShown = true
-                    }
+                    appCoordinator.isMumoryDetailMenuSheetShown = true
                 }, label: {
                     Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
                         .resizable()
@@ -218,22 +210,27 @@ public struct MumoryDetailView: View {
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
-                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumoryAnnotation, isOn: true)
-                //                    .transition(.move(edge: .bottom))
+                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumory, isOn: true)
+//                    .transition(.move(edge: .bottom))
             }
-
         } // ZStack
-        .navigationBarBackButtonHidden(true)
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
-        .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown) {
-            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
-                
-                self.mumoryDataViewModel.deleteMumory(self.mumoryAnnotation) {
+        .onAppear {
+            Task {
+                print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
+                self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
+            }
+        }
+        .navigationBarBackButtonHidden()
+        .ignoresSafeArea()
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumory))
+        .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
+            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
+                mumoryDataViewModel.deleteMumory(mumory) {
+                    print("뮤모리 삭제 성공")
                     appCoordinator.isDeleteMumoryPopUpViewShown = false
                     appCoordinator.rootPath.removeLast()
                 }
             })
-        }
-        .ignoresSafeArea()
+        })
     }
 }

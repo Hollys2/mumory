@@ -18,6 +18,7 @@ public enum MumoryBottomSheetType {
     case mumoryCommentMyView
     case mumoryCommentFriendView
     case addFriend
+    case myMumory
 }
 
 public enum SearchFriendType {
@@ -57,8 +58,7 @@ public struct MumoryBottomSheet {
                     self.appCoordinator.isMumoryDetailMenuSheetShown = false
                     
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        self.mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
-                        self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, mumoryAnnotation: mumoryAnnotation)) // 추후 파이어스토어 ID로 수정
+                        self.appCoordinator.rootPath.append(MumoryView(type: .editMumoryView, mumoryAnnotation: mumoryAnnotation))
                     }
                 }),
                 BottemSheetMenuOption(iconImage: mumoryAnnotation.isPublic ? SharedAsset.lockMumoryDetailMenu.swiftUIImage : SharedAsset.unlockMumoryDetailMenu.swiftUIImage, title: mumoryAnnotation.isPublic ? "나만보기" : "전체공개") {
@@ -121,8 +121,15 @@ public struct MumoryBottomSheet {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.appCoordinator.rootPath.append(SearchFriendType.unblockFriend)
                     }
-                })
-            ]
+                })]
+        case .myMumory:
+            return [
+                BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
+                    self.appCoordinator.isDeleteMumoryPopUpViewShown = true
+                },
+                BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
+                    
+                }]
         }
     }
 }
@@ -149,6 +156,8 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
     @Binding var isShown: Bool
     let mumoryBottomSheet: MumoryBottomSheet
     
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
     public init(isShown: Binding<Bool>, mumoryBottomSheet: MumoryBottomSheet) {
         self._isShown = isShown
         self.mumoryBottomSheet = mumoryBottomSheet
@@ -167,40 +176,35 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
         dimmingView.alpha = 0
         view.addSubview(dimmingView)
         
-        let tapGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture))
-        dimmingView.addGestureRecognizer(tapGestureRecognizer)
-        
         let newView = UIView()
-        newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 0)
+        newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
         newView.backgroundColor = .clear
-        view.addSubview(newView)
     
         let hostingController = UIHostingController(rootView: BottomSheetView(isShown: $isShown, menuOptions: self.mumoryBottomSheet.menuOptions, action: {
+            dimmingView.alpha = 0
+
             UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut], animations: {
-                
-                newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height , width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
-                
-                dimmingView.alpha = 0
+                newView.frame.origin.y = UIScreen.main.bounds.height
             }) { (_) in
                 newView.removeFromSuperview()
                 dimmingView.removeFromSuperview()
                 self.isShown = false
             }
-
         }))
-        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
+        hostingController.view.frame = newView.bounds
         hostingController.view.backgroundColor = .clear
-        
+      
         newView.addSubview(hostingController.view)
-        
-        UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut]) {
+        view.addSubview(newView)
 
-            newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height - (54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31) - 27, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
-            dimmingView.alpha = 0.5
+        dimmingView.alpha = 0.5
+        UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut]) {
+            newView.frame.origin.y = UIScreen.main.bounds.height - (54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31) - 27
         }
         
+        let tapGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture))
+        dimmingView.addGestureRecognizer(tapGestureRecognizer)
         let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePanGesture(_:)))
-        //        hostingController.view.addGestureRecognizer(panGesture)
         newView.addGestureRecognizer(panGesture)
         
         context.coordinator.uiView = view
@@ -229,7 +233,6 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
         }
         
         @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
-            
             guard let newView = newView, let dimmingView = dimmingView else { return }
             
             var initialPosition: CGPoint = .zero
@@ -253,9 +256,6 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
                         newView.frame.origin.y = UIScreen.main.bounds.height
                         dimmingView.alpha = 0
                     }) { value in
-                        
-                        print("value: \(value)")
-                        
                         newView.removeFromSuperview()
                         dimmingView.removeFromSuperview()
                         self.parent.isShown = false
@@ -266,23 +266,17 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
                         newView.frame.origin.y = UIScreen.main.bounds.height - (54 * CGFloat(self.parent.mumoryBottomSheet.menuOptions.count) + 31) - 27
                     }
                 }
-                
             default:
                 break
             }
-            
-            
         }
         
         @objc func handleTapGesture() {
-            
             guard let newView = newView, let dimmingView = dimmingView else { return }
             
+            dimmingView.alpha = 0
             UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut], animations: {
-                
-                newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height , width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.parent.mumoryBottomSheet.menuOptions.count) + 31)
-                
-                dimmingView.alpha = 0
+                newView.frame.origin.y = UIScreen.main.bounds.height
             }) { (_) in
                 newView.removeFromSuperview()
                 dimmingView.removeFromSuperview()
@@ -308,7 +302,6 @@ public struct BottomSheetView: View {
     }
     
     public var body: some View {
-        
         VStack(spacing: 0) {
             
             Image(uiImage: SharedAsset.dragIndicator.image)
@@ -329,13 +322,13 @@ public struct BottomSheetView: View {
                         
                         HStack(spacing: 0) {
                             
-                            Spacer().frame(width: 20)
+                            Spacer().frame(width: option.iconImage == SharedAsset.editMumoryDetailMenu.swiftUIImage || option.iconImage == SharedAsset.mapMumoryDetailMenu.swiftUIImage ? 24 : 20)
                             
                             option.iconImage
-                            //                                .resizable()
-                                .frame(width: 30, height: 30)
+                                .resizable()
+                                .frame(width: option.iconImage == SharedAsset.editMumoryDetailMenu.swiftUIImage || option.iconImage == SharedAsset.mapMumoryDetailMenu.swiftUIImage ? 22 : 30, height: option.iconImage == SharedAsset.editMumoryDetailMenu.swiftUIImage || option.iconImage == SharedAsset.mapMumoryDetailMenu.swiftUIImage ? 22 : 30)
                             
-                            Spacer().frame(width: 10)
+                            Spacer().frame(width: option.iconImage == SharedAsset.editMumoryDetailMenu.swiftUIImage || option.iconImage == SharedAsset.mapMumoryDetailMenu.swiftUIImage ? 14 : 10)
                             
                             Text(option.title)
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -482,15 +475,15 @@ struct BottomSheetViewModifier: ViewModifier {
         ZStack {
             
             Color.clear
-        
+            
             content
             
             if isShown {
                 BottomSheetUIViewRepresentable(isShown: $isShown, mumoryBottomSheet: mumoryBottomSheet)
-                    .zIndex(3)
             }
         }
         .zIndex(1)
+        .ignoresSafeArea()
     }
 }
 

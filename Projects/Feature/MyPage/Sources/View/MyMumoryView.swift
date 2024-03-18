@@ -12,34 +12,18 @@ import Shared
 
 public struct MyMumoryView: View {
     
-    @State private var translation: CGSize = .zero
+    @State private var selectedDate: Date = Date()
     @State private var currentTabSelection: Int = 0
     @State private var isDatePickerShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @State private var offset: CGFloat = 0.0
     @State private var scrollViewOffsetY: CGFloat = 0.0
     @State private var dateViewOffsetY: CGFloat = 0.0
     
     public init() {}
-    
-    var dragGesture: some Gesture {
-        DragGesture()
-            .onChanged { value in
-                if value.translation.height > 0 {
-                    DispatchQueue.main.async {
-                        translation.height = value.translation.height
-                    }
-                }
-            }
-            .onEnded { value in
-                
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    translation.height = 0
-                }
-            }
-    }
     
     public var body: some View {
         ZStack(alignment: .bottom) {
@@ -56,6 +40,7 @@ public struct MyMumoryView: View {
                             self.appCoordinator.rootPath.removeLast()
                         }, label: {
                             SharedAsset.backButtonTopBar.swiftUIImage
+                                .resizable()
                                 .frame(width: 30, height: 30)
                         })
                         
@@ -69,6 +54,7 @@ public struct MyMumoryView: View {
                             self.appCoordinator.rootPath.append(4)
                         }, label: {
                             SharedAsset.searchButtonMypage.swiftUIImage
+                                .resizable()
                                 .frame(width: 30, height: 30)
                         })
                     }
@@ -118,11 +104,8 @@ public struct MyMumoryView: View {
                                     )
                                 
                                 HStack(spacing: 6) {
-                                    Text("\(self.appCoordinator.selectedMonth)월")
-                                        .font(
-                                            Font.custom("Pretendard", size: 20)
-                                                .weight(.semibold)
-                                        )
+                                    Text("\(Calendar.current.component(.month, from: self.selectedDate))월")
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                                         .foregroundColor(.white)
                                     
                                     SharedAsset.dateButtonMypage.swiftUIImage
@@ -131,61 +114,45 @@ public struct MyMumoryView: View {
                                 }
                                 .padding(.leading, 12)
                                 .onTapGesture {
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        self.isDatePickerShown = true
-                                    }
+                                    self.isDatePickerShown = true
                                 }
                             }
                             
                             ScrollView(showsIndicators: false) {
                                 
                                 VStack(spacing: 0) {
-                                    ItemView(viewModel: ItemViewModel(isSelected: true, heartCount: 2, commentCount: 3))
-                                        .padding(.top, 20)
                                     
-                                    ZStack(alignment: .leading) {
-                                        Rectangle()
-                                            .foregroundColor(.clear)
-                                            .frame(height: 61)
-                                            .overlay(
+                                    Spacer().frame(height: 20)
+                                    
+                                    ForEach(Array(mumoryDataViewModel.filterdMumorys.enumerated()), id: \.element) { index, mumory in
+                                        
+                                        let spacing = calculateSpacing(forIndex: index)
+                                        
+                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filterdMumorys[index - 1]) {
+                                            ZStack(alignment: .leading) {
                                                 Rectangle()
                                                     .foregroundColor(.clear)
-                                                    .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                    .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                alignment: .top
-                                            )
-                                        
-                                        Text("2023년 9월")
-                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                            .foregroundColor(.white)
-                                            .padding(.leading, 12)
-                                    }
-                                    .background(
-                                        GeometryReader { geometry in
-                                            Color.clear
-                                                .onAppear {
-                                                    self.dateViewOffsetY = geometry.frame(in: .global).minY
-                                                }
-                                                .onChange(of: self.offset) { newValue in
-                                                    print("ScrollView offset changed: \(newValue)")
-                                                    
-                                                    if self.scrollViewOffsetY + newValue >= self.dateViewOffsetY {
-                                                        self.appCoordinator.updateSelectedDate(year: 2020, month: 9)
-                                                    } else {
-                                                        self.appCoordinator.updateSelectedDate(year: 2020, month: 1)
-                                                    }
-                                                }
+                                                    .frame(height: 61)
+                                                    .overlay(
+                                                        Rectangle()
+                                                            .foregroundColor(.clear)
+                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                        alignment: .top
+                                                    )
+                                                
+                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                    .foregroundColor(.white)
+                                                    .padding(.leading, 12)
+                                            }
+                                            .padding(.top, 30)
+
                                         }
-                                    )
-                                    
-                                    
-                                    ItemView(viewModel: ItemViewModel(isLocked: true, heartCount: 0, commentCount: 0))
-                                        .padding(.top, 5)
-                                    
-                                    ItemView(viewModel: ItemViewModel(heartCount: 0, commentCount: 0))
-                                        .background(.red)
-                                    ItemView(viewModel: ItemViewModel(heartCount: 0, commentCount: 0))
-                                        .background(.blue)
+                                        
+                                        MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
+                                            .padding(.bottom, CGFloat(spacing))
+                                    }
                                 } // VStack
                             } // ScrollView
                             .background(
@@ -203,11 +170,6 @@ public struct MyMumoryView: View {
 //                                        }
                                 }
                             )
-//                            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-//                                // 스크롤의 실시간 변화를 감지하고 출력
-//                                print("ScrollView offset changed in real-time: \(value)")
-//                            }
-                            
                         } // VStack
                         .pageView()
                         .tag(0)
@@ -242,29 +204,39 @@ public struct MyMumoryView: View {
                 }
             }
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-            
-            //            if self.isDatePickerShown {
-            //                Color.black.opacity(0.5).ignoresSafeArea()
-            //                    .onTapGesture {
-            //                        withAnimation(Animation.easeOut(duration: 0.2)) {
-            //                            self.isDatePickerShown = false
-            //                        }
-            //                    }
-            //
-            //                CustomDatePicker()
-            //                    .offset(y: self.translation.height - appCoordinator.safeAreaInsetsBottom)
-            //                    .gesture(dragGesture)
-            //                    .transition(.move(edge: .bottom))
-            //                    .zIndex(1)
-            //            }
-            
         }
         .navigationBarBackButtonHidden(true)
-        .ignoresSafeArea()
+        .preferredColorScheme(.dark)
         .sheet(isPresented: self.$isDatePickerShown, content: {
-            CustomDatePicker()
+            MyMumoryDatePicker(selectedDate: self.$selectedDate)
                 .presentationDetents([.height(309)])
         })
+        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .myMumory, mumoryAnnotation: Mumory()))
+        .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
+            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
+                mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {
+                    print("뮤모리 삭제 성공")
+                    appCoordinator.isDeleteMumoryPopUpViewShown = false
+                }
+            })
+        })
+        .ignoresSafeArea()
+    }
+    
+    func calculateSpacing(forIndex index: Int) -> CGFloat {
+        guard index > 0 else {
+            return 0
+        }
+        let previousDate = mumoryDataViewModel.filterdMumorys[index - 1].date
+        let currentDate = mumoryDataViewModel.filterdMumorys[index].date
+        return !Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day) ? 0 : 30
+    }
+    
+    func isSameMonth(_ mumory1: Mumory, with mumory2: Mumory) -> Bool {
+        let calendar = Calendar.current
+        let components1 = calendar.dateComponents([.year, .month], from: mumory1.date)
+        let components2 = calendar.dateComponents([.year, .month], from: mumory2.date)
+        return components1.year == components2.year && components1.month == components2.month
     }
     
     func makeCoordinator() -> Coordinator {
@@ -280,137 +252,83 @@ public struct MyMumoryView: View {
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            parent.offset = scrollView.contentOffset.y
+//            parent.offset = scrollView.contentOffset.y
         }
     }
 }
 
-struct ScrollOffsetPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+struct MumoryItemView: View {
     
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
-    }
-}
-
-
-struct CustomDatePicker: View {
-    
-    @State private var selectedDate: Date = Date()
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            Picker("Year and Month", selection: self.$selectedDate) {
-                ForEach(2000..<2030) { year in
-                    ForEach(1..<13) { month in
-                        Text("\(String(format: "%d", year))년 \(month)월")
-                            .tag(AppCoordinator.getYearMonthDate(year: year, month: month))
-                            .foregroundColor(.white)
-                    }
-                }
-            }
-            .pickerStyle(WheelPickerStyle())
-            .onAppear {
-                let year = Calendar.current.component(.year, from: Date())
-                let month = Calendar.current.component(.month, from: Date())
-                
-                self.selectedDate = AppCoordinator.getYearMonthDate(year: year, month: month)
-            }
-            
-            Button(action: {
-                self.appCoordinator.selectedDate = self.selectedDate
-                dismiss()
-            }) {
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: UIScreen.main.bounds.width - 40, height: 58)
-                        .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                        .cornerRadius(35)
-                    
-                    Text("완료")
-                        .font(
-                            SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18)
-                        )
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.black)
-                }
-            }
-        }
-        .frame(height: 309)
-        .padding(.vertical, 100)
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-    }
-}
-
-struct ItemViewModel {
-    let isSelected: Bool
-    let isLocked: Bool
-    let heartCount: Int
-    let commentCount: Int
-    
-    init(isSelected: Bool = false, isLocked: Bool = false, heartCount: Int = 0, commentCount: Int = 0) {
-        self.isSelected = isSelected
-        self.isLocked = isLocked
-        self.heartCount = heartCount
-        self.commentCount = commentCount
-    }
-}
-
-struct ItemView: View {
-    
-    @State private var isMenuShown: Bool = false
     @State private var vStackOffsetY: CGFloat = 0
+    @State private var isTruncated: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    let viewModel: ItemViewModel
+    private let mumory: Mumory
+    private let isRecent: Bool
     
-    init(viewModel: ItemViewModel) {
-        self.viewModel = viewModel
+    init(mumory: Mumory, isRecent: Bool) {
+        self.mumory = mumory
+        self.isRecent = isRecent
+    }
+    
+    private var previousDate: Date? {
+        guard let index = mumoryDataViewModel.filterdMumorys.firstIndex(where: { $0.id == mumory.id }) else {
+            return nil
+        }
+        guard index > 0 else {
+            return nil
+        }
+        return mumoryDataViewModel.filterdMumorys[index - 1].date
+    }
+    
+    private var isSameDateAsPrevious: Bool {
+        guard let previousDate = previousDate else {
+            return false
+        }
+        return Calendar.current.isDate(mumory.date, equalTo: previousDate, toGranularity: .day)
     }
     
     var body: some View {
-                
+        
         HStack(spacing: 0) {
 
             Spacer().frame(width: 12)
             
             VStack(spacing: 0) {
                 
-                VStack(alignment: .center, spacing: 3) {
-                    Text("\(appCoordinator.formattedDate(date: Date(), dateFormat: "dd"))")
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
-                        .foregroundColor(self.viewModel.isSelected ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
-                        .fixedSize(horizontal: true, vertical: false)
+                if !isSameDateAsPrevious {
+                    VStack(alignment: .center, spacing: 3) {
+                        Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "dd"))")
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                            .foregroundColor(self.isRecent ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
+                            .fixedSize(horizontal: true, vertical: false)
+                        
+                        Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "E"))")
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
+                            .foregroundColor(self.isRecent ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
+                            .fixedSize(horizontal: true, vertical: false)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 14)
+                    .frame(width: 35, alignment: .center)
+                    .background(self.isRecent ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.25, green: 0.25, blue: 0.25))
+                    .cornerRadius(18)
                     
-                    Text("\(appCoordinator.formattedDate(date: Date(), dateFormat: "E"))")
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                        .foregroundColor(self.viewModel.isSelected ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
-                        .fixedSize(horizontal: true, vertical: false)
+                    Spacer().frame(height: 15)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 14)
-                .frame(width: 35, alignment: .center)
-                .background(self.viewModel.isSelected ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.25, green: 0.25, blue: 0.25))
-                .cornerRadius(18)
-                
-                Spacer().frame(height: 15)
                 
                 Rectangle()
-                    .frame(width: 1, height: (UIScreen.main.bounds.width - 82) * 0.97)
+                    .frame(width: 0.5)
+//                , height: (UIScreen.main.bounds.width - 82) * 0.97)
                     .overlay(
                         Rectangle()
                             .inset(by: 0.25)
                             .stroke(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.5), lineWidth: 0.5)
                     )
-
-                Spacer().frame(height: 30)
             }
+            .frame(width: 35)
             
             Spacer().frame(width: 15)
             
@@ -420,7 +338,7 @@ struct ItemView: View {
 
                 HStack(spacing: 0) {
                     
-                    if self.viewModel.isLocked {
+                    if !self.mumory.isPublic {
                         Image(uiImage: SharedAsset.lockIconMypage.image)
                             .resizable()
                             .frame(width: 20, height: 20)
@@ -442,7 +360,7 @@ struct ItemView: View {
 
                     Spacer().frame(width: 4)
 
-                    Text("반포한강공원반포한강공원반포한강공원반포한강공원")
+                    Text(self.mumory.locationModel.locationTitle)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                         .frame(width: 210, height: 10, alignment: .leading)
@@ -452,17 +370,32 @@ struct ItemView: View {
                     SharedAsset.menuButtonMypage.swiftUIImage
                         .resizable()
                         .frame(width: 22, height: 22)
+                        .onTapGesture {
+                            self.appCoordinator.choosedMumoryAnnotation = self.mumory
+                            appCoordinator.isMyMumoryBottomSheetShown = true
+                        }
                 } // HStack
-
+                
                 Spacer().frame(height: 11)
-
+                
                 ZStack(alignment: .topLeading) {
-
-                    SharedAsset.artworkSample.swiftUIImage
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: UIScreen.main.bounds.width - 82, height: UIScreen.main.bounds.width - 82)
-                        .cornerRadius(15)
+                    
+                    AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                        case .failure:
+                            Text("Failed to load image")
+                        case .empty:
+                            ProgressView()
+                        default:
+                            Color(red: 0.18, green: 0.18, blue: 0.18)
+                        }
+                    }
+                    .frame(width: UIScreen.main.bounds.width - 82, height: UIScreen.main.bounds.width - 82)
+                    .cornerRadius(15)
 
                     Rectangle()
                         .foregroundColor(.clear)
@@ -483,7 +416,8 @@ struct ItemView: View {
                         .gesture(
                             TapGesture(count: 1)
                                 .onEnded {
-//                                    self.appCoordinator.rootPath.append(0)
+                                    mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                                    self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                                 }
                         )
 
@@ -496,10 +430,10 @@ struct ItemView: View {
                         Spacer().frame(width: 5)
                         
                         Group {
-                            Text("Hollywood")
+                            Text(self.mumory.musicModel.title)
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                             
-                            + Text("  검정치마")
+                            + Text("  \(self.mumory.musicModel.artist)")
                                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                         }
                         .foregroundColor(.white)
@@ -515,11 +449,8 @@ struct ItemView: View {
                             
                             Spacer().frame(width: 2)
                             
-                            Text("\(self.viewModel.heartCount)")
-                                .font(
-                                    Font.custom("Pretendard", size: 12)
-                                        .weight(.medium)
-                                )
+                            Text("\(self.mumory.likes.count)")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                 .foregroundColor(.white)
                             
                             Spacer().frame(width: 8)
@@ -530,11 +461,8 @@ struct ItemView: View {
                             
                             Spacer().frame(width: 2)
                             
-                            Text("\(self.viewModel.commentCount)")
-                                .font(
-                                    Font.custom("Pretendard", size: 12)
-                                        .weight(.medium)
-                                )
+                            Text("\(self.mumory.commentCount)")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                 .foregroundColor(.white)
                         }
                     } // HStack
@@ -545,83 +473,49 @@ struct ItemView: View {
                     VStack(spacing: 14) {
                         // MARK: Image Counter & Tag
                         ScrollView(.horizontal, showsIndicators: false) {
+                            
                             HStack(spacing: 8) {
-                                HStack(spacing: 4) {
-                                    SharedAsset.imageCountSocial.swiftUIImage
-                                        .frame(width: 18, height: 18)
-                                    Text("2")
-                                        .font(
-                                            Font.custom("Pretendard", size: 15)
-                                                .weight(.medium)
-                                        )
-                                        .multilineTextAlignment(.center)
-                                        .foregroundColor(.white)
-                                }
-                                .frame(width: 48, height: 28)
-                                .background(
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 48, height: 28)
-                                        .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
-                                        .cornerRadius(15)
-                                )
                                 
-                                HStack(alignment: .center, spacing: 5) {
-                                    SharedAsset.tagMumoryDatail.swiftUIImage
-                                        .resizable()
-                                        .frame(width: 14, height: 14)
-                                    
-                                    Text("태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그")
-                                        .font(
-                                            Font.custom("Pretendard", size: 12)
-                                                .weight(.semibold)
-                                        )
-                                        .foregroundColor(.white)
-                                        .lineLimit(1)
+                                if let imageURLs = self.mumory.imageURLs, !imageURLs.isEmpty {
+                                    HStack(spacing: 4) {
+                                        
+                                        SharedAsset.imageCountSocial.swiftUIImage
+                                            .frame(width: 18, height: 18)
+                                        
+                                        Text("\(imageURLs.count)")
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                            .multilineTextAlignment(.center)
+                                            .foregroundColor(.white)
+                                    }
+                                    .frame(width: 48, height: 28)
+                                    .background(
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 48, height: 28)
+                                            .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
+                                            .cornerRadius(15)
+                                    )
                                 }
-                                .padding(.leading, 8)
-                                .padding(.trailing, 10)
-                                .padding(.vertical, 7)
-                                .background(.white.opacity(0.25))
-                                .cornerRadius(14)
                                 
-                                HStack(alignment: .center, spacing: 5) {
-                                    SharedAsset.tagMumoryDatail.swiftUIImage
-                                        .resizable()
-                                        .frame(width: 14, height: 14)
-                                    
-                                    Text("태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그")
-                                        .font(
-                                            Font.custom("Pretendard", size: 12)
-                                                .weight(.semibold)
-                                        )
-                                        .foregroundColor(.white)
-                                        .lineLimit(1)
+                                if let tags = self.mumory.tags, !tags.isEmpty {
+                                    ForEach(tags, id: \.self) { tag in
+                                        HStack(alignment: .center, spacing: 5) {
+                                            SharedAsset.tagMumoryDatail.swiftUIImage
+                                                .resizable()
+                                                .frame(width: 14, height: 14)
+                                            
+                                            Text("\(tag)")
+                                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                                .foregroundColor(.white)
+                                                .lineLimit(1)
+                                        }
+                                        .padding(.leading, 8)
+                                        .padding(.trailing, 10)
+                                        .padding(.vertical, 7)
+                                        .background(.white.opacity(0.25))
+                                        .cornerRadius(14)
+                                    }
                                 }
-                                .padding(.leading, 8)
-                                .padding(.trailing, 10)
-                                .padding(.vertical, 7)
-                                .background(.white.opacity(0.25))
-                                .cornerRadius(14)
-                                
-                                HStack(alignment: .center, spacing: 5) {
-                                    SharedAsset.tagMumoryDatail.swiftUIImage
-                                        .resizable()
-                                        .frame(width: 14, height: 14)
-                                    
-                                    Text("태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그태그")
-                                        .font(
-                                            Font.custom("Pretendard", size: 12)
-                                                .weight(.semibold)
-                                        )
-                                        .foregroundColor(.white)
-                                        .lineLimit(1)
-                                }
-                                .padding(.leading, 8)
-                                .padding(.trailing, 10)
-                                .padding(.vertical, 7)
-                                .background(.white.opacity(0.25))
-                                .cornerRadius(14)
                                 
                                 Spacer()
                             } // HStack
@@ -634,28 +528,42 @@ struct ItemView: View {
                         )
                         
                         // MARK: Content
-                        HStack(spacing: 0) {
-                            Text("내용 내용내용 내용내용내용 내용내용내용내용내용 내용내용내용내용내용내용")
-                                .font(
-                                    Font.custom("Pretendard", size: 13)
-                                        .weight(.medium)
-                                )
-                                .foregroundColor(.white)
-                                .lineLimit(1)
-                                .frame(alignment: .leading)
+                        if let content = self.mumory.content, !content.isEmpty {
                             
-                            Spacer()
-                            
-                            // 컨텐트 너비에 따른 조건문 추가 예정
-                            Text("더보기")
-                                .font(
-                                    Font.custom("Pretendard", size: 11)
-                                        .weight(.medium)
-                                )
-                                .multilineTextAlignment(.trailing)
-                                .foregroundColor(.white.opacity(0.7))
-                                .lineLimit(1)
-                                .frame(alignment: .leading)
+                            HStack(spacing: 0) {
+                                
+                                Text(content)
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                                    .frame(maxWidth: (UIScreen.main.bounds.width - 82) * 0.66 * 0.87, alignment: .leading)
+                                    .fixedSize(horizontal: true, vertical: false)
+                                    .background(
+                                        GeometryReader { proxy in
+                                            Color.clear.onAppear {
+                                                let size = content.size(withAttributes: [.font: SharedFontFamily.Pretendard.medium.font(size: 13)])
+                                                
+                                                if size.width > proxy.size.width {
+                                                    self.isTruncated = true
+                                                } else {
+                                                    self.isTruncated = false
+                                                }
+                                            }
+                                        }
+                                    )
+                                
+                                Spacer(minLength: 0)
+                                
+                                if self.isTruncated {
+                                    Text("더보기")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 11))
+                                        .multilineTextAlignment(.trailing)
+                                        .foregroundColor(.white.opacity(0.7))
+                                        .lineLimit(1)
+                                        .frame(alignment: .leading)
+                                }
+                            }
+                            .padding(.top, 14)
                         }
                     } // VStack
                     .frame(width: UIScreen.main.bounds.width - 82 - 47)
@@ -678,17 +586,79 @@ struct ItemView: View {
             
             Spacer().frame(width: 20)
         }
-//        .frame(height: 401)
-        //        .sheet(isPresented: self.$isMenuShown, content: {
-        //            SocialMenuSheetView()
-        //                .padding(.horizontal, 9)
-        //                .presentationDetents([.height(190)])
-        //                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-        //        })
+    }
+}
+
+struct MyMumoryDatePicker: View {
+    
+    @Binding var selectedDate: Date
+    
+    @State private var pickerDate: Date = Date()
+    @State private var selectedYear: Int = 0
+    @State private var selectedMonth: Int = 0
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        VStack(spacing: 0) {
+                  
+            Picker("Year and Month", selection: self.$pickerDate) {
+                ForEach(2000..<2030) { year in
+                    ForEach(1..<13) { month in
+                        Text("\(String(format: "%d", year))년 \(month)월")
+                            .tag(DateManager.getYearMonthDate(year: year, month: month))
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+            .pickerStyle(WheelPickerStyle())
+            .onAppear {
+                self.selectedYear = Calendar.current.component(.year, from: self.selectedDate)
+                self.selectedMonth = Calendar.current.component(.month, from: self.selectedDate)
+                self.pickerDate = DateManager.getYearMonthDate(year: self.selectedYear, month: self.selectedMonth)
+            }
+            
+            Button(action: {
+                self.selectedDate = pickerDate
+                
+                let calendar = Calendar.current
+                let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
+                let range = ...lastDayOfMonth
+                let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
+                
+                for m in newDataBeforeSelectedDate {
+                    print("date: \(m.date)")
+                }
+                mumoryDataViewModel.filterdMumorys = newDataBeforeSelectedDate
+                
+                dismiss()
+            }) {
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: UIScreen.main.bounds.width - 40, height: 58)
+                        .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+                        .cornerRadius(35)
+                    
+                    Text("완료")
+                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.black)
+                }
+            }
+        }
+        .frame(height: 309)
+        .padding(.vertical, 100)
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
     }
 }
 
 struct RoundedSquareView: View {
+    
+    let mumory: Mumory = Mumory()
     
     var body: some View {
         
@@ -697,9 +667,20 @@ struct RoundedSquareView: View {
               .foregroundColor(.clear)
               .frame(width: getUIScreenBounds().width * 0.435, height: getUIScreenBounds().width * 0.435)
               .background(
-                SharedAsset.artworkSample.swiftUIImage
-                  .resizable()
-                  .aspectRatio(contentMode: .fill)
+                AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    case .failure:
+                        Text("Failed to load image")
+                    case .empty:
+                        ProgressView()
+                    default:
+                        Color(red: 0.18, green: 0.18, blue: 0.18)
+                    }
+                }
                   .frame(width: getUIScreenBounds().width * 0.435, height: getUIScreenBounds().width * 0.435)
                   .clipped()
               )
@@ -753,9 +734,20 @@ struct RoundedSquareView: View {
                     .foregroundColor(.clear)
                     .frame(width: 36, height: 36)
                     .background(
-                        SharedAsset.artworkSample.swiftUIImage
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
+                        AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            case .failure:
+                                Text("Failed to load image")
+                            case .empty:
+                                ProgressView()
+                            default:
+                                Color(red: 0.18, green: 0.18, blue: 0.18)
+                            }
+                        }
                             .frame(width: 36, height: 36)
                             .clipped()
                     )
@@ -810,12 +802,5 @@ struct RoundedSquareView: View {
             }
             .offset(x: getUIScreenBounds().width * 0.435 - 36 - 32 - 15, y: getUIScreenBounds().width * 0.435 - 36 - 15)
         }
-    }
-}
-
-
-struct MyMumoryView_Previews: PreviewProvider {
-    static var previews: some View {
-        MyMumoryView()
     }
 }

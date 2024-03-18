@@ -9,6 +9,8 @@
 import Foundation
 import SwiftUI
 import Core
+
+
 public struct MumoriUser: Hashable{
     public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
         return lhs.uid == rhs.uid
@@ -41,6 +43,16 @@ public struct MumoriUser: Hashable{
         self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
         self.bio = data["bio"] as? String ?? ""
     }
-    
+}
 
+extension MumoriUser {
+    
+//    static func fromDocumentDataToMumory(_ documentData: [String: Any], uId: String) async -> MumoriUser? {
+//        
+//        guard let id = documentData["id"] as? String,
+//              let nickname = documentData["nickname"] as? String,
+//              let profileImageURL = documentData["profileImageURL"] as? URL else { return nil }
+//        
+//        return await self.init(uid: uId)
+//    }
 }

@@ -39,7 +39,7 @@ public struct MonthlyStatView: View {
                         .background(SharedAsset.backgroundColor.swiftUIColor.opacity(0.9))
                     
                     HStack(spacing: 6) {
-                        Text("\(self.appCoordinator.formattedDate(date: Date(), dateFormat: "YYYY"))년 \(self.appCoordinator.formattedDate(date: Date(), dateFormat: "M"))월")
+                        Text("\(DateManager.formattedDate(date: Date(), dateFormat: "YYYY"))년 \(DateManager.formattedDate(date: Date(), dateFormat: "M"))월")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                             .foregroundColor(.white)
                         

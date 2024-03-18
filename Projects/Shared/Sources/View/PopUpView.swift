@@ -29,7 +29,7 @@ public enum PopUpType {
 
 public struct PopUpView: View {
     
-    @Binding private var isShown: Bool
+    @Binding private var isPopUpShown: Bool
     
     @State private var isButtonEnabled = true
     
@@ -44,7 +44,7 @@ public struct PopUpView: View {
     
     //    public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: @escaping () -> Void) {
     public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: (() -> Void)? = nil) {
-        self._isShown = isShown
+        self._isPopUpShown = isShown
         self.type = type
         self.title = title
         self.subTitle = subTitle
@@ -84,7 +84,7 @@ public struct PopUpView: View {
                 case .oneButton:
                     HStack(spacing: 0) {
                         Button(action: {
-                            self.isShown = false
+                            self.isPopUpShown = false
                         }) {
                             ZStack {
                                 Rectangle()
@@ -107,7 +107,7 @@ public struct PopUpView: View {
                 case .twoButton:
                     HStack(spacing: 0) {
                         Button(action: {
-                            self.isShown = false
+                            self.isPopUpShown = false
                         }) {
                             ZStack {
                                 Rectangle()
@@ -159,11 +159,11 @@ public struct PopUpView: View {
                             Button(action: {
                                 self.buttonAction?()
                                 
-                                withAnimation(.easeInOut(duration: 0.1)) {
-                                    self.appCoordinator.isCreateMumorySheetShown = false
-                                }
+//                                self.isPopUpShown = false
+//                                withAnimation(.easeInOut(duration: 3)) {
+//                                    self.appCoordinator.isCreateMumorySheetShown = false
+//                                }
                                 
-                                self.isShown = false
                             }) {
                                 ZStack {
                                     Rectangle()
@@ -186,7 +186,7 @@ public struct PopUpView: View {
                         
                         HStack(spacing: 0) {
                             Button(action: {
-                                self.isShown = false
+                                self.isPopUpShown = false
                             }) {
                                 ZStack {
                                     Rectangle()
@@ -228,10 +228,3 @@ public struct PopUpView: View {
         }
     }
 }
-
-//struct PopUpView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        PopUpView(type: .twoButton, title: ("훈민정음"), buttonTitle: ("세종대황"))
-//
-//    }
-//}

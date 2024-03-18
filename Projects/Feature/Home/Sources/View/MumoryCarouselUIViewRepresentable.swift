@@ -189,13 +189,7 @@ struct MumoryCard: View {
                     Spacer()
                     
                     Button(action: {
-                        //                        withAnimation(Animation.easeInOut(duration: 0.2)) {
-//                        //                            appCoordinator.isMumoryDetailShown = true
-//                        //                        }
-//                        appCoordinator.mumoryPopUpZIndex = 0
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-//                            appCoordinator.mumoryPopUpZIndex = 2
-//                        }
+                        mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                         appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage
