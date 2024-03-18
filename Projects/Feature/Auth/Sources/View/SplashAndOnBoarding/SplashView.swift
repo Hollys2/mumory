@@ -69,8 +69,6 @@ public struct SplashView: View {
                         SearchLocationView()
                     } else if i == "map" {
                         SearchLocationMapView()
-                    } else if i == "search-social" {
-                        SocialSearchView()
                     } else {
                         Color.gray
                     }

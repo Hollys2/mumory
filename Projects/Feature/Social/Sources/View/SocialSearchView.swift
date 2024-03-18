@@ -72,6 +72,8 @@ struct PageTabView<Content: View, Label: View>: View {
 
 public struct SocialSearchView: View {
     
+    @Binding private var isSocialSearchViewShown: Bool
+    
     @State private var searchText: String = ""
     @State private var currentTabSelection: Int = 0
     @State private var isRecentSearch: Bool = false
@@ -81,7 +83,9 @@ public struct SocialSearchView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    public init() {}
+    public init(isShown: Binding<Bool>) {
+        self._isSocialSearchViewShown = isShown
+    }
     
     public var body: some View {
         
@@ -139,7 +143,7 @@ public struct SocialSearchView: View {
                     .foregroundColor(.white)
                     .onTapGesture {
                         self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
-                        appCoordinator.rootPath.removeLast()
+                        self.isSocialSearchViewShown = false
                     }
             }
             .padding(.horizontal, 20)
@@ -463,7 +467,7 @@ struct SearchedMumoryItemView: View {
         }))
         .onAppear {
             Task {
-                self.user = await MumoriUser(uId: self.mumory.userDocumentID)
+                self.user = await MumoriUser(uId: self.mumory.uId)
             }
         }
     }

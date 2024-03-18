@@ -271,7 +271,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let collectionReference = db.collection("Mumory")
 
         let newData: [String: Any] = [
-            "uId": mumory.userDocumentID,
+            "uId": mumory.uId,
             "date": FirebaseManager.Timestamp(date: mumory.date),
             "songId": String(describing: mumory.musicModel.songID),
             "locationTitle": mumory.locationModel.locationTitle,
@@ -304,7 +304,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let documentReference = db.collection("Mumory").document(mumory.id)
 
         let updatedData: [String: Any] = [
-            "uId": mumory.userDocumentID,
+            "uId": mumory.uId,
             "date": FirebaseManager.Timestamp(date: mumory.date),
             "songId": String(describing: mumory.musicModel.songID),
             "latitude": mumory.locationModel.coordinate.latitude,
@@ -651,7 +651,7 @@ extension MumoryDataViewModel {
         
         let db = FirebaseManager.shared.db
         
-        let commentsRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
+        let commentsRef = db.collection("User").document(mumoryAnnotation.uId).collection("mumory").document(mumoryAnnotation.id)
         
         db.runTransaction({ (transaction, errorPointer) -> Any? in
             

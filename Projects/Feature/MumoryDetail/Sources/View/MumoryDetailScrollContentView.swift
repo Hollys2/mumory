@@ -33,7 +33,9 @@ struct TagView: View {
 
 struct MumoryDetailScrollContentView: View {
     
-    @Binding var mumoryAnnotation: Mumory
+    @Binding var mumory: Mumory
+    
+    @State var user: MumoriUser = MumoriUser()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -44,13 +46,7 @@ struct MumoryDetailScrollContentView: View {
             
             ZStack(alignment: .bottomLeading) {
                 
-//                Rectangle()
-//                    .foregroundColor(.clear)
-//                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-//                    .background(Color(red: 0.17, green: 0.17, blue: 0.17).opacity(0.2))
-                
-                SharedAsset.albumFilterMumoryDetail.swiftUIImage
-                    .resizable()
+                Color.clear
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                 
                 Rectangle()
@@ -66,24 +62,6 @@ struct MumoryDetailScrollContentView: View {
                             endPoint: UnitPoint(x: 0.5, y: 0.56)
                         )
                     )
-                
-                
-                VStack(spacing: 10) {
-                    
-                    Text("\(mumoryAnnotation.musicModel.title)")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
-                        .lineLimit(2)
-                        .foregroundColor(.white)
-                        .frame(width: 301, alignment: .leading)
-
-                    
-                    Text("\(mumoryAnnotation.musicModel.artist)")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 20))
-                        .lineLimit(1)
-                        .foregroundColor(.white.opacity(0.8))
-                        .frame(width: 301, alignment: .leading)
-                }
-                .padding(.leading, 20)
             }
             
             VStack(spacing: 0) {
@@ -91,7 +69,7 @@ struct MumoryDetailScrollContentView: View {
                 Group {
                     // MARK: Profile & Info
                     HStack(spacing: 8) {
-                        AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
+                        AsyncImage(url: self.user.profileImageURL) { phase in
                             switch phase {
                             case .success(let image):
                                 image
@@ -104,7 +82,7 @@ struct MumoryDetailScrollContentView: View {
                         .mask {Circle()}
                         
                         VStack(spacing: 0) {
-                            Text("\(appCoordinator.currentUser.nickname)")
+                            Text("\(self.user.nickname)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -113,13 +91,13 @@ struct MumoryDetailScrollContentView: View {
                             
                             HStack(spacing: 0) {
 
-                                Text(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))
+                                Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumory.isPublic))
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
 
-                                if !self.mumoryAnnotation.isPublic {
+                                if !self.mumory.isPublic {
                                     Image(uiImage: SharedAsset.lockMumoryDatail.image)
                                         .resizable()
                                         .frame(width: 18, height: 18)
@@ -133,7 +111,7 @@ struct MumoryDetailScrollContentView: View {
                                 
                                 Spacer().frame(width: 4)
                                 
-                                Text("\(self.mumoryAnnotation.locationModel.locationTitle)")
+                                Text("\(self.mumory.locationModel.locationTitle)")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
 //                                    .lineLimit(1)
@@ -146,7 +124,7 @@ struct MumoryDetailScrollContentView: View {
                     .frame(height: 38)
                     .padding(.vertical, 50)
                     
-                    if let tags = self.mumoryAnnotation.tags {
+                    if let tags = self.mumory.tags {
                         // MARK: Tag
                         HStack(spacing: 0) {
                             
@@ -164,7 +142,7 @@ struct MumoryDetailScrollContentView: View {
                         .padding(.bottom, 20)
                     }
                     
-                    if let content = self.mumoryAnnotation.content, !content.isEmpty {
+                    if let content = self.mumory.content, !content.isEmpty {
                         // MARK: Content
                         Text("\(content)")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
@@ -179,8 +157,8 @@ struct MumoryDetailScrollContentView: View {
 //                    if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
                         // MARK: Image
 //                    if let selectedMumoryAnnotaion = mumoryDataViewModel.selectedMumoryAnnotation, !(selectedMumoryAnnotaion.imageURLs ?? []).isEmpty {
-                    if !(self.mumoryAnnotation.imageURLs ?? []).isEmpty {
-                        MumoryDetailImageScrollView(mumoryAnnotation: self.mumoryAnnotation)
+                    if !(self.mumory.imageURLs ?? []).isEmpty {
+                        MumoryDetailImageScrollView(mumoryAnnotation: self.mumory)
                             .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
                             .padding(.bottom, 25)
                     }
@@ -188,11 +166,10 @@ struct MumoryDetailScrollContentView: View {
                 
                 Spacer().frame(height: 25)
                 
-                MumoryDetailReactionBarView(mumoryAnnotation: self.$mumoryAnnotation, isOn: false)
+                MumoryDetailReactionBarView(mumory: self.$mumory, isOn: false)
                     .background(GeometryReader { geometry in
                         Color.clear.onChange(of: geometry.frame(in: .global).minY) { minY in
-//                            print("minY: \(minY)")
-                            let isReactionBarShown = minY + 85 > UIScreen.main.bounds.height
+                            let isReactionBarShown = minY > UIScreen.main.bounds.height - 85
                             
                             if appCoordinator.isReactionBarShown != isReactionBarShown {
                                 appCoordinator.isReactionBarShown = isReactionBarShown
@@ -272,5 +249,10 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
+        .onAppear {
+            Task {
+                self.user = await MumoriUser(uId: self.mumory.uId)
+            }
+        }
     }
 }
