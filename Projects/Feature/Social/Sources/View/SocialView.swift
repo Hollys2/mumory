@@ -167,7 +167,7 @@ struct SocialScrollCotentView: View {
             LazyVStack(spacing: 0) {
                 
                 ForEach(self.mumoryDataViewModel.everyMumorys, id: \.self) { i in
-                    SocialItemView(mumoryAnnotation: i)
+                    SocialItemView(mumory: i)
                 }
             }
             .frame(width: UIScreen.main.bounds.width - 20)
@@ -180,13 +180,14 @@ struct SocialItemView: View {
     
     @State private var isTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
+    @State var user: MumoriUser = MumoriUser()
     
     @StateObject private var dateManager: DateManager = DateManager()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
-    var mumoryAnnotation: Mumory
+    let mumory: Mumory
     
     var body: some View {
         
@@ -194,7 +195,7 @@ struct SocialItemView: View {
             // MARK: Profile
             HStack(spacing: 8) {
                 
-                AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
+                AsyncImage(url: self.user.profileImageURL) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -210,7 +211,7 @@ struct SocialItemView: View {
                 
                 VStack(alignment: .leading, spacing: 5.25) {
                     
-                    Text("\(appCoordinator.currentUser.nickname)")
+                    Text("\(self.user.nickname)")
                         .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -218,11 +219,11 @@ struct SocialItemView: View {
                     
                     HStack(spacing: 0) {
                         
-                        Text(DateManager.formattedDate(date: self.mumoryAnnotation.date, isPublic: self.mumoryAnnotation.isPublic))
+                        Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumory.isPublic))
                             .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                         
-                        if !self.mumoryAnnotation.isPublic {
+                        if !self.mumory.isPublic {
                             Image(uiImage: SharedAsset.lockMumoryDatail.image)
                                 .resizable()
                                 .frame(width: 18, height: 18)
@@ -236,7 +237,7 @@ struct SocialItemView: View {
                         
                         Spacer().frame(width: 4)
                         
-                        Text(self.mumoryAnnotation.locationModel.locationTitle)
+                        Text(self.mumory.locationModel.locationTitle)
                             .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                             .frame(maxWidth: 106)
@@ -254,7 +255,7 @@ struct SocialItemView: View {
                     .foregroundColor(.clear)
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                     .background(
-                        AsyncImage(url: self.mumoryAnnotation.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                        AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                             switch phase {
                             case .success(let image):
                                 image
@@ -292,8 +293,8 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
-                                mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
-                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumoryAnnotation))
+                                mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                             }
                     )
                 
@@ -306,14 +307,14 @@ struct SocialItemView: View {
                     
                     Spacer().frame(width: 6)
                     
-                    Text(self.mumoryAnnotation.musicModel.title)
+                    Text(self.mumory.musicModel.title)
                         .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                         .multilineTextAlignment(.trailing)
                         .foregroundColor(.white)
                     
                     Spacer().frame(width: 8)
                     
-                    Text(self.mumoryAnnotation.musicModel.artist)
+                    Text(self.mumory.musicModel.artist)
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                         .foregroundColor(.white)
                     
@@ -321,7 +322,7 @@ struct SocialItemView: View {
                     
                     Button(action: {
 //                        self.appCoordinator.choosedSongID = self.mumoryAnnotation.musicModel.songID
-                        self.appCoordinator.choosedMumoryAnnotation = self.mumoryAnnotation
+                        self.appCoordinator.choosedMumoryAnnotation = self.mumory
                         self.appCoordinator.isSocialMenuSheetViewShown = true
                     }, label: {
                         SharedAsset.menuButtonSocial.swiftUIImage
@@ -344,7 +345,7 @@ struct SocialItemView: View {
                         HStack(spacing: 8) {
                             
                             // MARK: Image Counter
-                            if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
+                            if let imageURLs = self.mumory.imageURLs, !imageURLs.isEmpty {
                                 
                                 HStack(spacing: 4) {
                                     
@@ -368,7 +369,7 @@ struct SocialItemView: View {
                             }
                             
                             // MARK: Tag
-                            if let tags = self.mumoryAnnotation.tags {
+                            if let tags = self.mumory.tags {
                                 
                                 ForEach(tags, id: \.self) { tag in
                                     
@@ -403,7 +404,7 @@ struct SocialItemView: View {
 
                     
                     // MARK: Content
-                    if let content = self.mumoryAnnotation.content, !content.isEmpty {
+                    if let content = self.mumory.content, !content.isEmpty {
                         
                         HStack(spacing: 0) {
                         
@@ -454,21 +455,21 @@ struct SocialItemView: View {
                         isButtonDisabled = true
 
                         Task {
-                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumoryAnnotation, uId: appCoordinator.currentUser.uId)
+                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: appCoordinator.currentUser.uId)
                             
                             lazy var functions = Functions.functions()
-                            functions.httpsCallable("like").call(["mumoryId": mumoryAnnotation.id]) { result, error in
+                            functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
                                 if let error = error {
                                     print("Error Functions \(error.localizedDescription)")
                                 } else {
-                                    self.mumoryAnnotation.likes = self.mumoryDataViewModel.selectedMumoryAnnotation.likes
-                                    print("라이크 성공: \(mumoryAnnotation.likes.count)")
+                                    self.mumory.likes = self.mumoryDataViewModel.selectedMumoryAnnotation.likes
+                                    print("라이크 성공: \(mumory.likes.count)")
                                     isButtonDisabled = false
                                 }
                             }
                         }
                     }, label: {
-                        mumoryAnnotation.likes.contains(appCoordinator.currentUser.uId) ?
+                        mumory.likes.contains(appCoordinator.currentUser.uId) ?
                         SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
@@ -487,15 +488,15 @@ struct SocialItemView: View {
                     .disabled(isButtonDisabled)
                     
                     
-                    if mumoryAnnotation.likes.count != 0 {
-                        Text("\(mumoryAnnotation.likes.count)")
+                    if mumory.likes.count != 0 {
+                        Text("\(mumory.likes.count)")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white)
                     }
                     
                     Button(action: {
-                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumoryAnnotation
+                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
                         
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             self.appCoordinator.isSocialCommentSheetViewShown = true
@@ -511,8 +512,8 @@ struct SocialItemView: View {
                             .mask {Circle()}
                     })
                     
-                    if mumoryAnnotation.commentCount != 0 {
-                        Text("\(mumoryAnnotation.commentCount)")
+                    if mumory.commentCount != 0 {
+                        Text("\(mumory.commentCount)")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white)
@@ -527,11 +528,18 @@ struct SocialItemView: View {
             
             Spacer().frame(height: 40)
         } // VStack
+        .onAppear {
+            Task {
+                self.user = await MumoriUser(uId: self.mumory.uId)
+            }
+        }
     }
 }
 
 public struct SocialView: View {
     
+    @Binding private var isSocialSearchViewShown: Bool
+
     @State private var offsetY: CGFloat = 0
     @State private var isAddFriendNotification: Bool = false
     @State private var friendRequests: [String] = []
@@ -542,7 +550,9 @@ public struct SocialView: View {
     
     @State private var translation: CGSize = .zero
     
-    public init(){}
+    public init(isShown: Binding<Bool>) {
+        self._isSocialSearchViewShown = isShown
+    }
     
     public var body: some View {
         
@@ -568,9 +578,7 @@ public struct SocialView: View {
                 Spacer()
 
                 Button(action: {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        self.appCoordinator.rootPath.append("search-social")
-                    }
+                    self.isSocialSearchViewShown = true
                 }) {
                     SharedAsset.searchButtonSocial.swiftUIImage
                         .resizable()

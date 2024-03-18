@@ -409,7 +409,7 @@ public struct MumoryEditView: View {
                 }
                 
                 group.notify(queue: .main) {
-                    let newMumory = Mumory(id: mumoryAnnotation.id, userDocumentID: appCoordinator.currentUser.uId, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, commentCount: mumoryAnnotation.commentCount)
+                    let newMumory = Mumory(id: mumoryAnnotation.id, uId: appCoordinator.currentUser.uId, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, commentCount: mumoryAnnotation.commentCount)
                     
                     mumoryDataViewModel.updateMumory(newMumory) {
 

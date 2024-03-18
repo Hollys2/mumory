@@ -23,6 +23,7 @@ struct CommentView: View {
     @Binding var selectedIndex: Int
     @Binding var commentDocumentID: String
     
+    @State private var user: MumoriUser = MumoriUser()
     @State private var isSecretComment: Bool = false
     @State private var isSelectedComment: Bool = false
     
@@ -33,9 +34,17 @@ struct CommentView: View {
         
         HStack(alignment: .top,  spacing: 13) {
             
-            SharedAsset.profileMumoryDetail.swiftUIImage
-                .resizable()
-                .frame(width: 32, height: 32)
+            AsyncImage(url: self.user.profileImageURL) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                default:
+                    Color(red: 0.184, green: 0.184, blue: 0.184)
+                }
+            }
+            .frame(width: 32, height: 32)
+            .mask {Circle()}
             
             VStack(spacing: 0) {
                 
@@ -110,6 +119,11 @@ struct CommentView: View {
         .frame(width: UIScreen.main.bounds.width - 40)
         .frame(minHeight: 117 - 20)
         .padding(.top, 12)
+        .onAppear {
+            Task {
+                self.user = await MumoriUser(uId: comment.userDocumentID)
+            }
+        }
         
         
         // MARK: Reply
@@ -135,7 +149,9 @@ struct Reply: View {
     
     let comment: Comment
     
+    @State private var user: MumoriUser = MumoriUser()
     @State private var isSecretComment: Bool = false
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
@@ -143,9 +159,17 @@ struct Reply: View {
         
         HStack(alignment: .top, spacing: 13) {
             
-            SharedAsset.profileMumoryDetail.swiftUIImage
-                .resizable()
-                .frame(width: 28, height: 28)
+            AsyncImage(url: self.user.profileImageURL) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                default:
+                    Color(red: 0.184, green: 0.184, blue: 0.184)
+                }
+            }
+            .frame(width: 28, height: 28)
+            .mask {Circle()}
             
             VStack(spacing: 0) {
                 
@@ -207,6 +231,11 @@ struct Reply: View {
         .frame(minHeight: 77)
         .padding(.top, 10)
         .padding(.leading, 45)
+        .onAppear {
+            Task {
+                self.user = await MumoriUser(uId: comment.userDocumentID)
+            }
+        }
     }
 }
 

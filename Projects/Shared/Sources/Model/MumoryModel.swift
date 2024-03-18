@@ -56,7 +56,7 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     
     public var id: String
 
-    public var userDocumentID: String
+    public var uId: String
     public var date: Date
     public var musicModel: MusicModel
     public var locationModel: LocationModel
@@ -68,9 +68,9 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     public var likes: [String]
     public var commentCount: Int
 
-    public init(id: String, userDocumentID: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int) {
+    public init(id: String, uId: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int) {
         self.id = id
-        self.userDocumentID = userDocumentID
+        self.uId = uId
         self.date = date
         self.musicModel = musicModel
         self.locationModel = locationModel
@@ -83,7 +83,7 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     }
     
     public override convenience init() {
-        self.init(id: "UNKNOWN", userDocumentID: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: 0)
+        self.init(id: "UNKNOWN", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: 0)
     }
     
     func copy(from other: Mumory) {
@@ -131,7 +131,7 @@ extension Mumory {
             let location = CLLocation(latitude: latitude, longitude: longitude)
             let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "로케이션서브타이틀", coordinate: location.coordinate)
             
-            return Mumory(id: mumoryDocumentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count)
+            return Mumory(id: mumoryDocumentID, uId: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count)
             
         } catch {
             print("Error fetching music or location:", error.localizedDescription)

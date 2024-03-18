@@ -20,6 +20,7 @@ public struct HomeView: View {
     @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
+    @State private var isSocialSearchViewShown: Bool = false
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -42,7 +43,7 @@ public struct HomeView: View {
                 case .home:
                     mapView
                 case .social:
-                    SocialView()
+                    SocialView(isShown: self.$isSocialSearchViewShown)
                 case .library:
                     LibraryView()
                 case .notification:
@@ -94,6 +95,10 @@ public struct HomeView: View {
             }
             
             MyPageBottomAnimationView()
+            
+            if self.isSocialSearchViewShown {
+                SocialSearchView(isShown: self.$isSocialSearchViewShown)
+            }
             
         } // ZStack
         .ignoresSafeArea()
