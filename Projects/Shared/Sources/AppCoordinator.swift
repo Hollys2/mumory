@@ -62,6 +62,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isHiddenTabBarWithoutAnimation: Bool = false
     
     @Published public var bottomAnimationViewStatus: BottomAnimationPage = .remove
+    @Published public var selectedTab: Tab = .home
     
     public var selectedYear: Int {
         Calendar.current.component(.year, from: self.selectedDate)

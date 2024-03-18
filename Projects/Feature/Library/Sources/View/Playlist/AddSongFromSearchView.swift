@@ -14,7 +14,6 @@ struct AddSongFromSearchView: View {
     @Binding var originPlaylist: MusicPlaylist
     
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var snackbarManager: SnackBarViewModel
 
     @State var term: String = ""
     @State var timer: Timer?
@@ -51,7 +50,6 @@ struct AddSongFromSearchView: View {
                     LazyVStack(spacing: 0, content: {
                         ForEach(songs, id: \.self) { song in
                             AddMusicItem(songID: song.id.rawValue, originPlaylist: $originPlaylist)
-                                .environmentObject(snackbarManager)
                             Divider()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)

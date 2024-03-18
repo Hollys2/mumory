@@ -82,6 +82,7 @@ struct ActivityListView: View {
                 .padding(.leading, 20)
                 .frame(height: 55)
                 .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
                     isPresentDatePicker = true
                 }
                 .fullScreenCover(isPresented: $isPresentDatePicker, content: {

@@ -13,6 +13,7 @@ import MusicKit
 struct MusicChartDetailItem: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     var rank: Int
     var song: Song
 
@@ -66,6 +67,7 @@ struct MusicChartDetailItem: View {
                     .padding(.trailing, 23)
                     .onTapGesture {
                         playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
                 SharedAsset.bookmark.swiftUIImage
@@ -75,6 +77,7 @@ struct MusicChartDetailItem: View {
                     .padding(.trailing, 23)
                     .onTapGesture {
                         playerViewModel.addToFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }
             

@@ -133,48 +133,41 @@ struct MyRequestFriendItem: View {
         .frame(height: 84)
         .fullScreenCover(isPresented: $isPresentDeletePopup) {
             TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
-                deleteRequest()
+                Task {
+                    guard let result = await deleteFriendRequest(uId: currentUserData.uid, friendUId: friend.uid) else {
+                        return
+                    }
+                    myRequestFriendList.removeAll(where: {$0.uid == friend.uid})
+                    
+                }
             }
             .background(TransparentBackground())
         }
     }
-    
-    private func deleteRequest() {
-        let db = Firebase.db
-        let deleteMyQuery = db.collection("User").document(currentUserData.uid).collection("Friend")
-            .whereField("uId", isEqualTo: friend.uid)
-            .whereField("type", isEqualTo: "request")
-        
-        let deleteFriendQuery = db.collection("User").document(friend.uid).collection("Friend")
-            .whereField("uId", isEqualTo: currentUserData.uid)
-            .whereField("type", isEqualTo: "recieve")
-        
-        Task {
-            guard let result = try? await deleteMyQuery.getDocuments() else {
-                return
-            }
-            guard let deleteResult = try? await result.documents.first?.reference.delete() else {
-                return
-            }
-            myRequestFriendList.removeAll(where: {$0.uid == friend.uid})
-        }
-        Task {
-            guard let resultFriend = try? await deleteFriendQuery.getDocuments() else {
-                return
-            }
-            guard let deleteResultFriend = try? await resultFriend.documents.first?.reference.delete() else {
-                return
-            }
-        }
-        
-        
-    }
 }
 
-struct FriendBottomSheet: View {
-    var body: some View {
-        VStack{
-            
-        }
+public func deleteFriendRequest(uId: String, friendUId: String) async -> Bool?{
+    let db = FBManager.shared.db
+    
+    let deleteMyQuery = db.collection("User").document(uId).collection("Friend")
+        .whereField("uId", isEqualTo: friendUId)
+        .whereField("type", isEqualTo: "request")
+    
+    let deleteFriendQuery = db.collection("User").document(friendUId).collection("Friend")
+        .whereField("uId", isEqualTo: uId)
+        .whereField("type", isEqualTo: "recieve")
+    
+    guard let result = try? await deleteMyQuery.getDocuments() else {
+        return nil
     }
+    guard let deleteResult = try? await result.documents.first?.reference.delete() else {
+        return nil
+    }
+    guard let resultFriend = try? await deleteFriendQuery.getDocuments() else {
+        return nil
+    }
+    guard let deleteResultFriend = try? await resultFriend.documents.first?.reference.delete() else {
+        return nil
+    }
+    return true
 }

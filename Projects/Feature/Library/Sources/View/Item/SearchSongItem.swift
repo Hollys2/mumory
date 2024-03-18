@@ -50,6 +50,7 @@ struct SearchSongItem: View {
                 .frame(width: 30, height: 30)
                 .padding(.trailing, 16)
                 .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
                 .fullScreenCover(isPresented: $isPresentBottomSheet) {

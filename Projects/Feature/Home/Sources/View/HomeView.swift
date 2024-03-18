@@ -28,10 +28,11 @@ public struct HomeView: View {
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var withdrawViewModel: WithdrawViewModel
     
+    public init(){}
     
-    @State var myPageStack: [MyPage] = []
-    
-    public init() {}
+    public init(tab: Tab) {
+        self.selectedTab = tab
+    }
     
     public var body: some View {
         
@@ -59,8 +60,7 @@ public struct HomeView: View {
                 
                 
                 MiniPlayerView()
-                    .padding(.bottom, 89)
-                    .opacity(appCoordinator.isHiddenTabBar ? 0 : 1)
+           
                 
             
                 CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)

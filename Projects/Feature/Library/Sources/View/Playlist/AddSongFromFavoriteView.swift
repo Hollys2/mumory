@@ -13,7 +13,6 @@ import Core
 struct AddSongFromFavoriteView: View {
     @Binding var originPlaylist: MusicPlaylist
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var snackbarManager: SnackBarViewModel
     @State var favoritePlaylist: MusicPlaylist?
     @State var favoriteSong = []
     private let lineGray = Color(white: 0.31)
@@ -29,7 +28,6 @@ struct AddSongFromFavoriteView: View {
                 LazyVStack(spacing: 0, content: {
                     ForEach(favoritePlaylist?.songIDs ?? [], id: \.self) { id in
                         AddMusicItem(songID: id, originPlaylist: $originPlaylist)
-                            .environmentObject(snackbarManager)
                         Divider()
                             .frame(maxWidth: .infinity)
                             .frame(height: 0.5)

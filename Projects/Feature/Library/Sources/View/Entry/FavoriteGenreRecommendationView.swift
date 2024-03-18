@@ -167,20 +167,19 @@ private struct RecommendationScrollView: View {
     
     private func fetchSongInfo(songIDs: [String]) async {
         for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            
-            do {
-                let response = try await request.response()
+            Task {
+                let musicItemID = MusicItemID(rawValue: id)
+                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                guard let response = try? await request.response() else {
+                    return
+                }
                 guard let song = response.items.first else {
                     print("no song")
-                    continue
+                    return
                 }
                 withAnimation {
                     self.songs.append(song)
                 }
-            } catch {
-                print("Error: \(error)")
             }
         }
     }

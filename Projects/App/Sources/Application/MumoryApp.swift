@@ -18,39 +18,50 @@ struct MumoryApp: App {
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var currentUserData: CurrentUserData = .init()
     @StateObject var playerManager: PlayerViewModel = .init()
+    @StateObject var snackBarViewModel: SnackBarViewModel = .init()
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
                 //                CreateMumoryBottomSheetView()
 //                HomeView()
                 //충독나서 스플래시 화면으로 수정함
-                SplashView()
-                    .onOpenURL(perform: { url in
-                        if (AuthApi.isKakaoTalkLoginUrl(url)) {
-                            AuthController.handleOpenUrl(url: url)
+                ZStack{
+                    SplashView()
+                        .onOpenURL(perform: { url in
+                            if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                                AuthController.handleOpenUrl(url: url)
+                            }
+                        })
+                        .environmentObject(appCoordinator)
+                        .environmentObject(locationManager)
+                        .environmentObject(localSearchViewModel)
+                        .environmentObject(mumoryDataViewModel)
+                        .environmentObject(dateManager)
+                        .environmentObject(firebaseManager)
+                        .environmentObject(keyboardResponder)
+                        .environmentObject(currentUserData)
+                        .environmentObject(playerManager)
+                        .environmentObject(snackBarViewModel)
+                        .onAppear {
+                            print("MumoryApp onAppear")
+                            
+                            appCoordinator.currentUser = UserModel(documentID: "tester", nickname: "솔다", id: "solda")
+                            
+                            appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
+                            appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
+                            
+                            currentUserData.topInset = geometry.safeAreaInsets.top
+                            currentUserData.bottomInset = geometry.safeAreaInsets.bottom
                         }
-                    })
-                    .environmentObject(appCoordinator)
-                    .environmentObject(locationManager)
-                    .environmentObject(localSearchViewModel)
-                    .environmentObject(mumoryDataViewModel)
-                    .environmentObject(dateManager)
-                    .environmentObject(firebaseManager)
-                    .environmentObject(keyboardResponder)
-                    .environmentObject(currentUserData)
-                    .environmentObject(playerManager)
-                    .onAppear {
-                        print("MumoryApp onAppear")
+                    
+                    SnackBarView()
+                        .environmentObject(snackBarViewModel)
+                        .environmentObject(appCoordinator)
 
-                        appCoordinator.currentUser = UserModel(documentID: "tester", nickname: "솔다", id: "solda")
-                        
-                        appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
-                        appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
-                        
-                        currentUserData.topInset = geometry.safeAreaInsets.top
-                        currentUserData.bottomInset = geometry.safeAreaInsets.bottom
-                    }
+                    
+                }
             }
+ 
         }
     }
 }

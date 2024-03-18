@@ -13,7 +13,7 @@ public enum MumoryPage: Hashable {
     case customization
     case startCustomization
     case signUp
-    case home
+    case home(selectedTab: Tab)
     case emailLogin
     case lastOfCustomization
     case login
@@ -34,6 +34,7 @@ public enum LibraryPage: Hashable{
     case saveToPlaylist(songs: [Song])
     case recommendation(genreID: Int)
     case selectableArtist(artist: Artist)
+    case favorite
     
     public func hash(into hasher: inout Hasher) {
           switch self {
@@ -66,6 +67,8 @@ public enum LibraryPage: Hashable{
           case .selectableArtist(artist: let artist):
               hasher.combine(11)
               hasher.combine(artist)
+          case .favorite:
+              hasher.combine(12)
           }
       }
 }
@@ -83,4 +86,10 @@ public enum MyPage: Hashable {
     case friendList(friends: [MumoriUser])
     case friendPage(friend: MumoriUser)
     case activityList
+}
+public enum Tab {
+    case home
+    case social
+    case library
+    case notification
 }

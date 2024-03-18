@@ -14,7 +14,7 @@ import Core
 struct SaveToPlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var snackbarManager: SnackBarViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     
     @State var playlistArray: [MusicPlaylist] = []
     @State var isCreatePopupPresent: Bool = false
@@ -137,7 +137,7 @@ struct SaveToPlaylistView: View {
                     guard error == nil else {
                         return
                     }
-                    snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                    snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                 }
             }
             appCoordinator.rootPath.removeLast()
@@ -149,14 +149,14 @@ struct SaveToPlaylistView: View {
             
             //이미 있으면 실패 스낵바, 없으면 저장
             if to.songIDs.contains(song) {
-                snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
+                snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
             }else {
                 DispatchQueue.global().async {
-                    path.document(to.id).updateData(["songIds": [song]]) { error in
+                    path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion([song])]) { error in
                         guard error == nil else {
                             return
                         }
-                        snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                        snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                     }
                 }
                 appCoordinator.rootPath.removeLast()

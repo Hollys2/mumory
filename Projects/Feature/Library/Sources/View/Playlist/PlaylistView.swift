@@ -28,6 +28,8 @@ struct PlaylistView: View {
     
     @State var isPresentModifyPlaylistView: Bool = false
     
+    @State var selectedTab: Tab = .library
+        
     init(playlist: MusicPlaylist){
         self.playlist = playlist
     }
@@ -61,7 +63,7 @@ struct PlaylistView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 30)
                             .foregroundStyle(.white)
-//                            .background(Color.yellow)
+
                         
                         //나만보기 아이템
                         HStack(spacing: 5, content: {
@@ -195,16 +197,6 @@ struct PlaylistView: View {
                 Spacer()
                 
                 if isEditing {
-                    
-//                    SharedAsset.completeLiterally.swiftUIImage
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(width: 38, height: 43)
-//                        .padding(.trailing, 20)
-//                        .onTapGesture {
-//                            setEditMode(isEditing: false)
-//                        }
-                    
                     Button(action: {
                         setEditMode(isEditing: false)
                     }, label: {
@@ -222,6 +214,7 @@ struct PlaylistView: View {
                         .frame(width: 30, height: 30)
                         .padding(.trailing, 20)
                         .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
                             isBottomSheetPresent = true
                         }
                 }
@@ -234,7 +227,7 @@ struct PlaylistView: View {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
                     PlaylistBottomSheetView(playlist: playlist, songs: songs, editPlaylistNameAction: {
                         isBottomSheetPresent = false
-                            isPresentModifyPlaylistView = true
+                        isPresentModifyPlaylistView = true
                     })
                 }
                 .background(TransparentBackground())
@@ -266,6 +259,16 @@ struct PlaylistView: View {
             }
             
             
+            MumoryTabSampleView(selectedTab: $selectedTab)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .onChange(of: selectedTab) { value in
+                    appCoordinator.selectedTab = value
+                    UIView.setAnimationsEnabled(false)
+                    appCoordinator.rootPath = NavigationPath()
+                    UIView.setAnimationsEnabled(true)
+
+                }
+            
             
             
         }
@@ -273,6 +276,7 @@ struct PlaylistView: View {
         .onAppear(perform: {
             getPlaylist()
         })
+
         
         
     }
@@ -499,5 +503,67 @@ private struct AddSongButtonInPlaylistView: View {
                 .frame(height: 0.5)
                 .background(ColorSet.subGray)
         })
+    }
+}
+
+private struct MumoryTabSampleView: View {
+
+    @Binding var selectedTab: Tab
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    public init(selectedTab: Binding<Tab>) {
+        self._selectedTab = selectedTab
+    }
+    
+    public var body: some View {
+        GeometryReader { geometry in
+            HStack(alignment: .bottom, spacing: 0) {
+                
+                Button(action: {
+                    selectedTab = .home
+                    playerViewModel.isShownMiniPlayer = false
+                }) {
+                    Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    selectedTab = .social
+                    playerViewModel.isShownMiniPlayer = false
+                }) {
+                    Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                        appCoordinator.isCreateMumorySheetShown = true
+                        appCoordinator.offsetY = CGFloat.zero
+                    }
+                }) {
+                    Image(asset: SharedAsset.createMumoryTabbar)
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    selectedTab = .library
+                    playerViewModel.isShownMiniPlayer = true
+                }) {
+                    Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    selectedTab = .notification
+                    playerViewModel.isShownMiniPlayer = false
+                }) {
+                    Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
+                }
+                .frame(width: geometry.size.width / 5)
+            }
+            .padding(.top, 2)
+        }
+        .frame(height: 89)
+        .background(Color.black)
     }
 }

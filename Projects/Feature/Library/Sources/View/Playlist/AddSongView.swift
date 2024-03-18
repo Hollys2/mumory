@@ -11,7 +11,6 @@ import Shared
 
 struct AddSongView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @StateObject var snackBarViewModel: SnackBarViewModel = SnackBarViewModel()
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var originPlaylist: MusicPlaylist
     @State var isTapFavorite: Bool = true
@@ -99,11 +98,9 @@ struct AddSongView: View {
                 
                 if isTapFavorite{
                     AddSongFromFavoriteView(originPlaylist: $originPlaylist)
-                        .environmentObject(snackBarViewModel)
                         .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
                 }else {
                     AddSongFromSearchView(originPlaylist: $originPlaylist)
-                        .environmentObject(snackBarViewModel)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
                 }
         

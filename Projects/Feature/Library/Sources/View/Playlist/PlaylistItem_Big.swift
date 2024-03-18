@@ -193,7 +193,11 @@ struct PlaylistItem_Big: View {
                 
             }
             .onTapGesture {
-                appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                if playlist.id == "favorite"{
+                    appCoordinator.rootPath.append(LibraryPage.favorite)
+                }else {
+                    appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                }
             }
             
         }

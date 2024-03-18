@@ -146,7 +146,7 @@ struct LastOfCustomizationView: View {
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            appCoordinator.rootPath.append(MumoryPage.home)
+                            appCoordinator.rootPath.append(MumoryPage.home(selectedTab: .home))
                         }
                 }
             })

@@ -18,6 +18,7 @@ struct SongBottomSheetView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -99,14 +100,14 @@ struct SongBottomSheetView: View {
                             .onTapGesture {
                                 playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
                                 dismiss()
-                                //snackbar present true
+                                snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                             }
                     }else{
                         BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                             .onTapGesture {
                                 playerViewModel.addToFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
                                 dismiss()
-                                //snackbar present true
+                                snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                             }
                     }
                 }

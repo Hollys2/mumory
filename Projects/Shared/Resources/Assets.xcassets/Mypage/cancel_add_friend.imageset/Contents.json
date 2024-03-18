@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Image 1.png",
+      "filename" : "CancelAddFriend_IC.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Image 1@2x.png",
+      "filename" : "CancelAddFriend_IC@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Lock_IC.png",
+      "filename" : "CancelAddFriend_IC@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

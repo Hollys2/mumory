@@ -15,7 +15,7 @@ struct NowPlayingView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentQueue: Bool = false
     
  
@@ -158,6 +158,7 @@ struct PlayControlView: View {
                         .scaledToFit()
                         .frame(width: 32, height: 32)
                         .frame(maxWidth: .infinity)
+                    
                 })
                 .padding(.horizontal, 33)
                 .padding(.bottom, 32)

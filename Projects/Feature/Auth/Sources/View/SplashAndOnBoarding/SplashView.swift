@@ -98,8 +98,8 @@ public struct SplashView: View {
                     case .customization:
                         TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
                             .environmentObject(customizationManageViewModel)
-                    case .home:
-                        HomeView()
+                    case .home(selectedTab: let tab):
+                        HomeView(tab: tab)
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
                     case .signUp:
@@ -156,6 +156,7 @@ public struct SplashView: View {
                         
                     case .saveToPlaylist(songs: let songs):
                         SaveToPlaylistView(songs: songs)
+                            .navigationBarBackButtonHidden()
                         
                     case .recommendation(genreID: let genreID):
                         RecommendationListView(genreID: genreID)
@@ -164,7 +165,10 @@ public struct SplashView: View {
                     case .selectableArtist(artist: let artist):
                         SelectableArtistView(artist: artist)
                             .navigationBarBackButtonHidden()
-
+                        
+                    case .favorite:
+                        FavoriteListView()
+                            .navigationBarBackButtonHidden()
                     }
                 }
                 .navigationDestination(for: MyPage.self) { page in

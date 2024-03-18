@@ -125,7 +125,9 @@ struct MiniPlayerView: View {
                 )
                 .padding(.bottom, 10)
                 .padding(.horizontal, 8)
+                .padding(.bottom, 89)
                 .opacity(playerManager.isShownMiniPlayer ? 1 : 0)
+
 
         }
         

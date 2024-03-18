@@ -32,7 +32,7 @@ struct MyPlaylistView: View {
                     
                     Spacer()
                     
-                    Text("\(currentUserData.playlistArray.count-1)") //플레이리스트 추가 아이템 제외
+                    Text("\(currentUserData.playlistArray.count)") //플레이리스트 추가 아이템 제외
                         .foregroundStyle(LibraryColorSet.lightGrayTitle)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .padding(.trailing, 4)
@@ -53,7 +53,11 @@ struct MyPlaylistView: View {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
                             PlaylistItem(playlist: playlist, itemSize: 81)
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                                    if playlist.id == "favorite" {
+                                        appCoordinator.rootPath.append(LibraryPage.favorite)
+                                    }else {
+                                        appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                                    }
                                 }
                         }
                         AddSongItem()

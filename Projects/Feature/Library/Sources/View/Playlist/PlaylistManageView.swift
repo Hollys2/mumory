@@ -106,6 +106,7 @@ struct PlaylistManageView: View {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
                             PlaylistItem_Big(playlist: .constant(playlist), isEditing: $isEditing)
                                 .frame(minWidth: 170, minHeight: 215)
+                            
                         }
                         AddSongItemBig()
                             .opacity(isEditing ? 0 : 1)

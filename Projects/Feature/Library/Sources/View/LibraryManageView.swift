@@ -17,7 +17,6 @@ public struct LibraryManageView: View {
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryCoordinator
-    @StateObject var snackbarManager: SnackBarViewModel = SnackBarViewModel()
     
     @State var isPlaying: Bool = true
     @State var hasToRemoveSafeArea: Bool = false
@@ -97,68 +96,68 @@ public struct LibraryManageView: View {
                 .opacity(hasToRemoveSafeArea ? 0 : 1)
             
             //스낵바 - 추후 수정 예정
-            HStack {
-                if snackbarManager.status == .success {
-                    HStack(spacing: 0) {
-                        HStack(spacing: 0, content: {
-                            Text("플레이리스트")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            
-                            Text("\"\(snackbarManager.title)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                            
-                            Text("\"")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            
-                            Text("에 추가되었습니다.")
-                                .fixedSize()
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                        })
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        
-                        
-                        
-                        Text("실행취소")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                            .padding(.leading, 18)
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                    }
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                }else if snackbarManager.status == .failure{
-                    HStack(spacing: 0) {
-                        Text("이미 플레이리스트")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                        
-                        Text("\"\(snackbarManager.title)")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                        
-                        Text("\"")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                        
-                        Text("에 존재합니다.")
-                            .fixedSize()
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                    }
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                }
-            }
-            .ignoresSafeArea()
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
-            .padding(.horizontal, 20)
-            .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-            .padding(.horizontal, 15)
-            .offset(y: snackbarManager.isPresent ? 53 : -50)
-            .opacity(snackbarManager.isPresent ? 1 : 0)
+//            HStack {
+//                if snackbarManager.status == .success {
+//                    HStack(spacing: 0) {
+//                        HStack(spacing: 0, content: {
+//                            Text("플레이리스트")
+//                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                            
+//                            Text("\"\(snackbarManager.title)")
+//                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                                .lineLimit(1)
+//                                .truncationMode(.tail)
+//                            
+//                            Text("\"")
+//                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                            
+//                            Text("에 추가되었습니다.")
+//                                .fixedSize()
+//                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                        })
+//                        .frame(maxWidth: .infinity, alignment: .leading)
+//                        
+//                        
+//                        
+//                        Text("실행취소")
+//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+//                            .padding(.leading, 18)
+//                            .foregroundStyle(ColorSet.mainPurpleColor)
+//                    }
+//                    .lineLimit(1)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    
+//                }else if snackbarManager.status == .failure{
+//                    HStack(spacing: 0) {
+//                        Text("이미 플레이리스트")
+//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                        
+//                        Text("\"\(snackbarManager.title)")
+//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                            .lineLimit(1)
+//                            .truncationMode(.tail)
+//                        
+//                        Text("\"")
+//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                        
+//                        Text("에 존재합니다.")
+//                            .fixedSize()
+//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+//                    }
+//                    .lineLimit(1)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    
+//                }
+//            }
+//            .ignoresSafeArea()
+//            .frame(maxWidth: .infinity)
+//            .frame(height: 48)
+//            .padding(.horizontal, 20)
+//            .background(Color.white)
+//            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+//            .padding(.horizontal, 15)
+//            .offset(y: snackbarManager.isPresent ? 53 : -50)
+//            .opacity(snackbarManager.isPresent ? 1 : 0)
             
         }
         .onAppear(perform: {

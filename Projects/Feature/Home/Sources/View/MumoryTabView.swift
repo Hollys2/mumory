@@ -11,12 +11,7 @@ import SwiftUI
 import Shared
 
 
-public enum Tab {
-    case home
-    case social
-    case library
-    case notification
-}
+
 
 
 public struct MumoryTabView: View {
