@@ -79,14 +79,6 @@ public class AppCoordinator: ObservableObject {
         self.selectedDate = Calendar.current.date(from: components) ?? Date()
      }
     
-    public static func getYearMonthDate(year: Int, month: Int) -> Date {
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        
-        return Calendar.current.date(from: components) ?? Date()
-    }
-    
     public init () {}
 }
 
@@ -137,6 +129,14 @@ public class DateManager: ObservableObject {
         } else {
             return "방금 전"
         }
+    }
+    
+    public static func getYearMonthDate(year: Int, month: Int) -> Date {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        
+        return Calendar.current.date(from: components) ?? Date()
     }
 }
     

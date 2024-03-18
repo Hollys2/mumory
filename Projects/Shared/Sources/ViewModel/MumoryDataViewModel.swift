@@ -25,8 +25,9 @@ final public class MumoryDataViewModel: ObservableObject {
     
     @Published public var musicModels: [MusicModel] = []
     
-    @Published public var myMumoryAnnotations: [Mumory] = []
-    @Published public var everyMumoryAnnotations: [Mumory] = []
+    @Published public var myMumorys: [Mumory] = []
+    @Published public var everyMumorys: [Mumory] = []
+    @Published public var filterdMumorys: [Mumory] = []
     
     @Published public var mumoryComments: [Comment] = []
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
@@ -100,22 +101,29 @@ final public class MumoryDataViewModel: ObservableObject {
                         let documentData = documentChange.document.data()
                         guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
                         
-                        if !self.myMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
+                        if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
                             DispatchQueue.main.async {
-                                self.myMumoryAnnotations.append(newMumory)
-                                self.myMumoryAnnotations.sort { $0.date > $1.date }
+                                self.myMumorys.append(newMumory)
+                                self.myMumorys.sort { $0.date > $1.date }
                             }
                             print("Document added: \(documentChange.document.documentID)")
+                        }
+                        
+                        if !self.filterdMumorys.contains(where: { $0.id == newMumory.id }) {
+                            DispatchQueue.main.async {
+                                self.filterdMumorys.append(newMumory)
+                                self.filterdMumorys.sort { $0.date > $1.date }
+                            }
                         }
                         
                     case .modified:
                         let documentData = documentChange.document.data()
                         
                         let modifiedDocumentID = documentChange.document.documentID
-                        if let index = self.myMumoryAnnotations.firstIndex(where: { $0.id == modifiedDocumentID }),
-                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.myMumoryAnnotations[index].id) {
+                        if let index = self.myMumorys.firstIndex(where: { $0.id == modifiedDocumentID }),
+                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.myMumorys[index].id) {
                             DispatchQueue.main.async {
-                                self.myMumoryAnnotations[index] = updatedMumory
+                                self.myMumorys[index] = updatedMumory
                             }
                         }
                         print("Document modified: \(modifiedDocumentID)")
@@ -126,7 +134,7 @@ final public class MumoryDataViewModel: ObservableObject {
                         
                         let removedDocumentID = documentChange.document.documentID
                         DispatchQueue.main.async {
-                            self.myMumoryAnnotations.removeAll { $0.id == removedDocumentID }
+                            self.myMumorys.removeAll { $0.id == removedDocumentID }
                         }
                     }
                 }
@@ -159,30 +167,33 @@ final public class MumoryDataViewModel: ObservableObject {
         return Mumory()
     }
     
-    public func fetchMumorys() {
+    public func fetchMyMumory(uId: String, completion: @escaping () -> Void) {
         let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("Mumory")
+        let collectionReference = db.collection("Mumory").whereField("uId", isEqualTo: uId)
         
         Task {
             do {
                 let snapshot = try await collectionReference.getDocuments()
                 
+//                DispatchQueue.main.async {
+//                    self.myMumorys = []
+//                }
+                
                 for document in snapshot.documents {
-                    
                     let documentData = document.data()
                     guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
-                    if !self.everyMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
+                    
+                    if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
                         DispatchQueue.main.async {
-                            self.everyMumoryAnnotations.append(newMumory)
-                            self.everyMumoryAnnotations.sort { $0.date > $1.date }
+                            self.myMumorys.append(newMumory)
+                            self.myMumorys.sort { $0.date > $1.date }
                         }
-//                        self.fetchCommentReply2(mumoryDocumentID: newMumory.id)
                     }
                 }
-                
-                print("fetchMumorys successfully!")
+                print("fetchMyMumory successfully!")
+                completion()
             } catch {
-                print("Error fetching playlist documents: \(error.localizedDescription)")
+                print("Error fetchMyMumory: \(error.localizedDescription)")
             }
         }
     }
@@ -197,7 +208,7 @@ final public class MumoryDataViewModel: ObservableObject {
         Task {
             
             DispatchQueue.main.async {
-                self.everyMumoryAnnotations = []
+                self.everyMumorys = []
             }
             
             do {
@@ -209,10 +220,10 @@ final public class MumoryDataViewModel: ObservableObject {
                     
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
-                    if !self.everyMumoryAnnotations.contains(where: { $0.id == newMumory.id }) {
+                    if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
                         DispatchQueue.main.async {
-                            self.everyMumoryAnnotations.append(newMumory)
-                            self.everyMumoryAnnotations.sort { $0.date > $1.date }
+                            self.everyMumorys.append(newMumory)
+                            self.everyMumorys.sort { $0.date > $1.date }
                         }
                     }
                 }
@@ -309,7 +320,7 @@ final public class MumoryDataViewModel: ObservableObject {
             if let error = error {
                 print("Error updating document: \(error.localizedDescription)")
                 
-                if let originalMumory = self.myMumoryAnnotations.first(where: { $0.id == mumory.id }) {
+                if let originalMumory = self.myMumorys.first(where: { $0.id == mumory.id }) {
                     mumory.copy(from: originalMumory)
                 }
             } else {
@@ -667,9 +678,9 @@ extension MumoryDataViewModel {
             oldComments.append(commentData) // : [String: Any]
 //            mumoryAnnotation.comments.append(comment) // : Comment
             
-            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
+            if let index = self.everyMumorys.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
                 DispatchQueue.main.async {
-                    self.everyMumoryAnnotations[index] = mumoryAnnotation
+                    self.everyMumorys[index] = mumoryAnnotation
                 }
             }
             
@@ -784,9 +795,9 @@ extension MumoryDataViewModel {
                 mumoryAnnotation.likes.append(uId)
             }
             
-            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
+            if let index = self.everyMumorys.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
                 DispatchQueue.main.async {
-                    self.everyMumoryAnnotations[index] = mumoryAnnotation
+                    self.everyMumorys[index] = mumoryAnnotation
                 }
             }
             

@@ -124,14 +124,14 @@ public struct MyMumoryView: View {
                                     
                                     Spacer().frame(height: 20)
                                     
-                                    ForEach(Array(mumoryDataViewModel.myMumoryAnnotations.enumerated()), id: \.element) { index, mumory in
+                                    ForEach(Array(mumoryDataViewModel.filterdMumorys.enumerated()), id: \.element) { index, mumory in
                                         
                                         let spacing = calculateSpacing(forIndex: index)
                                         
-                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.myMumoryAnnotations[index - 1]) {
+                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filterdMumorys[index - 1]) {
                                             ZStack(alignment: .leading) {
                                                 Rectangle()
-                                                    .foregroundColor(.red)
+                                                    .foregroundColor(.clear)
                                                     .frame(height: 61)
                                                     .overlay(
                                                         Rectangle()
@@ -146,27 +146,12 @@ public struct MyMumoryView: View {
                                                     .foregroundColor(.white)
                                                     .padding(.leading, 12)
                                             }
-                                            .background(
-                                                GeometryReader { geometry in
-                                                    Color.clear
-                                                        .onAppear {
-                                                            self.dateViewOffsetY = geometry.frame(in: .global).minY
-                                                        }
-                                                    //                                                .onChange(of: self.offset) { newValue in
-                                                    ////                                                    print("ScrollView offset changed: \(newValue)")
-                                                    //
-                                                    //                                                    if self.scrollViewOffsetY + newValue >= self.dateViewOffsetY {
-                                                    //                                                        self.appCoordinator.updateSelectedDate(year: 2020, month: 9)
-                                                    //                                                    } else {
-                                                    //                                                        self.appCoordinator.updateSelectedDate(year: 2020, month: 1)
-                                                    //                                                    }
-                                                    //                                                }
-                                                }
-                                            )
+                                            .padding(.top, 30)
+
                                         }
                                         
-                                        MumoryItemView(mumory: mumory, isRecent: true)
-                                            .padding(.top, CGFloat(spacing))
+                                        MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
+                                            .padding(.bottom, CGFloat(spacing))
                                     }
                                 } // VStack
                             } // ScrollView
@@ -223,7 +208,7 @@ public struct MyMumoryView: View {
         .navigationBarBackButtonHidden(true)
         .preferredColorScheme(.dark)
         .sheet(isPresented: self.$isDatePickerShown, content: {
-            CustomDatePicker(selectedDate: self.$selectedDate)
+            MyMumoryDatePicker(selectedDate: self.$selectedDate)
                 .presentationDetents([.height(309)])
         })
         .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .myMumory, mumoryAnnotation: Mumory()))
@@ -242,9 +227,9 @@ public struct MyMumoryView: View {
         guard index > 0 else {
             return 0
         }
-        let previousDate = mumoryDataViewModel.myMumoryAnnotations[index - 1].date
-        let currentDate = mumoryDataViewModel.myMumoryAnnotations[index].date
-        return Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day) ? 0 : 30
+        let previousDate = mumoryDataViewModel.filterdMumorys[index - 1].date
+        let currentDate = mumoryDataViewModel.filterdMumorys[index].date
+        return !Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day) ? 0 : 30
     }
     
     func isSameMonth(_ mumory1: Mumory, with mumory2: Mumory) -> Bool {
@@ -267,7 +252,7 @@ public struct MyMumoryView: View {
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            parent.offset = scrollView.contentOffset.y
+//            parent.offset = scrollView.contentOffset.y
         }
     }
 }
@@ -289,13 +274,13 @@ struct MumoryItemView: View {
     }
     
     private var previousDate: Date? {
-        guard let index = mumoryDataViewModel.myMumoryAnnotations.firstIndex(where: { $0.id == mumory.id }) else {
+        guard let index = mumoryDataViewModel.filterdMumorys.firstIndex(where: { $0.id == mumory.id }) else {
             return nil
         }
         guard index > 0 else {
             return nil
         }
-        return mumoryDataViewModel.myMumoryAnnotations[index - 1].date
+        return mumoryDataViewModel.filterdMumorys[index - 1].date
     }
     
     private var isSameDateAsPrevious: Bool {
@@ -604,36 +589,51 @@ struct MumoryItemView: View {
     }
 }
 
-struct CustomDatePicker: View {
+struct MyMumoryDatePicker: View {
     
     @Binding var selectedDate: Date
+    
+    @State private var pickerDate: Date = Date()
+    @State private var selectedYear: Int = 0
+    @State private var selectedMonth: Int = 0
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         VStack(spacing: 0) {
                   
-            Picker("Year and Month", selection: self.$selectedDate) {
-                
+            Picker("Year and Month", selection: self.$pickerDate) {
                 ForEach(2000..<2030) { year in
                     ForEach(1..<13) { month in
                         Text("\(String(format: "%d", year))년 \(month)월")
-                            .tag(AppCoordinator.getYearMonthDate(year: year, month: month))
+                            .tag(DateManager.getYearMonthDate(year: year, month: month))
                             .foregroundColor(.white)
                     }
                 }
             }
             .pickerStyle(WheelPickerStyle())
             .onAppear {
-                let year = Calendar.current.component(.year, from: Date())
-                let month = Calendar.current.component(.month, from: Date())
-                
-                self.selectedDate = AppCoordinator.getYearMonthDate(year: year, month: month)
+                self.selectedYear = Calendar.current.component(.year, from: self.selectedDate)
+                self.selectedMonth = Calendar.current.component(.month, from: self.selectedDate)
+                self.pickerDate = DateManager.getYearMonthDate(year: self.selectedYear, month: self.selectedMonth)
             }
             
             Button(action: {
-//                self.appCoordinator.selectedDate = self.selectedDate
-//                selectedDate
+                self.selectedDate = pickerDate
+                
+                let calendar = Calendar.current
+                let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
+                let range = ...lastDayOfMonth
+                let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
+                
+                for m in newDataBeforeSelectedDate {
+                    print("date: \(m.date)")
+                }
+                mumoryDataViewModel.filterdMumorys = newDataBeforeSelectedDate
+                
                 dismiss()
             }) {
                 ZStack {

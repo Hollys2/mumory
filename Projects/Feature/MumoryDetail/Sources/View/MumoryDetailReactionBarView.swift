@@ -63,13 +63,15 @@ struct MumoryDetailReactionBarView: View {
                 })
                 .disabled(isButtonDisabled)
                 
-                Spacer().frame(width: 4)
+                if mumoryAnnotation.likes.count != 0 {
+                    Spacer().frame(width: 4)
+                    
+                    Text("\(mumoryAnnotation.likes.count)")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundColor(.white)
+                }
                 
-                Text("\(mumoryAnnotation.likes.count)")
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundColor(.white)
-                
-                Spacer().frame(width: 12)
+                Spacer().frame(width: 13)
                 
                 Button(action: {
                     mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
@@ -82,11 +84,14 @@ struct MumoryDetailReactionBarView: View {
                         .frame(width: 42, height: 42)
                 })
                 
-                Spacer().frame(width: 4)
                 
-                Text("\(mumoryAnnotation.commentCount)")
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundColor(.white)
+                if mumoryAnnotation.commentCount != 0 {
+                    Spacer().frame(width: 4)
+                    
+                    Text("\(mumoryAnnotation.commentCount)")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundColor(.white)
+                }
                 
                 Spacer()
                 

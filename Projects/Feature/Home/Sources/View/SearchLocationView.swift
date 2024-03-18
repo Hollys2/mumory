@@ -198,30 +198,28 @@ struct SearchLocationView: View {
                         .cornerRadius(15)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         
-                        if !self.localSearchViewModel.recentSearches.isEmpty {
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("최근 검색")
-                                        .font(
-                                            Font.custom("Pretendard", size: 13)
-                                                .weight(.medium)
-                                        )
-                                        .foregroundColor(.white)
-                                    
-                                    Spacer()
-                                    
-                                    Button(action: {
-                                        self.localSearchViewModel.clearRecentSearches()
-                                    }) {
-                                        Text("전체삭제")
-                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                                            .multilineTextAlignment(.trailing)
-                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                    }
-                                }
-                                .padding([.horizontal, .top], 20)
-                                .padding(.bottom, 11)
+                        
+                        VStack(spacing: 0) {
+                            HStack {
+                                Text("최근 검색")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                    .foregroundColor(.white)
                                 
+                                Spacer()
+                                
+                                Button(action: {
+                                    self.localSearchViewModel.clearRecentSearches()
+                                }) {
+                                    Text("전체삭제")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                        .multilineTextAlignment(.trailing)
+                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                }
+                            }
+                            .padding([.horizontal, .top], 20)
+                            .padding(.bottom, 11)
+                            
+                            if !self.localSearchViewModel.recentSearches.isEmpty {
                                 ForEach(self.localSearchViewModel.recentSearches, id: \.self) { value in
                                     HStack {
                                         Image(systemName: "magnifyingglass")
@@ -247,10 +245,18 @@ struct SearchLocationView: View {
                                     .padding(.leading, 15)
                                     .padding(.trailing, 20)
                                 }
+                            } else {
+                                Text("최근 검색내역이 없습니다.")
+                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                                    .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                                    .frame(height: 50)
                             }
-                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                            .cornerRadius(15)
+                            
+                            Spacer().frame(height: 15)
                         }
+                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                        .cornerRadius(15)
+                        
                         
                         if !self.localSearchViewModel.popularSearches.isEmpty {
                             

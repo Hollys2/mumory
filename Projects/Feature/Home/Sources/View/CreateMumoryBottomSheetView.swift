@@ -382,21 +382,29 @@ public struct CreateMumoryBottomSheetView: View {
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
+                        print("calendarDate1: \(calendarDate)")
+                        var calendar = Calendar.current
+                        let newDate = calendar.date(bySettingHour: calendar.component(.hour, from: Date()),
+                                                    minute: calendar.component(.minute, from: Date()),
+                                                    second: calendar.component(.second, from: Date()),
+                                                    of: calendarDate) ?? Date()
+                        self.calendarDate = newDate
+                        
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
                            let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
                             mumoryDataViewModel.isCreating = true
-                            
+
                             let dispatchGroup = DispatchGroup()
-                            
+
                             for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
-                                
+
                                 guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
                                     print("Could not convert image to Data.")
                                     continue
                                 }
-                                
+
                                 dispatchGroup.enter()
-                                
+
                                 let imageRef = FirebaseManager.shared.storage.reference().child("mumoryImages/\(UUID().uuidString).jpg")
                                 _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
                                     guard metadata != nil else {
@@ -404,43 +412,44 @@ public struct CreateMumoryBottomSheetView: View {
                                         dispatchGroup.leave()
                                         return
                                     }
-                                    
+
                                     imageRef.downloadURL { (url, error) in
                                         guard let url = url, error == nil else {
                                             print("Error getting download URL: \(error?.localizedDescription ?? "")")
                                             dispatchGroup.leave()
                                             return
                                         }
-                                        
+
                                         print("Download URL for Image \(index + 1)")
                                         self.imageURLs.append(url.absoluteString)
                                         dispatchGroup.leave()
                                     }
                                 }
                             }
-                            
+
                             dispatchGroup.notify(queue: .main) {
+
                                 let newMumoryAnnotation = Mumory(id: "", userDocumentID: appCoordinator.currentUser.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0)
-                                
+
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                     switch result {
                                     case .success:
                                         print("뮤모리 만들기 성공")
-                                        
+
                                         mumoryDataViewModel.choosedMusicModel = nil
                                         mumoryDataViewModel.choosedLocationModel = nil
                                         self.tags.removeAll()
                                         self.contentText.removeAll()
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
-                                        
+
                                         self.newRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
-                                        
+
                                     case .failure(let error):
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")
                                     }
                                 }
-                                
+
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false

@@ -61,9 +61,9 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("updateUIView: SocialScrollViewRepresentable")
 
-        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumoryAnnotations {
+        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
             DispatchQueue.main.async {
-                self.mumoryDataViewModel.everyMumoryAnnotations = self.mumoryDataViewModel.everyMumoryAnnotations.sorted(by: { $0.date > $1.date })
+                self.mumoryDataViewModel.everyMumorys = self.mumoryDataViewModel.everyMumorys.sorted(by: { $0.date > $1.date })
             }
 
             let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
@@ -77,7 +77,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
             uiView.refreshControl = UIRefreshControl()
             uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
 
-            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumoryAnnotations
+            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumorys
         }
     }
     
@@ -166,7 +166,7 @@ struct SocialScrollCotentView: View {
             
             LazyVStack(spacing: 0) {
                 
-                ForEach(self.mumoryDataViewModel.everyMumoryAnnotations, id: \.self) { i in
+                ForEach(self.mumoryDataViewModel.everyMumorys, id: \.self) { i in
                     SocialItemView(mumoryAnnotation: i)
                 }
             }

@@ -124,6 +124,9 @@ public struct HomeView: View {
                     MyMumoryView()
                 }
             }
+            .onAppear {
+                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+            }
         }
     }
     
@@ -134,7 +137,7 @@ public struct HomeView: View {
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear")
-                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+//                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
                 }
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")
