@@ -16,6 +16,8 @@ struct FriendPageView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isStranger: Bool = false
     @State var isPresentFriendBottomSheet: Bool = false
+    @State var isPresentBlockConfirmPopup: Bool = false
+
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
@@ -65,7 +67,7 @@ struct FriendPageView: View {
         }
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
-                FriendPageCommonBottomSheetView(friend: self.friend)
+                FriendPageCommonBottomSheetView(friend: self.friend, isPresentBlockConfirmPopup: $isPresentBlockConfirmPopup)
             }
             .background(TransparentBackground())
         })
@@ -196,12 +198,12 @@ struct UnkownFriendPageView: View {
 
                 HStack(spacing: 4, content: {
                     if isRequested {
-                        SharedAsset.friendIconSocial.swiftUIImage
+                        SharedAsset.cancelAddFriend.swiftUIImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 22, height: 22)
                     }else {
-                        SharedAsset.cancelAddFriend.swiftUIImage
+                        SharedAsset.friendIconSocial.swiftUIImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 22, height: 22)
@@ -219,12 +221,14 @@ struct UnkownFriendPageView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 22)
                 .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
                     isPresentPopup = true
                 }
                
         })
         .fullScreenCover(isPresented: $isPresentPopup, content: {
             PopupView
+                .background(TransparentBackground())
         })
 
     }
@@ -240,7 +244,7 @@ struct UnkownFriendPageView: View {
     //친구가 아닌 사용자 컨텐츠 부분 안내
     var UnknownFriendContentView: some View{
         VStack(spacing: 0, content: {
-            SharedAsset.lock.swiftUIImage
+            SharedAsset.lockBig.swiftUIImage
                 .resizable()
                 .scaledToFit()
                 .frame(width: 77, height: 77)
@@ -249,7 +253,7 @@ struct UnkownFriendPageView: View {
             Text("친구가 아닌 사용자입니다")
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                 .foregroundStyle(Color.white)
-                .padding(.bottom, 20)
+                .padding(.bottom, 10)
             
             Text("친구인 사용자의 프로필만 볼 수 있습니다.")
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -307,12 +311,15 @@ struct UnkownFriendPageView: View {
 
 
 struct FriendInfoView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentBottomSheet: Bool = false
+    @State var isPresentConfirmPopup: Bool = false
+    
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
     }
-    
+    @Environment(\.dismiss) var dismiss
     var body: some View {
         
         VStack(spacing: 0, content: {
@@ -397,10 +404,22 @@ struct FriendInfoView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 22)
             .onTapGesture {
+                UIView.setAnimationsEnabled(false)
                 isPresentBottomSheet = true
             }
+            //바텀 애니메이션 뷰
             .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-                
+                BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                    DeleteFriendBottomSheetView(friend: friend, isPresentPopup: $isPresentConfirmPopup)
+                }
+                .background(TransparentBackground())
+            })
+            //친구 끊기 확인 팝업
+            .fullScreenCover(isPresented: $isPresentConfirmPopup, content: {
+                TwoButtonPopupView(title: "\(friend.nickname)님과 친구를 끊겠습니까?", positiveButtonTitle: "친구 끊기") {
+                    deleteFriend(uId: currentUserData.uid, friendUId: friend.uid)
+                }
+                .background(TransparentBackground())
             })
         })
     }
@@ -487,30 +506,21 @@ struct FriendPlaylistView: View {
     }
 }
 
-struct FriendBottomSheetView: View {
-    let friend: MumoriUser
-    init(friend: MumoriUser) {
-        self.friend = friend
-    }
-    var body: some View {
-        VStack(spacing: 0, content: {
-            BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단")
-            Line5()
-            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
-        })
-    }
-}
+
 
 struct FriendPageCommonBottomSheetView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @Environment(\.dismiss) var dismiss
     let friend: MumoriUser
-    init(friend: MumoriUser) {
+    @Binding var isPresentBlockConfirmPopup: Bool
+    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>) {
         self.friend = friend
+        self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
     }
+    
     var body: some View {
         VStack(spacing: 0, content: {
-            BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단")
+            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
                 .onTapGesture {
                     dismiss()
                     blockFriend(uId: currentUserData.uid, friendUId: friend.uid)
@@ -520,11 +530,38 @@ struct FriendPageCommonBottomSheetView: View {
         })
     }
     
-    private func blockFriend(uId: String, friendUId: String) {
-        let db = FBManager.shared.db
-        let query = db.collection("User").document(uId)
-        query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
-        query.updateData(["blockedFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
+
+}
+
+struct FriendDeleteBlockBottomSheetView: View {
+    @Environment(\.dismiss) var dismiss
+    let friend: MumoriUser
+    @Binding var isPresentBlockConfirmPopup: Bool
+    @Binding var isPresentDeleteConfirmPopup: Bool
+    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>, isPresentDeleteConfirmPopup: Binding<Bool>) {
+        self.friend = friend
+        self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
+        self._isPresentDeleteConfirmPopup = isPresentDeleteConfirmPopup
+    }
+    
+    var body: some View {
+        VStack(spacing: 0, content: {
+            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
+                .onTapGesture {
+                    dismiss()
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBlockConfirmPopup = true
+                }
+            
+            Line5()
+            
+            BottomSheetSubTitleItem(image: SharedAsset.cutOffFriend.swiftUIImage, title: "\(friend.nickname)과 친구 끊기", subTitle: "\(friend.nickname)님과 친구 관계를 끊습니다.")
+                .onTapGesture {
+                    dismiss()
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeleteConfirmPopup = true
+                }
+        })
     }
 }
 
@@ -537,4 +574,41 @@ public struct Line5: View {
     }
 }
 
+public func blockFriend(uId: String, friendUId: String) {
+    let db = FBManager.shared.db
+    let query = db.collection("User").document(uId)
+    query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+    query.updateData(["blockFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
+    
+    let friendQuery = db.collection("User").document(friendUId)
+    friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+}
 
+public func deleteFriend(uId: String, friendUId: String){
+    let db = FBManager.shared.db
+    
+    let query = db.collection("User").document(uId)
+    query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+    
+    let friendQuery = db.collection("User").document(friendUId)
+    friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+}
+
+struct DeleteFriendBottomSheetView: View {
+    @EnvironmentObject var currentUserDat: CurrentUserData
+    @Environment(\.dismiss) var dismiss
+    @Binding var isPresentPopup: Bool
+    let friend: MumoriUser
+    init(friend: MumoriUser, isPresentPopup: Binding<Bool>) {
+        self.friend = friend
+        self._isPresentPopup = isPresentPopup
+    }
+    var body: some View {
+        BottomSheetSubTitleItem(image: SharedAsset.cutOffFriend.swiftUIImage, title: "\(friend.nickname)과 친구 끊기", subTitle: "\(friend.nickname)님과 친구 관계를 끊습니다.")
+            .onTapGesture {
+                dismiss()
+                UIView.setAnimationsEnabled(false)
+                isPresentPopup = true
+            }
+    }
+}

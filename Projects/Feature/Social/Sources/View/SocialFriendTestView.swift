@@ -52,6 +52,7 @@ struct SocialFriendTestView: View {
                     Spacer()
                     
                     Button(action: {
+                        UIView.setAnimationsEnabled(false)
                         isPresentFriendBottomSheet = true
                     }, label: {
                         SharedAsset.menuButtonSearchFriend.swiftUIImage
@@ -136,15 +137,27 @@ struct SocialFriendTestView: View {
     
     private func searchFriend(){
         Task {
-            guard let snapshot = try? await db.collection("User").whereField("id", isEqualTo: searchText).getDocuments() else {
+            let query = db.collection("User")
+                .whereField("id", isEqualTo: searchText)
+            
+            guard let snapshot = try? await query.getDocuments() else {
                 return
             }
+            
             guard let doc = snapshot.documents.first else {
                 return
             }
+            
+            let blockFriends = (doc.data()["blockFriends"] as? [String]) ?? []
+            
+            if blockFriends.contains(currentUserData.uid){
+                return
+            }
+            
             guard let friendUID = doc.data()["uid"] as? String else {
                 return
             }
+            
             self.friendSearchResult = await MumoriUser(uid: friendUID)
         }
     }
@@ -430,6 +443,7 @@ struct FriendRequestItem: View {
                 return
             }
             friendRequestList.removeAll(where: {$0.uid == friend.uid})
+            currentUserData.friends.append(friend.uid)
         }
     }
 }

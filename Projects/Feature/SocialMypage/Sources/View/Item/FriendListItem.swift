@@ -11,6 +11,10 @@ import Shared
 
 struct FriendListItem: View {
     let friend: MumoriUser
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isPresentBottomSheet: Bool = false
+    @State var isPresentBlockConfirmPopup: Bool = false
+    @State var isPresentDeleteConfirmPopup: Bool = false
     
     init(friend: MumoriUser) {
         self.friend = friend
@@ -45,13 +49,34 @@ struct FriendListItem: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 22, height: 22)
+                .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBottomSheet = true
+                }
         })
         .padding(.horizontal, 20)
         .background(ColorSet.background)
         .frame(height: 79)
+        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                FriendDeleteBlockBottomSheetView(friend: friend,
+                                                 isPresentBlockConfirmPopup: $isPresentBlockConfirmPopup,
+                                                 isPresentDeleteConfirmPopup: $isPresentDeleteConfirmPopup)
+                
+            }
+            .background(TransparentBackground())
+        })
+        .fullScreenCover(isPresented: $isPresentBlockConfirmPopup, content: {
+            TwoButtonPopupView(title: "\(friend.nickname)님을 차단하시겠습니까?", subTitle: "차단 관리는 친구 추가 > 메뉴 >\n차단친구 관리 페이지에서 관리할 수 있습니다.", positiveButtonTitle: "차단") {
+                blockFriend(uId: currentUserData.uid, friendUId: friend.uid)
+            }
+            .background(TransparentBackground())
+        })
+        .fullScreenCover(isPresented: $isPresentDeleteConfirmPopup, content: {
+            TwoButtonPopupView(title: "\(friend.nickname)님과 친구를 끊겠습니까?", positiveButtonTitle: "친구 끊기") {
+                deleteFriend(uId: currentUserData.uid, friendUId: friend.uid)
+            }
+        })
     }
 }
 
-//#Preview {
-//    FriendListItem()
-//}

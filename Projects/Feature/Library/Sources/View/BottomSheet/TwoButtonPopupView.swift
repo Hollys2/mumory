@@ -52,6 +52,7 @@ struct TwoButtonPopupView: View {
 
                 Text(subTitle)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                    .multilineTextAlignment(.center)
                     .foregroundStyle(Color.white)
                     .frame(height: subTitle.isEmpty ? 0 : nil)
                     .padding(.bottom, subTitle.isEmpty ? 0 : 32)
