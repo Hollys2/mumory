@@ -56,7 +56,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
 //                    selectedTab = .library
-                    self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory())) // 추후 파이어스토어 ID로 수정
+                    //self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory())) // 추후 파이어스토어 ID로 수정
                     playerViewModel.isShownMiniPlayer = true
                 }) {
                     Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
