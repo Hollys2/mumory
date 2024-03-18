@@ -200,7 +200,7 @@ public struct CustomizationView: View {
         
         isLoading = false
         isCustomizationDone = true
-        appCoordinator.rootPath.append(LoginPage.lastOfCustomization)
+        appCoordinator.rootPath.append(MumoryPage.lastOfCustomization)
     }
 
     
@@ -225,8 +225,9 @@ public struct CustomizationView: View {
         let db = Firebase.db
         let playlist: [String: Any] = [
             "title": "즐겨찾기 목록",
-            "songIdentifiers": [],
+            "songIds": [],
             "isPublic": false,
+            "date": Date()
         ]
         
         try? await db.collection("User").document(uid).collection("Playlist").document("favorite").setData(playlist)

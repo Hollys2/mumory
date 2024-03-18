@@ -14,9 +14,7 @@ import AVFAudio
 struct SearchEntryView: View {
     @Binding var term: String
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
-    @EnvironmentObject var manager: LibraryManageModel
-//    @State var recentSearchList: [String] = []
-
+    @EnvironmentObject var appCoordinator: AppCoordinator
     var body: some View {
         ScrollView{
             VStack(spacing: 15){
@@ -29,7 +27,7 @@ struct SearchEntryView: View {
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                         .foregroundColor(.white)
                         .onTapGesture {
-                            manager.push(destination: .shazam)
+                            appCoordinator.rootPath.append(LibraryPage.shazam)
                         }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

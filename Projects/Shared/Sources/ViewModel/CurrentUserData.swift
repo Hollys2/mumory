@@ -17,20 +17,23 @@ public class CurrentUserData: ObservableObject {
                 Task{
                     self.user = await MumoriUser(uid: self.uid)
                 }
+                Task {
+                    let query = FBManager.shared.db.collection("User").document(self.uid)
+                    guard let data = try? await query.getDocument().data() else {return}
+                    guard let friends = data["friends"] as? [String] else {return}
+                    self.friends = friends
+                }
             }
-            
         }
     }
     @Published public var user: MumoriUser = MumoriUser()
+    @Published public var friends: [String] = []
     
-    
+    //삭제 예정...
     @Published public var favoriteGenres: [Int] = []
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
-    
-    @Published public var playlistArray: [MusicPlaylist] = [
-        MusicPlaylist(id: "addItem", title: "", songIDs: [], isPublic: true, isAddItme: true)
-    ]
+    @Published public var playlistArray: [MusicPlaylist] = []
     
     public init(){
     }

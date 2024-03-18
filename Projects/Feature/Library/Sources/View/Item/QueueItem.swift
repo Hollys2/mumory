@@ -58,6 +58,7 @@ struct QueueItem: View {
                 .frame(width: 22, height: 22)
                 .padding(.trailing, 13)
                 .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
                 .fullScreenCover(isPresented: $isPresentBottomSheet, content: {

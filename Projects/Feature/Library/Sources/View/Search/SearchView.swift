@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct SearchView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
     
@@ -40,6 +40,7 @@ struct SearchView: View {
                         SharedAsset.xWhiteCircle.swiftUIImage
                             .frame(width: 23, height: 23)
                             .padding(.trailing, 17)
+                            .opacity(term.isEmpty ? 0 : 1)
                             .onTapGesture {
                                 term = ""
                             }
@@ -54,7 +55,7 @@ struct SearchView: View {
                             .foregroundColor(.white)
                             .font(.system(size: 16, weight: .medium))
                             .onTapGesture {
-                                manager.pop()
+                                appCoordinator.rootPath.removeLast()
                             }
                   
                 })
@@ -87,7 +88,3 @@ struct SearchView: View {
             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
     }
 }
-
-//#Preview {
-//    SearchView()
-//}

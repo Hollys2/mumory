@@ -61,6 +61,9 @@ public class AppCoordinator: ObservableObject {
     @Published public var isHiddenTabBar: Bool = false
     @Published public var isHiddenTabBarWithoutAnimation: Bool = false
     
+    @Published public var bottomAnimationViewStatus: BottomAnimationPage = .remove
+    @Published public var selectedTab: Tab = .home
+    
     public var selectedYear: Int {
         Calendar.current.component(.year, from: self.selectedDate)
      }
@@ -92,6 +95,19 @@ public class AppCoordinator: ObservableObject {
         components.month = month
         
         return Calendar.current.date(from: components) ?? Date()
+    }
+    
+    //아래에서 나오는 뷰 관리 용도
+    public enum BottomAnimationPage {
+        case myPage
+        case play
+        case remove
+    }
+    
+    public func setBottomAnimationPage(page: BottomAnimationPage) {
+        withAnimation {
+            self.bottomAnimationViewStatus = page
+        }
     }
     
     public init () {}
@@ -145,5 +161,6 @@ public class DateManager: ObservableObject {
             return "방금 전"
         }
     }
+
 }
     

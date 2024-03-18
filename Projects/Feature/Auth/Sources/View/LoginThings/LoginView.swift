@@ -13,16 +13,7 @@ import KakaoSDKUser
 import Lottie
 import GoogleSignIn
 import Firebase
-public enum LoginPage: Hashable {
-    case customization
-    case startCustomization
-    case signUp
-    case home
-    case emailLogin
-    case lastOfCustomization
-    case login
 
-}
 public struct LoginView: View {
     @Environment(\.presentationMode) var presentationMode
 
@@ -57,7 +48,7 @@ public struct LoginView: View {
                     EmailLoginButton()
                         .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
                         .onTapGesture {
-                            appCoordinator.rootPath.append(LoginPage.emailLogin)
+                            appCoordinator.rootPath.append(MumoryPage.emailLogin)
                         }
 //                        .onTapGesture {
 //                            isEmailLoginTapped = true
@@ -100,7 +91,7 @@ public struct LoginView: View {
                         
                     }
                     .onTapGesture {
-                        appCoordinator.rootPath.append(LoginPage.signUp)
+                        appCoordinator.rootPath.append(MumoryPage.signUp)
                     }
                     
                 }
@@ -289,7 +280,7 @@ public struct LoginView: View {
 //                self.goToCustomization = true
                 
                 //루트패스 수정
-                appCoordinator.rootPath.append(LoginPage.customization)
+                appCoordinator.rootPath.append(MumoryPage.customization)
                 return
             }
 
@@ -300,7 +291,7 @@ public struct LoginView: View {
             
             //루트패스 수정
 //            isLoginCompleted = true
-            appCoordinator.rootPath = NavigationPath([LoginPage.home])
+            appCoordinator.rootPath.append(MumoryPage.home(selectedTab: .home))
         }else {
             //신규 회원
             
@@ -315,7 +306,7 @@ public struct LoginView: View {
             self.isLoading = false
 //            self.goToCustomization = true
             //루트패스
-            appCoordinator.rootPath.append(LoginPage.customization)
+            appCoordinator.rootPath.append(MumoryPage.customization)
         }
 
 

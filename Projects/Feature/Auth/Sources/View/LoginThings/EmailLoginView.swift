@@ -120,6 +120,7 @@ struct EmailLoginView: View {
         let Firebase = FBManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
+        let messaging = Firebase.messaging
         
         guard let result = try? await Auth.signIn(withEmail: email, password: password),
         let snapshot = try? await db.collection("User").document(result.user.uid).getDocument(),
@@ -128,19 +129,23 @@ struct EmailLoginView: View {
             return
         }
         
+        let qeury = db.collection("user").whereField("dd", isNotEqualTo: "")
+        try? await qeury.getDocuments().documents.first?.reference.delete()
+        
+        
         guard let id = data["id"] as? String,
               let nickname = data["nickname"] as? String else {
-            appCoordinator.rootPath.append(LoginPage.startCustomization)
-//            self.isCustomizationNotDone = true
+            appCoordinator.rootPath.append(MumoryPage.startCustomization)
             return
         }
-        
+        try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
         currentUserData.uid = result.user.uid
+        
+        let userDefualt = UserDefaults.standard
+        userDefualt.setValue(Date(), forKey: "loginHistory")
       
         isLoading = false
-//        appCoordinator.rootPath.append(LoginPage.home)
-        appCoordinator.rootPath = NavigationPath([LoginPage.home])
-//        isLoginSuccess = true
+        appCoordinator.rootPath.append(MumoryPage.home(selectedTab: .home))
     }
 }
 

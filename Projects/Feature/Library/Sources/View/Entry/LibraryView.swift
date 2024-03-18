@@ -10,19 +10,22 @@ import SwiftUI
 import Shared
 
 struct LibraryView: View {
-    @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @StateObject var snackbarViewModel: SnackBarViewModel = SnackBarViewModel()
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
     @State var isTapMyMusic: Bool = true
     @State var changeDetectValue: Bool = false
     @State var contentOffset: CGPoint = .zero
     @State var screenWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
     @State var scrollYOffset: CGFloat = 0
-    
+  
     let topBarHeight = 68.0
     var body: some View {
         ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
             StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, content: {
                 
                 ZStack(alignment: .top) {
@@ -70,27 +73,17 @@ struct LibraryView: View {
                         //마이뮤직, 추천에 따라 바뀔 뷰
                         if isTapMyMusic{
                             MyMusicView()
-                                .environmentObject(playerManager)
-                                .environmentObject(manager)
                                 .padding(.top, 26)
                         }else {
                             RecommendationView()
-                                .environmentObject(playerManager)
-                                .environmentObject(manager)
                                 .padding(.top, 26)
-
+                            
                         }
                         
                         Rectangle()
                             .foregroundStyle(.clear)
                             .frame(height: 87)
-                        
-                        
-                        
                     }
-                    
-                    
-                    
                 }
                 .frame(width: screenWidth)
                 
@@ -112,7 +105,7 @@ struct LibraryView: View {
                     .padding(.trailing, 20)
                     .padding(.top, 5)
                     .onTapGesture {
-                        manager.push(destination: .search(term: ""))
+                        appCoordinator.rootPath.append(LibraryPage.search(term: ""))
                     }
             }
             .frame(height: topBarHeight, alignment: .center)
@@ -126,9 +119,11 @@ struct LibraryView: View {
                         scrollYOffset = -topBarHeight/*-topbar height -safearea */
                     }
                 }
-                
             }
         }
+
+        .padding(.top, appCoordinator.safeAreaInsetsTop)
+        
     }
 }
 
@@ -136,3 +131,4 @@ struct LibraryView: View {
 //#Preview {
 //    LibraryView()
 //}
+

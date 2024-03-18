@@ -9,10 +9,8 @@
 import SwiftUI
 import Shared
 
-struct AddPlaylistSongView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+struct AddSongView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var snackbarManager: SnackBarViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var originPlaylist: MusicPlaylist
     @State var isTapFavorite: Bool = true
@@ -35,7 +33,7 @@ struct AddPlaylistSongView: View {
                             .resizable()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                manager.pop()
+                                appCoordinator.rootPath.removeLast()
                             }
 
                     Spacer()
@@ -100,39 +98,29 @@ struct AddPlaylistSongView: View {
                 
                 if isTapFavorite{
                     AddSongFromFavoriteView(originPlaylist: $originPlaylist)
-                        .environmentObject(snackbarManager)
                         .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
                 }else {
                     AddSongFromSearchView(originPlaylist: $originPlaylist)
-                        .environmentObject(snackbarManager)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
                 }
         
                 
             })
             
-        
-                            
-
-            
         }
-        .onAppear(perform: {
-            appCoordinator.isHiddenTabBarWithoutAnimation = true
-            withAnimation {
-                appCoordinator.isHiddenTabBar = true
-            }
-        })
-        .onDisappear(perform: {
-            appCoordinator.isHiddenTabBarWithoutAnimation = false
-            withAnimation {
-                appCoordinator.isHiddenTabBar = false
-            }
-        })
+//        .onAppear(perform: {
+//            withAnimation {
+//                appCoordinator.isHiddenTabBar = true
+//            }
+//            
+//        })
+//        .onDisappear(perform: {
+//            withAnimation {
+//                appCoordinator.isHiddenTabBar = false
+//            }
+//        })
     }
 }
 
-//#Preview {
-//    AddPlaylistSongView()
-//}
 
 

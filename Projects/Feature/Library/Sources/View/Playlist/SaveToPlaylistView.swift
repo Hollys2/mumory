@@ -13,9 +13,8 @@ import Core
 
 struct SaveToPlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var snackbarManager: SnackBarViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     
     @State var playlistArray: [MusicPlaylist] = []
     @State var isCreatePopupPresent: Bool = false
@@ -40,7 +39,7 @@ struct SaveToPlaylistView: View {
                     
                     Spacer()
                     Button {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     } label: {
                         SharedAsset.xWhite.swiftUIImage
                             .resizable()
@@ -130,50 +129,37 @@ struct SaveToPlaylistView: View {
         let db = Firebase.db
         
         let path = db.collection("User").document(currentUserData.uid).collection("Playlist")
-        var data = to.songIDs //기존 노래ID들
         
         if self.songIDs.count > 1 {
             //리스트로 저장할 때
             DispatchQueue.global(qos: .background ).async {
-                data += self.songIDs.filter({!data.contains($0)}) //중복 제거 후 업로드할 데이터에 추가
-                
-                let uploadData = [
-                    "songIdentifiers" : data
-                ]
-                
-                path.document(to.id).setData(uploadData, merge: true) { error in
-                    if error == nil {
-                        snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songIDs])]) { error in
+                    guard error == nil else {
+                        return
                     }
+                    snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                 }
             }
-            
-            manager.pop()
+            appCoordinator.rootPath.removeLast()
         }else {
             //1곡씩 저장할 때
             guard let song = self.songIDs.first else {
                 return
             }
             
+            //이미 있으면 실패 스낵바, 없으면 저장
             if to.songIDs.contains(song) {
-                //이미 해당 플리에 존재할 때
-                snackbarManager.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
+                snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
             }else {
-                //새롭게 추가할 때
                 DispatchQueue.global().async {
-                    data.append(song)
-                    
-                    let uploadData = [
-                        "songIdentifiers" : data
-                    ]
-                    
-                    path.document(to.id).setData(uploadData, merge: true) { error in
-                        if error == nil {
-                            snackbarManager.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
+                    path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion([song])]) { error in
+                        guard error == nil else {
+                            return
                         }
+                        snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                     }
                 }
-                manager.pop()
+                appCoordinator.rootPath.removeLast()
             }
         }
         
@@ -206,7 +192,7 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
-                    guard let songIDs = document.data()["songIdentifiers"] as? [String] else {
+                    guard let songIDs = document.data()["songIds"] as? [String] else {
                         print("no song id")
                         return
                     }
@@ -216,7 +202,7 @@ struct SaveToPlaylistView: View {
                     
                     withAnimation {
                         if !(id == "favorite") {
-                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false))
+                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
                         }
                     }
                     

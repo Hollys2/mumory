@@ -13,9 +13,8 @@ import MusicKit
 
 //라이브러리 첫 화면 - 최근 뮤모리 뮤직 하단 뷰
 struct MyPlaylistView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    
     
     var rows: [GridItem] = [
         GridItem(.fixed(215), spacing: 23),
@@ -33,7 +32,7 @@ struct MyPlaylistView: View {
                     
                     Spacer()
                     
-                    Text("\(currentUserData.playlistArray.count-1)") //플레이리스트 추가 아이템 제외
+                    Text("\(currentUserData.playlistArray.count)") //플레이리스트 추가 아이템 제외
                         .foregroundStyle(LibraryColorSet.lightGrayTitle)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .padding(.trailing, 4)
@@ -46,17 +45,23 @@ struct MyPlaylistView: View {
                 .padding(.top, 10)
                 .padding(.bottom, 10)
                 .onTapGesture {
-                    manager.push(destination: .playlistManage)
+                    appCoordinator.rootPath.append(LibraryPage.playlistManage)
                 }
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: 12, content: {
                         ForEach(currentUserData.playlistArray, id: \.title) { playlist in
-                            PlaylistItem(playlist: playlist, itemSize: 81, isAddSongItem: playlist.isAddItme)
+                            PlaylistItem(playlist: playlist, itemSize: 81)
                                 .onTapGesture {
-                                    manager.push(destination: .playlist(playlist: playlist))
+                                    if playlist.id == "favorite" {
+                                        appCoordinator.rootPath.append(LibraryPage.favorite)
+                                    }else {
+                                        appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                                    }
                                 }
                         }
+                        AddSongItem()
+
                     })
                     .padding(.horizontal, 20)
                 }
@@ -77,12 +82,12 @@ struct MyPlaylistView: View {
     func getPlayList(){
         let Firebase = FBManager.shared
         let db = Firebase.db
-                
-        DispatchQueue.main.async {
-            currentUserData.playlistArray = [MusicPlaylist(id: "addItem", title: "", songIDs: [], isPublic: false, isAddItme: true)]
-        }
+        
+        currentUserData.playlistArray.removeAll()
         
         let query = db.collection("User").document(currentUserData.uid).collection("Playlist")
+            .order(by: "date", descending: true)
+        
         query.getDocuments { snapshot, error in
             if let error = error {
                 print(error)
@@ -96,7 +101,7 @@ struct MyPlaylistView: View {
                         print("no private thing")
                         return
                     }
-                    guard let songIDs = snapshot.data()["songIdentifiers"] as? [String] else {
+                    guard let songIDs = snapshot.data()["songIds"] as? [String] else {
                         print("no id list")
                         return
                     }
@@ -105,12 +110,11 @@ struct MyPlaylistView: View {
                     DispatchQueue.main.async {
                         if id == "favorite" {
                             withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false), at: 0)
+                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic), at: 0)
                             }
                         }else {
-                            let index = currentUserData.playlistArray.count - 1
                             withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, isAddItme: false), at: index)
+                                currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
                             }
                         }
                     }

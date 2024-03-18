@@ -28,7 +28,9 @@ struct MusicListItem: View {
     }
     
     @State var isPresentBottomSheet: Bool = false
-
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
         
     var body: some View {
         
@@ -63,13 +65,34 @@ struct MusicListItem: View {
             })
             
             Spacer()
-            SharedAsset.bookmark.swiftUIImage
-                .frame(width: 20, height: 20)
-                .padding(.trailing, 23)
+            
+            if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                SharedAsset.bookmarkFilled.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .padding(.trailing, 23)
+                    .onTapGesture {
+                        playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                    }
+            }else {
+                SharedAsset.bookmark.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .padding(.trailing, 23)
+                    .onTapGesture {
+                        playerViewModel.addToFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                    }
+            }
+          
             
             SharedAsset.menu.swiftUIImage
                 .frame(width: 22, height: 22)
                 .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
                 .fullScreenCover(isPresented: $isPresentBottomSheet) {
@@ -90,7 +113,4 @@ struct MusicListItem: View {
     }
 }
 
-//#Preview {
-//    MusicChartDetailItem()
-//}
 

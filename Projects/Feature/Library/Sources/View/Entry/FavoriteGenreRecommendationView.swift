@@ -13,7 +13,6 @@ import MusicKit
 
 struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
     @State var isEditGenreViewPresent: Bool = false
     @State var isEditGenreInfoPresent: Bool = false
     @State var genreInfoTimer: Timer?
@@ -23,7 +22,6 @@ struct FavoriteGenreRecommendationView: View {
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(currentUserData.favoriteGenres, id: \.self){genreID in
                     RecommendationScrollView(genreID: genreID)
-                        .environmentObject(manager)
                         .frame(height: 210)
                         .padding(.top, 35)
                 }
@@ -65,7 +63,7 @@ struct FavoriteGenreRecommendationView: View {
                                                 .padding(.bottom, 6)
                                         }
                                         .offset(y: -37)
-                                        .transition(.scale(scale: 0.0, anchor: .top))
+                                        .transition(.scale(scale: 0.0, anchor: .top).combined(with: .opacity))
                                 }
                                 
                             }
@@ -103,6 +101,7 @@ struct FavoriteGenreRecommendationView: View {
             }
         }
         .onAppear {
+//            let db = FBManager.shared.db.coll
 //            recommendationIDList.removeAll()
 //            recommendationSongList.removeAll()
 
@@ -113,7 +112,7 @@ struct FavoriteGenreRecommendationView: View {
 }
 
 private struct RecommendationScrollView: View {
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var songs: [Song] = []
     @State var songIDs: [String] = []
@@ -121,12 +120,11 @@ private struct RecommendationScrollView: View {
     init(genreID: Int) {
         self.genreID = genreID
     }
-//    @Binding var songs: [Int: [Song]]
     var body: some View {
         VStack(spacing: 0) {
             GenreTitle(genreName: MusicGenreHelper().genreName(id: genreID))
                 .onTapGesture {
-                    manager.push(destination: .recommendation(genreID: genreID))
+                    appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: genreID))
                 }
             
             ScrollView(.horizontal) {
@@ -169,20 +167,19 @@ private struct RecommendationScrollView: View {
     
     private func fetchSongInfo(songIDs: [String]) async {
         for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            
-            do {
-                let response = try await request.response()
+            Task {
+                let musicItemID = MusicItemID(rawValue: id)
+                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                guard let response = try? await request.response() else {
+                    return
+                }
                 guard let song = response.items.first else {
                     print("no song")
-                    continue
+                    return
                 }
                 withAnimation {
                     self.songs.append(song)
                 }
-            } catch {
-                print("Error: \(error)")
             }
         }
     }

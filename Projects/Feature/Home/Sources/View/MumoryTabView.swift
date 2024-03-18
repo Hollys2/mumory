@@ -11,12 +11,7 @@ import SwiftUI
 import Shared
 
 
-public enum Tab {
-    case home
-    case social
-    case library
-    case notification
-}
+
 
 
 public struct MumoryTabView: View {
@@ -24,7 +19,7 @@ public struct MumoryTabView: View {
     @Binding var selectedTab: Tab
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     public init(selectedTab: Binding<Tab>) {
         self._selectedTab = selectedTab
     }
@@ -35,6 +30,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .home
+                    playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
                 }
@@ -42,6 +38,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .social
+                    playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
                 }
@@ -59,6 +56,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .library
+                    playerViewModel.isShownMiniPlayer = true
                 }) {
                     Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
                 }
@@ -66,6 +64,7 @@ public struct MumoryTabView: View {
                 
                 Button(action: {
                     selectedTab = .notification
+                    playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
                 }

@@ -12,7 +12,7 @@ import MusicKit
 
 struct ChartListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var contentOffset: CGPoint = .zero
     @State var viewWidth: CGFloat = .zero
@@ -33,7 +33,7 @@ struct ChartListView: View {
                         .frame(width: 30, height: 30)
                         .padding(.leading, 20)
                         .onTapGesture {
-                            manager.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                     Spacer()
                     VStack(spacing: 5, content: {
@@ -51,7 +51,7 @@ struct ChartListView: View {
                         .frame(width: 30, height: 30)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            manager.push(destination: .search(term: ""))
+                            appCoordinator.rootPath.append(LibraryPage.search(term: ""))
                         }
                 })
 //                .padding(.top, sizeManager.topInset)

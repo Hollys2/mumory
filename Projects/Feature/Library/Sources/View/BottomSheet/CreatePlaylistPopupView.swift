@@ -11,12 +11,19 @@ import Shared
 import Core
 
 struct CreatePlaylistPopupView: View {
+    enum PlaylistType {
+        case new
+        case old
+    }
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
     
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
     @State var backgroundOpacity = 0.0
+    
+    var title: String = "새 플레이리스트"
+
     
     let titleMaxLength = 30
     
@@ -37,7 +44,7 @@ struct CreatePlaylistPopupView: View {
                         }
                 }
                 
-                Text("새 플레이리스트")
+                Text(title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                     .foregroundStyle(.white)
                 
@@ -159,7 +166,8 @@ struct CreatePlaylistPopupView: View {
         let data: [String: Any] = [
             "title": playlistTitle,
             "isPublic": isTapPublic,
-            "songIdentifiers": []
+            "songIds": [],
+            "date": Date()
         ]
         
         db.collection("User").document(currentUserData.uid).collection("Playlist").addDocument(data: data) { error in

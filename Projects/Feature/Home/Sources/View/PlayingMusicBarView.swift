@@ -12,8 +12,9 @@ import Shared
 
 public struct PlayingMusicBarView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var playerManager: PlayerViewModel
-    @State var isPresentPlayingView: Bool = false
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
+//    @State var isPresentPlayingView: Bool = false
     @State var isPresentMyPage: Bool = false
     
     let artistTextColor = Color(white: 0.89)
@@ -25,7 +26,7 @@ public struct PlayingMusicBarView: View {
             
             //재생페이지로 넘어가는 터치 영역
             HStack(spacing: 0, content: {
-                AsyncImage(url: playerManager.playingSong()?.artwork?.url(width: 100, height: 100)) { image in
+                AsyncImage(url: playerViewModel.playingSong()?.artwork?.url(width: 100, height: 100)) { image in
                     image
                         .resizable()
                         .scaledToFill()
@@ -42,7 +43,7 @@ public struct PlayingMusicBarView: View {
                 .padding(.trailing, 13)
 
                 
-                if let playingSong = playerManager.currentSong {
+                if let playingSong = playerViewModel.currentSong {
                     VStack(spacing: 2) {
                         Text(playingSong.title)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
@@ -68,27 +69,26 @@ public struct PlayingMusicBarView: View {
                 
             })
             .onTapGesture {
-                isPresentPlayingView = true
+                playerViewModel.isPresentNowPlayingView = true
+//                appCoordinator.setBottomAnimationPage(page: .play)
             }
-            .fullScreenCover(isPresented: $isPresentPlayingView, content: {
-                NowPlayingView()
-            })
+ 
             
             
             //재생버튼. 재생 여부에 따라 다르게 보여야함
             Circle()
-                .trim(from: 0, to: playerManager.playbackRate()) //재생률에 따라 변화해야함
+                .trim(from: 0, to: playerViewModel.playbackRate()) //재생률에 따라 변화해야함
                 .stroke(ColorSet.mainPurpleColor, lineWidth: 2)
                 .frame(width: 26, height: 26)
                 .rotationEffect(.degrees(-90))
                 .overlay {
-                    if playerManager.isPlaying {
+                    if playerViewModel.isPlaying {
                         SharedAsset.pauseButtonTopbar.swiftUIImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 24, height: 24)
                             .onTapGesture {
-                                playerManager.pause()
+                                playerViewModel.pause()
                             }
                     }else {
                         SharedAsset.playButtonTopbar.swiftUIImage
@@ -96,7 +96,7 @@ public struct PlayingMusicBarView: View {
                             .scaledToFit()
                             .frame(width: 24, height: 24)
                             .onTapGesture {
-                                playerManager.play()
+                                playerViewModel.play()
                             }
                     }
                 }
@@ -123,11 +123,9 @@ public struct PlayingMusicBarView: View {
             }
             .padding(.trailing, 11)
             .onTapGesture {
-                isPresentMyPage = true
+                appCoordinator.setBottomAnimationPage(page: .myPage)
             }
-            .fullScreenCover(isPresented: $isPresentMyPage) {
-                MyPageView()
-            }
+     
                         
         })
         .frame(maxWidth: .infinity)
@@ -135,8 +133,12 @@ public struct PlayingMusicBarView: View {
         .background(Color.black.opacity(0.9))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
         .padding(.horizontal, 15)
+        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
+            NowPlayingView()
+        }
 
     }
+
 }
 
 //struct PlayingMusicBarVIew_Previews: PreviewProvider {

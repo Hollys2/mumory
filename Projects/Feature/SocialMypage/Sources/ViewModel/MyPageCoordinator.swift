@@ -10,20 +10,7 @@ import Foundation
 import SwiftUI
 import Shared
 
-public enum MyPage: Hashable {
-//    case myPage
-    case setting
-    case account
-    case notification
-    case setPW
-    case question
-    case emailVerification
-    case selectNotificationTime
-    case login
-    case friendList(friends: [MumoriUser])
-    case friendPage(friend: MumoriUser)
-    case activityList
-}
+
 class MyPageCoordinator: ObservableObject {
     @Published public var stack: [MyPage] = []
     public init() {}
@@ -33,6 +20,7 @@ class MyPageCoordinator: ObservableObject {
     }
     
     func push(destination: MyPage) {
+        print("push")
         self.stack.append(destination)
     }
     
@@ -44,6 +32,9 @@ class MyPageCoordinator: ObservableObject {
     @ViewBuilder
     func getView(destination: MyPage) -> some View {
         switch(destination){
+        case .myPage:
+            MyPageView()
+            
         case .setting:
             SettingView()
   
@@ -75,7 +66,7 @@ class MyPageCoordinator: ObservableObject {
             FriendPageView(friend: friend)
             
         case .activityList:
-            ActivityListView()
+            ActivityListView() 
         }
 
     }

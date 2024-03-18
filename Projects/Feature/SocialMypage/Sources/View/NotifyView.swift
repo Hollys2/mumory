@@ -11,73 +11,77 @@ import Shared
 
 struct NotifyView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @State var notifications: [Notification] = []
-    
     let db = FBManager.shared.db
 
-    var body: some View {
-        ZStack(alignment: .top) {
-            ColorSet.background.ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0, content: {
-                //상단바
-                HStack{
-                    Text("알림")
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 24))
-                        .foregroundStyle(Color.white)
-                    Spacer()
-                    SharedAsset.set.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                }
-                .frame(height: 63)
-                .padding(.horizontal, 20)
 
-                
-                UnreadText(unreadCount: notifications.filter{!$0.isRead}.count)
-                    .padding(.top, 18)
-       
-                
-                ScrollView {
-                    LazyVStack(spacing: 0, content: {
-                        ForEach(notifications.indices, id: \.self) { index in
-                            switch(notifications[index].type) {
-                            case .like:
-                                NotifyLikeItem(notification: $notifications[index])
-                            case .comment, .reply:
-                                NotifyCommentItem(notification: $notifications[index])
-                            case .friendAccept, .friendRequest:
-                                NotifyFriendItem(notification: $notifications[index])
-                            case .none:
-                                EmptyView()
+    var body: some View {
+            ZStack(alignment: .top) {
+                ColorSet.background.ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 0, content: {
+                    //상단바
+                    HStack{
+                        Text("알림")
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 24))
+                            .foregroundStyle(Color.white)
+                    
+                        Spacer()
+                        
+                        SharedAsset.set.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                    }
+                    .frame(height: 63)
+                    .padding(.horizontal, 20)
+                    
+                    
+                    UnreadText(unreadCount: notifications.filter{!$0.isRead}.count)
+                        .padding(.top, 18)
+                    
+                    
+                    ScrollView {
+                        LazyVStack(spacing: 0, content: {
+                            ForEach(notifications.indices, id: \.self) { index in
+                                switch(notifications[index].type) {
+                                case .like:
+                                    NotifyLikeItem(notification: $notifications[index])
+                                case .comment, .reply:
+                                    NotifyCommentItem(notification: $notifications[index])
+                                case .friendAccept, .friendRequest:
+                                    NotifyFriendItem(notification: $notifications[index])
+                                case .none:
+                                    EmptyView()
+                                }
+                                
+                                Divider()
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 0.5)
+                                    .background(ColorSet.subGray)
                             }
                             
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(ColorSet.subGray)
-                        }
-               
-                    })
-                }
-
-            
-            })
-            .padding(.top, currentUserData.topInset)
-        }
-        .onAppear{
-            Task{
-                await getNotification()
+                        })
+                    }
+                    
+                    
+                })
+                .padding(.top, currentUserData.topInset)
             }
-        }
+            .onAppear{
+                Task{
+                    await getNotification()
+                }
+            }
     }
     
     private func getNotification() async {
+        self.notifications.removeAll()
         let query = db.collection("User").document(currentUserData.uid).collection("Notification")
             .order(by: "date", descending: true)
+        
         //페이징기능 만들기
         //페이징기능때문에 안 본 알림이 몇개인지 알 수 있기는 한가..? 고민해보기
-            
         
         guard let result = try? await query.getDocuments() else {
             print("no data")
@@ -90,11 +94,11 @@ struct NotifyView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-static var previews: some View {
-    NotifyView()
-}
-}
+//struct ContentView_Previews: PreviewProvider {
+//static var previews: some View {
+//    NotifyView()
+//}
+//}
 
 struct UnreadText: View {
     let unreadCount: Int
@@ -190,10 +194,12 @@ struct NotifyLikeItem: View {
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    
                 }
                 self.notification.isRead = true
             }
             //해당 알림과 관련된 페이지로 넘어가기
+  
         }
     }
     
@@ -277,6 +283,7 @@ struct NotifyCommentItem: View {
 
 struct NotifyFriendItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @Binding var notification: Notification
     init(notification: Binding<Notification>) {
         self._notification = notification
@@ -328,13 +335,17 @@ struct NotifyFriendItem: View {
         .frame(height: 90)
         .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
         .onTapGesture {
+            print("friend")
+            Task {
+                let friend = await MumoriUser(uid: notification.friendUId)
+                appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+            }
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserData.uid).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                 }
                 self.notification.isRead = true
             }
-            //해당 알림과 관련된 페이지로 넘어가기
         }
     }
 }
@@ -357,6 +368,7 @@ struct Notification {
     var artworkURL: URL?
     var mumoriId: String = ""
     var content: String = ""
+    var friendUId: String = ""
     
     init(id: String, data: [String: Any]) {
         self.id = id
@@ -393,7 +405,9 @@ struct Notification {
             
         case .friendAccept, .friendRequest:
             guard let friendNickname = data["friendNickname"] as? String else {return}
+            guard let friendUId = data["friendUId"] as? String else {return}
             self.friendNickname = friendNickname
+            self.friendUId = friendUId
             
         case .none: return
 

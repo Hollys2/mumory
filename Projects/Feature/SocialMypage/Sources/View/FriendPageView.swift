@@ -12,38 +12,29 @@ import Core
 import MusicKit
 
 struct FriendPageView: View {
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isStranger: Bool = false
+    @State var isPresentFriendBottomSheet: Bool = false
+    @State var isPresentBlockConfirmPopup: Bool = false
+
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
     }
-    let lineGray = Color(white: 0.37)
+    init(uId: String) async {
+        self.friend = await MumoriUser(uid: uId)
+    }
+    
 
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background
-            ScrollView{
-                VStack(spacing: 0, content: {
-                    FriendInfoView(friend: friend)
-                    
-                    Divider()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 0.5)
-                        .background(lineGray)
-                    
-                    Rectangle()
-                        .fill(Color.clear)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 187)
-                                            
-                    Divider()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 0.5)
-                        .background(lineGray)
-                    
-                    FriendPlaylistView(friend: friend)
-                })
+            
+            if isStranger{
+                UnkownFriendPageView(friend: friend)
+            }else {
+                KnownFriendPageView(friend: friend)
             }
             
             HStack{
@@ -52,7 +43,7 @@ struct FriendPageView: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
-                        myPageCoordinator.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()
@@ -61,26 +52,274 @@ struct FriendPageView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentFriendBottomSheet = true
+                    }
             }
             .padding(.horizontal, 20)
             .frame(height: 44)
             .padding(.top, currentUserData.topInset)
         }
         .ignoresSafeArea()
+        .onAppear {
+            isStranger = !currentUserData.friends.contains(friend.uid)
+        }
+        .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
+                FriendPageCommonBottomSheetView(friend: self.friend, isPresentBlockConfirmPopup: $isPresentBlockConfirmPopup)
+            }
+            .background(TransparentBackground())
+        })
     }
 }
 
-//#Preview {
-//    FriendPageView()
-//}
+struct KnownFriendPageView: View {
+    let friend: MumoriUser
+    let lineGray = Color(white: 0.37)
+
+    init(friend: MumoriUser) {
+        self.friend = friend
+    }
+    var body: some View {
+        ScrollView{
+            VStack(spacing: 0, content: {
+                FriendInfoView(friend: friend)
+                
+                Divider()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 0.5)
+                    .background(lineGray)
+                
+                //맵뷰 들어갈 공간
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 187)
+                                        
+                Divider()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 0.5)
+                    .background(lineGray)
+                
+                FriendPlaylistView(friend: friend)
+            })
+        }
+    }
+}
+
+
+struct UnkownFriendPageView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isPresentPopup: Bool = false
+    @State var isRequested: Bool = false
+    @State var myRequestList: [String] = []//이미 요청한 친구 uid배열
+    
+    let friend: MumoriUser
+    let secretId: String
+    init(friend: MumoriUser) {
+        self.friend = friend
+        secretId = String(friend.id.prefix(2)) + String(repeating: "*", count: friend.id.count-2)
+    }
+    
+    var body: some View {
+        ZStack(alignment: .top){
+            VStack(spacing: 0, content: {
+                UnknownFriendInfoView
+                line
+                UnknownFriendContentView
+                    .padding(.top, 90)
+            })
+        }
+        .onAppear{
+            getMyRequestList()
+        }
+    }
+    
+    //상단 친구 인포메이션 - 배경사진, 프로필사진, 닉네임, 아이디 등
+    var UnknownFriendInfoView: some View {
+        VStack(spacing: 0, content: {
+ 
+            AsyncImage(url: friend.backgroundImageURL) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: getUIScreenBounds().width, height: 150)
+                    .clipped()
+            } placeholder: {
+                Rectangle()
+                    .frame(maxWidth: .infinity)
+                    .frame(width: getUIScreenBounds().width)
+                    .frame(height: 150)
+                    .foregroundStyle(ColorSet.darkGray)
+            }
+            .overlay {
+                LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
+            }
+            
+            VStack(alignment: .leading, spacing: 4, content: {
+                Text(friend.nickname)
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
+                        .foregroundStyle(Color.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 20)
+
+                Text("@\(secretId)")
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.charSubGray)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                 
+                //자기소개
+                Text(friend.bio)
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundStyle(ColorSet.subGray)
+                        .frame(height: 52, alignment: .bottom)
+                        .padding(.bottom, 18)
+                })
+                .overlay {
+                    AsyncImage(url: friend.profileImageURL) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
+                            .clipShape(Circle())
+                    } placeholder: {
+                        SharedAsset.profileRed.swiftUIImage
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
+                            .clipShape(Circle())
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .offset(y: -50)
+
+                }
+                .padding(.horizontal, 20)
+
+                HStack(spacing: 4, content: {
+                    if isRequested {
+                        SharedAsset.cancelAddFriend.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                    }else {
+                        SharedAsset.friendIconSocial.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                    }
+                    
+                    Text(isRequested ? "요청 취소" : "친구 추가")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(Color.black)
+                    
+                })
+                .frame(maxWidth: .infinity)
+                .frame(height: 45)
+                .background(isRequested ? ColorSet.charSubGray : ColorSet.mainPurpleColor)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                .padding(.horizontal, 20)
+                .padding(.bottom, 22)
+                .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentPopup = true
+                }
+               
+        })
+        .fullScreenCover(isPresented: $isPresentPopup, content: {
+            PopupView
+                .background(TransparentBackground())
+        })
+
+    }
+    
+    //구분선
+    var line: some View {
+        Divider()
+            .frame(maxWidth: .infinity)
+            .frame(height: 1)
+            .background(ColorSet.subGray)
+    }
+    
+    //친구가 아닌 사용자 컨텐츠 부분 안내
+    var UnknownFriendContentView: some View{
+        VStack(spacing: 0, content: {
+            SharedAsset.lockBig.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 77, height: 77)
+                .padding(.bottom, 30)
+            
+            Text("친구가 아닌 사용자입니다")
+                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                .foregroundStyle(Color.white)
+                .padding(.bottom, 10)
+            
+            Text("친구인 사용자의 프로필만 볼 수 있습니다.")
+                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                .foregroundStyle(ColorSet.subGray)
+
+        })
+    }
+    
+    //친구 요청, 삭제 팝업
+    var PopupView: some View {
+        if isRequested {
+            TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
+                Task{
+                    guard let result = await deleteFriendRequest(uId: currentUserData.uid, friendUId: self.friend.uid) else {
+                        return
+                    }
+                    isRequested = false
+                }
+            }
+        }else {
+            TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구 요청") {
+                let functions = FBManager.shared.functions
+                Task {
+                    guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uid]) else {
+                        print("network error")
+                        return
+                    }
+                    isRequested = true
+                }
+            }
+        }
+    }
+    
+    //내가 보낸 친구 요청 리스트 받아오기
+    private func getMyRequestList(){
+        let db = FBManager.shared.db
+        let query = db.collection("User").document(currentUserData.uid).collection("Friend")
+            .whereField("type", isEqualTo: "request")
+        query.getDocuments { snapshot, error in
+            Task {
+                guard error == nil else {return}
+                guard let snapshot = snapshot else {return}
+                snapshot.documents.forEach { doc in
+                    guard let uId = doc.data()["uId"] as? String else {return}
+                    self.myRequestList.append(uId)
+                    if uId == friend.uid {
+                        self.isRequested = true
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
 
 struct FriendInfoView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentBottomSheet: Bool = false
+    @State var isPresentConfirmPopup: Bool = false
+    
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
     }
-    
+    @Environment(\.dismiss) var dismiss
     var body: some View {
         
         VStack(spacing: 0, content: {
@@ -165,10 +404,22 @@ struct FriendInfoView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 22)
             .onTapGesture {
+                UIView.setAnimationsEnabled(false)
                 isPresentBottomSheet = true
             }
+            //바텀 애니메이션 뷰
             .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-                
+                BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                    DeleteFriendBottomSheetView(friend: friend, isPresentPopup: $isPresentConfirmPopup)
+                }
+                .background(TransparentBackground())
+            })
+            //친구 끊기 확인 팝업
+            .fullScreenCover(isPresented: $isPresentConfirmPopup, content: {
+                TwoButtonPopupView(title: "\(friend.nickname)님과 친구를 끊겠습니까?", positiveButtonTitle: "친구 끊기") {
+                    deleteFriend(uId: currentUserData.uid, friendUId: friend.uid)
+                }
+                .background(TransparentBackground())
             })
         })
     }
@@ -229,11 +480,11 @@ struct FriendPlaylistView: View {
                     guard let title = data["title"] as? String else {
                         return
                     }
-                    guard let songIdentifiers = data["songIdentifiers"] as? [String] else {
+                    guard let songIdentifiers = data["songIds"] as? [String] else {
                         return
                     }
                     let id = document.documentID
-                    self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, isAddItme: false))
+                    self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic))
                 }
           
             }
@@ -252,5 +503,112 @@ struct FriendPlaylistView: View {
             songs.append(song)
         }
         return songs
+    }
+}
+
+
+
+struct FriendPageCommonBottomSheetView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @Environment(\.dismiss) var dismiss
+    let friend: MumoriUser
+    @Binding var isPresentBlockConfirmPopup: Bool
+    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>) {
+        self.friend = friend
+        self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
+    }
+    
+    var body: some View {
+        VStack(spacing: 0, content: {
+            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
+                .onTapGesture {
+                    dismiss()
+                    blockFriend(uId: currentUserData.uid, friendUId: friend.uid)
+                }
+            Line5()
+            BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+        })
+    }
+    
+
+}
+
+struct FriendDeleteBlockBottomSheetView: View {
+    @Environment(\.dismiss) var dismiss
+    let friend: MumoriUser
+    @Binding var isPresentBlockConfirmPopup: Bool
+    @Binding var isPresentDeleteConfirmPopup: Bool
+    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>, isPresentDeleteConfirmPopup: Binding<Bool>) {
+        self.friend = friend
+        self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
+        self._isPresentDeleteConfirmPopup = isPresentDeleteConfirmPopup
+    }
+    
+    var body: some View {
+        VStack(spacing: 0, content: {
+            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
+                .onTapGesture {
+                    dismiss()
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBlockConfirmPopup = true
+                }
+            
+            Line5()
+            
+            BottomSheetSubTitleItem(image: SharedAsset.cutOffFriend.swiftUIImage, title: "\(friend.nickname)과 친구 끊기", subTitle: "\(friend.nickname)님과 친구 관계를 끊습니다.")
+                .onTapGesture {
+                    dismiss()
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeleteConfirmPopup = true
+                }
+        })
+    }
+}
+
+public struct Line5: View {
+    public var body: some View {
+        Divider()
+            .frame(height: 0.5)
+            .frame(maxWidth: .infinity)
+            .background(ColorSet.subGray)
+    }
+}
+
+public func blockFriend(uId: String, friendUId: String) {
+    let db = FBManager.shared.db
+    let query = db.collection("User").document(uId)
+    query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+    query.updateData(["blockFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
+    
+    let friendQuery = db.collection("User").document(friendUId)
+    friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+}
+
+public func deleteFriend(uId: String, friendUId: String){
+    let db = FBManager.shared.db
+    
+    let query = db.collection("User").document(uId)
+    query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+    
+    let friendQuery = db.collection("User").document(friendUId)
+    friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+}
+
+struct DeleteFriendBottomSheetView: View {
+    @EnvironmentObject var currentUserDat: CurrentUserData
+    @Environment(\.dismiss) var dismiss
+    @Binding var isPresentPopup: Bool
+    let friend: MumoriUser
+    init(friend: MumoriUser, isPresentPopup: Binding<Bool>) {
+        self.friend = friend
+        self._isPresentPopup = isPresentPopup
+    }
+    var body: some View {
+        BottomSheetSubTitleItem(image: SharedAsset.cutOffFriend.swiftUIImage, title: "\(friend.nickname)과 친구 끊기", subTitle: "\(friend.nickname)님과 친구 관계를 끊습니다.")
+            .onTapGesture {
+                dismiss()
+                UIView.setAnimationsEnabled(false)
+                isPresentPopup = true
+            }
     }
 }

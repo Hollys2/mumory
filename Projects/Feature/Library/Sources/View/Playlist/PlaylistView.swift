@@ -12,7 +12,6 @@ import MusicKit
 import Core
 
 struct PlaylistView: View {
-    @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
@@ -27,6 +26,10 @@ struct PlaylistView: View {
     @State var playlist: MusicPlaylist
     @State var isCompletedGetSongs: Bool = false
     
+    @State var isPresentModifyPlaylistView: Bool = false
+    
+    @State var selectedTab: Tab = .library
+        
     init(playlist: MusicPlaylist){
         self.playlist = playlist
     }
@@ -42,8 +45,6 @@ struct PlaylistView: View {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
                     ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
                 }
-
-            
         
             
             
@@ -62,7 +63,7 @@ struct PlaylistView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 30)
                             .foregroundStyle(.white)
-//                            .background(Color.yellow)
+
                         
                         //나만보기 아이템
                         HStack(spacing: 5, content: {
@@ -190,22 +191,12 @@ struct PlaylistView: View {
                     .padding(.leading, 20)
                     .opacity(isEditing ? 0 : 1)
                     .onTapGesture {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()
                 
                 if isEditing {
-                    
-//                    SharedAsset.completeLiterally.swiftUIImage
-//                        .resizable()
-//                        .scaledToFit()
-//                        .frame(width: 38, height: 43)
-//                        .padding(.trailing, 20)
-//                        .onTapGesture {
-//                            setEditMode(isEditing: false)
-//                        }
-                    
                     Button(action: {
                         setEditMode(isEditing: false)
                     }, label: {
@@ -223,6 +214,7 @@ struct PlaylistView: View {
                         .frame(width: 30, height: 30)
                         .padding(.trailing, 20)
                         .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
                             isBottomSheetPresent = true
                         }
                 }
@@ -233,11 +225,17 @@ struct PlaylistView: View {
             .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    PlaylistBottomSheetView(playlist: playlist, songs: songs)
-                        .environmentObject(manager)
+                    PlaylistBottomSheetView(playlist: playlist, songs: songs, editPlaylistNameAction: {
+                        isBottomSheetPresent = false
+                        isPresentModifyPlaylistView = true
+                    })
                 }
                 .background(TransparentBackground())
             })
+            .fullScreenCover(isPresented: $isPresentModifyPlaylistView) {
+                ModifyPlaylistPopupView(playlist: $playlist)
+                    .background(TransparentBackground())
+            }
             
             
             //삭제버튼
@@ -261,6 +259,16 @@ struct PlaylistView: View {
             }
             
             
+            MumoryTabSampleView(selectedTab: $selectedTab)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .onChange(of: selectedTab) { value in
+                    appCoordinator.selectedTab = value
+                    UIView.setAnimationsEnabled(false)
+                    appCoordinator.rootPath = NavigationPath()
+                    UIView.setAnimationsEnabled(true)
+
+                }
+            
             
             
         }
@@ -268,6 +276,7 @@ struct PlaylistView: View {
         .onAppear(perform: {
             getPlaylist()
         })
+
         
         
     }
@@ -290,7 +299,7 @@ struct PlaylistView: View {
                     return
                 }
                 
-                guard let songIDs = data["songIdentifiers"] as? [String] else {
+                guard let songIDs = data["songIds"] as? [String] else {
                     print("no song id")
                     return
                 }
@@ -341,23 +350,14 @@ struct PlaylistView: View {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
-        var newSongs = songs.filter{ !selectedSongsForDelete.contains($0) }
-        
-        let newData = [
-            "songIdentifiers" : newSongs.map({$0.id.rawValue})
-        ]
-        
-        db.collection("User").document(currentUserData.uid).collection("Playlist")
-            .document(playlist.id).setData(newData, merge: true) { error in
-                if error == nil {
-                    print("successful")
+        let songIdsForDelete = selectedSongsForDelete.map{$0.id.rawValue}
 
-                    DispatchQueue.main.async {
-                        songs = newSongs
-                        setEditMode(isEditing: false)
-                    }
-                }
-            }
+        
+        db.collection("User").document(currentUserData.uid).collection("Playlist").document(playlist.id)
+            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(songIdsForDelete)])
+        
+        songs.removeAll(where: {selectedSongsForDelete.contains($0)})
+        setEditMode(isEditing: false)
     }
     
 
@@ -503,5 +503,67 @@ private struct AddSongButtonInPlaylistView: View {
                 .frame(height: 0.5)
                 .background(ColorSet.subGray)
         })
+    }
+}
+
+private struct MumoryTabSampleView: View {
+
+    @Binding var selectedTab: Tab
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    public init(selectedTab: Binding<Tab>) {
+        self._selectedTab = selectedTab
+    }
+    
+    public var body: some View {
+        GeometryReader { geometry in
+            HStack(alignment: .bottom, spacing: 0) {
+                
+                Button(action: {
+                    selectedTab = .home
+                    playerViewModel.isShownMiniPlayer = false
+                }) {
+                    Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    selectedTab = .social
+                    playerViewModel.isShownMiniPlayer = false
+                }) {
+                    Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                        appCoordinator.isCreateMumorySheetShown = true
+                        appCoordinator.offsetY = CGFloat.zero
+                    }
+                }) {
+                    Image(asset: SharedAsset.createMumoryTabbar)
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    selectedTab = .library
+                    playerViewModel.isShownMiniPlayer = true
+                }) {
+                    Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
+                }
+                .frame(width: geometry.size.width / 5)
+                
+                Button(action: {
+                    selectedTab = .notification
+                    playerViewModel.isShownMiniPlayer = false
+                }) {
+                    Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
+                }
+                .frame(width: geometry.size.width / 5)
+            }
+            .padding(.top, 2)
+        }
+        .frame(height: 89)
+        .background(Color.black)
     }
 }

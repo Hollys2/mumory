@@ -10,92 +10,76 @@ import SwiftUI
 import Shared
 import Core
 
-struct MyPageView: View {
+public struct MyPageView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
-    @StateObject var myPageCoordinator: MyPageCoordinator = MyPageCoordinator()
-    @StateObject var withdrawManager: WithdrawViewModel = WithdrawViewModel()
-    @StateObject var settingViewModel: SettingViewModel = SettingViewModel()
+    @EnvironmentObject var withdrawManager: WithdrawViewModel
+    @EnvironmentObject var settingViewModel: SettingViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isPresentEditProfile: Bool = false
     
     let lineGray = Color(white: 0.37)
-    var body: some View {
+    public var body: some View {
         
-        NavigationStack(path: $myPageCoordinator.stack) {
-            ZStack(alignment: .top){
-                ColorSet.background
-                ScrollView{
-                    VStack(spacing: 0, content: {
-                        UserInfoView()
-                        
-                        Divider()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 0.5)
-                            .background(lineGray)
-                        
-                        SimpleFriendView()
-                            .environmentObject(myPageCoordinator)
-
-                        
-                        Divider()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 0.5)
-                            .background(lineGray)
-                        
-                        MyMumori()
-                        
-                        SubFunctionView()
-                            .environmentObject(myPageCoordinator)
-                        
-                        Rectangle()
-                            .fill(Color.clear)
-                            .frame(height: 200)
-                    })
-                }
+        ZStack(alignment: .top){
+            ColorSet.background
+            ScrollView{
+                VStack(spacing: 0, content: {
+                    UserInfoView()
+                    
+                    Divider()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 0.5)
+                        .background(lineGray)
+                    
+                    SimpleFriendView()
+                    
+                    
+                    Divider()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 0.5)
+                        .background(lineGray)
+                    
+                    MyMumori()
+                    
+                    SubFunctionView()
+                    
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(height: 200)
+                })
+            }
+            
+            HStack{
+                SharedAsset.xGradient.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        appCoordinator.setBottomAnimationPage(page: .remove)
+                    }
                 
-                HStack{
-                    SharedAsset.xGradient.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            dismiss()
-                        }
-                    
-                    Spacer()
-                    
-                    SharedAsset.setGradient.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            myPageCoordinator.push(destination: .setting)
-                        }
-                }
-                .padding(.horizontal, 20)
-                .frame(height: 44)
-                .padding(.top, currentUserData.topInset)
+                Spacer()
+                
+                SharedAsset.setGradient.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MyPage.setting)
+                    }
             }
-            .ignoresSafeArea()
-            .navigationDestination(for: MyPage.self) { myPage in
-                myPageCoordinator.getView(destination: myPage)
-                    .navigationBarBackButtonHidden()
-                    .environmentObject(myPageCoordinator)
-                    .environmentObject(withdrawManager)
-                    .environmentObject(settingViewModel)
-            }
-            .onAppear {
-                settingViewModel.uid = currentUserData.user.uid
-            }
+            .padding(.horizontal, 20)
+            .frame(height: 44)
+            .padding(.top, currentUserData.topInset)
         }
-        
+        .ignoresSafeArea()
+        .onAppear {
+            settingViewModel.uid = currentUserData.user.uid
+        }
     }
 }
-
-//#Preview {
-//    MyPageView()
-//}
 
 struct UserInfoView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -123,47 +107,47 @@ struct UserInfoView: View {
             
             VStack(alignment: .leading, spacing: 4, content: {
                 Text(currentUserData.user.nickname)
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
-                        .foregroundStyle(Color.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 20)
-
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
+                    .foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 20)
+                
                 Text("@\(currentUserData.user.id)")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
-                        .foregroundStyle(ColorSet.charSubGray)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
+                    .foregroundStyle(ColorSet.charSubGray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
                 Text(currentUserData.user.bio)
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .foregroundStyle(ColorSet.subGray)
-                        .frame(height: 52, alignment: .bottom)
-                        .padding(.bottom, 18)
-         
-
-
-                })
-                .overlay {
-                    AsyncImage(url: currentUserData.user.profileImageURL) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 90, height: 90)
-                            .clipShape(Circle())
-                    } placeholder: {
-                        Circle()
-                            .fill(Color.black)
-                            .frame(width: 90, height: 90)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .offset(y: -50)
-
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(ColorSet.subGray)
+                    .frame(height: 52, alignment: .bottom)
+                    .padding(.bottom, 18)
+                
+                
+                
+            })
+            .overlay {
+                AsyncImage(url: currentUserData.user.profileImageURL) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 90, height: 90)
+                        .clipShape(Circle())
+                } placeholder: {
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: 90, height: 90)
                 }
-                .padding(.horizontal, 20)
-
-
-
-
-         
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .offset(y: -50)
+                
+            }
+            .padding(.horizontal, 20)
+            
+            
+            
+            
+            
             
             HStack(spacing: 8, content: {
                 SharedAsset.editProfile.swiftUIImage
@@ -171,7 +155,7 @@ struct UserInfoView: View {
                 Text("프로필 편집")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundStyle(ColorSet.D9Gray)
-                  
+                
             })
             .frame(maxWidth: .infinity)
             .frame(height: 45)
@@ -190,7 +174,7 @@ struct UserInfoView: View {
 }
 
 struct SimpleFriendView: View {
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var friends: [MumoriUser] = []
     var body: some View {
@@ -214,7 +198,7 @@ struct SimpleFriendView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                myPageCoordinator.push(destination: .friendList(friends: self.friends))
+                appCoordinator.rootPath.append(MyPage.friendList(friends: self.friends))
             }
             
             ScrollView(.horizontal) {
@@ -222,7 +206,7 @@ struct SimpleFriendView: View {
                     ForEach(friends, id: \.self) { friend in
                         FriendHorizontalItem(user: friend)
                             .onTapGesture {
-                                myPageCoordinator.push(destination: .friendPage(friend: friend))
+                                appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
                             }
                     }
                 })
@@ -257,9 +241,18 @@ struct SimpleFriendView: View {
     }
 }
 
+struct MumorySample: Hashable{
+    var id: String
+    var date: Date
+    var locationTitle: String
+    var songID: String
+    var isPublic: Bool
+}
+
 struct MyMumori: View {
-    @State var list: [Int] = [1,2,3,4,5]
-//    @State var mumoris: [Mymori]
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var mumoryList: [MumorySample] = []
+    let Firebase = FBManager.shared
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -269,7 +262,7 @@ struct MyMumori: View {
                 
                 Spacer()
                 
-                Text("\(list.count)")
+                Text("\(mumoryList.count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.charSubGray)
                     .padding(.trailing, 3)
@@ -284,25 +277,65 @@ struct MyMumori: View {
             
             ScrollView(.horizontal) {
                 HStack(spacing: 11, content: {
-                    ForEach(list, id: \.self) { index in
-                        MyMumoriItem()
-                            .id(UUID())
+                    ForEach(mumoryList, id: \.id) { mumory in
+                        MyMumoryItem(mumory: mumory)
                     }
                 })
                 .padding(.horizontal, 20)
-
+                
             }
             .scrollIndicators(.hidden)
             .padding(.bottom, 40)
         })
+        .onAppear {
+            getMyMumory()
+        }
+    }
+    
+    private func getMyMumory(){
+        let db = Firebase.db
+        let uid = "tester"
+        let query = db.collection("Mumory").order(by: "date", descending: true).whereField("uId", isEqualTo: uid)
+        
+        query.getDocuments { snapshot, error in
+            guard error == nil else {
+                return
+            }
+            guard let snapshot = snapshot else {
+                print("b")
+                return
+            }
+            snapshot.documents.forEach { doc in
+                print("c")
+                Task {
+                    let data = doc.data()
+                    
+                    guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                        print("d")
+                        return
+                    }
+                    guard let songID = data["songID"] as? String else {
+                        print("e")
+                        return
+                    }
+                    let locationTitle = data["locationTitle"] as? String ?? ""
+                    let isPublic = data["isPublic"] as? Bool ?? false
+                    let id = doc.documentID
+                    
+                    self.mumoryList.append(MumorySample(id: id, date: date, locationTitle: locationTitle, songID: songID, isPublic: isPublic))
+                }
+                
+            }
+        }
+        
     }
 }
 
 struct SubFunctionView: View {
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
-
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
     let lineGray = Color(white: 0.37)
-
+    
     var body: some View {
         VStack(spacing: 0) {
             
@@ -376,7 +409,7 @@ struct SubFunctionView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                myPageCoordinator.push(destination: .activityList)
+                appCoordinator.rootPath.append(MyPage.activityList)
             }
         }
     }

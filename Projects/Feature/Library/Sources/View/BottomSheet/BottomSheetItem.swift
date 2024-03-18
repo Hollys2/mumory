@@ -50,6 +50,45 @@ struct BottomSheetItem: View {
     
 }
 
-//#Preview {
-//    BottomSheetItem(image: SharedAsset.bookmarkFilled.swiftUIImage, title: "즐겨찾기하기", type: .normal)
-//}
+
+struct BottomSheetSubTitleItem: View {
+    var image: Image
+    var title: String
+    var subTitle: String
+    
+    init(image: Image, title: String, subTitle: String) {
+        self.image = image
+        self.title = title
+        self.subTitle = subTitle
+    }
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 13, content: {
+            image
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+            
+            VStack(spacing: 5, content: {
+                Text(title)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(Color.white)
+                    .lineLimit(1)
+                
+                Text(subTitle)
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 10))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundStyle(ColorSet.subGray)
+                    .lineLimit(1)
+                
+            })
+          
+        })
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 54)
+        .padding(.horizontal, 20)
+        .background(ColorSet.background)
+    }
+    
+}

@@ -12,6 +12,7 @@ import FirebaseAuth
 import FirebaseStorage
 import Firebase
 import FirebaseMessaging
+import FirebaseFunctions
 
 public class FBManager {
     
@@ -21,15 +22,18 @@ public class FBManager {
     public let auth: Auth
     public let app: FirebaseApp?
     public let messaging: Messaging
+    public let functions: Functions
     public typealias TimeStamp = Timestamp
     public typealias Document = DocumentSnapshot
-
+    public typealias Fieldvalue = FieldValue
+    
     private init() {
         db = Firestore.firestore()
         storage = Storage.storage()
         auth = Auth.auth()
         app = FirebaseApp.app()
         messaging = Messaging.messaging()
+        functions = Functions.functions()
     }
     
     public func getGoogleCredential(idToken: String, accessToken: String) -> AuthCredential {

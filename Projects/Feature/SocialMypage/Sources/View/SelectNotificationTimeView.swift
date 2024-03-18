@@ -20,7 +20,7 @@ enum time{
 
 struct SelectNotificationTimeView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var myPageCoordinator: MyPageCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
 
     @State var selectIndex: Int = 0
@@ -36,7 +36,7 @@ struct SelectNotificationTimeView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            myPageCoordinator.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                     
                     Spacer()

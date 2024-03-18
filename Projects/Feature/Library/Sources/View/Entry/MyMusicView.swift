@@ -10,7 +10,6 @@ import SwiftUI
 import Shared
 
 struct MyMusicView: View {
-    @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var playerManager: PlayerViewModel
     var body: some View {
         ZStack(alignment: .top){

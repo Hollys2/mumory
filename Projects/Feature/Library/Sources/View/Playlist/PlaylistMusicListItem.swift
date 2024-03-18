@@ -90,6 +90,7 @@ struct PlaylistMusicListItem: View {
                         .scaledToFit()
                         .frame(width: 22, height: 22)
                         .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
                             isPresentBottomSheet = true
                         }
                         .fullScreenCover(isPresented: $isPresentBottomSheet, content: {

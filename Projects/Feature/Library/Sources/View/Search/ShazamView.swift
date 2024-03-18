@@ -13,7 +13,7 @@ import Lottie
 struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -26,7 +26,7 @@ struct ShazamView: View {
                         .frame(width: 30, height: 30)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .onTapGesture {
-                            manager.pop()
+                            appCoordinator.rootPath.removeLast()
                         }
                 }
                 .padding(.horizontal, 20)

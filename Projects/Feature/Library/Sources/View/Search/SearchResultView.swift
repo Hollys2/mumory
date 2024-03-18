@@ -13,8 +13,8 @@ import MusicKit
 struct SearchResultView: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
     @EnvironmentObject private var playerManager: PlayerViewModel
-    @EnvironmentObject private var manager: LibraryManageModel
     @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var appCoordinator: AppCoordinator
     
     @Binding var term: String
     @State private var musicList: MusicItemCollection<Song> = []
@@ -61,8 +61,7 @@ struct SearchResultView: View {
                             ForEach(artistList){ artist in
                                 SearchArtistItem(artist: artist)
                                     .onTapGesture {
-                                        manager.page = .search(term: term)
-                                        manager.push(destination: .artist(artist: artist))
+                                        appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == artist.name})
@@ -168,6 +167,3 @@ struct SearchResultView: View {
     }
 }
 
-//#Preview {
-//    SearchResultView()
-//}

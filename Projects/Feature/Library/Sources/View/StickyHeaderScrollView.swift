@@ -158,10 +158,5 @@ class UIStickyScrollViewController: UIViewController{
         self.hostingController.willMove(toParent: self)
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
-//        
-//        print("1content size: \(scrollView.contentSize)")
-//        print("1hosting size: \(hostingController.view.frame.size)")
-//        print("1scrollview size: \(scrollView.frame.size)")
-//        print("1view size: \(view.frame.size)")
     }
 }

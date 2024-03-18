@@ -13,193 +13,300 @@ import Shared
 import MusicKit
 
 @available(iOS 16.0, *)
-struct MusicRow: View {
-    
-    @State var musicModel: MusicModel
-    
+
+//가장 처음 샤잠, 최근 검색, 검색텍스트필드 등이 있음
+//검색 단어 존재 유무에 따라서 초반 뷰와 결과 뷰를 나눠서 보여주는 역할
+struct SearchMusicView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerManager: PlayerViewModel
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
+    @State var term: String = ""
+    @State var musicList: MusicItemCollection<Song> = []
+    @State var artistList: MusicItemCollection<Artist> = []
+    @GestureState var dragAmount = CGSize.zero
+    
     var body: some View {
-        Button(action: {
-            mumoryDataViewModel.choosedMusicModel = musicModel
-            appCoordinator.rootPath.removeLast()
-        }) {
-            HStack(alignment: .center, spacing: 13) {
-                AsyncImage(url: musicModel.artworkUrl) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 50, height: 50)
-                    default:
-                        Color.purple
-                            .frame(width: 50, height: 50)
-                    }
+        ZStack{
+            Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 1).ignoresSafeArea()
+            VStack(spacing: 0) {
+                HStack(spacing: 0, content: {
+                    HStack(spacing: 0, content: {
+                        SharedAsset.graySearch.swiftUIImage
+                            .frame(width: 23, height: 23)
+                            .padding(.leading, 15)
+                        
+                        TextField("노래 및 아티스트 검색", text: $term, prompt: searchPlaceHolder())
+                            .textFieldStyle(.plain)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .padding(.leading, 7)
+                            .foregroundColor(.white)
+                        
+                        
+                        SharedAsset.xWhiteCircle.swiftUIImage
+                            .frame(width: 23, height: 23)
+                            .padding(.trailing, 17)
+                            .onTapGesture {
+                                term = ""
+                            }
+                    })
+                    .frame(height: 45)
+                    .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .circular))
+                    
+                    
+                    Text("취소")
+                        .padding(.leading, 8)
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .medium))
+                        .onTapGesture {
+                            appCoordinator.rootPath.removeLast()
+                        }
+                    
+                })
+                .padding(.top, 12)
+                .padding(.leading, 20)
+                .padding(.trailing, 20)
+                .padding(.bottom, 15)
+                .background(.clear)
+                
+                if term.count > 0{
+                    SearchSelectableResultView(term: $term)
+                    
+                }else{
+                    SearchEntryView(term: $term)
                 }
                 
-                VStack(spacing: 6) {
-                    Text(musicModel.title)
-                        .lineLimit(1)
-                        .font(Font.custom("Pretendard", size: 15).weight(.semibold))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Text(musicModel.artist)
-                        .lineLimit(1)
-                        .font(Font.custom("Pretendard", size: 13))
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            } // HStack
-            .frame(maxWidth: .infinity)
-            .frame(height: 70)
-            .padding(.horizontal, 5)
+                
+                
+                Spacer()
+            }
         }
+        .navigationBarBackButtonHidden()
+        .background(.black)
+        
+    }
+    
+    
+    private func searchPlaceHolder() -> Text {
+        return Text("노래 및 아티스트 검색")
+            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
     }
 }
 
-@available(iOS 16.0, *)
-struct SearchMusicView: View {
+
+//검색 결과 뷰
+struct SearchSelectableResultView: View {
+    @EnvironmentObject private var recentSearchObject: RecentSearchObject
+    @EnvironmentObject private var playerManager: PlayerViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var appCoordinator: AppCoordinator
     
-    //    @Binding var translation: CGSize
+    @Binding var term: String
+    @State private var musicList: MusicItemCollection<Song> = []
+    @State private var artistList: MusicItemCollection<Artist> = []
     
-    @State private var searchText = ""
+    @State private var timer: Timer?
+    @State private var localTime = 0.0
     
-    @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
-    @GestureState var dragAmount = CGSize.zero
-    
-    @Environment(\.dismiss) private var dismiss
+    @State private var offset: CGPoint = .zero
+    @State private var contentSize: CGSize = .zero
+    @State private var requestIndex = 0
+    @State private var haveToLoadNextPage: Bool = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            Image(uiImage: SharedAsset.dragIndicator.image)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 14)
-                .padding(.bottom, 14)
-                .background(SharedAsset.backgroundColor.swiftUIColor) // 색이 존재해야 제스처 동작함
-            
-            //        onCommit: {
-            //            UIApplication.shared.resignFirstResponder() // 리턴 누르면 키보드 내림
-            //        },
-            HStack {
-                ZStack(alignment: .leading) {
-                    TextField("", text: $searchText, prompt: Text("음악 검색").font(Font.custom("Pretendard", size: 16))
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 45)
-                    .padding(.horizontal, 15 + 23 + 7)
-                    .background(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .fill(Color(red: 0.24, green: 0.24, blue: 0.24))
-                    )
-                    .foregroundColor(.white)
-                    .onChange(of: searchText){ newValue in
-                        if !searchText.isEmpty {
-                            //                            mumoryDataViewModel.musicModels = searchAppleMusic()
-                        } else {
-                            mumoryDataViewModel.musicModels = []
-                        }
-                    }
-                    
-                    Image(systemName: "magnifyingglass")
-                        .frame(width: 23, height: 23)
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                        .padding(.leading, 15)
-                    
-                    if !self.searchText.isEmpty {
-                        Button(action: {
-                            self.searchText = ""
-                        }) {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.white)
+        ZStack{
+            ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize){
+                VStack(spacing: 0, content: {
+                    if musicList.count == 0 && artistList.count == 0 {
+                        Text("검색 결과가 없습니다")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .foregroundStyle(ColorSet.subGray)
+                            .padding(.top, 130)
+                    }else {
+                        LazyVStack(spacing: 0, content: {
+                            //아티스트 검색 결과 타이틀 및 리스트
+                            Text("아티스트")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                .foregroundStyle(.white)
+                                .padding(.leading, 20)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.top, 16)
+                                .padding(.bottom, 9)
+                            
+                            ForEach(artistList){ artist in
+                                SearchArtistItem(artist: artist)
+                                    .onTapGesture {
+                                        appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))
+                                        
+                                        //최근 검색어 저장
+                                        let userDefault = UserDefaults.standard
+                                        var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                        recentSearchList.removeAll(where: {$0 == artist.name})
+                                        recentSearchList.insert(artist.name, at: 0)
+                                        userDefault.set(recentSearchList, forKey: "recentSearchList")
+                                    }
                             }
-                            .padding(.trailing, 17)
-                        }
+                            
+                            //구분선
+                            Rectangle()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 8)
+                                .background(Color.black)
+                            
+                            //음악 검색 결과 타이틀 및 리스트
+                            Text("곡")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundStyle(.white)
+                                .padding(.leading, 20)
+                                .padding(.top, 16)
+                                .padding(.bottom, 9)
+                            
+                            ForEach(musicList){ music in
+                                SearchSelectableSongItem(song: music)
+                                    .onTapGesture {
+                                        //최근 검색어 저장
+                                        let userDefault = UserDefaults.standard
+                                        var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                        recentSearchList.removeAll(where: {$0 == music.title})
+                                        recentSearchList.insert(music.title, at: 0)
+                                        userDefault.set(recentSearchList, forKey: "recentSearchList")
+                                    }
+                                
+                            }
+                            
+                            Rectangle()
+                                .frame(height: 87)
+                                .foregroundStyle(.clear)
+                        })
+                        
                     }
-                }
+                })
+                .frame(width: getUIScreenBounds().width)
+                //검색어 감지
+                .onChange(of: term, perform: { value in
+                    requestIndex = 0
+                    timer?.invalidate()
+                    timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: false, block: { timer in
+                        print("???")
+                        offset.y = 0
+                        requestArtist(term: term)
+                        requestSong(term: term, index: 0)
+                    })
+                })
                 
-                Button(action: {
-                    self.appCoordinator.rootPath.removeLast()
-                }) {
-                    Text("취소")
-                        .font(
-                            Font.custom("Pretendard", size: 16)
-                                .weight(.medium)
-                        )
-                        .multilineTextAlignment(.trailing)
-                        .foregroundColor(.white)
-                }
-            } // HStack
-            .frame(maxWidth: .infinity)
-            .padding(.bottom, 15)
-            ScrollView {
-                VStack(spacing: 0) {
-                    ForEach(self.mumoryDataViewModel.musicModels, id: \.self) { musicModel in
-                        MusicRow(musicModel: musicModel)
+            }
+            //스크롤 감지
+            .onChange(of: offset, perform: { value in
+                if offset.y/contentSize.height > 0.7 {
+                    if !haveToLoadNextPage {
+                        haveToLoadNextPage = true
+                        requestIndex += 1
+                        requestSong(term: term, index: requestIndex)
                     }
-                } // VStack
-                .padding(.bottom, 66)
-            } // ScrollView
-            .scrollIndicators(.hidden)
-        } // VStack
-        .navigationBarBackButtonHidden(true)
-        .padding(.horizontal, 21)
-        .frame(width: UIScreen.main.bounds.width + 1)
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-        .onAppear {
-            fetchMusic()
+                }else {
+                    haveToLoadNextPage = false
+                }
+            })
         }
-        .onDisappear {
-            appCoordinator.isSearchLocationViewShown = false
-            self.searchText = ""
-            mumoryDataViewModel.musicModels = []
+        .onAppear {
+            offset.y = 0
+            requestArtist(term: term)
+            requestSong(term: term, index: 0)
+        }
+        
+    }
+    public func requestArtist(term: String){
+        var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
+        request.limit = 20
+        
+        Task {
+            do {
+                let response = try await request.response()
+                DispatchQueue.main.async {
+                    self.artistList = response.artists
+                }
+            }catch(let error) {
+                print("error: \(error.localizedDescription)")
+            }
+            
         }
         
     }
     
-    private let requestSearch: MusicCatalogSearchRequest = {
-        var req = MusicCatalogSearchRequest(term: "ADOY", types: [Song.self])
-        req.limit = 10
-        return req
-    }()
-    
-    private func fetchMusic()  {
+    public func requestSong(term: String, index: Int) {
+        print("request song")
+        var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
+        request.limit = 20
+        request.offset = index * 20
         Task {
-            let status = await MusicAuthorization.request()
-            switch status {
-            case .authorized:
-                do {
-                    let response = try await requestSearch.response()
-                    
-                    self.mumoryDataViewModel.musicModels = response.songs.compactMap({
-                        .init(songID: $0.id, title: $0.title, artist: $0.artistName, artworkUrl: $0.artwork?.url(width: 500, height: 500))
-                    })
-//                    print("do: \(self.mumoryDataViewModel.musicModels)")
-                } catch {
-                    print("catch: \(String(describing: error))")
+            do {
+                let response = try await request.response()
+                DispatchQueue.main.async {
+                    self.musicList += response.songs
                 }
-            default :
-                break
+            }catch(let error) {
+                print("error: \(error.localizedDescription)")
             }
+            
         }
+    }
+}
+
+//선택 가능한 노래 아이템(우측에 하얀 플러스 아이콘)
+struct SearchSelectableSongItem: View {
+    var song: Song
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    var body: some View {
+        HStack(spacing: 0, content: {
+            AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
+                image
+                    .resizable()
+                    .frame(width: 57, height: 57)
+                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5)))
+            } placeholder: {
+                RoundedRectangle(cornerSize: CGSize(width: 5, height: 5))
+                    .frame(width: 57, height: 57)
+                    .foregroundStyle(.gray)
+            }
+            VStack(spacing: 3, content: {
+                Text(song.title)
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Text(song.artistName)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            })
+            .padding(.leading, 16)
+            
+            Spacer()
+            
+            SharedAsset.addWhiteCircle.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .onTapGesture {
+                    let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    mumoryDataViewModel.choosedMusicModel = musicModel
+                    appCoordinator.rootPath.removeLast()
+                }
+        })
+        .padding(.vertical, 19)
+        .padding(.horizontal, 20)
+        .background(ColorSet.background)
+        
     }
     
-    func fetchSongInfo(songId: String) async throws -> MusicModel {
-        let musicItemID = MusicItemID(rawValue: songId)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        let response = try await request.response()
-        guard let song = response.items.first else {
-            throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
-        }
-        let artworkUrl = song.artwork?.url(width: 500, height: 500)
-        return MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: artworkUrl)
-    }
+    
 }

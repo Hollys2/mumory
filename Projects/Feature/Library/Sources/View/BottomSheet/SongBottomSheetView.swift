@@ -15,7 +15,11 @@ enum bottomSheetType {
 }
 struct SongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var manager: LibraryManageModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
     var types: [bottomSheetType] = []
@@ -83,23 +87,43 @@ struct SongBottomSheetView: View {
                     BottomSheetItem(image: SharedAsset.artist.swiftUIImage, title: "아티스트 노래 목록 보기")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             getArtist(song: song) { artist in
-                                manager.push(destination: .artist(artist: artist))
+                                appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
                             }
                         }
                 }
                 
                 if !types.contains(.withoutBookmark){
-                    BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
+                    if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                        BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
+                            .onTapGesture {
+                                playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                                dismiss()
+                                snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                            }
+                    }else{
+                        BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
+                            .onTapGesture {
+                                playerViewModel.addToFavorite(uid: currentUserData.uid, songId: song.id.rawValue)
+                                dismiss()
+                                snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                            }
+                    }
                 }
                 
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                     .onTapGesture {
                         dismiss()
-                        manager.push(destination: .saveToPlaylist(songs: [song]))
+                        appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
                     }
                 BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
+                    .onTapGesture {
+                        dismiss()
+                        UIPasteboard.general.string = song.url?.absoluteString
+                        snackBarViewModel.setSnackBar(type: .copy, status: .success)
+                    }
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                 
             })
@@ -108,26 +132,23 @@ struct SongBottomSheetView: View {
         }
     
     private func getArtist(song: Song, completion: @escaping (Artist) -> ())  {
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
-        request.properties = [.artists]
+    
         Task{
-            do{
-                let response = try await request.response().items
-                guard let song = response.first else {
-                    print("no song")
-                    return
-                }
-                
-                guard let artist = song.artists?.first else {
-                    print("no artist")
-                    return
-                }
-                
-                completion(artist)
-                
-            }catch(let error) {
-                print("error: \(error.localizedDescription)")
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: song.id)
+            request.properties = [.artists]
+            guard let response = try? await request.response().items else {
+                return
             }
+            guard let song = response.first else {
+                print("no song")
+                return
+            }
+            guard let artist = song.artists?.first else {
+                print("no artist")
+                return
+            }
+            
+            completion(artist)
         }
     }
 

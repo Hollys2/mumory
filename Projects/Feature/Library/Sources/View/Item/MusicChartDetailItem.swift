@@ -11,6 +11,9 @@ import Shared
 import MusicKit
 
 struct MusicChartDetailItem: View {
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     var rank: Int
     var song: Song
 
@@ -55,9 +58,28 @@ struct MusicChartDetailItem: View {
             })
             
             Spacer()
-            SharedAsset.bookmark.swiftUIImage
-                .frame(width: 20, height: 20)
-                .padding(.trailing, 23)
+            
+            if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                SharedAsset.bookmarkFilled.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .padding(.trailing, 23)
+                    .onTapGesture {
+                        playerViewModel.removeFromFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                    }
+            }else {
+                SharedAsset.bookmark.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .padding(.trailing, 23)
+                    .onTapGesture {
+                        playerViewModel.addToFavorite(uid: currentUserData.uid, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                    }
+            }
             
             SharedAsset.menu.swiftUIImage
                 .frame(width: 22, height: 22)

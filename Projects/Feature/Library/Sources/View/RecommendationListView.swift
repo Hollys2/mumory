@@ -12,7 +12,6 @@ import MusicKit
 import Core
 
 struct RecommendationListView: View {
-    @EnvironmentObject var manager: LibraryManageModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerManager: PlayerViewModel
@@ -97,7 +96,7 @@ struct RecommendationListView: View {
                         //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
                         Rectangle()
                             .foregroundStyle(.clear)
-                            .frame(height: songs.count == 0 ? 1000 : isCompletedGetSongs ? 90 : 1000)
+                            .frame(height: songs.count < 50 ? 1000 : 90)
                         
                         
                     })
@@ -119,7 +118,7 @@ struct RecommendationListView: View {
                     .frame(width: 30, height: 30)
                     .padding(.leading, 20)
                     .onTapGesture {
-                        manager.pop()
+                        appCoordinator.rootPath.removeLast()
                     }
                 
                 Spacer()
@@ -130,6 +129,7 @@ struct RecommendationListView: View {
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
                     .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
                         isBottomSheetPresent = true
                     }
             })
@@ -171,32 +171,25 @@ struct RecommendationListView: View {
     
     private func fetchSongInfo(songIDs: [String]) async {
         self.songs = []
-        
         for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
+            Task {
+                let musicItemID = MusicItemID(rawValue: id)
+                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                guard let response = try? await request.response() else {
+                    return
+                }
                 guard let song = response.items.first else {
                     print("no song")
-                    continue
+                    return
                 }
-                
-                DispatchQueue.main.async {
+                withAnimation {
                     self.songs.append(song)
                 }
-                
-                
-            } catch {
-                print("Error: \(error)")
             }
         }
-        
         isCompletedGetSongs = true
     }   
+    
     private func getUpdateDateText() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM월 dd일에 업데이트됨"
