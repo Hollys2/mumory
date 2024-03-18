@@ -99,7 +99,3 @@ public struct PagingTestView: View {
         }
     }
 }
-
-#Preview {
-    PagingTestView()
-}

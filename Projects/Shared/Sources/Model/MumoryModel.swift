@@ -70,41 +70,41 @@ public struct LocationModel: Identifiable, Codable {
 }
 
 public struct Comment: Codable, Hashable {
-    public let mumoryDocumentID: String
+    
+    public var id: String
+    
     public let userDocumentID: String
     public let parentDocumentID: String?
     public let date: Date
     public let content: String
     public let isPublic: Bool
     
-    public init(mumoryDocumentID: String, userDocumentID: String, parentDocumentID: String? = nil, date: Date, content: String, isPublic: Bool) {
-         self.mumoryDocumentID = mumoryDocumentID
-         self.userDocumentID = userDocumentID
-         self.parentDocumentID = parentDocumentID
-         self.date = date
-         self.content = content
-         self.isPublic = isPublic
-     }
+    public init(id: String, userDocumentID: String, parentDocumentID: String? = nil, date: Date, content: String, isPublic: Bool) {
+        self.id = id
+        self.userDocumentID = userDocumentID
+        self.parentDocumentID = parentDocumentID
+        self.date = date
+        self.content = content
+        self.isPublic = isPublic
+    }
     
-    public init?(data: [String: Any]) {
-        guard let mumoryDocumentID = data["mumoryDocumentID"] as? String,
-              let userDocumentID = data["userDocumentID"] as? String,
-//              let parentDocumentID = data["parentDocumentID"] as? String,
+    public init?(id: String, data: [String: Any]) {
+        guard let userDocumentID = data["uId"] as? String,
               let date = data["date"] as? FirebaseManager.Timestamp,
               let content = data["content"] as? String,
               let isPublic = data["isPublic"] as? Bool
         else {
-            print("Something is nil!")
+            print("Something is nil in Comment")
             return nil
         }
-        
-        if let parentDocumentID = data["parentDocumentID"] as? String {
+
+        if let parentDocumentID = data["parentID"] as? String {
             self.parentDocumentID = parentDocumentID
         } else {
             self.parentDocumentID = nil
         }
 
-        self.mumoryDocumentID = mumoryDocumentID
+        self.id = id
         self.userDocumentID = userDocumentID
         self.date = date.dateValue()
         self.content = content
@@ -116,27 +116,36 @@ extension Comment {
     public func toDictionary() -> [String: Any] {
         if let parentDocumentID = parentDocumentID {
             return [
-                "mumoryDocumentID": mumoryDocumentID,
-                "userDocumentID": userDocumentID,
-                "parentDocumentID": parentDocumentID,
+                "uId": userDocumentID,
+                "parentId": parentDocumentID,
                 "date": FirebaseManager.Timestamp(date: date),
                 "content": content,
                 "isPublic": isPublic
             ]
         } else {
             return [
-                "mumoryDocumentID": mumoryDocumentID,
-                "userDocumentID": userDocumentID,
+                "uId": userDocumentID,
                 "date": FirebaseManager.Timestamp(date: date),
                 "content": content,
                 "isPublic": isPublic
             ]
         }
     }
+    
+    static func fromDocumentData(_ documentData: [String: Any], commentDocumentID: String, comments: [Comment]) -> Comment? {
+        guard let userDocumentID = documentData["uId"] as? String,
+              let date = documentData["date"] as? FirebaseManager.Timestamp,
+              let content = documentData["content"] as? String,
+              let isPublic = documentData["isPublic"] as? Bool else {
+            return nil
+        }
+        
+        return Comment(id: commentDocumentID, userDocumentID: userDocumentID, date: date.dateValue(), content: content, isPublic: isPublic)
+    }
 }
 
 
-public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
+public class Mumory: NSObject, MKAnnotation, Identifiable {
     
     public var id: String
 
@@ -150,11 +159,12 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     public var imageURLs: [String]?
     public var isPublic: Bool
     public var likes: [String]
+    public var commentCount: Int
     public var comments: [Comment]
     
     enum CodingKeys: String, CodingKey {
-        case userDocumentID
         case id
+        case userDocumentID
         case date
         case musicModel
         case locationModel
@@ -166,7 +176,7 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
         case comments
     }
 
-    public init(id: String, userDocumentID: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], comments: [Comment]) {
+    public init(id: String, userDocumentID: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int, comments: [Comment]) {
         self.id = id
         self.userDocumentID = userDocumentID
         self.date = date
@@ -177,11 +187,12 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
         self.imageURLs = imageURLs
         self.isPublic = isPublic
         self.likes = likes
+        self.commentCount = commentCount
         self.comments = comments
     }
     
     public override convenience init() {
-        self.init(id: "", userDocumentID: "UNKNOWN", date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], comments: [])
+        self.init(id: "", userDocumentID: "UNKNOWN", date: Date(), musicModel: MusicModel(songID: MusicItemID(rawValue: "123"), title: "", artist: ""), locationModel: LocationModel(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: -1, comments: [])
     }
     
     func copy(from other: Mumory) {
@@ -198,130 +209,54 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
 }
 
 extension Mumory {
-    static func fetchMusic(musicID: String) async throws -> MusicModel {
-        let musicItemID = MusicItemID(rawValue: musicID)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        let response = try await request.response()
-        guard let song = response.items.first else {
-            throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+    
+    static func fromDocumentData(_ documentData: [String: Any], mumoryDocumentID: String) async -> Mumory? {
+        
+        guard let userDocumentID = documentData["uId"] as? String,
+              let songID = documentData["songID"] as? String,
+              let latitude = documentData["latitude"] as? CLLocationDegrees,
+              let longitude = documentData["longitude"] as? CLLocationDegrees,
+              let date = documentData["date"] as? FirebaseManager.Timestamp,
+              let tags = documentData["tags"] as? [String],
+              let content = documentData["content"] as? String,
+              let imageURLs = documentData["imageURLs"] as? [String],
+              let isPublic = documentData["isPublic"] as? Bool,
+              let likes = documentData["likes"] as? [String],
+              let count = documentData["commentCount"] as? Int else {
+            return nil
         }
         
-        return MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
-    }
-    
-    public static func locationToLocationModel(location: CLLocation) async -> LocationModel? {
-        let geocoder = CLGeocoder()
         do {
-            let placemarks = try await geocoder.reverseGeocodeLocation(location)
-            guard let placemark = placemarks.first else {
-                return nil
-            }
+            let musicItemID = MusicItemID(rawValue: songID)
+            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
             
+            async let musicResponse = request.response()
+            let location = CLLocation(latitude: latitude, longitude: longitude)
+            async let placemarkResults = CLGeocoder().reverseGeocodeLocation(location)
+            async let commentCountResult = MumoryDataViewModel.fetchCommentCount(mumoryId: mumoryDocumentID)
+            
+            let (response, placemarks, commentCount) = await (try musicResponse, try placemarkResults, commentCountResult)
+            
+            guard let song = response.items.first else {
+                throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
+            }
+            let musicModel = MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
+            
+            guard let placemark = placemarks.first else {
+                return nil as Mumory?
+            }
             let locationTitle = placemark.name ?? ""
             let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
-            
             let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: location.coordinate)
             
-            return locationModel
+
+            return Mumory(id: mumoryDocumentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count, comments: [])
+            
         } catch {
-            print("Error: ", error.localizedDescription)
+            print("Error fetching music or location:", error.localizedDescription)
             return nil
         }
     }
-    
-    func convertDataToMumory(with newData: [String: Any]) async -> Mumory? {
-        guard let userDocumentID = newData["userDocumentID"] as? String,
-              let songID = newData["songID"] as? String,
-              let latitude = newData["latitude"] as? CLLocationDegrees,
-              let longitude = newData["longitude"] as? CLLocationDegrees,
-              let date = newData["date"] as? FirebaseManager.Timestamp,
-              let tags = newData["tags"] as? [String],
-              let content = newData["content"] as? String,
-              let imageURLs = newData["imageURLs"] as? [String],
-              let isPublic = newData["isPublic"] as? Bool,
-              let likes = newData["likes"] as? [String],
-              let comments = newData["comments"] as? [[String: Any]] else {
-            return nil
-        }
-        
-        do {
-            let musicModel = try await Mumory.fetchMusic(musicID: songID)
-            let location = CLLocation(latitude: latitude, longitude: longitude)
-            guard let locationModel = await Mumory.locationToLocationModel(location: location) else { return nil }
-            let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-            
-            return Mumory(id: self.id, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-            
-        } catch {
-            return nil
-        }
-    }
-    
-    func createAsync(with documentData: [String: Any], documentID: String) async -> Mumory? {
-           guard let userDocumentID = documentData["userDocumentID"] as? String,
-                 let songID = documentData["songID"] as? String,
-                 let latitude = documentData["latitude"] as? CLLocationDegrees,
-                 let longitude = documentData["longitude"] as? CLLocationDegrees,
-                 let date = documentData["date"] as? FirebaseManager.Timestamp,
-                 let tags = documentData["tags"] as? [String],
-                 let content = documentData["content"] as? String,
-                 let imageURLs = documentData["imageURLs"] as? [String],
-                 let isPublic = documentData["isPublic"] as? Bool,
-                 let likes = documentData["likes"] as? [String],
-                 let comments = documentData["comments"] as? [[String: Any]] else {
-               return nil
-           }
-
-           // 비동기 작업 수행
-           do {
-//               let extensionInstance = MumoryExtension() // 가정: MumoryExtension에 fetchMusic과 locationToLocationModel 메서드가 정의되어 있음
-               let musicModel = try await Mumory.fetchMusic(musicID: songID)
-               let location = CLLocation(latitude: latitude, longitude: longitude)
-               guard let locationModel = await Mumory.locationToLocationModel(location: location) else { return nil }
-               let commentsData = comments.compactMap { Comment(data: $0) } // : [Comment]
-               
-               // 모든 데이터가 준비되면 Mumory 인스턴스 생성
-               return Mumory(id: documentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-           } catch {
-               return nil
-           }
-       }
-    
-    static func fromDocumentData(_ documentData: [String: Any], documentID: String) async -> Mumory? {
-            guard let userDocumentID = documentData["userDocumentID"] as? String,
-                  let songID = documentData["songID"] as? String,
-                  let latitude = documentData["latitude"] as? CLLocationDegrees,
-                  let longitude = documentData["longitude"] as? CLLocationDegrees,
-                  let date = documentData["date"] as? FirebaseManager.Timestamp,
-                  let tags = documentData["tags"] as? [String],
-                  let content = documentData["content"] as? String,
-                  let imageURLs = documentData["imageURLs"] as? [String],
-                  let isPublic = documentData["isPublic"] as? Bool,
-                  let likes = documentData["likes"] as? [String],
-                  let comments = documentData["comments"] as? [[String: Any]] else {
-                return nil
-            }
-
-            let commentsData = comments.compactMap { Comment(data: $0) }
-            let musicModel: MusicModel
-            let locationModel: LocationModel?
-
-            do {
-                musicModel = try await Mumory.fetchMusic(musicID: songID)
-                let location = CLLocation(latitude: latitude, longitude: longitude)
-                locationModel = await Mumory.locationToLocationModel(location: location)
-            } catch {
-                print("Error fetching music or location:", error.localizedDescription)
-                return nil
-            }
-
-            guard let finalLocationModel = locationModel else {
-                print("Failed to get location model.")
-                return nil
-            }
-
-            return Mumory(id: documentID, userDocumentID: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: finalLocationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, comments: commentsData)
-        }
 }
 
 //public class MumoryData: Codable {

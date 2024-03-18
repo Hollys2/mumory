@@ -420,7 +420,7 @@ public struct CreateMumoryBottomSheetView: View {
                             }
                             
                             dispatchGroup.notify(queue: .main) {
-                                let newMumoryAnnotation = Mumory(id: "", userDocumentID: "tester", date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], comments: [])
+                                let newMumoryAnnotation = Mumory(id: "", userDocumentID: "tester", date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0, comments: [])
                                 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                     switch result {
