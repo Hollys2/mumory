@@ -76,11 +76,10 @@ struct CommentView: View {
                     } // HStack
                     
                     
-                    Text(comment.isPublic ? "비밀 댓글입니다." : comment.content)
+                    Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? comment.content : "비밀 댓글입니다.")
                         .lineSpacing(20)
-                        .font(comment.isPublic ? Font.custom("Pretendard", size: 14)
-                            .weight(.medium) : Font.custom("Pretendard", size: 14))
-                        .foregroundColor(comment.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                        .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
+                        .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding(.vertical, 15)
                 } // VStack
@@ -88,7 +87,7 @@ struct CommentView: View {
                 .background(
                     Rectangle()
                         .foregroundColor(.clear)
-                        .background(comment.isPublic ? Color(red: 0.09, green: 0.09, blue: 0.09) : Color(red: 0.12, green: 0.12, blue: 0.12))
+                        .background(self.selectedComment.id == self.comment.id ? Color(red: 0.09, green: 0.09, blue: 0.09) : Color(red: 0.12, green: 0.12, blue: 0.12))
                         .cornerRadius(15)
                 )
                 
@@ -117,7 +116,6 @@ struct CommentView: View {
                 self.user = await MumoriUser(uId: comment.userDocumentID)
             }
         }
-        
         
         // MARK: Reply
         ForEach(self.replies, id: \.self) { reply in
@@ -201,10 +199,10 @@ struct Reply: View {
                     })
                 } // HStack
                 
-                Text(comment.isPublic ? comment.content : "비밀 댓글입니다.")
+                Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? comment.content : "비밀 댓글입니다.")
                     .lineSpacing(20)
-                    .font(comment.isPublic ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundColor(comment.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                    .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                    .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(.vertical, 15)
 
@@ -424,6 +422,7 @@ public struct MumoryCommentSheetView: View {
                                         .frame(width: 4, alignment: .bottom)
 
                                     Button(action: {
+                                        self.selectedComment = Comment()
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     }, label: {
                                         Text("취소")

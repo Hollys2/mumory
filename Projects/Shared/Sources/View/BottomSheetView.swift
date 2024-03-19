@@ -15,7 +15,7 @@ public enum MumoryBottomSheetType {
     case mumoryDetailView
     case mumorySocialView
     case mumoryCommentView
-    case mumoryCommentMyView
+    case mumoryCommentMyView(isMe: Bool)
     case mumoryCommentFriendView
     case addFriend
     case myMumory
@@ -97,16 +97,24 @@ public struct MumoryBottomSheet {
             
         case .mumoryCommentView:
             return []
-        case .mumoryCommentMyView:
-            return [
-                BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", action: {
-                    self.appCoordinator.isDeleteCommentPopUpViewShown = true
-                })
-            ]
+        case .mumoryCommentMyView(let isMe):
+            if isMe {
+                return [
+                    BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", action: {
+                        self.appCoordinator.isDeleteCommentPopUpViewShown = true
+                    })
+                ]
+            } else {
+                return [
+                    BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
+
+                    })
+                ]
+            }
         case .mumoryCommentFriendView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
-                    //                    self.appCoordinator.isDeleteCommentPopUpViewShown = true
+
                 })
             ]
         case .addFriend:
