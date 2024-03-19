@@ -17,6 +17,7 @@ struct TagView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 5) {
             Image(uiImage: SharedAsset.tagMumoryDatail.image)
+                .resizable()
                 .frame(width: 14, height: 14)
 
             Text(text)
@@ -123,10 +124,11 @@ struct MumoryDetailScrollContentView: View {
                         .frame(height: 38)
                     } // HStack
                     .frame(height: 38)
-                    .padding(.vertical, 50)
+                    .padding(.top, 55)
+                    .padding(.bottom, (self.mumory.tags ?? []).isEmpty && (self.mumory.content ?? []).isEmpty && (self.mumory.tags ?? []).isEmpty ? 50 : 55)
+                    .background(.orange)
                     
-                    if let tags = self.mumory.tags {
-                        // MARK: Tag
+                    if let tags = self.mumory.tags, !tags.isEmpty {
                         HStack(spacing: 0) {
                             
                             ForEach(tags.indices, id: \.self) { index in
@@ -140,32 +142,26 @@ struct MumoryDetailScrollContentView: View {
                             
                             Spacer(minLength: 0)
                         } // HStack
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 25)
                     }
                     
                     if let content = self.mumory.content, !content.isEmpty {
-                        // MARK: Content
                         Text("\(content)")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                             .multilineTextAlignment(.leading)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                             .fixedSize(horizontal: false, vertical: true)
-                            .padding(.bottom, 20)
+                            .padding(.bottom, 25)
                     }
 
-                    
-//                    if let imageURLs = self.mumoryAnnotation.imageURLs, !imageURLs.isEmpty {
                         // MARK: Image
-//                    if let selectedMumoryAnnotaion = mumoryDataViewModel.selectedMumoryAnnotation, !(selectedMumoryAnnotaion.imageURLs ?? []).isEmpty {
                     if !(self.mumory.imageURLs ?? []).isEmpty {
                         MumoryDetailImageScrollView(mumoryAnnotation: self.mumory)
                             .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
-                            .padding(.bottom, 25)
+                            .padding(.bottom, 50 - 11)
                     }
                 }
-                
-                Spacer().frame(height: 25)
                 
                 MumoryDetailReactionBarView(mumory: self.$mumory, isOn: false)
                     .background(GeometryReader { geometry in

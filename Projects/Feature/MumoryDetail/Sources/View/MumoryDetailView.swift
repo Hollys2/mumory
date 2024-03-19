@@ -198,7 +198,9 @@ public struct MumoryDetailView: View {
                     Image(uiImage: SharedAsset.closeButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 30, height: 30)
-                        .padding(20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .padding(.bottom, 12)
                 })
                 
                 Spacer()
@@ -213,7 +215,7 @@ public struct MumoryDetailView: View {
                 })
             }
             .padding(.top, appCoordinator.safeAreaInsetsTop + 19 - 20)
-            .padding(.bottom, 12)
+//            .padding(.bottom, 12)
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
