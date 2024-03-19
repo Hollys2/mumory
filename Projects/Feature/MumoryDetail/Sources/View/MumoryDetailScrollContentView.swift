@@ -20,7 +20,6 @@ struct TagView: View {
         HStack(alignment: .center, spacing: 5) {
             Image(uiImage: SharedAsset.tagMumoryDatail.image)
                 .resizable()
-                .resizable()
                 .frame(width: 14, height: 14)
 
             Text(text)
