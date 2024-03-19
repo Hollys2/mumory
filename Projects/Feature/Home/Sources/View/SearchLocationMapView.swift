@@ -66,7 +66,9 @@ public struct SearchLocationMapView: View {
                             .frame(width: 30, height: 30)
                             .padding(20)
                     }
-                    .padding(.top, appCoordinator.safeAreaInsetsTop + 19)
+                    .padding(.top, appCoordinator.safeAreaInsetsTop)
+                    .background(.red)
+//                    .background(.blue)
                 }
                 
                 VStack(spacing: 0) {
