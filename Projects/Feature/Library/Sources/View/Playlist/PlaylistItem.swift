@@ -11,15 +11,15 @@ import Shared
 import MusicKit
 
 struct PlaylistItem: View {
-    @State var playlist: MusicPlaylist
-    @State var songs: [Song] = []
+    @Binding var playlist: MusicPlaylist
+//    @State var songs: [Song] = []
     
     var radius: CGFloat = 10
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     let itemSize: CGFloat
     
-    init(playlist: MusicPlaylist,itemSize: CGFloat){
-        self.playlist = playlist
+    init(playlist: Binding<MusicPlaylist>,itemSize: CGFloat){
+        self._playlist = playlist
         self.itemSize = itemSize
     }
     
@@ -30,12 +30,12 @@ struct PlaylistItem: View {
                 VStack(spacing: 0, content: {
                     HStack(spacing: 0, content: {
                         //1번째 이미지
-                        if songs.count < 1 {
+                        if playlist.songs.count < 1 {
                             Rectangle()
                                 .fill(emptyGray)
                                 .frame(width: itemSize, height: itemSize)
                         }else{
-                            AsyncImage(url: songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                 image
                                     .resizable()
                                     .scaledToFill()
@@ -54,12 +54,12 @@ struct PlaylistItem: View {
                             .foregroundStyle(ColorSet.background)
                         
                         //2번째 이미지
-                        if songs.count < 2{
+                        if playlist.songs.count < 2{
                             Rectangle()
                                 .fill(emptyGray)
                                 .frame(width: itemSize, height: itemSize)
                         }else{
-                            AsyncImage(url: songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                 image
                                     .resizable()
                                     .scaledToFill()
@@ -82,12 +82,12 @@ struct PlaylistItem: View {
                     
                     HStack(spacing: 0,content: {
                         //3번째 이미지
-                        if songs.count < 3 {
+                        if playlist.songs.count < 3 {
                             Rectangle()
                                 .fill(emptyGray)
                                 .frame(width: itemSize, height: itemSize)
                         }else{
-                            AsyncImage(url: songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                 image
                                     .resizable()
                                     .scaledToFill()
@@ -106,12 +106,12 @@ struct PlaylistItem: View {
                             .foregroundStyle(ColorSet.background)
                         
                         //4번째 이미지
-                        if songs.count <  4 {
+                        if playlist.songs.count <  4 {
                             Rectangle()
                                 .fill(emptyGray)
                                 .frame(width: itemSize, height: itemSize)
                         }else{
-                            AsyncImage(url: songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                            AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                 image
                                     .resizable()
                                     .scaledToFill()
@@ -162,11 +162,11 @@ struct PlaylistItem: View {
             }
             
         }
-        .onAppear(perform: {
-            Task{
-                self.songs = await fetchSongInfo(songIDs: playlist.songIDs)
-            }
-        })
+//        .onAppear(perform: {
+//            Task{
+//                self.songs = await fetchSongInfo(songIDs: playlist.songIDs)
+//            }
+//        })
     }
     
     private func fetchSongInfo(songIDs: [String]) async -> [Song]{

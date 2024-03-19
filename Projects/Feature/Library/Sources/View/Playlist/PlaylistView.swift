@@ -18,20 +18,19 @@ struct PlaylistView: View {
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
-    @State var songs: [Song] = []
+//    @State var songs: [Song] = []
     @State var isEditing: Bool = false
     @State var isSongDeletePopupPresent: Bool = false
     @State var selectedSongsForDelete: [Song] = []
     
-    @State var playlist: MusicPlaylist
-    @State var isCompletedGetSongs: Bool = false
+    @Binding var playlist: MusicPlaylist
     
     @State var isPresentModifyPlaylistView: Bool = false
     
     @State var selectedTab: Tab = .library
         
-    init(playlist: MusicPlaylist){
-        self.playlist = playlist
+    init(playlist: Binding<MusicPlaylist>){
+        self._playlist = playlist
     }
     
     var body: some View {
@@ -39,7 +38,7 @@ struct PlaylistView: View {
             ColorSet.background.ignoresSafeArea()
 
             //이미지
-            PlaylistImage(songs: $songs)
+            PlaylistImage(songs: $playlist.songs)
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
@@ -81,7 +80,7 @@ struct PlaylistView: View {
                         
                         ZStack(alignment: .bottom){
                             HStack(spacing: 0, content: {
-                                if songs.count == selectedSongsForDelete.count {
+                                if playlist.songs.count == selectedSongsForDelete.count {
                                     SharedAsset.checkCircleFill.swiftUIImage
                                         .resizable()
                                         .scaledToFit()
@@ -100,7 +99,7 @@ struct PlaylistView: View {
                                         .padding(.trailing, 14)
                                         .onTapGesture {
                                             DispatchQueue.main.async {
-                                                selectedSongsForDelete = songs
+                                                selectedSongsForDelete = playlist.songs
                                             }
                                         }
                                 }
@@ -128,7 +127,7 @@ struct PlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerManager.playAll(title: playlist.title , songs: songs)
+                                        playerManager.playAll(title: playlist.title , songs: playlist.songs)
                                     }
                             })
                             .padding(.bottom, 15)
@@ -140,7 +139,7 @@ struct PlaylistView: View {
                         .padding(.horizontal, 20)
                         
                         //플레이리스트 곡 목록
-                        ForEach(songs, id: \.self) { song in
+                        ForEach(playlist.songs, id: \.self) { song in
                             PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongs: $selectedSongsForDelete)
                                 .animation(.default, value: isEditing)
                                 .onTapGesture {
@@ -166,7 +165,7 @@ struct PlaylistView: View {
                         //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
                         Rectangle()
                             .foregroundStyle(.clear)
-                            .frame(height: songs.count == 0 ? 1000 : isCompletedGetSongs ? 500 : 1000)
+                            .frame(height: playlist.songIDs.count == playlist.songs.count ? 500 : 1000)
                         
                         
                     })
@@ -225,7 +224,7 @@ struct PlaylistView: View {
             .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    PlaylistBottomSheetView(playlist: playlist, songs: songs, editPlaylistNameAction: {
+                    PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
                         isBottomSheetPresent = false
                         isPresentModifyPlaylistView = true
                     })
@@ -259,92 +258,92 @@ struct PlaylistView: View {
             }
             
             
-            MumoryTabSampleView(selectedTab: $selectedTab)
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .onChange(of: selectedTab) { value in
-                    appCoordinator.selectedTab = value
-                    UIView.setAnimationsEnabled(false)
-                    appCoordinator.rootPath = NavigationPath()
-                    UIView.setAnimationsEnabled(true)
-
-                }
+//            MumoryTabSampleView(selectedTab: $selectedTab)
+//                .frame(maxHeight: .infinity, alignment: .bottom)
+//                .onChange(of: selectedTab) { value in
+//                    appCoordinator.selectedTab = value
+//                    UIView.setAnimationsEnabled(false)
+//                    appCoordinator.rootPath = NavigationPath()
+//                    UIView.setAnimationsEnabled(true)
+//
+//                }
             
             
             
         }
         .ignoresSafeArea()
-        .onAppear(perform: {
-            getPlaylist()
-        })
+//        .onAppear(perform: {
+//            getPlaylist()
+//        })
 
         
         
     }
     
     private func setEditMode(isEditing: Bool) {
-        appCoordinator.isHiddenTabBarWithoutAnimation = isEditing
+//        appCoordinator.isHiddenTabBarWithoutAnimation = isEditing
         withAnimation {
             self.isEditing = isEditing
             appCoordinator.isHiddenTabBar = isEditing
         }
     }
-    private func getPlaylist() {
-        let Firebase = FBManager.shared
-        let db = Firebase.db
-        
-        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
-            if error == nil {
-                guard let data = snapshot?.data() else {
-                    print("no data")
-                    return
-                }
-                
-                guard let songIDs = data["songIds"] as? [String] else {
-                    print("no song id")
-                    return
-                }
-                playlist.songIDs = songIDs
-                
-                Task {
-                    await fetchSongInfo(songIDs: songIDs)
-                }
-                
-                
-                
-            }else {
-                print("error: \(error!)")
-            }
-        }
-    }
+//    private func getPlaylist() {
+//        let Firebase = FBManager.shared
+//        let db = Firebase.db
+//        
+//        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
+//            if error == nil {
+//                guard let data = snapshot?.data() else {
+//                    print("no data")
+//                    return
+//                }
+//                
+//                guard let songIDs = data["songIds"] as? [String] else {
+//                    print("no song id")
+//                    return
+//                }
+//                playlist.songIDs = songIDs
+//                
+//                Task {
+//                    await fetchSongInfo(songIDs: songIDs)
+//                }
+//                
+//                
+//                
+//            }else {
+//                print("error: \(error!)")
+//            }
+//        }
+//    }
     
-    private func fetchSongInfo(songIDs: [String]) async {
-        self.songs = []
-        
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-            
-                withAnimation {
-                    self.songs.append(song)
-                }
-                
-                
-            } catch {
-                print("Error: \(error)")
-            }
-        }
-        
-        isCompletedGetSongs = true
-    }
+//    private func fetchSongInfo(songIDs: [String]) async {
+//        self.songs = []
+//        
+//        for id in songIDs {
+//            let musicItemID = MusicItemID(rawValue: id)
+//            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+//            request.properties = [.genres, .artists]
+//            
+//            do {
+//                let response = try await request.response()
+//                
+//                guard let song = response.items.first else {
+//                    print("no song")
+//                    continue
+//                }
+//            
+//                withAnimation {
+//                    self.songs.append(song)
+//                }
+//                
+//                
+//            } catch {
+//                print("Error: \(error)")
+//            }
+//        }
+//        
+//        isCompletedGetSongs = true
+//    }
     
     private func deleteSongsFromPlaylist() {
         let Firebase = FBManager.shared
@@ -356,7 +355,7 @@ struct PlaylistView: View {
         db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
             .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(songIdsForDelete)])
         
-        songs.removeAll(where: {selectedSongsForDelete.contains($0)})
+        playlist.songs.removeAll(where: {selectedSongsForDelete.contains($0)})
         setEditMode(isEditing: false)
     }
     
@@ -364,18 +363,18 @@ struct PlaylistView: View {
 }
 
 
-private struct PlaylistImage: View {
+public struct PlaylistImage: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var imageWidth: CGFloat = 0
     @Binding var songs: [Song]
     
     let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     
-    init(songs: Binding<[Song]>) {
+    public init(songs: Binding<[Song]>) {
         self._songs = songs
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
                 //1번째 이미지

@@ -142,22 +142,15 @@ struct UnkownFriendPageView: View {
     var UnknownFriendInfoView: some View {
         VStack(spacing: 0, content: {
  
-            AsyncImage(url: friend.backgroundImageURL) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: getUIScreenBounds().width, height: 150)
-                    .clipped()
-            } placeholder: {
-                Rectangle()
-                    .frame(maxWidth: .infinity)
-                    .frame(width: getUIScreenBounds().width)
-                    .frame(height: 150)
-                    .foregroundStyle(ColorSet.darkGray)
-            }
-            .overlay {
-                LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
-            }
+            
+            Rectangle()
+                .frame(maxWidth: .infinity)
+                .frame(width: getUIScreenBounds().width)
+                .frame(height: 150)
+                .foregroundStyle(ColorSet.darkGray)
+                .overlay {
+                    LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
+                }
             
             VStack(alignment: .leading, spacing: 4, content: {
                 Text(friend.nickname)
@@ -171,32 +164,23 @@ struct UnkownFriendPageView: View {
                         .foregroundStyle(ColorSet.charSubGray)
                         .frame(maxWidth: .infinity, alignment: .leading)
                  
-                //자기소개
-                Text(friend.bio)
+                //자기소개 안보이게
+                Text("")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(ColorSet.subGray)
                         .frame(height: 52, alignment: .bottom)
                         .padding(.bottom, 18)
-                })
-                .overlay {
-                    AsyncImage(url: friend.profileImageURL) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 90, height: 90)
-                            .clipShape(Circle())
-                    } placeholder: {
-                        SharedAsset.profileRed.swiftUIImage
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 90, height: 90)
-                            .clipShape(Circle())
-                    }
+            })
+            .overlay {
+                SharedAsset.profileRed.swiftUIImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 90, height: 90)
+                    .clipShape(Circle())
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .offset(y: -50)
-
-                }
-                .padding(.horizontal, 20)
+            }
+            .padding(.horizontal, 20)
 
                 HStack(spacing: 4, content: {
                     if isRequested {
@@ -430,14 +414,15 @@ struct FriendInfoView: View {
 }
 
 struct FriendPlaylistView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
     }
     
     let db = FBManager.shared.db
-    
     @State var playlists: [MusicPlaylist] = []
+    
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0, content: {
@@ -458,11 +443,17 @@ struct FriendPlaylistView: View {
                 })
                 .frame(height: 67)
                 .padding(.horizontal, 20)
+                .onTapGesture {
+                    appCoordinator.rootPath.append(MumoryPage.friendPlaylistManage(friend: self.friend, playlist: $playlists))
+                }
                 
                 ScrollView(.horizontal) {
                     HStack(alignment: .top,spacing: 10, content: {
-                        ForEach(playlists, id: \.id) { playlist in
-                            PlaylistItem(playlist: playlist, itemSize: 85)
+                        ForEach( 0 ..< playlists.count, id: \.self) { index in
+                            PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
+                                .onTapGesture {
+                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlist: $playlists[index]))
+                                }
                         }
                         .padding(.horizontal, 20)
                     })
@@ -470,32 +461,39 @@ struct FriendPlaylistView: View {
             })
         }
         .onAppear {
-            Task {
-                guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
-                    print("error")
-                    return
+            if self.playlists.isEmpty {
+                Task {
+                    await getPlaylist()
+                    fetchSongToPlaylist(playlistArray: $playlists)
                 }
-                for document in snapshot.documents {
-                    let data = document.data()
-                    guard let isPublic = data["isPublic"] as? Bool else {
-                        return
-                    }
-                    if !isPublic {continue}
-                    guard let title = data["title"] as? String else {
-                        return
-                    }
-                    guard let songIdentifiers = data["songIds"] as? [String] else {
-                        return
-                    }
-                    let id = document.documentID
-                    self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic))
-                }
-          
             }
         }
     }
-    
+    private func getPlaylist() async {
+        self.playlists.removeAll()
+        guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
+            print("error")
+            return
+        }
+        for document in snapshot.documents {
+            let data = document.data()
+            guard let isPublic = data["isPublic"] as? Bool else {
+                return
+            }
+            if !isPublic {continue}
+            guard let title = data["title"] as? String else {
+                return
+            }
+            guard let songIdentifiers = data["songIds"] as? [String] else {
+                return
+            }
+            let id = document.documentID
+            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic))
+        }
+        
+    }
     private func fetchSongInfo(songIdentifiers: [String]) async -> [Song] {
+ 
         var songs: [Song] = []
         for id in songIdentifiers {
             let musicItemID = MusicItemID(rawValue: id)
@@ -614,5 +612,209 @@ struct DeleteFriendBottomSheetView: View {
                 UIView.setAnimationsEnabled(false)
                 isPresentPopup = true
             }
+    }
+}
+
+
+struct PlaylistItemTest: View {
+    @Binding var playlist: MusicPlaylist
+//    @State var songs: [Song] = []
+    
+    var radius: CGFloat = 10
+    var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
+    let itemSize: CGFloat
+    
+    init(playlist: Binding<MusicPlaylist>,itemSize: CGFloat){
+        self._playlist = playlist
+        self.itemSize = itemSize
+    }
+    
+    var body: some View {
+        ZStack(alignment: .top){
+            
+            VStack(spacing: 0){
+                VStack(spacing: 0, content: {
+                    HStack(spacing: 0, content: {
+                        //1번째 이미지
+                        if playlist.songs.count < 1 {
+                            Rectangle()
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
+                        }
+                        
+                        //세로줄(구분선)
+                        Rectangle()
+                            .frame(width: 1)
+                            .frame(maxHeight: .infinity)
+                            .foregroundStyle(ColorSet.background)
+                        
+                        //2번째 이미지
+                        if playlist.songs.count < 2{
+                            Rectangle()
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
+                        }
+                        
+                        
+                    })
+                    
+                    //가로줄(구분선)
+                    Rectangle()
+                        .frame(height: 1)
+                        .frame(maxWidth: .infinity)
+                        .foregroundStyle(ColorSet.background)
+                    
+                    HStack(spacing: 0,content: {
+                        //3번째 이미지
+                        if playlist.songs.count < 3 {
+                            Rectangle()
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
+                        }
+                        
+                        //세로줄 구분선
+                        Rectangle()
+                            .frame(width: 1)
+                            .frame(maxHeight: .infinity)
+                            .foregroundStyle(ColorSet.background)
+                        
+                        //4번째 이미지
+                        if playlist.songs.count <  4 {
+                            Rectangle()
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
+                        }
+                        
+                    })
+                })
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                .overlay {
+                    SharedAsset.bookmarkWhite.swiftUIImage
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                        .opacity(playlist.id == "favorite" ? 1 : 0)
+                    
+                    SharedAsset.lockPurple.swiftUIImage
+                        .resizable()
+                        .frame(width: 23, height: 23)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .opacity(playlist.id == "favorite" ? 0 : playlist.isPublic ? 0 : 1)
+                }
+                
+                
+                Text(playlist.title)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .padding(.top, 10)
+                    .foregroundStyle(.white)
+                
+                Text("\(playlist.songIDs.count)곡")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(LibraryColorSet.lightGrayTitle)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 5)
+                
+            }
+            
+        }
+//        .onAppear(perform: {
+//            Task{
+//                self.songs = await fetchSongInfo(songIDs: playlist.songIDs)
+//            }
+//        })
+    }
+    
+    private func fetchSongInfo(songIDs: [String]) async -> [Song]{
+        var songs: [Song] = []
+        var count: Int = 0
+        for id in songIDs {
+            if count > 3 {
+                break
+            }
+            let musicItemID = MusicItemID(rawValue: id)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
+            let response = try? await request.response()
+            guard let song = response?.items.first else {
+                continue
+            }
+            songs.append(song)
+            count += 1
+        }
+        return songs
+    }
+    
+}
+
+
+
+
+public func fetchSongToPlaylist(playlistArray: Binding<[MusicPlaylist]>) {
+    for i in 0 ..< playlistArray.count {
+        let songIDs = playlistArray.wrappedValue[i].songIDs
+        for id in songIDs {
+            Task {
+                let musicItemID = MusicItemID(rawValue: id)
+                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                let response = try? await request.response()
+                guard let song = response?.items.first else {
+                    return
+                }
+                DispatchQueue.main.async {
+                    playlistArray.wrappedValue[i].songs.append(song)
+                }
+            }
+        }
     }
 }

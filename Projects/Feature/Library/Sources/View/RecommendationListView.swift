@@ -203,117 +203,117 @@ struct RecommendationListView: View {
 }
 
 
-private struct PlaylistImage: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
-    @State var imageWidth: CGFloat = 0
-    @Binding var songs: [Song]
-    
-    let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
-    
-    init(songs: Binding<[Song]>) {
-        self._songs = songs
-    }
-    
-    var body: some View {
-        VStack(spacing: 0, content: {
-            HStack(spacing: 0, content: {
-                //1번째 이미지
-                if songs.count < 1 {
-                    Rectangle()
-                        .frame(width: imageWidth, height: imageWidth)
-                        .foregroundStyle(emptyGray)
-                }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageWidth, height: imageWidth)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageWidth, height: imageWidth)
-                            .foregroundStyle(emptyGray)
-                    }
-                }
-                
-                //세로줄(구분선)
-                Rectangle()
-                    .frame(width: 1, height: imageWidth)
-                    .foregroundStyle(ColorSet.background)
-                
-                //2번째 이미지
-                if songs.count < 2{
-                    Rectangle()
-                        .frame(width: imageWidth, height: imageWidth)
-                        .foregroundStyle(emptyGray)
-                }else{
-                    AsyncImage(url: songs[1].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageWidth, height: imageWidth)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageWidth, height: imageWidth)
-                            .foregroundStyle(emptyGray)
-                    }
-                }
-                
-                
-            })
-            
-            //가로줄(구분선)
-            Rectangle()
-                .frame(width: getUIScreenBounds().width, height: 1)
-                .foregroundStyle(ColorSet.background)
-            
-            HStack(spacing: 0,content: {
-                //3번째 이미지
-                if songs.count < 3 {
-                    Rectangle()
-                        .frame(width: imageWidth, height: imageWidth)
-                        .foregroundStyle(emptyGray)
-                }else{
-                    AsyncImage(url: songs[2].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageWidth, height: imageWidth)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageWidth, height: imageWidth)
-                            .foregroundStyle(emptyGray)
-                    }
-                }
-                
-                //세로줄 구분선
-                Rectangle()
-                    .frame(width: 1, height: imageWidth)
-                    .foregroundStyle(ColorSet.background)
-                
-                //4번째 이미지
-                if songs.count <  4 {
-                    Rectangle()
-                        .frame(width: imageWidth, height: imageWidth)
-                        .foregroundStyle(emptyGray)
-                }else{
-                    AsyncImage(url: songs[3].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageWidth, height: imageWidth)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageWidth, height: imageWidth)
-                            .foregroundStyle(emptyGray)
-                    }
-                }
-                
-            })
-        })
-        .onAppear {
-            DispatchQueue.main.async {
-                self.imageWidth = getUIScreenBounds().width/2
-            }
-        }
-        
-    }
-    
-    
-}
+//private struct PlaylistImage: View {
+//    @EnvironmentObject var currentUserData: CurrentUserData
+//    @State var imageWidth: CGFloat = 0
+//    @Binding var songs: [Song]
+//    
+//    let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
+//    
+//    init(songs: Binding<[Song]>) {
+//        self._songs = songs
+//    }
+//    
+//    var body: some View {
+//        VStack(spacing: 0, content: {
+//            HStack(spacing: 0, content: {
+//                //1번째 이미지
+//                if songs.count < 1 {
+//                    Rectangle()
+//                        .frame(width: imageWidth, height: imageWidth)
+//                        .foregroundStyle(emptyGray)
+//                }else{
+//                    AsyncImage(url: songs[0].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+//                        image
+//                            .resizable()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                    } placeholder: {
+//                        Rectangle()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                            .foregroundStyle(emptyGray)
+//                    }
+//                }
+//                
+//                //세로줄(구분선)
+//                Rectangle()
+//                    .frame(width: 1, height: imageWidth)
+//                    .foregroundStyle(ColorSet.background)
+//                
+//                //2번째 이미지
+//                if songs.count < 2{
+//                    Rectangle()
+//                        .frame(width: imageWidth, height: imageWidth)
+//                        .foregroundStyle(emptyGray)
+//                }else{
+//                    AsyncImage(url: songs[1].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+//                        image
+//                            .resizable()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                    } placeholder: {
+//                        Rectangle()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                            .foregroundStyle(emptyGray)
+//                    }
+//                }
+//                
+//                
+//            })
+//            
+//            //가로줄(구분선)
+//            Rectangle()
+//                .frame(width: getUIScreenBounds().width, height: 1)
+//                .foregroundStyle(ColorSet.background)
+//            
+//            HStack(spacing: 0,content: {
+//                //3번째 이미지
+//                if songs.count < 3 {
+//                    Rectangle()
+//                        .frame(width: imageWidth, height: imageWidth)
+//                        .foregroundStyle(emptyGray)
+//                }else{
+//                    AsyncImage(url: songs[2].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+//                        image
+//                            .resizable()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                    } placeholder: {
+//                        Rectangle()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                            .foregroundStyle(emptyGray)
+//                    }
+//                }
+//                
+//                //세로줄 구분선
+//                Rectangle()
+//                    .frame(width: 1, height: imageWidth)
+//                    .foregroundStyle(ColorSet.background)
+//                
+//                //4번째 이미지
+//                if songs.count <  4 {
+//                    Rectangle()
+//                        .frame(width: imageWidth, height: imageWidth)
+//                        .foregroundStyle(emptyGray)
+//                }else{
+//                    AsyncImage(url: songs[3].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+//                        image
+//                            .resizable()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                    } placeholder: {
+//                        Rectangle()
+//                            .frame(width: imageWidth, height: imageWidth)
+//                            .foregroundStyle(emptyGray)
+//                    }
+//                }
+//                
+//            })
+//        })
+//        .onAppear {
+//            DispatchQueue.main.async {
+//                self.imageWidth = getUIScreenBounds().width/2
+//            }
+//        }
+//        
+//    }
+//    
+//    
+//}
 

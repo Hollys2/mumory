@@ -11,6 +11,7 @@ import Shared
 import MusicKit
 import Core
 public struct MyRecentMusicView: View {
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var musicList: [Song] = []
@@ -31,15 +32,15 @@ public struct MyRecentMusicView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             
-            if musicList.isEmpty{
+            if mumoryDataViewModel.myMumorys.isEmpty{
                 NoMumoryView()
                     .frame(maxHeight: .infinity, alignment: .center)
                     .padding(.bottom, 7)
             }else {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top,spacing: 8, content: {
-                        ForEach(musicList, id: \.title) { song in
-                            RecentMusicItem(song: song)
+                        ForEach(mumoryDataViewModel.myMumorys, id: \.self) { mumory in
+                            RecentMusicItem(songId: mumory.musicModel.songID.rawValue)
                         }
                     })
                     .padding(.horizontal, 20)
@@ -48,9 +49,9 @@ public struct MyRecentMusicView: View {
                 .padding(.top, 12)
             }
         })
-        .onAppear(perform: {
-            searchRecentMusicPost()
-        })
+//        .onAppear(perform: {
+//            searchRecentMusicPost()
+//        })
     }
     
     private func searchRecentMusicPost(){
@@ -94,6 +95,8 @@ public struct MyRecentMusicView: View {
 
 
 struct NoMumoryView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+
     var body: some View {
         VStack(alignment: .center,spacing: 0, content: {
             Text("나의 뮤모리를 기록하고")
@@ -114,6 +117,12 @@ struct NoMumoryView: View {
                 .background(ColorSet.darkGray)
                 .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
                 .padding(.top, 25)
+                .onTapGesture {
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                        appCoordinator.isCreateMumorySheetShown = true
+                        appCoordinator.offsetY = CGFloat.zero
+                    }
+                }
 
         })
     }

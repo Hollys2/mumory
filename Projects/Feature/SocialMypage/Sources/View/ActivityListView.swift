@@ -282,7 +282,7 @@ struct DatePickerView: View {
     @State var selectDate: Date = Date()
     init(date: Binding<Date>){
         self._date = date
-        self.selectDate = date.wrappedValue
+        self.selectDate = Date()
         
         let calendar = Calendar.current
         let startDateComponents = DateComponents(year: 2023, month: 1)
@@ -322,6 +322,7 @@ struct DatePickerView: View {
             })
       
         }
+ 
     }
     
     private func DateText(date: Date) -> String {

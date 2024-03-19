@@ -30,7 +30,7 @@ struct PlaylistItem_Big: View {
         self._isEditing = isEditing
     }
     
-    @State var songs: [Song] = []
+//    @State var songs: [Song] = []
     var body: some View {
         ZStack{
             VStack(spacing: 0){
@@ -38,12 +38,12 @@ struct PlaylistItem_Big: View {
                     VStack(spacing: 0, content: {
                         HStack(spacing: 0, content: {
                             //1번째 이미지
-                            if songs.count < 1 {
+                            if playlist.songs.count < 1 {
                                 Rectangle()
                                     .frame(width: 84, height: 84)
                                     .foregroundStyle(emptyGray)
                             }else{
-                                AsyncImage(url: songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                     image
                                         .resizable()
                                         .frame(width: 84, height: 84)
@@ -60,12 +60,12 @@ struct PlaylistItem_Big: View {
                                 .foregroundStyle(ColorSet.background)
                             
                             //2번째 이미지
-                            if songs.count < 2{
+                            if playlist.songs.count < 2{
                                 Rectangle()
                                     .frame(width: 84, height: 84)
                                     .foregroundStyle(emptyGray)
                             }else{
-                                AsyncImage(url: songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                     image
                                         .resizable()
                                         .frame(width: 84, height: 84)
@@ -86,12 +86,12 @@ struct PlaylistItem_Big: View {
                         
                         HStack(spacing: 0,content: {
                             //3번째 이미지
-                            if songs.count < 3 {
+                            if playlist.songs.count < 3 {
                                 Rectangle()
                                     .frame(width: 84, height: 84)
                                     .foregroundStyle(emptyGray)
                             }else{
-                                AsyncImage(url: songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                     image
                                         .resizable()
                                         .frame(width: 84, height: 84)
@@ -108,12 +108,12 @@ struct PlaylistItem_Big: View {
                                 .foregroundStyle(ColorSet.background)
                             
                             //4번째 이미지
-                            if songs.count <  4 {
+                            if playlist.songs.count <  4 {
                                 Rectangle()
                                     .frame(width: 84, height: 84)
                                     .foregroundStyle(emptyGray)
                             }else{
-                                AsyncImage(url: songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
                                     image
                                         .resizable()
                                         .frame(width: 84, height: 84)
@@ -196,15 +196,15 @@ struct PlaylistItem_Big: View {
                 if playlist.id == "favorite"{
                     appCoordinator.rootPath.append(LibraryPage.favorite)
                 }else {
-                    appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                    appCoordinator.rootPath.append(LibraryPage.playlist(playlist: $playlist))
                 }
             }
             
         }
         .onAppear(perform: {
-            Task{
-                await fetchSongInfo(songIDs: playlist.songIDs)
-            }
+//            Task{
+//                await fetchSongInfo(songIDs: playlist.songIDs)
+//            }
         })
     }
     
@@ -220,26 +220,26 @@ struct PlaylistItem_Big: View {
         }
     }
     
-    private func fetchSongInfo(songIDs: [String]) async {
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                
-                self.songs.append(song)
-            } catch {
-                print("Error: \(error)")
-            }
-        }
-    }
+//    private func fetchSongInfo(songIDs: [String]) async {
+//        for id in songIDs {
+//            let musicItemID = MusicItemID(rawValue: id)
+//            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+//            request.properties = [.genres, .artists]
+//            
+//            do {
+//                let response = try await request.response()
+//                
+//                guard let song = response.items.first else {
+//                    print("no song")
+//                    continue
+//                }
+//                
+//                self.songs.append(song)
+//            } catch {
+//                print("Error: \(error)")
+//            }
+//        }
+//    }
     
 }
 
