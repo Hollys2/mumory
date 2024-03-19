@@ -34,6 +34,7 @@ public struct MumoriUser: Hashable{
         guard let document = try? await db.collection("User").document(uId).getDocument() else {
             return
         }
+        
         guard let data = document.data() else {
             return
         }
