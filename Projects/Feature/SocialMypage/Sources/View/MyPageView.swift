@@ -250,12 +250,9 @@ struct MumorySample: Hashable{
 }
 
 struct MyMumori: View {
-    
-    @State var mumoryList: [MumorySample] = []
-
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     let Firebase = FBManager.shared
 
     var body: some View {
@@ -269,7 +266,7 @@ struct MyMumori: View {
                 
                 Spacer()
                 
-                Text("\(mumoryList.count)")
+                Text("\(mumoryDataViewModel.myMumorys.count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.charSubGray)
                     .padding(.trailing, 3)
@@ -287,8 +284,11 @@ struct MyMumori: View {
             
             ScrollView(.horizontal) {
                 HStack(spacing: 11, content: {
-                    ForEach(mumoryList, id: \.id) { mumory in
+                    ForEach(mumoryDataViewModel.myMumorys.prefix(10), id: \.id) { mumory in
                         MyMumoryItem(mumory: mumory)
+                            .onTapGesture {
+                                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                            }
                     }
                 })
                 .padding(.horizontal, 20)
@@ -297,48 +297,45 @@ struct MyMumori: View {
             .scrollIndicators(.hidden)
             .padding(.bottom, 40)
         })
-        .onAppear {
-            getMyMumory()
-        }
     }
     
-    private func getMyMumory(){
-        let db = Firebase.db
-        let uid = currentUserData.uId
-        let query = db.collection("Mumory").order(by: "date", descending: true).whereField("uId", isEqualTo: uid)
-        
-        query.getDocuments { snapshot, error in
-            guard error == nil else {
-                return
-            }
-            guard let snapshot = snapshot else {
-                print("b")
-                return
-            }
-            snapshot.documents.forEach { doc in
-                print("c")
-                Task {
-                    let data = doc.data()
-                    
-                    guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {
-                        print("d")
-                        return
-                    }
-                    guard let songID = data["songID"] as? String else {
-                        print("e")
-                        return
-                    }
-                    let locationTitle = data["locationTitle"] as? String ?? ""
-                    let isPublic = data["isPublic"] as? Bool ?? false
-                    let id = doc.documentID
-                    
-                    self.mumoryList.append(MumorySample(id: id, date: date, locationTitle: locationTitle, songID: songID, isPublic: isPublic))
-                }
-                
-            }
-        }
-        
-    }
+//    private func getMyMumory(){
+//        let db = Firebase.db
+//        let uid = currentUserData.uId
+//        let query = db.collection("Mumory").order(by: "date", descending: true).whereField("uId", isEqualTo: uid)
+//        
+//        query.getDocuments { snapshot, error in
+//            guard error == nil else {
+//                return
+//            }
+//            guard let snapshot = snapshot else {
+//                print("b")
+//                return
+//            }
+//            snapshot.documents.forEach { doc in
+//                print("c")
+//                Task {
+//                    let data = doc.data()
+//                    
+//                    guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {
+//                        print("d")
+//                        return
+//                    }
+//                    guard let songID = data["songID"] as? String else {
+//                        print("e")
+//                        return
+//                    }
+//                    let locationTitle = data["locationTitle"] as? String ?? ""
+//                    let isPublic = data["isPublic"] as? Bool ?? false
+//                    let id = doc.documentID
+//                    
+//                    self.mumoryList.append(MumorySample(id: id, date: date, locationTitle: locationTitle, songID: songID, isPublic: isPublic))
+//                }
+//                
+//            }
+//        }
+//        
+//    }
 }
 
 struct SubFunctionView: View {

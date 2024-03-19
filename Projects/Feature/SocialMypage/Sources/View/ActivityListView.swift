@@ -8,18 +8,49 @@
 
 import SwiftUI
 import Shared
+import MusicKit
+
 enum ActivityType {
     case all
     case like
     case comment
     case friend
 }
+struct Activity: Hashable{
+    let type: String
+    let songId: String
+    let mumoryId: String
+    let friendNickname: String
+    let myNickname: String
+    var content: String = ""
+    let activityText: String
+    
+    init(type: String, songId: String, mumoryId: String, friendNickname: String, myNickname: String, content: String) {
+        self.type = type
+        self.songId = songId
+        self.mumoryId = mumoryId
+        self.friendNickname = friendNickname
+        self.myNickname = myNickname
+        self.content = content
+        
+        if type == "like" {
+            activityText = "\(myNickname)님이 \(friendNickname)님의 뮤모리 를 공감합니다."
+        }else if type == "comment" {
+            activityText = "\(myNickname)님이 \(friendNickname)님의 뮤모리에 댓글을 남겼습니다: “\(content)”"
+        }else if type == "reply" {
+            activityText = "\(myNickname)님이 \(friendNickname)님의 댓글에 답글을 남겼습니다: “\(content)”"
+        }else {
+            activityText = "USER ACIVITY ISSUE"
+        }
+    }
+}
 struct ActivityListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var selection: ActivityType = .all
     @State var date: Date = Date()
     @State var isPresentDatePicker: Bool = false
-    @State var activityList: [String: [Any]] = [:]
+    @State var activityList: [String: [Activity]] = [:]
     
     let db = FBManager.shared.db
     
@@ -107,8 +138,8 @@ struct ActivityListView: View {
                     VStack(spacing: 0, content: {
                         ForEach(activityList.keys.sorted(by: > ), id: \.self) { date in
                             Section {
-                                ForEach((activityList[date] as? [String]) ?? [] , id: \.self) { title in
-                                   ActivityTestItem(title: title)
+                                ForEach((activityList[date]) ?? [] , id: \.self) { activity in
+                                   ActivityTestItem(activity: activity)
                                 }
                             } header: {
                                 Text(date)
@@ -164,16 +195,27 @@ struct ActivityListView: View {
     }
     
     private func getActivity(type: ActivityType, date: Date, pagingCorsor: Binding<FBManager.Document?>) async {
-        activityList.removeAll()
+        if pagingCorsor.wrappedValue == nil {
+            activityList.removeAll()
+        }
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy년 MM월 dd일"
         guard let targetDate = Calendar.current.date(byAdding: .month, value: 1, to: date) else {
             return
         }
+        
         Task {
-            let query = db.collection("User").document("s61sCSHlZQRfzeDOmG3sDt6saGI2").collection("Notification")
+            var query = db.collection("User").document(currentUserData.uId).collection("Activity")
                 .whereField("date", isLessThan: targetDate)
                 .order(by: "date", descending: true)
+            
+            if type == .like {
+                query = query
+                        .whereField("type", isEqualTo: "like")
+            }else if type == .comment {
+                query = query
+                        .whereField("type", in: ["comment", "reply"])
+            }
             
             guard let snapshots = try? await query.getDocuments() else {
                 print("error1")
@@ -183,19 +225,18 @@ struct ActivityListView: View {
             snapshots.documents.forEach { document in
                 let data = document.data()
 
-                guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {
-                    return
-                }
-                guard let title = data["friendNickname"] as? String else {
-                    return
-                }
+                guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {return}
+                guard let type = data["type"] as? String else {return}
+                guard let friendNickname = data["friendNickname"] as? String else {return}
+                guard let songId = data["songId"] as? String else {return}
+                guard let mumoryId = data["mumoryId"] as? String else {return}
+                let content = (data["content"] as? String) ?? ""
                 let dateString = formatter.string(from: date)
                 
                 if !self.activityList.keys.contains(dateString) {
                     self.activityList[dateString] = []
                 }
-                self.activityList[dateString]?.append(title)
-
+                self.activityList[dateString]?.append(Activity(type: type, songId: songId, mumoryId: mumoryId, friendNickname: friendNickname, myNickname: currentUserData.user.nickname, content: content))
             }
             
         }
@@ -281,9 +322,6 @@ struct DatePickerView: View {
             })
       
         }
-        .onAppear(perform: {
-            selectDate = date
-        })
     }
     
     private func DateText(date: Date) -> String {
@@ -294,11 +332,15 @@ struct DatePickerView: View {
 }
 
 struct ActivityTestItem: View {
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    let title: String
-    init(title: String) {
-        self.title = title
+    let activity: Activity
+    init(activity: Activity) {
+        self.activity = activity
     }
+    @State var song: Song?
+    
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -306,13 +348,21 @@ struct ActivityTestItem: View {
                     .fill(ColorSet.Gray34)
                     .frame(width: 38, height: 38)
                     .overlay {
-                        SharedAsset.notifyLike.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
+                        //타입이 좋아요인지 댓글인지에 따라 다른 아이콘
+                        if activity.type == "like" {
+                            SharedAsset.notifyLike.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                        }else if activity.type == "comment" || activity.type == "reply" {
+                            SharedAsset.notifyComment.swiftUIImage  
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+                        }
                     }
                 
-                AsyncImage(url: URL(string: "https://cdnimg.melon.co.kr/cm2/album/images/112/04/947/11204947_20230316100238_500.jpg?0af76a293c86008d6eb99af90374d31d/melon/optimize/90")) { image in
+                AsyncImage(url: self.song?.artwork?.url(width: 300, height: 300)) { image in
                     image
                         .resizable()
                         .scaledToFill()
@@ -323,8 +373,7 @@ struct ActivityTestItem: View {
                 .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
                 .padding(.leading, 12)
                 
-                
-                Text("사용자본인님이 \(title)님의 뮤모리 를 공감합니다.")
+                Text(activity.activityText)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .foregroundStyle(Color.white)
                     .lineLimit(2)
@@ -347,6 +396,19 @@ struct ActivityTestItem: View {
                 .frame(height: 0.5)
                 .background(ColorSet.subGray)
         })
+        .onAppear{
+            Task {
+                self.song = await fetchSong(songID: activity.songId)
+            }
+        }
+        .onTapGesture {
+            if self.activity.type == "like" || self.activity.type == "comment" || self.activity.type == "reply" {
+                Task{
+                    let mumory = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
+                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                }
+            }
+        }
 
 
     }

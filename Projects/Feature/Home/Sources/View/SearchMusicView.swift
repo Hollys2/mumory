@@ -138,9 +138,7 @@ struct SearchSelectableResultView: View {
                             ForEach(artistList){ artist in
                                 SearchArtistItem(artist: artist)
                                     .onTapGesture {
-                                        appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))
-                                        
-                                        //최근 검색어 저장
+                                        appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))                                        //최근 검색어 저장
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == artist.name})

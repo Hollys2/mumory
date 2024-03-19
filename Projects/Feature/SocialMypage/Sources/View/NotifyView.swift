@@ -7,11 +7,13 @@
 //
 
 import SwiftUI
+import MusicKit
 import Shared
 
 struct NotifyView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    
     @State var notifications: [Notification] = []
     let db = FBManager.shared.db
 
@@ -135,11 +137,15 @@ struct UnreadText: View {
 
 struct NotifyLikeItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @Binding var notification: Notification
     init(notification: Binding<Notification>) {
         self._notification = notification
+
     }
     let db = FBManager.shared.db
+    @State var song: Song?
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -153,7 +159,7 @@ struct NotifyLikeItem: View {
                         .frame(width: 24, height: 24)
                 }
             
-            AsyncImage(url: notification.artworkURL) { image in
+            AsyncImage(url: self.song?.artwork?.url(width: 300, height: 300)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -190,7 +196,19 @@ struct NotifyLikeItem: View {
         .frame(height: 90)
         .frame(maxWidth: .infinity)
         .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
+        .onAppear{
+            if song == nil {
+                Task {
+                    self.song = await fetchSong(songID: notification.songId)
+                }
+            }
+        }
         .onTapGesture {
+            Task{
+                let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
+                print(mumory.imageURLs)
+                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+            }
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
@@ -207,12 +225,15 @@ struct NotifyLikeItem: View {
 }
 
 struct NotifyCommentItem: View {
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @Binding var notification: Notification
     init(notification: Binding<Notification>) {
         self._notification = notification
     }
     let db = FBManager.shared.db
+    @State var song: Song?
 
     var body: some View {
         HStack(spacing: 0, content: {
@@ -226,7 +247,7 @@ struct NotifyCommentItem: View {
                         .frame(width: 24, height: 24)
                 }
             
-            AsyncImage(url: notification.artworkURL) { image in
+            AsyncImage(url: self.song?.artwork?.url(width: 300, height: 300)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -269,7 +290,19 @@ struct NotifyCommentItem: View {
         .padding(.horizontal, 15)
         .frame(height: 90)
         .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
+        .onAppear{
+            if self.song == nil {
+                Task {
+                    self.song = await fetchSong(songID: notification.songId)
+                }
+            }
+        }
         .onTapGesture {
+            Task{
+                let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
+                print(mumory.imageURLs)
+                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+            }
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
@@ -365,7 +398,7 @@ struct Notification {
     var date: Date
     var isRead: Bool
     var friendNickname: String = ""
-    var artworkURL: URL?
+    var songId: String = ""
     var mumoriId: String = ""
     var content: String = ""
     var friendUId: String = ""
@@ -386,23 +419,23 @@ struct Notification {
         
         switch(self.type){
         case .like:
-            guard let artworkURLString = data["artworkURL"] as? String else {return}
-            self.artworkURL = URL(string: artworkURLString)
+            guard let songId = data["songId"] as? String else {return}
+            self.songId = songId
             guard let friendNickname = data["friendNickname"] as? String else {return}
             self.friendNickname = friendNickname
-            guard let mumoriId = data["mumoriId"] as? String else {return}
+            guard let mumoriId = data["mumoryId"] as? String else {return}
             self.mumoriId = mumoriId
             
         case .comment, .reply:
-            guard let artworkURLString = data["artworkURL"] as? String else {return}
-            self.artworkURL = URL(string: artworkURLString)
+            guard let songId = data["songId"] as? String else {return}
+            self.songId = songId
             guard let friendNickname = data["friendNickname"] as? String else {return}
             self.friendNickname = friendNickname
-            guard let mumoriId = data["mumoriId"] as? String else {return}
+            guard let mumoriId = data["mumoryId"] as? String else {return}
             self.mumoriId = mumoriId
-            guard let content = data["content"] as? String else {return}
+            guard let content = data["content"] as? String else {print("error");return}
             self.content = content
-            
+            print(content)
         case .friendAccept, .friendRequest:
             guard let friendNickname = data["friendNickname"] as? String else {return}
             guard let friendUId = data["friendUId"] as? String else {return}
@@ -439,4 +472,16 @@ private func dateToString(date: Date) -> String{
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
     return formatter.string(from: date)
+}
+
+public func fetchSong(songID: String) async -> Song? {
+    let musicItemID = MusicItemID(rawValue: songID)
+    var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+    guard let response = try? await request.response() else {
+        return nil
+    }
+    guard let song = response.items.first else {
+        return nil
+    }
+    return song
 }

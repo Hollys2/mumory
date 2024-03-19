@@ -185,7 +185,8 @@ public struct CustomizationView: View {
             "id": manager.id,
             "nickname": manager.nickname,
             "favoriteGenres": manager.selectedGenres.map({$0.id}),
-            "notificationTime": manager.selectedTime
+            "notificationTime": manager.selectedTime,
+            "fcmToken": messaging.fcmToken ?? ""
         ]
         
         userData.merge(await uploadProfileImage(uid: uid))

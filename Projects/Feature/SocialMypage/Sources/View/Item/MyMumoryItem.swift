@@ -11,9 +11,9 @@ import Shared
 import MusicKit
 
 struct MyMumoryItem: View {
-    let mumory: MumorySample
+    let mumory: Mumory
     @State var song: Song?
-    init(mumory: MumorySample) {
+    init(mumory: Mumory) {
         self.mumory = mumory
     }
     
@@ -31,7 +31,7 @@ struct MyMumoryItem: View {
                 RoundedRectangle(cornerRadius: 10, style: .circular)
                     .frame(width: 170, height: 170)
             }
-            .overlay {
+            .overlay(content: {
                 Text(DateText(date: mumory.date))
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                     .foregroundStyle(Color.white)
@@ -59,7 +59,7 @@ struct MyMumoryItem: View {
                         .frame(width: 18, height: 18)
                         .scaledToFit()
                     
-                    Text(mumory.locationTitle)
+                    Text(mumory.locationModel.locationTitle)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -68,13 +68,13 @@ struct MyMumoryItem: View {
                 })
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 .padding(11)
-                
-            }
+            })
+           
             
         })
         .onAppear {
             Task {
-                self.song = await fetchSong(songID: mumory.songID)
+                self.song = await fetchSong(songID: mumory.musicModel.songID.rawValue)
             }
         }
     }

@@ -170,6 +170,9 @@ struct RecommendationListView: View {
     }
     
     private func fetchSongInfo(songIDs: [String]) async {
+        if self.songs.count >= 50 {
+            return
+        }
         self.songs = []
         for id in songIDs {
             Task {
