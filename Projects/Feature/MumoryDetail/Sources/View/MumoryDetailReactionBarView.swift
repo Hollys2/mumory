@@ -29,7 +29,8 @@ struct MumoryDetailReactionBarView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: UIScreen.main.bounds.width, height: 85)
-                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+//                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+                .background(.green)
                 .overlay(
                     Rectangle()
                         .frame(height: 0.5)

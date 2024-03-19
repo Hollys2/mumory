@@ -152,7 +152,11 @@ struct MumoryDetailScrollContentView: View {
 =======
                     .padding(.bottom, (self.mumory.tags ?? []).isEmpty && (self.mumory.content ?? []).isEmpty && (self.mumory.tags ?? []).isEmpty ? 50 : 55)
                     .background(.orange)
+<<<<<<< HEAD
 >>>>>>> d1f4c20 (refactoring)
+=======
+>>>>>>> fe2fd42 (refactoring)
+>>>>>>> 2246a03 (refactoring)
                     
                     if let tags = self.mumory.tags, !tags.isEmpty {
                         HStack(spacing: 0) {
@@ -193,7 +197,11 @@ struct MumoryDetailScrollContentView: View {
                 MumoryDetailReactionBarView(mumory: self.mumory, isOn: false)
 =======
                 MumoryDetailReactionBarView(mumory: self.$mumory, isOn: false)
+<<<<<<< HEAD
 >>>>>>> d1f4c20 (refactoring)
+=======
+>>>>>>> fe2fd42 (refactoring)
+>>>>>>> 2246a03 (refactoring)
                     .background(GeometryReader { geometry in
                         Color.clear
                             .onAppear(perform: {
