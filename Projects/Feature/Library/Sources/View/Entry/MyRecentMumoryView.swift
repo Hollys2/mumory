@@ -44,10 +44,18 @@ public struct MyRecentMusicView: View {
             }else {
                 ScrollView(.horizontal) {
 <<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
+<<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
                     LazyHStack(alignment: .top, spacing: spacing, content: {
 =======
                     LazyHStack(alignment: .top,spacing: 8, content: {
 >>>>>>> 5e1e803 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
+=======
+<<<<<<< HEAD
+                    LazyHStack(alignment: .top, spacing: spacing, content: {
+=======
+                    LazyHStack(alignment: .top,spacing: 8, content: {
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
                         ForEach(mumoryDataViewModel.myMumorys, id: \.self) { mumory in
                             RecentMusicItem(songId: mumory.musicModel.songID.rawValue)
                         }
@@ -59,6 +67,10 @@ public struct MyRecentMusicView: View {
             }
         })
 <<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
+<<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
+=======
+<<<<<<< HEAD
+>>>>>>> dd89775 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
         .onAppear(perform: {
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
         })
@@ -66,7 +78,11 @@ public struct MyRecentMusicView: View {
 //        .onAppear(perform: {
 //            searchRecentMusicPost()
 //        })
+<<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
 >>>>>>> 5e1e803 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
+=======
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
     }
     
     private func searchRecentMusicPost(){

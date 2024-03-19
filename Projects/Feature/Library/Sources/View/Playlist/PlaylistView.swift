@@ -42,7 +42,11 @@ struct PlaylistView: View {
 <<<<<<< HEAD
                 .frame(width: getUIScreenBounds().width)
 =======
+<<<<<<< HEAD
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view)
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))

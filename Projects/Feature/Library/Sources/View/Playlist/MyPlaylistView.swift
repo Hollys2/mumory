@@ -54,7 +54,11 @@ struct MyPlaylistView: View {
                     LazyHGrid(rows: rows,spacing: spacing, content: {
 =======
                     LazyHGrid(rows: rows,spacing: 12, content: {
+<<<<<<< HEAD
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view)
                         ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
@@ -83,7 +87,11 @@ struct MyPlaylistView: View {
 <<<<<<< HEAD
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
 =======
+<<<<<<< HEAD
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view)
             currentUserData.playlistArray.removeAll()
             Task {
                 await getPlayList()

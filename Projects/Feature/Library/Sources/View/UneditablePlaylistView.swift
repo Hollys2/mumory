@@ -92,7 +92,11 @@ struct UneditablePlaylistView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.5)
                                 .background(ColorSet.subGray)
+<<<<<<< HEAD
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view)
                         }
                         
                         

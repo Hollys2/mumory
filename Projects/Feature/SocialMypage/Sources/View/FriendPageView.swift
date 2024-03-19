@@ -447,7 +447,11 @@ struct FriendPlaylistView: View {
                     HStack(alignment: .top, spacing: 10, content: {
 =======
                     HStack(alignment: .top,spacing: 10, content: {
+<<<<<<< HEAD
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+>>>>>>> f24e9fe (edit playlist view)
+>>>>>>> dd89775 (edit playlist view)
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
                             PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
                                 .onTapGesture {
