@@ -46,7 +46,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        print("updateUIView: SocialScrollViewRepresentable")
+//        print("updateUIView: SocialScrollViewRepresentable")
         if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
 
             let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
