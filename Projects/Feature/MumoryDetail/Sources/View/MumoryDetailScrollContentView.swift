@@ -21,9 +21,12 @@ struct TagView: View {
             Image(uiImage: SharedAsset.tagMumoryDatail.image)
                 .resizable()
 <<<<<<< HEAD
+<<<<<<< HEAD
                 .resizable()
 =======
 >>>>>>> d1f4c20 (refactoring)
+=======
+>>>>>>> 3f00400 (refactoring)
                 .frame(width: 14, height: 14)
 
             Text(text)
