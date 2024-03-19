@@ -104,7 +104,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
     
     func addRecentSearch(_ locationSearch: RecentLocationSearch) {
         recentSearches.insert(locationSearch, at: 0)
-        recentSearches = Array(recentSearches.prefix(10))
+        recentSearches = Array(Set(recentSearches).prefix(10))
         
         do {
             let encoder = JSONEncoder()

@@ -54,7 +54,13 @@ struct CommentView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                         
-                        if !comment.isPublic {
+                        if !comment.isPublic && comment.userDocumentID == appCoordinator.currentUser.uId {
+                            Spacer().frame(width: 5)
+                            
+                            SharedAsset.commentUnlockMumoryDetail.swiftUIImage
+                                .resizable()
+                                .frame(width: 15, height: 15)
+                        } else if !comment.isPublic && comment.userDocumentID != appCoordinator.currentUser.uId {
                             Spacer().frame(width: 5)
                             
                             SharedAsset.commentLockMumoryDetail.swiftUIImage
@@ -76,10 +82,10 @@ struct CommentView: View {
                     } // HStack
                     
                     
-                    Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? comment.content : "비밀 댓글입니다.")
+                    Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
                         .lineSpacing(20)
-                        .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
-                        .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                        .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
+                        .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding(.vertical, 15)
                 } // VStack
@@ -181,7 +187,11 @@ struct Reply: View {
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                     
-                    if !comment.isPublic {
+                    if !comment.isPublic && comment.userDocumentID == appCoordinator.currentUser.uId {
+                        SharedAsset.commentUnlockMumoryDetail.swiftUIImage
+                            .resizable()
+                            .frame(width: 15, height: 15)
+                    } else if !comment.isPublic && comment.userDocumentID != appCoordinator.currentUser.uId {
                         SharedAsset.commentLockMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 15, height: 15)
@@ -199,10 +209,10 @@ struct Reply: View {
                     })
                 } // HStack
                 
-                Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? comment.content : "비밀 댓글입니다.")
+                Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
                     .lineSpacing(20)
-                    .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                    .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                    .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                    .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(.vertical, 15)
 

@@ -62,9 +62,10 @@ public struct MumoryBottomSheet {
                     }
                 }),
                 BottemSheetMenuOption(iconImage: mumoryAnnotation.isPublic ? SharedAsset.lockMumoryDetailMenu.swiftUIImage : SharedAsset.unlockMumoryDetailMenu.swiftUIImage, title: mumoryAnnotation.isPublic ? "나만보기" : "전체공개") {
+                    mumoryDataViewModel.isUpdating = true
                     mumoryAnnotation.isPublic.toggle()
                     mumoryDataViewModel.updateMumory(mumoryAnnotation) {
-                        
+                        mumoryDataViewModel.isUpdating = false
                     }
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기") {

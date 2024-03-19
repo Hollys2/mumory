@@ -82,6 +82,7 @@ struct MumoryDetailScrollContentView: View {
                         .mask {Circle()}
                         
                         VStack(spacing: 0) {
+                            
                             Text("\(self.user.nickname)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(.white)
@@ -103,7 +104,7 @@ struct MumoryDetailScrollContentView: View {
                                         .frame(width: 18, height: 18)
                                 }
                                 
-                                Spacer(minLength: 0)
+                                Spacer()
                                 
                                 Image(uiImage: SharedAsset.locationMumoryDatail.image)
                                     .resizable()
@@ -114,12 +115,12 @@ struct MumoryDetailScrollContentView: View {
                                 Text("\(self.mumory.locationModel.locationTitle)")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-//                                    .lineLimit(1)
                                     .frame(maxWidth: getUIScreenBounds().width * 0.27)
                                     .frame(height: 11, alignment: .leading)
                                     .fixedSize(horizontal: true, vertical: false)
                             } // HStack
                         } // VStack
+                        .frame(height: 38)
                     } // HStack
                     .frame(height: 38)
                     .padding(.vertical, 50)

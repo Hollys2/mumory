@@ -16,12 +16,19 @@ public struct MyMumoryView: View {
     @State private var currentTabSelection: Int = 0
     @State private var isDatePickerShown: Bool = false
     
+    @State private var filteredLocations: [String: [Mumory]] = [:]
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @State private var offset: CGFloat = 0.0
     @State private var scrollViewOffsetY: CGFloat = 0.0
     @State private var dateViewOffsetY: CGFloat = 0.0
+    
+    let columns: [GridItem] = [
+        GridItem(.flexible(), spacing: 0),
+        GridItem(.flexible(), spacing: 0)
+    ]
     
     public init() {}
     
@@ -176,8 +183,10 @@ public struct MyMumoryView: View {
                         ScrollView(showsIndicators: false) {
                             
                             VStack(spacing: 0) {
+                                
                                 HStack(spacing: 0) {
-                                    Text("지역 8곳에서 기록함")
+                                    
+                                    Text("지역 \(self.filteredLocations.count)곳에서 기록함")
                                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     
@@ -186,19 +195,45 @@ public struct MyMumoryView: View {
                                 .padding(.vertical, 22)
                                 .padding(.horizontal, 20)
                                 
-                                ForEach(0..<10) { row in
-                                    LazyHStack(spacing: 11) {
-                                        RoundedSquareView()
-                                        RoundedSquareView()
+//                                ForEach(filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
+//
+//                                    LazyHStack(spacing: 11) {
+//                                        RoundedSquareView(regionTitle: region, mumorys: mumories)
+//                                    }
+//                                    .padding(.horizontal, 20)
+//                                    .padding(.bottom, 12)
+//                                }
+                                LazyVGrid(columns: columns, spacing: 0) {
+                                    
+                                    ForEach(filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
+
+                                        RoundedSquareView(regionTitle: region, mumorys: mumories)
                                     }
-                                    .padding(.horizontal, 20)
-                                    .padding(.bottom, 12)
                                 }
+                                .padding(.horizontal, 10)
+                                .padding(.bottom, 12)
+
                             }
                             .padding(.bottom, 100)
                         }
                         .pageView()
                         .tag(1)
+                        .onAppear {
+                            for (region, boundary) in MapConstant.boundaries {
+                                let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
+                                    let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
+                                    let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
+                                    return latInRange && lonInRange
+                                }
+                                print("region: \(region)")
+                                print("filteredLocations: \(filteredMumorys)")
+                                
+                                if !filteredMumorys.isEmpty {
+                                    self.filteredLocations[region] = filteredMumorys
+                                }
+                            }
+                            
+                        }
                     }
                 }
             }
@@ -662,6 +697,9 @@ struct MyMumoryDatePicker: View {
 
 struct RoundedSquareView: View {
     
+    let regionTitle: String
+    let mumorys: [Mumory]
+    
     let mumory: Mumory = Mumory()
     
     var body: some View {
@@ -671,7 +709,7 @@ struct RoundedSquareView: View {
               .foregroundColor(.clear)
               .frame(width: getUIScreenBounds().width * 0.435, height: getUIScreenBounds().width * 0.435)
               .background(
-                AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                AsyncImage(url: self.mumorys[0].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -689,6 +727,12 @@ struct RoundedSquareView: View {
                   .clipped()
               )
               .cornerRadius(10)
+              .blur(radius: 3)
+              .mask {
+                  Rectangle()
+                      .frame(width: getUIScreenBounds().width * 0.435, height: getUIScreenBounds().width * 0.435)
+                      .cornerRadius(10)
+              }
             
             Rectangle()
                 .foregroundColor(.clear)
@@ -697,18 +741,18 @@ struct RoundedSquareView: View {
                 .cornerRadius(10)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("서울특별시")
+                Text(regionTitle)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundColor(.white)
 
-                Text("오늘")
+                Text(DateManager.formattedRegionDate(date: self.mumorys[0].date))
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundColor(.white)
             }
             .offset(x: 15, y: 22)
 
             HStack {
-                Text("55핀")
+                Text("\(mumorys.count)핀")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white)
@@ -734,75 +778,106 @@ struct RoundedSquareView: View {
             .offset(x: 15, y: getUIScreenBounds().width * 0.435 - 24 - 15)
             
             ZStack {
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                            case .failure:
-                                Text("Failed to load image")
-                            case .empty:
-                                ProgressView()
-                            default:
-                                Color(red: 0.18, green: 0.18, blue: 0.18)
+                if self.mumorys.count >= 2 {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            AsyncImage(url: self.mumorys[1].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                case .failure:
+                                    Text("Failed to load image")
+                                case .empty:
+                                    ProgressView()
+                                default:
+                                    Color(red: 0.18, green: 0.18, blue: 0.18)
+                                }
                             }
-                        }
-                            .frame(width: 36, height: 36)
-                            .clipped()
-                    )
-                    .cornerRadius(5)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .inset(by: 0.5)
-                            .stroke(.white, lineWidth: 1)
-                    )
+                                .frame(width: 36, height: 36)
+                                .clipped()
+                        )
+                        .cornerRadius(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .inset(by: 0.5)
+                                .stroke(.white, lineWidth: 1)
+                        )
+                }
                 
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        SharedAsset.artworkSample.swiftUIImage
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 36, height: 36)
-                            .clipped()
-                    )
-                    .cornerRadius(5)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .inset(by: 0.5)
-                            .stroke(.white, lineWidth: 1)
-                    )
-                    .offset(x: 16)
+                if self.mumorys.count >= 3 {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            AsyncImage(url: self.mumorys[2].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                case .failure:
+                                    Text("Failed to load image")
+                                case .empty:
+                                    ProgressView()
+                                default:
+                                    Color(red: 0.18, green: 0.18, blue: 0.18)
+                                }
+                            }
+                                .frame(width: 36, height: 36)
+                                .clipped()
+                        )
+                        .cornerRadius(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .inset(by: 0.5)
+                                .stroke(.white, lineWidth: 1)
+                        )
+                        .offset(x: 16)
+                }
                 
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        SharedAsset.artworkSample.swiftUIImage
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .frame(width: 36, height: 36)
-                            .clipped()
-                    )
-                    .cornerRadius(5)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .inset(by: 0.5)
-                            .stroke(.white, lineWidth: 1)
-                    )
-                    .offset(x: 32)
+                if self.mumorys.count >= 4 {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            AsyncImage(url: self.mumorys[3].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                case .failure:
+                                    Text("Failed to load image")
+                                case .empty:
+                                    ProgressView()
+                                default:
+                                    Color(red: 0.18, green: 0.18, blue: 0.18)
+                                }
+                            }
+                                .frame(width: 36, height: 36)
+                                .clipped()
+                        )
+                        .cornerRadius(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .inset(by: 0.5)
+                                .stroke(.white, lineWidth: 1)
+                        )
+                        .offset(x: 32)
+                }
                                     
-                SharedAsset.artworkFilterMypage.swiftUIImage
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 36, height: 36)
-                    .offset(x: 32)
+                
+                if self.mumorys.count > 4 {
+                    SharedAsset.artworkFilterMypage.swiftUIImage
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 36, height: 36)
+                        .offset(x: 32)
+                }
             }
             .offset(x: getUIScreenBounds().width * 0.435 - 36 - 32 - 15, y: getUIScreenBounds().width * 0.435 - 36 - 15)
         }

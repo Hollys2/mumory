@@ -282,7 +282,8 @@ public struct SplashView: View {
 
             currentUserData.uId = user.uid
             
-            appCoordinator.currentUser = await MumoriUser(uId: user.uid)
+            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
+//            await MumoriUser().fetchFriend(uId: user.uid)
 
             currentUserData.favoriteGenres = favoriteGenres
             page = .home

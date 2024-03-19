@@ -220,6 +220,12 @@ public struct MumoryDetailView: View {
                 MumoryDetailReactionBarView(mumory: self.$mumory, isOn: true)
 //                    .transition(.move(edge: .bottom))
             }
+            
+            ZStack {
+                Color.clear
+                
+                LoadingAnimationView(isLoading: self.$mumoryDataViewModel.isUpdating)
+            }
         } // ZStack
         .onAppear {
             Task {

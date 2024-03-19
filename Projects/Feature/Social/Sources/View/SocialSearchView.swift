@@ -39,7 +39,7 @@ struct PageTabView<Content: View, Label: View>: View {
                     .foregroundColor(.clear)
                     .frame(width: getUIScreenBounds().width, height: 0.3)
                     .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
-                    
+                
                 , alignment: .bottom
             )
             .onPreferenceChange(TabWidthPreferenceKey.self) { preferences in
@@ -65,7 +65,7 @@ struct PageTabView<Content: View, Label: View>: View {
             }
             
         }
-
+        
         
     }
 }
@@ -77,6 +77,7 @@ public struct SocialSearchView: View {
     @State private var searchText: String = ""
     @State private var currentTabSelection: Int = 0
     @State private var isRecentSearch: Bool = false
+    @State private var recentSearches: [String] = []
     
     @StateObject var friendManager: FriendManager = .init()
     
@@ -85,6 +86,7 @@ public struct SocialSearchView: View {
     
     public init(isShown: Binding<Bool>) {
         self._isSocialSearchViewShown = isShown
+        self._recentSearches = State(initialValue: UserDefaults.standard.stringArray(forKey: "socialSearch") ?? [])
     }
     
     public var body: some View {
@@ -107,7 +109,10 @@ public struct SocialSearchView: View {
                         
                         mumoryDataViewModel.searchMumoryByContent(self.searchText)
                         friendManager.searchFriend(nickname: self.searchText)
-                        searchText = ""
+                        
+                        recentSearches.insert(self.searchText, at: 0)
+                        recentSearches = Array(Set(recentSearches).prefix(10))
+                        UserDefaults.standard.set(recentSearches, forKey: "socialSearch")
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 45)
@@ -124,16 +129,17 @@ public struct SocialSearchView: View {
                         .padding(.leading, 15)
                     
                     if !self.searchText.isEmpty {
-                        Button(action: {
-                            self.searchText = ""
-                        }) {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.trailing, 17)
+                        HStack {
+                            
+                            Spacer()
+                            
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white)
+                                .onTapGesture {
+                                    self.searchText = ""
+                                }
                         }
+                        .padding(.trailing, 17)
                     }
                 }
                 
@@ -147,169 +153,252 @@ public struct SocialSearchView: View {
                     }
             }
             .padding(.horizontal, 20)
+            .padding(.bottom, 10)
+
             
-            Spacer().frame(height: 10)
-            
-            PageTabView(selection: $currentTabSelection) {
-                
-                ForEach(Array(["친구", "게시물"].enumerated()), id: \.element) { index, title in
-                    Text(title)
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(currentTabSelection == index ? .white : Color(red: 0.82, green: 0.82, blue: 0.82))
-                        .background(
-                            GeometryReader{ g in
-                                Color.clear
-                                    .preference(key: TabWidthPreferenceKey.self, value: [index: g.size.width])
-                            }
-                        )
-                        .pageLabel()
-                        .background(Color(red: 0.09, green: 0.09, blue: 0.09)) // 터치영역 확장
-                        .onTapGesture {
-                            withAnimation {
-                                currentTabSelection = index
-                            }
+            if searchText == "" {
+                VStack(spacing: 0) {
+
+                    HStack {
+                        Text("최근 검색")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        Button(action: {
+                            self.recentSearches = []
+                            UserDefaults.standard.set(recentSearches, forKey: "socialSearch")
+                        }) {
+                            Text("전체삭제")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                         }
-                }
-                
-            } content: {
-                
-                ScrollView(showsIndicators: false) {
-                    
-                    VStack(spacing: 0) {
-                        
-                        ForEach(friendManager.searchedFriends, id: \.self) { friend in
-                            
-                            HStack(spacing: 0) {
-                                
-                                Spacer().frame(width: 15)
-                                
-                                SharedAsset.profileMumoryDetail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 50, height: 50)
-                                
-                                Spacer().frame(width: 15)
-                                
-                                VStack(alignment: .leading, spacing: 5.5) {
-                                    Text(friend.nickname)
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                                        .foregroundColor(.white)
-                                    
-                                    Text("@\(friend.id)")
-                                        .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 13))
-                                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                }
-                                
+                    }
+                    .padding([.horizontal, .top], 20)
+                    .padding(.bottom, 11)
+
+                    if !self.recentSearches.isEmpty {
+                        ForEach(self.recentSearches, id: \.self) { value in
+                            HStack {
+                                Image(systemName: "magnifyingglass")
+                                    .frame(width: 23, height: 23)
+                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+
+                                Text(value)
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                    .foregroundColor(.white)
+
                                 Spacer()
-                                
-                                SharedAsset.nextButtonSocialSearch.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 24, height: 24)
-                                
-                                Spacer().frame(width: 15)
+
+                                Button(action: {
+                                    self.recentSearches.removeAll { $0 == value }
+                                    UserDefaults.standard.set(self.recentSearches, forKey: "socialSearch")
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .frame(width: 19, height: 19)
+                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                }
                             }
                             .frame(maxWidth: .infinity)
-                            .frame(height: 70)
+                            .frame(height: 50)
+                            .padding(.leading, 15)
+                            .padding(.trailing, 20)
+                            .onTapGesture {
+                                self.searchText = value
+                                
+                                mumoryDataViewModel.searchedMumoryAnnotations = []
+                                friendManager.searchedFriends = []
+                                
+                                mumoryDataViewModel.searchMumoryByContent(self.searchText)
+                                friendManager.searchFriend(nickname: self.searchText)
+                                
+                                recentSearches.insert(self.searchText, at: 0)
+                                recentSearches = Array(Set(recentSearches).prefix(10))
+                                UserDefaults.standard.set(recentSearches, forKey: "socialSearch")
+                            }
                         }
+                    } else {
+                        Text("최근 검색내역이 없습니다.")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                            .frame(height: 50)
                     }
-                    .frame(height: 70 * CGFloat(friendManager.searchedFriends.count) + 30)
-                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                    .cornerRadius(15)
-                    .padding(.top, 18)
-                    .padding(.horizontal, 20)
-                }
-                .pageView()
-                .tag(0)
-                
-                ScrollView(showsIndicators: false) {
-                    
-                    HStack(spacing: 0) {
-                        Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
-                          .font(Font.custom("Pretendard", size: 12))
-                          .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
-                        
-                        Spacer()
-                        
-                        Text("정확도")
-                          .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
-                          .multilineTextAlignment(.trailing)
-                          .foregroundColor(self.isRecentSearch ? Color(red: 0.65, green: 0.65, blue: 0.65) : Color(red: 0.64, green: 0.51, blue: 0.99))
-                          .overlay(
-                            self.isRecentSearch ? AnyView(EmptyView()) :
-                                AnyView(
-                                         Rectangle()
-                                             .foregroundColor(.clear)
-                                             .frame(width: 5, height: 5)
-                                             .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                             .cornerRadius(2.5)
-                                             .offset(x: -10)
-                                     )
-                            , alignment: .leading
-                            )
-                          .onTapGesture {
-                              self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
-                                  guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
-//                                  return content.localizedCaseInsensitiveCompare(searchText) == .orderedSame
-                                  return content1.count < content2.count
-                              }
 
-                              self.isRecentSearch = false
-                          }
-                        
-                        Spacer().frame(width: 19)
-                        
-                        Text("최신")
-                          .font(
-                            Font.custom("Apple SD Gothic Neo", size: 14)
-                              .weight(.medium)
-                          )
-                          .multilineTextAlignment(.trailing)
-                          .foregroundColor(self.isRecentSearch ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.65, green: 0.65, blue: 0.65))
-                          .overlay(
-                            self.isRecentSearch ?
-                            AnyView(Rectangle()
-                                .foregroundColor(.clear)
-                                .frame(width: 5, height: 5)
-                                .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                .cornerRadius(2.5)
-                                .offset(x: -10))
-                            : AnyView(EmptyView())
-                            , alignment: .leading
-                          )
-                          .onTapGesture {
-                              self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
-                                  return doc1.date > doc2.date
-                              }
-                              
-                              self.isRecentSearch = true
-                          }
-                    }
-                    .padding(.top, 24)
-                    .padding(.horizontal, 20)
-                    
-                    VStack(spacing: 0) {
-                        
-                        ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
-                            SearchedMumoryItemView(mumory: mumory)
-                        }
-                    }
-                    .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
-                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                    .cornerRadius(15)
-                    .padding(.top, 24)
-                    .padding(.horizontal, 20)
-                    .overlay(
-                        Rectangle()
-                            .frame(width: getUIScreenBounds().width - 40, height: 0.3)
-                            .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                            .offset(y: -15)
-                            .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
-                        , alignment: .bottom
-                    )
-                    .padding(.bottom, 100)
+                    Spacer().frame(height: 15)
                 }
-                .tag(1)
+                .frame(width: getUIScreenBounds().width - 40)
+                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                .cornerRadius(15)
+                .padding(.top, 6)
+            } else {
+                PageTabView(selection: $currentTabSelection) {
+
+                    ForEach(Array(["친구", "게시물"].enumerated()), id: \.element) { index, title in
+                        Text(title)
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(currentTabSelection == index ? .white : Color(red: 0.82, green: 0.82, blue: 0.82))
+                            .background(
+                                GeometryReader{ g in
+                                    Color.clear
+                                        .preference(key: TabWidthPreferenceKey.self, value: [index: g.size.width])
+                                }
+                            )
+                            .pageLabel()
+                            .background(Color(red: 0.09, green: 0.09, blue: 0.09)) // 터치영역 확장
+                            .onTapGesture {
+                                withAnimation {
+                                    currentTabSelection = index
+                                }
+                            }
+                    }
+
+                } content: {
+
+                    ScrollView(showsIndicators: false) {
+
+                        VStack(spacing: 0) {
+
+                            ForEach(friendManager.searchedFriends, id: \.self) { friend in
+
+                                HStack(spacing: 0) {
+
+                                    Spacer().frame(width: 15)
+
+                                    SharedAsset.profileMumoryDetail.swiftUIImage
+                                        .resizable()
+                                        .frame(width: 50, height: 50)
+
+                                    Spacer().frame(width: 15)
+
+                                    VStack(alignment: .leading, spacing: 5.5) {
+                                        Text(friend.nickname)
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                            .foregroundColor(.white)
+
+                                        Text("@\(friend.id)")
+                                            .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 13))
+                                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                    }
+
+                                    Spacer()
+
+                                    SharedAsset.nextButtonSocialSearch.swiftUIImage
+                                        .resizable()
+                                        .frame(width: 24, height: 24)
+
+                                    Spacer().frame(width: 15)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 70)
+                            }
+                        }
+                        .frame(height: 70 * CGFloat(friendManager.searchedFriends.count) + 30)
+                        .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                        .cornerRadius(15)
+                        .padding(.top, 18)
+                        .padding(.horizontal, 20)
+                    }
+                    .pageView()
+                    .tag(0)
+
+                    ScrollView(showsIndicators: false) {
+
+                        HStack(spacing: 0) {
+                            Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
+                                .font(Font.custom("Pretendard", size: 12))
+                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
+
+                            Spacer()
+
+                            Text("정확도")
+                                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(self.isRecentSearch ? Color(red: 0.65, green: 0.65, blue: 0.65) : Color(red: 0.64, green: 0.51, blue: 0.99))
+                                .overlay(
+                                    self.isRecentSearch ? AnyView(EmptyView()) :
+                                        AnyView(
+                                            Rectangle()
+                                                .foregroundColor(.clear)
+                                                .frame(width: 5, height: 5)
+                                                .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                                .cornerRadius(2.5)
+                                                .offset(x: -10)
+                                        )
+                                    , alignment: .leading
+                                )
+                                .onTapGesture {
+                                    self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                                        guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
+                                        //                                  return content.localizedCaseInsensitiveCompare(searchText) == .orderedSame
+                                        return content1.count < content2.count
+                                    }
+
+                                    self.isRecentSearch = false
+                                }
+
+                            Spacer().frame(width: 19)
+
+                            Text("최신")
+                                .font(
+                                    Font.custom("Apple SD Gothic Neo", size: 14)
+                                        .weight(.medium)
+                                )
+                                .multilineTextAlignment(.trailing)
+                                .foregroundColor(self.isRecentSearch ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.65, green: 0.65, blue: 0.65))
+                                .overlay(
+                                    self.isRecentSearch ?
+                                    AnyView(Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(width: 5, height: 5)
+                                        .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                        .cornerRadius(2.5)
+                                        .offset(x: -10))
+                                    : AnyView(EmptyView())
+                                    , alignment: .leading
+                                )
+                                .onTapGesture {
+                                    self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                                        return doc1.date > doc2.date
+                                    }
+
+                                    self.isRecentSearch = true
+                                }
+                        }
+                        .padding(.top, 24)
+                        .padding(.horizontal, 20)
+
+                        VStack(spacing: 0) {
+
+                            ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
+                                SearchedMumoryItemView(mumory: mumory)
+                            }
+                        }
+                        .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
+                        .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                        .cornerRadius(15)
+                        .padding(.top, 24)
+                        .padding(.horizontal, 20)
+                        .overlay(
+                            Rectangle()
+                                .frame(width: getUIScreenBounds().width - 40, height: 0.3)
+                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
+                                .offset(y: -15)
+                                .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
+                            , alignment: .bottom
+                        )
+                        .padding(.bottom, 100)
+                    }
+                    .tag(1)
+                }
+                .onDisappear {
+                    self.currentTabSelection = 0
+                }
             }
+            
+            Spacer(minLength: 0)
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)
