@@ -261,6 +261,7 @@ struct UneditablePlaylistMusicListItem: View {
         
     }
 }
+<<<<<<< HEAD
 
 public struct PlaylistImageTest: View {
     @State var imageWidth: CGFloat = 0
@@ -372,3 +373,5 @@ public struct PlaylistImageTest: View {
     
     
 }
+=======
+>>>>>>> d1f4c20 (refactoring)

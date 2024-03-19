@@ -20,7 +20,10 @@ struct TagView: View {
         HStack(alignment: .center, spacing: 5) {
             Image(uiImage: SharedAsset.tagMumoryDatail.image)
                 .resizable()
+<<<<<<< HEAD
                 .resizable()
+=======
+>>>>>>> d1f4c20 (refactoring)
                 .frame(width: 14, height: 14)
 
             Text(text)
@@ -140,7 +143,12 @@ struct MumoryDetailScrollContentView: View {
                     } // HStack
                     .frame(height: 38)
                     .padding(.top, 55)
+<<<<<<< HEAD
                     .padding(.bottom, (self.mumory.tags ?? []).isEmpty && (self.mumory.content ?? "").isEmpty && (self.mumory.imageURLs ?? []).isEmpty ? 50 : 55 - 11)
+=======
+                    .padding(.bottom, (self.mumory.tags ?? []).isEmpty && (self.mumory.content ?? []).isEmpty && (self.mumory.tags ?? []).isEmpty ? 50 : 55)
+                    .background(.orange)
+>>>>>>> d1f4c20 (refactoring)
                     
                     if let tags = self.mumory.tags, !tags.isEmpty {
                         HStack(spacing: 0) {
@@ -177,7 +185,11 @@ struct MumoryDetailScrollContentView: View {
                     }
                 }
                 
+<<<<<<< HEAD
                 MumoryDetailReactionBarView(mumory: self.mumory, isOn: false)
+=======
+                MumoryDetailReactionBarView(mumory: self.$mumory, isOn: false)
+>>>>>>> d1f4c20 (refactoring)
                     .background(GeometryReader { geometry in
                         Color.clear
                             .onAppear(perform: {
