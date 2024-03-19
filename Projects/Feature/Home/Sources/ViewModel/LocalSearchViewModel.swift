@@ -18,8 +18,8 @@ struct RecentLocationSearch: Codable, Hashable {
     
     var locationTitle: String
     var locationSubTitle: String
-    var latitude: CLLocationDegrees
-    var longitude: CLLocationDegrees
+    var latitude: Double
+    var longitude: Double
     
     static func == (lhs: RecentLocationSearch, rhs: RecentLocationSearch) -> Bool {
         return lhs.locationTitle == rhs.locationTitle &&

@@ -16,36 +16,30 @@ public class KeyboardResponder: ObservableObject {
     
     var keyboardShowCancellable: AnyCancellable?
     var keyboardHideCancellable: AnyCancellable?
-
+    
     public init() {
         keyboardShowCancellable = NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
             .sink { notification in
-//                print("keyboardWillShowNotification")
-                let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
-                let keyboardHeight = keyboardSize?.height ?? 0
+                                let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+                                let keyboardHeight = keyboardSize?.height ?? 0
                 
                 guard let duration: TimeInterval = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
-                
-//                print("keyboardHeight: \(keyboardHeight)")
-
-                DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: duration)) {
                     self.isKeyboardHiddenButtonShown = true
-                    
-                    withAnimation(.spring(response: 0.45, dampingFraction: 1)) {
+//                    DispatchQueue.main.async {
                         self.keyboardHeight = keyboardHeight
-                    }
+//                    }
                 }
             }
-
+        
         keyboardHideCancellable = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
-            .sink { _ in
-//                print("keyboardWillHideNotification")
-                DispatchQueue.main.async {
+            .sink { notification in
+                guard let duration: TimeInterval = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+                withAnimation(.easeInOut(duration: duration)) {
                     self.isKeyboardHiddenButtonShown = false
-                    
-                    withAnimation(.spring(response: 0.45, dampingFraction: 1)) {
+//                    DispatchQueue.main.async {
                         self.keyboardHeight = 0
-                    }
+//                    }
                 }
             }
     }

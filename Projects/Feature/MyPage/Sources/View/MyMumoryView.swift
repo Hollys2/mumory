@@ -147,7 +147,6 @@ public struct MyMumoryView: View {
                                                     .padding(.leading, 12)
                                             }
                                             .padding(.top, 30)
-
                                         }
                                         
                                         MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
@@ -229,6 +228,11 @@ public struct MyMumoryView: View {
         }
         let previousDate = mumoryDataViewModel.filterdMumorys[index - 1].date
         let currentDate = mumoryDataViewModel.filterdMumorys[index].date
+                    
+        print("previousDate: \(previousDate)")
+        print("currentDate: \(currentDate)")
+        print(!Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day))
+            
         return !Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day) ? 0 : 30
     }
     
