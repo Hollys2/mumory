@@ -450,7 +450,8 @@ public struct CreateMumoryBottomSheetView: View {
                                     switch result {
                                     case .success:
                                         print("뮤모리 만들기 성공")
-
+                                        mumoryDataViewModel.isCreating = false
+                                        
                                         mumoryDataViewModel.choosedMusicModel = nil
                                         mumoryDataViewModel.choosedLocationModel = nil
                                         self.tags.removeAll()
@@ -459,6 +460,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         self.imageURLs.removeAll()
 
                                         self.newRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                                        
 
                                     case .failure(let error):
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")

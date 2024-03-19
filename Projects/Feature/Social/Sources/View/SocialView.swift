@@ -20,37 +20,24 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     var content: () -> Content
     var onRefresh: () -> Void
 
-    @Binding var offsetY: CGFloat
+    @Binding var contentOffsetY: CGFloat
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    init(offsetY: Binding<CGFloat>, onRefresh: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
-        self._offsetY = offsetY
+    init(contentOffsetY: Binding<CGFloat>, onRefresh: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
+        self._contentOffsetY = contentOffsetY
         self.onRefresh = onRefresh
         self.content = content
     }
     
     func makeUIView(context: Context) -> UIScrollView {
-        
         let scrollView = UIScrollView()
 
         scrollView.delegate = context.coordinator
 
-        scrollView.refreshControl = UIRefreshControl()
-        scrollView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
-        
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
-
-        let hostingController = UIHostingController(rootView: self.content()
-            .environmentObject(self.mumoryDataViewModel)
-        )
-        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        
-        scrollView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
-        hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
-        scrollView.addSubview(hostingController.view)
         
         context.coordinator.scrollView = scrollView
         
@@ -60,22 +47,16 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("updateUIView: SocialScrollViewRepresentable")
-
         if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
-            DispatchQueue.main.async {
-                self.mumoryDataViewModel.everyMumorys = self.mumoryDataViewModel.everyMumorys.sorted(by: { $0.date > $1.date })
-            }
 
             let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
-            let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+            let height = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
 
-            uiView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
-            hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
+            uiView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
+            hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: height)
 
             uiView.subviews.forEach { $0.removeFromSuperview() }
             uiView.addSubview(hostingController.view)
-            uiView.refreshControl = UIRefreshControl()
-            uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
 
             context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumorys
         }
@@ -95,41 +76,28 @@ extension SocialScrollViewRepresentable {
         var scrollView: UIScrollView?
         var preOffsetY: CGFloat = 0.0
         var topBarOffsetY: CGFloat = 0.0
-        var oldMumoryAnnotations: [Mumory] = []
+        var oldMumoryAnnotations: [Mumory] = [] // immutatable if it is declared in SocialScrollViewRepresentable
         
         init(parent: SocialScrollViewRepresentable) {
             self.parent = parent
             super.init()
         }
         
-        @objc func handleRefreshControl(sender: UIRefreshControl) {
+        func handleRefreshControl() {
             print("handleRefreshControl")
-            
+            self.parent.mumoryDataViewModel.isUpdating = true
             parent.mumoryDataViewModel.fetchEveryMumory()
-
-            let hostingController = UIHostingController(rootView: parent.content().environmentObject(parent.mumoryDataViewModel))
-            let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-            hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: x)
-            scrollView?.contentSize = CGSize(width: 0, height: x)
+        }
+        
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            let offsetY = scrollView.contentOffset.y
             
-            scrollView?.subviews.forEach { $0.removeFromSuperview() }
-            scrollView?.addSubview(hostingController.view)
-            
-            let newRefreshControl = UIRefreshControl()
-            newRefreshControl.addTarget(self, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
-            scrollView?.refreshControl = newRefreshControl
-            
-            if newRefreshControl.isRefreshing {
-                newRefreshControl.endRefreshing()
+            if offsetY < -100 {
+                handleRefreshControl()
             }
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            
-            if let refreshControl = scrollView.refreshControl, refreshControl.isRefreshing {
-                  print("새로고침이 시작되었습니다.")
-              }
-            
             let offsetY = scrollView.contentOffset.y
             let contentHeight = scrollView.contentSize.height
             let scrollViewHeight = scrollView.bounds.height
@@ -144,7 +112,7 @@ extension SocialScrollViewRepresentable {
             }
 
             DispatchQueue.main.async {
-                self.parent.offsetY = self.topBarOffsetY
+                self.parent.contentOffsetY = self.topBarOffsetY
             }
 
             preOffsetY = offsetY
@@ -156,7 +124,6 @@ struct SocialScrollCotentView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-
     
     var body: some View {
         
@@ -172,6 +139,7 @@ struct SocialScrollCotentView: View {
             }
             .frame(width: UIScreen.main.bounds.width - 20)
         } // VStack
+        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 100)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
     }
 }
@@ -205,17 +173,17 @@ struct SocialItemView: View {
                     }
                 }
                 .frame(width: 38, height: 38)
-                .mask {
-                    Circle()
-                }
+                .mask {Circle()}
                 
-                VStack(alignment: .leading, spacing: 5.25) {
+                VStack(alignment: .leading, spacing: 0) {
                     
                     Text("\(self.user.nickname)")
                         .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: true, vertical: false)
+                    
+                    Spacer(minLength: 0)
                     
                     HStack(spacing: 0) {
                         
@@ -245,7 +213,9 @@ struct SocialItemView: View {
                             .fixedSize(horizontal: true, vertical: false)
                     } // HStack
                 } // VStack
+                .frame(height: 38)
             } // HStack
+            .frame(height: 38)
             
             Spacer().frame(height: 13)
             
@@ -311,12 +281,14 @@ struct SocialItemView: View {
                         .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                         .multilineTextAlignment(.trailing)
                         .foregroundColor(.white)
+                        .lineLimit(1)
                     
                     Spacer().frame(width: 8)
                     
                     Text(self.mumory.musicModel.artist)
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                         .foregroundColor(.white)
+                        .lineLimit(1)
                     
                     Spacer()
                     
@@ -528,6 +500,7 @@ struct SocialItemView: View {
             
             Spacer().frame(height: 40)
         } // VStack
+        .frame(height: getUIScreenBounds().width + 71)
         .onAppear {
             Task {
                 self.user = await MumoriUser(uId: self.mumory.uId)
@@ -540,6 +513,7 @@ public struct SocialView: View {
     
     @Binding private var isSocialSearchViewShown: Bool
 
+    @State private var isFirstTabSelected = false
     @State private var offsetY: CGFloat = 0
     @State private var isAddFriendNotification: Bool = false
     @State private var friendRequests: [String] = []
@@ -560,8 +534,8 @@ public struct SocialView: View {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
 
-            if mumoryDataViewModel.isSocialFetchFinished {
-                SocialScrollViewRepresentable(offsetY: self.$offsetY, onRefresh: {
+            if !mumoryDataViewModel.isUpdating {
+                SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                     print("onRefresh!")
                 }) {
                     SocialScrollCotentView()
@@ -622,14 +596,24 @@ public struct SocialView: View {
             .frame(height: 68)
             .padding(.horizontal, 20)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
-//            .padding(.bottom, 15)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
+            
+            if mumoryDataViewModel.isUpdating {
+                ZStack {
+                    Color.clear
+                    LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
+                }
+            }
         }
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation))
         .preferredColorScheme(.dark)
         .onAppear {
-            mumoryDataViewModel.fetchEveryMumory()
+            if !appCoordinator.isFirstTabSelected {
+                mumoryDataViewModel.fetchEveryMumory()
+                appCoordinator.isFirstTabSelected = true
+            }
+            
             FirebaseManager.shared.observeFriendRequests()
             print("SocialView onAppear")
         }
@@ -639,16 +623,3 @@ public struct SocialView: View {
     }
 }
 
-class CustomRefreshControl: UIControl {
-    var isRefreshing = false
-
-    func beginRefreshing() {
-        isRefreshing = true
-        // 새로고침 애니메이션 시작
-    }
-
-    func endRefreshing() {
-        isRefreshing = false
-        // 새로고침 애니메이션 종료
-    }
-}

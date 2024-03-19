@@ -22,6 +22,7 @@ public struct MumoriUser: Hashable{
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
     public var bio: String = ""
+    public var friends: [String] = []
     
     public init() {}
     
@@ -42,6 +43,16 @@ public struct MumoriUser: Hashable{
         self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")
         self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
         self.bio = data["bio"] as? String ?? ""
+    }
+    
+    public func fetchFriend(uId: String) async -> MumoriUser {
+        let query = FBManager.shared.db.collection("User").document(self.uId)
+        guard let data = try? await query.getDocument().data() else {return MumoriUser()}
+        guard let friends = data["friends"] as? [String] else {return MumoriUser()}
+        
+        var newUser = await MumoriUser(uId: uId)
+        newUser.friends = friends
+        return newUser
     }
 }
 

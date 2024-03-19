@@ -155,6 +155,7 @@ public struct SearchLocationMapView: View {
                     .gesture(dragGesture)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
+                    .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
                     .offset(y: -scrollViewOffset)
                     .onAppear {
                         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in

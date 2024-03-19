@@ -25,8 +25,8 @@ public class KeyboardResponder: ObservableObject {
                 
                 guard let duration: TimeInterval = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
                 withAnimation(.easeInOut(duration: duration)) {
-                    self.isKeyboardHiddenButtonShown = true
                     DispatchQueue.main.async {
+                        self.isKeyboardHiddenButtonShown = true
                         self.keyboardHeight = keyboardHeight
                     }
                 }
@@ -36,8 +36,8 @@ public class KeyboardResponder: ObservableObject {
             .sink { notification in
                 guard let duration: TimeInterval = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
                 withAnimation(.easeInOut(duration: duration)) {
-                    self.isKeyboardHiddenButtonShown = false
                     DispatchQueue.main.async {
+                        self.isKeyboardHiddenButtonShown = false
                         self.keyboardHeight = 0
                     }
                 }

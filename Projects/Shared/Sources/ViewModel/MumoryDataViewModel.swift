@@ -33,8 +33,6 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
     @Published public var searchedMumoryAnnotations: [Mumory] = []
     
-    @Published public var isSocialFetchFinished: Bool = false
-    
     @Published public var isLoading: Bool = false
     @Published public var isCreating: Bool = false
     @Published public var isUpdating: Bool = false
@@ -101,15 +99,34 @@ final public class MumoryDataViewModel: ObservableObject {
                         let documentData = documentChange.document.data()
                         guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
                         
-                        if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
-                            DispatchQueue.main.async {
+//                        if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
+//                            DispatchQueue.main.async {
+//                                self.myMumorys.append(newMumory)
+//                                self.myMumorys.sort { $0.date > $1.date }
+//                            }
+//                            print("Document added: \(documentChange.document.documentID)")
+//                        }
+                        DispatchQueue.main.async {
+                            var uniqueIds = Set<String>(self.myMumorys.map { $0.id })
+                            
+                            if uniqueIds.contains(documentChange.document.documentID) {
+                                // 이미 배열에 같은 id를 가진 Mumory가 있는 경우
+                                uniqueIds.remove(documentChange.document.documentID)
+                                uniqueIds.insert(newMumory.id)
+                                self.myMumorys = self.myMumorys.filter { $0.id != documentChange.document.documentID }
                                 self.myMumorys.append(newMumory)
                                 self.myMumorys.sort { $0.date > $1.date }
+                                print("1Document updated: \(documentChange.document.documentID)")
+                            } else {
+                                // 배열에 같은 id를 가진 Mumory가 없는 경우
+                                self.myMumorys.append(newMumory)
+                                self.myMumorys.sort { $0.date > $1.date }
+                                print("1Document added: \(documentChange.document.documentID)")
                             }
-                            print("Document added: \(documentChange.document.documentID)")
                         }
+
                         
-                        if !self.filterdMumorys.contains(where: { $0.id == newMumory.id }) {
+                        if !self.filterdMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                             DispatchQueue.main.async {
                                 self.filterdMumorys.append(newMumory)
                                 self.filterdMumorys.sort { $0.date > $1.date }
@@ -199,7 +216,6 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchEveryMumory() {
-        self.isSocialFetchFinished = false
         let db = FirebaseManager.shared.db
         
         let mumoryCollectionRef = db.collection("Mumory")
@@ -229,7 +245,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 }
                 
                 DispatchQueue.main.async {
-                    self.isSocialFetchFinished = true
+                    self.isUpdating = false
                 }
                 print("fetchSocialMumory successfully!")
             } catch {
@@ -291,7 +307,6 @@ final public class MumoryDataViewModel: ObservableObject {
                 completionHandler(.failure(error))
             } else {
                 print("createMumory successfully!")
-                self.isCreating = false
                 completionHandler(.success(()))
             }
         }
@@ -646,55 +661,6 @@ final public class MumoryDataViewModel: ObservableObject {
 }
 
 extension MumoryDataViewModel {
-    
-    public func createComment2(mumoryAnnotation: Mumory, loginUserID: String, comment: Comment) {
-        
-        let db = FirebaseManager.shared.db
-        
-        let commentsRef = db.collection("User").document(mumoryAnnotation.uId).collection("mumory").document(mumoryAnnotation.id)
-        
-        db.runTransaction({ (transaction, errorPointer) -> Any? in
-            
-            let postDocument: DocumentSnapshot
-            
-            do {
-                try postDocument = transaction.getDocument(commentsRef)
-            } catch let fetchError as NSError {
-                errorPointer?.pointee = fetchError
-                return nil
-            }
-            
-            guard var oldComments = postDocument.data()?["comments"] as? [[String: Any]] else {
-                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
-                ])
-                errorPointer?.pointee = error
-                return nil
-            }
-            
-            let commentData = comment.toDictionary()
-            print("commentData: \(commentData)")
-
-            oldComments.append(commentData) // : [String: Any]
-//            mumoryAnnotation.comments.append(comment) // : Comment
-            
-            if let index = self.everyMumorys.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                DispatchQueue.main.async {
-                    self.everyMumorys[index] = mumoryAnnotation
-                }
-            }
-            
-            transaction.updateData(["comments": oldComments], forDocument: commentsRef)
-            return nil
-        }) { (object, error) in
-            if let error = error {
-                print("Transaction failed: \(error)")
-            } else {
-                self.fetchEveryMumory()
-                print("Transaction successfully committed!")
-            }
-        }
-    }
     
     public func createReply2(mumoryAnnotation: Mumory, loginUserID: String, parentCommentIndex: Int, reply: Comment) {
         

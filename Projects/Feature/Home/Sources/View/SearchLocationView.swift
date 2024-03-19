@@ -195,8 +195,8 @@ struct SearchLocationView: View {
                         .cornerRadius(15)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         
-                        
                         VStack(spacing: 0) {
+                            
                             HStack {
                                 Text("최근 검색")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
@@ -259,7 +259,6 @@ struct SearchLocationView: View {
                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                         .cornerRadius(15)
                         
-                        
                         if !self.localSearchViewModel.popularSearches.isEmpty {
                             
                             VStack(alignment: .leading, spacing: 0) {
@@ -292,7 +291,6 @@ struct SearchLocationView: View {
                             }
                             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                             .cornerRadius(15)
-                            
                         }
                         
                     } // VStack

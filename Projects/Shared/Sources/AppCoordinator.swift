@@ -42,6 +42,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isRewardPopUpViewShown = false
     @Published public var isDeleteMumoryPopUpViewShown = false
     @Published public var isLoading = false
+    @Published public var isFirstTabSelected: Bool = false
     
     @Published public var isTestViewShown = true
     
@@ -144,6 +145,23 @@ public class DateManager: ObservableObject {
             return "\(minute)분 전"
         } else {
             return "방금 전"
+        }
+    }
+    
+    public static func formattedRegionDate(date: Date) -> String {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .weekOfYear, .day, .hour, .minute], from: date, to: Date())
+        
+        if let year = components.year, year > 0 {
+            return "\(year)년 전"
+        } else if let month = components.month, month > 0 {
+            return "\(month)개월 전"
+        } else if let week = components.weekOfYear, week > 0 {
+            return "\(week)주 전"
+        } else if let day = components.day, day > 0 {
+            return "\(day)일 전"
+        } else {
+            return "오늘"
         }
     }
     

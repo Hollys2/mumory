@@ -19,6 +19,7 @@ public struct MumoryTabView: View {
     @Binding var selectedTab: Tab
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     public init(selectedTab: Binding<Tab>) {
         self._selectedTab = selectedTab
@@ -45,6 +46,16 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
+//                    for (region, boundary) in MapConstant.boundaries {
+//                        let filteredLocations = mumoryDataViewModel.myMumorys.filter { mumory in
+//                            let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
+//                            let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
+//                            return latInRange && lonInRange
+//                        }
+//                        print("region: \(region)")
+//                        print("filteredLocations: \(filteredLocations)")
+//                    }
+                    
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
                         appCoordinator.offsetY = CGFloat.zero
