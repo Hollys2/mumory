@@ -50,13 +50,13 @@ struct MyPlaylistView: View {
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: 12, content: {
-                        ForEach(currentUserData.playlistArray, id: \.title) { playlist in
-                            PlaylistItem(playlist: playlist, itemSize: 81)
+                        ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
+                            PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
-                                    if playlist.id == "favorite" {
+                                    if currentUserData.playlistArray[index].id == "favorite" {
                                         appCoordinator.rootPath.append(LibraryPage.favorite)
                                     }else {
-                                        appCoordinator.rootPath.append(LibraryPage.playlist(playlist: playlist))
+                                        appCoordinator.rootPath.append(LibraryPage.playlist(playlist: $currentUserData.playlistArray[index]))
                                     }
                                 }
                         }
@@ -74,55 +74,49 @@ struct MyPlaylistView: View {
             
         }
         .onAppear(perform: {
-            getPlayList()
+            currentUserData.playlistArray.removeAll()
+            Task {
+                await getPlayList()
+            }
         })
         
     }
     
-    func getPlayList(){
+    func getPlayList() async {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
         currentUserData.playlistArray.removeAll()
         
         let query = db.collection("User").document(currentUserData.uId).collection("Playlist")
-            .order(by: "date", descending: true)
+            .order(by: "date", descending: false)
         
-        query.getDocuments { snapshot, error in
-            if let error = error {
-                print(error)
-            }else if let snapshot = snapshot {
-                snapshot.documents.forEach { snapshot in
-                    guard let title = snapshot.data()["title"] as? String else {
-                        print("no title")
-                        return
-                    }
-                    guard let isPublic = snapshot.data()["isPublic"] as? Bool else {
-                        print("no private thing")
-                        return
-                    }
-                    guard let songIDs = snapshot.data()["songIds"] as? [String] else {
-                        print("no id list")
-                        return
-                    }
-                    let id = snapshot.reference.documentID
-                    
-                    DispatchQueue.main.async {
-                        if id == "favorite" {
-                            withAnimation {
-                                currentUserData.playlistArray.insert(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic), at: 0)
-                            }
-                        }else {
-                            withAnimation {
-                                currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
-                            }
-                        }
-                    }
-          
-
-                    
-                }
+        guard let snapshot = try? await query.getDocuments() else {
+            return
+        }
+        
+        snapshot.documents.forEach { document in
+            let data = document.data()
+            guard let title = data["title"] as? String else {
+                print("no title")
+                return
             }
+            guard let isPublic = data["isPublic"] as? Bool else {
+                print("no private thing")
+                return
+            }
+            guard let songIDs = data["songIds"] as? [String] else {
+                print("no id list")
+                return
+            }
+            let id = document.reference.documentID
+            
+            withAnimation {
+                currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
+                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
+            }
+            
+
         }
     }
     
@@ -149,6 +143,40 @@ struct MyPlaylistView: View {
         }
         
         return songs
+    }
+    
+    private func fetchSongWithPlaylistIndex(index: Int) {
+        print("playlist \(index)")
+        let songIDs = currentUserData.playlistArray[index].songIDs
+        for id in songIDs {
+            Task {
+                let musicItemID = MusicItemID(rawValue: id)
+                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                request.properties = [.genres, .artists]
+                guard let response = try? await request.response() else {return}
+                guard let song = response.items.first else {return}
+                DispatchQueue.main.async {
+                    currentUserData.playlistArray[index].songs.append(song)
+                }
+                
+            }
+        }
+    }
+    
+    private func fetchPlaylistSong(playlist: Binding<MusicPlaylist>) {
+        for id in playlist.songIDs.wrappedValue {
+            Task {
+                let musicItemID = MusicItemID(rawValue: id)
+                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                request.properties = [.genres, .artists]
+                guard let response = try? await request.response() else {return}
+                guard let song = response.items.first else {return}
+                DispatchQueue.main.async {
+                    playlist.songs.wrappedValue.append(song)
+                }
+                
+            }
+        }
     }
 }
 

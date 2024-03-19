@@ -14,6 +14,7 @@ public struct MusicPlaylist: Equatable, Hashable {
     public var title: String
     public var songIDs: [String]
     public var isPublic: Bool
+    public var songs: [Song] = []
     
     public init(id: String, title: String, songIDs: [String], isPublic: Bool) {
         self.id = id

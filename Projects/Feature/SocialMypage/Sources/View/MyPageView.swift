@@ -34,6 +34,7 @@ public struct MyPageView: View {
                         .background(lineGray)
                     
                     SimpleFriendView()
+                        .frame(height: 195, alignment: .top)
                     
                     
                     Divider()
@@ -42,6 +43,7 @@ public struct MyPageView: View {
                         .background(lineGray)
                     
                     MyMumori()
+                        .frame(height: 283, alignment: .top)
                     
                     SubFunctionView()
                     

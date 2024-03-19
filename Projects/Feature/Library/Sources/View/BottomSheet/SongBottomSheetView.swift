@@ -19,6 +19,7 @@ struct SongBottomSheetView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -113,6 +114,16 @@ struct SongBottomSheetView: View {
                 }
                 
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
+                    .onTapGesture {
+                        dismiss()
+                        let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                        mumoryDataViewModel.choosedMusicModel = musicModel
+                        withAnimation(Animation.easeInOut(duration: 0.1)) {
+                            appCoordinator.isCreateMumorySheetShown = true
+                            appCoordinator.offsetY = CGFloat.zero
+                        }
+                    }
+                
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                     .onTapGesture {
                         dismiss()

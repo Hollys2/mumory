@@ -103,8 +103,8 @@ struct PlaylistManageView: View {
                 //플레이리스트 스크롤뷰
                 ScrollView(.vertical) {
                     LazyVGrid(columns: cols, spacing: 30, content: {
-                        ForEach(currentUserData.playlistArray, id: \.title) { playlist in
-                            PlaylistItem_Big(playlist: .constant(playlist), isEditing: $isEditing)
+                        ForEach(0 ..< currentUserData.playlistArray.count, id: \.self) { index in
+                            PlaylistItem_Big(playlist: $currentUserData.playlistArray[index], isEditing: $isEditing)
                                 .frame(minWidth: 170, minHeight: 215)
                             
                         }
