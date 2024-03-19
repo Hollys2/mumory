@@ -55,7 +55,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
         
         //        if context.coordinator.oldImageURLs != self.mumoryAnnotation.imageURLs {
         
-        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((self.mumoryDataViewModel.selectedMumoryAnnotation.imageURLs ?? []).count)
+        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((self.mumoryAnnotation.imageURLs ?? []).count)
         uiView.contentSize = CGSize(width: totalWidth, height: 1)
         
         //            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
