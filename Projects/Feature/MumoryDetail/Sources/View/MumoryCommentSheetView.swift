@@ -13,19 +13,15 @@ import Shared
 
 struct CommentView: View {
     
-    let index: Int
     let comment: Comment
     let replies: [Comment]
     
     var isFocused: FocusState<Bool>.Binding
     
     @Binding var isWritingReply: Bool
-    @Binding var selectedIndex: Int
-    @Binding var commentDocumentID: String
+    @Binding var selectedComment: Comment
     
     @State private var user: MumoriUser = MumoriUser()
-    @State private var isSecretComment: Bool = false
-    @State private var isSelectedComment: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -80,30 +76,27 @@ struct CommentView: View {
                     } // HStack
                     
                     
-                    Text(isSecretComment ? "비밀 댓글입니다." : comment.content)
+                    Text(comment.isPublic ? "비밀 댓글입니다." : comment.content)
                         .lineSpacing(20)
-                        .font(isSecretComment ? Font.custom("Pretendard", size: 14)
+                        .font(comment.isPublic ? Font.custom("Pretendard", size: 14)
                             .weight(.medium) : Font.custom("Pretendard", size: 14))
-                        .foregroundColor(isSecretComment ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                        .foregroundColor(comment.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding(.vertical, 15)
-                    //                        .background(Color.gray.opacity(0.2))
-                    
                 } // VStack
                 .padding(.horizontal, 15)
                 .background(
                     Rectangle()
                         .foregroundColor(.clear)
-                        .background(isSelectedComment ? Color(red: 0.09, green: 0.09, blue: 0.09) : Color(red: 0.12, green: 0.12, blue: 0.12))
+                        .background(comment.isPublic ? Color(red: 0.09, green: 0.09, blue: 0.09) : Color(red: 0.12, green: 0.12, blue: 0.12))
                         .cornerRadius(15)
                 )
                 
                 Spacer().frame(height: 15)
                 
                 Button(action: {
-                    selectedIndex = index
                     isFocused.wrappedValue = true
-                    commentDocumentID = comment.id
+                    selectedComment = comment
                     isWritingReply = true
                 }, label: {
                     Text("답글 달기")
@@ -150,7 +143,6 @@ struct Reply: View {
     let comment: Comment
     
     @State private var user: MumoriUser = MumoriUser()
-    @State private var isSecretComment: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -209,15 +201,13 @@ struct Reply: View {
                     })
                 } // HStack
                 
-                Text(isSecretComment ? "비밀 댓글입니다." : comment.content)
+                Text(comment.isPublic ? comment.content : "비밀 댓글입니다.")
                     .lineSpacing(20)
-                    .font(isSecretComment ? Font.custom("Pretendard", size: 14)
-                        .weight(.medium) : Font.custom("Pretendard", size: 14))
-                    .foregroundColor(isSecretComment ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                    .font(comment.isPublic ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundColor(comment.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(.vertical, 15)
-                //                        .background(Color.gray.opacity(0.2))
-                
+
             } // VStack
             .padding(.horizontal, 15)
             .background(
@@ -252,7 +242,7 @@ public struct MumoryCommentSheetView: View {
     @State private var replyText: String = ""
     @State private var isWritingReply: Bool = false
     @State private var selectedIndex: Int = -1
-    @State private var commentId: String = ""
+    @State private var selectedComment: Comment = Comment()
     @State private var isButtonDisabled: Bool = false
     
     @State private var isPublic: Bool = false
@@ -332,7 +322,7 @@ public struct MumoryCommentSheetView: View {
                         VStack(spacing: 0) {
                             // MARK: Comment
                             ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
-                                CommentView(index: index, comment: comment, replies: self.replies, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedIndex: $selectedIndex, commentDocumentID: $commentId)
+                                CommentView(comment: comment, replies: self.replies, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment)
                             }
                         }
                     }
@@ -420,7 +410,7 @@ public struct MumoryCommentSheetView: View {
 
                                 HStack(spacing: 5) {
 
-                                    Text("\(appCoordinator.currentUser.nickname)")
+                                    Text("\(selectedComment.nickname)")
                                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                         .foregroundColor(.white) +
                                     Text("님에게 답글 남기는 중")
@@ -485,7 +475,7 @@ public struct MumoryCommentSheetView: View {
                                                     isButtonDisabled = true
                                                     
                                                     Task {
-                                                        mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: appCoordinator.currentUser.uId, nickname: appCoordinator.currentUser.nickname, parentId: commentId, mumoryId: mumory.id, date: Date(), content: replyText, isPublic: self.isPublic)) { result in
+                                                        mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: appCoordinator.currentUser.uId, nickname: appCoordinator.currentUser.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: replyText, isPublic: self.isPublic)) { result in
                                                             replyText = ""
                                                             switch result {
                                                             case .success(let replies):

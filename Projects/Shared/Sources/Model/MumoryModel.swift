@@ -129,7 +129,7 @@ extension Mumory {
             let musicModel = MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
             
             let location = CLLocation(latitude: latitude, longitude: longitude)
-            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "로케이션서브타이틀", coordinate: location.coordinate)
+            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "", coordinate: location.coordinate)
             
             return Mumory(id: mumoryDocumentID, uId: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count)
             

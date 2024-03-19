@@ -59,7 +59,7 @@ struct MumoryDetailImageScrollView: UIViewRepresentable {
         uiView.contentSize = CGSize(width: totalWidth, height: 1)
         
         //            let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(imageURLs: self.imageURLs))
-        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumoryDataViewModel.selectedMumoryAnnotation))
+        let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumoryAnnotation))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
         
         uiView.subviews.forEach { $0.removeFromSuperview() }

@@ -73,7 +73,17 @@ public struct CreateMumoryBottomSheetView: View {
                 Color.black.opacity(0.6)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        self.isDeletePopUpShown = true
+                        mumoryDataViewModel.choosedMusicModel = nil
+                        mumoryDataViewModel.choosedLocationModel = nil
+                        self.calendarDate = Date()
+                        self.tags.removeAll()
+                        self.contentText.removeAll()
+                        photoPickerViewModel.removeAllSelectedImages()
+                        self.imageURLs.removeAll()
+                        
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            self.appCoordinator.isCreateMumorySheetShown = false
+                        }
                     }
                 
                 VStack(spacing: 0) {
@@ -86,8 +96,17 @@ public struct CreateMumoryBottomSheetView: View {
                                 .resizable()
                                 .frame(width: 25, height: 25)
                                 .gesture(TapGesture(count: 1).onEnded {
-                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                    self.isDeletePopUpShown = true
+                                    mumoryDataViewModel.choosedMusicModel = nil
+                                    mumoryDataViewModel.choosedLocationModel = nil
+                                    self.calendarDate = Date()
+                                    self.tags.removeAll()
+                                    self.contentText.removeAll()
+                                    photoPickerViewModel.removeAllSelectedImages()
+                                    self.imageURLs.removeAll()
+                                    
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        self.appCoordinator.isCreateMumorySheetShown = false
+                                    }
                                 })
                             
                             Spacer()
@@ -254,7 +273,7 @@ public struct CreateMumoryBottomSheetView: View {
                                 .padding(.horizontal, 20)
                             } // VStack
                             .padding(.top, 20)
-                            .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -200 : 0)
+//                            .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -200 : 0)
                         } // ScrollView
                         .simultaneousGesture(DragGesture().onChanged { i in
                             print("simultaneousGesture DragGesture")
@@ -263,28 +282,28 @@ public struct CreateMumoryBottomSheetView: View {
                     }
                     
                     ZStack(alignment: .bottom) {
-                        
+
                         VStack {
-                            
+
                             Spacer()
-                            
+
                             HStack(spacing: 0) {
-                                
+
                                 Group {
                                     Text("전체공개")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                         .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-                                    
+
                                     Spacer().frame(width: 7)
-                                    
+
                                     Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
                                         .frame(width: 17, height: 17)
-                                    
+
                                 }
                                 .gesture(TapGesture(count: 1).onEnded {
                                     self.isPublic.toggle()
                                 })
-                                
+
                                 Spacer()
                             }
                             Spacer()
@@ -302,28 +321,28 @@ public struct CreateMumoryBottomSheetView: View {
                             , alignment: .top
                         )
                         .highPriorityGesture(DragGesture())
-                        
+
                         VStack {
                             Spacer()
                             HStack(spacing: 0) {
-                                
+
                                 Group {
                                     Text("전체공개")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                         .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-                                    
+
                                     Spacer().frame(width: 7)
-                                    
+
                                     Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
                                         .frame(width: 17, height: 17)
-                                    
+
                                 }
                                 .gesture(TapGesture(count: 1).onEnded {
                                     self.isPublic.toggle()
                                 })
-                                
+
                                 Spacer()
-                                
+
                                 Button(action: {
                                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                 }) {
@@ -358,7 +377,7 @@ public struct CreateMumoryBottomSheetView: View {
                         .offset(y: self.bottomBarHeight)
                         .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight - self.bottomBarHeight : 0)
                         .highPriorityGesture(DragGesture())
-                        
+
                     }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -366,13 +385,9 @@ public struct CreateMumoryBottomSheetView: View {
                 .padding(.top, appCoordinator.safeAreaInsetsTop + 16)
                 .offset(y: self.offsetY + self.dragState.translation.height)
                 .gesture(dragGesture)
-                .gesture(TapGesture(count: 1).onEnded {
-                    //                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                })
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
                 .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
-                    
                     DatePicker("", selection: self.$calendarDate, displayedComponents: [.date])
                         .datePickerStyle(.graphical)
                         .labelsHidden()
@@ -383,7 +398,7 @@ public struct CreateMumoryBottomSheetView: View {
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
                         print("calendarDate1: \(calendarDate)")
-                        var calendar = Calendar.current
+                        let calendar = Calendar.current
                         let newDate = calendar.date(bySettingHour: calendar.component(.hour, from: Date()),
                                                     minute: calendar.component(.minute, from: Date()),
                                                     second: calendar.component(.second, from: Date()),
@@ -486,6 +501,46 @@ public struct CreateMumoryBottomSheetView: View {
                     })
                     
                 })
+                
+//                HStack(spacing: 0) {
+//
+//                    Group {
+//                        Text("전체공개")
+//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+//                            .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
+//
+//                        Spacer().frame(width: 7)
+//
+//                        Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
+//                            .frame(width: 17, height: 17)
+//                    }
+//                    .gesture(TapGesture(count: 1).onEnded {
+//                        self.isPublic.toggle()
+//                    })
+//
+//                    Spacer()
+//
+//                    Button(action: {
+//                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+//                    }) {
+//                        SharedAsset.keyboardButtonCreateMumory.swiftUIImage
+//                            .resizable()
+//                            .frame(width: 26, height: 26)
+//                    }
+//                    .opacity(self.keyboardResponder.isKeyboardHiddenButtonShown ? 1 : 0)
+//
+//                }
+//                .frame(height: 55)
+//                .padding(.leading, 25)
+//                .padding(.trailing, 20)
+//                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+//                .overlay(
+//                    Rectangle()
+//                        .inset(by: 0.15)
+//                        .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
+//                        .frame(height: 0.7)
+//                    , alignment: .top
+//                )
             }
         }
     }
