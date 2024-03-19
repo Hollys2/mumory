@@ -21,8 +21,11 @@ struct SongBottomSheetView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+<<<<<<< HEAD
     
     @State var isPresentCreateMumoryView: Bool = false
+=======
+>>>>>>> 5e1e803 (edit playlist view)
     
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -115,6 +118,7 @@ struct SongBottomSheetView: View {
                 
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                     .onTapGesture {
+<<<<<<< HEAD
 //                        dismiss()
 //                        appCoordinator.bottomAnimationViewStatus = .remove
 //                        appCoordinator.rootPath = NavigationPath()
@@ -124,15 +128,23 @@ struct SongBottomSheetView: View {
                         UIView.setAnimationsEnabled(false)
                         isPresentCreateMumoryView = true
                         UIView.setAnimationsEnabled(true)
+=======
+                        dismiss()
+                        let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                        mumoryDataViewModel.choosedMusicModel = musicModel
+>>>>>>> 5e1e803 (edit playlist view)
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             appCoordinator.isCreateMumorySheetShown = true
                             appCoordinator.offsetY = CGFloat.zero
                         }
                     }
+<<<<<<< HEAD
                     .fullScreenCover(isPresented: $isPresentCreateMumoryView) {
                         AnimationWrapper()
                             .background(TransparentBackground())
                     }
+=======
+>>>>>>> 5e1e803 (edit playlist view)
                 
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                     .onTapGesture {

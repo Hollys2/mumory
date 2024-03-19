@@ -50,7 +50,11 @@ struct MyPlaylistView: View {
                 }
                 
                 ScrollView(.horizontal) {
+<<<<<<< HEAD
                     LazyHGrid(rows: rows,spacing: spacing, content: {
+=======
+                    LazyHGrid(rows: rows,spacing: 12, content: {
+>>>>>>> 5e1e803 (edit playlist view)
                         ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
@@ -76,7 +80,10 @@ struct MyPlaylistView: View {
             
         }
         .onAppear(perform: {
+<<<<<<< HEAD
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
+=======
+>>>>>>> 5e1e803 (edit playlist view)
             currentUserData.playlistArray.removeAll()
             Task {
                 await getPlayList()
@@ -116,7 +123,11 @@ struct MyPlaylistView: View {
             
             withAnimation {
                 currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
+<<<<<<< HEAD
 //                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
+=======
+                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
+>>>>>>> 5e1e803 (edit playlist view)
             }
             
 

@@ -39,7 +39,10 @@ struct PlaylistView: View {
 
             //이미지
             PlaylistImage(songs: $playlist.songs)
+<<<<<<< HEAD
                 .frame(width: getUIScreenBounds().width)
+=======
+>>>>>>> 5e1e803 (edit playlist view)
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
@@ -134,7 +137,10 @@ struct PlaylistView: View {
                                 PlayAllButton()
                                     .onTapGesture {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
+<<<<<<< HEAD
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
+=======
+>>>>>>> 5e1e803 (edit playlist view)
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -278,9 +284,15 @@ struct PlaylistView: View {
             
         }
         .ignoresSafeArea()
+<<<<<<< HEAD
         .onAppear(perform: {
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
         })
+=======
+//        .onAppear(perform: {
+//            getPlaylist()
+//        })
+>>>>>>> 5e1e803 (edit playlist view)
 
         
         

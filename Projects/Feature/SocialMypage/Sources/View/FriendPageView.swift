@@ -140,7 +140,11 @@ struct UnkownFriendPageView: View {
             Rectangle()
                 .frame(maxWidth: .infinity)
                 .frame(width: getUIScreenBounds().width)
+<<<<<<< HEAD
                 .frame(height: 165)
+=======
+                .frame(height: 150)
+>>>>>>> 5e1e803 (edit playlist view)
                 .foregroundStyle(ColorSet.darkGray)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
@@ -172,7 +176,11 @@ struct UnkownFriendPageView: View {
                     .frame(width: 90, height: 90)
                     .clipShape(Circle())
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+<<<<<<< HEAD
                     .offset(y: -40)
+=======
+                    .offset(y: -50)
+>>>>>>> 5e1e803 (edit playlist view)
             }
             .padding(.horizontal, 20)
 
@@ -435,7 +443,11 @@ struct FriendPlaylistView: View {
                 }
                 
                 ScrollView(.horizontal) {
+<<<<<<< HEAD
                     HStack(alignment: .top, spacing: 10, content: {
+=======
+                    HStack(alignment: .top,spacing: 10, content: {
+>>>>>>> 5e1e803 (edit playlist view)
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
                             PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
                                 .onTapGesture {

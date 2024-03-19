@@ -10,7 +10,11 @@ import SwiftUI
 import Shared
 import MusicKit
 import Core
+<<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
 public struct MyRecentMumoryView: View {
+=======
+public struct MyRecentMusicView: View {
+>>>>>>> 5e1e803 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel
@@ -39,7 +43,11 @@ public struct MyRecentMumoryView: View {
                     .padding(.bottom, 7)
             }else {
                 ScrollView(.horizontal) {
+<<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
                     LazyHStack(alignment: .top, spacing: spacing, content: {
+=======
+                    LazyHStack(alignment: .top,spacing: 8, content: {
+>>>>>>> 5e1e803 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
                         ForEach(mumoryDataViewModel.myMumorys, id: \.self) { mumory in
                             RecentMusicItem(songId: mumory.musicModel.songID.rawValue)
                         }
@@ -50,9 +58,15 @@ public struct MyRecentMumoryView: View {
                 .padding(.top, 12)
             }
         })
+<<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
         .onAppear(perform: {
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
         })
+=======
+//        .onAppear(perform: {
+//            searchRecentMusicPost()
+//        })
+>>>>>>> 5e1e803 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
     }
     
     private func searchRecentMusicPost(){

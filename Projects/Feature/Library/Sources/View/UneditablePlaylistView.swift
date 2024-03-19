@@ -66,7 +66,10 @@ struct UneditablePlaylistView: View {
                                 PlayAllButton()
                                     .onTapGesture {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
+<<<<<<< HEAD
                                         AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
+=======
+>>>>>>> 5e1e803 (edit playlist view)
                                     }
                             })
                             .padding(.bottom, 15)
@@ -82,7 +85,14 @@ struct UneditablePlaylistView: View {
                                     playerManager.playNewSong(song: song)
                                 }
                             
+<<<<<<< HEAD
                             Divider05()
+=======
+                            Divider()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 0.5)
+                                .background(ColorSet.subGray)
+>>>>>>> 5e1e803 (edit playlist view)
                         }
                         
                         
@@ -262,6 +272,9 @@ struct UneditablePlaylistMusicListItem: View {
     }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 5e1e803 (edit playlist view)
 
 public struct PlaylistImageTest: View {
     @State var imageWidth: CGFloat = 0
@@ -373,5 +386,8 @@ public struct PlaylistImageTest: View {
     
     
 }
+<<<<<<< HEAD
 =======
 >>>>>>> d1f4c20 (refactoring)
+=======
+>>>>>>> 5e1e803 (edit playlist view)
