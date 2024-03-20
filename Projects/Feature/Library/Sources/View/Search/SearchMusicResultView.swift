@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 import MusicKit
 
-struct SearchResultView: View {
+struct SearchMusicResultView: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
     @EnvironmentObject private var playerManager: PlayerViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
@@ -93,7 +93,6 @@ struct SearchResultView: View {
                                         recentSearchList.insert(music.title, at: 0)
                                         userDefault.set(recentSearchList, forKey: "recentSearchList")
                                     }
-                                
                             }
                             
                             Rectangle()
@@ -133,7 +132,7 @@ struct SearchResultView: View {
     public func requestArtist(term: String){
         var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
         request.limit = 20
-        
+        request.includeTopResults = true
         Task {
             do {
                 let response = try await request.response()
@@ -143,7 +142,6 @@ struct SearchResultView: View {
             }catch(let error) {
                 print("error: \(error.localizedDescription)")
             }
-            
         }
         
     }
@@ -152,6 +150,7 @@ struct SearchResultView: View {
         print("request song")
         var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
         request.limit = 20
+        request.includeTopResults = true
         request.offset = index * 20
         Task {
             do {

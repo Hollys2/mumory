@@ -64,6 +64,9 @@ struct NowPlayingView: View {
                 PlayControlView(isPresentQueue: $isPresentQueue)
             })
             
+            SnackBarView()
+
+            
         }
     }
 }

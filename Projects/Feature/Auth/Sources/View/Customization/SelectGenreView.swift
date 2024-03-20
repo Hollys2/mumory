@@ -64,23 +64,22 @@ public struct SelectGenreView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, 20)
                             .padding(.top, 7)
-
                         
                         //Tag Layout
                         //2차원배열이기 때문에 ForEach 2개 사용
                         VStack(spacing: 13, content: {
                             ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: geometry.size.width), id: \.self){ genreList in
-                                HStack(spacing: 9, content: {
+                                HStack(spacing: 11, content: {
                                     ForEach(genreList, id: \.self){ genre in
                                         Text(genre.name)
-                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                                            .font(manager.contains(genre: genre) ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                             .padding(.horizontal, 19)
                                             .padding(.vertical, 8)
                                             .background(manager.contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-                                            .foregroundStyle(manager.contains(genre: genre) ? Color.black : ColorSet.lightGray)
+                                            .foregroundStyle(manager.contains(genre: genre) ? Color.black : ColorSet.subGray)
                                             .overlay(content: {
                                                 RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                                    .stroke(ColorSet.lightGray, lineWidth: manager.contains(genre: genre) ? 0 : 1)
+                                                    .stroke(ColorSet.subGray, lineWidth: manager.contains(genre: genre) ? 0 : 1)
                                             })
                                             .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                             .onTapGesture {

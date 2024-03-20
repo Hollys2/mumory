@@ -45,15 +45,11 @@ struct AddSongFromSearchView: View {
                             }
                         }
                     })
-                
+                                
                 SimpleScrollView(contentOffset: $scrollOffset) {
                     LazyVStack(spacing: 0, content: {
                         ForEach(songs, id: \.self) { song in
                             AddMusicItem(songID: song.id.rawValue, originPlaylist: $originPlaylist)
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(lineGray)
                         }
                     })
                     .frame(width: getUIScreenBounds().width)
@@ -105,12 +101,6 @@ struct SongSearchTextField: View {
     let textfieldBackground = Color(white: 0.24)
     var body: some View {
         HStack(spacing: 0, content: {
-            SharedAsset.graySearch.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 23, height: 23)
-                .padding(.leading, 15)
-            
             TextField("", text: $term, prompt: getPrompt())
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .foregroundStyle(Color.white)
@@ -124,6 +114,7 @@ struct SongSearchTextField: View {
                     .frame(width: 23, height: 23)
             }                    
             .padding(.leading, 10)
+            .opacity(term.isEmpty ? 0 : 1)
 
 
           

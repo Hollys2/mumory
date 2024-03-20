@@ -92,19 +92,12 @@ extension ShazamViewModel: SHSessionDelegate {
         }
         self.audioEngine.stop()
         self.audioEngine.inputNode.removeTap(onBus: 0)
-
-
     }
 
     func session(_ session: SHSession, didFind match: SHMatch) {
         let mediaItems = match.mediaItems
 
         if let firstItem = mediaItems.first {
-            
-//            guard let resultSong = firstItem.songs.first else {
-//                return
-//            }
-//            print("art work url: \(resultSong.artwork?.url(width: 500, height: 500)?.absoluteString)")
             DispatchQueue.main.async {
                 withAnimation {
                     self.shazamSong = firstItem
@@ -115,8 +108,6 @@ extension ShazamViewModel: SHSessionDelegate {
             }
             self.audioEngine.stop()
             self.audioEngine.inputNode.removeTap(onBus: 0)
-
-
         }
     }
 }

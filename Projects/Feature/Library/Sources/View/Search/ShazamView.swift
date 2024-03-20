@@ -9,11 +9,16 @@
 import SwiftUI
 import Shared
 import Lottie
+import MusicKit
+import ShazamKit
 
 struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @State var startsRecording: Bool = false
+    @State var isPresentBottomSheet: Bool = false
+    @State var song: Song?
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -30,107 +35,131 @@ struct ShazamView: View {
                         }
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 60)
+                .frame(height: 63)
            
                 
-                if shazamManager.isRecording {
-                    VStack(spacing: 13, content: {
-                        Text("음악을 듣고 있어요")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                        
-                        LottieView(animation: .named("shazam", bundle: .module))
-                            .looping()
-                    })
-                    .padding(.top, 36)
-                    .transition(.opacity)
-                }else {
-                    if shazamManager.isShazamCompleted {
+                    if shazamManager.isRecording {
                         VStack(spacing: 0, content: {
+                            Text("음악을 듣고 있어요")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                                .foregroundStyle(ColorSet.mainPurpleColor)
                             
-                            AsyncImage(url: shazamManager.shazamSong?.artworkURL) { image in
-                                image.resizable()
-                                    .scaledToFill()
-                                    .frame(width: 145, height: 145)
-                                    .cornerRadius(10, corners: .allCorners)
-                            } placeholder: {
-                                RoundedRectangle(cornerRadius: 10, style: .circular)
-                                    .frame(width: 145, height: 145)
-                                    .foregroundStyle(.gray)
-                            }
-                            .padding(.top, 36)
-                            
-                            Text(shazamManager.shazamSong?.title ?? "NO TITLE")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                                .foregroundStyle(.white)
-                                .padding(.top, 20)
-                            
-                            Text(shazamManager.shazamSong?.artist ?? "NO ARTIST")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                .foregroundStyle(ColorSet.charSubGray)
-                                .padding(.top, 5)
-                            
-                            HStack(spacing: 12, content: {
-                                AgainButton()
-                                    .onTapGesture {
-                                        shazamManager.startOrEndListening()
-                                    }
-                                PlayButton()
-                            })
-                            .padding(.top, 25)
+                            LottieView(animation: .named("shazam", bundle: .module))
+                                .looping()
                         })
                         .transition(.opacity)
                         
                     }else {
-                        VStack(spacing: 0, content: {
-                            Text("음악을 찾지 못했어요")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                                .foregroundStyle(ColorSet.mainPurpleColor)
-                            
-                            Text("주변의 소음이 없는 곳에서 다시 시도해주세요")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                .foregroundStyle(ColorSet.subGray)
-                                .padding(.top, 12)
-                            
-                            SharedAsset.shazamFailure.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 78)
-                                .padding(.leading, 20)
-                                .padding(.trailing, 25)
-                                .padding(.top, 5)
-                            
-                            AgainButton()
-                                .padding(.top, 5)
-                                .onTapGesture {
-                                    shazamManager.startOrEndListening()
+                        if shazamManager.isShazamCompleted {
+                            VStack(spacing: 0, content: {
+                                
+                                AsyncImage(url: shazamManager.shazamSong?.artworkURL) { image in
+                                    image.resizable()
+                                        .scaledToFill()
+                                        .frame(width: 145, height: 145)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                                } placeholder: {
+                                    RoundedRectangle(cornerRadius: 10, style: .circular)
+                                        .frame(width: 145, height: 145)
+                                        .foregroundStyle(.gray)
                                 }
-                        })
-                        .transition(.opacity)
+                                .overlay(content: {
+                                    SharedAsset.menu.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 30, height: 30)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                                        .padding(.trailing, 5)
+                                        .padding(.top, 8)
+                                        .onTapGesture {
+                                            guard let song = self.song else {
+                                                return
+                                            }
+                                            UIView.setAnimationsEnabled(false)
+                                            isPresentBottomSheet = true
+                                        }
+                                })
+                                .padding(.top, 36)
+                                
+                                Text(shazamManager.shazamSong?.title ?? "NO TITLE")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                    .foregroundStyle(.white)
+                                    .padding(.top, 16)
+                                
+                                Text(shazamManager.shazamSong?.artist ?? "NO ARTIST")
+                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                                    .foregroundStyle(ColorSet.charSubGray)
+                                    .padding(.top, 5)
+                                
+                                HStack(spacing: 12, content: {
+                                    AgainButton()
+                                        .onTapGesture {
+                                            shazamManager.startOrEndListening()
+                                        }
+                                    PlayButton()
+                                })
+                                .padding(.top, 25)
+                            })
+                            .transition(.opacity)
+                            
+                        }else {
+                            VStack(spacing: 0) {
+                                Text("음악을 찾지 못했어요")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                                    .foregroundStyle(ColorSet.mainPurpleColor)
+                                
+                                Text("주변의 소음이 없는 곳에서 다시 시도해주세요")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                    .foregroundStyle(ColorSet.subGray)
+                                    .padding(.top, 12)
+                                
+                                SharedAsset.shazamFailure.swiftUIImage
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 78)
+                                    .padding(.leading, 20)
+                                    .padding(.trailing, 25)
+                                    .padding(.top, 5)
+                                
+                                AgainButton()
+                                    .padding(.top, 5)
+                                    .onTapGesture {
+                                        shazamManager.startOrEndListening()
+                                    }
+                            }
+                            .transition(.opacity)
+                            
+                            
+                        }
                     }
-  
-                }
-                
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
-                    .padding(.top, 75)
-                
+                    
+                    Divider()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 0.5)
+                        .background(ColorSet.subGray)
+                        .padding(.top, 60)
               
             })
         }
         .onAppear(perform: {
             shazamManager.startOrEndListening()
         })
-//        .ignoresSafeArea()
+        .onChange(of: shazamManager.shazamSong, perform: { newValue in
+            Task {
+                self.song = await fetchSong(songID: shazamManager.shazamSong?.appleMusicID ?? "")
+            }
+        })
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            if let song = self.song {
+                BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                    SongBottomSheetView(song: song)
+                }
+                .background(TransparentBackground())
+            }
+        }
     }
 }
 
-//#Preview {
-//
-//    ShazamView()
-//}
 
 struct AgainButton: View {
     private let backgroundColor = Color(red: 0.24, green: 0.24, blue: 0.24)

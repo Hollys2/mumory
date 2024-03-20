@@ -28,10 +28,6 @@ struct AddSongFromFavoriteView: View {
                 LazyVStack(spacing: 0, content: {
                     ForEach(favoritePlaylist?.songIDs ?? [], id: \.self) { id in
                         AddMusicItem(songID: id, originPlaylist: $originPlaylist)
-                        Divider()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 0.5)
-                            .background(lineGray)
                     }
 
                 })

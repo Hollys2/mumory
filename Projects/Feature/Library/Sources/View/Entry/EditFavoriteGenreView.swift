@@ -27,19 +27,19 @@ struct EditFavoriteGenreView: View {
                     .padding(.leading, 20)
                     .padding(.top, 30 + 118)
                 
-                VStack(spacing: 13, content: {
+                VStack(spacing: 15, content: {
                     ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: getUIScreenBounds().width), id: \.self){ genreList in
-                        HStack(spacing: 9, content: {
+                        HStack(spacing: 11, content: {
                             ForEach(genreList, id: \.self){ genre in
                                 Text(genre.name)
-                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                                    .font(contains(genre: genre) ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                     .padding(.horizontal, 19)
                                     .padding(.vertical, 8)
                                     .background(contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-                                    .foregroundStyle(contains(genre: genre) ? Color.black : ColorSet.lightGray)
+                                    .foregroundStyle(contains(genre: genre) ? Color.black : ColorSet.subGray)
                                     .overlay(content: {
                                         RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
-                                            .stroke(ColorSet.lightGray, lineWidth: contains(genre: genre) ? 0 : 1)
+                                            .stroke(ColorSet.subGray, lineWidth: contains(genre: genre) ? 0 : 1)
                                     })
                                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                     .onTapGesture {
@@ -86,8 +86,7 @@ struct EditFavoriteGenreView: View {
             .background(ColorSet.background.opacity(0.9))
             .padding(.bottom, 5)
             .ignoresSafeArea()
-      
-            
+                  
             VStack{
                 Spacer()
                 Button {

@@ -50,7 +50,7 @@ struct ProfileSettingView: View {
                             .padding(.top, 40)
                         
                         Text("마이페이지에서 수정할 수 있어요")
-                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.top, 7)
