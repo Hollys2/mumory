@@ -24,7 +24,8 @@ struct MumoryApp: App {
         WindowGroup {
             GeometryReader { geometry in
                 ZStack {
-                    SplashView()
+//                    SplashView()
+                    MumoryEditView(mumoryAnnotation: Mumory())
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                                 AuthController.handleOpenUrl(url: url)
