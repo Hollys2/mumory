@@ -79,10 +79,7 @@ struct NotificationView: View {
                     })
                 
 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
+                Divider05()
                     .padding(.top, 7)
                     .padding(.bottom, 7)
                 

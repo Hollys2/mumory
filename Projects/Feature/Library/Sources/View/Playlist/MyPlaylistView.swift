@@ -15,7 +15,7 @@ import MusicKit
 struct MyPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    
+    @State var spacing: CGFloat = 0
     var rows: [GridItem] = [
         GridItem(.fixed(215), spacing: 23),
         GridItem(.fixed(215), spacing: 23)
@@ -49,7 +49,7 @@ struct MyPlaylistView: View {
                 }
                 
                 ScrollView(.horizontal) {
-                    LazyHGrid(rows: rows,spacing: 12, content: {
+                    LazyHGrid(rows: rows,spacing: spacing, content: {
                         ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
@@ -74,6 +74,7 @@ struct MyPlaylistView: View {
             
         }
         .onAppear(perform: {
+            spacing = getUIScreenBounds().width <= 375 ? 8 : 12
             currentUserData.playlistArray.removeAll()
             Task {
                 await getPlayList()

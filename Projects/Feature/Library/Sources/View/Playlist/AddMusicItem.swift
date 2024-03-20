@@ -18,7 +18,6 @@ struct AddMusicItem: View {
     let songID: String
     @Binding var originPlaylist: MusicPlaylist
     @State var isSnackBarPresent: Bool = false
-    
     @State var song: Song?
     var body: some View {
         HStack(spacing: 0, content: {
@@ -86,6 +85,7 @@ struct AddMusicItem: View {
             db.collection("User").document(currentUserData.uId).collection("Playlist").document(originPlaylist.id)
                 .updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songID])])
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
+            snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songId: songID)
 
         }else {
             //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함

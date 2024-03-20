@@ -91,10 +91,7 @@ public struct ImageSelectBottomSheet: View {
                         }
                         
                         if imageBundle.image != nil {
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.2)
-                                .background(ColorSet.darkGray)
+                           Divider03()
                                 .padding(.horizontal, 2)
                             
                             HStack(spacing: 0, content: {

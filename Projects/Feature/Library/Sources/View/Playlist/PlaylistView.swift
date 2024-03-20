@@ -39,6 +39,7 @@ struct PlaylistView: View {
 
             //이미지
             PlaylistImage(songs: $playlist.songs)
+                .frame(width: getUIScreenBounds().width)
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
@@ -499,10 +500,7 @@ private struct AddSongButtonInPlaylistView: View {
             .padding(.vertical, 15)
             .padding(.horizontal, 20)
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(ColorSet.subGray)
+            Divider05()
         })
     }
 }

@@ -84,7 +84,7 @@ struct MyMumoryItem: View {
     
     private func DateText(date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MM월 dd일"
+        formatter.dateFormat = "M월 dd일"
         return formatter.string(from: date)
     }
     

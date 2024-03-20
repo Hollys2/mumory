@@ -81,11 +81,7 @@ struct ArtistOfSongView: View {
                         .padding(.top, 39)
                         .padding(.bottom, 18)
                         
-                        //구분선
-                        Divider()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 0.5)
-                            .background(ColorSet.subGray)
+                        Divider05()
                         
                         //노래 리스트
                         ForEach(songs, id: \.id){ song in
@@ -93,10 +89,6 @@ struct ArtistOfSongView: View {
                                 .onTapGesture {
                                     playerManager.playNewSong(song: song)
                                 }
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(ColorSet.subGray)
                         }
                         
                         Rectangle()

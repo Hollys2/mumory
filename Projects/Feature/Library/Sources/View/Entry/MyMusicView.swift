@@ -19,10 +19,7 @@ struct MyMusicView: View {
                 MyRecentMusicView()
                     .frame(height: 250, alignment: .top)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.3)
-                    .background(ColorSet.subGray)
+                Divider03()
                 
                 MyPlaylistView()
                     .padding(.top, 35)

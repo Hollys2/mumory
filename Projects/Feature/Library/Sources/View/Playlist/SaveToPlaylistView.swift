@@ -52,11 +52,7 @@ struct SaveToPlaylistView: View {
                 .padding(.horizontal, 20)
                 .frame(height: 70)
                 
-                //구분선
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.lineGray)
+                Divider05()
                 
                 //새 플레이리스트 만들기 버튼
                 HStack(spacing: 10, content: {
@@ -83,17 +79,12 @@ struct SaveToPlaylistView: View {
                 }
                 
                 //새 플레이리스트 만들기 버튼 하단 굵은 구분선
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.lineGray)
+                Divider05()
+                
                 Rectangle()
                     .frame(maxWidth: .infinity)
                     .frame(height: 16)
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.lineGray)
+                Divider05()
                 
                 
                 LazyVStack(spacing: 0, content: {

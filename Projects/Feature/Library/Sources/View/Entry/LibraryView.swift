@@ -82,6 +82,9 @@ struct LibraryView: View {
                     }
                 }
                 .frame(width: screenWidth)
+                .onAppear {
+                    print("screent width: \(getUIScreenBounds().width), height: \(getUIScreenBounds().height)")
+                }
                 
             })
             
