@@ -91,10 +91,7 @@ struct AddSongView: View {
                 })
                 .frame(maxWidth: .infinity, alignment: isTapFavorite ? .leading : .trailing)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(lineGray)
+                Divider05()
                 
                 if isTapFavorite{
                     AddSongFromFavoriteView(originPlaylist: $originPlaylist)

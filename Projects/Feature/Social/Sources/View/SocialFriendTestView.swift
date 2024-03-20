@@ -100,10 +100,7 @@ struct SocialFriendTestView: View {
                 .padding(.bottom, 31)
                 .padding(.top, 20)
 
-                Divider()
-                    .frame(height: 0.5)
-                    .frame(maxWidth: .infinity)
-                    .background(ColorSet.subGray)
+                Divider05()
                 
                 if itemSelection == 0 {
                     //친구 추가 - selection: 0
@@ -547,10 +544,7 @@ struct SocialFriendBottomSheet: View {
                     appCoordinator.rootPath.append(MumoryPage.requestFriend)
                 }
             
-            Divider()
-                .frame(height: 0.5)
-                .frame(maxWidth: .infinity)
-                .background(ColorSet.subGray)
+            Divider05()
             
             BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "차단친구 관리")
                 .onTapGesture {

@@ -63,6 +63,7 @@ class SimpleScrollViewController: UIViewController{
         let v = UIScrollView()
         v.isPagingEnabled = false
         v.showsVerticalScrollIndicator = false
+        v.automaticallyAdjustsScrollIndicatorInsets = true
         return v
     }()
     
@@ -72,7 +73,7 @@ class SimpleScrollViewController: UIViewController{
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        print("inset: \(scrollView.verticalScrollIndicatorInsets.right)")
         self.hostingController.view.backgroundColor = .clear
             
         self.view.addSubview(self.scrollView)

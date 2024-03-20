@@ -98,7 +98,12 @@ public struct SnackBarView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    
+    var additionalAction: () -> Void = {}
     public init(){}
+    public init(additionalAction: @escaping () -> Void) {
+        self.additionalAction = additionalAction
+    }
     
     public var body: some View {
         VStack{
@@ -266,6 +271,7 @@ public struct SnackBarView: View {
                 .foregroundStyle(ColorSet.skeleton02)
                 .onTapGesture {
                     appCoordinator.rootPath.append(LibraryPage.favorite)
+                    additionalAction()
                 }
         }
         .lineLimit(1)

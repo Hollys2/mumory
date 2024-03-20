@@ -46,9 +46,7 @@ struct FriendListView: View {
                 .padding(.horizontal, 20)
                 .frame(height: 63)
                 
-                Divider()
-                    .background(lineGray)
-                    .frame(height: 0.5)
+                Divider05()
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0, content: {

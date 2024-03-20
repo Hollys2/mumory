@@ -81,10 +81,7 @@ struct UneditablePlaylistView: View {
                                     playerManager.playNewSong(song: song)
                                 }
                             
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(ColorSet.subGray)
+                            Divider05()
                         }
                         
                         

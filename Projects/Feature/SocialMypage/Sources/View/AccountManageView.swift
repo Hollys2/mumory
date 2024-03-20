@@ -78,10 +78,7 @@ struct AccountManageView: View {
                 
                 //이메일 가입 유저만 비밀번호 재설정 가능하=
                 if settingViewModel.signinMethod == "Email"{
-                    Divider()
-                        .frame(maxWidth: .infinity, maxHeight: 0.5)
-                        .frame(height: 0.5)
-                        .background(ColorSet.subGray)
+                    Divider05()
                         .padding(.top, 7)
                         .padding(.bottom, 7)
                     

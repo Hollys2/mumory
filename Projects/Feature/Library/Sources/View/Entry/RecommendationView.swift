@@ -65,10 +65,7 @@ public struct RecommendationView: View {
                 }
                 .frame(height: 300)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.3)
-                    .background(ColorSet.subGray)
+                Divider03()
                     .padding(.top, 15)
                 
                 FavoriteGenreRecommendationView()

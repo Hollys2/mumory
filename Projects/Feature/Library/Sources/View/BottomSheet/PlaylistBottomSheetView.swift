@@ -39,10 +39,7 @@ struct PlaylistBottomSheetView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(lineGray)
+            Divider05()
                 .padding(.horizontal, 4)
             
             BottomSheetItem(image: SharedAsset.editPlaylist.swiftUIImage, title: "플레이리스트 이름 수정")
@@ -56,7 +53,7 @@ struct PlaylistBottomSheetView: View {
                     appCoordinator.rootPath.append(LibraryPage.addSong(originPlaylist: playlist))
                 }
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
-            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트에 삭제", type: .warning)
+            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트 삭제", type: .warning)
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
             
         })

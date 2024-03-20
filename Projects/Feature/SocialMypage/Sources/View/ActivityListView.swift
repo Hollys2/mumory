@@ -95,10 +95,7 @@ struct ActivityListView: View {
                     }
                 }
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
+                Divider05()
                     
                 HStack(spacing: 6){
                     Text(DateText(date: date))
@@ -129,10 +126,7 @@ struct ActivityListView: View {
                     }
                 })
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
+                Divider05()
                 
                 ScrollView {
                     VStack(spacing: 0, content: {
@@ -149,10 +143,7 @@ struct ActivityListView: View {
                                     .padding(.leading, 12)
                                     .frame(height: 60)
                                 
-                                Divider()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 0.5)
-                                    .background(ColorSet.subGray)
+                                Divider05()
                             }
 
                         }
@@ -262,8 +253,8 @@ struct SelectionButtonView: View {
     }
     var body: some View {
         Text(title)
-            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-            .foregroundStyle(selection == type ? Color.black : Color.white)
+            .font(selection == type ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+            .foregroundStyle(selection == type ? Color.black : ColorSet.D0Gray)
             .padding(.horizontal, 16)
             .frame(height: 33)
             .background(selection == type ? ColorSet.mainPurpleColor : ColorSet.darkGray)
@@ -392,10 +383,7 @@ struct ActivityTestItem: View {
             .frame(maxWidth: .infinity)
             .background(ColorSet.background)
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(ColorSet.subGray)
+            Divider05()
         })
         .onAppear{
             Task {

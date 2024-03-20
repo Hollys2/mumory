@@ -16,6 +16,7 @@ public struct MyRecentMusicView: View {
     @EnvironmentObject var playerManager: PlayerViewModel
     @State var musicList: [Song] = []
     @State var exists: Bool = false
+    @State var spacing: CGFloat = 0
     public init() {
         
     }
@@ -38,7 +39,7 @@ public struct MyRecentMusicView: View {
                     .padding(.bottom, 7)
             }else {
                 ScrollView(.horizontal) {
-                    LazyHStack(alignment: .top,spacing: 12, content: {
+                    LazyHStack(alignment: .top, spacing: spacing, content: {
                         ForEach(mumoryDataViewModel.myMumorys, id: \.self) { mumory in
                             RecentMusicItem(songId: mumory.musicModel.songID.rawValue)
                         }
@@ -49,9 +50,9 @@ public struct MyRecentMusicView: View {
                 .padding(.top, 12)
             }
         })
-//        .onAppear(perform: {
-//            searchRecentMusicPost()
-//        })
+        .onAppear(perform: {
+            spacing = getUIScreenBounds().width <= 375 ? 8 : 12
+        })
     }
     
     private func searchRecentMusicPost(){

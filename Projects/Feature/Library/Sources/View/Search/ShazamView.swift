@@ -132,13 +132,10 @@ struct ShazamView: View {
                             
                         }
                     }
-                    
-                    Divider()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 0.5)
-                        .background(ColorSet.subGray)
-                        .padding(.top, 60)
-              
+                
+                Divider05()
+                    .padding(.top, 60)
+                
             })
         }
         .onAppear(perform: {

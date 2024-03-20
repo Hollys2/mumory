@@ -77,19 +77,12 @@ struct SelectableArtistView: View {
                             .padding(.bottom, 18)
                         
                         //구분선
-                        Divider()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 0.5)
-                            .background(ColorSet.subGray)
+                        Divider05()
                         
                         //노래 리스트
                         ForEach(songs, id: \.id){ song in
                             SelectableMusicListItem(song: song)
-                        
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(ColorSet.subGray)
+                 
                         }
                         
                         Rectangle()
@@ -166,53 +159,57 @@ struct SelectableMusicListItem: View {
     }
         
     var body: some View {
-        
-        HStack(spacing: 0, content: {
-            AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
-                image
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .clipShape(RoundedRectangle(cornerRadius: 5,style: .circular))
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 5, style: .circular)
-                    .foregroundStyle(.gray)
-                    .frame(width: 40, height: 40)
-            }
-            .padding(.trailing, 13)
-
-            
-            VStack(content: {
-                Text(song.title)
-                    .frame(maxWidth: .infinity,alignment: .leading)
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                
-                Text(song.artistName)
-                    .frame(maxWidth: .infinity,alignment: .leading)
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundStyle(LibraryColorSet.lightGrayTitle)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            })
-            
-            Spacer()
-            
-            SharedAsset.addPurpleCircleFilled.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 30, height: 30)
-                .onTapGesture {    
-                    let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                    mumoryDataViewModel.choosedMusicModel = musicModel
-                    appCoordinator.rootPath.removeLast()
-                    appCoordinator.rootPath.removeLast()
+        VStack(spacing: 0) {
+            HStack(spacing: 0, content: {
+                AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
+                    image
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .clipShape(RoundedRectangle(cornerRadius: 5,style: .circular))
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                        .foregroundStyle(.gray)
+                        .frame(width: 40, height: 40)
                 }
-        })
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 15)
-        .padding(.horizontal, 20)
-        .background(ColorSet.background)
+                .padding(.trailing, 13)
+
+                
+                VStack(content: {
+                    Text(song.title)
+                        .frame(maxWidth: .infinity,alignment: .leading)
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    
+                    Text(song.artistName)
+                        .frame(maxWidth: .infinity,alignment: .leading)
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundStyle(LibraryColorSet.lightGrayTitle)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                })
+                
+                Spacer()
+                
+                SharedAsset.addPurpleCircleFilled.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                        mumoryDataViewModel.choosedMusicModel = musicModel
+                        appCoordinator.rootPath.removeLast()
+                        appCoordinator.rootPath.removeLast()
+                    }
+            })
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 15)
+            .padding(.horizontal, 20)
+            .background(ColorSet.background)
+            
+            Divider05()
+        }
+     
     }
 }

@@ -64,7 +64,11 @@ struct NowPlayingView: View {
                 PlayControlView(isPresentQueue: $isPresentQueue)
             })
             
-            SnackBarView()
+            SnackBarView {
+                Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { timer in
+                    dismiss()
+                }
+            }
 
             
         }

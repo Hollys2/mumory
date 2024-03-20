@@ -39,10 +39,7 @@ struct BlockFriendListView: View {
                 .padding(.horizontal, 20)
                 .frame(height: 77)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
+                Divider05()
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {

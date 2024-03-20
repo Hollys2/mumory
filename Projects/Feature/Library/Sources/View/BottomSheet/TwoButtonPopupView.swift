@@ -57,10 +57,7 @@ struct TwoButtonPopupView: View {
                     .frame(height: subTitle.isEmpty ? 0 : nil)
                     .padding(.bottom, subTitle.isEmpty ? 0 : 32)
                 
-                Divider()
-                    .frame(height: 0.5)
-                    .frame(maxWidth: .infinity)
-                    .background(lineGray)
+                Divider05()
                 
                 HStack(spacing: 0, content: {
                     Button(action: {
@@ -74,7 +71,7 @@ struct TwoButtonPopupView: View {
                     
                     Divider()
                         .frame(width: 0.5, height: 50)
-                        .background(lineGray)
+                        .background(ColorSet.skeleton02)
                     
                     Button(action: {
                         Task {

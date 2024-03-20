@@ -88,10 +88,7 @@ struct KnownFriendPageView: View {
             VStack(spacing: 0, content: {
                 FriendInfoView(friend: friend)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(lineGray)
+                Divider05()
                 
                 //맵뷰 들어갈 공간
                 Rectangle()
@@ -99,10 +96,7 @@ struct KnownFriendPageView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 187)
                                         
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(lineGray)
+                Divider05()
                 
                 FriendPlaylistView(friend: friend)
             })
@@ -128,7 +122,7 @@ struct UnkownFriendPageView: View {
         ZStack(alignment: .top){
             VStack(spacing: 0, content: {
                 UnknownFriendInfoView
-                line
+                Divider10()
                 UnknownFriendContentView
                     .padding(.top, 90)
             })
@@ -219,13 +213,7 @@ struct UnkownFriendPageView: View {
 
     }
     
-    //구분선
-    var line: some View {
-        Divider()
-            .frame(maxWidth: .infinity)
-            .frame(height: 1)
-            .background(ColorSet.subGray)
-    }
+   
     
     //친구가 아닌 사용자 컨텐츠 부분 안내
     var UnknownFriendContentView: some View{
@@ -526,7 +514,7 @@ struct FriendPageCommonBottomSheetView: View {
                     dismiss()
                     blockFriend(uId: currentUserData.uId, friendUId: friend.uId)
                 }
-            Line5()
+            Divider05()
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
         })
     }
@@ -554,7 +542,7 @@ struct FriendDeleteBlockBottomSheetView: View {
                     isPresentBlockConfirmPopup = true
                 }
             
-            Line5()
+            Divider05()
             
             BottomSheetSubTitleItem(image: SharedAsset.cutOffFriend.swiftUIImage, title: "\(friend.nickname)과 친구 끊기", subTitle: "\(friend.nickname)님과 친구 관계를 끊습니다.")
                 .onTapGesture {
@@ -566,14 +554,6 @@ struct FriendDeleteBlockBottomSheetView: View {
     }
 }
 
-public struct Line5: View {
-    public var body: some View {
-        Divider()
-            .frame(height: 0.5)
-            .frame(maxWidth: .infinity)
-            .background(ColorSet.subGray)
-    }
-}
 
 public func blockFriend(uId: String, friendUId: String) {
     let db = FBManager.shared.db

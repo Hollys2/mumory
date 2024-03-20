@@ -77,10 +77,7 @@ struct SongBottomSheetView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(lineGray)
+                Divider05()
                     .padding(.horizontal, 4)
                     .padding(.bottom, 10)
                 

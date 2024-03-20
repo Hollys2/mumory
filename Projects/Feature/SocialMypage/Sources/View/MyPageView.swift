@@ -28,19 +28,13 @@ public struct MyPageView: View {
                 VStack(spacing: 0, content: {
                     UserInfoView()
                     
-                    Divider()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 0.5)
-                        .background(lineGray)
+                    Divider05()
                     
                     SimpleFriendView()
                         .frame(height: 195, alignment: .top)
                     
                     
-                    Divider()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 0.5)
-                        .background(lineGray)
+                    Divider05()
                     
                     MyMumori()
                         .frame(height: 283, alignment: .top)
@@ -301,44 +295,6 @@ struct MyMumori: View {
             .padding(.bottom, 40)
         })
     }
-    
-//    private func getMyMumory(){
-//        let db = Firebase.db
-//        let uid = currentUserData.uId
-//        let query = db.collection("Mumory").order(by: "date", descending: true).whereField("uId", isEqualTo: uid)
-//        
-//        query.getDocuments { snapshot, error in
-//            guard error == nil else {
-//                return
-//            }
-//            guard let snapshot = snapshot else {
-//                print("b")
-//                return
-//            }
-//            snapshot.documents.forEach { doc in
-//                print("c")
-//                Task {
-//                    let data = doc.data()
-//                    
-//                    guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {
-//                        print("d")
-//                        return
-//                    }
-//                    guard let songID = data["songID"] as? String else {
-//                        print("e")
-//                        return
-//                    }
-//                    let locationTitle = data["locationTitle"] as? String ?? ""
-//                    let isPublic = data["isPublic"] as? Bool ?? false
-//                    let id = doc.documentID
-//                    
-//                    self.mumoryList.append(MumorySample(id: id, date: date, locationTitle: locationTitle, songID: songID, isPublic: isPublic))
-//                }
-//                
-//            }
-//        }
-//        
-//    }
 }
 
 struct SubFunctionView: View {
@@ -349,10 +305,7 @@ struct SubFunctionView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(lineGray)
+            Divider05()
             
             HStack(spacing: 0, content: {
                 Text("리워드")
@@ -371,10 +324,7 @@ struct SubFunctionView: View {
             .background(ColorSet.background)
             
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(lineGray)
+            Divider05()
             
             HStack(spacing: 0, content: {
                 Text("월간 통계")
@@ -393,10 +343,7 @@ struct SubFunctionView: View {
             .background(ColorSet.background)
             
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(lineGray)
+            Divider05()
             
             HStack(spacing: 0, content: {
                 Text("활동 내역")
@@ -422,10 +369,7 @@ struct SubFunctionView: View {
                 appCoordinator.rootPath.append(MyPage.activityList)
             }
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(lineGray)
+            Divider05()
         }
     }
 }
