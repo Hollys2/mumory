@@ -156,6 +156,7 @@ struct SaveToPlaylistView: View {
                         guard error == nil else {
                             return
                         }
+                        snackBarViewModel.setRecentSaveData(playlist: to, songId: song)
                         snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                     }
                 }

@@ -47,6 +47,7 @@ struct SearchMusicView: View {
                         SharedAsset.xWhiteCircle.swiftUIImage
                             .frame(width: 23, height: 23)
                             .padding(.trailing, 17)
+                            .opacity(term.isEmpty ? 0 : 1)
                             .onTapGesture {
                                 term = ""
                             }
@@ -71,11 +72,10 @@ struct SearchMusicView: View {
                 .padding(.bottom, 15)
                 .background(.clear)
                 
-                if term.count > 0{
+                if term.count > 0 {
                     SearchSelectableResultView(term: $term)
-                    
                 }else{
-                    SearchEntryView(term: $term)
+                    SearchMusicEntryView(term: $term)
                 }
                 
                 
@@ -183,20 +183,17 @@ struct SearchSelectableResultView: View {
                     }
                 })
                 .frame(width: getUIScreenBounds().width)
-                //검색어 감지
-                .onChange(of: term, perform: { value in
-                    requestIndex = 0
-                    timer?.invalidate()
-                    timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: false, block: { timer in
-                        print("???")
-                        offset.y = 0
+            }
+            .onChange(of: term, perform: { value in
+                localTime = 0.0
+                requestIndex = 0
+            })
+            .onChange(of: localTime, perform: { value in
+                if localTime == 0.8 {
                         requestArtist(term: term)
                         requestSong(term: term, index: 0)
-                    })
-                })
-                
-            }
-            //스크롤 감지
+                }
+            })
             .onChange(of: offset, perform: { value in
                 if offset.y/contentSize.height > 0.7 {
                     if !haveToLoadNextPage {
@@ -209,17 +206,21 @@ struct SearchSelectableResultView: View {
                 }
             })
         }
-        .onAppear {
-            offset.y = 0
-            requestArtist(term: term)
-            requestSong(term: term, index: 0)
-        }
+        .onAppear(perform: {
+            self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
+                localTime += 0.2
+            }
+        })
+        .onDisappear(perform: {
+            timer?.invalidate()
+        })
         
     }
     public func requestArtist(term: String){
         var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
         request.limit = 20
-        
+        request.includeTopResults = true
+
         Task {
             do {
                 let response = try await request.response()
@@ -238,6 +239,7 @@ struct SearchSelectableResultView: View {
         print("request song")
         var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
         request.limit = 20
+        request.includeTopResults = true
         request.offset = index * 20
         Task {
             do {
@@ -271,6 +273,7 @@ struct SearchSelectableSongItem: View {
                     .frame(width: 57, height: 57)
                     .foregroundStyle(.gray)
             }
+            
             VStack(spacing: 3, content: {
                 Text(song.title)
                     .font(.system(size: 20, weight: .medium))
@@ -287,10 +290,11 @@ struct SearchSelectableSongItem: View {
                     .truncationMode(.tail)
             })
             .padding(.leading, 16)
+            .padding(.trailing, 20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             
-            Spacer()
-            
-            SharedAsset.addWhiteCircle.swiftUIImage
+            SharedAsset.addPurpleCircleFilled.swiftUIImage
                 .resizable()
                 .scaledToFit()
                 .frame(width: 30, height: 30)

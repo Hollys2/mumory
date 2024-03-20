@@ -78,18 +78,18 @@ struct MyRequestFriendListView: View {
 }
 
 
-struct MyRequestFriendItem: View {
-    let friend: MumoriUser
+public struct MyRequestFriendItem: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isPresentDeletePopup: Bool = false
     @Binding var myRequestFriendList: [MumoriUser]
-    init(friend: MumoriUser, myRequestFriendList: Binding<[MumoriUser]>) {
+    let friend: MumoriUser
+    public init(friend: MumoriUser, myRequestFriendList: Binding<[MumoriUser]>) {
         self.friend = friend
         self._myRequestFriendList = myRequestFriendList
     }
     let Firebase = FBManager.shared
-    @State var isPresentDeletePopup: Bool = false
-    @EnvironmentObject var currentUserData: CurrentUserData
     
-    var body: some View {
+    public var body: some View {
         HStack(spacing: 13, content: {
             AsyncImage(url: friend.profileImageURL) { image in
                 image
@@ -132,7 +132,7 @@ struct MyRequestFriendItem: View {
         .background(ColorSet.background)
         .frame(height: 84)
         .fullScreenCover(isPresented: $isPresentDeletePopup) {
-            TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
+            TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
                 Task {
                     guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
                         return

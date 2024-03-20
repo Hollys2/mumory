@@ -23,11 +23,11 @@ struct TermsOfServiceView: View {
             LibraryColorSet.background.ignoresSafeArea()
             VStack(spacing: 0){
                 
-                Text("서비스 이용약관에\n동의해주세요")
+                Text("서비스 이용약관에\n동의해주세요!")
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 43)
-                    .padding(.leading, 29)
+                    .padding(.leading, 20)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                     .lineSpacing(7)
                 
@@ -69,22 +69,22 @@ struct TermsOfServiceView: View {
                 .padding(.trailing, 20)
                 
                 SignUpConsentItem(type: .required, title: "이용약관 동의", isChecked: $isCheckedFirstItem)
-                    .padding(.top, 48)
+                    .padding(.top, 35)
                     .onChange(of: isCheckedFirstItem, perform: { value in
                         //필수항목 2가지 모두 체크 되어있는지 확인
                         manager.isCheckedRequiredItems = isCheckedFirstItem && isCheckedSecondItem
                     })
                 
                 SignUpConsentItem(type: .required, title: "개인정보 수집 및 이용 동의", isChecked: $isCheckedSecondItem)
-                    .padding(.top, 35)
+                    .padding(.top, 30)
                     .onChange(of: isCheckedSecondItem, perform: { value in
                         //필수항목 2가지 모두 isCheckedRequiredItems 되어있는지 확인
                         manager.isCheckedRequiredItems = isCheckedFirstItem && isCheckedSecondItem
                     })
                 
                 SignUpConsentItem(type: .select, title: "서비스 소식 수신 동의", isChecked: $isCheckedThirdItem)
-                    .padding(.top, 35)
-                    .padding(.bottom, 64)
+                    .padding(.top, 30)
+                    .padding(.bottom, 55)
                     .onChange(of: isCheckedThirdItem, perform: { value in
                         manager.isCheckedServiceNewsNotification = value
                     })

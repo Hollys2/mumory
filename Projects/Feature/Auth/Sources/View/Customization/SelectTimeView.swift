@@ -59,7 +59,7 @@ struct SelectTimeView: View {
                     })
                     
                     Text("설정 > 알림에서 수정할 수 있어요")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundStyle(ColorSet.subGray)
                         .padding(.leading, 20)

@@ -55,7 +55,7 @@ struct MiniPlayerView: View {
                             .padding(.leading, 11)
                         }else {
                             Text("재생중인 음악이 없습니다.")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundStyle(Color.white)
                                 .padding(.leading, 8)
                         }
@@ -89,16 +89,18 @@ struct MiniPlayerView: View {
                                 playerManager.play()
                             }
                     }
-    
                     
-                    SharedAsset.musicForward.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20)
-                        .padding(.trailing, 30)
-                        .onTapGesture {
-                            playerManager.skipToNext()
-                        }
+                    if let playingSong = playerManager.currentSong {
+
+                        SharedAsset.musicForward.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                            .padding(.trailing, 30)
+                            .onTapGesture {
+                                playerManager.skipToNext()
+                            }
+                    }
                         
                     
                     
@@ -121,7 +123,7 @@ struct MiniPlayerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
                 .overlay( /// apply a rounded border
                     RoundedRectangle(cornerRadius: 35, style: .circular)
-                        .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 0.5)
+                        .stroke(ColorSet.skeleton02, lineWidth: 0.5)
                 )
                 .padding(.bottom, 10)
                 .padding(.horizontal, 8)

@@ -199,7 +199,7 @@ struct SelectableMusicListItem: View {
             
             Spacer()
             
-            SharedAsset.addWhiteCircle.swiftUIImage
+            SharedAsset.addPurpleCircleFilled.swiftUIImage
                 .resizable()
                 .scaledToFit()
                 .frame(width: 30, height: 30)

@@ -32,6 +32,9 @@ struct MyMumoryItem: View {
                     .frame(width: 170, height: 170)
             }
             .overlay(content: {
+                Color.black.opacity(0.4)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+
                 Text(DateText(date: mumory.date))
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                     .foregroundStyle(Color.white)

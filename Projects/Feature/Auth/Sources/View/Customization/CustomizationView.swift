@@ -66,14 +66,14 @@ public struct CustomizationView: View {
                         .foregroundColor(.white)
                         .padding(.trailing, setPadding(screen: CGSize(width: getUIScreenBounds().width, height: getUIScreenBounds().height)))
                 }
-                .padding(.top, 20)
                 
                 //Switch View
                 switch(manager.step){
                 case 0:
                     SelectGenreView()
                         .environmentObject(manager)
-                        .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), removal: .move(edge: isTapBackButton ? .trailing : .leading)))
+                        .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), 
+                                                removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                         .onAppear(perform: {
                             isTapBackButton = false
                         })
@@ -81,7 +81,8 @@ public struct CustomizationView: View {
                 case 1:
                     SelectTimeView()
                         .environmentObject(manager)
-                        .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), removal: .move(edge: isTapBackButton ? .trailing : .leading)))
+                        .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), 
+                                                removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                         .onAppear(perform: {
                             isTapBackButton = false
                         })
@@ -89,7 +90,8 @@ public struct CustomizationView: View {
                 case 2:
                     ProfileSettingView()
                         .environmentObject(manager)
-                        .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), removal: .move(edge: isTapBackButton ? .trailing : .leading)))
+                        .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), 
+                                                removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                         .onAppear(perform: {
                             isTapBackButton = false
                         })

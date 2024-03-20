@@ -38,7 +38,7 @@ public struct MyRecentMusicView: View {
                     .padding(.bottom, 7)
             }else {
                 ScrollView(.horizontal) {
-                    LazyHStack(alignment: .top,spacing: 8, content: {
+                    LazyHStack(alignment: .top,spacing: 12, content: {
                         ForEach(mumoryDataViewModel.myMumorys, id: \.self) { mumory in
                             RecentMusicItem(songId: mumory.musicModel.songID.rawValue)
                         }
@@ -78,17 +78,7 @@ public struct MyRecentMusicView: View {
         }
     }
     
-    private func fetchSong(songID: String) async -> Song? {
-        let musicItemID = MusicItemID(rawValue: songID)
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        guard let response = try? await request.response() else {
-            return nil
-        }
-        guard let song = response.items.first else {
-            return nil
-        }
-        return song
-    }
+
 }
 
 
@@ -127,6 +117,4 @@ struct NoMumoryView: View {
         })
     }
 }
-//#Preview {
-//    NoMumoryView()
-//}
+

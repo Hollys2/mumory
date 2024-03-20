@@ -54,7 +54,7 @@ struct ChartListView: View {
                             appCoordinator.rootPath.append(LibraryPage.search(term: ""))
                         }
                 })
-//                .padding(.top, sizeManager.topInset)
+                .frame(height: 63)
                 
                 HStack(alignment: .bottom){
                     Text("100곡")
@@ -73,20 +73,13 @@ struct ChartListView: View {
                 }
                 .padding(.top, 20)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
+                Divider05()
                     .padding(.top, 15)
                 
                 ScrollWrapperWithIndex(songs: $songs, index: $searchIndex, contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
                     LazyVStack(spacing: 0, content: {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.3)
-                                .background(ColorSet.subGray)
                         }
                     })
                     .frame(width: getUIScreenBounds().width)

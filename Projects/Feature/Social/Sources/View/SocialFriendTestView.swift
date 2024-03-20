@@ -14,6 +14,14 @@ import Shared
 //아이템: 친구 추가, 요청/수락, 요청취소, 차단해제
 //바텀시트,
 struct SocialFriendTestView: View {
+    private enum FriendRequestStatus {
+        case loading
+        case valid
+        case alreadyFriend
+        case alreadyRequest
+        case alreadyRecieve
+    }
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State private var itemSelection = 0
@@ -21,8 +29,10 @@ struct SocialFriendTestView: View {
     
     @State private var friendSearchResult: MumoriUser?
     @State private var friendRequestList: [MumoriUser] = []
-    
+    @State private var myRequestFriendList: [MumoriUser] = []
     @State private var isPresentFriendBottomSheet: Bool = false
+    @State private var friendRequestStatus: FriendRequestStatus = .valid
+ 
     
     let db = FBManager.shared.db
     var body: some View {
@@ -65,8 +75,8 @@ struct SocialFriendTestView: View {
                 
                 HStack(spacing: 6, content: {
                     Text("친구 추가")
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-                        .foregroundStyle(itemSelection == 0 ? Color.black : Color.white)
+                        .font(itemSelection == 0 ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                        .foregroundStyle(itemSelection == 0 ? Color.black : ColorSet.D0Gray)
                         .padding(.horizontal, 16)
                         .frame(height: 33)
                         .background(itemSelection == 0 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
@@ -76,20 +86,19 @@ struct SocialFriendTestView: View {
                         }
                     
                     Text("친구 요청")
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-                        .foregroundStyle(itemSelection == 1 ? Color.black : Color.white)
+                        .font(itemSelection == 1 ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))                        .foregroundStyle(itemSelection == 1 ? Color.black : ColorSet.D0Gray)
                         .padding(.horizontal, 16)
                         .frame(height: 33)
                         .background(itemSelection == 1 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
                         .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
                         .onTapGesture {
                             self.itemSelection = 1
-                            getFriendRequest()
                         }
                        
                 })
                 .padding(.leading, 20)
                 .padding(.bottom, 31)
+                .padding(.top, 20)
 
                 Divider()
                     .frame(height: 0.5)
@@ -104,10 +113,28 @@ struct SocialFriendTestView: View {
                         .onSubmit {
                             searchFriend()
                         }
+                        .onChange(of: searchText) { newValue in
+                            if searchText.isEmpty {
+                                self.friendSearchResult = nil
+                            }
+                        }
                     
                     if let friend = self.friendSearchResult {
-                        FriendAddItem(friend: friend)
-                            .padding(.top, 15)
+                        VStack(spacing: 0) {
+                            switch friendRequestStatus {
+                            case .loading:
+                                EmptyView()
+                            case .valid:
+                                FriendAddItem(friend: friend)
+                            case .alreadyFriend:
+                                AlreadFriendItem(friend: friend)
+                            case .alreadyRequest:
+                                MyRequestFriendItem(friend: friend, myRequestFriendList: $myRequestFriendList)
+                            case .alreadyRecieve:
+                                FriendRequestItem(friend: friend, friendRequestList: $friendRequestList)
+                            }
+                        }
+                        .padding(.top, 15)
                     }
                     
                 }else {
@@ -132,33 +159,54 @@ struct SocialFriendTestView: View {
             }
             .background(TransparentBackground())
         })
+        .onAppear {
+            getFriendRequest()
+            getMyRequestFriendList()
+        }
 
     }
     
     private func searchFriend(){
+        friendRequestStatus = .loading
         Task {
             let query = db.collection("User")
                 .whereField("id", isEqualTo: searchText)
             
-            guard let snapshot = try? await query.getDocuments() else {
-                return
-            }
-            
-            guard let doc = snapshot.documents.first else {
-                return
-            }
-            
+            guard let snapshot = try? await query.getDocuments() else {return}
+            guard let doc = snapshot.documents.first else {return}
             let blockFriends = (doc.data()["blockFriends"] as? [String]) ?? []
+            if blockFriends.contains(currentUserData.uId){return}
+            guard let friendUID = doc.data()["uid"] as? String else {return}
             
-            if blockFriends.contains(currentUserData.uId){
-                return
-            }
-            
-            guard let friendUID = doc.data()["uid"] as? String else {
-                return
+            if currentUserData.friends.contains(friendUID) {
+                friendRequestStatus = .alreadyFriend
+            }else if friendRequestList.contains(where: {$0.uId == friendUID}) {
+                friendRequestStatus = .alreadyRecieve
+            }else if myRequestFriendList.contains(where: {$0.uId == friendUID}) {
+                friendRequestStatus = .alreadyRequest
+            }else {
+                friendRequestStatus = .valid
             }
             
             self.friendSearchResult = await MumoriUser(uId: friendUID)
+        }
+    }
+    
+    private func getMyRequestFriendList(){
+        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
+            .whereField("type", isEqualTo: "request")
+        Task {
+            guard let snapshot = try? await query.getDocuments() else {
+                return
+            }
+            snapshot.documents.forEach { document in
+                guard let uid = document.data()["uId"] as? String else {
+                    return
+                }
+                Task {
+                    myRequestFriendList.append(await MumoriUser(uId: uid))
+                }
+            }
         }
     }
     
@@ -245,8 +293,51 @@ struct SearchFriendTextField: View {
     
     func getPrompt() -> Text {
         return Text(prompt)
-            .foregroundColor(Color(red: 0.77, green: 0.77, blue: 0.77))
+            .foregroundColor(ColorSet.subGray)
             .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
+    }
+}
+
+struct AlreadFriendItem: View {
+    let friend: MumoriUser
+    init(friend: MumoriUser) {
+        self.friend = friend
+    }
+    
+    var body: some View {
+        HStack(spacing: 13, content: {
+            AsyncImage(url: friend.profileImageURL) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
+            } placeholder: {
+                Circle()
+                    .fill(ColorSet.darkGray)
+                    .frame(width: 50)
+            }
+            
+            VStack(alignment: .leading, spacing: 1, content: {
+                Text(friend.nickname)
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                    .foregroundStyle(Color.white)
+                    .lineLimit(1)
+                
+                Text("@\(friend.id)")
+                    .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 13))
+                    .foregroundStyle(ColorSet.charSubGray)
+                    .lineLimit(1)
+            })
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text("이미 등록된 친구입니다.")
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                .foregroundStyle(Color.white)
+        })
+        .padding(.horizontal, 20)
+        .background(ColorSet.background)
+        .frame(height: 84)
     }
 }
 
@@ -308,7 +399,7 @@ struct FriendAddItem: View {
         .background(ColorSet.background)
         .frame(height: 84)
         .fullScreenCover(isPresented: $isPresentRequestPopup) {
-            TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구 요청") {
+            TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
                 request()
             }
             .background(TransparentBackground())
@@ -402,13 +493,13 @@ struct FriendRequestItem: View {
         .background(ColorSet.background)
         .frame(height: 84)
         .fullScreenCover(isPresented: $isPresentDeletePopup) {
-            TwoButtonPopupView(title: "친구 요청을 삭제하시겠습니까?", positiveButtonTitle: "요청 삭제") {
+            TwoButtonPopupView(title: "친구 요청을 삭제하시겠습니까?", positiveButtonTitle: "요청삭제") {
                 deleteRequest()
             }
             .background(TransparentBackground())
         }
         .fullScreenCover(isPresented: $isPresentAcceptPopup) {
-            TwoButtonPopupView(title: "친구 요청을 수락하시겠습니까?", positiveButtonTitle: "요청 수락") {
+            TwoButtonPopupView(title: "친구 요청을 수락하시겠습니까?", positiveButtonTitle: "요청수락") {
                 acceptRequest()
             }
             .background(TransparentBackground())

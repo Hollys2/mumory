@@ -49,10 +49,7 @@ struct FavoriteListView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 19)
                 
-                Divider()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 0.5)
-                    .background(ColorSet.subGray)
+                Divider05()
                     .padding(.top, 15)
                 
                 ScrollView {
@@ -140,11 +137,6 @@ struct FavoriteSongItem: View {
                     .onTapGesture {
                         bookmark = SharedAsset.bookmark.swiftUIImage
                         playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
-                        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
-                            withAnimation {
-                                list.removeAll(where: {$0 == song})
-                            }
-                        }
                     }
                 
                 SharedAsset.menu.swiftUIImage
@@ -154,14 +146,10 @@ struct FavoriteSongItem: View {
             })
             .padding(.horizontal, 20)
             .background(ColorSet.background)
+            .frame(height: 95)
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(ColorSet.subGray)
-                .padding(.top, 15)
+            Divider05()
         })
-        .frame(height: 95)
   
   
         
