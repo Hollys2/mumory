@@ -219,6 +219,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let db = FirebaseManager.shared.db
         
         let mumoryCollectionRef = db.collection("Mumory")
+            .limit(to: 10)
         //            .order(by: "date", descending: true)
         
         Task {

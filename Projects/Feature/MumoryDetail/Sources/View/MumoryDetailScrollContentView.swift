@@ -125,8 +125,7 @@ struct MumoryDetailScrollContentView: View {
                     } // HStack
                     .frame(height: 38)
                     .padding(.top, 55)
-                    .padding(.bottom, (self.mumory.tags ?? []).isEmpty && (self.mumory.content ?? []).isEmpty && (self.mumory.tags ?? []).isEmpty ? 50 : 55)
-                    .background(.orange)
+                    .padding(.bottom, (self.mumory.tags ?? []).isEmpty && (self.mumory.content ?? "").isEmpty && (self.mumory.imageURLs ?? []).isEmpty ? 50 : 55 - 11)
                     
                     if let tags = self.mumory.tags, !tags.isEmpty {
                         HStack(spacing: 0) {

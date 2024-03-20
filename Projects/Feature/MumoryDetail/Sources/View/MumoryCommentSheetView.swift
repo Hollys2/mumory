@@ -49,6 +49,16 @@ struct CommentView: View {
                     Spacer().frame(height: 13)
                     
                     HStack(spacing: 0) {
+                        Text("\(comment.nickname)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        
+                        Text("・")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                            .frame(width: 4, alignment: .bottom)
 
                         Text(DateManager.formattedCommentDate(date: comment.date))
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
@@ -81,13 +91,13 @@ struct CommentView: View {
                         
                     } // HStack
                     
-                    
                     Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
                         .lineSpacing(20)
                         .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
                         .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                         .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .padding(.vertical, 15)
+                        .padding(.top, 11)
+                        .padding(.bottom, 15)
                 } // VStack
                 .padding(.horizontal, 15)
                 .background(
@@ -214,7 +224,8 @@ struct Reply: View {
                     .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                     .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .padding(.vertical, 15)
+                    .padding(.top, 11)
+                    .padding(.bottom, 15)
 
             } // VStack
             .padding(.horizontal, 15)
@@ -320,6 +331,7 @@ public struct MumoryCommentSheetView: View {
                                 }
                             }, label: {
                                 SharedAsset.commentCloseButtonMumoryDetail.swiftUIImage
+                                    .resizable()
                                     .frame(width: 25, height: 25)
                             })
                         } // HStack

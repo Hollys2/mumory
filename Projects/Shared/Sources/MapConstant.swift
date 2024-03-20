@@ -12,7 +12,7 @@ public enum MapConstant {
             latitude: (min: 37.426, max: 37.701),
             longitude: (min: 126.764, max: 127.183)
         ),
-        "부산광역시": (
+        "부산광역시 🇨🇦": (
             latitude: (min: 35.052, max: 35.245),
             longitude: (min: 128.960, max: 129.210)
         ),

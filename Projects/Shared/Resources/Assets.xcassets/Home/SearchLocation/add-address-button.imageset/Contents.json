@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Mini_Filter (1) 2.png",
+      "filename" : "Image.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Mini_Filter (1) 1.png",
+      "filename" : "Image@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Mini_Filter (1).png",
+      "filename" : "Image@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

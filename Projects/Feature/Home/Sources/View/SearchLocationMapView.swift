@@ -67,8 +67,6 @@ public struct SearchLocationMapView: View {
                             .padding(20)
                     }
                     .padding(.top, appCoordinator.safeAreaInsetsTop)
-                    .background(.red)
-//                    .background(.blue)
                 }
                 
                 VStack(spacing: 0) {
@@ -78,30 +76,29 @@ public struct SearchLocationMapView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 30)
-                        .padding(.top, 27)
+                        .padding(.top, 30)
                     
                     Text("\(locationModel.locationSubtitle)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                         .foregroundColor(.white.opacity(0.7))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 30)
-                        .padding(.top, 8)
-                        .padding(.bottom, 13)
+                        .padding(.top, 10)
                     
                     HStack(alignment: .center, spacing: 6) {
 
                         SharedAsset.pencilIconCreateMumory.swiftUIImage
                             .resizable()
                             .frame(width: 12, height: 12)
+                            .offset(x: 13)
                         
-                        Text("직접 입력")
+                        Text("직접입력")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .offset(x: 13)
                     }
-                    .padding(.horizontal, 13)
-                    .padding(.vertical, 10)
-                    .frame(height: 33, alignment: .leading)
+                    .frame(width: 89, height: 33, alignment: .leading)
                     .background(Color(red: 0.09, green: 0.09, blue: 0.09))
                     .cornerRadius(30)
                     .overlay(
@@ -109,13 +106,14 @@ public struct SearchLocationMapView: View {
                             .inset(by: 0.5)
                             .stroke(Color(red: 0.47, green: 0.47, blue: 0.47), lineWidth: 1)
                     )
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture {
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             self.isBottomSheetShown = true
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 30)
+                    .padding(.top, 15)
                     
                     Spacer()
                     
@@ -139,7 +137,7 @@ public struct SearchLocationMapView: View {
                         
                     }
                 } // VStack
-                .frame(height: UIScreen.main.bounds.height * 0.349)
+                .frame(height: 260)
                 .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             } // VStack
             .navigationBarBackButtonHidden(true)

@@ -384,15 +384,17 @@ public struct LocationInputBottomSheetView: View {
     
     public var body: some View {
         VStack(spacing: 0) {
-            Spacer().frame(height: 9)
-            
-            Image(uiImage: SharedAsset.dragIndicator.image)
-                .resizable()
-                .frame(width: 47, height: 4)
-            
-            Spacer().frame(height: 33)
             
             VStack(spacing: 0) {
+                
+                Spacer().frame(height: 9)
+
+                SharedAsset.dragIndicator.swiftUIImage
+                    .resizable()
+                    .frame(width: 47, height: 4)
+                    .offset(y: 3)
+                
+                Spacer().frame(height: 31)
                 
                 VStack(alignment: .leading, spacing: 0) {
                     
@@ -402,12 +404,13 @@ public struct LocationInputBottomSheetView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
                     Text("해당 장소에 대해 기억하기 쉬운 이름으로 변경해보세요")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundColor(.white.opacity(0.7))
                         .padding(.top, 10)
-                        .padding(.bottom, 33)
                 }
                 .padding(.horizontal, 10)
+                
+                Spacer().frame(height: 29)
                 
                 ZStack(alignment: .leading) {
                     TextField("가나다라마바사", text: $searchText,
@@ -438,6 +441,8 @@ public struct LocationInputBottomSheetView: View {
                     }
                 }
                 
+                Spacer().frame(height: 40)
+                
                 Button(action: {
                     self.locationTitleText = self.searchText
                     self.searchText = ""
@@ -458,17 +463,16 @@ public struct LocationInputBottomSheetView: View {
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.black)
                         )
-                        .padding(.top, 33)
                 }
                 .disabled(self.searchText.isEmpty)
+                .offset(y: -5)
                 
-                
-                Spacer()
+                Spacer(minLength: 30)
             }
             .padding(.horizontal, 20)
         }
         .frame(width: UIScreen.main.bounds.width - 14, height: 287)
-        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .cornerRadius(15)
     }
 }

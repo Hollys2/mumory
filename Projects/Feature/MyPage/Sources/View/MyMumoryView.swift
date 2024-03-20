@@ -349,9 +349,7 @@ struct MumoryItemView: View {
                             .foregroundColor(self.isRecent ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
                             .fixedSize(horizontal: true, vertical: false)
                     }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 14)
-                    .frame(width: 35, alignment: .center)
+                    .frame(width: 35, height: 56, alignment: .center)
                     .background(self.isRecent ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.25, green: 0.25, blue: 0.25))
                     .cornerRadius(18)
                     
@@ -473,7 +471,7 @@ struct MumoryItemView: View {
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                             
                             + Text("  \(self.mumory.musicModel.artist)")
-                                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         }
                         .foregroundColor(.white)
                         .lineLimit(1)
@@ -836,7 +834,7 @@ struct RoundedSquareView: View {
                                 .inset(by: 0.5)
                                 .stroke(.white, lineWidth: 1)
                         )
-                        .offset(x: 16)
+                        .offset(x: 18)
                 }
                 
                 if self.mumorys.count >= 4 {
@@ -867,7 +865,7 @@ struct RoundedSquareView: View {
                                 .inset(by: 0.5)
                                 .stroke(.white, lineWidth: 1)
                         )
-                        .offset(x: 32)
+                        .offset(x: 36)
                 }
                                     
                 
@@ -876,7 +874,7 @@ struct RoundedSquareView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: 36, height: 36)
-                        .offset(x: 32)
+                        .offset(x: 36)
                 }
             }
             .offset(x: getUIScreenBounds().width * 0.435 - 36 - 32 - 15, y: getUIScreenBounds().width * 0.435 - 36 - 15)

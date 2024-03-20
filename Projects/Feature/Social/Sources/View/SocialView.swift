@@ -286,7 +286,7 @@ struct SocialItemView: View {
                     Spacer().frame(width: 8)
                     
                     Text(self.mumory.musicModel.artist)
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundColor(.white)
                         .lineLimit(1)
                     
@@ -323,7 +323,7 @@ struct SocialItemView: View {
                                     
                                     SharedAsset.imageCountSocial.swiftUIImage
                                         .resizable()
-                                        .frame(width: 18, height: 18)
+                                        .frame(width: 14, height: 14)
                                     
                                     Text("\(imageURLs.count)")
                                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
@@ -335,7 +335,7 @@ struct SocialItemView: View {
                                     Rectangle()
                                         .foregroundColor(.clear)
                                         .frame(width: 48, height: 28)
-                                        .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
+                                        .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.7))
                                         .cornerRadius(15)
                                 )
                             }
@@ -380,7 +380,7 @@ struct SocialItemView: View {
                         
                         HStack(spacing: 0) {
                         
-                            Text(content)
+                            Text(content.replacingOccurrences(of: "\n", with: " "))
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
@@ -389,7 +389,7 @@ struct SocialItemView: View {
                                 .background(
                                     GeometryReader { proxy in
                                         Color.clear.onAppear {
-                                            let size = content.size(withAttributes: [.font: SharedFontFamily.Pretendard.medium.font(size: 13)])
+                                            let size = content.replacingOccurrences(of: "\n", with: " ").size(withAttributes: [.font: SharedFontFamily.Pretendard.medium.font(size: 13)])
                                             
                                             if size.width > proxy.size.width {
                                                 self.isTruncated = true

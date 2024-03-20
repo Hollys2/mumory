@@ -27,6 +27,8 @@ public struct CreateMumoryBottomSheetView: View {
     @State private var isPublishErrorPopUpShown: Bool = false
     @State private var isTagErrorPopUpShown: Bool = false
     @State private var isDeletePopUpShown: Bool = false
+    @State private var isImagePickerShown: Bool = false
+    @State private var sourceType: UIImagePickerController.SourceType?
     
     @GestureState private var dragState = DragState.inactive
     
@@ -73,16 +75,21 @@ public struct CreateMumoryBottomSheetView: View {
                 Color.black.opacity(0.6)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        mumoryDataViewModel.choosedMusicModel = nil
-                        mumoryDataViewModel.choosedLocationModel = nil
-                        self.calendarDate = Date()
-                        self.tags.removeAll()
-                        self.contentText.removeAll()
-                        photoPickerViewModel.removeAllSelectedImages()
-                        self.imageURLs.removeAll()
-                        
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            self.appCoordinator.isCreateMumorySheetShown = false
+                        if mumoryDataViewModel.choosedMusicModel != nil ||
+                           mumoryDataViewModel.choosedLocationModel != nil {
+                            self.isDeletePopUpShown = true
+                        } else {
+                            mumoryDataViewModel.choosedMusicModel = nil
+                            mumoryDataViewModel.choosedLocationModel = nil
+                            self.calendarDate = Date()
+                            self.tags.removeAll()
+                            self.contentText.removeAll()
+                            photoPickerViewModel.removeAllSelectedImages()
+                            self.imageURLs.removeAll()
+                            
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                self.appCoordinator.isCreateMumorySheetShown = false
+                            }
                         }
                     }
                 
@@ -96,16 +103,21 @@ public struct CreateMumoryBottomSheetView: View {
                                 .resizable()
                                 .frame(width: 25, height: 25)
                                 .gesture(TapGesture(count: 1).onEnded {
-                                    mumoryDataViewModel.choosedMusicModel = nil
-                                    mumoryDataViewModel.choosedLocationModel = nil
-                                    self.calendarDate = Date()
-                                    self.tags.removeAll()
-                                    self.contentText.removeAll()
-                                    photoPickerViewModel.removeAllSelectedImages()
-                                    self.imageURLs.removeAll()
-                                    
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        self.appCoordinator.isCreateMumorySheetShown = false
+                                    if mumoryDataViewModel.choosedMusicModel != nil ||
+                                       mumoryDataViewModel.choosedLocationModel != nil {
+                                        self.isDeletePopUpShown = true
+                                    } else {
+                                        mumoryDataViewModel.choosedMusicModel = nil
+                                        mumoryDataViewModel.choosedLocationModel = nil
+                                        self.calendarDate = Date()
+                                        self.tags.removeAll()
+                                        self.contentText.removeAll()
+                                        photoPickerViewModel.removeAllSelectedImages()
+                                        self.imageURLs.removeAll()
+                                        
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            self.appCoordinator.isCreateMumorySheetShown = false
+                                        }
                                     }
                                 })
                             
@@ -165,6 +177,13 @@ public struct CreateMumoryBottomSheetView: View {
                                             withAnimation(.easeInOut(duration: 0.1)) {
                                                 self.isDatePickerShown.toggle()
                                             }
+//                                            self.isImagePickerShown = true
+                                        }
+                                        .confirmationDialog("Select Source", isPresented: self.$isImagePickerShown) {
+                                            Button("Camera", role: .destructive) {
+                                            }
+                                            Button("Photo Library", role: .none) {
+                                            }
                                         }
                                         .background {
                                             GeometryReader { geometry in
@@ -216,30 +235,29 @@ public struct CreateMumoryBottomSheetView: View {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
                                                      maxSelectionCount: 3,
                                                      matching: .images) {
-                                            
-                                            Rectangle()
-                                                .foregroundColor(.clear)
-                                                .frame(width: 75, height: 75)
-                                                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                                .cornerRadius(10)
-                                                .overlay(
-                                                    VStack(spacing: 0) {
-                                                        (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
-                                                            .resizable()
-                                                            .frame(width: 25, height: 25)
-                                                        
-                                                        HStack(spacing: 0) {
-                                                            Text("\(photoPickerViewModel.imageSelectionCount)")
-                                                                .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                                .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                            Text(" / 3")
-                                                                .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                        }
-                                                        .multilineTextAlignment(.center)
-                                                        .padding(.top, 10)
-                                                    }
-                                                )
+                                            VStack(spacing: 0) {
+                                                (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                                    .resizable()
+                                                    .frame(width: 24, height: 24)
+                                                    .offset(y: 1)
+                                                
+                                                Spacer(minLength: 0)
+                                                
+                                                HStack(spacing: 0) {
+                                                    Text("\(photoPickerViewModel.imageSelectionCount)")
+                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                        .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                    Text(" / 3")
+                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                }
+                                                .multilineTextAlignment(.center)
+                                                .offset(y: 2)
+                                            }
+                                            .padding(.vertical, 15)
+                                            .frame(width: 75, height: 75)
+                                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                            .cornerRadius(10)
                                         }
                                         
                                         if !photoPickerViewModel.selectedImages.isEmpty {
@@ -348,7 +366,7 @@ public struct CreateMumoryBottomSheetView: View {
                                 }) {
                                     SharedAsset.keyboardButtonCreateMumory.swiftUIImage
                                         .resizable()
-                                        .frame(width: 26, height: 26)
+                                        .frame(width: 24, height: 24)
                                 }
                             }
                             Spacer()
@@ -993,6 +1011,7 @@ struct TagContainerView: View {
                     .allowsHitTesting(false)
             }
         } // ZStack
+        .frame(height: 60)
     }
 }
 
@@ -1011,7 +1030,7 @@ struct ContentContainerView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                .frame(minHeight: getUIScreenBounds().height == 667 ? 86 : 111)
+//                .frame(minHeight: getUIScreenBounds().height == 667 ? 86 : 111)
                 .cornerRadius(15)
             
             HStack(alignment: .top, spacing: 0) {
@@ -1028,6 +1047,7 @@ struct ContentContainerView: View {
                     .kerning(0.24)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
+//                    .frame(height: 111)
                     .padding([.top, .leading], -5)
                     .overlay(
                         Text("자유롭게 내용을 입력하세요.")
@@ -1048,6 +1068,7 @@ struct ContentContainerView: View {
             .padding(.vertical, 18)
             .padding(.horizontal, 17)
         }
+        .frame(height: 111)
     }
 }
 
@@ -1125,4 +1146,17 @@ struct TagTextField: UIViewRepresentable {
             self.parent.text = ""
         }
     }
+}
+
+struct ImagePicker: UIViewControllerRepresentable {
+    typealias UIViewControllerType = UIImagePickerController
+    var sourceType: UIImagePickerController.SourceType
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
 }

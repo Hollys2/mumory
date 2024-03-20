@@ -9,6 +9,7 @@
 
 import CoreLocation
 import Combine
+import UIKit
 
 
 // 1. 권한
@@ -46,8 +47,10 @@ extension LocationManager: CLLocationManagerDelegate {
             manager.requestWhenInUseAuthorization()
         case .restricted:
             print(".restricted")
+            promptForLocationSettings()
         case .denied:
             print(".denied")
+            promptForLocationSettings()
         case .authorizedAlways:
             print(".authorizedAlways")
             manager.startUpdatingLocation()
@@ -59,8 +62,33 @@ extension LocationManager: CLLocationManagerDelegate {
         }
     }
     
-    
     public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("didFailWithError in CLLocationManagerDelegate: \(error)")
     }
+    
+    public func promptForLocationSettings() {
+          let alertController = UIAlertController(
+              title: "위치 권한 필요",
+              message: "이 기능을 사용하기 위해서는 위치 권한이 필요합니다. 설정으로 이동하여 권한을 허용해 주세요.",
+              preferredStyle: .alert)
+          
+          let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) -> Void in
+              guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                  return
+              }
+              
+              if UIApplication.shared.canOpenURL(settingsUrl) {
+                  UIApplication.shared.open(settingsUrl, completionHandler: { (success) in
+                      // 설정 앱이 열림
+                  })
+              }
+          }
+          
+          let cancelAction = UIAlertAction(title: "취소", style: .destructive, handler: nil)
+          alertController.addAction(settingsAction)
+          alertController.addAction(cancelAction)
+          
+          // 현재 뷰 컨트롤러에서 경고창 표시 (예시)
+          UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+      }
 }
