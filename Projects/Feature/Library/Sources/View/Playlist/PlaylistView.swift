@@ -62,6 +62,7 @@ struct PlaylistView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 30)
                             .foregroundStyle(.white)
+                            .padding(.bottom, 8)
 
                         
                         //나만보기 아이템
@@ -72,13 +73,15 @@ struct PlaylistView: View {
                                 .frame(width: 13, height: 13)
                             
                             Text("나만보기")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundStyle(ColorSet.subGray)
                         })
-                        .padding(.top, 10)
                         .opacity(playlist.isPublic ? 0 : 1)
+                        .padding(.bottom, 24)
                         
                         ZStack(alignment: .bottom){
+                            
+                            //편집시 전체선택
                             HStack(spacing: 0, content: {
                                 if playlist.songs.count == selectedSongsForDelete.count {
                                     SharedAsset.checkCircleFill.swiftUIImage
@@ -110,9 +113,10 @@ struct PlaylistView: View {
                                 
                                 Spacer()
                             })
-                            .padding(.bottom, 17)
+                            .frame(maxHeight: .infinity, alignment: .bottom)
                             .opacity(isEditing ? 1 : 0)
                             
+                            //평소 보이는 곡 개수와 편집, 전체 재생 버튼
                             HStack(alignment: .bottom,spacing: 8, content: {
                                 Text("\(playlist.songIDs.count)곡")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
@@ -130,13 +134,15 @@ struct PlaylistView: View {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
                                     }
                             })
-                            .padding(.bottom, 15)
+                            .frame(maxHeight: .infinity, alignment: .bottom)
                             .opacity(isEditing ? 0 : 1)
+
                         }
                         .animation(.default, value: isEditing)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 74)
+                        .frame(height: 33)
                         .padding(.horizontal, 20)
+                        .padding(.bottom, 15)
                         
                         //플레이리스트 곡 목록
                         ForEach(playlist.songs, id: \.self) { song in
@@ -154,10 +160,6 @@ struct PlaylistView: View {
                                     }
                                 }
                             
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(ColorSet.subGray)
                         }
                         
                         

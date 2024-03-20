@@ -57,10 +57,6 @@ struct NotifyView: View {
                                     EmptyView()
                                 }
                                 
-                                Divider()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 0.5)
-                                    .background(ColorSet.subGray)
                             }
                             
                         })
@@ -115,17 +111,14 @@ struct UnreadText: View {
                     .foregroundStyle(Color.white)
 
                 Text("개의 알림을 읽지 않았습니다.")
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 13))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                     .foregroundStyle(Color(white: 0.52))
 
             }
             .padding(.leading, 20)
             .padding(.bottom, 20)
         
-        Divider()
-            .frame(maxWidth: .infinity)
-            .frame(height: 0.5)
-            .background(ColorSet.A6Gray.opacity(0.7))
+        Divider05()
             
 
             
@@ -171,14 +164,14 @@ struct NotifyLikeItem: View {
             .padding(.leading, 12)
             
             VStack(alignment: .leading, spacing: 7, content: {
-                Text("\(notification.friendNickname)님이 \(currentUserData.user.nickname)님의 뮤모리 핀을 공감합니다.")
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                Text("\(notification.friendNickname)님이 회원님의 뮤모리 핀을 공감합니다.")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(Color.white)
                     .lineLimit(2)
                 
                 Text(dateToString(date: notification.date))
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
-                    .foregroundStyle(Color(white: 0.72))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 13))
+                    .foregroundStyle(ColorSet.subGray)
 
             })
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -260,20 +253,20 @@ struct NotifyCommentItem: View {
             
             VStack(alignment: .leading, spacing: 7, content: {
                 if notification.type == .comment {
-                    Text("\(notification.friendNickname)님이 \(currentUserData.user.nickname)님의 뮤모리에 댓글을 남겼습니다: “\(notification.content)”")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                    Text("\(notification.friendNickname)님이 회원님의 뮤모리에 댓글을 남겼습니다: “\(notification.content)”")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(Color.white)
                         .lineLimit(2)
                 }else {
-                    Text("\(notification.friendNickname)님이 \(currentUserData.user.nickname)님의 댓글에 답글 남겼습니다: “\(notification.content)”")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                    Text("\(notification.friendNickname)님이 회원님의 댓글에 답글 남겼습니다: “\(notification.content)”")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(Color.white)
                         .lineLimit(2)
                 }
                 
                 Text(dateToString(date: notification.date))
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
-                    .foregroundStyle(Color(white: 0.72))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 13))
+                    .foregroundStyle(ColorSet.subGray)
 
             })
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -338,20 +331,20 @@ struct NotifyFriendItem: View {
             
             VStack(alignment: .leading, spacing: 7, content: {
                 if notification.type == .friendRequest {
-                    Text("\(notification.friendNickname)님이 \(currentUserData.user.nickname)님에게 친구요청을 보냈습니다.")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                    Text("\(notification.friendNickname)님이 회원님에게 친구요청을 보냈습니다.")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(Color.white)
                         .lineLimit(2)
                 }else {
-                    Text("\(notification.friendNickname)님이 \(currentUserData.user.nickname)님의 친구요청을 수락했습니다.")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                    Text("\(notification.friendNickname)님이 회원님의 친구요청을 수락했습니다.")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(Color.white)
                         .lineLimit(2)
                 }
                 
                 Text(dateToString(date: notification.date))
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
-                    .foregroundStyle(Color(white: 0.72))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 13))
+                    .foregroundStyle(ColorSet.subGray)
 
             })
             .padding(.leading, 12)

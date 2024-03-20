@@ -75,7 +75,6 @@ struct SignUpManageView: View {
                             .foregroundColor(.white)
                             .padding(.trailing, setPadding(screen: CGSize(width: getUIScreenBounds().width, height: getUIScreenBounds().height)))
                     }
-                    .padding(.top, 20)
                     
                     //가입 절차 별 페이지
                     switch(manager.step){

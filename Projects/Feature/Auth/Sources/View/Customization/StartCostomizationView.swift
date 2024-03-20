@@ -45,7 +45,7 @@ struct StartCostomizationView: View {
                 Spacer()
                 
                 Text("뮤모리는 Apple Music과 연계된 어플입니다.")
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                 
             

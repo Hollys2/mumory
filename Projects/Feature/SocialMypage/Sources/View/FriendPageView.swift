@@ -252,7 +252,7 @@ struct UnkownFriendPageView: View {
     var PopupView: some View {
         VStack {
             if isRequested {
-                TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청 취소") {
+                TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
                     Task{
                         guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: self.friend.uId) else {
                             return
@@ -261,7 +261,7 @@ struct UnkownFriendPageView: View {
                     }
                 }
             } else {
-                TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구 요청") {
+                TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
                     let functions = FBManager.shared.functions
                     Task {
                         guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
@@ -294,7 +294,6 @@ struct UnkownFriendPageView: View {
             }
         }
     }
-    
 }
 
 
@@ -448,7 +447,7 @@ struct FriendPlaylistView: View {
                 }
                 
                 ScrollView(.horizontal) {
-                    HStack(alignment: .top,spacing: 10, content: {
+                    HStack(alignment: .top, spacing: 10, content: {
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
                             PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
                                 .onTapGesture {

@@ -41,7 +41,7 @@ struct MusicChartDetailItem: View {
                 .foregroundStyle(LibraryColorSet.purpleBackground)
                 .padding(.trailing, 14)
             
-            VStack(content: {
+            VStack(spacing: 1, content: {
                 Text(song.title)
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))

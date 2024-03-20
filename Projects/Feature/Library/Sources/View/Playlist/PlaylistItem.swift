@@ -147,7 +147,7 @@ struct PlaylistItem: View {
                 
                 Text(playlist.title)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(width: itemSize * 2, alignment: .leading)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .padding(.top, 10)

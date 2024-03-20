@@ -39,11 +39,9 @@ struct LibraryView: View {
                                 isTapMyMusic = true
                             }, label: {
                                 Text("마이뮤직")
-                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-                                    .padding(.leading, 20)
-                                    .padding(.trailing, 20)
-                                    .padding(.top, 10)
-                                    .padding(.bottom, 10)
+                                    .font(isTapMyMusic ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                    .padding(.horizontal, 16)
+                                    .frame(height: 33)
                                     .foregroundStyle(isTapMyMusic ? Color.black : LibraryColorSet.lightGrayForeground)
                                     .background(isTapMyMusic ? LibraryColorSet.purpleBackground : LibraryColorSet.darkGrayBackground)
                                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 22, height: 22), style: .circular))
@@ -53,12 +51,10 @@ struct LibraryView: View {
                             Button(action: {
                                 isTapMyMusic = false
                             }, label: {
-                                Text("추천")
-                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-                                    .padding(.leading, 20)
-                                    .padding(.trailing, 20)
-                                    .padding(.top, 10)
-                                    .padding(.bottom, 10)
+                                Text("뮤모리 추천")
+                                    .font(isTapMyMusic ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13) :SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
+                                    .padding(.horizontal, 16)
+                                    .frame(height: 33)
                                     .foregroundStyle(isTapMyMusic ? LibraryColorSet.lightGrayForeground : Color.black)
                                     .background(isTapMyMusic ? LibraryColorSet.darkGrayBackground : LibraryColorSet.purpleBackground)
                                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 22, height: 22), style: .circular))

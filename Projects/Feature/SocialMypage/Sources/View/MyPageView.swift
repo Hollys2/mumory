@@ -53,6 +53,7 @@ public struct MyPageView: View {
                 })
             }
             
+            //상단바
             HStack{
                 SharedAsset.xGradient.swiftUIImage
                     .resizable()
@@ -73,7 +74,7 @@ public struct MyPageView: View {
                     }
             }
             .padding(.horizontal, 20)
-            .frame(height: 44)
+            .frame(height: 63)
             .padding(.top, currentUserData.topInset)
         }
         .ignoresSafeArea()
@@ -100,7 +101,7 @@ struct UserInfoView: View {
                 Rectangle()
                     .frame(maxWidth: .infinity)
                     .frame(width: getUIScreenBounds().width)
-                    .frame(height: 150)
+                    .frame(height: 165)
                     .foregroundStyle(ColorSet.darkGray)
             }
             .overlay {
@@ -141,7 +142,7 @@ struct UserInfoView: View {
                         .frame(width: 90, height: 90)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .offset(y: -50)
+                .offset(y: -40)
                 
             }
             .padding(.horizontal, 20)
@@ -420,6 +421,11 @@ struct SubFunctionView: View {
             .onTapGesture {
                 appCoordinator.rootPath.append(MyPage.activityList)
             }
+            
+            Divider()
+                .frame(maxWidth: .infinity)
+                .frame(height: 0.5)
+                .background(lineGray)
         }
     }
 }

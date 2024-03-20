@@ -44,10 +44,7 @@ struct SaveToPlaylistItem: View {
             .frame(height: 70)
             .background(ColorSet.background)
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 0.5)
-                .background(ColorSet.lineGray)
+            Divider05()
         })
    
     }

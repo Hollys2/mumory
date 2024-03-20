@@ -70,10 +70,7 @@ struct MusicChartItem: View {
             }
             .padding(.vertical, 15)
             
-            Divider()
-                .frame(maxWidth: .infinity)
-                .frame(height: 1)
-                .background(ColorSet.subGray)
+            Divider05()
                 .opacity(rank%4 == 0 ? 0 : 1)
         }
         .padding(.leading, 20)

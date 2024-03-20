@@ -14,11 +14,11 @@ import Core
 struct AddMusicItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-
+    
     let songID: String
     @Binding var originPlaylist: MusicPlaylist
     @State var isSnackBarPresent: Bool = false
-
+    
     @State var song: Song?
     var body: some View {
         HStack(spacing: 0, content: {
@@ -33,7 +33,7 @@ struct AddMusicItem: View {
                     .frame(width: 40, height: 40)
             }
             .padding(.trailing, 13)
-
+            
             
             VStack(content: {
                 Text(song?.title ?? "")
@@ -52,7 +52,7 @@ struct AddMusicItem: View {
             })
             
             Spacer()
-            SharedAsset.addPurpleCircle.swiftUIImage
+            SharedAsset.addPurpleCircleFilled.swiftUIImage
                 .resizable()
                 .scaledToFill()
                 .frame(width: 31, height: 31)
@@ -63,13 +63,14 @@ struct AddMusicItem: View {
                 }
         })
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 15)
         .padding(.horizontal, 20)
+        .frame(height: 70)
         .onAppear(perform: {
             Task{
                 await fetchSongInfo(songID: songID)
             }
         })
+        
     }
     private func addMusicToPlaylist() {
         let Firebase = FBManager.shared

@@ -25,117 +25,119 @@ struct LastOfCustomizationView: View {
             ColorSet.background.ignoresSafeArea()
             GeometryReader(content: { geometry in
                 
-                
-                VStack(spacing: 0){
-                    Text("프로필 생성이 완료되었습니다!")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                        .foregroundStyle(.white)
-                        .padding(.top, geometry.size.height > 700 ? 65 : 50)
-                        .offset(y: firstYOffset)
-                        .opacity(firstOpacity)
-                    
-                    VStack(spacing: 0, content: {
-                        VStack(spacing: 0, content: {
-                            
-                      
-                            manager.getProfileImage()
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 105, height: 105)
-                                .clipShape(Circle())
-                                .padding(.top, 38)
-                                
-                            
-                            Text(manager.nickname)
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
-                                .foregroundStyle(.white)
-                                .padding(.top, 18)
-                            
-                            Text("@\(manager.id)")
-                                .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
-                                .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .padding(.top, 8)
-                                .padding(.bottom, 25)
-                        })
+                ScrollView(.vertical) {
+                    VStack(spacing: 0){
+                        Text("프로필 생성이 완료되었습니다!")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
+                            .foregroundStyle(.white)
+                            .padding(.top, geometry.size.height > 700 ? 65 : 50)
+                            .offset(y: firstYOffset)
+                            .opacity(firstOpacity)
                         
                         VStack(spacing: 0, content: {
-                            Text("관심 음악 장르")
-                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 6)
-                                .padding(.bottom, 6)
-                                .padding(.leading, 12)
-                                .padding(.trailing, 12)
-                                .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
-                                .padding(.top, 18)
+                            VStack(spacing: 0, content: {
+                                
+                          
+                                manager.getProfileImage()
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 105, height: 105)
+                                    .clipShape(Circle())
+                                    .padding(.top, 38)
+                                    
+                                
+                                Text(manager.nickname)
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
+                                    .foregroundStyle(.white)
+                                    .padding(.top, 18)
+                                
+                                Text("@\(manager.id)")
+                                    .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
+                                    .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                    .padding(.top, 8)
+                                    .padding(.bottom, 25)
+                            })
                             
+                            VStack(spacing: 0, content: {
+                                Text("관심 음악 장르")
+                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
+                                    .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
+                                    .padding(.top, 6)
+                                    .padding(.bottom, 6)
+                                    .padding(.leading, 12)
+                                    .padding(.trailing, 12)
+                                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
+                                    .padding(.top, 18)
+                                
 
-                        Text(getGenreText(list: manager.selectedGenres,screen: geometry.size))
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                .foregroundColor(ColorSet.mainPurpleColor)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 13)
-                                .lineSpacing(5)
-                            
-                            Rectangle()
-                                .frame(height: 1)
-                                .padding(.leading, 57)
-                                .padding(.trailing, 57)
-                                .padding(.top, 20)
-                                .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
-                            
-                            Text("음악 감상 시간대")
-                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 6)
-                                .padding(.bottom, 6)
-                                .padding(.leading, 12)
-                                .padding(.trailing, 12)
-                                .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
-                                .padding(.top, 21)
-                            
+                            Text(getGenreText(list: manager.selectedGenres,screen: geometry.size))
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                    .foregroundColor(ColorSet.mainPurpleColor)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.top, 13)
+                                    .lineSpacing(5)
+                                
+                                Rectangle()
+                                    .frame(height: 1)
+                                    .padding(.leading, 57)
+                                    .padding(.trailing, 57)
+                                    .padding(.top, 20)
+                                    .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
+                                
+                                Text("음악 감상 시간대")
+                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
+                                    .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
+                                    .padding(.top, 6)
+                                    .padding(.bottom, 6)
+                                    .padding(.leading, 12)
+                                    .padding(.trailing, 12)
+                                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
+                                    .padding(.top, 21)
+                                
 
-                            Text(getTimeZoneComment(timeZone: manager.selectedTime))
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                .foregroundColor(ColorSet.mainPurpleColor)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(5)
-                                .padding(.top, 12)
-                                .padding(.bottom, 20)
+                                Text(getTimeZoneComment(timeZone: manager.selectedTime))
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                    .foregroundColor(ColorSet.mainPurpleColor)
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(5)
+                                    .padding(.top, 12)
+                                    .padding(.bottom, 20)
 
+                            })
+                            .frame(maxWidth: .infinity)
+                            .background(ColorSet.moreDeepGray)
+
+                            
                         })
                         .frame(maxWidth: .infinity)
-                        .background(ColorSet.moreDeepGray)
-
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
+                        .overlay(content: {
+                            RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .circular)
+                                .stroke(ColorSet.subGray, lineWidth: 0.5)
+                        })
+                        .padding(.leading, 58)
+                        .padding(.trailing, 58)
+                        .padding(.top, geometry.size.height > 700 ? 40 : 20)
+                        .offset(y: secondYOffset)
+                        .opacity(secondOpacity)
                         
-                    })
-                    .frame(maxWidth: .infinity)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
-                    .overlay(content: {
-                        RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .circular)
-                            .stroke(ColorSet.subGray, lineWidth: 0.5)
-                    })
-                    .padding(.leading, 58)
-                    .padding(.trailing, 58)
-                    .padding(.top, geometry.size.height > 700 ? 40 : 20)
-                    .offset(y: secondYOffset)
-                    .opacity(secondOpacity)
-                    
-                    Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
-                        .foregroundStyle(ColorSet.subGray)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 37)
-                        .tracking(0.3)
-                        .lineSpacing(5)
-                        .offset(y: thirdYOffset)
-                        .opacity(geometry.size.height > 700 ? thirdOpacity : 0)
-                    
-                    
-                    Spacer()
-         
+                        Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
+                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
+                            .foregroundStyle(ColorSet.subGray)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 37)
+                            .tracking(0.3)
+                            .lineSpacing(5)
+                            .offset(y: thirdYOffset)
+                            .opacity(geometry.size.height > 700 ? thirdOpacity : 0)
+                        
+                        
+                        Spacer()
+             
+
+                    }
 
                 }
                 

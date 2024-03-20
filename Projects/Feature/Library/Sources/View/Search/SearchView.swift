@@ -22,7 +22,7 @@ struct SearchView: View {
         
     var body: some View {
         ZStack{
-            Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 1).ignoresSafeArea()
+            ColorSet.background.ignoresSafeArea()
             VStack(spacing: 0) {
                 HStack(spacing: 0, content: {
                     HStack(spacing: 0, content: {
@@ -30,7 +30,7 @@ struct SearchView: View {
                             .frame(width: 23, height: 23)
                             .padding(.leading, 15)
                         
-                        TextField("제목을 입력하세요", text: $term, prompt: searchPlaceHolder())
+                        TextField("", text: $term, prompt: searchPlaceHolder())
                             .textFieldStyle(.plain)
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
@@ -66,10 +66,10 @@ struct SearchView: View {
                 .background(.clear)
                 
                 if term.count > 0{
-                    SearchResultView(term: $term)
+                    SearchMusicResultView(term: $term)
                     
                 }else{
-                    SearchEntryView(term: $term)
+                    SearchMusicEntryView(term: $term)
                 }
                 
                 

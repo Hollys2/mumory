@@ -26,6 +26,12 @@ public class SnackBarViewModel: ObservableObject {
     @Published public var type: SnackbarType = .playlist
     @Published public var title: String = ""
     var timer: Timer?
+    
+    struct RecentSaveData{
+        var playlistId: String
+        var songId: String
+    }
+    var recentSaveData = RecentSaveData(playlistId: "", songId: "")
 
     public func setSnackBarAboutPlaylist(status: SnackbarStatus, playlistTitle: String) {
         self.timer?.invalidate()
@@ -62,7 +68,17 @@ public class SnackBarViewModel: ObservableObject {
         })
     }
     
-    private func setPresentValue(isPresent: Bool) {
+    public func setRecentSaveData(playlist: MusicPlaylist, songId: String) {
+        self.recentSaveData = RecentSaveData(playlistId: playlist.id, songId: songId)
+    }
+    
+    public func removeRecentSaveData(uId: String) {
+        let db = FBManager.shared.db
+        db.collection("User").document(uId).collection("Playlist").document(self.recentSaveData.playlistId)
+            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove([self.recentSaveData.songId])])
+        setSnackBar(type: .playlist, status: .delete)
+    }
+    public func setPresentValue(isPresent: Bool) {
         DispatchQueue.main.async {
             withAnimation(.linear(duration: 0.25)){
                 self.isPresent = isPresent
@@ -81,7 +97,7 @@ public class SnackBarViewModel: ObservableObject {
 public struct SnackBarView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
+    @EnvironmentObject var currentUserData: CurrentUserData
     public init(){}
     
     public var body: some View {
@@ -94,7 +110,7 @@ public struct SnackBarView: View {
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
                 
             case (.playlist, .failure):
-                PlaylistSuccessView
+                PlaylistFailureView
                     .offset(y: snackBarViewModel.isPresent ? 53 : -70)
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
                 
@@ -111,6 +127,10 @@ public struct SnackBarView: View {
                 CopySongURLView
                     .offset(y: snackBarViewModel.isPresent ? 53 : -70)
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
+            case (.playlist, .delete):
+                PlaylistDeleteView
+                    .offset(y: snackBarViewModel.isPresent ? 53 : -70)
+                    .opacity(snackBarViewModel.isPresent ? 1 : 0)
             default:
                 EmptyView()
             }
@@ -124,7 +144,7 @@ public struct SnackBarView: View {
         DragGesture()
             .onChanged { drag in
                 withAnimation(.linear(duration: 0.25)) {
-                    self.snackBarViewModel.isPresent = false
+                    snackBarViewModel.setPresentValue(isPresent: false)
                 }
             }
     }
@@ -150,10 +170,45 @@ public struct SnackBarView: View {
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             
-            Text("실행취소")
-                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                .padding(.leading, 18)
-                .foregroundStyle(ColorSet.mainPurpleColor)
+            Button {
+                snackBarViewModel.removeRecentSaveData(uId: currentUserData.uId)
+                snackBarViewModel.setPresentValue(isPresent: false)
+            } label: {
+                Text("실행취소")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                    .padding(.leading, 18)
+                    .foregroundStyle(ColorSet.mainPurpleColor)
+            }
+            
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 48)
+        .padding(.horizontal, 20)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+        .padding(.horizontal, 15)
+    }
+    
+    var PlaylistDeleteView: some View {
+        HStack(spacing: 0) {
+            HStack(spacing: 0, content: {
+                Text("플레이리스트")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                
+                Text("\"\(snackBarViewModel.title)")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                
+                Text("\"")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                
+                Text("에서 삭제되었습니다.")
+                    .fixedSize()
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+            })
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .lineLimit(1)
         .frame(maxWidth: .infinity, alignment: .leading)

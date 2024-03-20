@@ -34,6 +34,7 @@ struct TermsOfServiceForSocialView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 30, height: 30)
+                            .padding(.leading, 20)
                             .onTapGesture {
                                 dismiss()
                             }
@@ -42,7 +43,7 @@ struct TermsOfServiceForSocialView: View {
                     }
                     .frame(height: 63)
                     
-                    Text("서비스 이용약관에\n동의해주세요")
+                    Text("서비스 이용약관에\n동의해주세요!")
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 43)

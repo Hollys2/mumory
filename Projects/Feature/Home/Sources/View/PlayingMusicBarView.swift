@@ -53,7 +53,7 @@ public struct PlayingMusicBarView: View {
                             .truncationMode(.tail)
                         
                         Text(playingSong.artistName)
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(ColorSet.charSubGray)
                             .lineLimit(1)
@@ -61,7 +61,7 @@ public struct PlayingMusicBarView: View {
                     }
                 }else {
                     Text("재생 중인 음악이 없습니다.")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 11))
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.trailing, 21)
@@ -121,7 +121,7 @@ public struct PlayingMusicBarView: View {
                     .fill(ColorSet.background)
                     .frame(width: 31, height: 31)
             }
-            .padding(.trailing, 11)
+            .padding(.trailing, 14)
             .onTapGesture {
                 appCoordinator.setBottomAnimationPage(page: .myPage)
             }

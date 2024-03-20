@@ -73,7 +73,6 @@ private struct UserProfile: View {
     var body: some View {
         ZStack(alignment: .top){
             
-            VStack(spacing: 0, content: {
                 
                 //배경이미지
                 VStack{
@@ -83,29 +82,24 @@ private struct UserProfile: View {
                             .resizable()
                             .scaledToFill()
                             .frame(maxWidth: .infinity)
-                            .frame(height: 150)
+                            .frame(height: 165)
                             .clipped()
                     }else {
                         Rectangle()
                             .frame(maxWidth: .infinity)
-                            .frame(height: 150)
+                            .frame(height: 165)
                             .foregroundStyle(ColorSet.darkGray)
                     }
                 }
                 .overlay {
                     ColorSet.background.opacity(0.4)
-
-                    VStack(spacing: 20, content: {
-                        Text("프로필 편집")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(Color.white)
-                        SharedAsset.camera.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                    })
-                    .frame(maxHeight: .infinity, alignment: .bottom)
-                    .padding(.bottom, 24)
+                    
+                    SharedAsset.camera.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .frame(maxHeight: .infinity, alignment: .bottom)
+                        .padding(.bottom, 24)
                 }
                 .onTapGesture {
                     isPresentBackgroundBottomSheet = true
@@ -117,51 +111,53 @@ private struct UserProfile: View {
                 .onChange(of: backgroundImageBundle.image) { value in
                     profileData.backgroundStatus = .valid
                 }
-                
-                
-                
-                //프로필 이미지
-                VStack{
-                    if let image = profileImageBundle.image {
-                        image
+                .overlay {
+                    //프로필 이미지
+                    VStack{
+                        if let image = profileImageBundle.image {
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: .infinity)
+                                .frame(width: 90, height: 90)
+                        }else {
+                            Circle()
+                                .fill(ColorSet.darkGray)
+                                .frame(width: 90, height: 90)
+                        }
+                    }
+                    .overlay(content: {
+                        ColorSet.background.opacity(0.4)
+                        
+                        SharedAsset.camera.swiftUIImage
                             .resizable()
-                            .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(width: 90, height: 90)
-                    }else {
-                        Circle()
-                            .fill(ColorSet.darkGray)
-                            .frame(width: 90, height: 90)
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                    })
+                    .clipShape(Circle())
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .offset(y: 50)
+                    .padding(.trailing, 20)
+                    .onTapGesture {
+                        isPresentProfileBottomSheet = true
+                    }
+                    .fullScreenCover(isPresented: $isPresentProfileBottomSheet) {
+                        ImageSelectBottomSheet(isPresent: $isPresentProfileBottomSheet, imageBundle: $profileImageBundle)
+                            .background(TransparentBackground())
+                    }
+                    .onChange(of: profileImageBundle.image) { value in
+                        profileData.profileStatus = .valid
                     }
                 }
-                .overlay(content: {
-                    ColorSet.background.opacity(0.4)
-                    
-                    SharedAsset.camera.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                })
-                .clipShape(Circle())
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .padding(.trailing, 20)
-                .offset(y: -50)
-                .onTapGesture {
-                    isPresentProfileBottomSheet = true
-                }
-                .fullScreenCover(isPresented: $isPresentProfileBottomSheet) {
-                    ImageSelectBottomSheet(isPresent: $isPresentProfileBottomSheet, imageBundle: $profileImageBundle)
-                        .background(TransparentBackground())
-                }
-                .onChange(of: profileImageBundle.image) { value in
-                    profileData.profileStatus = .valid
-                }
                 
                 
-            })
+                
+      
+                
+                
           
             //상단바
-            HStack{
+            HStack(alignment: .center){
                 SharedAsset.xGradient.swiftUIImage
                     .resizable()
                     .scaledToFit()
@@ -172,6 +168,12 @@ private struct UserProfile: View {
                 
                 Spacer()
                 
+                Text("프로필 편집")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                    .foregroundStyle(Color.white)
+                
+                Spacer()
+
                 Text("완료")
                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
                     .foregroundStyle(Color.black)
@@ -189,7 +191,7 @@ private struct UserProfile: View {
                     
             }
             .padding(.horizontal, 20)
-            .frame(height: 44)
+            .frame(height: 63)
             .padding(.top, currentUserData.topInset)
         }
         .onAppear {
@@ -520,6 +522,8 @@ private struct NicknameStackView: View {
             }
         })
         .padding(.horizontal, 20)
+        .padding(.top, 70)
+
     }
     
     private func checkNickname(nickname: String) {
