@@ -192,5 +192,10 @@ public class PlayerViewModel: ObservableObject {
     }
     
 
+    public func appleMusicAuthorization() {
+        Task {
+            let authorizationStatus = await MusicAuthorization.request()
+        }
+    }
  
 }

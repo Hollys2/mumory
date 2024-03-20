@@ -15,6 +15,7 @@ import KakaoSDKAuth
 import GoogleSignIn
 import FirebaseMessaging
 import Shared
+import MusicKit
 
 //import RealmSwift
 
@@ -36,6 +37,15 @@ import Shared
             }
         }
         application.registerForRemoteNotifications()
+         
+         Task {
+             let authorizationStatus = await MusicAuthorization.request()
+             if authorizationStatus == .authorized {
+                 print("음악 권한 받음")
+             } else {
+                 print("음악 권한 거절")
+             }
+         }
         
         //테스트용 키. 추후에 원본 키로 수정하기
         KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
