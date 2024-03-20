@@ -248,8 +248,6 @@ public struct SnackBarView: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
         .padding(.horizontal, 15)
-        
-  
     }
     
     var FavoriteAddView: some View {

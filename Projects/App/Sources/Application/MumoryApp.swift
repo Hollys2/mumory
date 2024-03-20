@@ -17,7 +17,7 @@ struct MumoryApp: App {
     @StateObject var firebaseManager: FirebaseManager = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var currentUserData: CurrentUserData = .init()
-    @StateObject var playerManager: PlayerViewModel = .init()
+    @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
     
     var body: some Scene {
@@ -25,7 +25,6 @@ struct MumoryApp: App {
             GeometryReader { geometry in
                 ZStack {
                     SplashView()
-//                    MumoryEditView(mumoryAnnotation: Mumory())
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                                 AuthController.handleOpenUrl(url: url)
@@ -39,11 +38,9 @@ struct MumoryApp: App {
                         .environmentObject(firebaseManager)
                         .environmentObject(keyboardResponder)
                         .environmentObject(currentUserData)
-                        .environmentObject(playerManager)
+                        .environmentObject(playerViewModel)
                         .environmentObject(snackBarViewModel)
-                        .onAppear {
-                            print("MumoryApp onAppear")
-                            
+                        .onAppear {                            
                             appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                             appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                             
