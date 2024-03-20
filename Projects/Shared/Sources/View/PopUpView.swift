@@ -131,7 +131,6 @@ public struct PopUpView: View {
                             isButtonEnabled = false
                             self.buttonAction?()
                             
-//                            self.isShown = false // 추후 성공했을 때만 팝업창이 사라지게 하기
                         }) {
                             ZStack {
                                 Rectangle()

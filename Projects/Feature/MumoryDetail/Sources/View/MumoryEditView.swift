@@ -54,6 +54,8 @@ public struct MumoryEditView: View {
         
         ZStack(alignment: .bottom) {
             
+            SharedAsset.backgroundColor.swiftUIColor
+            
             VStack(spacing: 0) {
 
                 // MARK: -Top bar
@@ -154,33 +156,34 @@ public struct MumoryEditView: View {
                             ContentContainerView(contentText: self.$contentText)
                             
                             HStack(spacing: 11) {
+                                
                                 PhotosPicker(selection: $photoPickerViewModel.imageSelections,
                                              maxSelectionCount: 1,
                                              matching: .images) {
                                     
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 75, height: 75)
-                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                        .cornerRadius(10)
-                                        .overlay(
-                                            VStack(spacing: 0) {
-                                                (imageURLs.count + photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
-                                                    .resizable()
-                                                    .frame(width: 25, height: 25)
-                                                
-                                                HStack(spacing: 0) {
-                                                    Text("\(imageURLs.count + photoPickerViewModel.imageSelectionCount)")
-                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                        .foregroundColor(imageURLs.count + photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                    Text(" / 3")
-                                                        .font(Font.custom("Pretendard", size: 14).weight(.medium))
-                                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                }
-                                                .multilineTextAlignment(.center)
-                                                .padding(.top, 10)
-                                            }
-                                        )
+                                    VStack(spacing: 0) {
+                                        (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                            .resizable()
+                                            .frame(width: 24, height: 24)
+                                            .offset(y: 1)
+                                        
+                                        Spacer(minLength: 0)
+                                        
+                                        HStack(spacing: 0) {
+                                            Text("\(photoPickerViewModel.imageSelectionCount)")
+                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                            Text(" / 3")
+                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                        }
+                                        .multilineTextAlignment(.center)
+                                        .offset(y: 2)
+                                    }
+                                    .padding(.vertical, 15)
+                                    .frame(width: 75, height: 75)
+                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                    .cornerRadius(10)
                                 }
                                 
                                 
@@ -257,15 +260,17 @@ public struct MumoryEditView: View {
                     .padding(.bottom, 50)
                     
                 } // ScrollView
-                .simultaneousGesture(DragGesture().onChanged { i in
-                    print("simultaneousGesture DragGesture")
-                    
-                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                })
+//                .simultaneousGesture(DragGesture().onChanged { i in
+//                    print("simultaneousGesture DragGesture")
+//
+//                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+//                })
                 
-                Spacer(minLength: 0)
+                
+//                Spacer(minLength: 0)
+
             } // VStack
-            .background(SharedAsset.backgroundColor.swiftUIColor)
+//            .background(SharedAsset.backgroundColor.swiftUIColor)
             .toolbar(.hidden)
             .ignoresSafeArea()
             .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - appCoordinator.safeAreaInsetsTop) {
@@ -378,7 +383,7 @@ public struct MumoryEditView: View {
                 }) {
                     SharedAsset.keyboardButtonCreateMumory.swiftUIImage
                         .resizable()
-                        .frame(width: 26, height: 26)
+                        .frame(width: 24, height: 24)
                 }
                 .opacity(self.keyboardResponder.isKeyboardHiddenButtonShown ? 1 : 0)
                 
@@ -386,6 +391,7 @@ public struct MumoryEditView: View {
             .frame(height: 55)
             .padding(.leading, 25)
             .padding(.trailing, 20)
+            .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
             .overlay(
                 Rectangle()
@@ -398,3 +404,11 @@ public struct MumoryEditView: View {
     }
 }
 
+extension View {
+    func keyboardAwarePadding() -> some View {
+        return GeometryReader { geometry in
+            self.padding(.bottom, geometry.safeAreaInsets.bottom)
+                .animation(.easeOut)
+        }
+    }
+}

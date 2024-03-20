@@ -123,7 +123,8 @@ public struct SocialSearchView: View {
                     )
                     .foregroundColor(.white)
                     
-                    Image(systemName: "magnifyingglass")
+                    SharedAsset.searchIconCreateMumory.swiftUIImage
+                        .resizable()
                         .frame(width: 23, height: 23)
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                         .padding(.leading, 15)
@@ -166,14 +167,16 @@ public struct SocialSearchView: View {
 
                         Spacer()
 
-                        Button(action: {
-                            self.recentSearches = []
-                            UserDefaults.standard.set(recentSearches, forKey: "socialSearch")
-                        }) {
-                            Text("전체삭제")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                                .multilineTextAlignment(.trailing)
-                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                        if !self.recentSearches.isEmpty {
+                            Button(action: {
+                                self.recentSearches = []
+                                UserDefaults.standard.set(recentSearches, forKey: "socialSearch")
+                            }) {
+                                Text("전체삭제")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                    .multilineTextAlignment(.trailing)
+                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            }
                         }
                     }
                     .padding([.horizontal, .top], 20)
@@ -181,8 +184,11 @@ public struct SocialSearchView: View {
 
                     if !self.recentSearches.isEmpty {
                         ForEach(self.recentSearches, id: \.self) { value in
+                            
                             HStack {
-                                Image(systemName: "magnifyingglass")
+                                
+                                SharedAsset.searchIconCreateMumory.swiftUIImage
+                                    .resizable()
                                     .frame(width: 23, height: 23)
                                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
 
@@ -203,8 +209,7 @@ public struct SocialSearchView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .padding(.leading, 15)
-                            .padding(.trailing, 20)
+                            .padding(.horizontal, 20)
                             .onTapGesture {
                                 self.searchText = value
                                 
@@ -306,90 +311,90 @@ public struct SocialSearchView: View {
 
                     ScrollView(showsIndicators: false) {
 
-                        HStack(spacing: 0) {
-                            Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
-                                .font(Font.custom("Pretendard", size: 12))
-                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
-
-                            Spacer()
-
-                            Text("정확도")
-                                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
-                                .multilineTextAlignment(.trailing)
-                                .foregroundColor(self.isRecentSearch ? Color(red: 0.65, green: 0.65, blue: 0.65) : Color(red: 0.64, green: 0.51, blue: 0.99))
-                                .overlay(
-                                    self.isRecentSearch ? AnyView(EmptyView()) :
-                                        AnyView(
-                                            Rectangle()
-                                                .foregroundColor(.clear)
-                                                .frame(width: 5, height: 5)
-                                                .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                                .cornerRadius(2.5)
-                                                .offset(x: -10)
-                                        )
-                                    , alignment: .leading
-                                )
-                                .onTapGesture {
-                                    self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
-                                        guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
-                                        //                                  return content.localizedCaseInsensitiveCompare(searchText) == .orderedSame
-                                        return content1.count < content2.count
-                                    }
-
-                                    self.isRecentSearch = false
-                                }
-
-                            Spacer().frame(width: 19)
-
-                            Text("최신")
-                                .font(
-                                    Font.custom("Apple SD Gothic Neo", size: 14)
-                                        .weight(.medium)
-                                )
-                                .multilineTextAlignment(.trailing)
-                                .foregroundColor(self.isRecentSearch ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.65, green: 0.65, blue: 0.65))
-                                .overlay(
-                                    self.isRecentSearch ?
-                                    AnyView(Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 5, height: 5)
-                                        .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                        .cornerRadius(2.5)
-                                        .offset(x: -10))
-                                    : AnyView(EmptyView())
-                                    , alignment: .leading
-                                )
-                                .onTapGesture {
-                                    self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
-                                        return doc1.date > doc2.date
-                                    }
-
-                                    self.isRecentSearch = true
-                                }
-                        }
-                        .padding(.top, 24)
-                        .padding(.horizontal, 20)
-
                         VStack(spacing: 0) {
-
-                            ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
-                                SearchedMumoryItemView(mumory: mumory)
+                            
+                            HStack(spacing: 0) {
+                                
+                                Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
+                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                                    .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
+                                
+                                Spacer()
+                                
+                                Text("정확도")
+                                    .font(self.isRecentSearch ? SharedFontFamily.Pretendard.light.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                    .multilineTextAlignment(.trailing)
+                                    .foregroundColor(self.isRecentSearch ? Color(red: 0.65, green: 0.65, blue: 0.65) : Color(red: 0.64, green: 0.51, blue: 0.99))
+                                    .overlay(
+                                        self.isRecentSearch ? AnyView(EmptyView()) :
+                                            AnyView(
+                                                Rectangle()
+                                                    .foregroundColor(.clear)
+                                                    .frame(width: 5, height: 5)
+                                                    .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                                    .cornerRadius(2.5)
+                                                    .offset(x: -10)
+                                            )
+                                        , alignment: .leading
+                                    )
+                                    .onTapGesture {
+                                        self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                                            guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
+                                            //                                  return content.localizedCaseInsensitiveCompare(searchText) == .orderedSame
+                                            return content1.count < content2.count
+                                        }
+                                        
+                                        self.isRecentSearch = false
+                                    }
+                                
+                                Spacer().frame(width: 19)
+                                
+                                Text("최신")
+                                    .font(self.isRecentSearch ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                                    .multilineTextAlignment(.trailing)
+                                    .foregroundColor(self.isRecentSearch ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.65, green: 0.65, blue: 0.65))
+                                    .overlay(
+                                        self.isRecentSearch ?
+                                        AnyView(Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 5, height: 5)
+                                            .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                            .cornerRadius(2.5)
+                                            .offset(x: -10))
+                                        : AnyView(EmptyView())
+                                        , alignment: .leading
+                                    )
+                                    .onTapGesture {
+                                        self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                                            return doc1.date > doc2.date
+                                        }
+                                        
+                                        self.isRecentSearch = true
+                                    }
                             }
+                            .padding(.vertical, 20)
+                            .padding(.horizontal, 20)
+                            
+                            VStack(spacing: 0) {
+                                
+                                ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
+                                    SearchedMumoryItemView(mumory: mumory)
+                                }
+                            }
+                            .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
+                            .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                            .cornerRadius(15)
+                            .padding(.horizontal, 20)
+                            .overlay(
+                                Rectangle()
+                                    .frame(width: getUIScreenBounds().width - 40, height: 0.3)
+                                    .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
+                                    .offset(y: -15)
+                                    .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
+                                , alignment: .bottom
+                            )
+                            .padding(.bottom, 100)
                         }
-                        .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
-                        .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                        .cornerRadius(15)
-                        .padding(.top, 24)
-                        .padding(.horizontal, 20)
-                        .overlay(
-                            Rectangle()
-                                .frame(width: getUIScreenBounds().width - 40, height: 0.3)
-                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                                .offset(y: -15)
-                                .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
-                            , alignment: .bottom
-                        )
-                        .padding(.bottom, 100)
                     }
                     .tag(1)
                 }
@@ -403,6 +408,9 @@ public struct SocialSearchView: View {
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
+        .simultaneousGesture(TapGesture(count: 1).onEnded({
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }))
     }
 }
 

@@ -38,10 +38,12 @@ struct AddressRow: View {
             
             appCoordinator.rootPath.removeLast()
         }) {
-            HStack(alignment: .center, spacing: 13) {
-                Image(uiImage: SharedAsset.addressSearchLocation.image)
+            HStack(spacing: 0) {
+                SharedAsset.addressSearchLocation.swiftUIImage
                     .resizable()
                     .frame(width: 20, height: 23)
+                
+                Spacer().frame(width: 13)
                 
                 VStack(spacing: 6) {
                     Text(result.title)
@@ -56,10 +58,16 @@ struct AddressRow: View {
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                
+                Spacer().frame(width: 20)
+                
+                SharedAsset.addAddressButton.swiftUIImage
+                    .resizable()
+                    .frame(width: 30, height: 30)
             } // HStack
             .frame(maxWidth: .infinity)
             .frame(height: 70)
-            .padding(.horizontal, 5)
+            .padding(.leading, 5)
         }
     }
 }
@@ -89,7 +97,8 @@ struct SearchLocationView: View {
                     )
                     .foregroundColor(.white)
                     
-                    Image(systemName: "magnifyingglass")
+                    SharedAsset.searchIconCreateMumory.swiftUIImage
+                        .resizable()
                         .frame(width: 23, height: 23)
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                         .padding(.leading, 15)
@@ -122,8 +131,11 @@ struct SearchLocationView: View {
             
             if self.localSearchViewModel.results.isEmpty {
                 ScrollView {
+                    
                     VStack(spacing: 15) {
+                        
                         VStack(spacing: 0) {
+                            
                             Button(action: {
                                 if let currentLocation = locationManager.currentLocation {
                                     mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
@@ -162,7 +174,7 @@ struct SearchLocationView: View {
                             Rectangle()
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 0.3)
-                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
+                                .foregroundColor(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.698).opacity(0.7))
                             
                             Button(action: {
                                 appCoordinator.rootPath.append("map")
@@ -192,8 +204,8 @@ struct SearchLocationView: View {
                                 }
                             }
                         }
-                        .cornerRadius(15)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                         
                         VStack(spacing: 0) {
                             
@@ -204,13 +216,15 @@ struct SearchLocationView: View {
                                 
                                 Spacer()
                                 
-                                Button(action: {
-                                    self.localSearchViewModel.clearRecentSearches()
-                                }) {
-                                    Text("전체삭제")
-                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                                        .multilineTextAlignment(.trailing)
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                if !self.localSearchViewModel.recentSearches.isEmpty {
+                                    Button(action: {
+                                        self.localSearchViewModel.clearRecentSearches()
+                                    }) {
+                                        Text("전체삭제")
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                            .multilineTextAlignment(.trailing)
+                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                    }
                                 }
                             }
                             .padding([.horizontal, .top], 20)
@@ -218,8 +232,10 @@ struct SearchLocationView: View {
                             
                             if !self.localSearchViewModel.recentSearches.isEmpty {
                                 ForEach(self.localSearchViewModel.recentSearches, id: \.self) { value in
+                                    
                                     HStack {
-                                        Image(systemName: "magnifyingglass")
+                                        SharedAsset.searchIconCreateMumory.swiftUIImage
+                                            .resizable()
                                             .frame(width: 23, height: 23)
                                             .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                         
@@ -239,8 +255,7 @@ struct SearchLocationView: View {
                                     }
                                     .frame(maxWidth: .infinity)
                                     .frame(height: 50)
-                                    .padding(.leading, 15)
-                                    .padding(.trailing, 20)
+                                    .padding(.horizontal, 20)
                                     .onTapGesture {
                                         mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, coordinate: CLLocationCoordinate2D(latitude: value.latitude, longitude: value.longitude))
                                         
@@ -257,7 +272,7 @@ struct SearchLocationView: View {
                             Spacer().frame(height: 15)
                         }
                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                        .cornerRadius(15)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                         
                         if !self.localSearchViewModel.popularSearches.isEmpty {
                             
@@ -274,7 +289,9 @@ struct SearchLocationView: View {
                                 .padding(20)
                                 
                                 HStack(spacing: 8) {
+                                    
                                     ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
+                                        
                                         Text(searchTerm)
                                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                             .frame(height: 33)
@@ -312,8 +329,9 @@ struct SearchLocationView: View {
                 .scrollIndicators(.hidden)   
             }
         } // VStack
+        .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
-        .padding(.horizontal, 21)
+        .padding(.horizontal, 20)
         .frame(width: UIScreen.main.bounds.width + 1)
         .padding(.top, 12)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))

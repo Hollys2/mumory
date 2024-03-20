@@ -10,7 +10,7 @@ struct MumoryApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var appCoordinator: AppCoordinator = .init()
-    @StateObject var locationManager: LocationManager = .init() // 위치 권한
+    @StateObject var locationManager: LocationManager = .init()
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     @StateObject var dateManager: DateManager = .init()
@@ -23,11 +23,9 @@ struct MumoryApp: App {
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
-                //                CreateMumoryBottomSheetView()
-//                HomeView()
-                //충독나서 스플래시 화면으로 수정함
                 ZStack {
-                    SplashView()
+//                    SplashView()
+                    MumoryEditView(mumoryAnnotation: Mumory())
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                                 AuthController.handleOpenUrl(url: url)
