@@ -1,15 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "create-mumory-tabbar.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "create-mumory-tabbar@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Add_BT.png",
+      "filename" : "create-mumory-tabbar@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

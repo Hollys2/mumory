@@ -1,15 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "social-off-tabbar.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "social-off-tabbar@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Social.png",
+      "filename" : "social-off-tabbar@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

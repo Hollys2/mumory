@@ -1,15 +1,17 @@
 {
   "images" : [
     {
+      "filename" : "notification-on-tabbar.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "notification-on-tabbar@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Notify-2.png",
+      "filename" : "notification-on-tabbar@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
