@@ -26,6 +26,7 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var musicModels: [MusicModel] = []
     
     @Published public var myMumorys: [Mumory] = []
+    @Published public var mumorys: [Mumory] = []
     @Published public var everyMumorys: [Mumory] = []
     @Published public var filterdMumorys: [Mumory] = []
     
@@ -239,6 +240,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     
                     if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
                         DispatchQueue.main.async {
+                            print("newMumory.date: \(newMumory.date)")
                             self.everyMumorys.append(newMumory)
                             self.everyMumorys.sort { $0.date > $1.date }
                         }

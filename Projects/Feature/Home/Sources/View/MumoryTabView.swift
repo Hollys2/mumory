@@ -34,6 +34,8 @@ public struct MumoryTabView: View {
                     playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
+                        .resizable()
+                        .frame(width: 31, height: 43)
                 }
                 .frame(width: geometry.size.width / 5)
                 
@@ -42,26 +44,22 @@ public struct MumoryTabView: View {
                     playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
+                        .resizable()
+                        .frame(width: 35, height: 45)
+
                 }
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-//                    for (region, boundary) in MapConstant.boundaries {
-//                        let filteredLocations = mumoryDataViewModel.myMumorys.filter { mumory in
-//                            let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
-//                            let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
-//                            return latInRange && lonInRange
-//                        }
-//                        print("region: \(region)")
-//                        print("filteredLocations: \(filteredLocations)")
-//                    }
-                    
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
                         appCoordinator.offsetY = CGFloat.zero
                     }
                 }) {
                     Image(asset: SharedAsset.createMumoryTabbar)
+                        .resizable()
+                        .frame(width: 51, height: 51)
+
                 }
                 .frame(width: geometry.size.width / 5)
                 
@@ -70,6 +68,8 @@ public struct MumoryTabView: View {
                     playerViewModel.isShownMiniPlayer = true
                 }) {
                     Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
+                        .resizable()
+                        .frame(width: 43, height: 45)
                 }
                 .frame(width: geometry.size.width / 5)
                 
@@ -78,6 +78,9 @@ public struct MumoryTabView: View {
                     playerViewModel.isShownMiniPlayer = false
                 }) {
                     Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
+                        .resizable()
+                        .frame(width: 31, height: 44)
+
                 }
                 .frame(width: geometry.size.width / 5)
             }

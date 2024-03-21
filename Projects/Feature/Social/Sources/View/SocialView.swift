@@ -101,7 +101,7 @@ extension SocialScrollViewRepresentable {
             let offsetY = scrollView.contentOffset.y
             let contentHeight = scrollView.contentSize.height
             let scrollViewHeight = scrollView.bounds.height
-            let limitHeight = self.parent.appCoordinator.safeAreaInsetsTop + 64
+            let limitHeight = self.parent.appCoordinator.safeAreaInsetsTop + 68
             
             topBarOffsetY += (offsetY - preOffsetY)
 

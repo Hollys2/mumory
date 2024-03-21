@@ -33,6 +33,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isSocialMenuSheetViewShown = false
     @Published public var isMumoryDetailCommentSheetViewShown = false
     @Published public var isSocialCommentSheetViewShown: Bool = false
+    @Published public var isMyMumorySearchViewShown: Bool = false
     @Published public var comments: [Comment] = []
     @Published public var isCommentBottomSheetShown = false
     @Published public var isMyMumoryBottomSheetShown = false

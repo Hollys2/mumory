@@ -983,11 +983,11 @@ struct TagContainerView: View {
                 
                 if self.tags.count < 3 {
                     TagTextField(text: $tagText, onCommit: {
-                        if tagText.first == "#" {
-                            tagText.removeFirst()
+//                        if tagText.first == "#" {
+//                            tagText.removeFirst()
                             tags.append(tagText)
                             tagText = ""
-                        }
+//                        }
                     }, onEditingChanged: { isEditing in
                         self.isEditing = isEditing
                     })
@@ -1126,7 +1126,7 @@ struct TagTextField: UIViewRepresentable {
             let currentText = textField.text ?? ""
             let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
             
-            return newText.count <= 6
+            return newText.count <= 5
         }
         
         func textFieldShouldReturn(_ textField: UITextField) -> Bool {
