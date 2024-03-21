@@ -72,7 +72,7 @@ struct PageTabView<Content: View, Label: View>: View {
 
 public struct SocialSearchView: View {
     
-    @Binding private var isSocialSearchViewShown: Bool
+    @Binding private var isShown: Bool
     
     @State private var searchText: String = ""
     @State private var currentTabSelection: Int = 0
@@ -85,7 +85,7 @@ public struct SocialSearchView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     public init(isShown: Binding<Bool>) {
-        self._isSocialSearchViewShown = isShown
+        self._isShown = isShown
         self._recentSearches = State(initialValue: UserDefaults.standard.stringArray(forKey: "socialSearch") ?? [])
     }
     
@@ -103,6 +103,7 @@ public struct SocialSearchView: View {
                                 Text("친구 및 게시물 검색")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
+                    .submitLabel(.search)
                     .onSubmit {
                         mumoryDataViewModel.searchedMumoryAnnotations = []
                         friendManager.searchedFriends = []
@@ -150,14 +151,14 @@ public struct SocialSearchView: View {
                     .foregroundColor(.white)
                     .onTapGesture {
                         self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
-                        self.isSocialSearchViewShown = false
+                        self.isShown = false
                     }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 10)
 
             
-            if searchText == "" {
+            if self.searchText == "" {
                 VStack(spacing: 0) {
 
                     HStack {
@@ -541,6 +542,22 @@ struct SearchedMumoryItemView: View {
                         .background(Color(red: 0.247, green: 0.247, blue: 0.247))
                         .cornerRadius(5)
                         .padding(.leading, 20)
+                        .overlay(
+                            (mumory.imageURLs ?? []).count > 1 ? ZStack {
+                                    Circle()
+                                        .foregroundColor(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
+                                        .frame(width: 19, height: 19)
+                                    
+                                    Text("\((mumory.imageURLs ?? []).count)")
+                                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 10))
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                }
+                                .offset(x: -5, y: -5)
+                            : nil
+
+                            , alignment: .bottomTrailing
+                        )
                 ) : nil
                 
             } // HStack

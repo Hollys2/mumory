@@ -12,23 +12,42 @@ import Shared
 
 public struct MyMumorySearchView: View {
     
+    @Binding private var isShown: Bool
+
     @State private var searchText: String = ""
     @State private var currentTabSelection: Int = 0
     @State private var isRecentSearch: Bool = false
+    @State private var recentSearches: [String] = []
     
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
-    public init() {}
-    
+    public init(isShown: Binding<Bool>) {
+        self._isShown = isShown
+    }
+        
     public var body: some View {
         VStack(spacing: 0) {
+            
             Spacer().frame(height: self.appCoordinator.safeAreaInsetsTop + 12)
             
             HStack(spacing: 8) {
+                
                 ZStack(alignment: .leading) {
+                    
                     TextField("", text: $searchText,
-                              prompt: Text("나의 뮤모리 검색").font(Font.custom("Pretendard", size: 16))
+                              prompt: Text("나의 뮤모리 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
+                    .submitLabel(.search)
+                    .onSubmit {
+                        mumoryDataViewModel.searchedMumoryAnnotations = []
+                        
+                        mumoryDataViewModel.searchMumoryByContent(self.searchText)
+                        
+                        recentSearches.insert(self.searchText, at: 0)
+                        recentSearches = Array(Set(recentSearches).prefix(10))
+                        UserDefaults.standard.set(recentSearches, forKey: "myMumorySearch")
+                    }
                     .frame(maxWidth: .infinity)
                     .frame(height: 45)
                     .padding(.horizontal, 15 + 23 + 7)
@@ -38,197 +57,161 @@ public struct MyMumorySearchView: View {
                     )
                     .foregroundColor(.white)
                     
-                    Image(systemName: "magnifyingglass")
+                    
+                    SharedAsset.searchIconCreateMumory.swiftUIImage
+                        .resizable()
                         .frame(width: 23, height: 23)
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                         .padding(.leading, 15)
                     
                     if !self.searchText.isEmpty {
-                        Button(action: {
-                            self.searchText = ""
-                        }) {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.trailing, 17)
+                        HStack {
+                            
+                            Spacer()
+                            
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white)
+                                .onTapGesture {
+                                    self.searchText = ""
+                                }
                         }
+                        .padding(.trailing, 17)
                     }
                 }
                 
                 Text("취소")
-                    .font(
-                        SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)
-                        //                        Font.custom("Pretendard", size: 16)
-                        //                            .weight(.medium)
-                    )
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.white)
+                    .onTapGesture {
+                        self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
+                        self.isShown = false
+                    }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 8)
             
-            ScrollView(showsIndicators: false) {
+            if self.searchText == "" {
                 VStack(spacing: 0) {
-                    HStack(spacing: 0) {
-                        Text("검색 결과 00건")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                            .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
-                        
+
+                    HStack {
+                        Text("최근 검색")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+
                         Spacer()
+
+                        if !self.recentSearches.isEmpty {
+                            Button(action: {
+                                self.recentSearches = []
+                                UserDefaults.standard.set(recentSearches, forKey: "myMumorySearch")
+                            }) {
+                                Text("전체삭제")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                    .multilineTextAlignment(.trailing)
+                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            }
+                        }
                     }
-                    .padding(.top, 17)
-                    .padding(.bottom, 25)
-                    .padding(.horizontal, 20)
+                    .padding([.horizontal, .top], 20)
+                    .padding(.bottom, 11)
+
+                    if !self.recentSearches.isEmpty {
+                        ForEach(self.recentSearches, id: \.self) { value in
+                            
+                            HStack {
+                                
+                                SharedAsset.searchIconCreateMumory.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 23, height: 23)
+                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+
+                                Text(value)
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                    .foregroundColor(.white)
+
+                                Spacer()
+
+                                Button(action: {
+                                    self.recentSearches.removeAll { $0 == value }
+                                    UserDefaults.standard.set(self.recentSearches, forKey: "myMumorySearch")
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .frame(width: 19, height: 19)
+                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .padding(.horizontal, 20)
+                            .onTapGesture {
+                                self.searchText = value
+                                
+                                mumoryDataViewModel.searchedMumoryAnnotations = []
+                                
+                                mumoryDataViewModel.searchMumoryByContent(self.searchText)
+                                
+                                recentSearches.insert(self.searchText, at: 0)
+                                recentSearches = Array(Set(recentSearches).prefix(10))
+                                UserDefaults.standard.set(recentSearches, forKey: "myMumorySearch")
+                            }
+                        }
+                    } else {
+                        Text("최근 검색내역이 없습니다.")
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                            .frame(height: 50)
+                    }
+
+                    Spacer().frame(height: 15)
+                }
+                .frame(width: getUIScreenBounds().width - 40)
+                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                .cornerRadius(15)
+                .padding(.top, 6)
+            } else {
+                ScrollView(showsIndicators: false) {
                     
                     VStack(spacing: 0) {
                         
-                        ForEach(0..<3) { _ in
+                        HStack(spacing: 0) {
+                            Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
                             
-                            VStack(spacing: 0) {
-                                Spacer().frame(height: 15)
-                                
-                                HStack(alignment: .center, spacing: 0) {
-                                    Image(uiImage: SharedAsset.profileMumoryDetail.image)
-                                        .resizable()
-                                        .frame(width: 24, height: 24)
-                                    
-                                    Spacer().frame(width: 7)
-                                    
-                                    Text("이르음음음음음")
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                        .foregroundColor(.white)
-                                        .frame(width: 75, height: 10, alignment: .leading)
-                                    
-                                    Text(" ・ 10월 2일")
-                                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                    
-                                    Spacer()
-                                    
-                                    Image(uiImage: SharedAsset.locationMumoryDatail.image)
-                                        .frame(width: 15, height: 15)
-                                    
-                                    Spacer().frame(width: 4)
-                                    
-                                    Text("반포한강공원반포한강공원")
-                                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                        .lineLimit(1)
-                                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                        .frame(width: 99, height: 12, alignment: .leading)
-                                } // HStack
-                                
-                                Spacer().frame(height: 15)
-                                
-                                HStack(spacing: 0) {
-                                    
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        
-                                        Text("내용내 용내 용내용옹내 용일 상일 상일상내용내용내용 내용옹내용일상 일상일상 내용내용내용 내용옹 내용 일상내용 내용옹내용 일상일상일상내용내용내용")
-                                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                            .foregroundColor(.white)
-                                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                                        
-//                                        Spacer()
-                                        
-                                        HStack(spacing: 10) {
-                                            Text("#태그태그태그")
-                                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                                .fixedSize(horizontal: true, vertical: false)
-
-                                            Text("#태그태그태그")
-                                                .font(Font.custom("Pretendard", size: 13))
-                                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                                .fixedSize(horizontal: true, vertical: false)
-
-                                            Text("#태그태그태그")
-                                                .font(Font.custom("Pretendard", size: 13))
-                                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                        }
-                                        .frame(maxWidth: .infinity, alignment: .leading) // HStack 정렬
-                                        .padding(.vertical, 5)
-                                        
-                                        HStack(spacing: 0) {
-                                            Image(uiImage: SharedAsset.musicIconMumoryDetail.image)
-                                                .frame(width: 14, height: 14)
-                                            
-                                            Group {
-//                                                Text("  What Was I Made For? [From The Motion Picture \"Barbie\"]")
-                                                Text("  Super Shy")
-                                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                                + Text("  NewJeans")
-                                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                                            }
-//                                            .frame(width: getUIScreenBounds().width * 0.48, alignment: .leading)
-//                                            .frame(width: getUIScreenBounds().width * 0.71, alignment: .leading)
-                                            .frame(alignment: .leading)
-                                            .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                            .lineLimit(1)
-//                                            .fixedSize(horizontal: true, vertical: false)
-
-                                            Spacer(minLength: 1)
-                                        }
-                                    } // VStack
-                                    
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 75, height: 75)
-                                        .background(Color(red: 0.85, green: 0.85, blue: 0.85))
-                                        .cornerRadius(5)
-                                        .padding(.leading, 20)
-                                        .overlay(
-                                            ZStack {
-                                                Circle()
-                                                    .foregroundColor(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
-                                                    .frame(width: 19, height: 19)
-
-                                                Text("2")
-                                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 10))
-                                                    .multilineTextAlignment(.center)
-                                                    .foregroundColor(.white)
-                                            }
-                                                .offset(x: -5, y: -5)
-                                            , alignment: .bottomTrailing
-                                        )
-                                } // HStack
-                                
-                                Spacer().frame(height: 17)
-                            } // VStack
-                            .frame(height: 148)
-                            .padding(.horizontal, 17)
-                            .overlay(
-                                Rectangle()
-                                    .frame(height: 0.3)
-                                    .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                                , alignment: .top
-                            )
+                            Spacer()
                         }
+                        .padding(.top, 13)
+                        .padding(.bottom, 19)
+                        .padding(.horizontal, 20)
+                        
+                        VStack(spacing: 0) {
+                            
+                            ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
+                                SearchedMumoryItemView(mumory: mumory)
+                            }
+                        }
+                        .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
+                        .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                        .cornerRadius(15)
+                        .padding(.horizontal, 20)
+                        .overlay(
+                            Rectangle()
+                                .frame(width: getUIScreenBounds().width - 40, height: 0.3)
+                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
+                                .offset(y: -15)
+                                .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
+                            , alignment: .bottom
+                        )
+                        .padding(.bottom, 100)
                     }
-                    .frame(height: 148 * 3 + 30)
-                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                    .cornerRadius(15)
-                    .padding(.horizontal, 20)
-                    .overlay(
-                        Rectangle()
-                            .frame(width: getUIScreenBounds().width - 40, height: 0.3)
-                            .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                            .offset(y: -15)
-                        , alignment: .bottom
-                    )
-                    .padding(.bottom, 100)
                 }
             }
+            
+            Spacer(minLength: 0)
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea()
-    }
-}
-
-struct MyPageSearchView_Previews: PreviewProvider {
-    static var previews: some View {
-        MyMumorySearchView()
     }
 }

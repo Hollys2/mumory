@@ -15,6 +15,7 @@ struct CommentView: View {
     
     let comment: Comment
     let replies: [Comment]
+    let mumory: Mumory
     
     var isFocused: FocusState<Bool>.Binding
     
@@ -48,31 +49,29 @@ struct CommentView: View {
                     
                     Spacer().frame(height: 13)
                     
-                    HStack(spacing: 0) {
-                        Text("\(comment.nickname)")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                        
-                        Text("・")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                            .frame(width: 4, alignment: .bottom)
+                    HStack(spacing: 5) {
+                        if self.comment.userDocumentID == appCoordinator.currentUser.uId || self.mumory.uId == self.comment.userDocumentID || appCoordinator.currentUser.friends.contains(comment.userDocumentID) || self.comment.isPublic {
+                            Text("\(comment.nickname)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            
+                            Text("・")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                .frame(width: 4, alignment: .bottom)
+                        }
 
                         Text(DateManager.formattedCommentDate(date: comment.date))
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                         
                         if !comment.isPublic && comment.userDocumentID == appCoordinator.currentUser.uId {
-                            Spacer().frame(width: 5)
-                            
                             SharedAsset.commentUnlockMumoryDetail.swiftUIImage
                                 .resizable()
                                 .frame(width: 15, height: 15)
                         } else if !comment.isPublic && comment.userDocumentID != appCoordinator.currentUser.uId {
-                            Spacer().frame(width: 5)
-                            
                             SharedAsset.commentLockMumoryDetail.swiftUIImage
                                 .resizable()
                                 .frame(width: 15, height: 15)
@@ -136,7 +135,7 @@ struct CommentView: View {
         // MARK: Reply
         ForEach(self.replies, id: \.self) { reply in
             if reply.parentId == comment.id {
-                Reply(comment: reply)
+                Reply(comment: reply, mumory: self.mumory)
                 Spacer().frame(height: 10)
             }
         }
@@ -155,6 +154,7 @@ struct CommentView: View {
 struct Reply: View {
     
     let comment: Comment
+    let mumory: Mumory
     
     @State private var user: MumoriUser = MumoriUser()
     
@@ -182,16 +182,19 @@ struct Reply: View {
                 Spacer().frame(height: 13)
                 
                 HStack(spacing: 5) {
-                    Text("\(comment.nickname)")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                    
-                    Text("・")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                        .frame(width: 4, alignment: .bottom)
+                    if self.comment.userDocumentID == appCoordinator.currentUser.uId || self.mumory.uId == self.comment.userDocumentID || appCoordinator.currentUser.friends.contains(comment.userDocumentID) || self.comment.isPublic {
+                        Text("\(comment.nickname)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        
+                        Text("・")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                            .frame(width: 4, alignment: .bottom)
+                    }
+
                     
                     Text(DateManager.formattedCommentDate(date: comment.date))
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
@@ -342,7 +345,7 @@ public struct MumoryCommentSheetView: View {
                         VStack(spacing: 0) {
                             // MARK: Comment
                             ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
-                                CommentView(comment: comment, replies: self.replies, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment)
+                                CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment)
                             }
                         }
                     }

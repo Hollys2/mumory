@@ -21,6 +21,7 @@ public struct HomeView: View {
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -99,7 +100,6 @@ public struct HomeView: View {
             if self.isSocialSearchViewShown {
                 SocialSearchView(isShown: self.$isSocialSearchViewShown)
             }
-            
         } // ZStack
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
@@ -165,11 +165,8 @@ public struct HomeView: View {
                 
                 Spacer()
             }
-            
-//            MyPageBottomAnimationView()
         }
     }
-
     
     @ViewBuilder
     private func MyPageBottomAnimationView() -> some View {
@@ -184,6 +181,7 @@ public struct HomeView: View {
         }
         
     }
+    
     @ViewBuilder
     private func PlayBottomAnimationView() -> some View {
         VStack {
