@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "library-off-tabbar.png",
+      "filename" : "Image.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "library-off-tabbar@2x.png",
+      "filename" : "Image@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "library-off-tabbar@3x.png",
+      "filename" : "Image@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
