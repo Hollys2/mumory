@@ -76,7 +76,7 @@ struct PlaylistManageView: View {
                     
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 40)
+                .frame(height: 63)
                 .fullScreenCover(isPresented: $isShowCreatePopup, content: {
                     CreatePlaylistPopupView()
                         .background(TransparentBackground())
@@ -97,6 +97,7 @@ struct PlaylistManageView: View {
                             isEditing = true
                             editButtonHeight = 0
                         }
+                        AnalyticsManager.shared.setSelectContentLog(title: "PlaylistManageViewEditButton")
                     }
                 
                 
@@ -122,6 +123,9 @@ struct PlaylistManageView: View {
              
             }
 
+        }
+        .onAppear {
+            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistManageView")
         }
   
     }

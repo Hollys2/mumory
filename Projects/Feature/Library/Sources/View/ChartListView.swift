@@ -69,6 +69,7 @@ struct ChartListView: View {
                         .onTapGesture {
                             playerManager.playAll(title: "최신 인기곡", songs: songs)
                             requestTop100(startIndex: searchIndex + 1)
+                            AnalyticsManager.shared.setSelectContentLog(title: "ChartListViewPlayAllButton")
                         }
                 }
                 .padding(.top, 20)
@@ -103,12 +104,13 @@ struct ChartListView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
+            AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }
     
     private func getUpdateDateText() -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM월 dd일에 업데이트됨"
+        dateFormatter.dateFormat = "M월 d일에 업데이트됨"
         return dateFormatter.string(from: Date())
     }
     
@@ -134,7 +136,7 @@ struct ChartListView: View {
     private func requestTop100(startIndex: Int) {
         self.searchIndex = 5 //재생 후 스크롤 시 증가하는 것을 막기위함
         
-        for index in startIndex  ..< 5 {
+        for index in startIndex ..< 5 {
             Task {
                 var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
                 request.limit = 20

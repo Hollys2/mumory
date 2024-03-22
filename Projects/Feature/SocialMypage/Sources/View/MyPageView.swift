@@ -18,7 +18,6 @@ public struct MyPageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isPresentEditProfile: Bool = false
-    
     let lineGray = Color(white: 0.37)
     public var body: some View {
         
@@ -74,6 +73,7 @@ public struct MyPageView: View {
         .ignoresSafeArea()
         .onAppear {
             settingViewModel.uid = currentUserData.user.uId
+            AnalyticsManager.shared.setScreenLog(screenTitle: "MyPageView")
         }
     }
 }

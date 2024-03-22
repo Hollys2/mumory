@@ -36,6 +36,8 @@ struct CreatePlaylistPopupView: View {
                 HStack{
                     Spacer()
                     SharedAsset.playerX.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 25, height: 25)
                         .padding(.trailing, 20)
                         .onTapGesture {
@@ -142,8 +144,8 @@ struct CreatePlaylistPopupView: View {
             .padding(.bottom, 44)
             .background(LibraryColorSet.background)
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-            .padding(.horizontal, 40)
-            
+            .frame(width: getUIScreenBounds().width * 0.8)
+
         }
         .onAppear(perform: {
             withAnimation(.easeIn(duration: 0.5)){

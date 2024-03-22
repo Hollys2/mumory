@@ -13,7 +13,7 @@ import MusicKit
 struct NowPlayingView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentQueue: Bool = false
@@ -31,7 +31,7 @@ struct NowPlayingView: View {
             
             //재생페이지에서 보여줄 배경 사진(앨범 커버)
             if !isPresentQueue{
-                AsyncImage(url: playerManager.playingSong()?.artwork?.url(width: 1000, height: 1000)) { image in
+                AsyncImage(url: playerViewModel.playingSong()?.artwork?.url(width: 1000, height: 1000)) { image in
                     image
                         .resizable()
                         .scaledToFill()
@@ -39,7 +39,6 @@ struct NowPlayingView: View {
                         .blur(radius: 20)
                         .overlay {
                             ColorSet.moreDeepGray.opacity(0.6).ignoresSafeArea()
-                            
                         }
                 } placeholder: {
                     Rectangle()
@@ -76,7 +75,7 @@ struct NowPlayingView: View {
 }
 
 struct PlayControlView: View {
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @Binding var isPresentQueue: Bool
     
     let durationTextColor = Color(white: 0.83)
@@ -118,16 +117,16 @@ struct PlayControlView: View {
                         .frame(width: 32, height: 32)
                         .frame(maxWidth: .infinity)
                         .onTapGesture {
-                            playerManager.skipToPrevious()
+                            playerViewModel.skipToPrevious()
                         }
                     
                     
                     
                     
                     //재생, 멈춤 버튼
-                    if playerManager.isPlaying {
+                    if playerViewModel.isPlaying {
                         Button(action: {
-                            playerManager.pause()
+                            playerViewModel.pause()
                         }, label: {
                             SharedAsset.pauseBig.swiftUIImage
                                 .resizable()
@@ -137,7 +136,7 @@ struct PlayControlView: View {
                         })
                     }else {
                         Button(action: {
-                            playerManager.play()
+                            playerViewModel.play()
                         }, label: {
                             SharedAsset.playBig.swiftUIImage
                                 .resizable()
@@ -154,7 +153,7 @@ struct PlayControlView: View {
                         .frame(width: 32, height: 32)
                         .frame(maxWidth: .infinity)
                         .onTapGesture {
-                            playerManager.skipToNext()
+                            playerViewModel.skipToNext()
                         }
                     
                     
@@ -185,11 +184,12 @@ struct PlayControlView: View {
 
 struct PlayingView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @State var animationDuration: Double = 5.0
     @State var titleWidth: CGFloat = 0
     @State private var startAnimation : Bool = false
+    @State var changeOffset: CGFloat = .zero
 
     
     let delay: Double = 1.0
@@ -223,7 +223,7 @@ struct PlayingView: View {
             .padding(.top, 19)
             
             //선명한 앨범 커버(정방형)
-            AsyncImage(url: playerManager.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
+            AsyncImage(url: playerViewModel.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()
                     .scaledToFit()
@@ -239,38 +239,31 @@ struct PlayingView: View {
             //아티스트 이름 및 노래 이름, 추가버튼
             HStack(alignment: .top, spacing: 0, content: {
                 VStack(spacing: 6, content: {
-                    Text(playerManager.currentSong?.title ?? " ")
-                        .fixedSize()
-                        .frame(maxWidth: 280, alignment: startAnimation ? .leading : .trailing)
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 23))
-                        .foregroundStyle(Color.white)
-                        .clipped()
-                        .onAppear {
-                            startAnimation = true
-                            guard let title = playerManager.currentSong?.title else {
-                                return
+                    ScrollView(.horizontal) {
+                        Text(playerViewModel.currentSong?.title ?? " ")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 23))
+                            .foregroundStyle(Color.white)
+                            .onAppear {
+                                startAnimation.toggle()
+                                guard let song = playerViewModel.currentSong else {return}
+                                titleWidth = getTextWidth(term: song.title)
+                                changeOffset = titleWidth < 280 ? 0 : -titleWidth
                             }
-                            self.animationDuration = Double(title.count) * 0.1
-                            self.titleWidth = getTextWidth(term: title)
-//                                        self.titleWidth = textWidth > 280 ? 280 : textWidth
-                        }
-                        .onDisappear {self.startAnimation = false}
-                        .animation( self.titleWidth < 280 ? nil : Animation.linear(duration: animationDuration).delay(delay).repeatForever(autoreverses: true), value: startAnimation)
-                        .onChange(of: playerManager.currentSong) { newValue in
-                            guard let title = newValue?.title else {
-                                return
-                            }
-                            self.animationDuration = Double(title.count) * 0.1
-                            self.titleWidth = getTextWidth(term: title)
-//                                        let textWidth = getTextWidth(term: title)
-//                                        print("text width: \(textWidth)")
-//                                        self.titleWidth = textWidth > 280 ? 280 : textWidth
-                            
-                        }
+                            .onChange(of: playerViewModel.currentSong, perform: { value in
+                                guard let song = value else {return}
+                                titleWidth = getTextWidth(term: song.title)
+                                changeOffset = titleWidth < 280 ? 0 : -titleWidth
+                            })
+                            .offset(x: startAnimation ? changeOffset : 0)
+                            .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true), value: startAnimation)
+
+
+                    }
+
                     
 
                     
-                    Text(playerManager.currentSong?.artistName ?? " ")
+                    Text(playerViewModel.currentSong?.artistName ?? " ")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 20))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -291,11 +284,11 @@ struct PlayingView: View {
             
             //슬라이드 바 및 재생시간
             VStack(spacing: 0, content: {
-                Slider(value: $playerManager.playingTime, in: 0...(playerManager.playingSong()?.duration ?? 0.0), onEditingChanged: { isEditing in
+                Slider(value: $playerViewModel.playingTime, in: 0...(playerViewModel.playingSong()?.duration ?? 0.0), onEditingChanged: { isEditing in
                     if isEditing {
-                        playerManager.startEditingSlider()
+                        playerViewModel.startEditingSlider()
                     }else {
-                        playerManager.updatePlaybackTime(to: playerManager.playingTime )
+                        playerViewModel.updatePlaybackTime(to: playerViewModel.playingTime )
                     }
                 })
                 .tint(Color.white)
@@ -303,14 +296,14 @@ struct PlayingView: View {
                 
                 HStack(content: {
                     //재생시간
-                    Text(getMinuteSecondString(time: playerManager.playingTime))
+                    Text(getMinuteSecondString(time: playerViewModel.playingTime))
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                         .foregroundStyle(durationTextColor)
                     
                     Spacer()
                     
                     //남은시간
-                    Text("-\(getMinuteSecondString(time: (playerManager.playingSong()?.duration ?? 0) - playerManager.playingTime))")
+                    Text("-\(getMinuteSecondString(time: (playerViewModel.playingSong()?.duration ?? 0) - playerViewModel.playingTime))")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                         .foregroundStyle(durationTextColor)
                 })
@@ -328,7 +321,7 @@ struct PlayingView: View {
 
 struct QueueView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
 
     let playlistTitleBackgroundColor = Color(white: 0.12)
     
@@ -348,14 +341,14 @@ struct QueueView: View {
             }
             
             HStack(content: {
-                Text(playerManager.queueTitle.isEmpty ? "재생중" : playerManager.queueTitle)
+                Text(playerViewModel.queueTitle.isEmpty ? "재생중" : playerViewModel.queueTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
-                Text(playerManager.queueTitle.isEmpty ? "" : "목록 재생중 1/\(playerManager.queue.count)")
+                Text(playerViewModel.queueTitle.isEmpty ? "" : "목록 재생중 \(playerViewModel.nowPlayingIndex())/\(playerViewModel.queue.count)")
                     .fixedSize()
                     .padding(.leading, 6)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
@@ -371,14 +364,14 @@ struct QueueView: View {
             ScrollViewReader { proxy in
                 ScrollView(.vertical) {
                     LazyVStack(spacing: 0) {
-                        ForEach(playerManager.queue, id: \.id){ song in
+                        ForEach(playerViewModel.queue, id: \.id){ song in
                             QueueItem(song: song, scrollProxy: proxy)
                                 .id(song.id)
                                 .onTapGesture {
                                     withAnimation {
                                         proxy.scrollTo(song.id, anchor: .top)
                                     }
-                                    playerManager.changeCurrentEntry(song: song)
+                                    playerViewModel.changeCurrentEntry(song: song)
                                 }
                         }
                     }
@@ -394,7 +387,7 @@ struct QueueView: View {
                   
                 })
                 .onAppear {
-                    proxy.scrollTo(playerManager.playingSong()?.id, anchor: .top)
+                    proxy.scrollTo(playerViewModel.playingSong()?.id, anchor: .top)
                 }
             }
         }

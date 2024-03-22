@@ -38,3 +38,23 @@ public struct Divider03: View {
             .background(ColorSet.skeleton02)
     }
 }
+
+public struct HorizontalDivider05: View {
+    public init(){}
+    public var body: some View {
+        Divider()
+            .frame(maxHeight: .infinity)
+            .frame(width: 0.5)
+            .background(ColorSet.skeleton02)
+    }
+}
+
+public struct HorizontalDivider10: View {
+    public init(){}
+    public var body: some View {
+        Divider()
+            .frame(maxHeight: .infinity)
+            .frame(width: 1)
+            .background(ColorSet.skeleton02)
+    }
+}

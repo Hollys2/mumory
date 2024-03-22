@@ -46,6 +46,7 @@ struct MyPlaylistView: View {
                 .padding(.bottom, 10)
                 .onTapGesture {
                     appCoordinator.rootPath.append(LibraryPage.playlistManage)
+                    AnalyticsManager.shared.setSelectContentLog(title: "MoveToPlaylistManage")
                 }
                 
                 ScrollView(.horizontal) {
@@ -58,6 +59,7 @@ struct MyPlaylistView: View {
                                     }else {
                                         appCoordinator.rootPath.append(LibraryPage.playlist(playlist: $currentUserData.playlistArray[index]))
                                     }
+                                    AnalyticsManager.shared.setSelectContentLog(title: "MyPlaylistViewItem")
                                 }
                         }
                         AddSongItem()
@@ -114,7 +116,7 @@ struct MyPlaylistView: View {
             
             withAnimation {
                 currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
-                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
+//                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
             }
             
 

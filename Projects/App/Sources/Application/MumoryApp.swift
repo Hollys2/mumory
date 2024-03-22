@@ -53,6 +53,13 @@ struct MumoryApp: App {
                         .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)
                         .environmentObject(currentUserData)
+                    
+//                    VStack{
+//                        Spacer()
+//                        MumoryTabView(selectedTab: $appCoordinator.selectedTab)
+//                            .environmentObject(appCoordinator)
+//                            .environmentObject(playerViewModel)
+//                    }
                 }
             }
         }

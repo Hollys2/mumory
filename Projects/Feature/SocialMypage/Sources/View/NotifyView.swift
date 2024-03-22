@@ -70,6 +70,7 @@ struct NotifyView: View {
                 Task{
                     await getNotification()
                 }
+                AnalyticsManager.shared.setScreenLog(screenTitle: "NotifyView")
             }
     }
     
@@ -199,7 +200,6 @@ struct NotifyLikeItem: View {
         .onTapGesture {
             Task{
                 let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                print(mumory.imageURLs)
                 appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
             }
             if !notification.isRead {
@@ -463,7 +463,7 @@ struct Notification {
 
 private func dateToString(date: Date) -> String{
     let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy년 MM월 dd일 HH:mm"
+    formatter.dateFormat = "yyyy년 M월 d일 HH:mm"
     return formatter.string(from: date)
 }
 

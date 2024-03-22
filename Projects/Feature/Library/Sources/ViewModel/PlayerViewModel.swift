@@ -192,10 +192,8 @@ public class PlayerViewModel: ObservableObject {
     }
     
 
-    public func appleMusicAuthorization() {
-        Task {
-            let authorizationStatus = await MusicAuthorization.request()
-        }
+    public func nowPlayingIndex() -> Int {
+        return (self.queue.firstIndex(where: {$0.id == self.currentSong?.id}) ?? 0) + 1
     }
  
 }

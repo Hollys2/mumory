@@ -128,11 +128,13 @@ struct PlaylistView: View {
                                     .onTapGesture {
                                         self.selectedSongsForDelete.removeAll()
                                         setEditMode(isEditing: true)
+                                        AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewEditButton")
                                     }
                                 
                                 PlayAllButton()
                                     .onTapGesture {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
+                                        AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -162,6 +164,7 @@ struct PlaylistView: View {
                                 }
                             
                         }
+                  
                         
                         
                         //플레이어에 가려지는 높이만큼 채워주기
@@ -275,9 +278,9 @@ struct PlaylistView: View {
             
         }
         .ignoresSafeArea()
-//        .onAppear(perform: {
-//            getPlaylist()
-//        })
+        .onAppear(perform: {
+            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
+        })
 
         
         

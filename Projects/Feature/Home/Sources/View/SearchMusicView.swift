@@ -85,6 +85,9 @@ struct SearchMusicView: View {
         }
         .navigationBarBackButtonHidden()
         .background(.black)
+        .onAppear {
+            AnalyticsManager.shared.setScreenLog(screenTitle: "SearchMusicView")
+        }
         
     }
     

@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 import Core
 
-public struct RecommendationView: View {
+public struct MumoryRecommendationView: View {
     @State var isShowing: Bool = false
     @State var isTouch: Bool = false
     @State private var path = NavigationPath()
@@ -62,6 +62,7 @@ public struct RecommendationView: View {
                                 }
                         }
                     })
+                    .padding(.trailing, 33)
                 }
                 .frame(height: 300)
                 
@@ -80,6 +81,7 @@ public struct RecommendationView: View {
         }
         .onAppear(perform: {
             searchChart(offset: 0)
+            AnalyticsManager.shared.setScreenLog(screenTitle: "MumoryRecommendationView")
         })
         
         

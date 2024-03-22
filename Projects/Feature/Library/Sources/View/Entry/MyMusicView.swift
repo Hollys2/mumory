@@ -16,7 +16,7 @@ struct MyMusicView: View {
             ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-                MyRecentMusicView()
+                MyRecentMumoryView()
                     .frame(height: 250, alignment: .top)
                 
                 Divider03()
@@ -26,6 +26,9 @@ struct MyMusicView: View {
 
                 
             })
+        }
+        .onAppear {
+            AnalyticsManager.shared.setScreenLog(screenTitle: "MyMusicView")
         }
     }
 }

@@ -69,24 +69,23 @@ struct BottomSheetSubTitleItem: View {
                 .scaledToFit()
                 .frame(width: 30, height: 30)
             
-            VStack(spacing: 5, content: {
+            VStack(spacing: 3, content: {
                 Text(title)
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                 
                 Text(subTitle)
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 10))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundStyle(ColorSet.subGray)
                     .lineLimit(1)
-                
             })
           
         })
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 54)
+        .frame(height: 55)
         .padding(.horizontal, 20)
         .background(ColorSet.background)
     }

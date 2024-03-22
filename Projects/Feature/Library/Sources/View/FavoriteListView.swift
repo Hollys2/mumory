@@ -13,6 +13,7 @@ import MusicKit
 struct FavoriteListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+
     @State var songs: [Song] = []
     var body: some View {
         ZStack(alignment: .top){
@@ -45,6 +46,10 @@ struct FavoriteListView: View {
                         .foregroundStyle(ColorSet.subGray)
                     Spacer()
                     PlayAllButton()
+                        .onTapGesture {
+                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: songs)
+                            AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
+                        }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 19)
@@ -91,8 +96,9 @@ struct FavoriteListView: View {
 }
 
 struct FavoriteSongItem: View {
-    let song: Song
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var list: [Song]
+    let song: Song
     init(song: Song, list: Binding<[Song]>) {
         self.song = song
         self._list = list
@@ -121,6 +127,8 @@ struct FavoriteSongItem: View {
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                     
                     Text(song.artistName)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
@@ -129,15 +137,27 @@ struct FavoriteSongItem: View {
                 })
                 .padding(.trailing, 27)
                 
-                bookmark
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .padding(.trailing, 20)
-                    .onTapGesture {
-                        bookmark = SharedAsset.bookmark.swiftUIImage
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
-                    }
+                if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                    SharedAsset.bookmarkFilled.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .padding(.trailing, 20)
+                        .onTapGesture {
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                        }
+                }else {
+                    SharedAsset.bookmark.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .padding(.trailing, 20)
+                        .onTapGesture {
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                        }
+                }
                 
                 SharedAsset.menu.swiftUIImage
                     .resizable()
