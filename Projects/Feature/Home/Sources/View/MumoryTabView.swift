@@ -11,9 +11,6 @@ import SwiftUI
 import Shared
 
 
-
-
-
 public struct MumoryTabView: View {
 
     @Binding var selectedTab: Tab

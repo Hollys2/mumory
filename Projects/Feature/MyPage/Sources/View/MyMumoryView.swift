@@ -256,7 +256,7 @@ public struct MyMumoryView: View {
             MyMumoryDatePicker(selectedDate: self.$selectedDate)
                 .presentationDetents([.height(309)])
         })
-        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .myMumory, mumoryAnnotation: Mumory()))
+        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .myMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {
@@ -351,12 +351,12 @@ struct MumoryItemView: View {
                 if !isSameDateAsPrevious {
                     VStack(alignment: .center, spacing: 3) {
                         Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "dd"))")
-                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
+                            .font(self.isRecent ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                             .foregroundColor(self.isRecent ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
 //                            .fixedSize(horizontal: true, vertical: false)
                         
                         Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "E"))")
-                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
+                            .font(self.isRecent ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                             .foregroundColor(self.isRecent ? Color(red: 0.09, green: 0.09, blue: 0.09) : .white)
 //                            .fixedSize(horizontal: true, vertical: false)
                     }

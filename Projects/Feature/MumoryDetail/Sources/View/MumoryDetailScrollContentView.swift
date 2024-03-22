@@ -8,6 +8,8 @@
 
 
 import SwiftUI
+import MapKit
+
 import Core
 import Shared
 
@@ -35,9 +37,9 @@ struct TagView: View {
 
 struct MumoryDetailScrollContentView: View {
     
-    @Binding var mumory: Mumory
-    
+    @State var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()
+    @State var isMapViewShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -82,6 +84,12 @@ struct MumoryDetailScrollContentView: View {
                         }
                         .frame(width: 38, height: 38)
                         .mask {Circle()}
+                        .onTapGesture {
+                            Task {
+                                let friend = await MumoriUser(uId: self.user.uId)
+                                appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                            }
+                        }
                         
                         VStack(spacing: 0) {
                             
@@ -108,18 +116,24 @@ struct MumoryDetailScrollContentView: View {
                                 
                                 Spacer()
                                 
-                                Image(uiImage: SharedAsset.locationMumoryDatail.image)
-                                    .resizable()
-                                    .frame(width: 17, height: 17)
-                                
-                                Spacer().frame(width: 4)
-                                
-                                Text("\(self.mumory.locationModel.locationTitle)")
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
-                                    .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                    .frame(maxWidth: getUIScreenBounds().width * 0.27)
-                                    .frame(height: 11, alignment: .leading)
-                                    .fixedSize(horizontal: true, vertical: false)
+                                Group {
+                                    Image(uiImage: SharedAsset.locationMumoryDatail.image)
+                                        .resizable()
+                                        .frame(width: 17, height: 17)
+                                    
+                                    Spacer().frame(width: 4)
+                                    
+                                    Text("\(self.mumory.locationModel.locationTitle)")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                        .frame(maxWidth: getUIScreenBounds().width * 0.27)
+                                        .frame(height: 11, alignment: .leading)
+                                        .fixedSize(horizontal: true, vertical: false)
+                                }
+                                .onTapGesture {
+                                    self.isMapViewShown = true
+                                }
+                            
                             } // HStack
                         } // VStack
                         .frame(height: 38)
@@ -163,15 +177,23 @@ struct MumoryDetailScrollContentView: View {
                     }
                 }
                 
-                MumoryDetailReactionBarView(mumory: self.$mumory, isOn: false)
+                MumoryDetailReactionBarView(mumory: self.mumory, isOn: false)
                     .background(GeometryReader { geometry in
-                        Color.clear.onChange(of: geometry.frame(in: .global).minY) { minY in
-                            let isReactionBarShown = minY > UIScreen.main.bounds.height - 85
-                            
-                            if appCoordinator.isReactionBarShown != isReactionBarShown {
-                                appCoordinator.isReactionBarShown = isReactionBarShown
+                        Color.clear
+                            .onAppear(perform: {
+                                let isReactionBarShown = geometry.frame(in: .global).minY > UIScreen.main.bounds.height - 85
+                               
+                                if appCoordinator.isReactionBarShown != isReactionBarShown {
+                                    appCoordinator.isReactionBarShown = isReactionBarShown
+                                }
+                            })
+                            .onChange(of: geometry.frame(in: .global).minY) { minY in
+                                let isReactionBarShown = minY > UIScreen.main.bounds.height - 85
+                                
+                                if appCoordinator.isReactionBarShown != isReactionBarShown {
+                                    appCoordinator.isReactionBarShown = isReactionBarShown
+                                }
                             }
-                        }
                     })
                 
                 Spacer().frame(height: 92)
@@ -230,7 +252,7 @@ struct MumoryDetailScrollContentView: View {
                                 )
 
                             Text("더보기")
-                                .font(Font.custom("Pretendard", size: 15))
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.white)
                         }
@@ -246,10 +268,18 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
+        .fullScreenCover(isPresented: self.$isMapViewShown) {
+            MumoryDetailMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
+                .onAppear {
+                    MKMapView.appearance().mapType = .mutedStandard
+                }
+        }
         .onAppear {
             Task {
+                self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await MumoriUser(uId: self.mumory.uId)
             }
         }
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapViewShown))
     }
 }

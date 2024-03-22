@@ -15,6 +15,7 @@ import KakaoSDKAuth
 import GoogleSignIn
 import FirebaseMessaging
 import Shared
+import MapKit
 import MusicKit
 
 //import RealmSwift

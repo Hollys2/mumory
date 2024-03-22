@@ -173,6 +173,7 @@ struct FriendItemView: View {
 
 public struct SocialFriendView: View {
     
+    @State private var mumory: Mumory = Mumory()
     @State private var searchText: String = ""
     @State private var searchFriendType: SearchFriendType = .addFriend
     @State private var isMenuSheetShown: Bool = false
@@ -364,7 +365,7 @@ public struct SocialFriendView: View {
             //                }
             //            }
         }
-        .bottomSheet(isShown: self.$isMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .addFriend, mumoryAnnotation: Mumory()))
+        .bottomSheet(isShown: self.$isMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .addFriend, mumoryAnnotation: self.$mumory))
         .popup(show: self.$isSendFriendRequestPopUpShown, content: {
             PopUpView(isShown: self.$isSendFriendRequestPopUpShown, type: .twoButton, title: "친구 요청을 보내시겠습니까?", buttonTitle: "친구 요청", buttonAction: {
                 FirebaseManager.shared.sendFriendRequest(receiverUserID: "tester")

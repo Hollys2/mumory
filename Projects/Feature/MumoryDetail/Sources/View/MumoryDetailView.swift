@@ -8,14 +8,16 @@
 
 
 import SwiftUI
+import MapKit
+
 import Shared
 
 struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     //    typealias UIViewType = UIScrollView
     
-    // Binding 해줘야 앨범 타이틀 바뀜
-    @Binding var mumoryAnnotation: Mumory
+    let mumory: Mumory
+    
     @Binding var contentOffsetY: Double
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -31,7 +33,7 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.$mumoryAnnotation)
+        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
             .environmentObject(appCoordinator)
             .environmentObject(mumoryDataViewModel)
         )
@@ -50,7 +52,7 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.$mumoryAnnotation)
+        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
             .environmentObject(appCoordinator)
             .environmentObject(mumoryDataViewModel)
         )
@@ -132,14 +134,15 @@ extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate 
 
 public struct MumoryDetailView: View {
     
-    @Environment(\.presentationMode) var presentationMode
-    
+
     @State var mumory: Mumory
+    @State var user: MumoriUser = MumoriUser()
     @State var offsetY: Double = .zero
+    @State var isMapSheetShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
+        
     public var body: some View {
         
         ZStack(alignment: .top) {
@@ -147,7 +150,7 @@ public struct MumoryDetailView: View {
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
             MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == appCoordinator.currentUser.uId ? true : false), mumoryAnnotation: Mumory()))
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == appCoordinator.currentUser.uId ? true : false), mumoryAnnotation: self.$mumory))
             
             ZStack(alignment: .bottomLeading) {
                 
@@ -187,7 +190,7 @@ public struct MumoryDetailView: View {
                 .padding(.leading, 20)
             } // ZStack
             
-            MumoryDetailScrollViewRepresentable(mumoryAnnotation: self.$mumory, contentOffsetY: self.$offsetY)
+            MumoryDetailScrollViewRepresentable(mumory: self.mumory, contentOffsetY: self.$offsetY)
             
             HStack {
                 Button(action: {
@@ -219,7 +222,7 @@ public struct MumoryDetailView: View {
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
-                MumoryDetailReactionBarView(mumory: self.$mumory, isOn: true)
+                MumoryDetailReactionBarView(mumory: self.mumory, isOn: true)
 //                    .transition(.move(edge: .bottom))
             }
             
@@ -231,16 +234,20 @@ public struct MumoryDetailView: View {
         } // ZStack
         .onAppear {
             Task {
-                print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
+                self.user = await MumoriUser(uId: self.mumory.uId)
+                print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
             }
-        }
-        .onDisappear {
-            appCoordinator.isReactionBarShown = false
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.mumory))
+//        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
+        .fullScreenCover(isPresented: self.$isMapSheetShown) {
+            MumoryDetailMapView(isShown: self.$isMapSheetShown, mumory: self.mumory, user: self.user)
+                .onAppear {
+                    MKMapView.appearance().mapType = .mutedStandard
+                }
+        }
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

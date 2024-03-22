@@ -8,11 +8,11 @@
 
 
 import SwiftUI
-//import Core
 import MapKit
 import MusicKit
 import FirebaseFirestore
 import Firebase
+
 
 final public class MumoryDataViewModel: ObservableObject {
     
@@ -26,7 +26,7 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var musicModels: [MusicModel] = []
     
     @Published public var myMumorys: [Mumory] = []
-    @Published public var mumorys: [Mumory] = []
+    @Published public var friendsMumorys: [Mumory] = []
     @Published public var everyMumorys: [Mumory] = []
     @Published public var filterdMumorys: [Mumory] = []
     
@@ -38,6 +38,8 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var isCreating: Bool = false
     @Published public var isUpdating: Bool = false
     
+    private var lastDocument: DocumentSnapshot?
+
     
     public init() {}
     
@@ -177,7 +179,7 @@ final public class MumoryDataViewModel: ObservableObject {
       
             } else {
                 print("Document does not exist")
-            }
+            }   
         } catch {
             print("Error fetching document: \(error.localizedDescription)")
         }
@@ -185,7 +187,7 @@ final public class MumoryDataViewModel: ObservableObject {
         return Mumory()
     }
     
-    public func fetchMyMumory(uId: String, completion: @escaping () -> Void) {
+    public func fetchMumorys(uId: String, completion: @escaping () -> Void) {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").whereField("uId", isEqualTo: uId)
         
@@ -193,9 +195,9 @@ final public class MumoryDataViewModel: ObservableObject {
             do {
                 let snapshot = try await collectionReference.getDocuments()
                 
-//                DispatchQueue.main.async {
-//                    self.myMumorys = []
-//                }
+                DispatchQueue.main.async {
+                    self.friendsMumorys = []
+                }
                 
                 for document in snapshot.documents {
                     let documentData = document.data()
@@ -203,54 +205,71 @@ final public class MumoryDataViewModel: ObservableObject {
                     
                     if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
                         DispatchQueue.main.async {
-                            self.myMumorys.append(newMumory)
-                            self.myMumorys.sort { $0.date > $1.date }
+                            self.friendsMumorys.append(newMumory)
+                            self.friendsMumorys.sort { $0.date > $1.date }
                         }
                     }
                 }
-                print("fetchMyMumory successfully!")
+                print("fetchMumorys successfully!")
                 completion()
             } catch {
-                print("Error fetchMyMumory: \(error.localizedDescription)")
+                print("Error fetchMumorys: \(error.localizedDescription)")
             }
         }
     }
     
     public func fetchEveryMumory() {
+        self.isUpdating = true
+        
         let db = FirebaseManager.shared.db
         
-        let mumoryCollectionRef = db.collection("Mumory")
+        var mumoryCollectionRef = db.collection("Mumory")
+            .order(by: "date", descending: true)
             .limit(to: 10)
-        //            .order(by: "date", descending: true)
+        
+        if let lastDoc = self.lastDocument {
+            mumoryCollectionRef = mumoryCollectionRef.start(afterDocument: lastDoc)
+        }
+        
+        let copiedMumoryCollectionRef = mumoryCollectionRef
+           
         
         Task {
-            
-            DispatchQueue.main.async {
-                self.everyMumorys = []
-            }
+//            DispatchQueue.main.async {
+//                self.everyMumorys = []
+//            }
             
             do {
-                let snapshot = try await mumoryCollectionRef.getDocuments()
+                let snapshot = try await copiedMumoryCollectionRef.getDocuments()
                 
                 for document in snapshot.documents {
-                    
                     let documentData = document.data()
-                    
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
-                    if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
-                        DispatchQueue.main.async {
-                            print("newMumory.date: \(newMumory.date)")
-                            self.everyMumorys.append(newMumory)
-                            self.everyMumorys.sort { $0.date > $1.date }
-                        }
+                    //                    if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
+                    DispatchQueue.main.async {
+                        print("newMumory.date: \(newMumory.date)")
+                        self.everyMumorys.append(newMumory)
+                        self.everyMumorys.sort { $0.date > $1.date }
                     }
+                    //                    }
                 }
+                
+                self.lastDocument = snapshot.documents.last
                 
                 DispatchQueue.main.async {
                     self.isUpdating = false
                 }
                 print("fetchSocialMumory successfully!")
+                
+                
+//                if snapshot.documents.count < 10 {
+//                    print("No more documents to fetch")
+//                    // 추가적인 작업 수행 가능
+//                } else {
+//                    // 다음 페이지의 데이터 가져오기
+//                    self.fetchEveryMumory()
+//                }
             } catch {
                 print("Error fetchSocialMumory: \(error.localizedDescription)")
             }

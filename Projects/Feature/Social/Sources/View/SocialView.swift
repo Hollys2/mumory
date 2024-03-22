@@ -8,9 +8,10 @@
 
 
 import SwiftUI
-import Shared
-
+import MapKit
 import FirebaseFunctions
+
+import Shared
 
 
 struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
@@ -146,6 +147,7 @@ struct SocialScrollCotentView: View {
 
 struct SocialItemView: View {
     
+    @State private var isMapViewShown: Bool = false
     @State private var isTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
     @State var user: MumoriUser = MumoriUser()
@@ -174,6 +176,12 @@ struct SocialItemView: View {
                 }
                 .frame(width: 38, height: 38)
                 .mask {Circle()}
+                .onTapGesture {
+                    Task {
+                        let friend = await MumoriUser(uId: self.user.uId)
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                    }
+                }
                 
                 VStack(alignment: .leading, spacing: 0) {
                     
@@ -199,18 +207,23 @@ struct SocialItemView: View {
                         
                         Spacer()
                         
-                        Image(uiImage: SharedAsset.locationMumoryDatail.image)
-                            .resizable()
-                            .frame(width: 17, height: 17)
-                        
-                        Spacer().frame(width: 4)
-                        
-                        Text(self.mumory.locationModel.locationTitle)
-                            .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
-                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                            .frame(maxWidth: 106)
-                            .frame(height: 11, alignment: .leading)
-                            .fixedSize(horizontal: true, vertical: false)
+                        Group {
+                            Image(uiImage: SharedAsset.locationMumoryDatail.image)
+                                .resizable()
+                                .frame(width: 17, height: 17)
+                            
+                            Spacer().frame(width: 4)
+                            
+                            Text(self.mumory.locationModel.locationTitle)
+                                .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
+                                .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                .frame(maxWidth: 106)
+                                .frame(height: 11, alignment: .leading)
+                                .fixedSize(horizontal: true, vertical: false)
+                        }
+                        .onTapGesture {
+                            self.isMapViewShown = true
+                        }
                     } // HStack
                 } // VStack
                 .frame(height: 38)
@@ -506,6 +519,12 @@ struct SocialItemView: View {
                 self.user = await MumoriUser(uId: self.mumory.uId)
             }
         }
+        .fullScreenCover(isPresented: self.$isMapViewShown) {
+            MumoryDetailMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
+                .onAppear {
+                    MKMapView.appearance().mapType = .mutedStandard
+                }
+        }
     }
 }
 
@@ -606,7 +625,7 @@ public struct SocialView: View {
                 }
             }
         }
-        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: appCoordinator.choosedMumoryAnnotation))
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .preferredColorScheme(.dark)
         .onAppear {
             if !appCoordinator.isFirstTabSelected {

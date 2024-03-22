@@ -261,7 +261,7 @@ public struct MumoryCommentSheetView: View {
     @State var replies: [Comment] = []
     
     @State private var commentText: String = ""
-    @State private var replyText: String = ""
+//    @State private var replyText: String = ""
     @State private var isWritingReply: Bool = false
     @State private var selectedIndex: Int = -1
     @State private var selectedComment: Comment = Comment()
@@ -352,11 +352,13 @@ public struct MumoryCommentSheetView: View {
                     .simultaneousGesture(DragGesture().onChanged { i in
                         print("simultaneousGesture DragGesture")
                         isWritingReply = false
+                        selectedComment = Comment()
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     })
                     .gesture(TapGesture(count: 1).onEnded {
                         print("gesture TapGesture")
                         isWritingReply = false
+                        selectedComment = Comment()
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     })
                     
@@ -427,7 +429,7 @@ public struct MumoryCommentSheetView: View {
                         .padding(.bottom, 23)
 
                             
-                        if isWritingReply {
+                        if self.isWritingReply {
 
                             VStack(spacing: 0) {
 
@@ -478,7 +480,7 @@ public struct MumoryCommentSheetView: View {
 
                                     Spacer().frame(width: 12)
 
-                                    TextField("", text: $replyText, prompt: Text("답글을 입력하세요.")
+                                    TextField("", text: self.$commentText, prompt: Text("답글을 입력하세요.")
                                         .font(Font.custom("Apple SD Gothic Neo", size: 15))
                                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     )
@@ -487,20 +489,20 @@ public struct MumoryCommentSheetView: View {
                                     .background(
                                         ZStack(alignment: .trailing) {
                                             RoundedRectangle(cornerRadius: 22.99999)
-                                                .stroke(Color(red: 0.651, green: 0.651, blue: 0.651), lineWidth: replyText.isEmpty ? 0 : 1)
+                                                .stroke(Color(red: 0.651, green: 0.651, blue: 0.651), lineWidth: self.commentText.isEmpty ? 0 : 1)
                                                 .foregroundColor(.clear)
                                                 .frame(width: UIScreen.main.bounds.width * 0.78, height: 44.99997)
                                                 .background(Color(red: 0.24, green: 0.24, blue: 0.24))
                                                 .cornerRadius(22.99999)
                                             
                                             Button(action: {
-                                                let isWhitespace = replyText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                                let isWhitespace = self.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                                 if !isWhitespace {
                                                     isButtonDisabled = true
                                                     
                                                     Task {
-                                                        mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: appCoordinator.currentUser.uId, nickname: appCoordinator.currentUser.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: replyText, isPublic: self.isPublic)) { result in
-                                                            replyText = ""
+                                                        mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: appCoordinator.currentUser.uId, nickname: appCoordinator.currentUser.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
+                                                            self.commentText = ""
                                                             switch result {
                                                             case .success(let replies):
                                                                 self.replies = replies
@@ -512,7 +514,7 @@ public struct MumoryCommentSheetView: View {
                                                     isButtonDisabled = false
                                                 }
                                             }, label: {
-                                                replyText.isEmpty ?
+                                                self.commentText.isEmpty ?
                                                 SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
                                                     .resizable()
                                                     .frame(width: 20, height: 20)
