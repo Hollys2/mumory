@@ -112,7 +112,16 @@ public struct SocialSearchView: View {
                         friendManager.searchFriend(nickname: self.searchText)
                         
                         recentSearches.insert(self.searchText, at: 0)
-                        recentSearches = Array(Set(recentSearches).prefix(10))
+                        var uniqueRecentSearches: [String] = []
+                        for search in recentSearches {
+                            if !uniqueRecentSearches.contains(search) {
+                                uniqueRecentSearches.append(search)
+                            }
+                        }
+                        if uniqueRecentSearches.count > 10 {
+                            uniqueRecentSearches = Array(recentSearches.prefix(10)) // 최대 10개까지만 유지
+                        }
+                        recentSearches = uniqueRecentSearches
                         UserDefaults.standard.set(recentSearches, forKey: "socialSearch")
                     }
                     .frame(maxWidth: .infinity)

@@ -13,7 +13,7 @@ import FirebaseFunctions
 
 struct MumoryDetailReactionBarView: View {
     
-    @Binding var mumory: Mumory
+    let mumory: Mumory
     
     @State var isOn: Bool
     @State private var isButtonDisabled = false
@@ -28,8 +28,7 @@ struct MumoryDetailReactionBarView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: UIScreen.main.bounds.width, height: 85)
-//                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-                .background(.green)
+                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
                 .overlay(
                     Rectangle()
                         .frame(height: 0.5)

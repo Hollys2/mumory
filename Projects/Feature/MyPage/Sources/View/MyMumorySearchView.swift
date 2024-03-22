@@ -24,6 +24,7 @@ public struct MyMumorySearchView: View {
     
     public init(isShown: Binding<Bool>) {
         self._isShown = isShown
+        self._recentSearches = State(initialValue: UserDefaults.standard.stringArray(forKey: "myMumorySearch") ?? [])
     }
         
     public var body: some View {
@@ -41,11 +42,19 @@ public struct MyMumorySearchView: View {
                     .submitLabel(.search)
                     .onSubmit {
                         mumoryDataViewModel.searchedMumoryAnnotations = []
-                        
                         mumoryDataViewModel.searchMumoryByContent(self.searchText)
                         
                         recentSearches.insert(self.searchText, at: 0)
-                        recentSearches = Array(Set(recentSearches).prefix(10))
+                        var uniqueRecentSearches: [String] = []
+                        for search in recentSearches {
+                            if !uniqueRecentSearches.contains(search) {
+                                uniqueRecentSearches.append(search)
+                            }
+                        }
+                        if uniqueRecentSearches.count > 10 {
+                            uniqueRecentSearches = Array(recentSearches.prefix(10)) // 최대 10개까지만 유지
+                        }
+                        recentSearches = uniqueRecentSearches
                         UserDefaults.standard.set(recentSearches, forKey: "myMumorySearch")
                     }
                     .frame(maxWidth: .infinity)

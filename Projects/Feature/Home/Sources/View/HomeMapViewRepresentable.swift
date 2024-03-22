@@ -31,12 +31,14 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
         
-        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultCoordinate2D, span: MapConstant.defaultSpan), animated: true)
+        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan), animated: true)
         
         if let encodedCoordinate = UserDefaults.standard.data(forKey: "lastCenterCoordinate"),
            let decodedCoordinate = try? JSONDecoder().decode(CodableCoordinate.self, from: encodedCoordinate),
            let encodedSpan = UserDefaults.standard.data(forKey: "lastCenterSpan"),
            let decodedSpan = try? JSONDecoder().decode(CodableCoordinateSpan.self, from: encodedSpan) {
+            print("decodedCoordinate.toCoordinate: \(decodedCoordinate.toCoordinate)")
+            print("decodedCoordinate.toSpan: \(decodedSpan.toSpan)")
             mapView.setRegion(MKCoordinateRegion(center: decodedCoordinate.toCoordinate, span: decodedSpan.toSpan), animated: true)
         }
         

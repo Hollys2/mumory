@@ -36,16 +36,19 @@ public struct MumoryBottomSheet {
     public let type: MumoryBottomSheetType
     
     @Binding public var isPublic: Bool
+    @Binding var isMapSheetShown: Bool
     
-    public let mumoryAnnotation: Mumory
+    @Binding var mumoryAnnotation: Mumory
     
-    public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: Mumory, isPublic: Binding<Bool>? = nil) {
+    
+    public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: Binding<Mumory>, isPublic: Binding<Bool>? = nil, isMapSheetShown: Binding<Bool>? = nil) {
         self.appCoordinator = appCoordinator
         self.mumoryDataViewModel = mumoryDataViewModel
         
         self.type = type
-        self.mumoryAnnotation = mumoryAnnotation
+        self._mumoryAnnotation = mumoryAnnotation
         self._isPublic = isPublic ?? Binding.constant(false)
+        self._isMapSheetShown = isMapSheetShown ?? Binding.constant(false)
     }
     
     public var menuOptions: [BottemSheetMenuOption] {
@@ -69,7 +72,9 @@ public struct MumoryBottomSheet {
                     }
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기") {
-                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.isMapSheetShown = true
+                    }
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
                     self.appCoordinator.isDeleteMumoryPopUpViewShown = true
@@ -326,6 +331,7 @@ public struct BottomSheetView: View {
                         if let action = self.action {
                             action()
                         }
+                        
                         option.action()
                     }) {
                         
@@ -339,10 +345,17 @@ public struct BottomSheetView: View {
                             
                             Spacer().frame(width: option.iconImage == SharedAsset.editMumoryDetailMenu.swiftUIImage || option.iconImage == SharedAsset.mapMumoryDetailMenu.swiftUIImage ? 14 : 10)
                             
-                            Text(option.title)
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .foregroundColor(option.title.contains("삭제") ? .red : .white)
-                                .frame(height: 55)
+                            if option.title.contains("나만보기") {
+                                Text(option.title)
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                    .foregroundColor(SharedAsset.mainColor.swiftUIColor)
+                                    .frame(height: 55)
+                            } else {
+                                Text(option.title)
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                    .foregroundColor(option.title.contains("삭제") ? .red : .white)
+                                    .frame(height: 55)
+                            }
                             
                             Spacer()
                         }
@@ -355,14 +368,14 @@ public struct BottomSheetView: View {
                 }
                 
             }
-            .frame(width: UIScreen.main.bounds.width - 14 - 18, height: 54 * CGFloat(menuOptions.count))
+            .frame(width: UIScreen.main.bounds.width - 14 - 18, height: 55 * CGFloat(menuOptions.count))
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .cornerRadius(15)
-            
-            Spacer().frame(height: 9)
+            .padding(.bottom, 9)
         }
-        .frame(width: UIScreen.main.bounds.width - 14, height: 54 * CGFloat(menuOptions.count) + 31)
-        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+        .frame(width: UIScreen.main.bounds.width - 14, height: 55 * CGFloat(menuOptions.count) + 31)
+        .background(Color(red: 0.122, green: 0.122, blue: 0.122))
+//        .background(ColorSet.moreDeepGray)
         .cornerRadius(15)
     }
 }
