@@ -108,6 +108,12 @@ extension ShazamViewModel: SHSessionDelegate {
             }
             self.audioEngine.stop()
             self.audioEngine.inputNode.removeTap(onBus: 0)
+            guard let shazamID = firstItem.shazamID else {return}
+            let userdefaults = UserDefaults.standard
+            var shazamHistory = userdefaults.value(forKey: "shazamHistory") as? [String] ?? []
+            shazamHistory.removeAll(where: {$0 == shazamID})
+            shazamHistory.insert(shazamID, at: 0)
+            userdefaults.set(shazamHistory, forKey: "shazamHistory")
         }
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 import MusicKit
 import Core
-public struct MyRecentMusicView: View {
+public struct MyRecentMumoryView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel

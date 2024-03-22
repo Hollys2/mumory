@@ -161,7 +161,7 @@ public struct HomeView: View {
             
             VStack {
                 PlayingMusicBarView()
-                    .offset(y: appCoordinator.safeAreaInsetsTop + 16)
+                    .offset(y: appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 12 : 16))
                 
                 Spacer()
             }

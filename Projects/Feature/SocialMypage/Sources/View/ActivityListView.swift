@@ -167,7 +167,7 @@ struct ActivityListView: View {
     
     private func DateText(date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MM월"
+        formatter.dateFormat = "M월"
         let calendar = Calendar.current
         let nowYear = calendar.component(.year, from: Date())
         let selectYear = calendar.component(.year, from: date)
@@ -181,7 +181,7 @@ struct ActivityListView: View {
     
     private func DateHeaderText(date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일"
+        formatter.dateFormat = "yyyy년 M월 d일"
         return formatter.string(from: date)
     }
     
@@ -190,7 +190,7 @@ struct ActivityListView: View {
             activityList.removeAll()
         }
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 MM월 dd일"
+        formatter.dateFormat = "yyyy년 M월 d일"
         guard let targetDate = Calendar.current.date(byAdding: .month, value: 1, to: date) else {
             return
         }
@@ -318,7 +318,7 @@ struct DatePickerView: View {
     
     private func DateText(date: Date) -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy년 MM월"
+        dateFormatter.dateFormat = "yyyy년 M월"
         return dateFormatter.string(from: date)
     }
 }

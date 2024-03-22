@@ -10,11 +10,14 @@ import SwiftUI
 import Shared
 import ShazamKit
 import AVFAudio
+import MusicKit
 
 struct SearchMusicEntryView: View {
-    @Binding var term: String
-    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
+    @State var popularSearchTerm: [String] = []
+    @Binding var term: String
+
     var body: some View {
         ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
@@ -48,18 +51,44 @@ struct SearchMusicEntryView: View {
                             .foregroundColor(.white)
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                         
-                        LazyVStack(content: {
-                            ForEach(1...3, id: \.self) { count in
-                                Text("\(count) 검색검색")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                    .foregroundColor(.black)
-                                    .padding(.horizontal, 16)
-                                    .frame(height: 33)
-                                    .background(ColorSet.mainPurpleColor)
-                                    .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
+                        
+                        LazyVStack(alignment: .leading, spacing: 12) {
+                            ForEach(getRows(list: self.popularSearchTerm), id: \.self) { list in
+                                HStack(spacing: 8) {
+                                    ForEach(list, id: \.self) { term in
+                                        Text(term)
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal, 16)
+                                            .frame(height: 33)
+                                            .background(ColorSet.mainPurpleColor)
+                                            .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
+                                            .onTapGesture {
+                                                self.term = term
+                                                
+                                                let userDefault = UserDefaults.standard
+                                                var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                                recentSearchList.removeAll(where: {$0 == term})
+                                                recentSearchList.insert(term, at: 0)
+                                                userDefault.set(recentSearchList, forKey: "recentSearchList")
+                                            }
+                                    }
+                                }
                             }
-                        })
-                        .padding(.top, 25)
+                        }
+                        .padding(.top, 20)
+                        
+//                        LazyVStack(content: {
+//                            ForEach(popularSearchTerm, id: \.self) { term in
+//                                Text(term)
+//                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+//                                    .foregroundColor(.black)
+//                                    .padding(.horizontal, 16)
+//                                    .frame(height: 33)
+//                                    .background(ColorSet.mainPurpleColor)
+//                                    .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
+//                            }
+//                        })
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
@@ -112,13 +141,68 @@ struct SearchMusicEntryView: View {
 
         }
         .onAppear(perform: {
+            requestPupularMusic()
+
             let userDefault = UserDefaults.standard
             guard let result = userDefault.value(forKey: "recentSearchList") as? [String] else {print("no recent list");return}
             recentSearchObject.recentSearchList = result
         })
     }
+    
+    private func requestPupularMusic() {
+        Task {
+            var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
+            request.limit = 6
+            let response = try await request.response().songCharts
+            guard let chart = response.first?.items else {
+                return
+            }
+            chart.forEach { song in
+                switch Int.random(in: 0...1) {
+                case 0:
+                    if !popularSearchTerm.contains(song.title){
+                        self.popularSearchTerm.append(song.title)
+                    }
+                case 1:
+                    if !popularSearchTerm.contains(song.artistName){
+                        self.popularSearchTerm.append(song.artistName)
+                    }
+                default:
+                    if !popularSearchTerm.contains(song.title){
+                        self.popularSearchTerm.append(song.title)
+                    }
+                }
+            }
+      
+        }
+    }
+    
+    private func getTextWidth(term: String) -> CGFloat {
+        let fontAttribute = [NSAttributedString.Key.font: SharedFontFamily.Pretendard.bold.font(size: 16)]
+        var width = (term as NSString).size(withAttributes: fontAttribute).width
+        width += 32 //아이템 좌우 여백
+        width += 5 //spacing
+        return width
+    }
+    
+    private func getRows(list: [String]) ->[[String]] {
+        var sumWidth: CGFloat = 0
+        var returnValue:[[String]] = [[]]
+        let screen = getUIScreenBounds().width - 80 //좌우 여백 35씩
+        var index = 0
+        for term in list{
+            let textWidth = getTextWidth(term: term)
+            if sumWidth + textWidth > screen{
+                sumWidth = textWidth
+                index += 1
+                returnValue.append([])
+                returnValue[index].append(term)
+            }else {
+                sumWidth += textWidth
+                returnValue[index].append(term)
+            }
+        }
+        return returnValue
+    }
 }
 
-//#Preview {
-//    SearchEntryView()
-//}

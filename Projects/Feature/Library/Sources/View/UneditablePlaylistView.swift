@@ -66,6 +66,7 @@ struct UneditablePlaylistView: View {
                                 PlayAllButton()
                                     .onTapGesture {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
+                                        AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
                                     }
                             })
                             .padding(.bottom, 15)

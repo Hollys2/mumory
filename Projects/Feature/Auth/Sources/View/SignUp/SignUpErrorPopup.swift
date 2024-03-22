@@ -23,9 +23,7 @@ struct SignUpErrorPopup: View {
                     .foregroundStyle(.white)
                     .padding(.top, 5)
                 
-                Rectangle()
-                    .frame(height: 0.5)
-                    .foregroundStyle(Color(red: 0.65, green: 0.65, blue: 0.65))
+                Divider05()
                     .padding(.top, 20)
                 
                 Button(action: {

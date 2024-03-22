@@ -140,7 +140,7 @@ struct UnkownFriendPageView: View {
             Rectangle()
                 .frame(maxWidth: .infinity)
                 .frame(width: getUIScreenBounds().width)
-                .frame(height: 150)
+                .frame(height: 165)
                 .foregroundStyle(ColorSet.darkGray)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
@@ -172,7 +172,7 @@ struct UnkownFriendPageView: View {
                     .frame(width: 90, height: 90)
                     .clipShape(Circle())
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .offset(y: -50)
+                    .offset(y: -40)
             }
             .padding(.horizontal, 20)
 
@@ -509,7 +509,7 @@ struct FriendPageCommonBottomSheetView: View {
     
     var body: some View {
         VStack(spacing: 0, content: {
-            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
+            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "회원님을 검색하거나 친구 추가를 할 수 없습니다.")
                 .onTapGesture {
                     dismiss()
                     blockFriend(uId: currentUserData.uId, friendUId: friend.uId)
@@ -535,7 +535,7 @@ struct FriendDeleteBlockBottomSheetView: View {
     
     var body: some View {
         VStack(spacing: 0, content: {
-            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "\(friend.nickname)님이 회원님을 검색하거나 친구 추가를 할 수 없습니다.")
+            BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "회원님을 검색하거나 친구 추가를 할 수 없습니다.")
                 .onTapGesture {
                     dismiss()
                     UIView.setAnimationsEnabled(false)

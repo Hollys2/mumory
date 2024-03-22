@@ -23,6 +23,7 @@ struct PlayAllButton: View {
         .overlay {
             RoundedRectangle(cornerRadius: 30, style: .circular).stroke(ColorSet.mainPurpleColor, lineWidth: 1.0)
         }
+        
     }
 }
 

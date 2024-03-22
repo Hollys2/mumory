@@ -73,6 +73,8 @@ struct RecommendationListView: View {
                             PlayAllButton()
                                 .onTapGesture {
                                     playerManager.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
+                                    AnalyticsManager.shared.setSelectContentLog(title: "RecommendationListViewPlayAllButton")
+
                                 }
                         })
                         .padding(.horizontal, 20)
@@ -143,7 +145,7 @@ struct RecommendationListView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
-            
+            AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
         
         
@@ -193,7 +195,7 @@ struct RecommendationListView: View {
     
     private func getUpdateDateText() -> String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM월 dd일에 업데이트됨"
+        dateFormatter.dateFormat = "M월 d일에 업데이트됨"
         return dateFormatter.string(from: Date())
     }
     

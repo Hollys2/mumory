@@ -14,6 +14,8 @@ struct MusicChartDetailItem: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @State var isPresentBottomSheet: Bool = false
+    
     var rank: Int
     var song: Song
 
@@ -83,6 +85,10 @@ struct MusicChartDetailItem: View {
             
             SharedAsset.menu.swiftUIImage
                 .frame(width: 22, height: 22)
+                .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBottomSheet = true
+                }
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -90,6 +96,13 @@ struct MusicChartDetailItem: View {
         .padding(.bottom, 15)
         .padding(.leading, 20)
         .padding(.trailing, 20)
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                SongBottomSheetView(song: song,
+                                    types: [.withoutBookmark])
+            }
+            .background(TransparentBackground())
+        }
     }
 }
 

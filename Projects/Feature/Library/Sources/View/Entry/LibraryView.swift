@@ -71,7 +71,7 @@ struct LibraryView: View {
                             MyMusicView()
                                 .padding(.top, 26)
                         }else {
-                            RecommendationView()
+                            MumoryRecommendationView()
                                 .padding(.top, 26)
                             
                         }
@@ -80,6 +80,8 @@ struct LibraryView: View {
                             .foregroundStyle(.clear)
                             .frame(height: 87)
                     }
+                    
+                  
                 }
                 .frame(width: screenWidth)
                 .onAppear {
@@ -87,6 +89,7 @@ struct LibraryView: View {
                 }
                 
             })
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             
             //상단바
             HStack(){
@@ -108,6 +111,7 @@ struct LibraryView: View {
                     }
             }
             .frame(height: topBarHeight, alignment: .center)
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             .background(ColorSet.background)
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
@@ -119,9 +123,13 @@ struct LibraryView: View {
                     }
                 }
             }
+            
+            ColorSet.background
+                .ignoresSafeArea()
+                .frame(maxWidth: .infinity)
+                .frame(height: appCoordinator.safeAreaInsetsTop)
         }
-
-        .padding(.top, appCoordinator.safeAreaInsetsTop)
+        .ignoresSafeArea()
         
     }
 }
