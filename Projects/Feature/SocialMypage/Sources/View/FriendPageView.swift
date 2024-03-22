@@ -141,10 +141,14 @@ struct UnkownFriendPageView: View {
                 .frame(maxWidth: .infinity)
                 .frame(width: getUIScreenBounds().width)
 <<<<<<< HEAD
+<<<<<<< HEAD
                 .frame(height: 165)
 =======
                 .frame(height: 150)
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+                .frame(height: 165)
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
                 .foregroundStyle(ColorSet.darkGray)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
@@ -177,10 +181,14 @@ struct UnkownFriendPageView: View {
                     .clipShape(Circle())
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
 <<<<<<< HEAD
+<<<<<<< HEAD
                     .offset(y: -40)
 =======
                     .offset(y: -50)
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+                    .offset(y: -40)
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
             }
             .padding(.horizontal, 20)
 

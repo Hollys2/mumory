@@ -67,9 +67,13 @@ struct UneditablePlaylistView: View {
                                     .onTapGesture {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
 <<<<<<< HEAD
+<<<<<<< HEAD
                                         AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
 =======
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+                                        AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
                                     }
                             })
                             .padding(.bottom, 15)

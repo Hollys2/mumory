@@ -10,11 +10,15 @@ import SwiftUI
 import Shared
 import MusicKit
 import Core
+<<<<<<< HEAD
 <<<<<<< HEAD:Projects/Feature/Library/Sources/View/Entry/MyRecentMumoryView.swift
 public struct MyRecentMumoryView: View {
 =======
 public struct MyRecentMusicView: View {
 >>>>>>> 5e1e803 (edit playlist view):Projects/Feature/Library/Sources/View/Entry/MyRecentMusicView.swift
+=======
+public struct MyRecentMumoryView: View {
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerManager: PlayerViewModel

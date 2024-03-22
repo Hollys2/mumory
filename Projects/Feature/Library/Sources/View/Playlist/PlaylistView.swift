@@ -142,9 +142,13 @@ struct PlaylistView: View {
                                     .onTapGesture {
                                         playerManager.playAll(title: playlist.title , songs: playlist.songs)
 <<<<<<< HEAD
+<<<<<<< HEAD
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
 =======
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+                                        AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -289,6 +293,7 @@ struct PlaylistView: View {
         }
         .ignoresSafeArea()
 <<<<<<< HEAD
+<<<<<<< HEAD
         .onAppear(perform: {
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
         })
@@ -297,6 +302,11 @@ struct PlaylistView: View {
 //            getPlaylist()
 //        })
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+        .onAppear(perform: {
+            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
+        })
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
 
         
         

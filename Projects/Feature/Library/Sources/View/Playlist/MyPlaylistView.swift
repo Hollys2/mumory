@@ -132,10 +132,14 @@ struct MyPlaylistView: View {
             withAnimation {
                 currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
 <<<<<<< HEAD
+<<<<<<< HEAD
 //                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
 =======
                 fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
 >>>>>>> 5e1e803 (edit playlist view)
+=======
+//                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
+>>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
             }
             
 
