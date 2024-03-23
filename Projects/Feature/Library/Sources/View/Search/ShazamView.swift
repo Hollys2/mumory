@@ -47,10 +47,14 @@ struct ShazamView: View {
                         Text(isListen ? "음악을 듣고 있어요" : "같은 음악을 찾는 중이에요")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                             .foregroundStyle(ColorSet.mainPurpleColor)
-                            .animation(shazamAnimation, value: isListen)
+                            .animation(shazamAnimation.delay(2.0), value: isListen)
+                            .frame(height: 45, alignment: .top)
+
                         
                         LottieView(animation: .named("shazam", bundle: .module))
                             .looping()
+                            .frame(height: 78)
+                     
                     })
                     .transition(.opacity)
                     
@@ -103,7 +107,7 @@ struct ShazamView: View {
                                     .onTapGesture {
                                         shazamManager.startOrEndListening()
                                     }
-                                PlayButton()
+                                PlayButton(enabled: shazamManager.shazamSong?.appleMusicID != nil)
                             })
                             .padding(.top, 25)
                         })
@@ -111,22 +115,22 @@ struct ShazamView: View {
                         
                     }else {
                         VStack(spacing: 0) {
-                            Text("음악을 찾지 못했어요")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                                .foregroundStyle(ColorSet.mainPurpleColor)
-                            
-                            Text("주변의 소음이 없는 곳에서 다시 시도해주세요")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                .foregroundStyle(ColorSet.subGray)
-                                .padding(.top, 12)
-                            
+                            VStack(alignment: .center, spacing: 6) {
+                                Text("음악을 찾지 못했어요")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                                    .foregroundStyle(ColorSet.mainPurpleColor)
+                                
+                                Text("주변의 소음이 없는 곳에서 다시 시도해주세요")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                    .foregroundStyle(ColorSet.subGray)
+                            }
+                            .frame(height: 45, alignment: .top)
+          
                             SharedAsset.shazamFailure.swiftUIImage
                                 .resizable()
                                 .scaledToFit()
                                 .frame(height: 78)
-                                .padding(.leading, 20)
-                                .padding(.trailing, 25)
-                                .padding(.top, 5)
+                       
                             
                             AgainButton()
                                 .padding(.top, 5)
@@ -135,8 +139,6 @@ struct ShazamView: View {
                                 }
                         }
                         .transition(.opacity)
-                        
-                        
                     }
                     
                     
@@ -152,12 +154,32 @@ struct ShazamView: View {
                     
                     Spacer()
                     
-                    EditButton()
-                        .onTapGesture {
-                            withAnimation {
-                                isEditing.toggle()
+                    if isEditing {
+                        Text("완료")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                            .foregroundStyle(Color.white)
+                            .onTapGesture {
+                                isEditing = false
                             }
+                        
+                    }else {
+                        HStack(spacing: 6, content: {
+                            SharedAsset.editMumoryDetailMenu.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 12, height: 12)
+                            
+                            Text("편집")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                .foregroundStyle(ColorSet.subGray)
+                        })
+                        .onTapGesture {
+                            selectedShazamHistory.removeAll()
+                            isEditing = true
                         }
+                    }
+                    
+                    
                 }
                 .frame(height: 41)
                 .padding(.horizontal, 20)
@@ -176,52 +198,66 @@ struct ShazamView: View {
                 
                 
             })
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             
             //하단 편집 바
-            VStack(alignment: .center, spacing: 0) {
-                Divider03()
+            HStack(alignment: .center){
+                Text(selectedShazamHistory.count == shazamHistory.count ? "전체선택 해제" : "전체선택")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                    .foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .onTapGesture {
+                        if selectedShazamHistory.count == shazamHistory.count {
+                            selectedShazamHistory = []
+                        }else {
+                            selectedShazamHistory = shazamHistory
+                        }
+                    }
                 
-                HStack{
-                    Text(selectedShazamHistory.count == shazamHistory.count ? "전체선택 해제" : "전체선택")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                        .foregroundStyle(Color.white)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .onTapGesture {
-                            if selectedShazamHistory.count == shazamHistory.count {
-                                selectedShazamHistory = []
-                            }else {
-                                selectedShazamHistory = shazamHistory
+                Divider()
+                    .ignoresSafeArea()
+                    .frame(width: 1, height: 32)
+                    .background(ColorSet.skeleton02)
+                
+                
+                HStack(alignment: .center, spacing: 10) {
+                    Text("삭제")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(selectedShazamHistory.isEmpty ? ColorSet.subGray : ColorSet.accentRed)
+                    
+                    if !selectedShazamHistory.isEmpty {
+                        Text("\(selectedShazamHistory.count)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                            .foregroundStyle(Color.black)
+                            .frame(height: 19)
+                            .padding(.horizontal, 7)
+                            .background(ColorSet.accentRed)
+                            .clipShape(RoundedRectangle(cornerRadius: 40, style: .circular))
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .onTapGesture {
+                    if !selectedShazamHistory.isEmpty {
+                        shazamHistory.forEach { item in
+                            if selectedShazamHistory.contains(item) {
+                                shazamHistory.removeAll(where: {$0 == item})
                             }
                         }
-                    
-                    HorizontalDivider10()
-                        .frame(height: 32)
-                    
-                    HStack(alignment: .center, spacing: 10) {
-                        Text("삭제")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(selectedShazamHistory.isEmpty ? ColorSet.subGray : ColorSet.accentRed)
-                        
-                        if !selectedShazamHistory.isEmpty {
-                            Text("\(selectedShazamHistory.count)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color.black)
-                                .frame(height: 19)
-                                .padding(.horizontal, 7)
-                                .background(ColorSet.accentRed)
-                                .clipShape(RoundedRectangle(cornerRadius: 40, style: .circular))
-                        }
-                        
+                        let result = shazamHistory.map({$0.shazamID ?? ""})
+                        UserDefaults.standard.setValue(result, forKey: "shazamHistory")
+                        isEditing = false
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                 }
+        
             }
-            .ignoresSafeArea()
-            .frame(height: isEditing ? 88 : 0)
+            .frame(height: 88)
             .background(ColorSet.darkGray)
+            .offset(y: isEditing ? 0 : 90)
+            .animation(.default, value: isEditing)
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .opacity(isEditing ? 1 : 0)
+
         }
+        .ignoresSafeArea()
         .onChange(of: shazamManager.isRecording, perform: { newValue in
             if newValue {
                 isListen.toggle()
@@ -248,19 +284,17 @@ struct ShazamView: View {
     }
     
     private var shazamAnimation: Animation {
-        Animation.linear(duration: 1.0)
-                .repeatForever(autoreverses: true)
-                .delay(2.0)
+        Animation.linear(duration: 2.0)
+            .repeatForever(autoreverses: true)
+        
     }
     
     private func fetchShazamSearchHistory() {
         let userdefaults = UserDefaults.standard
         guard let shazamHistory = userdefaults.stringArray(forKey: "shazamHistory") else {return}
         shazamHistory.forEach { shazamID in
-            print("\(shazamID)   1")
             SHMediaItem.fetch(shazamID: shazamID) { item, error in
                 guard let item = item else {return}
-                print("\(shazamID)   2")
                 withAnimation {
                     self.shazamHistory.append(item)
                 }
@@ -294,7 +328,10 @@ struct AgainButton: View {
 }
 
 struct PlayButton: View {
-    
+    var enabled: Bool = true
+    init(enabled: Bool) {
+        self.enabled = enabled
+    }
     var body: some View {
         HStack(alignment: .center, spacing: 6, content: {
             SharedAsset.playBlack.swiftUIImage
@@ -308,7 +345,7 @@ struct PlayButton: View {
         })
         .padding(.horizontal, 15)
         .frame(height: 33)
-        .background(ColorSet.mainPurpleColor)
+        .background(enabled ? ColorSet.mainPurpleColor : ColorSet.darkGray)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
     }
 }

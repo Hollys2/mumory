@@ -13,7 +13,7 @@ import MusicKit
 struct SelectableArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var playerManager: PlayerViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     @State private var offset: CGPoint = .zero
     @State private var contentSize: CGSize = .zero
@@ -82,7 +82,9 @@ struct SelectableArtistView: View {
                         //노래 리스트
                         ForEach(songs, id: \.id){ song in
                             SelectableMusicListItem(song: song)
-                 
+                                .onTapGesture {
+                                    playerViewModel.setPreviewPlayer(tappedSong: song)
+                                }
                         }
                         
                         Rectangle()
@@ -95,6 +97,7 @@ struct SelectableArtistView: View {
                 .frame(width: getUIScreenBounds().width)
 
             }
+            .ignoresSafeArea()
 
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
@@ -116,6 +119,13 @@ struct SelectableArtistView: View {
             })
             .frame(height: 50)
             .padding(.top, currentUserData.topInset)
+            
+            PreviewMiniPlayer()
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+                .offset(y: playerViewModel.isShownPreview ? 0 : 120)
+                .animation(.spring, value: playerViewModel.isShownPreview)
+            
         }
         .ignoresSafeArea()
         .onAppear(perform: {
@@ -152,14 +162,13 @@ struct SelectableArtistView: View {
 struct SelectableMusicListItem: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     var song: Song
     init(song: Song) {
         self.song = song
     }
         
     var body: some View {
-        VStack(spacing: 0) {
             HStack(spacing: 0, content: {
                 AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
                     image
@@ -207,9 +216,6 @@ struct SelectableMusicListItem: View {
             .padding(.vertical, 15)
             .padding(.horizontal, 20)
             .background(ColorSet.background)
-            
-            Divider05()
-        }
      
     }
 }

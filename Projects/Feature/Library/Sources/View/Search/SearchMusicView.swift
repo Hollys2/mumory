@@ -10,9 +10,9 @@ import SwiftUI
 import Shared
 import MusicKit
 
-struct SearchView: View {
+struct SearchMusicView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
     
     @State var term: String
@@ -76,7 +76,9 @@ struct SearchView: View {
     
                 Spacer()
             }
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
         }
+        .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
 

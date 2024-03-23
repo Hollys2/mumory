@@ -13,7 +13,7 @@ import MusicKit
 struct UneditablePlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
@@ -65,7 +65,7 @@ struct UneditablePlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerManager.playAll(title: playlist.title , songs: playlist.songs)
+                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
                                         AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
                                     }
                             })
@@ -79,7 +79,7 @@ struct UneditablePlaylistView: View {
                         ForEach(playlist.songs, id: \.self) { song in
                             UneditablePlaylistMusicListItem(song: song)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
                             
                             Divider05()

@@ -12,7 +12,7 @@ import MusicKit
 
 struct SearchMusicResultView: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
-    @EnvironmentObject private var playerManager: PlayerViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
@@ -27,6 +27,7 @@ struct SearchMusicResultView: View {
     @State private var contentSize: CGSize = .zero
     @State private var requestIndex = 0
     @State private var haveToLoadNextPage: Bool = false
+    @State private var isLoading: Bool = false
     
     var body: some View {
         ZStack{
@@ -43,8 +44,9 @@ struct SearchMusicResultView: View {
                             })
                             .onChange(of: localTime, perform: { value in
                                 if localTime == 0.8 {
-                                        requestArtist(term: term)
-                                        requestSong(term: term, index: 0)
+                                    isLoading = true
+                                    requestArtist(term: term)
+                                    requestSong(term: term, index: 0)
                                 }
                             })
                         
@@ -71,9 +73,9 @@ struct SearchMusicResultView: View {
                             }
                             
                             Rectangle()
+                                .fill(Color.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 8)
-                                .background(Color.black)
                             
                             Text("곡")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -86,7 +88,7 @@ struct SearchMusicResultView: View {
                             ForEach(musicList){ music in
                                 SearchSongItem(song: music)
                                     .onTapGesture {
-                                        playerManager.playNewSong(song: music)
+                                        playerViewModel.playNewSong(song: music)
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == music.title})
@@ -107,6 +109,7 @@ struct SearchMusicResultView: View {
                 
                 
             }
+            .ignoresSafeArea()
             .onChange(of: offset, perform: { value in
                 if offset.y/contentSize.height > 0.7 {
                     if !haveToLoadNextPage {
@@ -118,6 +121,8 @@ struct SearchMusicResultView: View {
                     haveToLoadNextPage = false
                 }
             })
+            
+
         }
         .onAppear(perform: {
             self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
@@ -138,6 +143,7 @@ struct SearchMusicResultView: View {
                 let response = try await request.response()
                 DispatchQueue.main.async {
                     self.artistList = response.artists
+                    isLoading = false
                 }
             }catch(let error) {
                 print("error: \(error.localizedDescription)")

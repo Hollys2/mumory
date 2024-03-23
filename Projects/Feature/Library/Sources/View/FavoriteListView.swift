@@ -168,7 +168,6 @@ struct FavoriteSongItem: View {
             .background(ColorSet.background)
             .frame(height: 95)
             
-            Divider05()
         })
   
   

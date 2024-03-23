@@ -106,7 +106,6 @@ public struct HomeView: View {
         .onAppear {
             playerViewModel.isShownMiniPlayer = false
             self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
-            
         }
     }
     

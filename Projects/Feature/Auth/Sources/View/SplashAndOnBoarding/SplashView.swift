@@ -64,7 +64,7 @@ public struct SplashView: View {
                 })
                 .navigationDestination(for: String.self, destination: { i in
                     if i == "music" {
-                        SearchMusicView()
+                        SearchMusicViewInCreateMumory()
                     } else if i == "location" {
                         SearchLocationView()
                     } else if i == "map" {
@@ -115,7 +115,7 @@ public struct SplashView: View {
                     case .login:
                         LoginView()
                     case .requestFriend:
-                        MyRequestFriendListView()
+                        MyFriendRequestListView()
                             .navigationBarBackButtonHidden()
                     case .blockFriend:
                         BlockFriendListView()
@@ -132,7 +132,7 @@ public struct SplashView: View {
                 .navigationDestination(for: LibraryPage.self) { page in
                     switch(page){
                     case .search(term: let term):
-                        SearchView(term: term)
+                        SearchMusicView(term: term)
                         
                     case .artist(artist: let artist):
                         ArtistView(artist: artist)
@@ -179,6 +179,8 @@ public struct SplashView: View {
                     switch(page){
                     case .myPage:
                         MyPageView()
+                            .environmentObject(settingViewModel)
+                            .environmentObject(withdrawViewModel)
                         
                     case .setting:
                         SettingView()
@@ -222,8 +224,8 @@ public struct SplashView: View {
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
-                    case .friendList(friends: let friends):
-                        FriendListView(friends: friends)
+                    case .friendList:
+                        FriendListView()
                             .navigationBarBackButtonHidden()
                         
                     case .friendPage(friend: let friend):

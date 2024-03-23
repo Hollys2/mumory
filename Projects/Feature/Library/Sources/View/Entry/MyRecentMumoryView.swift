@@ -13,7 +13,7 @@ import Core
 public struct MyRecentMumoryView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var musicList: [Song] = []
     @State var exists: Bool = false
     @State var spacing: CGFloat = 0

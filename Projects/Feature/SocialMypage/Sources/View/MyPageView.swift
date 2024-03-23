@@ -89,13 +89,11 @@ struct UserInfoView: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: getUIScreenBounds().width, height: 150)
+                    .frame(width: getUIScreenBounds().width, height: 165)
                     .clipped()
             } placeholder: {
                 Rectangle()
-                    .frame(maxWidth: .infinity)
-                    .frame(width: getUIScreenBounds().width)
-                    .frame(height: 165)
+                    .frame(width: getUIScreenBounds().width, height: 165)
                     .foregroundStyle(ColorSet.darkGray)
             }
             .overlay {
@@ -173,7 +171,6 @@ struct UserInfoView: View {
 struct SimpleFriendView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    @State var friends: [MumoriUser] = []
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -182,7 +179,7 @@ struct SimpleFriendView: View {
                     .foregroundStyle(Color.white)
                 
                 Spacer()
-                Text("\(friends.count)")
+                Text("\(currentUserData.friends.count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.charSubGray)
                     .padding(.trailing, 3)
@@ -195,12 +192,12 @@ struct SimpleFriendView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                appCoordinator.rootPath.append(MyPage.friendList(friends: self.friends))
+                appCoordinator.rootPath.append(MyPage.friendList)
             }
             
             ScrollView(.horizontal) {
                 HStack(spacing: 12, content: {
-                    ForEach(friends, id: \.self) { friend in
+                    ForEach(currentUserData.friends, id: \.self) { friend in
                         FriendHorizontalItem(user: friend)
                             .onTapGesture {
                                 appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
@@ -213,28 +210,6 @@ struct SimpleFriendView: View {
             .scrollIndicators(.hidden)
             .padding(.bottom, 37)
         })
-        .onAppear {
-            self.friends.removeAll()
-            let db = FBManager.shared.db
-            
-            Task {
-                guard let document = try? await db.collection("User").document(currentUserData.uId).getDocument() else {
-                    print("error1")
-                    return
-                }
-                guard let data = document.data() else {
-                    print("error2")
-                    return
-                }
-                let friendIDs = data["friends"] as? [String] ?? []
-                
-                friendIDs.forEach { id in
-                    Task{
-                        await self.friends.append(MumoriUser(uId: id))
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -250,6 +225,7 @@ struct MyMumori: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @State var spacing: CGFloat = .zero
     let Firebase = FBManager.shared
 
     var body: some View {
@@ -280,7 +256,7 @@ struct MyMumori: View {
             }
             
             ScrollView(.horizontal) {
-                HStack(spacing: 11, content: {
+                HStack(spacing: spacing, content: {
                     ForEach(mumoryDataViewModel.myMumorys.prefix(10), id: \.id) { mumory in
                         MyMumoryItem(mumory: mumory)
                             .onTapGesture {
@@ -294,6 +270,9 @@ struct MyMumori: View {
             .scrollIndicators(.hidden)
             .padding(.bottom, 40)
         })
+        .onAppear {
+            spacing = getUIScreenBounds().width <= 375 ? 8 : 11
+        }
     }
 }
 

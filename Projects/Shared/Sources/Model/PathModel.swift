@@ -176,7 +176,7 @@ public enum MyPage: Hashable {
     case emailVerification
     case selectNotificationTime
     case login
-    case friendList(friends: [MumoriUser])
+    case friendList
     case friendPage(friend: MumoriUser)
     case activityList
 }

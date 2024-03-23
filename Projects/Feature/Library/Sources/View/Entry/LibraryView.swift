@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct LibraryView: View {
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @StateObject var snackbarViewModel: SnackBarViewModel = SnackBarViewModel()
     @EnvironmentObject var appCoordinator: AppCoordinator

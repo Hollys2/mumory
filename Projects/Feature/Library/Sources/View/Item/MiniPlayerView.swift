@@ -11,14 +11,14 @@ import Shared
 import MusicKit
 
 struct MiniPlayerView: View {
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var isPresentPlayingView: Bool = false
     var body: some View {
   
                 HStack(spacing: 0, content: {
                     //재생 화면 나올 터치 뷰
                     HStack(spacing: 0) {
-                        AsyncImage(url: playerManager.currentSong?.artwork?.url(width: 100, height: 100), content: { image in
+                        AsyncImage(url: playerViewModel.currentSong?.artwork?.url(width: 100, height: 100), content: { image in
                             image
                                 .resizable()
                                 .frame(width: 40, height: 40)
@@ -33,7 +33,7 @@ struct MiniPlayerView: View {
                         .padding(.leading, 25)
                         
                         
-                        if let playingSong = playerManager.currentSong {
+                        if let playingSong = playerViewModel.currentSong {
                             //노래 제목 밑 아티스트 이름 - 세로정렬
                             VStack(spacing: 4, content: {
                                 Text(playingSong.title)
@@ -70,14 +70,14 @@ struct MiniPlayerView: View {
                   
                     Spacer()
                     
-                    if playerManager.isPlaying{
+                    if playerViewModel.isPlaying{
                         SharedAsset.pause.swiftUIImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 18, height: 18)
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                playerManager.pause()
+                                playerViewModel.pause()
                             }
                     }else {
                         SharedAsset.play.swiftUIImage
@@ -86,11 +86,11 @@ struct MiniPlayerView: View {
                             .frame(width: 16, height: 16)
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                playerManager.play()
+                                playerViewModel.play()
                             }
                     }
                     
-                    if let playingSong = playerManager.currentSong {
+                    if let playingSong = playerViewModel.currentSong {
 
                         SharedAsset.musicForward.swiftUIImage
                             .resizable()
@@ -98,7 +98,7 @@ struct MiniPlayerView: View {
                             .frame(width: 20, height: 20)
                             .padding(.trailing, 30)
                             .onTapGesture {
-                                playerManager.skipToNext()
+                                playerViewModel.skipToNext()
                             }
                     }
                         
@@ -110,7 +110,7 @@ struct MiniPlayerView: View {
                         .frame(width: 20, height: 20)
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerManager.isShownMiniPlayer = false
+                            playerViewModel.isShownMiniPlayer = false
                         }
                     
                     
@@ -128,7 +128,7 @@ struct MiniPlayerView: View {
                 .padding(.bottom, 10)
                 .padding(.horizontal, 8)
                 .padding(.bottom, 89)
-                .opacity(playerManager.isShownMiniPlayer ? 1 : 0)
+                .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
 
 
         }

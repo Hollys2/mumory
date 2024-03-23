@@ -15,7 +15,7 @@ public struct MumoryRecommendationView: View {
     @State var isShowing: Bool = false
     @State var isTouch: Bool = false
     @State private var path = NavigationPath()
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     
@@ -58,7 +58,7 @@ public struct MumoryRecommendationView: View {
                             MusicChartItem(rank: index+1, song: song) //순위 곡 item
                                 .frame(width: getUIScreenBounds().width - 40)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
                         }
                     })

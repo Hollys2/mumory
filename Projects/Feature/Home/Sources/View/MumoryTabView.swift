@@ -18,6 +18,7 @@ public struct MumoryTabView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     public init(selectedTab: Binding<Tab>) {
         self._selectedTab = selectedTab
     }

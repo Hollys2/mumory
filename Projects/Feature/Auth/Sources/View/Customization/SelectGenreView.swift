@@ -21,8 +21,6 @@ public struct SelectGenreView: View {
     public var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
-            GeometryReader(content: { geometry in
-                
                 ScrollView(){
                     VStack(spacing: 0, content: {
                         
@@ -68,7 +66,7 @@ public struct SelectGenreView: View {
                         //Tag Layout
                         //2차원배열이기 때문에 ForEach 2개 사용
                         VStack(spacing: 13, content: {
-                            ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: geometry.size.width), id: \.self){ genreList in
+                            ForEach(gerRows(list: MusicGenreHelper().genres, screenWidth: getUIScreenBounds().width), id: \.self){ genreList in
                                 HStack(spacing: 11, content: {
                                     ForEach(genreList, id: \.self){ genre in
                                         Text(genre.name)
@@ -99,9 +97,6 @@ public struct SelectGenreView: View {
                             .frame(width: 10, height: 200)
                     })
                 }
-                
-            })
-            
         }
         .onAppear(perform: {
         })

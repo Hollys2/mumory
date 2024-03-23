@@ -27,7 +27,6 @@ struct PlaylistMusicListItem: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
             HStack(spacing: 0, content: {
                 
               
@@ -129,8 +128,6 @@ struct PlaylistMusicListItem: View {
             .padding(.vertical, 15)
             .padding(.horizontal, 20)
             
-            Divider05()
-        }
 
         
     }

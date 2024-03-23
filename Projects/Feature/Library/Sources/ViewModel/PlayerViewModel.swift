@@ -19,6 +19,7 @@ struct PlayingInfo {
 public class PlayerViewModel: ObservableObject {
     @Published var isShownMiniPlayer: Bool = true
     @Published var isPlayingViewPresent: Bool = false
+    @Published var isShownPreview: Bool = false
     @Published var isPlaying: Bool = false
     
     @Published var playingInfo: PlayingInfo = PlayingInfo(playingTime: 0.0, playbackRate: 0.0)
@@ -195,5 +196,24 @@ public class PlayerViewModel: ObservableObject {
     public func nowPlayingIndex() -> Int {
         return (self.queue.firstIndex(where: {$0.id == self.currentSong?.id}) ?? 0) + 1
     }
- 
+    
+    public func setPreviewPlayer(tappedSong: Song) {
+        if currentSong?.id == tappedSong.id {
+            if isShownPreview {
+                self.pause()
+            } else {
+                self.play()
+            }
+            DispatchQueue.main.async {
+                self.isShownPreview.toggle()
+            }
+            
+        }else {
+            DispatchQueue.main.async {
+                self.isShownPreview = true
+            }
+            self.playNewSong(song: tappedSong)
+        }
+    }
+    
 }

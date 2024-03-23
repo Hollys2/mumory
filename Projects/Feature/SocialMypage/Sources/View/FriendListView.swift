@@ -11,14 +11,12 @@ import Shared
 
 struct FriendListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var currentUserData: CurrentUserData
+
     private let lineGray = Color(white: 0.48)
     @State var term: String = ""
-    @State var friends: [MumoriUser]
-    @State var results: [MumoriUser]
-    init(friends: [MumoriUser]) {
-        self.friends = friends
-        self.results = friends
-    }
+    @State var results: [MumoriUser] = []
+
     
     var body: some View {
         ZStack(alignment: .top, content: {
@@ -54,10 +52,10 @@ struct FriendListView: View {
                             .onChange(of: term) { value in
                                 if term.isEmpty {
                                     DispatchQueue.main.async {
-                                        self.results = friends
+                                        self.results = currentUserData.friends
                                     }
                                 }else {
-                                    let result = friends.filter({ user in
+                                    let result = currentUserData.friends.filter({ user in
                                         return user.nickname.contains(value.lowercased()) || user.id.contains(value.lowercased())
                                     })
                                     if result != self.results {
@@ -68,7 +66,7 @@ struct FriendListView: View {
                                 }
                             }
                         
-                        Text("\(friends.count)명")
+                        Text("\(currentUserData.friends.count)명")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.leading, 20)
@@ -121,6 +119,7 @@ struct SearchTextField: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 23, height: 23)
+                    .opacity(term.isEmpty ? 0 : 1)
             }
             .padding(.leading, 2)
           

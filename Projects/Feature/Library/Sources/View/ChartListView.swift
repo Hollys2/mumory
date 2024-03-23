@@ -13,7 +13,7 @@ import MusicKit
 struct ChartListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var contentOffset: CGPoint = .zero
     @State var viewWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
@@ -67,7 +67,7 @@ struct ChartListView: View {
                     PlayAllButton()
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerManager.playAll(title: "최신 인기곡", songs: songs)
+                            playerViewModel.playAll(title: "최신 인기곡", songs: songs)
                             requestTop100(startIndex: searchIndex + 1)
                             AnalyticsManager.shared.setSelectContentLog(title: "ChartListViewPlayAllButton")
                         }
@@ -150,7 +150,7 @@ struct ChartListView: View {
                 }
                 songs += chart
                 print("song count: \(songs.count), index: \(index)")
-                playerManager.setQueue(songs: songs)
+                playerViewModel.setQueue(songs: songs)
             }
         }
     }

@@ -14,7 +14,7 @@ import Core
 struct RecommendationListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
@@ -72,7 +72,7 @@ struct RecommendationListView: View {
                             
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
+                                    playerViewModel.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "RecommendationListViewPlayAllButton")
 
                                 }
@@ -86,7 +86,7 @@ struct RecommendationListView: View {
                         ForEach(songs, id: \.self) { song in
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
                             Divider05()
                         }

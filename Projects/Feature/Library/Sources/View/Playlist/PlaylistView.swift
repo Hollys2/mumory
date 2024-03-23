@@ -14,7 +14,7 @@ import Core
 struct PlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
@@ -28,7 +28,6 @@ struct PlaylistView: View {
     @State var isPresentModifyPlaylistView: Bool = false
     
     @State var selectedTab: Tab = .library
-        
     init(playlist: Binding<MusicPlaylist>){
         self._playlist = playlist
     }
@@ -133,7 +132,7 @@ struct PlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerManager.playAll(title: playlist.title , songs: playlist.songs)
+                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
                                     }
                             })
@@ -159,9 +158,10 @@ struct PlaylistView: View {
                                             selectedSongsForDelete.append(song)
                                         }
                                     }else {
-                                        playerManager.playNewSong(song: song)
+                                        playerViewModel.playNewSong(song: song)
                                     }
                                 }
+                            Divider05()
                             
                         }
                   

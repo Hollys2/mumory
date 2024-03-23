@@ -116,40 +116,15 @@ struct MyPlaylistView: View {
             
             withAnimation {
                 currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
-//                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
+                fetchSongWithPlaylistID(playlistId: id)
             }
             
 
         }
     }
-    
-    private func fetchSongInfo(songIDs: [String]) async -> [Song] {
-        var songs: [Song] = []
-        
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                
-                songs.append(song)
-            } catch {
-                print("Error: \(error)")
-            }
-        }
-        
-        return songs
-    }
-    
-    private func fetchSongWithPlaylistIndex(index: Int) {
-        print("playlist \(index)")
+
+    private func fetchSongWithPlaylistID(playlistId: String) {
+        guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlistId}) else {print("no index");return}
         let songIDs = currentUserData.playlistArray[index].songIDs
         for id in songIDs {
             Task {
@@ -158,29 +133,14 @@ struct MyPlaylistView: View {
                 request.properties = [.genres, .artists]
                 guard let response = try? await request.response() else {return}
                 guard let song = response.items.first else {return}
+                guard let reloadIndex = currentUserData.playlistArray.firstIndex(where: {$0.id == playlistId}) else {print("no index2");return}
                 DispatchQueue.main.async {
-                    currentUserData.playlistArray[index].songs.append(song)
+                    currentUserData.playlistArray[reloadIndex].songs.append(song)
                 }
-                
             }
         }
     }
-    
-    private func fetchPlaylistSong(playlist: Binding<MusicPlaylist>) {
-        for id in playlist.songIDs.wrappedValue {
-            Task {
-                let musicItemID = MusicItemID(rawValue: id)
-                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                request.properties = [.genres, .artists]
-                guard let response = try? await request.response() else {return}
-                guard let song = response.items.first else {return}
-                DispatchQueue.main.async {
-                    playlist.songs.wrappedValue.append(song)
-                }
-                
-            }
-        }
-    }
+
 }
 
 

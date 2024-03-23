@@ -108,7 +108,7 @@ public class DateManager: ObservableObject {
     public static func formattedDate(date: Date, dateFormat: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
-//        dateFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.locale = Locale(identifier: "ko_KR")
         
         return dateFormatter.string(from: date)
     }
