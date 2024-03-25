@@ -21,6 +21,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion?
     
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
@@ -143,6 +144,10 @@ extension HomeMapViewRepresentable {
         }
         
         @objc private func tappedGPSButton() {
+            if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
+                 self.parent.locationManager.promptForLocationSettings()
+             }
+            
             guard let mapView = mapView, let userLocation = mapView.userLocation.location else { return }
             
             let regionRadius: CLLocationDistance = 1000
