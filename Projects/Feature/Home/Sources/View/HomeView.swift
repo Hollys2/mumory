@@ -92,7 +92,6 @@ public struct HomeView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear {
-            playerViewModel.isShownMiniPlayer = false
             self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.user.uId)
         }
     }

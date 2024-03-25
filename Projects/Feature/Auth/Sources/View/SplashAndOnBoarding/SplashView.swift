@@ -57,12 +57,12 @@ public struct SplashView: View {
                     }
                 }
                 .onAppear(perform: {
-                    checkCurrentUserAndGetUserData()
-                    Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in
+                    Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
                         withAnimation {
                             isEndSplash = true
                         }
                     }
+                    checkCurrentUserAndGetUserData()
                 })
                 .navigationDestination(for: String.self, destination: { i in
                     if i == "music" {
@@ -294,27 +294,20 @@ public struct SplashView: View {
                 }
                 return
             }
-            
-    
-            
+
             currentUserData.uId = user.uid
-//            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
-//            await MumoriUser().fetchFriend(uId: user.uid)
+            print("uid: \(user.uid)")
             currentUserData.favoriteGenres = favoriteGenres
-            page = .home
+            
             withAnimation {
                 isInitialSettingDone = true
             }
-            
+            page = .home
+            appCoordinator.selectedTab = .home
+            try await db.collection("User").document(user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {
                 return
             }
-            
-            guard let fcmToken = messaging.fcmToken else {
-                return
-            }
-            try await db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
-            
             playerViewModel.favoriteSongIds = favoriteData["songIds"] as? [String] ?? []
         }
     }

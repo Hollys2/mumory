@@ -17,7 +17,7 @@ struct PlayingInfo {
 }
 
 public class PlayerViewModel: ObservableObject {
-    @Published public var isShownMiniPlayer: Bool = true
+    @Published public var isShownMiniPlayer: Bool = false
     @Published var miniPlayerMoveToBottom: Bool = false
     @Published var isPlayingViewPresent: Bool = false
     @Published var isShownPreview: Bool = false
