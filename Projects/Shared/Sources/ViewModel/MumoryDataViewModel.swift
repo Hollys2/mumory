@@ -28,7 +28,7 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var myMumorys: [Mumory] = []
     @Published public var friendsMumorys: [Mumory] = []
     @Published public var everyMumorys: [Mumory] = []
-    @Published public var filterdMumorys: [Mumory] = []
+    @Published public var filteredMumorys: [Mumory] = []
     
     @Published public var mumoryComments: [Comment] = []
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
@@ -37,6 +37,8 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var isLoading: Bool = false
     @Published public var isCreating: Bool = false
     @Published public var isUpdating: Bool = false
+    
+    private var tempMumory: [Mumory] = []
     
     private var lastDocument: DocumentSnapshot?
 
@@ -87,6 +89,7 @@ final public class MumoryDataViewModel: ObservableObject {
     public func fetchMyMumoryListener(userDocumentID: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
+            .order(by: "date", descending: true)
         let query = collectionReference.whereField("uId", isEqualTo: userDocumentID)
         
         let listener = query.addSnapshotListener { snapshot, error in
@@ -102,37 +105,36 @@ final public class MumoryDataViewModel: ObservableObject {
                         let documentData = documentChange.document.data()
                         guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
                         
-//                        if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
-//                            DispatchQueue.main.async {
-//                                self.myMumorys.append(newMumory)
-//                                self.myMumorys.sort { $0.date > $1.date }
-//                            }
-//                            print("Document added: \(documentChange.document.documentID)")
-//                        }
                         DispatchQueue.main.async {
-                            var uniqueIds = Set<String>(self.myMumorys.map { $0.id })
-                            
-                            if uniqueIds.contains(documentChange.document.documentID) {
-                                // 이미 배열에 같은 id를 가진 Mumory가 있는 경우
-                                uniqueIds.remove(documentChange.document.documentID)
-                                uniqueIds.insert(newMumory.id)
-                                self.myMumorys = self.myMumorys.filter { $0.id != documentChange.document.documentID }
+                            if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                                 self.myMumorys.append(newMumory)
-                                self.myMumorys.sort { $0.date > $1.date }
-                                print("1Document updated: \(documentChange.document.documentID)")
-                            } else {
-                                // 배열에 같은 id를 가진 Mumory가 없는 경우
-                                self.myMumorys.append(newMumory)
-                                self.myMumorys.sort { $0.date > $1.date }
-                                print("1Document added: \(documentChange.document.documentID)")
+//                                self.myMumorys.sort { $0.date > $1.date }
+                                print("Document added: \(documentChange.document.documentID)")
                             }
                         }
+//                        DispatchQueue.main.async {
+//                            var uniqueIds = Set<String>(self.myMumorys.map { $0.id })
+//
+//                            if uniqueIds.contains(documentChange.document.documentID) {
+//                                // 이미 배열에 같은 id를 가진 Mumory가 있는 경우
+//                                uniqueIds.remove(documentChange.document.documentID)
+//                                uniqueIds.insert(newMumory.id)
+//                                self.myMumorys = self.myMumorys.filter { $0.id != documentChange.document.documentID }
+//                                self.myMumorys.append(newMumory)
+//                                self.myMumorys.sort { $0.date > $1.date }
+//                                print("1Document updated: \(documentChange.document.documentID)")
+//                            } else {
+//                                // 배열에 같은 id를 가진 Mumory가 없는 경우
+//                                self.myMumorys.append(newMumory)
+//                                self.myMumorys.sort { $0.date > $1.date }
+//                                print("1Document added: \(documentChange.document.documentID)")
+//                            }
+//                        }
 
                         
-                        if !self.filterdMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
+                        if !self.filteredMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                             DispatchQueue.main.async {
-                                self.filterdMumorys.append(newMumory)
-                                self.filterdMumorys.sort { $0.date > $1.date }
+                                self.filteredMumorys.append(newMumory)
                             }
                         }
                         
@@ -236,51 +238,33 @@ final public class MumoryDataViewModel: ObservableObject {
         Task {
             do {
                 let snapshot = try await copiedMumoryCollectionRef.getDocuments()
-                
+//                self.tempMumory = []
                 for document in snapshot.documents {
                     let documentData = document.data()
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
-//                    if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
-//                        DispatchQueue.main.async {
-//                            print("newMumory.date: \(newMumory.date)")
-//                            self.everyMumorys.append(newMumory)
-//                            self.everyMumorys.sort { $0.date > $1.date }
-//                        }
-//                    }
-                    
                     DispatchQueue.main.async {
-                        var uniqueIds = Set<String>(self.everyMumorys.map { $0.id })
-                        
-                        if uniqueIds.contains(document.documentID) {
-                            // 이미 배열에 같은 id를 가진 Mumory가 있는 경우
-                            uniqueIds.remove(document.documentID)
-                            uniqueIds.insert(newMumory.id)
-                            self.everyMumorys = self.everyMumorys.filter { $0.id != document.documentID }
-                            self.everyMumorys.append(newMumory)
-                            self.everyMumorys.sort { $0.date > $1.date }
-                            print("2Document updated: \(document.documentID)")
-                        } else {
-                            // 배열에 같은 id를 가진 Mumory가 없는 경우
-                            self.everyMumorys.append(newMumory)
-                            self.everyMumorys.sort { $0.date > $1.date }
-                            print("2Document added: \(document.documentID)")
+                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
+                            self.tempMumory.append(newMumory)
                         }
                     }
                 }
                 
-                self.lastDocument = snapshot.documents.last
-                
                 DispatchQueue.main.async {
+//                    self.everyMumorys.append(contentsOf: self.tempMumory)
+                    self.everyMumorys = self.tempMumory
+                    self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
+                    
                 }
                 print("fetchSocialMumory successfully!")
                 
                 
-//                if snapshot.documents.count < 10 {
-//                    print("No more documents to fetch")
-//                    // 추가적인 작업 수행 가능
-//                } else {
+                if snapshot.documents.count < 10 {
+                    print("No more documents to fetch")
+                    // 추가적인 작업 수행 가능
+                }
+//                else {
 //                    // 다음 페이지의 데이터 가져오기
 //                    self.fetchEveryMumory()
 //                }

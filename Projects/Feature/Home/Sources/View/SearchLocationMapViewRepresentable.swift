@@ -18,6 +18,7 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
     
     @Binding var locationModel: LocationModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
@@ -28,7 +29,11 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
         
-        mapView.setRegion(MKCoordinateRegion(center: mapView.userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
+        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan), animated: true)
+        
+        if let center = locationManager.currentLocation {
+            mapView.setRegion(MKCoordinateRegion(center: center.coordinate, span: MapConstant.defaultSpan), animated: true)
+        }
         
         context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
@@ -109,6 +114,10 @@ extension SearchLocationMapViewRepresentable {
         }
         
         @objc private func tappedGPSButton() {
+            if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
+                self.parent.locationManager.promptForLocationSettings()
+            }
+            
             guard let mapView = mapView, let userLocation = mapView.userLocation.location else { return }
             let regionRadius: CLLocationDistance = 1000
             let region = MKCoordinateRegion(center: userLocation.coordinate,
