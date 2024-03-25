@@ -40,7 +40,7 @@ struct FriendListItem: View {
                     .foregroundStyle(Color.white)
                 
                 Text("@\(friend.id)")
-                    .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 12))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .foregroundStyle(ColorSet.charSubGray)
             })
             .frame(maxWidth: .infinity, alignment: .leading)

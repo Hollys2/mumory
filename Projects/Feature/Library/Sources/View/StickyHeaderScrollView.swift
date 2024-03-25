@@ -19,23 +19,25 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     @Binding var viewWidth: CGFloat
     @Binding var scrollDirection: ScrollDirection
     @Binding var topbarYoffset: CGFloat
+    var refreshAction: () -> Void
     var content: () -> Content
 
     
-    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
+    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, refreshAction: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
         self._changeDetectValue = changeDetectValue
         self._contentOffset = contentOffset
         self._viewWidth = viewWidth
         self._scrollDirection = scrollDirection
         self._topbarYoffset = topbarYoffset
+        self.refreshAction = refreshAction
         self.content = content
-
     }
 
     func makeUIViewController(context: Context) -> UIStickyScrollViewController {
-        let vc = UIStickyScrollViewController()
+        let vc = UIStickyScrollViewController(refreshAction: self.refreshAction)
         vc.hostingController.rootView = AnyView(self.content())
         vc.scrollView.delegate = context.coordinator
+        
         return vc
     }
 
@@ -106,7 +108,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
        
             }
             contentOffset.wrappedValue = scrollView.contentOffset
-            scrollView.refreshControl?.bounds = CGRect(x: 0, y: -68 , width: 100, height: 100)
+            scrollView.refreshControl?.bounds = CGRect(x: 0, y: -68, width: 50, height: 50)
         }
     }
 }
@@ -122,7 +124,17 @@ class UIStickyScrollViewController: UIViewController{
     var refreshControl: UIRefreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
     var index = 0
     var hostingController: UIHostingController<AnyView> = UIHostingController(rootView: AnyView(EmptyView()))
-
+    
+    var refreshAction: () -> Void
+    
+    init(refreshAction: @escaping () -> Void) {
+        self.refreshAction = refreshAction
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         scrollView.decelerationRate = .fast
@@ -167,7 +179,7 @@ class UIStickyScrollViewController: UIViewController{
     }
     
     @objc func refresh(){
-        print("library refresh")
+        self.refreshAction()
         refreshControl.endRefreshing()
     }
 

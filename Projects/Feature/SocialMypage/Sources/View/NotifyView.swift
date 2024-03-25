@@ -514,7 +514,8 @@ struct ReadAllButton: View {
                         updatedNotification.isRead = true
                         return updatedNotification
                     }
-                    snackBarViewModel.setSnackBar(type: .readAllNotification, status: .success)
+                }else {
+                    snackBarViewModel.setSnackBar(type: .readAllNotification, status: .failure)
                 }
             }
     }

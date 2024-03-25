@@ -138,8 +138,8 @@ public struct SnackBarView: View {
                     .offset(y: snackBarViewModel.isPresent ? 53 : -70)
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
                 
-            case (.readAllNotification, .success):
-                ReadAllNotificationView
+            case (.readAllNotification, .failure):
+                AlreadyReadAllNotificationView
                     .offset(y: snackBarViewModel.isPresent ? 53 : -70)
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
                 
@@ -332,7 +332,7 @@ public struct SnackBarView: View {
         .padding(.horizontal, 15)
     }
     
-    var ReadAllNotificationView: some View {
+    var AlreadyReadAllNotificationView: some View {
         HStack(spacing: 0) {
             Text("알림을 모두 읽었습니다.")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
@@ -344,6 +344,5 @@ public struct SnackBarView: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
         .padding(.horizontal, 15)
-   
     }
 }

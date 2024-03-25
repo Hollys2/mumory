@@ -31,6 +31,7 @@ struct MumoryApp: App {
                                 AuthController.handleOpenUrl(url: url)
                             }
                         })
+                        .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)
                         .environmentObject(locationManager)
                         .environmentObject(localSearchViewModel)
@@ -39,8 +40,7 @@ struct MumoryApp: App {
                         .environmentObject(keyboardResponder)
                         .environmentObject(currentUserData)
                         .environmentObject(playerViewModel)
-                        .environmentObject(snackBarViewModel)
-                        .onAppear {                            
+                        .onAppear {
                             appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                             appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
                             
