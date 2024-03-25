@@ -20,13 +20,13 @@ import MusicKit
 
 //import RealmSwift
 
- class AppDelegate: NSObject, UIApplicationDelegate{
-
-     func application(_ application: UIApplication,
+class AppDelegate: NSObject, UIApplicationDelegate{
+    
+    func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
         print("AppDelegate Start")
-
+        
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
@@ -38,15 +38,15 @@ import MusicKit
             }
         }
         application.registerForRemoteNotifications()
-         
-         Task {
-             let authorizationStatus = await MusicAuthorization.request()
-             if authorizationStatus == .authorized {
-                 print("음악 권한 받음")
-             } else {
-                 print("음악 권한 거절")
-             }
-         }
+        
+        Task {
+            let authorizationStatus = await MusicAuthorization.request()
+            if authorizationStatus == .authorized {
+                print("음악 권한 받음")
+            } else {
+                print("음악 권한 거절")
+            }
+        }
         
         //테스트용 키. 추후에 원본 키로 수정하기
         KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
@@ -58,7 +58,7 @@ import MusicKit
         return true
     }
     
-     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         var gid = false
         gid = GIDSignIn.sharedInstance.handle(url)
         if (AuthApi.isKakaoTalkLoginUrl(url)) {
@@ -67,30 +67,30 @@ import MusicKit
         return gid
     }
     
-
+    
 }
 extension AppDelegate: MessagingDelegate {
-     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("fcm token: \(fcmToken ?? "no fcm token")")
         let Firebase = FBManager.shared
-         let db = Firebase.db
-         let auth = Firebase.auth
-         
-         if let user = auth.currentUser {
-             guard let fcmToken = fcmToken else {
-                 return
-             }
-             db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
-         }
+        let db = Firebase.db
+        let auth = Firebase.auth
+        
+        if let user = auth.currentUser {
+            guard let fcmToken = fcmToken else {
+                return
+            }
+            db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
+        }
     }
 }
 extension AppDelegate: UNUserNotificationCenterDelegate{
-     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-         Messaging.messaging().apnsToken = deviceToken
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
     }
-
+    
     // foreground 상에서 알림이 보이게끔 해준다.
-     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .sound, .badge])
     }
 }

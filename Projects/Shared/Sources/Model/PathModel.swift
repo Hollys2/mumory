@@ -178,6 +178,8 @@ public enum MyPage: Hashable {
     case login
     case friendList(friends: [MumoriUser])
     case friendPage(friend: MumoriUser)
+    case reward
+    case monthlyStat
     case activityList
 }
 

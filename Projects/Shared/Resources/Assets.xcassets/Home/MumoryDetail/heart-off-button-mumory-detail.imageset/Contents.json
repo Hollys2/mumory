@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Image.png",
+      "filename" : "heart-off-button-mumory-detail.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Image@2x.png",
+      "filename" : "heart-off-button-mumory-detail@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Image@3x.png",
+      "filename" : "heart-off-button-mumory-detail@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

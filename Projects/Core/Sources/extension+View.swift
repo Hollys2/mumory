@@ -63,7 +63,6 @@ extension View {
         self
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(
-                
                 ZStack(alignment: .topLeading) {
                     
                     if show.wrappedValue {

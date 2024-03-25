@@ -105,6 +105,8 @@ public struct SocialSearchView: View {
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .submitLabel(.search)
                     .onSubmit {
+                        mumoryDataViewModel.isUpdating = true
+                        
                         mumoryDataViewModel.searchedMumoryAnnotations = []
                         friendManager.searchedFriends = []
                         

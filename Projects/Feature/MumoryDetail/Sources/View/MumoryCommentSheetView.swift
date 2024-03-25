@@ -26,6 +26,7 @@ struct CommentView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
         
@@ -50,7 +51,7 @@ struct CommentView: View {
                     Spacer().frame(height: 13)
                     
                     HStack(spacing: 5) {
-                        if self.comment.userDocumentID == appCoordinator.currentUser.uId || self.mumory.uId == self.comment.userDocumentID || appCoordinator.currentUser.friends.contains(comment.userDocumentID) || self.comment.isPublic {
+                        if self.comment.userDocumentID == currentUserData.user.uId || self.mumory.uId == self.comment.userDocumentID || currentUserData.user.friends.contains(comment.userDocumentID) || self.comment.isPublic {
                             Text("\(comment.nickname)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
@@ -67,11 +68,11 @@ struct CommentView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                         
-                        if !comment.isPublic && comment.userDocumentID == appCoordinator.currentUser.uId {
+                        if !comment.isPublic && comment.userDocumentID == currentUserData.user.uId {
                             SharedAsset.commentUnlockMumoryDetail.swiftUIImage
                                 .resizable()
                                 .frame(width: 15, height: 15)
-                        } else if !comment.isPublic && comment.userDocumentID != appCoordinator.currentUser.uId {
+                        } else if !comment.isPublic && comment.userDocumentID != currentUserData.user.uId {
                             SharedAsset.commentLockMumoryDetail.swiftUIImage
                                 .resizable()
                                 .frame(width: 15, height: 15)
@@ -90,10 +91,10 @@ struct CommentView: View {
                         
                     } // HStack
                     
-                    Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
+                    Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.user.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
                         .lineSpacing(20)
-                        .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
-                        .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                        .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.user.friends.contains(comment.userDocumentID) ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
+                        .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.user.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding(.top, 11)
                         .padding(.bottom, 15)
@@ -160,29 +161,37 @@ struct Reply: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
         
         HStack(alignment: .top, spacing: 13) {
             
-            AsyncImage(url: self.user.profileImageURL) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                default:
-                    Color(red: 0.184, green: 0.184, blue: 0.184)
+            if comment.isPublic {
+                AsyncImage(url: self.user.profileImageURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                    default:
+                        Color(red: 0.184, green: 0.184, blue: 0.184)
+                    }
                 }
+                .frame(width: 28, height: 28)
+                .mask {Circle()}
+            } else {
+                SharedAsset.profileMumoryDetail.swiftUIImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask {Circle()}
             }
-            .frame(width: 28, height: 28)
-            .mask {Circle()}
             
             VStack(spacing: 0) {
                 
                 Spacer().frame(height: 13)
                 
                 HStack(spacing: 5) {
-                    if self.comment.userDocumentID == appCoordinator.currentUser.uId || self.mumory.uId == self.comment.userDocumentID || appCoordinator.currentUser.friends.contains(comment.userDocumentID) || self.comment.isPublic {
+                    if self.comment.userDocumentID == currentUserData.user.uId || self.mumory.uId == self.comment.userDocumentID || currentUserData.user.friends.contains(comment.userDocumentID) || self.comment.isPublic {
                         Text("\(comment.nickname)")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             .foregroundColor(.white)
@@ -200,11 +209,11 @@ struct Reply: View {
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                     
-                    if !comment.isPublic && comment.userDocumentID == appCoordinator.currentUser.uId {
+                    if !comment.isPublic && comment.userDocumentID == currentUserData.user.uId {
                         SharedAsset.commentUnlockMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 15, height: 15)
-                    } else if !comment.isPublic && comment.userDocumentID != appCoordinator.currentUser.uId {
+                    } else if !comment.isPublic && comment.userDocumentID != currentUserData.user.uId {
                         SharedAsset.commentLockMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 15, height: 15)
@@ -222,10 +231,10 @@ struct Reply: View {
                     })
                 } // HStack
                 
-                Text(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
+                Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.user.friends.contains(comment.userDocumentID) ? comment.content : "비밀 댓글입니다.")
                     .lineSpacing(20)
-                    .font(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                    .foregroundColor(comment.isPublic || comment.userDocumentID == appCoordinator.currentUser.uId || appCoordinator.currentUser.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                    .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.user.friends.contains(comment.userDocumentID) ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                    .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.user.friends.contains(comment.userDocumentID) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(.top, 11)
                     .padding(.bottom, 15)
@@ -275,6 +284,7 @@ public struct MumoryCommentSheetView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
@@ -320,11 +330,14 @@ public struct MumoryCommentSheetView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                 .foregroundColor(.white)
                             
-                            Spacer().frame(width: 5)
                             
-                            Text("\(self.mumory.commentCount)")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
-                                .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                            if self.mumory.commentCount > 0 {
+                                Spacer().frame(width: 5)
+                                
+                                Text("\(self.mumory.commentCount)")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                            }
                             
                             Spacer()
                             
@@ -501,7 +514,7 @@ public struct MumoryCommentSheetView: View {
                                                     isButtonDisabled = true
                                                     
                                                     Task {
-                                                        mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: appCoordinator.currentUser.uId, nickname: appCoordinator.currentUser.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
+                                                        mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
                                                             self.commentText = ""
                                                             switch result {
                                                             case .success(let replies):
@@ -601,7 +614,7 @@ public struct MumoryCommentSheetView: View {
                                                 isButtonDisabled = true
                                                 
                                                 Task {
-                                                    mumoryDataViewModel.createComment(mumoryDocumentID: mumory.id, comment: Comment(id: "", uId: appCoordinator.currentUser.uId, nickname: appCoordinator.currentUser.nickname, parentId: "", mumoryId: mumory.id, date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
+                                                    mumoryDataViewModel.createComment(mumoryDocumentID: mumory.id, comment: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: "", mumoryId: mumory.id, date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
                                                         commentText = ""
                                                         self.comments = comments
                                                         isButtonDisabled = false
@@ -659,6 +672,8 @@ public struct MumoryCommentSheetView: View {
                             } else {
                                 self.replies.append(i)
                             }
+                            self.comments.sort { $0.date > $1.date }
+                            self.replies.sort { $0.date > $1.date }
                         }
                     }
                 }

@@ -25,6 +25,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     init(contentOffsetY: Binding<CGFloat>, onRefresh: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
         self._contentOffsetY = contentOffsetY
@@ -50,7 +51,9 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
 //        print("updateUIView: SocialScrollViewRepresentable")
         if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
 
-            let hostingController = UIHostingController(rootView: self.content().environmentObject(self.mumoryDataViewModel))
+            let hostingController = UIHostingController(rootView: self.content()
+                .environmentObject(self.mumoryDataViewModel)
+                .environmentObject(self.currentUserData))
             let height = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
 
             uiView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
@@ -125,6 +128,7 @@ struct SocialScrollCotentView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
     
     var body: some View {
         
@@ -156,7 +160,8 @@ struct SocialItemView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    
+    @EnvironmentObject private var currentUserData: CurrentUserData
+
     let mumory: Mumory
     
     var body: some View {
@@ -177,9 +182,13 @@ struct SocialItemView: View {
                 .frame(width: 38, height: 38)
                 .mask {Circle()}
                 .onTapGesture {
-                    Task {
-                        let friend = await MumoriUser(uId: self.user.uId)
-                        appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                    if self.user.uId == self.currentUserData.user.uId {
+                        appCoordinator.rootPath.append(MyPage.myPage)
+                    } else {
+                        Task {
+                            let friend = await MumoriUser(uId: self.user.uId)
+                            appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                        }
                     }
                 }
                 
@@ -256,22 +265,11 @@ struct SocialItemView: View {
                             .clipped()
                     )
                     .cornerRadius(15)
+
                 
-                Rectangle()
-                    .foregroundColor(.clear)
+                SharedAsset.artworkFilterSocial.swiftUIImage
+                    .resizable()
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: .black.opacity(0.4), location: 0.00),
-                                Gradient.Stop(color: .black.opacity(0), location: 0.26),
-                                Gradient.Stop(color: .black.opacity(0), location: 0.63),
-                                Gradient.Stop(color: .black.opacity(0.4), location: 0.96),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 0),
-                            endPoint: UnitPoint(x: 0.5, y: 1)
-                        )
-                    )
                     .cornerRadius(15)
                     .gesture(
                         TapGesture(count: 1)
@@ -280,6 +278,24 @@ struct SocialItemView: View {
                                 self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                             }
                     )
+                
+//                Rectangle()
+//                    .foregroundColor(.clear)
+//                    .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
+//                    .background(
+//                        LinearGradient(
+//                            stops: [
+//                                Gradient.Stop(color: .black.opacity(0.4), location: 0.00),
+//                                Gradient.Stop(color: .black.opacity(0), location: 0.26),
+//                                Gradient.Stop(color: .black.opacity(0), location: 0.63),
+//                                Gradient.Stop(color: .black.opacity(0.4), location: 0.96),
+//                            ],
+//                            startPoint: UnitPoint(x: 0.5, y: 0),
+//                            endPoint: UnitPoint(x: 0.5, y: 1)
+//                        )
+//                    )
+//                    .cornerRadius(15)
+
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
@@ -434,13 +450,13 @@ struct SocialItemView: View {
                 
                 
                 // MARK: Heart & Comment
-                VStack(spacing: 12) {
+                VStack(spacing: 0) {
                     
                     Button(action: {
                         isButtonDisabled = true
 
                         Task {
-                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: appCoordinator.currentUser.uId)
+                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId)
                             
                             lazy var functions = Functions.functions()
                             functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
@@ -454,7 +470,7 @@ struct SocialItemView: View {
                             }
                         }
                     }, label: {
-                        mumory.likes.contains(appCoordinator.currentUser.uId) ?
+                        mumory.likes.contains(currentUserData.user.uId) ?
                         SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
@@ -462,7 +478,7 @@ struct SocialItemView: View {
                                 .white.opacity(0.1)
                             )
                             .mask {Circle()}
-                        : SharedAsset.heartOffButtonMumoryDetail.swiftUIImage
+                        : SharedAsset.heartOffButtonSocial.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
                             .background(
@@ -471,13 +487,15 @@ struct SocialItemView: View {
                             .mask {Circle()}
                     })
                     .disabled(isButtonDisabled)
-                    
+                    .padding(.bottom, mumory.likes.isEmpty ? 12 : 0)
                     
                     if mumory.likes.count != 0 {
                         Text("\(mumory.likes.count)")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white)
+                            .padding(.top, 6)
+                            .padding(.bottom, 8)
                     }
                     
                     Button(action: {
@@ -502,12 +520,13 @@ struct SocialItemView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white)
+                            .padding(.top, 6)
                     }
                     
                 }
                 .offset(x: UIScreen.main.bounds.width - 20 - 42 - 17)
                 .alignmentGuide(VerticalAlignment.top) { d in
-                    d[.bottom] - (UIScreen.main.bounds.width - 20) + 27
+                    d[.bottom] - (UIScreen.main.bounds.width - 20) + 23
                 }
             } // ZStack
             
@@ -520,10 +539,7 @@ struct SocialItemView: View {
             }
         }
         .fullScreenCover(isPresented: self.$isMapViewShown) {
-            MumoryDetailMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
-                .onAppear {
-                    MKMapView.appearance().mapType = .mutedStandard
-                }
+            MumoryMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
         }
     }
 }
@@ -539,9 +555,9 @@ public struct SocialView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @ObservedObject var firebaseManager = FirebaseManager.shared
+    @EnvironmentObject var currentUserData: CurrentUserData
     
-    @State private var translation: CGSize = .zero
+    @ObservedObject var firebaseManager = FirebaseManager.shared
     
     public init(isShown: Binding<Bool>) {
         self._isSocialSearchViewShown = isShown
@@ -595,7 +611,7 @@ public struct SocialView: View {
                 Button(action: {
                     appCoordinator.setBottomAnimationPage(page: .myPage)
                 }) {
-                    AsyncImage(url: appCoordinator.currentUser.profileImageURL) { phase in
+                    AsyncImage(url: currentUserData.user.profileImageURL) { phase in
                         switch phase {
                         case .success(let image):
                             image

@@ -162,7 +162,7 @@ struct MumoryDetailFriendMumoryView: View {
                     
                     VStack(spacing: 14) {
                         Text("내용내 용내 용내용옹내 용일 상일 상일상내용내용내용 내용옹내용일상 일상일상 내용내용내용 내용옹 내용 일상내용 내용옹내용 일상일상일상내용내용내용")
-                            .font(Font.custom("Pretendard", size: 13))
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                         //                                            .multilineTextAlignment(.leading)
                             .lineLimit(3)
                             .foregroundColor(.white)
@@ -175,16 +175,13 @@ struct MumoryDetailFriendMumoryView: View {
                             Spacer().frame(width: 5)
                             
                             Text("Super Shy")
-                                .font(
-                                    Font.custom("Pretendard", size: 14)
-                                        .weight(.semibold)
-                                )
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             
                             Spacer().frame(width: 6)
                             
                             Text("NewJeans")
-                                .font(Font.custom("Pretendard", size: 14))
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             
                             Spacer()
@@ -205,7 +202,7 @@ struct MumoryDetailFriendMumoryView: View {
                 
                 Spacer().frame(height: 27)
             } // VStack
-            .frame(width: UIScreen.main.bounds.width - 40, height: 162)
+            .frame(width: UIScreen.main.bounds.width - 40, height: 212)
         } // ZStack
     }
 }

@@ -19,6 +19,7 @@ public struct CreateMumoryBottomSheetView: View {
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
     @Binding private var newRegion: MKCoordinateRegion?
+    @Binding private var selectedTab: Tab
     
     @State private var bottomBarHeight: CGFloat = 55
     
@@ -46,12 +47,14 @@ public struct CreateMumoryBottomSheetView: View {
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?> ) {
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>, selectedTab: Binding<Tab> ) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
         self._newRegion = newRegion
+        self._selectedTab = selectedTab
     }
     
     public var body: some View {
@@ -412,10 +415,10 @@ public struct CreateMumoryBottomSheetView: View {
                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         .preferredColorScheme(.dark)
+                        .environment(\.locale, Locale.init(identifier: "ko_KR"))
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
-                        print("calendarDate1: \(calendarDate)")
                         let calendar = Calendar.current
                         let newDate = calendar.date(bySettingHour: calendar.component(.hour, from: Date()),
                                                     minute: calendar.component(.minute, from: Date()),
@@ -462,7 +465,7 @@ public struct CreateMumoryBottomSheetView: View {
 
                             dispatchGroup.notify(queue: .main) {
 
-                                let newMumoryAnnotation = Mumory(id: "", uId: appCoordinator.currentUser.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0)
+                                let newMumoryAnnotation = Mumory(id: "", uId: currentUserData.user.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0)
 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                     switch result {
@@ -479,7 +482,8 @@ public struct CreateMumoryBottomSheetView: View {
 
                                         self.newRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                         
-
+                                        self.selectedTab = .home
+                                        
                                     case .failure(let error):
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")
                                     }
@@ -807,21 +811,11 @@ struct ContainerView: View {
                     }
                 } else {
                     if let mumoryAnnotation = self.mumoryAnnotation {
-                        
-                        VStack(spacing: 5) {
-                            
-                            Text("\(mumoryAnnotation.locationModel.locationTitle)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                .foregroundColor(.white)
-                                .lineLimit(1)
-                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                            
-                            Text("\(mumoryAnnotation.locationModel.locationSubtitle)")
-                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                .lineLimit(1)
-                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                        }
+                        Text("\(mumoryAnnotation.locationModel.locationTitle)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                            .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
                         
                         Spacer().frame(width: 15)
                         
@@ -829,22 +823,12 @@ struct ContainerView: View {
                             .resizable()
                             .frame(width: 31, height: 31)
                     } else {
-                        
                         if let choosed = self.mumoryDataViewModel.choosedLocationModel {
-                            VStack(spacing: 5) {
-
-                                Text("\(choosed.locationTitle)")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                    .foregroundColor(.white)
-                                    .lineLimit(1)
-                                    .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                                
-                                Text("\(choosed.locationSubtitle)")
-                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                                    .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                    .lineLimit(1)
-                                    .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                            }
+                            Text("\(choosed.locationTitle)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
                             
                             Spacer().frame(width: 15)
                             
@@ -959,20 +943,17 @@ struct TagContainerView: View {
                         self.isTagEditing = isEditing
                     })
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundColor(self.isTagEditing ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                     .onChange(of: tags[index], perform: { newValue in
-                        if newValue.count > 6 {
-                            tags[index] = String(newValue.prefix(6))
+                        if newValue.count > 5 {
+                            tags[index] = String(newValue.prefix(5))
                         }
-
-                        if newValue.contains(" ") || newValue.hasSuffix(" ") {
+                        
+                        if newValue.contains(" ") {
                             let beforeSpace = newValue.components(separatedBy: " ").first ?? ""
                             tags[index] = beforeSpace
-
                         } else if newValue == "" {
                             tags.remove(at: index)
-                        } else if !newValue.hasPrefix("#") {
-                            //                            tags.remove(at: index)
                         }
                     })
                     .fixedSize(horizontal: true, vertical: false)
@@ -982,27 +963,31 @@ struct TagContainerView: View {
                 
                 
                 if self.tags.count < 3 {
-                    TagTextField(text: $tagText, onCommit: {
-//                        if tagText.first == "#" {
-//                            tagText.removeFirst()
-                            tags.append(tagText)
-                            tagText = ""
-//                        }
-                    }, onEditingChanged: { isEditing in
-                        self.isEditing = isEditing
-                    })
-                    .onChange(of: tagText) { newValue in
-                        if !self.isEditing {
-                            tagText = ""
+                    TextField("", text: self.$tagText)
+                        .foregroundColor(.white)
+                        .onChange(of: self.tagText, perform: { newValue in
+                            if newValue.count > 5 {
+                                tagText = String(newValue.prefix(5))
+                            }
+                            
+                            if newValue.contains(" ") {
+                                tags.append(String(newValue.dropLast()))
+                                tagText = ""
+                            }
+                        })
+                        .onSubmit {
+                            if !tagText.isEmpty {
+                                self.tags.append(tagText)
+                                tagText = ""
+                            }
                         }
-                    }
                 }
                 
                 Spacer(minLength: 0)
             } // HStack
             .padding(.horizontal, 17)
             
-            if self.tags.count == 0 {
+            if self.tags.count == 0 && self.tagText.isEmpty {
                 Text(self.isEditing ? "" : "태그를 입력하세요. (5글자 이내, 최대 3개)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
@@ -1089,7 +1074,7 @@ struct TagTextField: UIViewRepresentable {
             print("폰트 로드에 실패했습니다.")
         }
         
-        textField.textColor = .white
+        textField.textColor = .red
         
         return textField
     }
@@ -1116,6 +1101,7 @@ struct TagTextField: UIViewRepresentable {
                 self.parent.text = textField.text ?? ""
                 
                 if let lastCharacter = textField.text?.last, lastCharacter == " " {
+                    print("가주아")
                     self.parent.onCommit()
                 }
             }
@@ -1124,7 +1110,16 @@ struct TagTextField: UIViewRepresentable {
         func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
             // 최대 길이를 6로 제한
             let currentText = textField.text ?? ""
+            print("1.: \(range), \(string)")
             let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
+            
+            if string == " " {
+                DispatchQueue.main.async {
+                    self.parent.text = newText
+                    self.parent.onCommit()
+                }
+                return false // " "는 입력되지 않도록
+            }
             
             return newText.count <= 5
         }

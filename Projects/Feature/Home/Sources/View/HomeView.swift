@@ -24,6 +24,7 @@ public struct HomeView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var keyboardResponder: KeyboardResponder
     @EnvironmentObject var settingViewModel: SettingViewModel
@@ -34,6 +35,7 @@ public struct HomeView: View {
     public init(tab: Tab) {
         self.selectedTab = tab
     }
+
     
     public var body: some View {
         
@@ -61,10 +63,10 @@ public struct HomeView: View {
             
             MiniPlayerView()
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region, selectedTab: $selectedTab)
             
             MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == appCoordinator.currentUser.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
             
             if self.appCoordinator.isMumoryPopUpShown {
                 ZStack {
@@ -105,7 +107,7 @@ public struct HomeView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             playerViewModel.isShownMiniPlayer = false
-            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.user.uId)
             
         }
     }

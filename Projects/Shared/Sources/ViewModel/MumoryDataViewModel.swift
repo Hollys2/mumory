@@ -641,6 +641,8 @@ final public class MumoryDataViewModel: ObservableObject {
                     guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
                     return content1.count < content2.count
                 }
+                
+                self.isUpdating = false
             }
         }
     }

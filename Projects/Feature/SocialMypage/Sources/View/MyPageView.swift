@@ -322,6 +322,9 @@ struct SubFunctionView: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .background(ColorSet.background)
+            .onTapGesture {
+                appCoordinator.rootPath.append(MyPage.reward)
+            }
             
             
             Divider05()
@@ -341,6 +344,9 @@ struct SubFunctionView: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .background(ColorSet.background)
+            .onTapGesture {
+                appCoordinator.rootPath.append(MyPage.monthlyStat)
+            }
             
             
             Divider05()
