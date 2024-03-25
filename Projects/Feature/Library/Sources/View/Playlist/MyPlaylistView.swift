@@ -50,22 +50,14 @@ struct MyPlaylistView: View {
                 }
                 
                 ScrollView(.horizontal) {
-<<<<<<< HEAD
                     LazyHGrid(rows: rows,spacing: spacing, content: {
-=======
-                    LazyHGrid(rows: rows,spacing: 12, content: {
-<<<<<<< HEAD
->>>>>>> 5e1e803 (edit playlist view)
-=======
->>>>>>> f24e9fe (edit playlist view)
->>>>>>> dd89775 (edit playlist view)
                         ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
                                     if currentUserData.playlistArray[index].id == "favorite" {
                                         appCoordinator.rootPath.append(LibraryPage.favorite)
                                     }else {
-                                        appCoordinator.rootPath.append(LibraryPage.playlist(playlist: $currentUserData.playlistArray[index]))
+                                        appCoordinator.rootPath.append(LibraryPage.playlistWithIndex(index: index))
                                     }
                                     AnalyticsManager.shared.setSelectContentLog(title: "MyPlaylistViewItem")
                                 }
@@ -84,23 +76,12 @@ struct MyPlaylistView: View {
             
         }
         .onAppear(perform: {
-<<<<<<< HEAD
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
-=======
-<<<<<<< HEAD
->>>>>>> 5e1e803 (edit playlist view)
-=======
->>>>>>> f24e9fe (edit playlist view)
->>>>>>> dd89775 (edit playlist view)
-            currentUserData.playlistArray.removeAll()
-            Task {
-                await getPlayList()
-            }
         })
         
     }
     
-    func getPlayList() async {
+    private func getPlayList() async {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
@@ -131,48 +112,13 @@ struct MyPlaylistView: View {
             
             withAnimation {
                 currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
-<<<<<<< HEAD
-<<<<<<< HEAD
-//                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
-=======
-                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
->>>>>>> 5e1e803 (edit playlist view)
-=======
-//                fetchSongWithPlaylistIndex(index: currentUserData.playlistArray.count-1)
->>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
+                fetchSongWithPlaylistID(playlistId: id)
             }
-            
+        }
+    }
 
-        }
-    }
-    
-    private func fetchSongInfo(songIDs: [String]) async -> [Song] {
-        var songs: [Song] = []
-        
-        for id in songIDs {
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            
-            do {
-                let response = try await request.response()
-                
-                guard let song = response.items.first else {
-                    print("no song")
-                    continue
-                }
-                
-                songs.append(song)
-            } catch {
-                print("Error: \(error)")
-            }
-        }
-        
-        return songs
-    }
-    
-    private func fetchSongWithPlaylistIndex(index: Int) {
-        print("playlist \(index)")
+    private func fetchSongWithPlaylistID(playlistId: String) {
+        guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlistId}) else {print("no index");return}
         let songIDs = currentUserData.playlistArray[index].songIDs
         for id in songIDs {
             Task {
@@ -181,30 +127,16 @@ struct MyPlaylistView: View {
                 request.properties = [.genres, .artists]
                 guard let response = try? await request.response() else {return}
                 guard let song = response.items.first else {return}
+                guard let reloadIndex = currentUserData.playlistArray.firstIndex(where: {$0.id == playlistId}) else {print("no index2");return}
                 DispatchQueue.main.async {
-                    currentUserData.playlistArray[index].songs.append(song)
+                    currentUserData.playlistArray[reloadIndex].songs.append(song)
                 }
-                
             }
         }
     }
     
-    private func fetchPlaylistSong(playlist: Binding<MusicPlaylist>) {
-        for id in playlist.songIDs.wrappedValue {
-            Task {
-                let musicItemID = MusicItemID(rawValue: id)
-                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                request.properties = [.genres, .artists]
-                guard let response = try? await request.response() else {return}
-                guard let song = response.items.first else {return}
-                DispatchQueue.main.async {
-                    playlist.songs.wrappedValue.append(song)
-                }
-                
-            }
-        }
-    }
 }
+
 
 
 

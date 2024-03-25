@@ -10,25 +10,23 @@ import SwiftUI
 import Shared
 import MusicKit
 import Core
+import MapKit
 
 struct PlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
-//    @State var songs: [Song] = []
     @State var isEditing: Bool = false
     @State var isSongDeletePopupPresent: Bool = false
     @State var selectedSongsForDelete: [Song] = []
+    @State var isPresentModifyPlaylistView: Bool = false
+    @State var selectedTab: Tab = .library
+    @State private var region: MKCoordinateRegion?
     
     @Binding var playlist: MusicPlaylist
-    
-    @State var isPresentModifyPlaylistView: Bool = false
-    
-    @State var selectedTab: Tab = .library
-        
     init(playlist: Binding<MusicPlaylist>){
         self._playlist = playlist
     }
@@ -39,14 +37,7 @@ struct PlaylistView: View {
 
             //이미지
             PlaylistImage(songs: $playlist.songs)
-<<<<<<< HEAD
                 .frame(width: getUIScreenBounds().width)
-=======
-<<<<<<< HEAD
->>>>>>> 5e1e803 (edit playlist view)
-=======
->>>>>>> f24e9fe (edit playlist view)
->>>>>>> dd89775 (edit playlist view)
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
@@ -140,15 +131,8 @@ struct PlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerManager.playAll(title: playlist.title , songs: playlist.songs)
-<<<<<<< HEAD
-<<<<<<< HEAD
+                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
-=======
->>>>>>> 5e1e803 (edit playlist view)
-=======
-                                        AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
->>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -173,9 +157,10 @@ struct PlaylistView: View {
                                             selectedSongsForDelete.append(song)
                                         }
                                     }else {
-                                        playerManager.playNewSong(song: song)
+                                        playerViewModel.playNewSong(song: song)
                                     }
                                 }
+                            Divider05()
                             
                         }
                   
@@ -242,19 +227,6 @@ struct PlaylistView: View {
             })
             .frame(height: 50)
             .padding(.top, currentUserData.topInset)
-            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
-                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
-                        isBottomSheetPresent = false
-                        isPresentModifyPlaylistView = true
-                    })
-                }
-                .background(TransparentBackground())
-            })
-            .fullScreenCover(isPresented: $isPresentModifyPlaylistView) {
-                ModifyPlaylistPopupView(playlist: $playlist)
-                    .background(TransparentBackground())
-            }
             
             
             //삭제버튼
@@ -277,39 +249,54 @@ struct PlaylistView: View {
                 })
             }
             
-            
-//            MumoryTabSampleView(selectedTab: $selectedTab)
-//                .frame(maxHeight: .infinity, alignment: .bottom)
-//                .onChange(of: selectedTab) { value in
-//                    appCoordinator.selectedTab = value
-//                    UIView.setAnimationsEnabled(false)
-//                    appCoordinator.rootPath = NavigationPath()
-//                    UIView.setAnimationsEnabled(true)
-//
-//                }
-            
-            
-            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
         }
         .ignoresSafeArea()
-<<<<<<< HEAD
-<<<<<<< HEAD
+        .navigationBarBackButtonHidden()
         .onAppear(perform: {
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
+            print("playlist on appear")
+            if playlist.songIDs.count != playlist.songs.count {
+                print("not same")
+                let startIndex = playlist.songs.count
+                for index in startIndex ..< playlist.songIDs.count {
+                    let songId = playlist.songIDs[index]
+                    print("song id: \(songId)")
+                    Task {
+                        guard let song = await fetchSong(songId: songId) else {return}
+                        DispatchQueue.main.async {
+                            playlist.songs.append(song)
+                            print("song count: \(playlist.songs.count)")
+                        }
+                    }
+                }
+            }
         })
-=======
-//        .onAppear(perform: {
-//            getPlaylist()
-//        })
->>>>>>> 5e1e803 (edit playlist view)
-=======
-        .onAppear(perform: {
-            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
+        .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+            BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+                PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
+                    isBottomSheetPresent = false
+                    isPresentModifyPlaylistView = true
+                })
+            }
+            .background(TransparentBackground())
         })
->>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
+        .fullScreenCover(isPresented: $isPresentModifyPlaylistView) {
+            ModifyPlaylistPopupView(playlist: $playlist)
+                .background(TransparentBackground())
+        }
 
         
         
+    }
+    
+    private func fetchSong(songId: String) async -> Song? {
+        let musicItemID = MusicItemID(rawValue: songId)
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        request.properties = [.genres, .artists]
+        guard let response = try? await request.response() else {return nil}
+        guard let song = response.items.first else {return nil}
+        return song
     }
     
     private func setEditMode(isEditing: Bool) {
@@ -322,26 +309,26 @@ struct PlaylistView: View {
 //    private func getPlaylist() {
 //        let Firebase = FBManager.shared
 //        let db = Firebase.db
-//        
+//
 //        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
 //            if error == nil {
 //                guard let data = snapshot?.data() else {
 //                    print("no data")
 //                    return
 //                }
-//                
+//
 //                guard let songIDs = data["songIds"] as? [String] else {
 //                    print("no song id")
 //                    return
 //                }
 //                playlist.songIDs = songIDs
-//                
+//
 //                Task {
 //                    await fetchSongInfo(songIDs: songIDs)
 //                }
-//                
-//                
-//                
+//
+//
+//
 //            }else {
 //                print("error: \(error!)")
 //            }
@@ -350,30 +337,30 @@ struct PlaylistView: View {
     
 //    private func fetchSongInfo(songIDs: [String]) async {
 //        self.songs = []
-//        
+//
 //        for id in songIDs {
 //            let musicItemID = MusicItemID(rawValue: id)
 //            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
 //            request.properties = [.genres, .artists]
-//            
+//
 //            do {
 //                let response = try await request.response()
-//                
+//
 //                guard let song = response.items.first else {
 //                    print("no song")
 //                    continue
 //                }
-//            
+//
 //                withAnimation {
 //                    self.songs.append(song)
 //                }
-//                
-//                
+//
+//
 //            } catch {
 //                print("Error: \(error)")
 //            }
 //        }
-//        
+//
 //        isCompletedGetSongs = true
 //    }
     
@@ -531,67 +518,5 @@ private struct AddSongButtonInPlaylistView: View {
             
             Divider05()
         })
-    }
-}
-
-private struct MumoryTabSampleView: View {
-
-    @Binding var selectedTab: Tab
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    public init(selectedTab: Binding<Tab>) {
-        self._selectedTab = selectedTab
-    }
-    
-    public var body: some View {
-        GeometryReader { geometry in
-            HStack(alignment: .bottom, spacing: 0) {
-                
-                Button(action: {
-                    selectedTab = .home
-                    playerViewModel.isShownMiniPlayer = false
-                }) {
-                    Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
-                }
-                .frame(width: geometry.size.width / 5)
-                
-                Button(action: {
-                    selectedTab = .social
-                    playerViewModel.isShownMiniPlayer = false
-                }) {
-                    Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
-                }
-                .frame(width: geometry.size.width / 5)
-                
-                Button(action: {
-                    withAnimation(Animation.easeInOut(duration: 0.1)) {
-                        appCoordinator.isCreateMumorySheetShown = true
-                        appCoordinator.offsetY = CGFloat.zero
-                    }
-                }) {
-                    Image(asset: SharedAsset.createMumoryTabbar)
-                }
-                .frame(width: geometry.size.width / 5)
-                
-                Button(action: {
-                    selectedTab = .library
-                    playerViewModel.isShownMiniPlayer = true
-                }) {
-                    Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
-                }
-                .frame(width: geometry.size.width / 5)
-                
-                Button(action: {
-                    selectedTab = .notification
-                    playerViewModel.isShownMiniPlayer = false
-                }) {
-                    Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
-                }
-                .frame(width: geometry.size.width / 5)
-            }
-            .padding(.top, 2)
-        }
-        .frame(height: 89)
-        .background(Color.black)
     }
 }

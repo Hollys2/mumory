@@ -13,7 +13,7 @@ import MusicKit
 struct UneditablePlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
@@ -65,15 +65,8 @@ struct UneditablePlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerManager.playAll(title: playlist.title , songs: playlist.songs)
-<<<<<<< HEAD
-<<<<<<< HEAD
+                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
                                         AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
-=======
->>>>>>> 5e1e803 (edit playlist view)
-=======
-                                        AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
->>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
                                     }
                             })
                             .padding(.bottom, 15)
@@ -86,21 +79,10 @@ struct UneditablePlaylistView: View {
                         ForEach(playlist.songs, id: \.self) { song in
                             UneditablePlaylistMusicListItem(song: song)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
                             
-<<<<<<< HEAD
                             Divider05()
-=======
-                            Divider()
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 0.5)
-                                .background(ColorSet.subGray)
-<<<<<<< HEAD
->>>>>>> 5e1e803 (edit playlist view)
-=======
->>>>>>> f24e9fe (edit playlist view)
->>>>>>> dd89775 (edit playlist view)
                         }
                         
                         
@@ -279,10 +261,6 @@ struct UneditablePlaylistMusicListItem: View {
         
     }
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 5e1e803 (edit playlist view)
 
 public struct PlaylistImageTest: View {
     @State var imageWidth: CGFloat = 0
@@ -394,8 +372,3 @@ public struct PlaylistImageTest: View {
     
     
 }
-<<<<<<< HEAD
-=======
->>>>>>> d1f4c20 (refactoring)
-=======
->>>>>>> 5e1e803 (edit playlist view)

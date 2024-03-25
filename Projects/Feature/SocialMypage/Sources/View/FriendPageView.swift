@@ -14,29 +14,25 @@ import MusicKit
 struct FriendPageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    @State var isStranger: Bool = false
+    @State var isStranger: Bool = true
     @State var isPresentFriendBottomSheet: Bool = false
     @State var isPresentBlockConfirmPopup: Bool = false
 
-    let friend: MumoriUser
+    @State var friend: MumoriUser
     
     init(friend: MumoriUser) {
-        self.friend = friend
+        self._friend = .init(initialValue: friend)
     }
-    
-    init(uId: String) async {
-        self.friend = await MumoriUser(uId: uId)
-    }
-    
 
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background
             
-            if isStranger{
-                UnkownFriendPageView(friend: friend)
-            }else {
+            if currentUserData.friends.contains(where: {$0.uId == friend.uId}){
                 KnownFriendPageView(friend: friend)
+            }else {
+                UnkownFriendPageView(friend: friend)
+
             }
             
             HStack{
@@ -64,14 +60,16 @@ struct FriendPageView: View {
             .padding(.top, currentUserData.topInset)
         }
         .ignoresSafeArea()
-        .onAppear {
-            isStranger = !currentUserData.friends.contains(friend.uId)
-        }
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
                 FriendPageCommonBottomSheetView(friend: self.friend, isPresentBlockConfirmPopup: $isPresentBlockConfirmPopup)
             }
             .background(TransparentBackground())
+        })
+        .onAppear(perform: {
+            Task {
+                self.friend = await MumoriUser(uId: self.friend.uId)
+            }
         })
     }
 }
@@ -172,15 +170,7 @@ struct UnkownFriendPageView: View {
                     .frame(width: 90, height: 90)
                     .clipShape(Circle())
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-<<<<<<< HEAD
-<<<<<<< HEAD
                     .offset(y: -40)
-=======
-                    .offset(y: -50)
->>>>>>> 5e1e803 (edit playlist view)
-=======
-                    .offset(y: -40)
->>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
             }
             .padding(.horizontal, 20)
 
@@ -310,13 +300,11 @@ struct FriendInfoView: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: getUIScreenBounds().width, height: 150)
+                    .frame(width: getUIScreenBounds().width, height: 165)
                     .clipped()
             } placeholder: {
                 Rectangle()
-                    .frame(maxWidth: .infinity)
-                    .frame(width: getUIScreenBounds().width)
-                    .frame(height: 150)
+                    .frame(width: getUIScreenBounds().width, height: 165)
                     .foregroundStyle(ColorSet.darkGray)
             }
             .overlay {
@@ -357,7 +345,7 @@ struct FriendInfoView: View {
                             .frame(width: 90, height: 90)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .offset(y: -50)
+                    .offset(y: -40)
 
                 }
                 .padding(.horizontal, 20)
@@ -405,6 +393,7 @@ struct FriendInfoView: View {
                 .background(TransparentBackground())
             })
         })
+        .ignoresSafeArea()
     }
 }
 
@@ -443,15 +432,7 @@ struct FriendPlaylistView: View {
                 }
                 
                 ScrollView(.horizontal) {
-<<<<<<< HEAD
                     HStack(alignment: .top, spacing: 10, content: {
-=======
-                    HStack(alignment: .top,spacing: 10, content: {
-<<<<<<< HEAD
->>>>>>> 5e1e803 (edit playlist view)
-=======
->>>>>>> f24e9fe (edit playlist view)
->>>>>>> dd89775 (edit playlist view)
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
                             PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
                                 .onTapGesture {
