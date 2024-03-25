@@ -121,9 +121,7 @@ struct SongBottomSheetView: View {
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                     .onTapGesture {
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 805e3e0 (edit UI things and working on now playing view text animation)
+
 //                        dismiss()
 //                        appCoordinator.bottomAnimationViewStatus = .remove
 //                        appCoordinator.rootPath = NavigationPath()
