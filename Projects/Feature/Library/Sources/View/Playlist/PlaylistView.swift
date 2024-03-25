@@ -254,6 +254,7 @@ struct PlaylistView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
+            playerViewModel.miniPlayerMoveToBottom = true
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
             print("playlist on appear")
             if playlist.songIDs.count != playlist.songs.count {
@@ -300,70 +301,12 @@ struct PlaylistView: View {
     }
     
     private func setEditMode(isEditing: Bool) {
-//        appCoordinator.isHiddenTabBarWithoutAnimation = isEditing
         withAnimation {
             self.isEditing = isEditing
             appCoordinator.isHiddenTabBar = isEditing
         }
     }
-//    private func getPlaylist() {
-//        let Firebase = FBManager.shared
-//        let db = Firebase.db
-//        
-//        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).getDocument { snapshot, error in
-//            if error == nil {
-//                guard let data = snapshot?.data() else {
-//                    print("no data")
-//                    return
-//                }
-//                
-//                guard let songIDs = data["songIds"] as? [String] else {
-//                    print("no song id")
-//                    return
-//                }
-//                playlist.songIDs = songIDs
-//                
-//                Task {
-//                    await fetchSongInfo(songIDs: songIDs)
-//                }
-//                
-//                
-//                
-//            }else {
-//                print("error: \(error!)")
-//            }
-//        }
-//    }
-    
-//    private func fetchSongInfo(songIDs: [String]) async {
-//        self.songs = []
-//        
-//        for id in songIDs {
-//            let musicItemID = MusicItemID(rawValue: id)
-//            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-//            request.properties = [.genres, .artists]
-//            
-//            do {
-//                let response = try await request.response()
-//                
-//                guard let song = response.items.first else {
-//                    print("no song")
-//                    continue
-//                }
-//            
-//                withAnimation {
-//                    self.songs.append(song)
-//                }
-//                
-//                
-//            } catch {
-//                print("Error: \(error)")
-//            }
-//        }
-//        
-//        isCompletedGetSongs = true
-//    }
-    
+
     private func deleteSongsFromPlaylist() {
         let Firebase = FBManager.shared
         let db = Firebase.db

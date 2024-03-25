@@ -169,8 +169,10 @@ struct LibraryView: View {
         guard let snapshot = try? await query.getDocuments() else {
             return
         }
-        
+        var count = 0
         snapshot.documents.forEach { document in
+            count += 1
+            print("count in looop: \(count)")
             let data = document.data()
             guard let title = data["title"] as? String else {
                 print("no title")
@@ -185,13 +187,9 @@ struct LibraryView: View {
                 return
             }
             let id = document.reference.documentID
-            
-            Task {
-                var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, songs: await fetchSongWithPlaylistID(songIDs: songIDs))
-                currentUserData.playlistArray.append(playlist)
-                
-            }
-
+            let playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic)
+            currentUserData.playlistArray.append(playlist)
+            fetchSong(playlist: $currentUserData.playlistArray[currentUserData.playlistArray.count-1])
         }
         isLoadingPlaylist = false
     }
@@ -212,6 +210,24 @@ struct LibraryView: View {
             returnValue.append(song)
         }
         return returnValue
+    }
+    
+    private func fetchSong(playlist: Binding<MusicPlaylist>) {
+        var count = 0
+        Task {
+            for id in playlist.songIDs.wrappedValue {
+                if count >= 4 {
+                    break
+                }
+                count += 1
+                let musicItemID = MusicItemID(rawValue: id)
+                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                request.properties = [.genres, .artists]
+                guard let response = try? await request.response() else {continue}
+                guard let song = response.items.first else {continue}
+                playlist.songs.wrappedValue.append(song)
+            }
+        }
     }
 }
 

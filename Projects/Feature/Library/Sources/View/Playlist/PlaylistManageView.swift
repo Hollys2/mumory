@@ -14,7 +14,7 @@ import FirebaseFirestore
 struct PlaylistManageView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var isCreatePlaylistCompleted: Bool = false
     @State var playlistArray: [MusicPlaylist] = []
     @State var isShowCreatePopup: Bool = false
@@ -125,6 +125,7 @@ struct PlaylistManageView: View {
 
         }
         .onAppear {
+            playerViewModel.miniPlayerMoveToBottom = true
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistManageView")
         }
   

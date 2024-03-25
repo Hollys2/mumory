@@ -68,6 +68,7 @@ struct FavoriteListView: View {
             })
         }
         .onAppear {
+            playerViewModel.miniPlayerMoveToBottom = true
             fetchSongInfo(songIDs: playerViewModel.favoriteSongIds)
         }
     }
