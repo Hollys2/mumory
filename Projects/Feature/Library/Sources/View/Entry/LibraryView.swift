@@ -29,14 +29,17 @@ struct LibraryView: View {
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
-            StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, content: {
+            StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, refreshAction: {
+                Task {
+                    await getPlayList()
+                }
+            }, content: {
                 
                 ZStack(alignment: .top) {
                     VStack(spacing: 0) {
                         
                         //마이뮤직, 추천 선택 스택
                         HStack(spacing: 6, content: {
-                            
                             //마이뮤직버튼
                             Button(action: {
                                 isTapMyMusic = true
@@ -83,16 +86,17 @@ struct LibraryView: View {
                             .foregroundStyle(.clear)
                             .frame(height: 87)
                     }
-                    
-                  
                 }
                 .frame(width: screenWidth)
                 .onAppear {
                     print("screent width: \(getUIScreenBounds().width), height: \(getUIScreenBounds().height)")
                 }
+        
                 
             })
             .padding(.top, appCoordinator.safeAreaInsetsTop)
+
+           
             
             //상단바
             HStack(){
@@ -115,7 +119,7 @@ struct LibraryView: View {
             }
             .frame(height: topBarHeight, alignment: .center)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
-            .background(ColorSet.background)
+            .background(ColorSet.background.opacity(0.3))
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
                 if newValue == .up {
@@ -153,9 +157,6 @@ struct LibraryView: View {
         })
         
     }
-    
-
-        
     
     private func getPlayList() async {
         let Firebase = FBManager.shared
@@ -212,6 +213,7 @@ struct LibraryView: View {
         return returnValue
     }
     
+    //새로고침 쭈욱 하면 여기서 튕김
     private func fetchSong(playlist: Binding<MusicPlaylist>) {
         var count = 0
         Task {

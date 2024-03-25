@@ -19,23 +19,25 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     @Binding var viewWidth: CGFloat
     @Binding var scrollDirection: ScrollDirection
     @Binding var topbarYoffset: CGFloat
+    var refreshAction: () -> Void
     var content: () -> Content
 
     
-    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
+    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, refreshAction: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
         self._changeDetectValue = changeDetectValue
         self._contentOffset = contentOffset
         self._viewWidth = viewWidth
         self._scrollDirection = scrollDirection
         self._topbarYoffset = topbarYoffset
+        self.refreshAction = refreshAction
         self.content = content
-
     }
 
     func makeUIViewController(context: Context) -> UIStickyScrollViewController {
-        let vc = UIStickyScrollViewController()
+        let vc = UIStickyScrollViewController(refreshAction: self.refreshAction)
         vc.hostingController.rootView = AnyView(self.content())
         vc.scrollView.delegate = context.coordinator
+        
         return vc
     }
 
@@ -106,7 +108,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
        
             }
             contentOffset.wrappedValue = scrollView.contentOffset
-
+            scrollView.refreshControl?.bounds = CGRect(x: 0, y: -68, width: 50, height: 50)
         }
     }
 }
@@ -119,14 +121,32 @@ class UIStickyScrollViewController: UIViewController{
         return v
     }()
     
+    var refreshControl: UIRefreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
     var index = 0
-
     var hostingController: UIHostingController<AnyView> = UIHostingController(rootView: AnyView(EmptyView()))
-
+    
+    var refreshAction: () -> Void
+    
+    init(refreshAction: @escaping () -> Void) {
+        self.refreshAction = refreshAction
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         scrollView.decelerationRate = .fast
         scrollView.showsHorizontalScrollIndicator = false
+        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+//        refreshControl.bounds = CGRect(x: refreshControl.bounds.origin.x,
+//                                       y: -68,
+//                                       width: refreshControl.bounds.size.width,
+//                                       height: refreshControl.bounds.size.height)
+        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+        scrollView.refreshControl = refreshControl
+
         
         self.hostingController.view.backgroundColor = .clear
 
@@ -138,8 +158,6 @@ class UIStickyScrollViewController: UIViewController{
         self.scrollView.addSubview(self.hostingController.view)
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
-
-
     }
 
     func pinEdges(of viewA: UIView, to viewB: UIView) {
@@ -159,4 +177,10 @@ class UIStickyScrollViewController: UIViewController{
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
     }
+    
+    @objc func refresh(){
+        self.refreshAction()
+        refreshControl.endRefreshing()
+    }
+
 }

@@ -67,6 +67,7 @@ struct NowPlayingView: View {
                     dismiss()
                 }
             }
+            .environmentObject(snackBarViewModel)
 
             
         }
