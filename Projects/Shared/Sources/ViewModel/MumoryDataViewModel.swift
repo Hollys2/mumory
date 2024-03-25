@@ -233,12 +233,7 @@ final public class MumoryDataViewModel: ObservableObject {
         
         let copiedMumoryCollectionRef = mumoryCollectionRef
            
-        
         Task {
-//            DispatchQueue.main.async {
-//                self.everyMumorys = []
-//            }
-            
             do {
                 let snapshot = try await copiedMumoryCollectionRef.getDocuments()
                 
@@ -749,64 +744,5 @@ extension MumoryDataViewModel {
 //                print("Transaction successfully committed!")
 //            }
 //        }
-    }
-
-    public func likeMumory2(mumoryAnnotation: Mumory, uId: String) {
-        
-        let db = FirebaseManager.shared.db
-        let postRef = db.collection("Mumory").document(mumoryAnnotation.id)
-        
-        db.runTransaction({ (transaction, errorPointer) -> Any? in
-            
-            let postDocument: DocumentSnapshot
-            
-            do {
-                try postDocument = transaction.getDocument(postRef)
-            } catch let fetchError as NSError {
-                errorPointer?.pointee = fetchError
-                return nil
-            }
-            
-            guard var oldLikes = postDocument.data()?["likes"] as? [String] else {
-                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
-                ])
-                errorPointer?.pointee = error
-                return nil
-            }
-            
-            if oldLikes.contains(uId) {
-                if let index = oldLikes.firstIndex(of: uId) {
-                    oldLikes.remove(at: index)
-                    mumoryAnnotation.likes.remove(at: index)
-                }
-            } else {
-                oldLikes.append(uId)
-                mumoryAnnotation.likes.append(uId)
-            }
-            
-            if let index = self.everyMumorys.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-                DispatchQueue.main.async {
-                    self.everyMumorys[index] = mumoryAnnotation
-                }
-            }
-            
-            transaction.updateData(["likes": oldLikes], forDocument: postRef)
-            
-//            let newData: [String: Any] = [
-//                "uId": uId,
-//                "data": FirebaseManager.Timestamp(date: Date()),
-//                "mumoryId": mumoryAnnotation.id
-//            ]
-//            likeCollectionRef.addDocument(data: newData)
-            
-            return nil
-        }) { (object, error) in
-            if let error = error {
-                print("Transaction failed: \(error)")
-            } else {
-                print("Transaction successfully committed!")
-            }
-        }
     }
 }

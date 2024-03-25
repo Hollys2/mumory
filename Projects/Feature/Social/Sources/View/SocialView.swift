@@ -120,6 +120,10 @@ extension SocialScrollViewRepresentable {
             }
 
             preOffsetY = offsetY
+            
+            if offsetY >= contentHeight - scrollViewHeight {
+                print("END")
+            }
         }
     }
 }
