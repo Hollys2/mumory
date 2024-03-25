@@ -12,10 +12,12 @@ import Core
 import PhotosUI
 import FirebaseFirestore
 
+//여기 내부에서만 사용하는 observable을 만들어서 사용할까??
+//아이템 내부에 type, status, value 정의해서 사용
 struct EditProfileView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State private var editProfileData: EditProfileData = EditProfileData()
-    
+    @State var isLoading: Bool = false
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background
@@ -28,9 +30,10 @@ struct EditProfileView: View {
                     Rectangle()
                         .fill(Color.clear)
                         .frame(height: 500)
-
                 })
             }
+            
+            LoadingAnimationView(isLoading: $isLoading)
         }
         .ignoresSafeArea()
         .onAppear(perform: {
@@ -44,9 +47,6 @@ struct EditProfileView: View {
     }
 }
 
-//#Preview {
-//    EditProfileView()
-//}
 
 public struct ImageBundle {
     public var item: PhotosPickerItem?
