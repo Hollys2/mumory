@@ -57,9 +57,6 @@ struct TOSDetailView: View {
     }
 }
 
-#Preview {
-    TOSDetailView()
-}
 
 
 var tosString: String =

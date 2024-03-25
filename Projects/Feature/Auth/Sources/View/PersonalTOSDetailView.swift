@@ -57,10 +57,6 @@ struct PersonalTOSDetailView: View {
     }
 }
 
-#Preview {
-    PersonalTOSDetailView()
-}
-
 var personalTosString =
 """
 뮤모리(이하 '서비스'라 함)는 온라인으로 제공하는 위치 기반 음악 기록 서비스입니다. 뮤모리는 개인정보 보호법, 정보통신망 이용촉진 및 정보보호 등에 관한 법률 등에 따라 회원님의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을 수립하여 공개합니다.

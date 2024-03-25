@@ -88,7 +88,7 @@ struct SearchMusicViewInCreateMumory: View {
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
                 .offset(y: playerViewModel.isShownPreview ? 0 : 120)
-                .animation(.spring, value: playerViewModel.isShownPreview)
+                .animation(.spring(), value: playerViewModel.isShownPreview)
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()

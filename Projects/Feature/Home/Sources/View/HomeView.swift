@@ -28,6 +28,9 @@ public struct HomeView: View {
     @EnvironmentObject var keyboardResponder: KeyboardResponder
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var withdrawViewModel: WithdrawViewModel
+    
+
+    
     public init(){}
     
     public var body: some View {
@@ -45,9 +48,9 @@ public struct HomeView: View {
                 case .notification:
                     NotifyView()
                 }
+                
                 MumoryTabView(selectedTab: $appCoordinator.selectedTab)
             }
-            
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
             
@@ -92,8 +95,7 @@ public struct HomeView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear {
-            playerViewModel.isShownMiniPlayer = false
-            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.user.uId)
+            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.uId)
         }
     }
     
@@ -103,8 +105,8 @@ public struct HomeView: View {
             
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
-                    print("HomeMapViewRepresentable onAppear")
-                    //                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+                    print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
+//                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.user.uId)
                 }
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")

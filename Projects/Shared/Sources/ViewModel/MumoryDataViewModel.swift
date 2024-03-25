@@ -241,13 +241,32 @@ final public class MumoryDataViewModel: ObservableObject {
                     let documentData = document.data()
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
-                    //                    if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
+//                    if !self.everyMumorys.contains(where: { $0.id == newMumory.id }) {
+//                        DispatchQueue.main.async {
+//                            print("newMumory.date: \(newMumory.date)")
+//                            self.everyMumorys.append(newMumory)
+//                            self.everyMumorys.sort { $0.date > $1.date }
+//                        }
+//                    }
+                    
                     DispatchQueue.main.async {
-                        print("newMumory.date: \(newMumory.date)")
-                        self.everyMumorys.append(newMumory)
-                        self.everyMumorys.sort { $0.date > $1.date }
+                        var uniqueIds = Set<String>(self.everyMumorys.map { $0.id })
+                        
+                        if uniqueIds.contains(document.documentID) {
+                            // 이미 배열에 같은 id를 가진 Mumory가 있는 경우
+                            uniqueIds.remove(document.documentID)
+                            uniqueIds.insert(newMumory.id)
+                            self.everyMumorys = self.everyMumorys.filter { $0.id != document.documentID }
+                            self.everyMumorys.append(newMumory)
+                            self.everyMumorys.sort { $0.date > $1.date }
+                            print("2Document updated: \(document.documentID)")
+                        } else {
+                            // 배열에 같은 id를 가진 Mumory가 없는 경우
+                            self.everyMumorys.append(newMumory)
+                            self.everyMumorys.sort { $0.date > $1.date }
+                            print("2Document added: \(document.documentID)")
+                        }
                     }
-                    //                    }
                 }
                 
                 self.lastDocument = snapshot.documents.last
