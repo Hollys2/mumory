@@ -556,7 +556,6 @@ public struct SocialView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    
     @ObservedObject var firebaseManager = FirebaseManager.shared
     
     public init(isShown: Binding<Bool>) {
@@ -601,7 +600,7 @@ public struct SocialView: View {
                         self.appCoordinator.isAddFriendViewShown = true
                     }
                 }) {
-                    (firebaseManager.friendRequests != [] ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
+                    (currentUserData.recievedNewFriends ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
                         .resizable()
                         .frame(width: 30, height: 30)
                 }

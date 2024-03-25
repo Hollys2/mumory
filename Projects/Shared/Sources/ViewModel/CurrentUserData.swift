@@ -18,23 +18,107 @@ public class CurrentUserData: ObservableObject {
                     self.user = await MumoriUser(uId: self.uId)
                 }
                 Task {
-                    let query = FBManager.shared.db.collection("User").document(self.uId)
-                    guard let data = try? await query.getDocument().data() else {return}
-                    guard let friends = data["friends"] as? [String] else {return}
-                    self.friends = friends
+                    self.FriendRequestListener()
+                    self.NotificationListener()
+                    self.FriendUpdateListener()
                 }
             }
         }
+        
     }
     
     @Published public var user: MumoriUser = MumoriUser()
-    @Published public var friends: [String] = []
+    @Published public var friends: [MumoriUser] = []
+    @Published public var blockFriends: [MumoriUser] = []
+    @Published public var friendRequests: [MumoriUser] = []
+    @Published public var recievedRequests: [MumoriUser] = []
+    @Published public var recievedNewFriends: Bool = false
+    @Published public var existUnreadNotification: Bool = false
     
     //삭제 예정...
     @Published public var favoriteGenres: [Int] = []
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
     @Published public var playlistArray: [MusicPlaylist] = []
+    
+    
+    func FriendRequestListener() {
+        DispatchQueue.main.async {
+            
+            let db = FBManager.shared.db
+            db.collection("User").document(self.uId).collection("Friend").addSnapshotListener { snapshot, error in
+                guard let snapshot = snapshot else {return}
+                snapshot.documentChanges.forEach { documentChange in
+                    switch documentChange.type {
+                    case .added:
+                        let data = documentChange.document.data()
+                        guard let type = data["type"] as? String else {return}
+                        if type == "recieve" {
+                            guard let friendUId = data["uId"] as? String else {return}
+                            Task {
+                                let user = await MumoriUser(uId: friendUId)
+                                DispatchQueue.main.async {
+                                    self.recievedNewFriends = true
+                                    self.recievedRequests.append(user)
+                                }
+                            }
+                            
+                        } else if type == "request" {
+                            guard let friendUId = data["uId"] as? String else {return}
+                            Task {
+                                let user = await MumoriUser(uId: friendUId)
+                                DispatchQueue.main.async {
+                                    self.friendRequests.append(user)
+                                }
+                            }
+                        }
+                    default: break
+                    }
+                }
+            }
+        }
+    }
+    
+    func FriendUpdateListener() {
+        DispatchQueue.main.async {
+            let db = FBManager.shared.db
+            db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
+                guard let snapshot = snapshot else {return}
+                guard let friendIds = snapshot.get("friends") as? [String] else {return}
+                self.friends.removeAll()
+                friendIds.forEach { uid in
+                    Task {
+                        let user = await MumoriUser(uId: uid)
+                        DispatchQueue.main.async {
+                            self.friends.append(user)
+                        }
+                    }
+                }
+                guard let blockFriendIds = snapshot.get("blockFriends") as? [String] else {return}
+                blockFriendIds.forEach { uid in
+                    Task {
+                        let user = await MumoriUser(uId: uid)
+                        DispatchQueue.main.async {
+                            self.blockFriends.append(user)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func NotificationListener() {
+        let db = FBManager.shared.db
+        let query = db.collection("User").document(self.uId).collection("Notification")
+            .whereField("isRead", isEqualTo: false)
+        
+        DispatchQueue.main.async {
+            query.addSnapshotListener { snapshot, error in
+                guard let snapshot = snapshot else {return}
+                self.existUnreadNotification = (snapshot.count > 0)
+            }
+        }
+    }
     
     public init(){
     }

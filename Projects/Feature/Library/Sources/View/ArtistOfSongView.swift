@@ -13,7 +13,7 @@ import MusicKit
 struct ArtistOfSongView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var playerManager: PlayerViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero
     @State private var contentSize: CGSize = .zero
@@ -73,7 +73,7 @@ struct ArtistOfSongView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(title: artist?.name ?? "재생중", songs: songs)
+                                    playerViewModel.playAll(title: artist?.name ?? "재생중", songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "ArtistViewPlayAllButton")
                                 }
                         })
@@ -88,7 +88,7 @@ struct ArtistOfSongView: View {
                         ForEach(songs, id: \.id){ song in
                             MusicListItem(song: song, type: .artist)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
                         }
                         

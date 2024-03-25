@@ -19,7 +19,6 @@ public struct CreateMumoryBottomSheetView: View {
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
     @Binding private var newRegion: MKCoordinateRegion?
-    @Binding private var selectedTab: Tab
     
     @State private var bottomBarHeight: CGFloat = 55
     
@@ -49,12 +48,10 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
-    
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>, selectedTab: Binding<Tab> ) {
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
         self._newRegion = newRegion
-        self._selectedTab = selectedTab
     }
     
     public var body: some View {
@@ -482,7 +479,7 @@ public struct CreateMumoryBottomSheetView: View {
 
                                         self.newRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                         
-                                        self.selectedTab = .home
+                                        appCoordinator.selectedTab = .home
                                         
                                     case .failure(let error):
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")

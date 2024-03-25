@@ -44,7 +44,7 @@ public struct BottomSheetWrapper: View {
                     })
                     .frame(maxWidth: .infinity)
                     .background(ColorSet.background)
-                    .cornerRadius(15, corners: [.allCorners])
+                    .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                     .padding(.horizontal, 7)
                     .offset(y: yOffset)
                     .gesture(drag)

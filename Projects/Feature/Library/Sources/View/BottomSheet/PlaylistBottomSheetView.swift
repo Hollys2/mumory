@@ -41,6 +41,7 @@ struct PlaylistBottomSheetView: View {
             
             Divider05()
                 .padding(.horizontal, 4)
+                .padding(.bottom, 10)
             
             BottomSheetItem(image: SharedAsset.editPlaylist.swiftUIImage, title: "플레이리스트 이름 수정")
                 .onTapGesture {

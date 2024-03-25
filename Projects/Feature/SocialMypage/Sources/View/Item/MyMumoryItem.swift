@@ -13,6 +13,7 @@ import MusicKit
 struct MyMumoryItem: View {
     let mumory: Mumory
     @State var song: Song?
+    @State var width: CGFloat = .zero
     init(mumory: Mumory) {
         self.mumory = mumory
     }
@@ -23,13 +24,13 @@ struct MyMumoryItem: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 170, height: 170)
+                    .frame(width: width, height: width)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
                 
             } placeholder: {
                 RoundedRectangle(cornerRadius: 10, style: .circular)
-                    .frame(width: 170, height: 170)
+                    .frame(width: width, height: width)
             }
             .overlay(content: {
                 Color.black.opacity(0.4)
@@ -76,6 +77,7 @@ struct MyMumoryItem: View {
             
         })
         .onAppear {
+            width = getUIScreenBounds().width < 380 ? 163 : 170
             Task {
                 self.song = await fetchSong(songID: mumory.musicModel.songID.rawValue)
             }

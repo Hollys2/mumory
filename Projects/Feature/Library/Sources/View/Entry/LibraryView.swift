@@ -8,9 +8,10 @@
 
 import SwiftUI
 import Shared
+import MusicKit
 
 struct LibraryView: View {
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @StateObject var snackbarViewModel: SnackBarViewModel = SnackBarViewModel()
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -21,6 +22,8 @@ struct LibraryView: View {
     @State var screenWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
     @State var scrollYOffset: CGFloat = 0
+    
+    @State var isLoadingPlaylist: Bool = false
   
     let topBarHeight = 68.0
     var body: some View {
@@ -123,6 +126,18 @@ struct LibraryView: View {
                     }
                 }
             }
+            .onChange(of: contentOffset.y, perform: { value in
+                print("y offset: \(value)")
+                if value < -30 {
+                    if !isLoadingPlaylist {
+                        isLoadingPlaylist = true
+                        Task {
+                            await getPlayList()
+                        }
+                        
+                    }
+                }
+            })
             
             ColorSet.background
                 .ignoresSafeArea()
@@ -130,7 +145,73 @@ struct LibraryView: View {
                 .frame(height: appCoordinator.safeAreaInsetsTop)
         }
         .ignoresSafeArea()
+        .onAppear(perform: {
+            playerViewModel.miniPlayerMoveToBottom = false
+            Task {
+                await getPlayList()
+            }
+        })
         
+    }
+    
+
+        
+    
+    private func getPlayList() async {
+        let Firebase = FBManager.shared
+        let db = Firebase.db
+        
+        currentUserData.playlistArray.removeAll()
+        
+        let query = db.collection("User").document(currentUserData.uId).collection("Playlist")
+            .order(by: "date", descending: false)
+        
+        guard let snapshot = try? await query.getDocuments() else {
+            return
+        }
+        
+        snapshot.documents.forEach { document in
+            let data = document.data()
+            guard let title = data["title"] as? String else {
+                print("no title")
+                return
+            }
+            guard let isPublic = data["isPublic"] as? Bool else {
+                print("no private thing")
+                return
+            }
+            guard let songIDs = data["songIds"] as? [String] else {
+                print("no id list")
+                return
+            }
+            let id = document.reference.documentID
+            
+            Task {
+                var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, songs: await fetchSongWithPlaylistID(songIDs: songIDs))
+                currentUserData.playlistArray.append(playlist)
+                
+            }
+
+        }
+        isLoadingPlaylist = false
+    }
+
+    private func fetchSongWithPlaylistID(songIDs: [String]) async -> [Song] {
+        var count = 0
+        var returnValue: [Song] = []
+        for id in songIDs {
+            if count >= 4 {
+                break
+            }
+            count += 1
+            let musicItemID = MusicItemID(rawValue: id)
+            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            request.properties = [.genres, .artists]
+            guard let response = try? await request.response() else {continue}
+            guard let song = response.items.first else {continue}
+            returnValue.append(song)
+        }
+        return returnValue
     }
 }
 

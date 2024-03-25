@@ -15,9 +15,18 @@ enum ChoiceType{
 }
 
 struct SignUpConsentItem: View {
+    @State var isPresentTosView: Bool = false
+    @State var isPresentPersnalInfoTosView: Bool = false
+    @Binding var isChecked: Bool
     var type: ChoiceType
     var title: String
-    @Binding var isChecked: Bool
+    
+    init(type: ChoiceType, title: String, isChecked: Binding<Bool>) {
+        self._isChecked = isChecked
+        self.type = type
+        self.title = title
+    }
+    
     var body: some View {
         HStack(spacing: 5){
             
@@ -46,6 +55,13 @@ struct SignUpConsentItem: View {
                     .foregroundColor(Color(red: 0.6, green: 0.6, blue: 0.6))
                     .padding(.leading, 5)
                     .underline()
+                    .onTapGesture {
+                        if title.contains("이용약관") {
+                            isPresentTosView = true
+                        }else if title.contains("개인정보"){
+                            isPresentPersnalInfoTosView = true
+                        }
+                    }
                 
             case .select:
                 EmptyView()
@@ -71,6 +87,12 @@ struct SignUpConsentItem: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.leading, 20)
         .padding(.trailing, 24)
+        .fullScreenCover(isPresented: $isPresentTosView, content: {
+            TOSDetailView()
+        })
+        .fullScreenCover(isPresented: $isPresentPersnalInfoTosView, content: {
+            PersonalTOSDetailView()
+        })
     }
 }
 

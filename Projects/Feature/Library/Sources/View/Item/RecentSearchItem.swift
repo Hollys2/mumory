@@ -15,14 +15,14 @@ struct RecentSearchItem: View {
     var body: some View {
         HStack(spacing: 13){
             SharedAsset.graySearch.swiftUIImage
+                .resizable()
+                .scaledToFit()
                 .frame(width: 23, height: 23)
             
             Text(title)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                 .foregroundColor(.white)
-                .padding(.top, 10)
-                .padding(.bottom, 10)
             
             SharedAsset.xGray.swiftUIImage
                 .frame(width: 19, height: 19)
@@ -33,8 +33,8 @@ struct RecentSearchItem: View {
                     result.removeAll(where: {$0 == title})
                     userDefault.set(result, forKey: "recentSearchList")
                 }
-            
         }
+        .frame(height: 50)
         
     }
 }

@@ -66,7 +66,7 @@ public struct SplashView: View {
                 })
                 .navigationDestination(for: String.self, destination: { i in
                     if i == "music" {
-                        SearchMusicView()
+                        SearchMusicViewInCreateMumory()
                     } else if i == "location" {
                         SearchLocationView()
                     } else if i == "map" {
@@ -100,8 +100,8 @@ public struct SplashView: View {
                     case .customization:
                         TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
                             .environmentObject(customizationManageViewModel)
-                    case .home(selectedTab: let tab):
-                        HomeView(tab: tab)
+                    case .home:
+                        HomeView()
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
                     case .signUp:
@@ -117,7 +117,7 @@ public struct SplashView: View {
                     case .login:
                         LoginView()
                     case .requestFriend:
-                        MyRequestFriendListView()
+                        MyFriendRequestListView()
                             .navigationBarBackButtonHidden()
                     case .blockFriend:
                         BlockFriendListView()
@@ -134,7 +134,7 @@ public struct SplashView: View {
                 .navigationDestination(for: LibraryPage.self) { page in
                     switch(page){
                     case .search(term: let term):
-                        SearchView(term: term)
+                        SearchMusicView(term: term)
                         
                     case .artist(artist: let artist):
                         ArtistView(artist: artist)
@@ -175,6 +175,9 @@ public struct SplashView: View {
                     case .favorite:
                         FavoriteListView()
                             .navigationBarBackButtonHidden()
+                        
+                    case .playlistWithIndex(index: let index):
+                        PlaylistView(playlist: $currentUserData.playlistArray[index])
                     }
                 }
                 .navigationDestination(for: MyPage.self) { page in
@@ -227,8 +230,8 @@ public struct SplashView: View {
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
-                    case .friendList(friends: let friends):
-                        FriendListView(friends: friends)
+                    case .friendList:
+                        FriendListView()
                             .navigationBarBackButtonHidden()
                         
                     case .friendPage(friend: let friend):
@@ -292,16 +295,11 @@ public struct SplashView: View {
                 return
             }
             
-            guard let fcmToken = data["fcmToken"] else {
-                page = .login
-                return
-            }
-
-            currentUserData.uId = user.uid
+    
             
-            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
+            currentUserData.uId = user.uid
+//            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
 //            await MumoriUser().fetchFriend(uId: user.uid)
-
             currentUserData.favoriteGenres = favoriteGenres
             page = .home
             withAnimation {
@@ -311,6 +309,11 @@ public struct SplashView: View {
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {
                 return
             }
+            
+            guard let fcmToken = messaging.fcmToken else {
+                return
+            }
+            try await db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
             
             playerViewModel.favoriteSongIds = favoriteData["songIds"] as? [String] ?? []
         }

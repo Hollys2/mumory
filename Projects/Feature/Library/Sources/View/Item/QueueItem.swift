@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct QueueItem: View {
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var isPresentBottomSheet: Bool = false
     var song: Song
     var scrollProxy: ScrollViewProxy
@@ -39,7 +39,7 @@ struct QueueItem: View {
                 Text(song.title)
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(playerManager.playingSong() == self.song ? ColorSet.mainPurpleColor : .white)
+                    .foregroundStyle(playerViewModel.playingSong() == self.song ? ColorSet.mainPurpleColor : .white)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
@@ -72,7 +72,7 @@ struct QueueItem: View {
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 70)
-        .background(playerManager.playingSong() == self.song ? Color.black : ColorSet.background)
+        .background(playerViewModel.playingSong() == self.song ? Color.black : ColorSet.background)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .circular))
         .padding(.horizontal, 15)
     }

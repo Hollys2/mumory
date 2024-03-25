@@ -9,17 +9,20 @@
 import SwiftUI
 import Shared
 import MusicKit
+import MapKit
 
 struct ArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var playerManager: PlayerViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero
     @State private var contentSize: CGSize = .zero
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
+    @State private var region: MKCoordinateRegion?
+    
     let artist: Artist
     
     init(artist: Artist) {
@@ -45,9 +48,6 @@ struct ArtistView: View {
             .overlay {
                 ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
             }
-
-
-        
             
             ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize) {
                 LazyVStack(spacing: 0, content: {
@@ -74,7 +74,7 @@ struct ArtistView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(title: artist.name , songs: songs)
+                                    playerViewModel.playAll(title: artist.name , songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "ArtistViewPlayAllButton")
 
                                 }
@@ -91,9 +91,8 @@ struct ArtistView: View {
                         ForEach(songs, id: \.id){ song in
                             MusicListItem(song: song, type: .artist)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
-                            Divider05()
                         }
                         
                         Rectangle()
@@ -137,6 +136,8 @@ struct ArtistView: View {
                 }
                 .background(TransparentBackground())
             })
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
         }
         .ignoresSafeArea()
         .onAppear(perform: {

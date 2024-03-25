@@ -11,8 +11,10 @@ import Shared
 import Core
 
 struct EditFavoriteGenreView: View {
-    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @Environment(\.dismiss) private var dismiss
+
     @State var selectedGenres: [Int] = []
     
     var body: some View {
@@ -58,7 +60,6 @@ struct EditFavoriteGenreView: View {
                     .foregroundStyle(Color.clear)
                     .frame(width: 10, height: 150)
             }
-            .ignoresSafeArea()
                 
             
             HStack(alignment: .center, spacing: 0) {
@@ -85,7 +86,11 @@ struct EditFavoriteGenreView: View {
             .padding(.top, currentUserData.topInset)
             .background(ColorSet.background.opacity(0.9))
             .padding(.bottom, 5)
-            .ignoresSafeArea()
+            
+            SharedAsset.underGradientLarge.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                   
             VStack{
                 Spacer()
@@ -93,12 +98,14 @@ struct EditFavoriteGenreView: View {
                     saveGenre()
                 } label: {
                     WhiteButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6)
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 20 + appCoordinator.safeAreaInsetsBottom)
                         .padding(.horizontal, 20)
+                        
                 }
                 .disabled(!(selectedGenres.count > 0 && selectedGenres.count < 6))
             }
         }
+        .ignoresSafeArea()
         .onAppear {
             selectedGenres = currentUserData.favoriteGenres
         }

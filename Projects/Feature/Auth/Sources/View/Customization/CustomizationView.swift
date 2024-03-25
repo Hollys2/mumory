@@ -104,7 +104,7 @@ public struct CustomizationView: View {
             
             VStack{
                 Spacer()
-                SharedAsset.underGradient.swiftUIImage
+                SharedAsset.underGradientLarge.swiftUIImage
                     .resizable()
                     .ignoresSafeArea()
                     .scaledToFit()
@@ -136,10 +136,6 @@ public struct CustomizationView: View {
             LoadingAnimationView(isLoading: $isLoading)
             
         }
-//        .navigationDestination(isPresented: $isCustomizationDone, destination: {
-//            LastOfCustomizationView()
-//                .environmentObject(manager)
-//        })
         .navigationBarBackButtonHidden()
         .gesture(DragGesture().onEnded({ gesture in
             if gesture.location.x - gesture.startLocation.x > 80 {

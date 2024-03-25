@@ -46,8 +46,11 @@ struct FavoriteGenreRecommendationView: View {
                         }
                         
                         Circle()
+                            .fill(ColorSet.mainPurpleColor)
                             .frame(width: 30, height: 30)
-                            .foregroundStyle(ColorSet.mainPurpleColor)
+                            .onTapGesture {
+                                isEditGenreViewPresent = true
+                            }
                             .overlay {
                                 SharedAsset.addBlack.swiftUIImage
                                     .resizable()
@@ -67,12 +70,6 @@ struct FavoriteGenreRecommendationView: View {
                                 }
                                 
                             }
-                            .onTapGesture {
-                                isEditGenreViewPresent = true
-                            }
-                            .fullScreenCover(isPresented: $isEditGenreViewPresent, content: {
-                                EditFavoriteGenreView()
-                            })
                             .onAppear(perform: {
                                 withAnimation(.spring()) {
                                     isEditGenreInfoPresent = true
@@ -100,12 +97,9 @@ struct FavoriteGenreRecommendationView: View {
            
             }
         }
-        .onAppear {
-//            let db = FBManager.shared.db.coll
-//            recommendationIDList.removeAll()
-//            recommendationSongList.removeAll()
-
-        }
+        .fullScreenCover(isPresented: $isEditGenreViewPresent, content: {
+            EditFavoriteGenreView()
+        })
     }
     //애플뮤직 테스트
    
@@ -113,7 +107,7 @@ struct FavoriteGenreRecommendationView: View {
 
 private struct RecommendationScrollView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var songs: [Song] = []
     @State var songIDs: [String] = []
     let genreID: Int
@@ -132,7 +126,7 @@ private struct RecommendationScrollView: View {
                     ForEach(songs, id: \.self){ song in
                         RecommendationMusicItem(song: song)
                             .onTapGesture {
-                                playerManager.playNewSong(song: song)
+                                playerViewModel.playNewSong(song: song)
                             }
                     }
                 }

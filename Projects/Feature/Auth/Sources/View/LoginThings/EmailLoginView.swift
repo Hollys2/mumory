@@ -145,7 +145,7 @@ struct EmailLoginView: View {
         userDefualt.setValue(Date(), forKey: "loginHistory")
       
         isLoading = false
-        appCoordinator.rootPath.append(MumoryPage.home(selectedTab: .home))
+        appCoordinator.rootPath.append(MumoryPage.home)
     }
 }
 

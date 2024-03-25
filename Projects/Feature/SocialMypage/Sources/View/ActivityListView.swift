@@ -97,34 +97,7 @@ struct ActivityListView: View {
                 
                 Divider05()
                     
-                HStack(spacing: 6){
-                    Text(DateText(date: date))
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                        .foregroundStyle(Color.white)
-                    
-                    SharedAsset.downArraowCircle.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 15, height: 15)
-                }
-                .padding(.leading, 20)
-                .frame(height: 55)
-                .onTapGesture {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentDatePicker = true
-                }
-                .fullScreenCover(isPresented: $isPresentDatePicker, content: {
-                    BottomSheetWrapper(isPresent: $isPresentDatePicker) {
-                        DatePickerView(date: $date)
-                    }
-                    .background(TransparentBackground())
-                })
-                .onChange(of: date, perform: { value in
-                    pagingCursor = nil
-                    Task {
-                        await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor)
-                    }
-                })
+              
                 
                 Divider05()
                 
@@ -147,7 +120,36 @@ struct ActivityListView: View {
                             }
 
                         }
-
+                    })
+                    .padding(.top, 55)
+                }
+                .overlay {
+                    
+                    HStack(spacing: 6){
+                        Text(DateText(date: date))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                            .foregroundStyle(Color.white)
+                        
+                        SharedAsset.downArraowCircle.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 15, height: 15)
+                        
+                        Spacer()
+                    }
+                    .padding(.leading, 20)
+                    .frame(height: 55)
+                    .background(ColorSet.background.opacity(0.9))
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentDatePicker = true
+                    }
+                    .onChange(of: date, perform: { value in
+                        pagingCursor = nil
+                        Task {
+                            await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor)
+                        }
                     })
                 }
             })
@@ -163,6 +165,12 @@ struct ActivityListView: View {
             
             self.date = calendar.date(from: resetDate) ?? Date()
         }
+        .fullScreenCover(isPresented: $isPresentDatePicker, content: {
+            BottomSheetWrapper(isPresent: $isPresentDatePicker) {
+                DatePickerView(date: $date)
+            }
+            .background(TransparentBackground())
+        })
     }
     
     private func DateText(date: Date) -> String {

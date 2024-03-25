@@ -17,7 +17,6 @@ import Firebase
 
 public struct HomeView: View {
     
-    @State private var selectedTab: Tab = .home
     @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
@@ -29,20 +28,14 @@ public struct HomeView: View {
     @EnvironmentObject var keyboardResponder: KeyboardResponder
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var withdrawViewModel: WithdrawViewModel
-    
     public init(){}
-    
-    public init(tab: Tab) {
-        self.selectedTab = tab
-    }
-
     
     public var body: some View {
         
         ZStack(alignment: .bottom) {
             
             VStack(spacing: 0) {
-                switch selectedTab {
+                switch appCoordinator.selectedTab {
                 case .home:
                     mapView
                 case .social:
@@ -52,18 +45,11 @@ public struct HomeView: View {
                 case .notification:
                     NotifyView()
                 }
-                
-                MumoryTabView(selectedTab: $selectedTab)
+                MumoryTabView(selectedTab: $appCoordinator.selectedTab)
             }
-//            .padding(.bottom, 89)
             
-//            MyPageBottomAnimationView()
             
-//            MumoryTabView(selectedTab: $selectedTab)
-            
-            MiniPlayerView()
-            
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region, selectedTab: $selectedTab)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
             
             MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
                 .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
@@ -108,7 +94,6 @@ public struct HomeView: View {
         .onAppear {
             playerViewModel.isShownMiniPlayer = false
             self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.user.uId)
-            
         }
     }
     
@@ -167,6 +152,12 @@ public struct HomeView: View {
                 
                 Spacer()
             }
+        }
+        .onAppear {
+            playerViewModel.isShownMiniPlayer = false
+        }
+        .onDisappear {
+            playerViewModel.isShownMiniPlayer = true
         }
     }
     

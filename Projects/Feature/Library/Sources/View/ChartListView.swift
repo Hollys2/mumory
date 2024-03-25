@@ -9,18 +9,18 @@
 import SwiftUI
 import Shared
 import MusicKit
+import MapKit
 
 struct ChartListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var contentOffset: CGPoint = .zero
     @State var viewWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
     @State var songs: [Song] = []
     @State var searchIndex = 0
-//    let song = Musicit
-    
+    @State private var region: MKCoordinateRegion?
     let dateTextColor = Color(red: 0.51, green: 0.51, blue: 0.51)
     
     var body: some View {
@@ -55,6 +55,7 @@ struct ChartListView: View {
                         }
                 })
                 .frame(height: 63)
+                .padding(.top, appCoordinator.safeAreaInsetsTop)
                 
                 HStack(alignment: .bottom){
                     Text("100곡")
@@ -67,7 +68,7 @@ struct ChartListView: View {
                     PlayAllButton()
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerManager.playAll(title: "최신 인기곡", songs: songs)
+                            playerViewModel.playAll(title: "최신 인기곡", songs: songs)
                             requestTop100(startIndex: searchIndex + 1)
                             AnalyticsManager.shared.setSelectContentLog(title: "ChartListViewPlayAllButton")
                         }
@@ -89,18 +90,18 @@ struct ChartListView: View {
                         .foregroundStyle(.clear)
                         .frame(height: 87)
                 }
+                .ignoresSafeArea()
                 .onChange(of: searchIndex, perform: { value in
                     if value < 5 {
                         requestChart(index: value)
                     }
                 })
-                
-
-
-                
-                
             })
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            
         }
+        .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
@@ -150,7 +151,7 @@ struct ChartListView: View {
                 }
                 songs += chart
                 print("song count: \(songs.count), index: \(index)")
-                playerManager.setQueue(songs: songs)
+                playerViewModel.setQueue(songs: songs)
             }
         }
     }

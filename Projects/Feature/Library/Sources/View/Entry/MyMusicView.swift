@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct MyMusicView: View {
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()

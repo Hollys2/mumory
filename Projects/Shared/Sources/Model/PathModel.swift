@@ -14,7 +14,7 @@ public enum MumoryPage: Hashable {
     case customization
     case startCustomization
     case signUp
-    case home(selectedTab: Tab)
+    case home
     case emailLogin
     case lastOfCustomization
     case login
@@ -35,8 +35,6 @@ public enum MumoryPage: Hashable {
              (.requestFriend, .requestFriend),
              (.blockFriend, .blockFriend):
             return true
-        case let (.home(selectedTab: selectedTab1), .home(selectedTab: selectedTab2)):
-            return selectedTab1 == selectedTab2
         case let (.friend(friend: friend1), .friend(friend: friend2)):
             return friend1 == friend2
         case let (.friendPlaylist(playlist: playlist1), .friendPlaylist(playlist: playlist2)):
@@ -56,9 +54,8 @@ public enum MumoryPage: Hashable {
             hasher.combine(1)
         case .signUp:
             hasher.combine(2)
-        case .home(selectedTab: let selectedTab):
+        case .home:
             hasher.combine(3)
-            hasher.combine(selectedTab)
         case .emailLogin:
             hasher.combine(4)
         case .lastOfCustomization:
@@ -96,6 +93,7 @@ public enum LibraryPage: Hashable{
     case recommendation(genreID: Int)
     case selectableArtist(artist: Artist)
     case favorite
+    case playlistWithIndex(index: Int)
     
     
     public static func == (lhs: LibraryPage, rhs: LibraryPage) -> Bool {
@@ -162,6 +160,9 @@ public enum LibraryPage: Hashable{
               hasher.combine(artist)
           case .favorite:
               hasher.combine(12)
+          case .playlistWithIndex(index: let index):
+              hasher.combine(13)
+              hasher.combine(index)
           }
       }
 }
@@ -176,7 +177,7 @@ public enum MyPage: Hashable {
     case emailVerification
     case selectNotificationTime
     case login
-    case friendList(friends: [MumoriUser])
+    case friendList
     case friendPage(friend: MumoriUser)
     case reward
     case monthlyStat

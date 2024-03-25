@@ -9,10 +9,9 @@
 import SwiftUI
 import Shared
 
-struct MyRequestFriendListView: View {
+struct MyFriendRequestListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @State var myRequestFriendList: [MumoriUser] = []
     let db = FBManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
@@ -43,46 +42,26 @@ struct MyRequestFriendListView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(myRequestFriendList, id: \.uId){ friend in
-                            MyRequestFriendItem(friend: friend, myRequestFriendList: $myRequestFriendList)
+                        ForEach(currentUserData.friendRequests, id: \.self){ friend in
+                            MyRequestFriendItem(friend: friend)
                         }
                     })
                 }
                 
             }
         }
-        .onAppear {
-            getMyRequestFriendList()
-        }
+
     }
-    private func getMyRequestFriendList(){
-        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
-            .whereField("type", isEqualTo: "request")
-        Task {
-            guard let snapshot = try? await query.getDocuments() else {
-                return
-            }
-            snapshot.documents.forEach { document in
-                guard let uid = document.data()["uId"] as? String else {
-                    return
-                }
-                Task {
-                    myRequestFriendList.append(await MumoriUser(uId: uid))
-                }
-            }
-        }
-    }
+
 }
 
 
 public struct MyRequestFriendItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentDeletePopup: Bool = false
-    @Binding var myRequestFriendList: [MumoriUser]
-    let friend: MumoriUser
-    public init(friend: MumoriUser, myRequestFriendList: Binding<[MumoriUser]>) {
+    var friend: MumoriUser
+    public init(friend: MumoriUser) {
         self.friend = friend
-        self._myRequestFriendList = myRequestFriendList
     }
     let Firebase = FBManager.shared
     
@@ -134,12 +113,12 @@ public struct MyRequestFriendItem: View {
                     guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
                         return
                     }
-                    myRequestFriendList.removeAll(where: {$0.uId == friend.uId})
-                    
+                    currentUserData.friendRequests.removeAll(where: {$0.uId == friend.uId})
                 }
             }
             .background(TransparentBackground())
         }
+
     }
 }
 

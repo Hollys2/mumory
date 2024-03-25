@@ -72,16 +72,6 @@ class AppDelegate: NSObject, UIApplicationDelegate{
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("fcm token: \(fcmToken ?? "no fcm token")")
-        let Firebase = FBManager.shared
-        let db = Firebase.db
-        let auth = Firebase.auth
-        
-        if let user = auth.currentUser {
-            guard let fcmToken = fcmToken else {
-                return
-            }
-            db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
-        }
     }
 }
 extension AppDelegate: UNUserNotificationCenterDelegate{

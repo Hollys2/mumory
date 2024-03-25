@@ -10,17 +10,20 @@ import SwiftUI
 import Shared
 import MusicKit
 import Core
+import MapKit
 
 struct RecommendationListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
     @State var songIDs: [String] = []
     @State var songs: [Song] = []
     @State var isCompletedGetSongs: Bool = false
+    @State private var region: MKCoordinateRegion?
+
     let genreID: Int
     let title: String
     
@@ -72,7 +75,7 @@ struct RecommendationListView: View {
                             
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerManager.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
+                                    playerViewModel.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "RecommendationListViewPlayAllButton")
 
                                 }
@@ -86,7 +89,7 @@ struct RecommendationListView: View {
                         ForEach(songs, id: \.self) { song in
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
-                                    playerManager.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song)
                                 }
                             Divider05()
                         }
@@ -135,17 +138,20 @@ struct RecommendationListView: View {
             })
             .frame(height: 50)
             .padding(.top, currentUserData.topInset)
-            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
-                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    RecommendationBottomSheetView(songs: songs, title: title)
-                }
-                .background(TransparentBackground())
-            })
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+  
         }
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
+        })
+        .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+            BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+                RecommendationBottomSheetView(songs: songs, title: title)
+            }
+            .background(TransparentBackground())
         })
         
         

@@ -77,18 +77,7 @@ struct SearchMusicEntryView: View {
                             }
                         }
                         .padding(.top, 20)
-                        
-//                        LazyVStack(content: {
-//                            ForEach(popularSearchTerm, id: \.self) { term in
-//                                Text(term)
-//                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-//                                    .foregroundColor(.black)
-//                                    .padding(.horizontal, 16)
-//                                    .frame(height: 33)
-//                                    .background(ColorSet.mainPurpleColor)
-//                                    .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
-//                            }
-//                        })
+
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
@@ -106,14 +95,16 @@ struct SearchMusicEntryView: View {
                                 .foregroundColor(.white)
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                             
-                            Text("전체삭제")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                .onTapGesture {
-                                    let userDefault = UserDefaults.standard
-                                    userDefault.removeObject(forKey: "recentSearchList")
-                                    recentSearchObject.recentSearchList = []
-                                }
+                            if !recentSearchObject.recentSearchList.isEmpty {
+                                Text("전체삭제")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                    .onTapGesture {
+                                        let userDefault = UserDefaults.standard
+                                        userDefault.removeObject(forKey: "recentSearchList")
+                                        recentSearchObject.recentSearchList = []
+                                    }
+                            }
                         }
                         
                         LazyVStack(content: {
@@ -124,12 +115,19 @@ struct SearchMusicEntryView: View {
                                         term = string
                                     }
                             }
+                            if recentSearchObject.recentSearchList.isEmpty {
+                                Text("최근 검색내역이 없습니다")
+                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                                    .foregroundStyle(ColorSet.subGray)
+                                    .frame(height: 50)
+                            }
                         })
                         .padding(.top, 25)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 15)
                     .background(ColorSet.moreDeepGray)
                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
                     .padding(.horizontal, 20)
@@ -150,6 +148,10 @@ struct SearchMusicEntryView: View {
     }
     
     private func requestPupularMusic() {
+        if !popularSearchTerm.isEmpty {
+            return
+        }
+        
         Task {
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
             request.limit = 6

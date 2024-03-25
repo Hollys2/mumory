@@ -291,7 +291,7 @@ public struct LoginView: View {
             
             //루트패스 수정
 //            isLoginCompleted = true
-            appCoordinator.rootPath.append(MumoryPage.home(selectedTab: .home))
+            appCoordinator.rootPath.append(MumoryPage.home)
         }else {
             //신규 회원
             

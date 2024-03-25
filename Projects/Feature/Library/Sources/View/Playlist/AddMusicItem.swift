@@ -86,6 +86,14 @@ struct AddMusicItem: View {
                 .updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songID])])
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
             snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songId: songID)
+            guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
+            currentUserData.playlistArray[index].songIDs.append(songID)
+
+            guard let song = self.song else {return}
+            currentUserData.playlistArray[index].songs.append(song)
+            
+            currentUserData.playlistArray.first(where: {$0.id == "favorite"})
+
 
         }else {
             //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함

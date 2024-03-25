@@ -22,4 +22,12 @@ public struct MusicPlaylist: Equatable, Hashable {
         self.songIDs = songIDs
         self.isPublic = isPublic
     }
+    
+    public init(id: String, title: String, songIDs: [String], isPublic: Bool, songs: [Song]) {
+        self.id = id
+        self.title = title
+        self.songIDs = songIDs
+        self.isPublic = isPublic
+        self.songs = songs
+    }
 }

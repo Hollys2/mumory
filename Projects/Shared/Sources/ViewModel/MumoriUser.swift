@@ -31,6 +31,11 @@ public struct MumoriUser: Hashable{
         
         let db = FBManager.shared.db
         
+        if uId.isEmpty {
+            nickname = "(알수없음)"
+            return
+        }
+        
         guard let document = try? await db.collection("User").document(uId).getDocument() else {
             return
         }

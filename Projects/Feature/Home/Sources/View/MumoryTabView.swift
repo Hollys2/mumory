@@ -18,7 +18,7 @@ public struct MumoryTabView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    
+    @EnvironmentObject var currentUserData: CurrentUserData
     public init(selectedTab: Binding<Tab>) {
         self._selectedTab = selectedTab
     }
@@ -34,7 +34,6 @@ public struct MumoryTabView: View {
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
                         selectedTab = .home
-                        playerViewModel.isShownMiniPlayer = false
                     }
                 
                 Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
@@ -44,7 +43,6 @@ public struct MumoryTabView: View {
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
                         selectedTab = .social
-                        playerViewModel.isShownMiniPlayer = false
                     }
                 
                 Image(asset: SharedAsset.createMumoryTabbar)
@@ -64,20 +62,20 @@ public struct MumoryTabView: View {
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
                         selectedTab = .library
-                        playerViewModel.isShownMiniPlayer = true
                     }
                 
-                Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
+                Image(asset: selectedTab == .notification ? currentUserData.existUnreadNotification ? SharedAsset.notificationOnDotTabbar : SharedAsset.notificationOnTabbar : currentUserData.existUnreadNotification ? SharedAsset.notificationOffDotTabbar : SharedAsset.notificationOffTabbar )                    
                     .resizable()
                     .frame(width: 31, height: 44)
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
                         selectedTab = .notification
-                        playerViewModel.isShownMiniPlayer = false
                     }
+
             }
             .padding(.top, 2)
         }
+        .ignoresSafeArea()
         .frame(height: appCoordinator.isHiddenTabBar ? 0 : 89)
         .background(Color.black)
     }

@@ -3,7 +3,7 @@ import Feature
 import KakaoSDKAuth
 import Core
 import Shared
-
+import MapKit
 
 @main
 struct MumoryApp: App {
@@ -18,6 +18,7 @@ struct MumoryApp: App {
     @StateObject var currentUserData: CurrentUserData = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
+    @State private var region: MKCoordinateRegion?
     
     var body: some Scene {
         WindowGroup {
@@ -45,6 +46,8 @@ struct MumoryApp: App {
                             
                             currentUserData.topInset = geometry.safeAreaInsets.top
                             currentUserData.bottomInset = geometry.safeAreaInsets.bottom
+                            
+                            playerViewModel.isShownMiniPlayer = false
                         }
                     
                     SnackBarView()
@@ -52,13 +55,11 @@ struct MumoryApp: App {
                         .environmentObject(appCoordinator)
                         .environmentObject(currentUserData)
                     
-//                    VStack{
-//                        Spacer()
-//                        MumoryTabView(selectedTab: $appCoordinator.selectedTab)
-//                            .environmentObject(appCoordinator)
-//                            .environmentObject(playerViewModel)
-//                    }
+                    MiniPlayerView()
+                        .environmentObject(playerViewModel)
+                    
                 }
+                .ignoresSafeArea()
             }
         }
     }

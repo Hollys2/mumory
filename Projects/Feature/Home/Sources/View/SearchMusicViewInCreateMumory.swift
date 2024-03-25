@@ -16,9 +16,9 @@ import MusicKit
 
 //가장 처음 샤잠, 최근 검색, 검색텍스트필드 등이 있음
 //검색 단어 존재 유무에 따라서 초반 뷰와 결과 뷰를 나눠서 보여주는 역할
-struct SearchMusicView: View {
+struct SearchMusicViewInCreateMumory: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
@@ -73,7 +73,7 @@ struct SearchMusicView: View {
                 .background(.clear)
                 
                 if term.count > 0 {
-                    SearchSelectableResultView(term: $term)
+                    SearchMusicResultViewInCreateMumory(term: $term)
                 }else{
                     SearchMusicEntryView(term: $term)
                 }
@@ -82,7 +82,15 @@ struct SearchMusicView: View {
                 
                 Spacer()
             }
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            
+            PreviewMiniPlayer()
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+                .offset(y: playerViewModel.isShownPreview ? 0 : 120)
+                .animation(.spring, value: playerViewModel.isShownPreview)
         }
+        .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
         .onAppear {
@@ -100,9 +108,9 @@ struct SearchMusicView: View {
 
 
 //검색 결과 뷰
-struct SearchSelectableResultView: View {
+struct SearchMusicResultViewInCreateMumory: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
-    @EnvironmentObject private var playerManager: PlayerViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
@@ -117,9 +125,11 @@ struct SearchSelectableResultView: View {
     @State private var contentSize: CGSize = .zero
     @State private var requestIndex = 0
     @State private var haveToLoadNextPage: Bool = false
+    @State private var isLoading: Bool = false
+    
     
     var body: some View {
-        ZStack{
+        ZStack(alignment: .top){
             ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize){
                 VStack(spacing: 0, content: {
                     if musicList.count == 0 && artistList.count == 0 {
@@ -141,7 +151,8 @@ struct SearchSelectableResultView: View {
                             ForEach(artistList){ artist in
                                 SearchArtistItem(artist: artist)
                                     .onTapGesture {
-                                        appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))                                        //최근 검색어 저장
+                                        appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))
+                                        //최근 검색어 저장
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == artist.name})
@@ -152,9 +163,9 @@ struct SearchSelectableResultView: View {
                             
                             //구분선
                             Rectangle()
+                                .fill(Color.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 8)
-                                .background(Color.black)
                             
                             //음악 검색 결과 타이틀 및 리스트
                             Text("곡")
@@ -168,6 +179,7 @@ struct SearchSelectableResultView: View {
                             ForEach(musicList){ music in
                                 SearchSelectableSongItem(song: music)
                                     .onTapGesture {
+                                        playerViewModel.setPreviewPlayer(tappedSong: music)
                                         //최근 검색어 저장
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
@@ -186,49 +198,54 @@ struct SearchSelectableResultView: View {
                     }
                 })
                 .frame(width: getUIScreenBounds().width)
-            }
-            .onChange(of: term, perform: { value in
-                localTime = 0.0
-                requestIndex = 0
-            })
-            .onChange(of: localTime, perform: { value in
-                if localTime == 0.8 {
+                .onChange(of: term, perform: { value in
+                    localTime = 0.0
+                    requestIndex = 0
+                    isLoading = true
+                })
+                .onChange(of: localTime, perform: { value in
+                    if localTime == 0.8 {
                         requestArtist(term: term)
                         requestSong(term: term, index: 0)
-                }
-            })
-            .onChange(of: offset, perform: { value in
-                if offset.y/contentSize.height > 0.7 {
-                    if !haveToLoadNextPage {
-                        haveToLoadNextPage = true
-                        requestIndex += 1
-                        requestSong(term: term, index: requestIndex)
                     }
-                }else {
-                    haveToLoadNextPage = false
+                })
+                .onChange(of: offset, perform: { value in
+                    if offset.y/contentSize.height > 0.7 {
+                        if !haveToLoadNextPage {
+                            haveToLoadNextPage = true
+                            requestIndex += 1
+                            requestSong(term: term, index: requestIndex)
+                        }
+                    }else {
+                        haveToLoadNextPage = false
+                    }
+                })
+                
+                
+            }
+            .ignoresSafeArea()
+            .onAppear(perform: {
+                self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
+                    localTime += 0.2
                 }
             })
+            .onDisappear(perform: {
+                timer?.invalidate()
+            })
+            
         }
-        .onAppear(perform: {
-            self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
-                localTime += 0.2
-            }
-        })
-        .onDisappear(perform: {
-            timer?.invalidate()
-        })
-        
     }
     public func requestArtist(term: String){
         var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
         request.limit = 20
         request.includeTopResults = true
-
+        
         Task {
             do {
                 let response = try await request.response()
                 DispatchQueue.main.async {
                     self.artistList = response.artists
+                    isLoading = false
                 }
             }catch(let error) {
                 print("error: \(error.localizedDescription)")
@@ -256,13 +273,19 @@ struct SearchSelectableResultView: View {
             
         }
     }
+    
 }
 
 //선택 가능한 노래 아이템(우측에 하얀 플러스 아이콘)
 struct SearchSelectableSongItem: View {
-    var song: Song
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    
+    var song: Song
+    init(song: Song) {
+        self.song = song
+    }
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -295,7 +318,7 @@ struct SearchSelectableSongItem: View {
             .padding(.leading, 16)
             .padding(.trailing, 20)
             .frame(maxWidth: .infinity, alignment: .leading)
-
+            
             
             SharedAsset.addPurpleCircleFilled.swiftUIImage
                 .resizable()
@@ -309,8 +332,8 @@ struct SearchSelectableSongItem: View {
         })
         .padding(.vertical, 19)
         .padding(.horizontal, 20)
-        .background(ColorSet.background)
-        
+        .background(ColorSet.background)    
+
     }
     
     

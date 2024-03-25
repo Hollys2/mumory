@@ -13,14 +13,15 @@ import Shared
 //메인 뷰
 //아이템: 친구 추가, 요청/수락, 요청취소, 차단해제
 //바텀시트,
+public enum FriendRequestStatus {
+    case loading
+    case valid
+    case alreadyFriend
+    case alreadyRequest
+    case alreadyRecieve
+}
 struct SocialFriendTestView: View {
-    private enum FriendRequestStatus {
-        case loading
-        case valid
-        case alreadyFriend
-        case alreadyRequest
-        case alreadyRecieve
-    }
+
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -28,8 +29,6 @@ struct SocialFriendTestView: View {
     @State private var searchText = ""
     
     @State private var friendSearchResult: MumoriUser?
-    @State private var friendRequestList: [MumoriUser] = []
-    @State private var myRequestFriendList: [MumoriUser] = []
     @State private var isPresentFriendBottomSheet: Bool = false
     @State private var friendRequestStatus: FriendRequestStatus = .valid
  
@@ -86,7 +85,8 @@ struct SocialFriendTestView: View {
                         }
                     
                     Text("친구 요청")
-                        .font(itemSelection == 1 ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))                        .foregroundStyle(itemSelection == 1 ? Color.black : ColorSet.D0Gray)
+                        .font(itemSelection == 1 ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))                       
+                        .foregroundStyle(itemSelection == 1 ? Color.black : ColorSet.D0Gray)
                         .padding(.horizontal, 16)
                         .frame(height: 33)
                         .background(itemSelection == 1 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
@@ -118,18 +118,16 @@ struct SocialFriendTestView: View {
                     
                     if let friend = self.friendSearchResult {
                         VStack(spacing: 0) {
-                            switch friendRequestStatus {
-                            case .loading:
-                                EmptyView()
-                            case .valid:
-                                FriendAddItem(friend: friend)
-                            case .alreadyFriend:
+                            if currentUserData.friends.contains(friend) {
                                 AlreadFriendItem(friend: friend)
-                            case .alreadyRequest:
-                                MyRequestFriendItem(friend: friend, myRequestFriendList: $myRequestFriendList)
-                            case .alreadyRecieve:
-                                FriendRequestItem(friend: friend, friendRequestList: $friendRequestList)
+                            } else if currentUserData.friendRequests.contains(friend) {
+                                MyRequestFriendItem(friend: friend)
+                            } else if currentUserData.recievedRequests.contains(friend){
+                                RecievedRequestItem(friend: friend)
+                            } else {
+                                FriendAddItem(friend: friend)
                             }
+                 
                         }
                         .padding(.top, 15)
                     }
@@ -138,10 +136,13 @@ struct SocialFriendTestView: View {
                     //친구 요청 - selection: 1
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
-                            ForEach(friendRequestList, id: \.self) { friend in
-                                FriendRequestItem(friend: friend, friendRequestList: $friendRequestList)
+                            ForEach(currentUserData.recievedRequests, id: \.self) { friend in
+                                RecievedRequestItem(friend: friend)
                             }
                         })
+                    }
+                    .onAppear {
+                        currentUserData.recievedNewFriends = false
                     }
               
                 }
@@ -156,10 +157,6 @@ struct SocialFriendTestView: View {
             }
             .background(TransparentBackground())
         })
-        .onAppear {
-            getFriendRequest()
-            getMyRequestFriendList()
-        }
 
     }
     
@@ -175,11 +172,11 @@ struct SocialFriendTestView: View {
             if blockFriends.contains(currentUserData.uId){return}
             guard let friendUID = doc.data()["uid"] as? String else {return}
             
-            if currentUserData.friends.contains(friendUID) {
+            if currentUserData.friends.contains(where: {$0.uId == friendUID}) {
                 friendRequestStatus = .alreadyFriend
-            }else if friendRequestList.contains(where: {$0.uId == friendUID}) {
+            }else if currentUserData.recievedRequests.contains(where: {$0.uId == friendUID}) {
                 friendRequestStatus = .alreadyRecieve
-            }else if myRequestFriendList.contains(where: {$0.uId == friendUID}) {
+            }else if currentUserData.friendRequests.contains(where: {$0.uId == friendUID}) {
                 friendRequestStatus = .alreadyRequest
             }else {
                 friendRequestStatus = .valid
@@ -188,44 +185,45 @@ struct SocialFriendTestView: View {
             self.friendSearchResult = await MumoriUser(uId: friendUID)
         }
     }
-    
-    private func getMyRequestFriendList(){
-        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
-            .whereField("type", isEqualTo: "request")
-        Task {
-            guard let snapshot = try? await query.getDocuments() else {
-                return
-            }
-            snapshot.documents.forEach { document in
-                guard let uid = document.data()["uId"] as? String else {
-                    return
-                }
-                Task {
-                    myRequestFriendList.append(await MumoriUser(uId: uid))
-                }
-            }
-        }
-    }
-    
-    private func getFriendRequest(){
-        self.friendRequestList.removeAll()
-        Task{
-            let query = db.collection("User").document(currentUserData.uId).collection("Friend")
-                .whereField("type", isEqualTo: "recieve")
-        
-            guard let docs = try? await query.getDocuments() else {
-                return
-            }
-            docs.documents.forEach { doc in
-                guard let uid = doc.data()["uId"] as? String else {
-                    return
-                }
-                Task {
-                    friendRequestList.append(await MumoriUser(uId: uid))
-                }
-            }
-        }
-    }
+
+//
+//    private func getMyRequestFriendList(){
+//        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
+//            .whereField("type", isEqualTo: "request")
+//        Task {
+//            guard let snapshot = try? await query.getDocuments() else {
+//                return
+//            }
+//            snapshot.documents.forEach { document in
+//                guard let uid = document.data()["uId"] as? String else {
+//                    return
+//                }
+//                Task {
+//                    myRequestFriendList.append(await MumoriUser(uId: uid))
+//                }
+//            }
+//        }
+//    }
+//    
+//    private func getFriendRequest(){
+//        self.friendRequestList.removeAll()
+//        Task{
+//            let query = db.collection("User").document(currentUserData.uId).collection("Friend")
+//                .whereField("type", isEqualTo: "recieve")
+//        
+//            guard let docs = try? await query.getDocuments() else {
+//                return
+//            }
+//            docs.documents.forEach { doc in
+//                guard let uid = doc.data()["uId"] as? String else {
+//                    return
+//                }
+//                Task {
+//                    friendRequestList.append(await MumoriUser(uId: uid))
+//                }
+//            }
+//        }
+//    }
 }
 
 struct FindFriendSelectItem: View {
@@ -410,18 +408,16 @@ struct FriendAddItem: View {
                 print("network error")
                 return
             }
-            
         }
     }
 }
 
-struct FriendRequestItem: View {
+struct RecievedRequestItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    let friend: MumoriUser
-    @Binding var friendRequestList: [MumoriUser]
-    init(friend: MumoriUser, friendRequestList: Binding<[MumoriUser]>) {
+    var friend: MumoriUser
+    var uId: String = ""
+    init(friend: MumoriUser) {
         self.friend = friend
-        self._friendRequestList = friendRequestList
     }
     @State var isPresentDeletePopup: Bool = false
     @State var isPresentAcceptPopup: Bool = false
@@ -514,7 +510,7 @@ struct FriendRequestItem: View {
             guard let result = try? await snapshot.documents.first?.reference.delete() else {
                 return
             }
-            friendRequestList.removeAll(where: {$0.uId == friend.uId})
+            currentUserData.recievedRequests.removeAll(where: {$0.uId == friend.uId})
         }
     }
     
@@ -526,8 +522,8 @@ struct FriendRequestItem: View {
                 print("network error")
                 return
             }
-            friendRequestList.removeAll(where: {$0.uId == friend.uId})
-            currentUserData.friends.append(friend.uId)
+            currentUserData.recievedRequests.removeAll(where: {$0.uId == friend.uId})
+            currentUserData.friends.append(friend)
         }
     }
 }

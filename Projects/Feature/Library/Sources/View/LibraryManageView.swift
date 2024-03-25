@@ -13,7 +13,7 @@ import Core
 
 public struct LibraryManageView: View {
     @State private var path = NavigationPath()
-    @EnvironmentObject var playerManager: PlayerViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var recentSearchObject: RecentSearchObject
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var manager: LibraryCoordinator

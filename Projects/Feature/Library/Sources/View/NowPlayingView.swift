@@ -17,7 +17,6 @@ struct NowPlayingView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentQueue: Bool = false
-    
  
     init() {
         let thumbImage = UIImage(systemName: "circle.fill")?.withTintColor(.white).resized(to: CGSize(width: 11, height: 11))
@@ -256,13 +255,10 @@ struct PlayingView: View {
                             })
                             .offset(x: startAnimation ? changeOffset : 0)
                             .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true), value: startAnimation)
-
-
                     }
+                    .scrollIndicators(.hidden)
+                    .scrollDisabled(true)
 
-                    
-
-                    
                     Text(playerViewModel.currentSong?.artistName ?? " ")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 20))
                         .foregroundStyle(artistTextColor)
@@ -270,6 +266,7 @@ struct PlayingView: View {
                    
                 })
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.trailing, 20)
                 
                 SharedAsset.addPurpleCircleFilled.swiftUIImage
                     .resizable()
