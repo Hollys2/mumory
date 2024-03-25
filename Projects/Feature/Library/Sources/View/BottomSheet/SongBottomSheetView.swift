@@ -21,9 +21,7 @@ struct SongBottomSheetView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
-    @State var isPresentCreateMumoryView: Bool = false
-    
+        
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
     var types: [bottomSheetType] = []
@@ -115,24 +113,19 @@ struct SongBottomSheetView: View {
                 
                 BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                     .onTapGesture {
-//                        dismiss()
-//                        appCoordinator.bottomAnimationViewStatus = .remove
-//                        appCoordinator.rootPath = NavigationPath()
-                   
-                        let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                        mumoryDataViewModel.choosedMusicModel = musicModel
-                        UIView.setAnimationsEnabled(false)
-                        isPresentCreateMumoryView = true
-                        UIView.setAnimationsEnabled(true)
-                        withAnimation(Animation.easeInOut(duration: 0.1)) {
-                            appCoordinator.isCreateMumorySheetShown = true
-                            appCoordinator.offsetY = CGFloat.zero
+                        dismiss()
+                        
+                        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
+                            let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                            mumoryDataViewModel.choosedMusicModel = musicModel
+                            withAnimation(Animation.easeInOut(duration: 0.1)) {
+                                appCoordinator.isCreateMumorySheetShown = true
+                                appCoordinator.offsetY = CGFloat.zero
+                            }
                         }
+                        
                     }
-                    .fullScreenCover(isPresented: $isPresentCreateMumoryView) {
-                        AnimationWrapper()
-                            .background(TransparentBackground())
-                    }
+      
                 
                 BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                     .onTapGesture {

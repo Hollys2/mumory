@@ -12,7 +12,6 @@ import Shared
 struct BlockFriendListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @State var blockFriendList: [MumoriUser] = []
     let db = FBManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
@@ -43,48 +42,28 @@ struct BlockFriendListView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(blockFriendList, id: \.uId){ friend in
-                            BlockFriendItem(friend: friend, blockFriendList: $blockFriendList)
+                        ForEach(currentUserData.blockFriends, id: \.uId){ friend in
+                            BlockFriendItem(friend: friend)
                         }
                     })
                 }
                 
             }
         }
-        .onAppear {
-            getBlockFriendList()
-        }
-    }
-    
-    private func getBlockFriendList() {
-        let query = db.collection("User").document(currentUserData.uId)
-        Task {
-            guard let data = try? await query.getDocument().data() else {
-                return
-            }
-            guard let blockFriends = data["blockFriends"] as? [String] else {
-                return
-            }
-            blockFriends.forEach { uid in
-                Task{
-                    self.blockFriendList.append(await MumoriUser(uId: uid))
-                }
-            }
-        }
+
     }
 }
 
 
 struct BlockFriendItem: View {
-    let friend: MumoriUser
-    @Binding var blockFriendList: [MumoriUser]
-    init(friend: MumoriUser, blockFriendList: Binding<[MumoriUser]>) {
-        self.friend = friend
-        self._blockFriendList = blockFriendList
-    }
-    let Firebase = FBManager.shared
-    @State var isPresentRequestPopup: Bool = false
     @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isPresentRequestPopup: Bool = false
+    let Firebase = FBManager.shared
+    let friend: MumoriUser
+    init(friend: MumoriUser) {
+        self.friend = friend
+    }
+    
     var body: some View {
         HStack(spacing: 13, content: {
             AsyncImage(url: friend.profileImageURL) { image in
@@ -122,12 +101,12 @@ struct BlockFriendItem: View {
                 .onTapGesture {
                     let query = Firebase.db.collection("User").document(currentUserData.uId)
                     query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
-                    self.blockFriendList.removeAll(where: {$0.uId == self.friend.uId})
+                    self.currentUserData.blockFriends.removeAll(where: {$0.uId == self.friend.uId})
                 }
         })
         .padding(.horizontal, 20)
-        .background(ColorSet.background)
         .frame(height: 84)
+        .background(ColorSet.background)
     }
 }
 

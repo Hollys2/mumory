@@ -173,6 +173,9 @@ public struct SplashView: View {
                     case .favorite:
                         FavoriteListView()
                             .navigationBarBackButtonHidden()
+                        
+                    case .playlistWithIndex(index: let index):
+                        PlaylistView(playlist: $currentUserData.playlistArray[index])
                     }
                 }
                 .navigationDestination(for: MyPage.self) { page in
@@ -281,16 +284,11 @@ public struct SplashView: View {
                 return
             }
             
-            guard let fcmToken = data["fcmToken"] else {
-                page = .login
-                return
-            }
-
-            currentUserData.uId = user.uid
+    
             
-            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
+            currentUserData.uId = user.uid
+//            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
 //            await MumoriUser().fetchFriend(uId: user.uid)
-
             currentUserData.favoriteGenres = favoriteGenres
             page = .home
             withAnimation {
@@ -300,6 +298,11 @@ public struct SplashView: View {
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {
                 return
             }
+            
+            guard let fcmToken = messaging.fcmToken else {
+                return
+            }
+            try await db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
             
             playerViewModel.favoriteSongIds = favoriteData["songIds"] as? [String] ?? []
         }

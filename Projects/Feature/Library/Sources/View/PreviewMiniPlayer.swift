@@ -48,22 +48,23 @@ struct PreviewMiniPlayer: View {
             Circle()
                 .trim(from: 0, to: playerViewModel.playbackRate()) //재생률에 따라 변화해야함
                 .stroke(ColorSet.mainPurpleColor, lineWidth: 2)
-                .frame(width: 26, height: 26)
+                .frame(width: 35, height: 35)
                 .rotationEffect(.degrees(-90))
                 .overlay {
                     if playerViewModel.isPlaying {
                         SharedAsset.pauseButtonTopbar.swiftUIImage
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 24, height: 24)
+                            .frame(width: 33, height: 33)
                             .onTapGesture {
                                 playerViewModel.pause()
                             }
+                        
                     }else {
                         SharedAsset.playButtonTopbar.swiftUIImage
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 24, height: 24)
+                            .frame(width: 33, height: 33)
                             .onTapGesture {
                                 playerViewModel.play()
                             }
@@ -74,6 +75,7 @@ struct PreviewMiniPlayer: View {
             
             Text("추가")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                .foregroundStyle(Color.black)
                 .padding(.horizontal, 10)
                 .frame(height: 24)
                 .background(ColorSet.mainPurpleColor)
@@ -92,9 +94,12 @@ struct PreviewMiniPlayer: View {
         .padding(.leading, 23)
         .frame(maxWidth: .infinity)
         .frame(height: 70)
-        .background(ColorSet.darkGray)
+        .background(ColorSet.background.opacity(0.9))
         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
-        .shadow(color: .black.opacity(0.2), radius: 10, y: 6)
+        .overlay(content: {
+            RoundedRectangle(cornerRadius: 35, style: .circular).stroke(ColorSet.skeleton02, lineWidth: 0.3)
+        })
+        .shadow(color: Color.black.opacity(0.2), radius: 10, y: 10)
         .padding(.horizontal, 8)
         
         

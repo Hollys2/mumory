@@ -67,30 +67,20 @@ import MusicKit
         return gid
     }
     
-
-}
+     
+ }
 extension AppDelegate: MessagingDelegate {
-     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("fcm token: \(fcmToken ?? "no fcm token")")
-        let Firebase = FBManager.shared
-         let db = Firebase.db
-         let auth = Firebase.auth
-         
-         if let user = auth.currentUser {
-             guard let fcmToken = fcmToken else {
-                 return
-             }
-             db.collection("User").document(user.uid).updateData(["fcmToken": fcmToken])
-         }
     }
 }
 extension AppDelegate: UNUserNotificationCenterDelegate{
-     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-         Messaging.messaging().apnsToken = deviceToken
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
     }
-
+    
     // foreground 상에서 알림이 보이게끔 해준다.
-     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .sound, .badge])
     }
 }

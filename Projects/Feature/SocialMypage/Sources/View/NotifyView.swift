@@ -34,14 +34,23 @@ struct NotifyView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 30, height: 30)
+                            .onTapGesture {
+                                appCoordinator.rootPath.append(MyPage.notification)
+                            }
                     }
                     .frame(height: 63)
                     .padding(.horizontal, 20)
                     
+                    HStack{
+                        UnreadText(notifications: $notifications)
+                        Spacer()
+                        ReadAllButton(notifications: $notifications)
+                    }
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 20)
                     
-                    UnreadText(unreadCount: notifications.filter{!$0.isRead}.count)
-                        .padding(.top, 18)
-                    
+                    Divider05()
+
                     
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
@@ -100,31 +109,24 @@ struct NotifyView: View {
 //}
 
 struct UnreadText: View {
-    let unreadCount: Int
-    init(unreadCount: Int) {
-        self.unreadCount = unreadCount
+    @Binding var notifications: [Notification]
+    init(notifications: Binding<[Notification]>) {
+        self._notifications = notifications
     }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 0, content: {
             HStack(alignment: .bottom, spacing: 0){
-                Text("\(unreadCount)")
+                Text("\(notifications.filter({!$0.isRead}).count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(Color.white)
 
                 Text("개의 알림을 읽지 않았습니다.")
                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                     .foregroundStyle(Color(white: 0.52))
+                                
 
             }
-            .padding(.leading, 20)
-            .padding(.bottom, 20)
         
-        Divider05()
-            
-
-            
-            
-        })
  
     }
 }
@@ -477,4 +479,41 @@ public func fetchSong(songID: String) async -> Song? {
         return nil
     }
     return song
+}
+
+struct ReadAllButton: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @Binding var notifications: [Notification]
+    init(notifications: Binding<[Notification]>) {
+        self._notifications = notifications
+    }
+    var body: some View {
+        Text("모두읽음")
+            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+            .foregroundStyle(notifications.filter({!$0.isRead}).count > 0 ? ColorSet.mainPurpleColor : ColorSet.subGray)
+            .padding(.horizontal, 12)
+            .frame(height: 30)
+            .background(ColorSet.darkGray)
+            .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
+            .onTapGesture {
+                if notifications.filter({!$0.isRead}).count > 0 {
+                    let db = FBManager.shared.db
+                    let query = db.collection("User").document(currentUserData.uId).collection("Notification")
+                        .whereField("isRead", isEqualTo: false)
+                    query.getDocuments { snapshot, error in
+                        guard let snapshot = snapshot else {return}
+                        snapshot.documents.forEach { document in
+                            document.reference.updateData(["isRead": true])
+                        }
+                    }
+                    notifications = notifications.map { notification in
+                        var updatedNotification = notification
+                        updatedNotification.isRead = true
+                        return updatedNotification
+                    }
+                    snackBarViewModel.setSnackBar(type: .readAllNotification, status: .success)
+                }
+            }
+    }
 }

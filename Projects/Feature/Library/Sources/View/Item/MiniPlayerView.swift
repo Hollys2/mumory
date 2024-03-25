@@ -10,10 +10,11 @@ import SwiftUI
 import Shared
 import MusicKit
 
-struct MiniPlayerView: View {
+public struct MiniPlayerView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var isPresentPlayingView: Bool = false
-    var body: some View {
+    public init(){}
+    public var body: some View {
   
                 HStack(spacing: 0, content: {
                     //재생 화면 나올 터치 뷰
@@ -129,6 +130,7 @@ struct MiniPlayerView: View {
                 .padding(.horizontal, 8)
                 .padding(.bottom, 89)
                 .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
+                .frame(maxHeight: .infinity, alignment: .bottom)
 
 
         }

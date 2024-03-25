@@ -29,10 +29,11 @@ public class CurrentUserData: ObservableObject {
     
     @Published public var user: MumoriUser = MumoriUser()
     @Published public var friends: [MumoriUser] = []
+    @Published public var blockFriends: [MumoriUser] = []
     @Published public var friendRequests: [MumoriUser] = []
     @Published public var recievedRequests: [MumoriUser] = []
     @Published public var recievedNewFriends: Bool = false
-    @Published public var recievedNewNotifications: Bool = false
+    @Published public var existUnreadNotification: Bool = false
     
     //삭제 예정...
     @Published public var favoriteGenres: [Int] = []
@@ -92,27 +93,29 @@ public class CurrentUserData: ObservableObject {
                             self.friends.append(user)
                         }
                     }
-                    
+                }
+                guard let blockFriendIds = snapshot.get("blockFriends") as? [String] else {return}
+                blockFriendIds.forEach { uid in
+                    Task {
+                        let user = await MumoriUser(uId: uid)
+                        DispatchQueue.main.async {
+                            self.blockFriends.append(user)
+                        }
+                    }
                 }
             }
         }
     }
     
     func NotificationListener() {
+        let db = FBManager.shared.db
+        let query = db.collection("User").document(self.uId).collection("Notification")
+            .whereField("isRead", isEqualTo: false)
+        
         DispatchQueue.main.async {
-            let db = FBManager.shared.db
-            db.collection("User").document(self.uId).collection("Notification").addSnapshotListener { snapshot, error in
+            query.addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
-                snapshot.documentChanges.forEach { documentChange in
-                    switch documentChange.type {
-                    case .added:
-                        let data = documentChange.document.data()
-                        DispatchQueue.main.async {
-                            self.recievedNewNotifications = true
-                        }
-                    default: break
-                    }
-                }
+                self.existUnreadNotification = (snapshot.count > 0)
             }
         }
     }

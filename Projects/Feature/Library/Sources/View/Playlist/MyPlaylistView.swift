@@ -57,7 +57,7 @@ struct MyPlaylistView: View {
                                     if currentUserData.playlistArray[index].id == "favorite" {
                                         appCoordinator.rootPath.append(LibraryPage.favorite)
                                     }else {
-                                        appCoordinator.rootPath.append(LibraryPage.playlist(playlist: $currentUserData.playlistArray[index]))
+                                        appCoordinator.rootPath.append(LibraryPage.playlistWithIndex(index: index))
                                     }
                                     AnalyticsManager.shared.setSelectContentLog(title: "MyPlaylistViewItem")
                                 }
@@ -77,15 +77,11 @@ struct MyPlaylistView: View {
         }
         .onAppear(perform: {
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
-            currentUserData.playlistArray.removeAll()
-            Task {
-                await getPlayList()
-            }
         })
         
     }
     
-    func getPlayList() async {
+    private func getPlayList() async {
         let Firebase = FBManager.shared
         let db = Firebase.db
         
@@ -118,8 +114,6 @@ struct MyPlaylistView: View {
                 currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
                 fetchSongWithPlaylistID(playlistId: id)
             }
-            
-
         }
     }
 
@@ -140,8 +134,9 @@ struct MyPlaylistView: View {
             }
         }
     }
-
+    
 }
+
 
 
 

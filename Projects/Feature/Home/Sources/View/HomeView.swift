@@ -28,7 +28,7 @@ public struct HomeView: View {
     @EnvironmentObject var keyboardResponder: KeyboardResponder
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var withdrawViewModel: WithdrawViewModel
-    
+    @EnvironmentObject var currentUserData: CurrentUserData
     public init(){}
     
     public init(tab: Tab) {
@@ -40,7 +40,7 @@ public struct HomeView: View {
         ZStack(alignment: .bottom) {
             
             VStack(spacing: 0) {
-                switch selectedTab {
+                switch appCoordinator.selectedTab {
                 case .home:
                     mapView
                 case .social:
@@ -51,7 +51,7 @@ public struct HomeView: View {
                     NotifyView()
                 }
                 
-                MumoryTabView(selectedTab: $selectedTab)
+                MumoryTabView(selectedTab: $appCoordinator.selectedTab)
             }
 //            .padding(.bottom, 89)
             
@@ -59,7 +59,6 @@ public struct HomeView: View {
             
 //            MumoryTabView(selectedTab: $selectedTab)
             
-            MiniPlayerView()
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
             
@@ -104,8 +103,7 @@ public struct HomeView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear {
-            playerViewModel.isShownMiniPlayer = false
-            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.appCoordinator.currentUser.uId)
+            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.uId)
         }
     }
     
@@ -164,6 +162,12 @@ public struct HomeView: View {
                 
                 Spacer()
             }
+        }
+        .onAppear {
+            playerViewModel.isShownMiniPlayer = false
+        }
+        .onDisappear {
+            playerViewModel.isShownMiniPlayer = true
         }
     }
     

@@ -138,8 +138,8 @@ struct ActivityListView: View {
                         Spacer()
                     }
                     .padding(.leading, 20)
-                    .background(ColorSet.background.blur(radius: 10))
                     .frame(height: 55)
+                    .background(ColorSet.background.opacity(0.9))
                     .frame(maxHeight: .infinity, alignment: .top)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)

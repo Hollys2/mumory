@@ -271,7 +271,7 @@ struct MyMumori: View {
             .padding(.bottom, 40)
         })
         .onAppear {
-            spacing = getUIScreenBounds().width <= 375 ? 8 : 11
+            spacing = getUIScreenBounds().width < 380 ? 8 : 12
         }
     }
 }

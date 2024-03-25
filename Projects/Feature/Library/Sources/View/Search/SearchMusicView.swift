@@ -9,22 +9,25 @@
 import SwiftUI
 import Shared
 import MusicKit
+import MapKit
 
 struct SearchMusicView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @Environment(\.dismiss) private var dismiss
     
     @State var term: String
     @State var musicList: MusicItemCollection<Song> = []
     @State var artistList: MusicItemCollection<Artist> = []
-   
-        
+    @State private var region: MKCoordinateRegion?
+
     var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
+            
             VStack(spacing: 0) {
                 HStack(spacing: 0, content: {
+                    //검색 텍스트 필드 뷰
                     HStack(spacing: 0, content: {
                         SharedAsset.graySearch.swiftUIImage
                             .frame(width: 23, height: 23)
@@ -77,6 +80,8 @@ struct SearchMusicView: View {
                 Spacer()
             }
             .padding(.top, appCoordinator.safeAreaInsetsTop)
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()

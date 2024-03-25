@@ -47,7 +47,8 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
-    
+    @EnvironmentObject private var currentUserData: CurrentUserData
+
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?> ) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
@@ -462,7 +463,7 @@ public struct CreateMumoryBottomSheetView: View {
 
                             dispatchGroup.notify(queue: .main) {
 
-                                let newMumoryAnnotation = Mumory(id: "", uId: appCoordinator.currentUser.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0)
+                                let newMumoryAnnotation = Mumory(id: "", uId: currentUserData.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0)
 
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                     switch result {

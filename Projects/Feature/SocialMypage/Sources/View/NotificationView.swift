@@ -48,7 +48,7 @@ struct NotificationView: View {
                         .frame(width: 30, height: 30)
                         .onTapGesture {
                             appCoordinator.bottomAnimationViewStatus = .remove
-                            appCoordinator.rootPath.removeLast(2)
+                            appCoordinator.rootPath = NavigationPath()
                         }
                 }
                 .frame(maxWidth: .infinity)

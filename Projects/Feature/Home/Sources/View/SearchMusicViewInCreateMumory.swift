@@ -73,7 +73,7 @@ struct SearchMusicViewInCreateMumory: View {
                 .background(.clear)
                 
                 if term.count > 0 {
-                    SearchSelectableResultView(term: $term)
+                    SearchMusicResultViewInCreateMumory(term: $term)
                 }else{
                     SearchMusicEntryView(term: $term)
                 }
@@ -108,7 +108,7 @@ struct SearchMusicViewInCreateMumory: View {
 
 
 //검색 결과 뷰
-struct SearchSelectableResultView: View {
+struct SearchMusicResultViewInCreateMumory: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData

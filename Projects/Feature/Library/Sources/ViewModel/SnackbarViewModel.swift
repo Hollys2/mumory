@@ -19,6 +19,7 @@ public enum SnackbarType {
     case playlist
     case favorite
     case copy
+    case readAllNotification
 }
 public class SnackBarViewModel: ObservableObject {
     @Published public var isPresent: Bool = false
@@ -136,6 +137,12 @@ public struct SnackBarView: View {
                 PlaylistDeleteView
                     .offset(y: snackBarViewModel.isPresent ? 53 : -70)
                     .opacity(snackBarViewModel.isPresent ? 1 : 0)
+                
+            case (.readAllNotification, .success):
+                ReadAllNotificationView
+                    .offset(y: snackBarViewModel.isPresent ? 53 : -70)
+                    .opacity(snackBarViewModel.isPresent ? 1 : 0)
+                
             default:
                 EmptyView()
             }
@@ -323,5 +330,20 @@ public struct SnackBarView: View {
         .background(Color.white)
         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
         .padding(.horizontal, 15)
+    }
+    
+    var ReadAllNotificationView: some View {
+        HStack(spacing: 0) {
+            Text("알림을 모두 읽었습니다.")
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+        }
+        .lineLimit(1)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 48)
+        .padding(.horizontal, 20)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+        .padding(.horizontal, 15)
+   
     }
 }

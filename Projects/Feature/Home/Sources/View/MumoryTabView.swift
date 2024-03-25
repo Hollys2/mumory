@@ -28,8 +28,7 @@ public struct MumoryTabView: View {
             HStack(alignment: .bottom, spacing: 0) {
                 
                 Button(action: {
-                    selectedTab = .home
-                    playerViewModel.isShownMiniPlayer = false
+                    appCoordinator.selectedTab = .home
                 }) {
                     Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
                         .resizable()
@@ -38,8 +37,7 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    selectedTab = .social
-                    playerViewModel.isShownMiniPlayer = false
+                    appCoordinator.selectedTab = .social
                 }) {
                     Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
                         .resizable()
@@ -62,8 +60,7 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    selectedTab = .library
-                    playerViewModel.isShownMiniPlayer = true
+                    appCoordinator.selectedTab = .library
                 }) {
                     Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
                         .resizable()
@@ -72,10 +69,9 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    selectedTab = .notification
-                    playerViewModel.isShownMiniPlayer = false
+                    appCoordinator.selectedTab = .notification
                 }) {
-                    Image(asset: selectedTab == .notification ? SharedAsset.notificationOnTabbar : SharedAsset.notificationOffTabbar)
+                    Image(asset: selectedTab == .notification ? currentUserData.existUnreadNotification ? SharedAsset.notificationOnDotTabbar : SharedAsset.notificationOnTabbar : currentUserData.existUnreadNotification ? SharedAsset.notificationOffDotTabbar : SharedAsset.notificationOffTabbar )
                         .resizable()
                         .frame(width: 31, height: 44)
 
@@ -84,6 +80,7 @@ public struct MumoryTabView: View {
             }
             .padding(.top, 2)
         }
+        .ignoresSafeArea()
         .frame(height: appCoordinator.isHiddenTabBar ? 0 : 89)
         .background(Color.black)
     }

@@ -96,6 +96,7 @@ public enum LibraryPage: Hashable{
     case recommendation(genreID: Int)
     case selectableArtist(artist: Artist)
     case favorite
+    case playlistWithIndex(index: Int)
     
     
     public static func == (lhs: LibraryPage, rhs: LibraryPage) -> Bool {
@@ -162,6 +163,9 @@ public enum LibraryPage: Hashable{
               hasher.combine(artist)
           case .favorite:
               hasher.combine(12)
+          case .playlistWithIndex(index: let index):
+              hasher.combine(13)
+              hasher.combine(index)
           }
       }
 }

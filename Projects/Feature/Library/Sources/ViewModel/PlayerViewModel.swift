@@ -17,7 +17,7 @@ struct PlayingInfo {
 }
 
 public class PlayerViewModel: ObservableObject {
-    @Published var isShownMiniPlayer: Bool = true
+    @Published public var isShownMiniPlayer: Bool = true
     @Published var isPlayingViewPresent: Bool = false
     @Published var isShownPreview: Bool = false
     @Published var isPlaying: Bool = false
@@ -34,6 +34,7 @@ public class PlayerViewModel: ObservableObject {
     @Published var isPresentNowPlayingView: Bool = false
         
     private var player = ApplicationMusicPlayer.shared
+    
 
     @Published var playingTime: TimeInterval = 0.0
 
@@ -215,5 +216,5 @@ public class PlayerViewModel: ObservableObject {
             self.playNewSong(song: tappedSong)
         }
     }
-    
+        
 }

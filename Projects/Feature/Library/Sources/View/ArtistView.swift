@@ -9,6 +9,7 @@
 import SwiftUI
 import Shared
 import MusicKit
+import MapKit
 
 struct ArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
@@ -20,6 +21,8 @@ struct ArtistView: View {
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
+    @State private var region: MKCoordinateRegion?
+    
     let artist: Artist
     
     init(artist: Artist) {
@@ -45,9 +48,6 @@ struct ArtistView: View {
             .overlay {
                 ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
             }
-
-
-        
             
             ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize) {
                 LazyVStack(spacing: 0, content: {
@@ -136,6 +136,8 @@ struct ArtistView: View {
                 }
                 .background(TransparentBackground())
             })
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
         }
         .ignoresSafeArea()
         .onAppear(perform: {

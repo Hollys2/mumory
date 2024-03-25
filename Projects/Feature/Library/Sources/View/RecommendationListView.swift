@@ -10,6 +10,7 @@ import SwiftUI
 import Shared
 import MusicKit
 import Core
+import MapKit
 
 struct RecommendationListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -21,6 +22,8 @@ struct RecommendationListView: View {
     @State var songIDs: [String] = []
     @State var songs: [Song] = []
     @State var isCompletedGetSongs: Bool = false
+    @State private var region: MKCoordinateRegion?
+
     let genreID: Int
     let title: String
     
@@ -135,17 +138,20 @@ struct RecommendationListView: View {
             })
             .frame(height: 50)
             .padding(.top, currentUserData.topInset)
-            .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
-                BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                    RecommendationBottomSheetView(songs: songs, title: title)
-                }
-                .background(TransparentBackground())
-            })
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+  
         }
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
+        })
+        .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+            BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+                RecommendationBottomSheetView(songs: songs, title: title)
+            }
+            .background(TransparentBackground())
         })
         
         
