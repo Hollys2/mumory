@@ -91,6 +91,8 @@ struct AddMusicItem: View {
 
             guard let song = self.song else {return}
             currentUserData.playlistArray[index].songs.append(song)
+            
+            currentUserData.playlistArray.first(where: {$0.id == "favorite"})
 
 
         }else {
