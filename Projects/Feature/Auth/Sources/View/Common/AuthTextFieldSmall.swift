@@ -22,17 +22,16 @@ struct AuthTextFieldSmall: View {
                 .foregroundColor(.white)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-
             
-            Button(action: {
-                text = ""
-            }, label: {
-                SharedAsset.xWhiteCircle.swiftUIImage
-                    .frame(width: 23, height: 23)
-                    .padding(.trailing, 17)
-                    .padding(.leading, 5)
-                    .opacity(text.count > 0 ? 1 : 0)
-            })
+            
+            SharedAsset.xWhiteCircle.swiftUIImage
+                .frame(width: 23, height: 23)
+                .padding(.trailing, 17)
+                .padding(.leading, 5)
+                .opacity(text.count > 0 ? 1 : 0)
+                .onTapGesture {
+                    text = ""
+                }
             
         }
         .frame(maxWidth: .infinity)

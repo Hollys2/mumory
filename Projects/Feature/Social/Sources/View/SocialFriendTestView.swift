@@ -264,19 +264,19 @@ struct SearchFriendTextField: View {
                 .foregroundColor(.white)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-
             
-            Button(action: {
-                text = ""
-            }, label: {
-                SharedAsset.xWhiteCircle.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 23, height: 23)
-                    .padding(.trailing, 17)
-                    .padding(.leading, 5)
-                    .opacity(text.count > 0 ? 1 : 0)
-            })
+            
+            
+            SharedAsset.xWhiteCircle.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 23, height: 23)
+                .padding(.trailing, 17)
+                .padding(.leading, 5)
+                .opacity(text.count > 0 ? 1 : 0)
+                .onTapGesture {
+                    text = ""
+                }
             
         }
         .frame(maxWidth: .infinity)
@@ -320,13 +320,14 @@ struct AlreadFriendItem: View {
                     .lineLimit(1)
                 
                 Text("@\(friend.id)")
-                    .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 13))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .foregroundStyle(ColorSet.charSubGray)
                     .lineLimit(1)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
-            
+            .padding(.trailing, 37)
             Text("이미 등록된 친구입니다.")
+                .fixedSize()
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                 .foregroundStyle(Color.white)
         })
@@ -365,7 +366,7 @@ struct FriendAddItem: View {
                     .lineLimit(1)
                 
                 Text("@\(friend.id)")
-                    .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 13))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .foregroundStyle(ColorSet.charSubGray)
                     .lineLimit(1)
             })
@@ -446,7 +447,7 @@ struct RecievedRequestItem: View {
                     .truncationMode(.tail)
                 
                 Text("@\(friend.id)")
-                    .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 13))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .foregroundStyle(ColorSet.charSubGray)
                     .lineLimit(1)
                     .truncationMode(.tail)

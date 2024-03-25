@@ -85,7 +85,7 @@ public struct MyRequestFriendItem: View {
                     .foregroundStyle(Color.white)
                 
                 Text("@\(friend.id)")
-                    .font(SharedFontFamily.Pretendard.thin.swiftUIFont(size: 13))
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .foregroundStyle(ColorSet.charSubGray)
             })
             .frame(maxWidth: .infinity, alignment: .leading)

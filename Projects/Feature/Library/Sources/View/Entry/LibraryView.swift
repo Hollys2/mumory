@@ -29,7 +29,11 @@ struct LibraryView: View {
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
-            StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, content: {
+            StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, refreshAction: {
+                Task {
+                    await getPlayList()
+                }
+            }, content: {
                 
                 ZStack(alignment: .top) {
                     VStack(spacing: 0) {
@@ -154,9 +158,6 @@ struct LibraryView: View {
         
     }
     
-
-        
-    
     private func getPlayList() async {
         let Firebase = FBManager.shared
         let db = Firebase.db
@@ -212,6 +213,7 @@ struct LibraryView: View {
         return returnValue
     }
     
+    //새로고침 쭈욱 하면 여기서 튕김
     private func fetchSong(playlist: Binding<MusicPlaylist>) {
         var count = 0
         Task {
