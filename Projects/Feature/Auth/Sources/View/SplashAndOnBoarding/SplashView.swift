@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import MapKit
 import Shared
 import Lottie
 import Core
@@ -34,7 +35,8 @@ public struct SplashView: View {
     @State var isEndSplash: Bool = false
     @State var page: initPage = .login
     
-    public init() {}
+    public init() {
+    }
     
     public var body: some View {
         ZStack(alignment: .top){
@@ -179,6 +181,9 @@ public struct SplashView: View {
                     switch(page){
                     case .myPage:
                         MyPageView()
+                            .navigationBarBackButtonHidden()
+                            .environmentObject(withdrawViewModel)
+                            .environmentObject(settingViewModel)
                         
                     case .setting:
                         SettingView()
@@ -229,7 +234,15 @@ public struct SplashView: View {
                     case .friendPage(friend: let friend):
                         FriendPageView(friend: friend)
                             .navigationBarBackButtonHidden()
+                        
+                    case .reward:
+                        RewardView()
+                            .navigationBarBackButtonHidden()
                     
+                    case .monthlyStat:
+                        MonthlyStatView()
+                            .navigationBarBackButtonHidden()
+                        
                     case .activityList:
                         ActivityListView()
                             .navigationBarBackButtonHidden()

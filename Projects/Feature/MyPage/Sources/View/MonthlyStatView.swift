@@ -13,7 +13,12 @@ import Shared
 
 public struct MonthlyStatView: View {
     
+    @State private var selectedDate: Date = Date()
+    @State private var isDatePickerShown: Bool = false
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     public init() {}
     
@@ -27,7 +32,7 @@ public struct MonthlyStatView: View {
                 
                 ScrollView(showsIndicators: false) {
                     
-                    ContentView()
+                    ContentView(date: self.$selectedDate)
                         .frame(height: 1000)
                 }
                 
@@ -39,7 +44,7 @@ public struct MonthlyStatView: View {
                         .background(SharedAsset.backgroundColor.swiftUIColor.opacity(0.9))
                     
                     HStack(spacing: 6) {
-                        Text("\(DateManager.formattedDate(date: Date(), dateFormat: "YYYY"))년 \(DateManager.formattedDate(date: Date(), dateFormat: "M"))월")
+                        Text("\(DateManager.formattedDate(date: self.selectedDate, dateFormat: "YYYY"))년 \(DateManager.formattedDate(date: self.selectedDate, dateFormat: "M"))월")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                             .foregroundColor(.white)
                         
@@ -49,8 +54,8 @@ public struct MonthlyStatView: View {
                     }
                     .padding(.leading, 12)
                     .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-//                            self.isDatePickerShown = true
+                        withAnimation(.easeInOut(duration: 0.1)) {
+                            self.isDatePickerShown = true
                         }
                     }
                 }
@@ -58,13 +63,31 @@ public struct MonthlyStatView: View {
         }
         .background(SharedAsset.backgroundColor.swiftUIColor)
         .preferredColorScheme(.dark)
+        .sheet(isPresented: self.$isDatePickerShown, content: {
+            MyMumoryDatePicker(selectedDate: self.$selectedDate)
+                .presentationDetents([.height(309)])
+        })
     }
 }
 
 struct ContentView: View {
     
+    @Binding var date: Date
+    
+    
+    @State var mumoryMonthly: [Mumory] = []
+    @State var mumoriesCountByMonth: [Int] = Array(repeating: 0, count: 12)
+    @State var mumoriesLikeCount: Int = 0
+    @State var mumoriesCommentCount: Int = 0
+    
+    @State private var filteredLocations: [String: [Mumory]] = [:]
+    
     @State var bottomPadding: CGFloat = 0
     @State var isPopUpViewShown: Bool = false
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
         
@@ -80,7 +103,7 @@ struct ContentView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     
-                    Text("사용자이름이름님의 이달의 관심 음악 장르는")
+                    Text("\(currentUserData.user.nickname)님의 이달의 관심 음악 장르는")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundColor(.white)
                     
@@ -101,6 +124,9 @@ struct ContentView: View {
                     .resizable()
                     .frame(width: 15, height: 15)
                     .offset(x: getUIScreenBounds().width - 40 - 15 - 11, y: 108 - 15 - 11)
+                    .onTapGesture {
+                        self.isPopUpViewShown = true
+                    }
             }
             
             ZStack(alignment: .topLeading) {
@@ -108,19 +134,19 @@ struct ContentView: View {
                 VStack(spacing: 0) {
                     
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("10월 뮤모리 작성")
+                        Text("\(DateManager.formattedDate(date: self.date, dateFormat: "M"))월 뮤모리 작성")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                             .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                         
                         HStack(spacing: 0) {
                             
-                            Text("9개")
+                            Text("\(self.mumoryMonthly.count)개")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             
                             Spacer()
                             
-                            Text("10월 10일, 오늘")
+                            Text("\(DateManager.formattedDate(date: self.date, dateFormat: "M"))월 \(DateManager.formattedDate(date: self.date, dateFormat: "d"))일, \(DateManager.formattedRegionDate(date: self.date))")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .multilineTextAlignment(.trailing)
                                 .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
@@ -136,65 +162,78 @@ struct ContentView: View {
                             
                             HStack(spacing: 10) {
                                 
-                                ForEach(0..<2) { _ in
-                                    Rectangle()
-                                        .foregroundColor(.clear)
-                                        .frame(width: 42, height: 66)
-                                        .background(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        .cornerRadius(30)
-                                        .overlay(
-                                            Text("10")
-                                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 15))
-                                                .multilineTextAlignment(.center)
-                                                .foregroundColor(Color(red: 0.21, green: 0.21, blue: 0.21))
-                                                .frame(height: 11)
-                                                .offset(y: -33 + 5.5 + 11)
-                                        )
-                                        .overlay(
-                                            Circle()
-                                                .fill(Color(red: 0.76, green: 0.76, blue: 0.76))
-                                                .frame(width: 32, height: 32)
-                                                .overlay(
-                                                    Text("+1")
-                                                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                                                        .multilineTextAlignment(.center)
-                                                        .foregroundColor(.black)
-                                                )
-                                                .offset(y: 12)
-                                        )
-                                }
-                                
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 42, height: 66)
-                                    .background(Color(red: 0.89, green: 0.89, blue: 0.89))
-                                    .cornerRadius(30)
-                                    .overlay(
-                                        Text("10")
-                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 15))
-                                            .multilineTextAlignment(.center)
-                                            .foregroundColor(.black)
-                                            .frame(height: 11)
-                                            .offset(y: -33 + 5.5 + 11)
-                                    )
-                                    .overlay(
-                                        Circle()
-                                            .fill(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                            .frame(width: 32, height: 32)
+                                ForEach(self.mumoriesCountByMonth.indices.filter { self.mumoriesCountByMonth[$0] > 0 }, id: \.self) { index in
+                                    let month = index + 1
+                                    
+                                    if DateManager.formattedDate(date: self.date, dateFormat: "M") == String(month) {
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 42, height: 66)
+                                            .background(Color(red: 0.89, green: 0.89, blue: 0.89))
+                                            .cornerRadius(30)
                                             .overlay(
-                                                Text("+1")
-                                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                                                Text("\(month)")
+                                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 15))
                                                     .multilineTextAlignment(.center)
                                                     .foregroundColor(.black)
+                                                    .frame(height: 11)
+                                                    .offset(y: -33 + 5.5 + 11)
                                             )
-                                            .offset(y: 12)
-                                    )
-                                    .id(0)
+                                            .overlay(
+                                                Circle()
+                                                    .fill(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                                    .frame(width: 32, height: 32)
+                                                    .overlay(
+                                                        Text("\(mumoriesCountByMonth[index])")
+                                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                                                            .multilineTextAlignment(.center)
+                                                            .foregroundColor(.black)
+                                                    )
+                                                    .offset(y: 12)
+                                            )
+                                            .id(0)
+                                    }
+                                    else if DateManager.formattedDate(date: self.date, dateFormat: "M") > String(month) {
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: 42, height: 66)
+                                            .background(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                            .cornerRadius(30)
+                                            .overlay(
+                                                Text("\(month)")
+                                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 15))
+                                                    .multilineTextAlignment(.center)
+                                                    .foregroundColor(Color(red: 0.21, green: 0.21, blue: 0.21))
+                                                    .frame(height: 11)
+                                                    .offset(y: -33 + 5.5 + 11)
+                                            )
+                                            .overlay(
+                                                Circle()
+                                                    .fill(Color(red: 0.76, green: 0.76, blue: 0.76))
+                                                    .frame(width: 32, height: 32)
+                                                    .overlay(
+                                                        Text("\(mumoriesCountByMonth[index])")
+                                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                                                            .multilineTextAlignment(.center)
+                                                            .foregroundColor(.black)
+                                                    )
+                                                    .offset(y: 12)
+                                            )
+                                    }
+                                }
                             }
                             .padding(.horizontal, 20)
                         }
                         .onAppear {
                             proxy.scrollTo(0)
+                            
+                            for mumory in mumoryDataViewModel.myMumorys {
+                                let month = Calendar.current.component(.month, from: mumory.date)
+                                mumoriesCountByMonth[month - 1] += 1
+                                
+                                mumoriesLikeCount += mumory.likes.count
+                                mumoriesCommentCount += mumory.commentCount
+                            }
                         }
                         .padding(.top, 25)
                     }
@@ -214,7 +253,7 @@ struct ContentView: View {
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                 
-                                Text("6개")
+                                Text("\(mumoriesLikeCount)개")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             }
@@ -224,7 +263,7 @@ struct ContentView: View {
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                 
-                                Text("5개")
+                                Text("\(mumoriesCommentCount)개")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             }
@@ -243,11 +282,28 @@ struct ContentView: View {
                 
                 
                 if self.isPopUpViewShown {
-                    MonthlyStatPopUpView()
+                    MonthlyStatPopUpView(isShown: self.$isPopUpViewShown)
                         .offset(x: getUIScreenBounds().width - 270 - 20 + 5, y: -20)
                 }
             }
             .padding(.top, 15)
+            .onAppear {
+                let calendar = Calendar.current
+                let month = calendar.component(.month, from: self.date)
+                self.mumoryMonthly = mumoryDataViewModel.filterdMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+                
+                for (region, boundary) in MapConstant.boundaries {
+                    let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
+                        let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
+                        let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
+                        return latInRange && lonInRange
+                    }
+                    
+                    if !filteredMumorys.isEmpty {
+                        self.filteredLocations[region] = filteredMumorys
+                    }
+                }
+            }
             
             Text("뮤모리된 지역")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -257,8 +313,11 @@ struct ContentView: View {
                 .padding(.leading, 20)
             
             HStack(spacing: 10) {
-                
-                ForEach(1..<4) { index in
+                let sortedLocationsArray = filteredLocations.sorted(by: { $0.key < $1.key })
+
+                ForEach(Array(sortedLocationsArray.enumerated()), id: \.element.key) { index, element in
+                    let region = element.key
+                    let mumories = element.value
                     
                     Rectangle()
                         .foregroundColor(.clear)
@@ -268,7 +327,7 @@ struct ContentView: View {
                         .overlay(
                             VStack(spacing: 0) {
                                 HStack(alignment: .center, spacing: 10) {
-                                    Text("TOP \(index)")
+                                    Text("TOP \(index + 1)")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                         .multilineTextAlignment(.center)
                                         .foregroundColor(.white)
@@ -282,14 +341,14 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                Text("서울특별시")
+                                Text("\(region)")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                     .multilineTextAlignment(.center)
                                     .foregroundColor(.white)
                                 
                                 Spacer()
                                 
-                                Text("6개")
+                                Text("\(mumories.count)개")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                     .multilineTextAlignment(.center)
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
@@ -299,6 +358,8 @@ struct ContentView: View {
                                 .frame(height: getUIScreenBounds().width * 0.28)
                         )
                 }
+                
+                Spacer(minLength: 0)
             }
             .padding(.top, 15)
             .padding(.horizontal, 20)
@@ -320,13 +381,13 @@ struct ContentView: View {
                         .cornerRadius(15)
                         .overlay(
                             VStack(alignment: .leading) {
-                                Text("새 플레이리스트")
+                                Text(i == 0 ? "새 플레이리스트" : "즐겨찾기한 음악")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                 
                                 Spacer()
                                 
-                                Text("3개")
+                                Text(i == 0 ? "\(currentUserData.playlistArray.count)개" : "\(currentUserData.playlistArray.first(where: {$0.id == "favorite"})?.songIDs.count ?? 0)개")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             }
@@ -345,6 +406,8 @@ struct ContentView: View {
 }
 
 struct MonthlyStatPopUpView: View {
+    
+    @Binding var isShown: Bool
     
     var body: some View {
         
@@ -368,6 +431,9 @@ struct MonthlyStatPopUpView: View {
                 SharedAsset.closeButtonPopup.swiftUIImage
                     .resizable()
                     .frame(width: 13, height: 13)
+                    .onTapGesture {
+                        self.isShown = false
+                    }
             }
             .padding(.leading, 17)
             .padding(.vertical, 13)
@@ -375,12 +441,5 @@ struct MonthlyStatPopUpView: View {
             .background(Color(red: 0.64, green: 0.51, blue: 0.99))
             .cornerRadius(17)
         }
-    }
-}
-
-
-struct MonthlyStatView_Previews: PreviewProvider {
-    static var previews: some View {
-        MonthlyStatView()
     }
 }

@@ -13,7 +13,6 @@ struct MumoryApp: App {
     @StateObject var locationManager: LocationManager = .init()
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
-    @StateObject var dateManager: DateManager = .init()
     @StateObject var firebaseManager: FirebaseManager = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var currentUserData: CurrentUserData = .init()
@@ -24,8 +23,8 @@ struct MumoryApp: App {
         WindowGroup {
             GeometryReader { geometry in
                 ZStack {
-//                    SplashView()
-                    MumoryEditView(mumoryAnnotation: Mumory())
+                    SplashView()
+//                    MumoryEditView(mumoryAnnotation: Mumory())
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                                 AuthController.handleOpenUrl(url: url)
@@ -35,7 +34,6 @@ struct MumoryApp: App {
                         .environmentObject(locationManager)
                         .environmentObject(localSearchViewModel)
                         .environmentObject(mumoryDataViewModel)
-                        .environmentObject(dateManager)
                         .environmentObject(firebaseManager)
                         .environmentObject(keyboardResponder)
                         .environmentObject(currentUserData)

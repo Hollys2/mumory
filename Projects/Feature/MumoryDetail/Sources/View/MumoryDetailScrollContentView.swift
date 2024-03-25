@@ -42,6 +42,7 @@ struct MumoryDetailScrollContentView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
         
@@ -209,7 +210,8 @@ struct MumoryDetailScrollContentView: View {
                     Spacer().frame(height: 35)
                     
                     MumoryDetailFriendMumoryScrollView()
-                        .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 162)
+                        .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 212)
+                        .background(.red)
                     
                     Spacer().frame(height: 17)
                     
@@ -219,7 +221,7 @@ struct MumoryDetailScrollContentView: View {
                 }
                 
                 Group {
-                    Text("동일한 지역에서 뮤모리된 음악")
+                    Text("주변에서 뮤모리된 음악")
                         .font(
                             Font.custom("Apple SD Gothic Neo", size: 18)
                                 .weight(.semibold)
@@ -267,12 +269,9 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
-        .fullScreenCover(isPresented: self.$isMapViewShown) {
-            MumoryDetailMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
-                .onAppear {
-                    MKMapView.appearance().mapType = .mutedStandard
-                }
-        }
+//        .fullScreenCover(isPresented: self.$isMapViewShown) {
+//            MumoryMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
+//        }
         .onAppear {
             Task {
                 self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)

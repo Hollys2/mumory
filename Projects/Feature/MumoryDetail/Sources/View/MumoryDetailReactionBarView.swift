@@ -20,6 +20,7 @@ struct MumoryDetailReactionBarView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
     
     var body: some View {
         
@@ -28,8 +29,7 @@ struct MumoryDetailReactionBarView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: UIScreen.main.bounds.width, height: 85)
-//                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-                .background(.green)
+                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
                 .overlay(
                     Rectangle()
                         .frame(height: 0.5)
@@ -44,7 +44,7 @@ struct MumoryDetailReactionBarView: View {
                     isButtonDisabled = true
 
                     Task {
-                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: appCoordinator.currentUser.uId)
+                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId)
                         
                         lazy var functions = Functions.functions()
                         functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
@@ -58,7 +58,7 @@ struct MumoryDetailReactionBarView: View {
                         }
                     }
                 }, label: {
-                    mumory.likes.contains(appCoordinator.currentUser.uId) ?
+                    mumory.likes.contains(currentUserData.user.uId) ?
                     Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)

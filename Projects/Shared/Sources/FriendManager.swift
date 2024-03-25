@@ -40,6 +40,8 @@ public class FriendManager: ObservableObject {
                             }
                         }
                     }
+                    
+
                 } else {
                     print("No documents found with nickname 'solda'")
                 }

@@ -34,6 +34,7 @@ public struct TopBarView: View {
                     self.appCoordinator.rootPath.removeLast()
                 }, label: {
                     SharedAsset.backButtonTopBar.swiftUIImage
+                        .resizable()
                         .frame(width: 30, height: 30)
                 })
                 
@@ -44,6 +45,7 @@ public struct TopBarView: View {
                         self.appCoordinator.rootPath.append(rightBarButtonNavigationPath)
                     }, label: {
                         SharedAsset.searchButtonMypage.swiftUIImage
+                            .resizable()
                             .frame(width: 30, height: 30)
                     })
                 }
