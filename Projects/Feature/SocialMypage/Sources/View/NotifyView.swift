@@ -50,7 +50,6 @@ struct NotifyView: View {
                     .padding(.horizontal, 20)
                     
                     Divider05()
-
                     
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
@@ -67,8 +66,10 @@ struct NotifyView: View {
                                 }
                                 
                             }
-                            
                         })
+                    }
+                    .refreshable {
+                        await getNotification()
                     }
                     
                     
@@ -80,6 +81,7 @@ struct NotifyView: View {
                     await getNotification()
                 }
                 AnalyticsManager.shared.setScreenLog(screenTitle: "NotifyView")
+                UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             }
     }
     

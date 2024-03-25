@@ -106,7 +106,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
        
             }
             contentOffset.wrappedValue = scrollView.contentOffset
-
+            scrollView.refreshControl?.bounds = CGRect(x: 0, y: -68 , width: 100, height: 100)
         }
     }
 }
@@ -119,14 +119,22 @@ class UIStickyScrollViewController: UIViewController{
         return v
     }()
     
+    var refreshControl: UIRefreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
     var index = 0
-
     var hostingController: UIHostingController<AnyView> = UIHostingController(rootView: AnyView(EmptyView()))
 
     override func viewDidLoad() {
         super.viewDidLoad()
         scrollView.decelerationRate = .fast
         scrollView.showsHorizontalScrollIndicator = false
+        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+//        refreshControl.bounds = CGRect(x: refreshControl.bounds.origin.x,
+//                                       y: -68,
+//                                       width: refreshControl.bounds.size.width,
+//                                       height: refreshControl.bounds.size.height)
+        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+        scrollView.refreshControl = refreshControl
+
         
         self.hostingController.view.backgroundColor = .clear
 
@@ -138,8 +146,6 @@ class UIStickyScrollViewController: UIViewController{
         self.scrollView.addSubview(self.hostingController.view)
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
-
-
     }
 
     func pinEdges(of viewA: UIView, to viewB: UIView) {
@@ -159,4 +165,10 @@ class UIStickyScrollViewController: UIViewController{
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
     }
+    
+    @objc func refresh(){
+        print("library refresh")
+        refreshControl.endRefreshing()
+    }
+
 }
