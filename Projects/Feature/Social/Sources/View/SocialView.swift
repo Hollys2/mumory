@@ -41,6 +41,18 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
         
+        let hostingController = UIHostingController(rootView: self.content()
+            .environmentObject(self.mumoryDataViewModel)
+            .environmentObject(self.currentUserData))
+        let height = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+
+        scrollView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
+        hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: height)
+
+        scrollView.subviews.forEach { $0.removeFromSuperview() }
+        scrollView.addSubview(hostingController.view)
+
+        
         context.coordinator.scrollView = scrollView
         
         return scrollView
@@ -122,8 +134,12 @@ extension SocialScrollViewRepresentable {
             preOffsetY = offsetY
             
             if offsetY >= contentHeight - scrollViewHeight {
-                print("END")
-                self.parent.mumoryDataViewModel.fetchEveryMumory()
+                
+                if !self.parent.mumoryDataViewModel.isUpdating {
+                    print("END")
+                    self.parent.mumoryDataViewModel.isUpdating = true
+                    self.parent.mumoryDataViewModel.fetchEveryMumory()
+                }
             }
         }
     }
@@ -375,8 +391,8 @@ struct SocialItemView: View {
                             
                             // MARK: Tag
                             if let tags = self.mumory.tags {
-                                
-                                ForEach(tags, id: \.self) { tag in
+                                let uniqueTags = Array(Set(tags))
+                                ForEach(uniqueTags, id: \.self) { tag in
                                     
                                     HStack(alignment: .center, spacing: 5) {
                                     

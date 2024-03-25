@@ -80,6 +80,8 @@ struct ContentView: View {
     @State var mumoriesLikeCount: Int = 0
     @State var mumoriesCommentCount: Int = 0
     
+    @State var days: Int = 0
+    @State var mumoryDaily: [Int: [Mumory]] = [:]
     @State private var filteredLocations: [String: [Mumory]] = [:]
     
     @State var bottomPadding: CGFloat = 0
@@ -108,7 +110,7 @@ struct ContentView: View {
                         .foregroundColor(.white)
                     
                     Group {
-                        Text("POP")
+                        Text("-")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                             .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                         
@@ -162,17 +164,17 @@ struct ContentView: View {
                             
                             HStack(spacing: 10) {
                                 
-                                ForEach(self.mumoriesCountByMonth.indices.filter { self.mumoriesCountByMonth[$0] > 0 }, id: \.self) { index in
-                                    let month = index + 1
+                                ForEach(self.mumoryDaily.keys.sorted(), id: \.self) { day in
+                                    let count = mumoryDaily[day]?.count ?? 0
                                     
-                                    if DateManager.formattedDate(date: self.date, dateFormat: "M") == String(month) {
+                                    if DateManager.formattedDate(date: self.date, dateFormat: "d") == String(day) {
                                         Rectangle()
                                             .foregroundColor(.clear)
                                             .frame(width: 42, height: 66)
                                             .background(Color(red: 0.89, green: 0.89, blue: 0.89))
                                             .cornerRadius(30)
                                             .overlay(
-                                                Text("\(month)")
+                                                Text("\(day)")
                                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 15))
                                                     .multilineTextAlignment(.center)
                                                     .foregroundColor(.black)
@@ -184,7 +186,7 @@ struct ContentView: View {
                                                     .fill(Color(red: 0.64, green: 0.51, blue: 0.99))
                                                     .frame(width: 32, height: 32)
                                                     .overlay(
-                                                        Text("\(mumoriesCountByMonth[index])")
+                                                        Text(count > 0 ? "+\(count)" : "")
                                                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                                                             .multilineTextAlignment(.center)
                                                             .foregroundColor(.black)
@@ -192,15 +194,14 @@ struct ContentView: View {
                                                     .offset(y: 12)
                                             )
                                             .id(0)
-                                    }
-                                    else if DateManager.formattedDate(date: self.date, dateFormat: "M") > String(month) {
+                                    } else if Int(DateManager.formattedDate(date: self.date, dateFormat: "d")) ?? 0 > day {
                                         Rectangle()
                                             .foregroundColor(.clear)
                                             .frame(width: 42, height: 66)
                                             .background(Color(red: 0.47, green: 0.47, blue: 0.47))
                                             .cornerRadius(30)
                                             .overlay(
-                                                Text("\(month)")
+                                                Text("\(day)")
                                                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 15))
                                                     .multilineTextAlignment(.center)
                                                     .foregroundColor(Color(red: 0.21, green: 0.21, blue: 0.21))
@@ -212,10 +213,10 @@ struct ContentView: View {
                                                     .fill(Color(red: 0.76, green: 0.76, blue: 0.76))
                                                     .frame(width: 32, height: 32)
                                                     .overlay(
-                                                        Text("\(mumoriesCountByMonth[index])")
-                                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                                                            .multilineTextAlignment(.center)
-                                                            .foregroundColor(.black)
+                                                        Text(count > 0 ? "+\(count)" : "")
+                                                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                                                                .multilineTextAlignment(.center)
+                                                                .foregroundColor(.black)
                                                     )
                                                     .offset(y: 12)
                                             )
@@ -225,15 +226,45 @@ struct ContentView: View {
                             .padding(.horizontal, 20)
                         }
                         .onAppear {
-                            proxy.scrollTo(0)
+//                            proxy.scrollTo(0)
                             
-                            for mumory in mumoryDataViewModel.myMumorys {
-                                let month = Calendar.current.component(.month, from: mumory.date)
-                                mumoriesCountByMonth[month - 1] += 1
-                                
-                                mumoriesLikeCount += mumory.likes.count
-                                mumoriesCommentCount += mumory.commentCount
+                            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+                            let calendar = Calendar.current
+                            let year = calendar.component(.year, from: Date())
+                            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+                            if isLeapYear {
+                                daysInMonth[1] = 29
                             }
+                            let month = calendar.component(.month, from: self.date)
+                            self.days = daysInMonth[month - 1]
+                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+                            
+                            for mumory in self.mumoryMonthly {
+                //                for day in (1...self.days) {
+                //                    print("day: \(d)")
+                //                }
+                                let day = Calendar.current.component(.day, from: mumory.date)
+                                
+                                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
+                                if var mumories = self.mumoryDaily[day] {
+                                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
+                                    mumories.append(mumory)
+                                    self.mumoryDaily[day] = mumories
+                                } else {
+                                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
+                                    self.mumoryDaily[day] = [mumory]
+                                }
+                            }
+                            
+                            for day in 1...self.days {
+                                 if self.mumoryDaily[day] == nil {
+                                     self.mumoryDaily[day] = []
+                                 }
+                             }
+                            
+                            print("mumoryDaily: \(mumoryDaily)")
+                            
+                            proxy.scrollTo(0, anchor: .trailing)
                         }
                         .padding(.top, 25)
                     }
@@ -287,23 +318,6 @@ struct ContentView: View {
                 }
             }
             .padding(.top, 15)
-            .onAppear {
-                let calendar = Calendar.current
-                let month = calendar.component(.month, from: self.date)
-                self.mumoryMonthly = mumoryDataViewModel.filterdMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
-                
-                for (region, boundary) in MapConstant.boundaries {
-                    let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
-                        let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
-                        let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
-                        return latInRange && lonInRange
-                    }
-                    
-                    if !filteredMumorys.isEmpty {
-                        self.filteredLocations[region] = filteredMumorys
-                    }
-                }
-            }
             
             Text("뮤모리된 지역")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -402,6 +416,27 @@ struct ContentView: View {
             Spacer()
         }
         .padding(.top, 65)
+        .onAppear {
+            for (region, boundary) in MapConstant.boundaries {
+                let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
+                    let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
+                    let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
+                    return latInRange && lonInRange
+                }
+                
+                if !filteredMumorys.isEmpty {
+                    self.filteredLocations[region] = filteredMumorys
+                }
+            }
+            
+            for mumory in mumoryDataViewModel.myMumorys {
+                let month = Calendar.current.component(.month, from: mumory.date)
+                mumoriesCountByMonth[month - 1] += 1
+                
+                mumoriesLikeCount += mumory.likes.count
+                mumoriesCommentCount += mumory.commentCount
+            }
+        }
     }
 }
 

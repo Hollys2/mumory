@@ -52,11 +52,13 @@ struct AddressRow: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Text(result.subtitle)
-                        .lineLimit(1)
-                        .font(Font.custom("Pretendard", size: 13))
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    if !result.subtitle.isEmpty {
+                        Text(result.subtitle)
+                            .lineLimit(1)
+                            .font(Font.custom("Pretendard", size: 13))
+                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
                 
                 Spacer().frame(width: 20)
@@ -181,10 +183,6 @@ struct SearchLocationView: View {
                                 .foregroundColor(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.698).opacity(0.7))
                             
                             Button(action: {
-                                if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
-                                     self.locationManager.promptForLocationSettings()
-                                 }
-                                
                                 appCoordinator.rootPath.append("map")
                             }) {
                                 ZStack {

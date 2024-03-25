@@ -8,11 +8,11 @@
 
 import SwiftUI
 import MapKit
+import MusicKit
+import Firebase
 
 import Core
 import Shared
-
-import Firebase
 
 
 public struct HomeView: View {
@@ -95,8 +95,42 @@ public struct HomeView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear {
-            self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.uId)
+            Task {
+                let authorizationStatus = await MusicAuthorization.request()
+                if authorizationStatus == .authorized {
+                    print("음악 권한 받음")
+                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.uId)
+                } else {
+                    print("음악 권한 거절")
+                    DispatchQueue.main.async {
+                        // 권한 거절 안내 및 설정으로 이동 유도
+                        self.showAlertToRedirectToSettings()
+                    }
+                }
+            }
         }
+    }
+    
+    func showAlertToRedirectToSettings() {
+        let alertController = UIAlertController(title: "음악 권한 허용", message: "뮤모리를 이용하려면 음악 권한이 필요합니다. 설정으로 이동하여 권한을 허용해주세요.", preferredStyle: .alert)
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, completionHandler: nil)
+            }
+        }
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(cancelAction)
+        
+        UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+//        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+//            if let window = windowScene.windows.first {
+//                window.rootViewController?.present(alertController, animated: true, completion: nil)
+//            }
+//        }
     }
     
     var mapView: some View {
@@ -106,7 +140,6 @@ public struct HomeView: View {
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
-//                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.user.uId)
                 }
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")

@@ -61,7 +61,7 @@ public struct SplashView: View {
                     }
                 }
                 .onAppear(perform: {
-                    Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
+                    Timer.scheduledTimer(withTimeInterval: 0, repeats: false) { timer in
                         withAnimation {
                             isEndSplash = true
                         }

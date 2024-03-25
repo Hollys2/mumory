@@ -103,11 +103,11 @@ public struct MyMumoryView: View {
                                     
                                     VStack(spacing: 0) {
                                         
-                                        ForEach(Array(mumoryDataViewModel.filterdMumorys.enumerated()), id: \.element) { index, mumory in
+                                        ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
                                             
                                             let spacing = calculateSpacing(forIndex: index)
                                             
-                                            if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filterdMumorys[index - 1]) {
+                                            if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
                                                 ZStack(alignment: .topLeading) {
                                                     Rectangle()
                                                         .foregroundColor(.clear)
@@ -272,8 +272,8 @@ public struct MyMumoryView: View {
         guard index > 0 else {
             return 0
         }
-        let previousDate = mumoryDataViewModel.filterdMumorys[index - 1].date
-        let currentDate = mumoryDataViewModel.filterdMumorys[index].date
+        let previousDate = mumoryDataViewModel.filteredMumorys[index - 1].date
+        let currentDate = mumoryDataViewModel.filteredMumorys[index].date
                     
         print("previousDate: \(previousDate)")
         print("currentDate: \(currentDate)")
@@ -324,13 +324,13 @@ struct MumoryItemView: View {
     }
     
     private var previousDate: Date? {
-        guard let index = mumoryDataViewModel.filterdMumorys.firstIndex(where: { $0.id == mumory.id }) else {
+        guard let index = mumoryDataViewModel.filteredMumorys.firstIndex(where: { $0.id == mumory.id }) else {
             return nil
         }
         guard index > 0 else {
             return nil
         }
-        return mumoryDataViewModel.filterdMumorys[index - 1].date
+        return mumoryDataViewModel.filteredMumorys[index - 1].date
     }
     
     private var isSameDateAsPrevious: Bool {
@@ -683,7 +683,7 @@ struct MyMumoryDatePicker: View {
                 for m in newDataBeforeSelectedDate {
                     print("date: \(m.date)")
                 }
-                mumoryDataViewModel.filterdMumorys = newDataBeforeSelectedDate
+                mumoryDataViewModel.filteredMumorys = newDataBeforeSelectedDate
                 
                 dismiss()
             }) {

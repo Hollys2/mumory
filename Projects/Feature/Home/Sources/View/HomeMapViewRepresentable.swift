@@ -56,6 +56,8 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
+        
+        
         // Remove annotations that are no longer in myMumoryAnnotations
 //        let currentAnnotationIDs = Set(uiView.annotations.compactMap { ($0 as? Mumory)?.id })
         let newAnnotationIDs = Set(self.mumoryDataViewModel.myMumorys.map { $0.id })
