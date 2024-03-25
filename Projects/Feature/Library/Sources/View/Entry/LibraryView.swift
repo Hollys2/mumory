@@ -126,18 +126,18 @@ struct LibraryView: View {
                     }
                 }
             }
-            .onChange(of: contentOffset.y, perform: { value in
-                print("y offset: \(value)")
-                if value < -30 {
-                    if !isLoadingPlaylist {
-                        isLoadingPlaylist = true
-                        Task {
-                            await getPlayList()
-                        }
-                        
-                    }
-                }
-            })
+//            .onChange(of: contentOffset.y, perform: { value in
+//                print("y offset: \(value)")
+//                if value < -30 {
+//                    if !isLoadingPlaylist {
+//                        isLoadingPlaylist = true
+//                        Task {
+//                            await getPlayList()
+//                        }
+//                        
+//                    }
+//                }
+//            })
             
             ColorSet.background
                 .ignoresSafeArea()
