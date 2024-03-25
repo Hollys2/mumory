@@ -36,7 +36,6 @@ struct LibraryView: View {
                         
                         //마이뮤직, 추천 선택 스택
                         HStack(spacing: 6, content: {
-                            
                             //마이뮤직버튼
                             Button(action: {
                                 isTapMyMusic = true
@@ -83,16 +82,17 @@ struct LibraryView: View {
                             .foregroundStyle(.clear)
                             .frame(height: 87)
                     }
-                    
-                  
                 }
                 .frame(width: screenWidth)
                 .onAppear {
                     print("screent width: \(getUIScreenBounds().width), height: \(getUIScreenBounds().height)")
                 }
+        
                 
             })
             .padding(.top, appCoordinator.safeAreaInsetsTop)
+
+           
             
             //상단바
             HStack(){
@@ -115,7 +115,7 @@ struct LibraryView: View {
             }
             .frame(height: topBarHeight, alignment: .center)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
-            .background(ColorSet.background)
+            .background(ColorSet.background.opacity(0.3))
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
                 if newValue == .up {
