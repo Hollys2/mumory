@@ -40,7 +40,7 @@ public struct HomeView: View {
         ZStack(alignment: .bottom) {
             
             VStack(spacing: 0) {
-                switch appCoordinator.selectedTab {
+                switch selectedTab {
                 case .home:
                     mapView
                 case .social:
@@ -51,7 +51,7 @@ public struct HomeView: View {
                     NotifyView()
                 }
                 
-                MumoryTabView(selectedTab: $appCoordinator.selectedTab)
+                MumoryTabView(selectedTab: $selectedTab)
             }
 //            .padding(.bottom, 89)
             

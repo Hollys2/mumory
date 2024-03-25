@@ -28,7 +28,7 @@ public struct MumoryTabView: View {
             HStack(alignment: .bottom, spacing: 0) {
                 
                 Button(action: {
-                    appCoordinator.selectedTab = .home
+                    selectedTab = .home
                 }) {
                     Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
                         .resizable()
@@ -37,7 +37,7 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    appCoordinator.selectedTab = .social
+                    selectedTab = .social
                 }) {
                     Image(uiImage: selectedTab == .social ? SharedAsset.socialOnTabbar.image : SharedAsset.socialOffTabbar.image)
                         .resizable()
@@ -60,7 +60,7 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    appCoordinator.selectedTab = .library
+                    selectedTab = .library
                 }) {
                     Image(asset: selectedTab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)
                         .resizable()
@@ -69,7 +69,7 @@ public struct MumoryTabView: View {
                 .frame(width: geometry.size.width / 5)
                 
                 Button(action: {
-                    appCoordinator.selectedTab = .notification
+                    selectedTab = .notification
                 }) {
                     Image(asset: selectedTab == .notification ? currentUserData.existUnreadNotification ? SharedAsset.notificationOnDotTabbar : SharedAsset.notificationOnTabbar : currentUserData.existUnreadNotification ? SharedAsset.notificationOffDotTabbar : SharedAsset.notificationOffTabbar )
                         .resizable()

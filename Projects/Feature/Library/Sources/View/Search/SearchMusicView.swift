@@ -86,6 +86,10 @@ struct SearchMusicView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
+        .onAppear {
+            playerViewModel.miniPlayerMoveToBottom = true
+        }
+
 
     }
 

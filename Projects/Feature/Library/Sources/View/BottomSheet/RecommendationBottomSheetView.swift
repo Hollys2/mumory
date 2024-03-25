@@ -38,6 +38,7 @@ struct RecommendationBottomSheetView: View {
             
             Divider05()
                 .padding(.horizontal, 4)
+                .padding(.bottom, 10)
             
             BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                 .onTapGesture {
@@ -152,6 +153,6 @@ private struct MiniPlaylistImage: View {
                 
             })
         })
-        .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+        .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
     }
 }

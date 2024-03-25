@@ -128,9 +128,10 @@ public struct MiniPlayerView: View {
                 )
                 .padding(.bottom, 10)
                 .padding(.horizontal, 8)
-                .padding(.bottom, 89)
+                .padding(.bottom, playerViewModel.miniPlayerMoveToBottom ? 15 : 89)
                 .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
                 .frame(maxHeight: .infinity, alignment: .bottom)
+                .animation(.linear(duration: 0.2), value: playerViewModel.miniPlayerMoveToBottom)
 
 
         }

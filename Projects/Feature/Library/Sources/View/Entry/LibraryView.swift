@@ -146,6 +146,7 @@ struct LibraryView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
+            playerViewModel.miniPlayerMoveToBottom = false
             Task {
                 await getPlayList()
             }
