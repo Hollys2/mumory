@@ -137,6 +137,10 @@ struct SearchLocationView: View {
                         VStack(spacing: 0) {
                             
                             Button(action: {
+                                if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
+                                     self.locationManager.promptForLocationSettings()
+                                 }
+                                
                                 if let currentLocation = locationManager.currentLocation {
                                     mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
                                         mumoryDataViewModel.choosedLocationModel = model
@@ -177,6 +181,10 @@ struct SearchLocationView: View {
                                 .foregroundColor(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.698).opacity(0.7))
                             
                             Button(action: {
+                                if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
+                                     self.locationManager.promptForLocationSettings()
+                                 }
+                                
                                 appCoordinator.rootPath.append("map")
                             }) {
                                 ZStack {
