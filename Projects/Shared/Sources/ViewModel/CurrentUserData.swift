@@ -24,10 +24,10 @@ public class CurrentUserData: ObservableObject {
                 }
             }
         }
-        
     }
     
     @Published public var user: MumoriUser = MumoriUser()
+    
     @Published public var friends: [MumoriUser] = []
     @Published public var blockFriends: [MumoriUser] = []
     @Published public var friendRequests: [MumoriUser] = []

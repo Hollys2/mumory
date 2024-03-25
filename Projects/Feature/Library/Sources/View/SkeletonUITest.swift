@@ -29,6 +29,3 @@ struct SkeletonUITest: View {
     }
 }
 
-#Preview {
-    SkeletonUITest()
-}

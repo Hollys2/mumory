@@ -11,6 +11,7 @@ import MapKit
 import Shared
 import Lottie
 import Core
+import Firebase
 import FirebaseAuth
 
 public struct SplashView: View {
@@ -22,6 +23,7 @@ public struct SplashView: View {
     
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject var customizationManageViewModel: CustomizationManageViewModel = CustomizationManageViewModel()
     @StateObject var withdrawViewModel: WithdrawViewModel = WithdrawViewModel()
@@ -35,11 +37,13 @@ public struct SplashView: View {
     @State var isEndSplash: Bool = false
     @State var page: initPage = .login
     
+    @State private var listener: ListenerRegistration?
+    
     public init() {
     }
     
     public var body: some View {
-        ZStack(alignment: .top){
+        ZStack(alignment: .top) {
             NavigationStack(path: $appCoordinator.rootPath) {
                 ZStack(alignment: .top) {
                     VStack(spacing: 0) {
@@ -294,16 +298,17 @@ public struct SplashView: View {
                 }
                 return
             }
-
+            
             currentUserData.uId = user.uid
-            print("uid: \(user.uid)")
+            
+//            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
+//            await MumoriUser().fetchFriend(uId: user.uid)
             currentUserData.favoriteGenres = favoriteGenres
             
             withAnimation {
                 isInitialSettingDone = true
             }
             page = .home
-            appCoordinator.selectedTab = .home
             try await db.collection("User").document(user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {
                 return

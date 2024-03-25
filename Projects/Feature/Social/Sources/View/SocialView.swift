@@ -120,6 +120,11 @@ extension SocialScrollViewRepresentable {
             }
 
             preOffsetY = offsetY
+            
+            if offsetY >= contentHeight - scrollViewHeight {
+                print("END")
+                self.parent.mumoryDataViewModel.fetchEveryMumory()
+            }
         }
     }
 }
@@ -295,7 +300,6 @@ struct SocialItemView: View {
 //                        )
 //                    )
 //                    .cornerRadius(15)
-
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
@@ -568,14 +572,14 @@ public struct SocialView: View {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
 
-            if !mumoryDataViewModel.isUpdating {
+//            if !mumoryDataViewModel.isUpdating {
                 SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                     print("onRefresh!")
                 }) {
                     SocialScrollCotentView()
                         .environmentObject(self.appCoordinator)
                 }
-            }
+//            }
         
             HStack(alignment: .top, spacing: 0) {
 
