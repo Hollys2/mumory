@@ -39,15 +39,17 @@ public struct CreateMumoryBottomSheetView: View {
     
     @State private var isPublic: Bool = true
     @State private var calendarYOffset: CGFloat = .zero
-    @State private var contentOffset: CGFloat = 0
     @State private var bottomBarOffset: CGFloat = 0
-    @State private var tagContainerViewFrame: CGRect = .zero
+    
+    @State private var tagContainerYOffset: CGFloat = .zero
+    @State private var contentContainerYOffset: CGFloat = .zero
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
+    
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
@@ -209,27 +211,18 @@ public struct CreateMumoryBottomSheetView: View {
                                 VStack(spacing: 16) {
                                     
                                     TagContainerView(tags: self.$tags)
-                                        .id(0)
-                                        .background(GeometryReader { geometry -> Color in
-                                            DispatchQueue.main.async {
-                                                self.tagContainerViewFrame = geometry.frame(in: .global)
-                                            }
-                                            return Color.clear
-                                        })
                                     
                                     
                                     ContentContainerView(contentText: self.$contentText)
                                         .id(1)
-                                        .background {
+                                        .background(
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onChange(of: geometry.frame(in: .global)) { i in
-                                                        self.contentOffset = i.maxY
-                                                    }
-                                                    .onChange(of: geometry.size.height) { newOffset in
+                                                    .onChange(of: geometry.frame(in: .global).maxY) { newValue in
+                                                        self.contentContainerYOffset = newValue
                                                     }
                                             }
-                                        }
+                                        )
                                     
                                     HStack(spacing: 11) {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -291,111 +284,8 @@ public struct CreateMumoryBottomSheetView: View {
                                 .padding(.horizontal, 20)
                             } // VStack
                             .padding(.top, 20)
-//                            .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -200 : 0)
+                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                         } // ScrollView
-                        .simultaneousGesture(DragGesture().onChanged { i in
-                            print("simultaneousGesture DragGesture")
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                        })
-                    }
-                    
-                    ZStack(alignment: .bottom) {
-
-                        VStack {
-
-                            Spacer()
-
-                            HStack(spacing: 0) {
-
-                                Group {
-                                    Text("전체공개")
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                        .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-
-                                    Spacer().frame(width: 7)
-
-                                    Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
-                                        .frame(width: 17, height: 17)
-
-                                }
-                                .gesture(TapGesture(count: 1).onEnded {
-                                    self.isPublic.toggle()
-                                })
-
-                                Spacer()
-                            }
-                            Spacer()
-                        }
-                        .frame(height: self.bottomBarHeight)
-                        .padding(.leading, 25)
-                        .padding(.trailing, 20)
-                        .padding(.bottom, self.appCoordinator.safeAreaInsetsBottom)
-                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                        .overlay(
-                            Rectangle()
-                                .inset(by: 0.15)
-                                .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
-                                .frame(height: 0.5)
-                            , alignment: .top
-                        )
-                        .highPriorityGesture(DragGesture())
-
-                        VStack {
-                            Spacer()
-                            HStack(spacing: 0) {
-
-                                Group {
-                                    Text("전체공개")
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                                        .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-
-                                    Spacer().frame(width: 7)
-
-                                    Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
-                                        .frame(width: 17, height: 17)
-
-                                }
-                                .gesture(TapGesture(count: 1).onEnded {
-                                    self.isPublic.toggle()
-                                })
-
-                                Spacer()
-
-                                Button(action: {
-                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                }) {
-                                    SharedAsset.keyboardButtonCreateMumory.swiftUIImage
-                                        .resizable()
-                                        .frame(width: 24, height: 24)
-                                }
-                            }
-                            Spacer()
-                        }
-                        .frame(height: self.bottomBarHeight)
-                        .padding(.leading, 25)
-                        .padding(.trailing, 20)
-                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                        .background {
-                            GeometryReader { geometry in
-                                Color.red
-                                    .onChange(of: geometry.frame(in: .global)) { i in
-                                        self.bottomBarOffset = i.minY
-                                    }
-                                    .onChange(of: geometry.size.height) { newOffset in
-                                    }
-                            }
-                        }
-                        .overlay(
-                            Rectangle()
-                                .inset(by: 0.15)
-                                .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
-                                .frame(height: 0.5)
-                            , alignment: .top
-                        )
-                        .offset(y: self.bottomBarHeight)
-                        .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight - self.bottomBarHeight : 0)
-                        .highPriorityGesture(DragGesture())
-
                     }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -523,45 +413,48 @@ public struct CreateMumoryBottomSheetView: View {
                     
                 })
                 
-//                HStack(spacing: 0) {
-//
-//                    Group {
-//                        Text("전체공개")
-//                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-//                            .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-//
-//                        Spacer().frame(width: 7)
-//
-//                        Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
-//                            .frame(width: 17, height: 17)
-//                    }
-//                    .gesture(TapGesture(count: 1).onEnded {
-//                        self.isPublic.toggle()
-//                    })
-//
-//                    Spacer()
-//
-//                    Button(action: {
-//                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-//                    }) {
-//                        SharedAsset.keyboardButtonCreateMumory.swiftUIImage
-//                            .resizable()
-//                            .frame(width: 26, height: 26)
-//                    }
-//                    .opacity(self.keyboardResponder.isKeyboardHiddenButtonShown ? 1 : 0)
-//
-//                }
-//                .frame(height: 55)
-//                .padding(.leading, 25)
-//                .padding(.trailing, 20)
-//                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-//                .overlay(
-//                    Rectangle()
-//                        .inset(by: 0.15)
-//                        .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
-//                        .frame(height: 0.7)
-//                    , alignment: .top
-//                )
+                HStack(spacing: 0) {
+                    
+                    Group {
+                        Text("전체공개")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                            .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
+                        
+                        Spacer().frame(width: 7)
+                        
+                        Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
+                            .frame(width: 17, height: 17)
+                    }
+                    .gesture(TapGesture(count: 1).onEnded {
+                        self.isPublic.toggle()
+                    })
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }) {
+                        SharedAsset.keyboardButtonCreateMumory.swiftUIImage
+                            .resizable()
+                            .frame(width: 24, height: 24)
+                    }
+                    .opacity(self.keyboardResponder.isKeyboardHiddenButtonShown ? 1 : 0)
+                    
+                }
+                .frame(height: 55)
+                .padding(.leading, 25)
+                .padding(.trailing, 20)
+                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                .overlay(
+                    Rectangle()
+                        .inset(by: 0.15)
+                        .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
+                        .frame(height: 0.7)
+                    , alignment: .top
+                )
+                .zIndex(2)
+                .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
             }
         }
     }
@@ -582,6 +475,7 @@ public struct CreateMumoryBottomSheetView: View {
                 photoPickerViewModel.removeAllSelectedImages()
                 self.imageURLs.removeAll()
                 
+                self.offsetY = .zero
                 self.isSheetShown = false
             }
         }
@@ -903,6 +797,7 @@ struct CalendarContainerView: View {
 struct TagContainerView: View {
     
     @Binding private var tags: [String]
+    @FocusState private var isFocused: Bool
     
     @State private var tagText: String = ""
     
@@ -938,6 +833,10 @@ struct TagContainerView: View {
                         set: { self.tags[index] = $0.replacingOccurrences(of: "#", with: "") }
                     ), onEditingChanged: { isEditing in
                         self.isTagEditing = isEditing
+                    })
+                    .focused(self.$isFocused)
+                    .onChange(of: isFocused, perform: { newValue in
+                        print("isFocued: \(newValue)")
                     })
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))

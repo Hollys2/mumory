@@ -321,7 +321,7 @@ public struct BottomSheetView: View {
             Image(uiImage: SharedAsset.dragIndicator.image)
                 .resizable()
                 .frame(width: 47, height: 4)
-                .padding(.vertical, 9)
+                .padding(.vertical, 8)
             
             VStack(spacing: 0) {
                 
@@ -361,17 +361,14 @@ public struct BottomSheetView: View {
                         }
                     }
                     
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(height: 0.5)
-                        .background(Color(red: 0.38, green: 0.38, blue: 0.38).opacity(0.4))
+                    EmptyView()
                 }
                 
             }
             .frame(width: UIScreen.main.bounds.width - 14 - 18, height: 55 * CGFloat(menuOptions.count))
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .cornerRadius(15)
-            .padding(.bottom, 9)
+            .padding(.bottom, 8)
         }
         .frame(width: UIScreen.main.bounds.width - 14, height: 55 * CGFloat(menuOptions.count) + 31)
         .background(Color(red: 0.122, green: 0.122, blue: 0.122))

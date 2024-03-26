@@ -60,14 +60,6 @@ public struct SplashView: View {
                         }
                     }
                 }
-                .onAppear(perform: {
-                    Timer.scheduledTimer(withTimeInterval: 0, repeats: false) { timer in
-                        withAnimation {
-                            isEndSplash = true
-                        }
-                    }
-                    checkCurrentUserAndGetUserData()
-                })
                 .navigationDestination(for: String.self, destination: { i in
                     if i == "music" {
                         SearchMusicViewInCreateMumory()
@@ -266,6 +258,14 @@ public struct SplashView: View {
                 }
                 .opacity(isEndSplash && isInitialSettingDone ? 0 : 1)
                 .transition(.opacity)
+                .onAppear(perform: {
+                    Timer.scheduledTimer(withTimeInterval: 0, repeats: false) { timer in
+                        withAnimation {
+                            isEndSplash = true
+                        }
+                    }
+                    checkCurrentUserAndGetUserData()
+                })
         }
         
     }
@@ -300,9 +300,7 @@ public struct SplashView: View {
             }
             
             currentUserData.uId = user.uid
-            
-//            appCoordinator.currentUser = await MumoriUser(uId: user.uid).fetchFriend(uId: user.uid)
-//            await MumoriUser().fetchFriend(uId: user.uid)
+            currentUserData.user = await MumoriUser(uId: user.uid)
             currentUserData.favoriteGenres = favoriteGenres
             
             withAnimation {
