@@ -102,7 +102,7 @@ extension SocialScrollViewRepresentable {
         func handleRefreshControl() {
             print("handleRefreshControl")
             self.parent.mumoryDataViewModel.isUpdating = true
-            parent.mumoryDataViewModel.fetchEveryMumory()
+            parent.mumoryDataViewModel.fetchEveryMumory2()
         }
         
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -134,7 +134,6 @@ extension SocialScrollViewRepresentable {
             preOffsetY = offsetY
             
             if offsetY >= contentHeight - scrollViewHeight {
-                
                 if !self.parent.mumoryDataViewModel.isUpdating {
                     print("END")
                     self.parent.mumoryDataViewModel.isUpdating = true
@@ -155,8 +154,6 @@ struct SocialScrollCotentView: View {
         
         VStack(spacing: 0) {
             
-            Spacer().frame(height: 100)
-            
             LazyVStack(spacing: 0) {
                 
                 ForEach(self.mumoryDataViewModel.everyMumorys, id: \.self) { i in
@@ -164,9 +161,11 @@ struct SocialScrollCotentView: View {
                 }
             }
             .frame(width: UIScreen.main.bounds.width - 20)
+            .padding(.top, 68 + 25)
         } // VStack
-        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 100)
+        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 68 + 25)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .ignoresSafeArea()
     }
 }
 
@@ -216,7 +215,7 @@ struct SocialItemView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     
                     Text("\(self.user.nickname)")
-                        .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16)))
+                        .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14)))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .fixedSize(horizontal: true, vertical: false)
@@ -226,7 +225,7 @@ struct SocialItemView: View {
                     HStack(spacing: 0) {
                         
                         Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumory.isPublic))
-                            .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
+                            .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14)))
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                         
                         if !self.mumory.isPublic {
@@ -242,12 +241,12 @@ struct SocialItemView: View {
                                 .resizable()
                                 .frame(width: 17, height: 17)
                             
-                            Spacer().frame(width: 4)
+                            Spacer().frame(width: 5)
                             
                             Text(self.mumory.locationModel.locationTitle)
-                                .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15)))
+                                .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14)))
                                 .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .frame(maxWidth: 106)
+                                .frame(maxWidth: getUIScreenBounds().width * 0.33589)
                                 .frame(height: 11, alignment: .leading)
                                 .fixedSize(horizontal: true, vertical: false)
                         }
@@ -587,15 +586,13 @@ public struct SocialView: View {
         ZStack(alignment: .top) {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
-
-//            if !mumoryDataViewModel.isUpdating {
-                SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
-                    print("onRefresh!")
-                }) {
-                    SocialScrollCotentView()
-                        .environmentObject(self.appCoordinator)
-                }
-//            }
+            
+            SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
+                print("onRefresh!")
+            }) {
+                SocialScrollCotentView()
+                    .environmentObject(self.appCoordinator)
+            }
         
             HStack(alignment: .top, spacing: 0) {
 
@@ -655,7 +652,8 @@ public struct SocialView: View {
             
             if mumoryDataViewModel.isUpdating {
                 ZStack {
-                    Color.clear
+                    Color.black
+                        .opacity(0.1)
                     LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
                 }
             }

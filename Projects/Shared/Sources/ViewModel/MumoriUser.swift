@@ -11,7 +11,8 @@ import SwiftUI
 import Core
 
 
-public struct MumoriUser: Hashable{
+public struct MumoriUser: Hashable {
+    
     public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
         return lhs.uId == rhs.uId
     }

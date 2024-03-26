@@ -94,7 +94,7 @@ struct MumoryDetailScrollContentView: View {
                         VStack(spacing: 0) {
                             
                             Text("\(self.user.nickname)")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
@@ -103,7 +103,7 @@ struct MumoryDetailScrollContentView: View {
                             HStack(spacing: 0) {
 
                                 Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumory.isPublic))
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
@@ -121,10 +121,10 @@ struct MumoryDetailScrollContentView: View {
                                         .resizable()
                                         .frame(width: 17, height: 17)
                                     
-                                    Spacer().frame(width: 4)
+                                    Spacer().frame(width: 5)
                                     
                                     Text("\(self.mumory.locationModel.locationTitle)")
-                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                         .frame(maxWidth: getUIScreenBounds().width * 0.27)
                                         .frame(height: 11, alignment: .leading)

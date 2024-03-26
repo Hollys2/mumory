@@ -10,13 +10,11 @@ import Foundation
 import Core
 
 public class CurrentUserData: ObservableObject {
+    
     //사용자 정보 및 디바이스 크기 정보
     @Published public var uId: String = "" {
         didSet {
             DispatchQueue.main.async {
-                Task{
-                    self.user = await MumoriUser(uId: self.uId)
-                }
                 Task {
                     self.FriendRequestListener()
                     self.NotificationListener()

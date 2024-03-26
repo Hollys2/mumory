@@ -366,13 +366,9 @@ struct MumoryItemView: View {
                 }
                 
                 Rectangle()
+                    .fill(Color(red: 0.247, green: 0.247, blue: 0.247))
                     .frame(width: 0.5)
                     .frame(maxHeight: .infinity)
-                    .overlay(
-                        Rectangle()
-                            .inset(by: 0.25)
-                            .stroke(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.5), lineWidth: 0.5)
-                    )
             }
             .frame(width: 35)
             

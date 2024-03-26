@@ -141,6 +141,9 @@ public struct HomeView: View {
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
                 }
+                .onChange(of: self.currentUserData.user.uId, perform: { newValue in
+                    print("HomeMapViewRepresentable onAppear2: \(newValue)")
+                })
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")
                     //                    self.listener?.remove()

@@ -250,6 +250,14 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
                 print("ERROR: NO URL2")
             }
             
+            for subview in clusterView.subviews {
+                if let hostingController = subview as? UIHostingController<AnyView> {
+                    if let countView = hostingController.rootView as? CountView {
+                        // countView에 접근할 수 있습니다.
+                    }
+                }
+            }
+            
             if cluster.memberAnnotations.count > 1 {
                 let countView = CountView(text: String(cluster.memberAnnotations.count))
                 let hostingController = UIHostingController(rootView: countView)
@@ -317,7 +325,6 @@ struct CountSwiftUIView: View {
     }
     
     var body: some View {
-        
         HStack(alignment: .center, spacing: 0) {
             Text("\(text)")
                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
@@ -325,11 +332,13 @@ struct CountSwiftUIView: View {
                 .foregroundColor(.black)
                 .frame(minWidth: 9)
                 .frame(height: 10)
-                .background() {
+                .fixedSize(horizontal: true, vertical: false)
+                .background {
                     GeometryReader { geometry in
                         Color.clear
                             .onAppear {
                                 self.textWidth = geometry.size.width
+                                print("self.textWidth: \(self.textWidth)")
                             }
                     }
                 }
@@ -339,7 +348,6 @@ struct CountSwiftUIView: View {
         .background(SharedAsset.mainColor.swiftUIColor)
         .cornerRadius(12)
         .offset(x: (self.textWidth + 16) / 2 + 56, y: 12 - 6)
-        
     }
 }
 
@@ -360,7 +368,11 @@ struct CountView: UIViewRepresentable {
         return hostingView
     }
     
-    func updateUIView(_ uiView: UIView, context: Context) {}
+    func updateUIView(_ uiView: UIView, context: Context) {
+        let hostingController = UIHostingController(rootView: CountSwiftUIView(text: text))
+        let hostingView = hostingController.view!
+        hostingView.backgroundColor = .clear
+    }
 }
 
 struct CodableCoordinate: Codable {

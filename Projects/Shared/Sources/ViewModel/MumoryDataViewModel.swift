@@ -246,6 +246,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
                             self.tempMumory.append(newMumory)
+                            self.tempMumory.sort { $0.date > $1.date }
                         }
                     }
                 }
@@ -255,8 +256,8 @@ final public class MumoryDataViewModel: ObservableObject {
                     self.everyMumorys = self.tempMumory
                     self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
-                    
                 }
+                
                 print("fetchSocialMumory successfully!")
                 
                 
@@ -273,6 +274,47 @@ final public class MumoryDataViewModel: ObservableObject {
             }
         }
     }
+    
+    public func fetchEveryMumory2() {
+        self.isUpdating = true
+        
+        let db = FirebaseManager.shared.db
+        
+           
+        Task {
+            var mumoryCollectionRef = db.collection("Mumory")
+                .order(by: "date", descending: true)
+                .limit(to: 10)
+
+            do {
+                let snapshot = try await mumoryCollectionRef.getDocuments()
+                self.tempMumory = []
+                for document in snapshot.documents {
+                    let documentData = document.data()
+                    guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
+                    
+                    DispatchQueue.main.async {
+                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
+                            self.tempMumory.append(newMumory)
+                            self.tempMumory.sort { $0.date > $1.date }
+                        }
+                    }
+                }
+                
+                DispatchQueue.main.async {
+                    self.everyMumorys = self.tempMumory
+                    self.lastDocument = snapshot.documents.last
+                    self.isUpdating = false
+                }
+                
+                print("fetchSocialMumory2 successfully!")
+
+            } catch {
+                print("Error fetchSocialMumory: \(error.localizedDescription)")
+            }
+        }
+    }
+
     
 //    public static func fetchCommentCount(mumoryId: String, completion: @escaping (Int?) -> Void) {
 //        let db = FirebaseManager.shared.db
@@ -330,7 +372,6 @@ final public class MumoryDataViewModel: ObservableObject {
                 completionHandler(.success(()))
             }
         }
-        
     }
 
     public func updateMumory(_ mumory: Mumory, completion: @escaping () -> Void) {
@@ -348,7 +389,8 @@ final public class MumoryDataViewModel: ObservableObject {
             "content": mumory.content ?? "",
             "imageURLs": mumory.imageURLs ?? [],
             "isPublic": mumory.isPublic,
-            "likes": mumory.likes
+            "likes": mumory.likes,
+            "commentCount": mumory.commentCount
         ]
         
         documentReference.updateData(updatedData) { error in
@@ -465,7 +507,7 @@ final public class MumoryDataViewModel: ObservableObject {
     public static func fetchComment(mumoryId: String) async -> [Comment]? {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
-            .order(by: "date", descending: true)
+            .order(by: "date", descending: false)
         
         var comments: [Comment] = []
         
