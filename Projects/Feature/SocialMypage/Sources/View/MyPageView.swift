@@ -327,7 +327,6 @@ struct SubFunctionView: View {
                 appCoordinator.rootPath.append(MyPage.monthlyStat)
             }
             
-            
             Divider05()
             
             HStack(spacing: 0, content: {
