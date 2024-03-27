@@ -111,8 +111,9 @@ struct SearchLocationView: View {
                         }) {
                             HStack {
                                 Spacer()
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.white)
+                                SharedAsset.removeButtonSearch.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 23, height: 23)
                             }
                             .padding(.trailing, 17)
                         }

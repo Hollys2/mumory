@@ -83,7 +83,7 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     }
     
     public override convenience init() {
-        self.init(id: "UNKNOWN", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: 0)
+        self.init(id: "UNKNOWN", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN PLACE", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: 0)
     }
     
     func copy(from other: Mumory) {

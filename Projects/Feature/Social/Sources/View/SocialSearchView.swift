@@ -146,8 +146,9 @@ public struct SocialSearchView: View {
                             
                             Spacer()
                             
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
+                            SharedAsset.removeButtonSearch.swiftUIImage
+                                .resizable()
+                                .frame(width: 23, height: 23)
                                 .onTapGesture {
                                     self.searchText = ""
                                 }
@@ -545,7 +546,7 @@ struct SearchedMumoryItemView: View {
                         case .empty:
                             ProgressView()
                         default:
-                            Color(red: 0.247, green: 0.247, blue: 0.247) // #3f3f3f
+                            Color(red: 0.247, green: 0.247, blue: 0.247)
                         }
                     }
                         .foregroundColor(.clear)

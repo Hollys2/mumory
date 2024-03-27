@@ -18,7 +18,7 @@ public struct MumoriUser: Hashable {
     }
     
     public var uId: String = ""
-    public var nickname: String = ""
+    public var nickname: String = "UNKNOWN"
     public var id: String = ""
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?

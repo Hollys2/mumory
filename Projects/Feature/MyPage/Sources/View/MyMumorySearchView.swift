@@ -75,11 +75,10 @@ public struct MyMumorySearchView: View {
                     
                     if !self.searchText.isEmpty {
                         HStack {
-                            
                             Spacer()
-                            
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
+                            SharedAsset.removeButtonSearch.swiftUIImage
+                                .resizable()
+                                .frame(width: 23, height: 23)
                                 .onTapGesture {
                                     self.searchText = ""
                                 }

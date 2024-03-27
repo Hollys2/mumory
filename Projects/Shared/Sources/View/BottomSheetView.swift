@@ -443,8 +443,9 @@ public struct LocationInputBottomSheetView: View {
                             Button(action: {
                                 self.searchText = ""
                             }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.white)
+                                SharedAsset.removeButtonSearch.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 23, height: 23)
                             }
                         }
                         .padding(.trailing, 17)

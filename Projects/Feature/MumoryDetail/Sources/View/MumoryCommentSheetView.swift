@@ -106,6 +106,7 @@ struct CommentView: View {
                         Spacer()
                         
                         Button(action: {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             mumoryDataViewModel.selectedComment = self.comment
                             appCoordinator.isCommentBottomSheetShown = true
                         }, label: {
@@ -117,9 +118,9 @@ struct CommentView: View {
                     } // HStack
                 
                     Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID })  ? comment.content : "비밀 댓글입니다.")
-                        .lineSpacing(20)
                         .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID })  ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
                         .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                        .lineSpacing(3)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding(.top, 11)
                         .padding(.bottom, 15)
@@ -265,6 +266,7 @@ struct Reply: View {
                     Spacer()
 
                     Button(action: {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         mumoryDataViewModel.selectedComment = self.comment
                         appCoordinator.isCommentBottomSheetShown = true
                     }, label: {
@@ -371,7 +373,13 @@ public struct MumoryCommentSheetView: View {
                             .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                             .cornerRadius(23)
                         
+                        SharedAsset.dragIndicator.swiftUIImage
+                            .resizable()
+                            .frame(width: 47, height: 4)
+                            .offset(y: -24)
+                        
                         HStack {
+                            
                             Text("댓글")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                 .foregroundColor(.white)
@@ -478,17 +486,12 @@ public struct MumoryCommentSheetView: View {
                             
                             Spacer().frame(width: 16)
                             
-                            Button(action: {
-                                self.isPublic.toggle()
-                            }, label: {
-                                self.isPublic ?
-                                SharedAsset.commentUnlockButtonMumoryDetail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 35, height: 39)
-                                : SharedAsset.commentLockButtonMumoryDetail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 35, height: 39)
-                            })
+                            Image(uiImage: self.isPublic ? SharedAsset.commentUnlockButtonMumoryDetail.image : SharedAsset.commentLockButtonMumoryDetail.image)
+                                .resizable()
+                                .frame(width: 35, height: 39)
+                                .onTapGesture {
+                                    self.isPublic.toggle()
+                                }
                             
                             Spacer().frame(width: 12)
                             
@@ -571,217 +574,6 @@ public struct MumoryCommentSheetView: View {
                     .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
                     .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
                     
-//                    if self.isWritingReply {
-//
-//                        VStack(spacing: 0) {
-//
-//                            HStack(spacing: 5) {
-//
-//                                Text("\(selectedComment.nickname)")
-//                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-//                                    .foregroundColor(.white) +
-//                                Text("님에게 답글 남기는 중")
-//                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-//                                    .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-//
-//                                Text("・")
-//                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-//                                    .multilineTextAlignment(.center)
-//                                    .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-//                                    .frame(width: 4, alignment: .bottom)
-//
-//                                Button(action: {
-//                                    self.selectedComment = Comment()
-//                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-//                                }, label: {
-//                                    Text("취소")
-//                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-//                                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-//                                })
-//
-//                            }
-//                            .frame(maxWidth: .infinity)
-//                            .frame(height: 36)
-//                            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-//
-//                            HStack(spacing: 0) {
-//
-//                                Spacer().frame(width: 16)
-//
-//                                Button(action: {
-//                                    self.isPublic.toggle()
-//                                }, label: {
-//                                    self.isPublic ?
-//                                    SharedAsset.commentUnlockButtonMumoryDetail.swiftUIImage
-//                                        .resizable()
-//                                        .frame(width: 35, height: 39)
-//                                    : SharedAsset.commentLockButtonMumoryDetail.swiftUIImage
-//                                        .resizable()
-//                                        .frame(width: 35, height: 39)
-//                                })
-//
-//                                Spacer().frame(width: 12)
-//
-//                                TextField("", text: self.$commentText, prompt: Text("답글을 입력하세요.")
-//                                    .font(Font.custom("Apple SD Gothic Neo", size: 15))
-//                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-//                                )
-//                                .padding(.leading, 25)
-//                                .padding(.trailing, 50)
-//                                .background(
-//                                    ZStack(alignment: .trailing) {
-//                                        RoundedRectangle(cornerRadius: 22.99999)
-//                                            .stroke(Color(red: 0.651, green: 0.651, blue: 0.651), lineWidth: self.commentText.isEmpty ? 0 : 1)
-//                                            .foregroundColor(.clear)
-//                                            .frame(width: UIScreen.main.bounds.width * 0.78, height: 44.99997)
-//                                            .background(Color(red: 0.24, green: 0.24, blue: 0.24))
-//                                            .cornerRadius(22.99999)
-//
-//                                        Button(action: {
-//                                            let isWhitespace = self.commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-//                                            if !isWhitespace {
-//                                                isButtonDisabled = true
-//
-//                                                Task {
-//                                                    mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
-//                                                        self.commentText = ""
-//                                                        switch result {
-//                                                        case .success(let replies):
-//                                                            self.replies = replies
-//                                                        case .failure(let error):
-//                                                            print(error)
-//                                                        }
-//                                                    }
-//                                                }
-//                                                isButtonDisabled = false
-//                                            }
-//                                        }, label: {
-//                                            self.commentText.isEmpty ?
-//                                            SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
-//                                                .resizable()
-//                                                .frame(width: 20, height: 20)
-//                                            : SharedAsset.commentWriteOnButtonMumoryDetail.swiftUIImage
-//                                                .resizable()
-//                                                .frame(width: 20, height: 20)
-//                                        })
-//                                        .padding(.trailing, 10)
-//                                    }
-//                                )
-//                                .foregroundColor(.white)
-//                                .frame(width: UIScreen.main.bounds.width * 0.78)
-//                                //                                    .focused($isTextFieldFocused)
-//
-//                                Spacer().frame(width: 20)
-//                            }
-//                            .frame(maxWidth: .infinity)
-//                            .frame(height: 72)
-//                            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-//                            .overlay(
-//                                Rectangle()
-//                                    .frame(height: 0.5)
-//                                    .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-//                                    .offset(y: -36)
-//                            )
-//                        }
-//                        .offset(y: 72 + 36)
-//                        .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight - 72 - 36 : 0)
-//                    } else {
-//
-//                        HStack(spacing: 0) {
-//
-//                            Spacer().frame(width: 16)
-//
-//                            Button(action: {
-//                                self.isPublic.toggle()
-//                            }, label: {
-//                                self.isPublic ?
-//                                SharedAsset.commentUnlockButtonMumoryDetail.swiftUIImage
-//                                    .resizable()
-//                                    .frame(width: 35, height: 39)
-//                                : SharedAsset.commentLockButtonMumoryDetail.swiftUIImage
-//                                    .resizable()
-//                                    .frame(width: 35, height: 39)
-//                            })
-//
-//                            Spacer().frame(width: 12)
-//
-//
-//                            //                                TextEditor(text: $commentText)
-//                            //                                    .scrollContentBackground(.hidden)
-//                            //                                    .foregroundColor(.white)
-//                            //                                    .font(Font.custom("Apple SD Gothic Neo", size: 18))
-//                            //                                    .frame(maxWidth: .infinity, alignment: .leading)
-//                            //                                    .background(.orange)
-//                            ////                                    .overlay(
-//                            ////                                        Text("자유롭게 내용을 입력하세요.")
-//                            ////                                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-//                            ////                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-//                            ////                                            .offset(y: 3)
-//                            ////                                            .opacity(self.commentText.isEmpty ? 1 : 0)
-//                            ////                                            .allowsHitTesting(false)
-//                            ////                                        , alignment: .topLeading
-//                            ////                                    )
-//                            TextField("", text: $commentText, prompt: Text("댓글을 입력하세요.")
-//                                .font(Font.custom("Apple SD Gothic Neo", size: 15))
-//                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-//                            )
-//                            .padding(.leading, 25)
-//                            .padding(.trailing, 50)
-//                            .background(
-//                                ZStack(alignment: .trailing) {
-//                                    RoundedRectangle(cornerRadius: 22.99999)
-//                                        .stroke(Color(red: 0.651, green: 0.651, blue: 0.651), lineWidth: commentText.isEmpty ? 0 : 1)
-//                                        .foregroundColor(.clear)
-//                                        .frame(width: UIScreen.main.bounds.width * 0.78, height: 44.99997)
-//                                        .background(Color(red: 0.24, green: 0.24, blue: 0.24))
-//                                        .cornerRadius(22.99999)
-//
-//
-//                                    Button(action: {
-//                                        let isWhitespace = commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-//                                        if !isWhitespace {
-//                                            isButtonDisabled = true
-//
-//                                            Task {
-//                                                mumoryDataViewModel.createComment(mumoryDocumentID: mumory.id, comment: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: "", mumoryId: mumory.id, date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
-//                                                    commentText = ""
-//                                                    self.comments = comments
-//                                                    isButtonDisabled = false
-//                                                }
-//                                                mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
-//                                            }
-//                                        }
-//                                    }, label: {
-//                                        commentText.isEmpty ?
-//                                        SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
-//                                            .resizable()
-//                                            .frame(width: 20, height: 20)
-//                                        : SharedAsset.commentWriteOnButtonMumoryDetail.swiftUIImage
-//                                            .resizable()
-//                                            .frame(width: 20, height: 20)
-//                                    })
-//                                    .disabled(isButtonDisabled)
-//                                    .padding(.trailing, 10)
-//                                }
-//                            )
-//                            .foregroundColor(.white)
-//                            .frame(width: UIScreen.main.bounds.width * 0.78)
-//
-//                            Spacer().frame(width: 20)
-//                        }
-//                        .frame(maxWidth: .infinity)
-//                        .frame(height: 72)
-//                        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-//                        .overlay(
-//                            Rectangle()
-//                                .fill(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-//                                .frame(height: 0.5)
-//                            , alignment: .top
-//                        )
-//                        .offset(y: 72)
-//                        .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight - 72 : 0)
-//                    }
-                    
                 } // VStack
                 .onAppear {
                     self.comments = []
@@ -804,6 +596,9 @@ public struct MumoryCommentSheetView: View {
                         mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
 
                     }
+                }
+                .onDisappear {
+                    self.commentText = ""
                 }
                 .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                 .cornerRadius(23, corners: [.topLeft, .topRight])
