@@ -52,7 +52,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var choosedSongID: MusicItemID?
     @Published public var choosedMumoryAnnotation: Mumory = Mumory()
     
-    @Published public var page: Int = 0
+    @Published public var page: Int = 1
     
     @Published public var translation: CGSize = CGSize(width: 0, height: 0)
     

@@ -141,6 +141,7 @@ public struct MumoryDetailView: View {
     @State var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()
     @State var offsetY: Double = .zero
+    @State var isMapSheetShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -246,7 +247,10 @@ public struct MumoryDetailView: View {
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
-//        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
+        .fullScreenCover(isPresented: self.$isMapSheetShown) {
+            MumoryMapView(isShown: self.$isMapSheetShown, mumory: self.mumory, user: self.user)
+        }
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

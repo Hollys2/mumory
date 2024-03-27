@@ -242,18 +242,19 @@ struct MumoryDetailScrollContentView: View {
                     
                     Spacer().frame(height: 25)
                     
-//                    PageControl(page: self.$appCoordinator.page)
-                    
                     HStack(spacing: 10) {
                         
-                        ProgressView(value: 0.5)
+                        ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count))
                             .accentColor(SharedAsset.mainColor.swiftUIColor)
                             .background(Color(red: 0.165, green: 0.165, blue: 0.165))
                             .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
+                            .animation(.easeInOut(duration: 0.1), value: self.appCoordinator.page)
                         
-                        Text("\(self.appCoordinator.page) / \(self.mumoryDataViewModel.myMumorys.count)")
+                        Text("\(self.appCoordinator.page)")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                             .foregroundColor(SharedAsset.mainColor.swiftUIColor)
+                        + Text(" / \(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                             .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                     }
                     
@@ -318,7 +319,6 @@ struct MumoryDetailScrollContentView: View {
                 self.user = await MumoriUser(uId: self.mumory.uId)
             }
         }
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapViewShown))
     }
     
     private func fetchSong(songId: String) async -> Song? {
