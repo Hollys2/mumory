@@ -504,6 +504,37 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
+    public func checkIsMyComment(mumoryId: String, parentId: String, currentUser: MumoriUser) -> Bool {
+        let db = FirebaseManager.shared.db
+        let docReference = db.collection("Mumory").document(mumoryId).collection("Comment").document(parentId)
+        var isMyComment = false
+        
+        let semaphore = DispatchSemaphore(value: 0)
+        
+        docReference.getDocument { (querySnapshot, error) in
+            defer {
+                semaphore.signal()
+            }
+            
+            if let error = error {
+                print("Error getting documents: \(error)")
+            } else if let documentSnapshot = querySnapshot, documentSnapshot.exists {
+                let documentData = documentSnapshot.data()
+                guard let uId = documentData?["uId"] as? String else { return }
+                
+                if currentUser.uId == uId {
+                    isMyComment = true
+                }
+                print("checkIsMyComment successfully")
+            }
+        }
+        
+        semaphore.wait()
+        return isMyComment
+    }
+
+
+
     public static func fetchComment(mumoryId: String) async -> [Comment]? {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
@@ -521,7 +552,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 comments.append(newComment)
             }
-            print("fetchComment 성공: \(comments)")
+            print("fetchComment 성공")
             return comments
         } catch {
             print("Error fetching documents: \(error)")

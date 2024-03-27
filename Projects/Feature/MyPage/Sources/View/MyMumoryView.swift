@@ -130,7 +130,6 @@ public struct MyMumoryView: View {
                                             }
                                             
                                             MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
-//                                                .padding(.bottom, CGFloat(spacing))
                                         }
                                     } // VStack
                                     .padding(.top, 45)
@@ -214,6 +213,9 @@ public struct MyMumoryView: View {
                                     ForEach(filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
 
                                         RoundedSquareView(regionTitle: region, mumorys: mumories)
+                                            .onTapGesture {
+                                                self.appCoordinator.rootPath.append(MumoryView(type: .regionMyMumoryView, mumoryAnnotation: Mumory(), region: region, mumorys: mumories))
+                                            }
                                     }
                                 }
                                 .padding(.horizontal, 16)
@@ -636,7 +638,7 @@ struct MumoryItemView: View {
     }
 }
 
-struct MyMumoryDatePicker: View {
+public struct MyMumoryDatePicker: View {
     
     @Binding var selectedDate: Date
     
@@ -649,7 +651,9 @@ struct MyMumoryDatePicker: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    var body: some View {
+//    public init() {}
+    
+    public var body: some View {
         VStack(spacing: 0) {
                   
             Picker("Year and Month", selection: self.$pickerDate) {
@@ -775,14 +779,6 @@ struct RoundedSquareView: View {
               RoundedRectangle(cornerRadius: 30)
                 .inset(by: 0.5)
                 .stroke(.white, lineWidth: 1)
-            )
-            .background(
-                GeometryReader { g in
-                    Color.clear
-                        .onAppear {
-//                            print(g.size.height)
-                        }
-                }
             )
             .offset(x: 15, y: getUIScreenBounds().width * 0.435 - 24 - 15)
             

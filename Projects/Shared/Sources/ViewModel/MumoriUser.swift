@@ -13,12 +13,8 @@ import Core
 
 public struct MumoriUser: Hashable {
     
-    public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
-        return lhs.uId == rhs.uId
-    }
-    
     public var uId: String = ""
-    public var nickname: String = "UNKNOWN"
+    public var nickname: String = ""
     public var id: String = ""
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
@@ -28,28 +24,23 @@ public struct MumoriUser: Hashable {
     public init() {}
     
     public init(uId: String) async {
-        self.uId = uId
-        
         let db = FBManager.shared.db
-        
-        if uId.isEmpty {
-            nickname = "(알수없음)"
-            return
-        }
-        
-        guard let document = try? await db.collection("User").document(uId).getDocument() else {
-            return
-        }
-        
+        guard let document = try? await db.collection("User").document(uId).getDocument() else { return }
         guard let data = document.data() else {
+            self.nickname = "탈퇴계정"
             return
         }
         
+        self.uId = uId
         self.nickname = data["nickname"] as? String ?? ""
         self.id = data["id"] as? String ?? ""
         self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")
         self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
         self.bio = data["bio"] as? String ?? ""
+    }
+    
+    public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
+        return lhs.uId == rhs.uId
     }
     
     public func fetchFriend(uId: String) async -> MumoriUser {
@@ -61,16 +52,4 @@ public struct MumoriUser: Hashable {
         newUser.friends = friends
         return newUser
     }
-}
-
-extension MumoriUser {
-    
-//    static func fromDocumentDataToMumory(_ documentData: [String: Any], uId: String) async -> MumoriUser? {
-//        
-//        guard let id = documentData["id"] as? String,
-//              let nickname = documentData["nickname"] as? String,
-//              let profileImageURL = documentData["profileImageURL"] as? URL else { return nil }
-//        
-//        return await self.init(uid: uId)
-//    }
 }
