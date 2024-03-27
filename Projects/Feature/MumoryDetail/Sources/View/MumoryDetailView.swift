@@ -141,20 +141,16 @@ public struct MumoryDetailView: View {
     @State var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()
     @State var offsetY: Double = .zero
-    @State var isMapSheetShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-        
+    
     public var body: some View {
         
         ZStack(alignment: .top) {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
-            
-//            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-//                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == currentUserData.user.uId ? true : false), mumoryAnnotation: self.$mumory))
             
             MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
                 .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
@@ -167,17 +163,19 @@ public struct MumoryDetailView: View {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-//                            .transition(.move(edge: .trailing))
                     default:
                         Color(red: 0.18, green: 0.18, blue: 0.18)
                     }
                 }
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                .overlay {
+                    ColorSet.background.opacity((self.offsetY + appCoordinator.safeAreaInsetsTop) / (getUIScreenBounds().width - 150))
+                }
                 
                 SharedAsset.albumFilterMumoryDetail.swiftUIImage
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                    .offset(y: -offsetY - appCoordinator.safeAreaInsetsTop)
+                    .offset(y: -self.offsetY - appCoordinator.safeAreaInsetsTop)
                 
                 VStack(spacing: 10) {
 
@@ -186,7 +184,6 @@ public struct MumoryDetailView: View {
                         .lineLimit(2)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
-
 
                     Text("\(mumory.musicModel.artist)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
@@ -200,6 +197,7 @@ public struct MumoryDetailView: View {
             MumoryDetailScrollViewRepresentable(mumory: self.mumory, contentOffsetY: self.$offsetY)
             
             HStack {
+                
                 Button(action: {
                     if !appCoordinator.rootPath.isEmpty {
                         appCoordinator.rootPath.removeLast()
@@ -221,17 +219,16 @@ public struct MumoryDetailView: View {
                     Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
                         .resizable()
                         .frame(width: 30, height: 30)
-                        .padding(20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .padding(.bottom, 12)
                 })
             }
-            .padding(.top, appCoordinator.safeAreaInsetsTop + 19 - 20)
-//            .padding(.bottom, 12)
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
                 MumoryDetailReactionBarView(mumory: self.mumory, isOn: true)
-                    .environmentObject(currentUserData)
-//                    .transition(.move(edge: .bottom))
             }
             
             ZStack {

@@ -187,7 +187,7 @@ struct SocialItemView: View {
     var body: some View {
         
         VStack(spacing: 0) {
-            // MARK: Profile
+
             HStack(spacing: 8) {
                 
                 AsyncImage(url: self.user.profileImageURL) { phase in
@@ -298,23 +298,6 @@ struct SocialItemView: View {
                                 self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                             }
                     )
-                
-//                Rectangle()
-//                    .foregroundColor(.clear)
-//                    .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
-//                    .background(
-//                        LinearGradient(
-//                            stops: [
-//                                Gradient.Stop(color: .black.opacity(0.4), location: 0.00),
-//                                Gradient.Stop(color: .black.opacity(0), location: 0.26),
-//                                Gradient.Stop(color: .black.opacity(0), location: 0.63),
-//                                Gradient.Stop(color: .black.opacity(0.4), location: 0.96),
-//                            ],
-//                            startPoint: UnitPoint(x: 0.5, y: 0),
-//                            endPoint: UnitPoint(x: 0.5, y: 1)
-//                        )
-//                    )
-//                    .cornerRadius(15)
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {

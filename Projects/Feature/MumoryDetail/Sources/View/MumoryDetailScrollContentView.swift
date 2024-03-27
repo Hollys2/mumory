@@ -9,6 +9,7 @@
 
 import SwiftUI
 import MapKit
+import MusicKit
 
 import Core
 import Shared
@@ -39,19 +40,22 @@ struct MumoryDetailScrollContentView: View {
     @State var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()
     @State var isMapViewShown: Bool = false
+    @State var playButtonOpacity: CGFloat = 1
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     var body: some View {
         
         VStack(spacing: 0) {
             
-            ZStack(alignment: .bottomLeading) {
+            ZStack(alignment: .bottomTrailing) {
                 
                 Color.clear
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                
                 
                 Rectangle()
                     .foregroundColor(.clear)
@@ -66,6 +70,32 @@ struct MumoryDetailScrollContentView: View {
                             endPoint: UnitPoint(x: 0.5, y: 0.56)
                         )
                     )
+                
+                SharedAsset.playButtonMumoryDatail.swiftUIImage
+                    .resizable()
+                    .frame(width: 42, height: 42)
+                    .offset(x: -20)
+                    .background(
+                        GeometryReader { geometry in
+                            Color.clear
+                                .onChange(of: geometry.frame(in: .global).minY) { newValue in
+                                    let threshold = 62 + appCoordinator.safeAreaInsetsTop
+                                    let distance = newValue - threshold
+                                    let maxDistance: CGFloat = 90
+                                    let opacity = min(max(distance / maxDistance, 0), 1)
+                                    
+                                    self.playButtonOpacity = Double(opacity)
+                                }
+                        }
+                    )
+                    .opacity(self.playButtonOpacity)
+                    .onTapGesture {
+                        Task {
+                            guard let song = await fetchSong(songId: self.mumory.musicModel.songID.rawValue) else {return}
+                            playerViewModel.playNewSong(song: song)
+                        }
+                    }
+
             }
             
             VStack(spacing: 0) {
@@ -133,7 +163,6 @@ struct MumoryDetailScrollContentView: View {
                                 .onTapGesture {
                                     self.isMapViewShown = true
                                 }
-                            
                             } // HStack
                         } // VStack
                         .frame(height: 38)
@@ -206,16 +235,27 @@ struct MumoryDetailScrollContentView: View {
                         )
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    Spacer().frame(height: 35)
+                        .padding(.bottom, 24)
                     
                     MumoryDetailFriendMumoryScrollView()
                         .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 212)
-                        .background(.red)
                     
-                    Spacer().frame(height: 17)
+                    Spacer().frame(height: 25)
                     
-                    PageControl(page: self.$appCoordinator.page)
+//                    PageControl(page: self.$appCoordinator.page)
+                    
+                    HStack(spacing: 10) {
+                        
+                        ProgressView(value: 0.5)
+                            .accentColor(SharedAsset.mainColor.swiftUIColor)
+                            .background(Color(red: 0.165, green: 0.165, blue: 0.165))
+                            .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
+                        
+                        Text("\(self.appCoordinator.page) / \(self.mumoryDataViewModel.myMumorys.count)")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                            .foregroundColor(SharedAsset.mainColor.swiftUIColor)
+                            .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                    }
                     
                     Spacer().frame(height: 80)
                 }
@@ -269,9 +309,9 @@ struct MumoryDetailScrollContentView: View {
             Spacer()
         } // VStack
         .ignoresSafeArea()
-//        .fullScreenCover(isPresented: self.$isMapViewShown) {
-//            MumoryMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
-//        }
+        .fullScreenCover(isPresented: self.$isMapViewShown) {
+            MumoryMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
+        }
         .onAppear {
             Task {
                 self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
@@ -280,4 +320,14 @@ struct MumoryDetailScrollContentView: View {
         }
         .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapViewShown))
     }
+    
+    private func fetchSong(songId: String) async -> Song? {
+        let musicItemID = MusicItemID(rawValue: songId)
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        request.properties = [.genres, .artists]
+        guard let response = try? await request.response() else {return nil}
+        guard let song = response.items.first else {return nil}
+        return song
+    }
+        
 }

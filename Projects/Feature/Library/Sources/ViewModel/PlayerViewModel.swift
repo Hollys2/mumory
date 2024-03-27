@@ -58,6 +58,7 @@ public class PlayerViewModel: ObservableObject {
         player.queue = [song]
         self.queue = [song]
         self.queueTitle = ""
+        isPresentNowPlayingView = true
         
         Task {
             do {

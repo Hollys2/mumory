@@ -834,16 +834,18 @@ struct TagContainerView: View {
                     ), onEditingChanged: { isEditing in
                         self.isTagEditing = isEditing
                     })
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                     .focused(self.$isFocused)
                     .onChange(of: isFocused, perform: { newValue in
                         print("isFocued: \(newValue)")
                     })
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                     .onChange(of: tags[index], perform: { newValue in
+                        
                         if newValue.count > 5 {
                             tags[index] = String(newValue.prefix(5))
                         }
+                        
                         
                         if newValue.contains(" ") {
                             let beforeSpace = newValue.components(separatedBy: " ").first ?? ""

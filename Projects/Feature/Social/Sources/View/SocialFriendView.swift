@@ -325,6 +325,7 @@ public struct SocialFriendView: View {
                                         searchText = ""
                                     }, label: {
                                         SharedAsset.removeButtonSearch.swiftUIImage
+                                            .resizable()
                                             .frame(width: 23, height: 23)
                                     })
                                     .padding(.trailing, 37)
