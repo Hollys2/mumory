@@ -185,6 +185,13 @@ struct PlaylistView: View {
                 .frame(minHeight: getUIScreenBounds().height)
 
             }
+            .refreshAction {
+                Task {
+                    let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
+                    guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                    currentUserData.playlistArray[index].songs = songs
+                }
+            }
             
             
             //상단바 - z축 최상위
@@ -255,23 +262,12 @@ struct PlaylistView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             playerViewModel.miniPlayerMoveToBottom = true
-            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
-            print("playlist on appear")
-            if playlist.songIDs.count != playlist.songs.count {
-                print("not same")
-                let startIndex = playlist.songs.count
-                for index in startIndex ..< playlist.songIDs.count {
-                    let songId = playlist.songIDs[index]
-                    print("song id: \(songId)")
-                    Task {
-                        guard let song = await fetchSong(songId: songId) else {return}
-                        DispatchQueue.main.async {
-                            playlist.songs.append(song)
-                            print("song count: \(playlist.songs.count)")
-                        }
-                    }
-                }
+            Task {
+                let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
+                guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                currentUserData.playlistArray[index].songs = songs
             }
+            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
@@ -286,9 +282,6 @@ struct PlaylistView: View {
             ModifyPlaylistPopupView(playlist: $playlist)
                 .background(TransparentBackground())
         }
-
-        
-        
     }
     
     private func fetchSong(songId: String) async -> Song? {
@@ -319,8 +312,6 @@ struct PlaylistView: View {
         playlist.songs.removeAll(where: {selectedSongsForDelete.contains($0)})
         setEditMode(isEditing: false)
     }
-    
-
 }
 
 

@@ -41,15 +41,15 @@ struct NowPlayingView: View {
                         }
                 } placeholder: {
                     Rectangle()
-                        .foregroundStyle(Color(white: 0.41))
+                        .fill(Color(white: 0.28))
                         .scaledToFill()
                         .ignoresSafeArea()
-                    
                 }
                 .frame(width: getUIScreenBounds().width)
                 
-                LinearGradient(colors: [Color.black, .clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.85)).ignoresSafeArea()
+                LinearGradient(gradient: Gradient(colors: [Color.black, Color.clear]), startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.90)).ignoresSafeArea()
                 
+   
             }
             
             
@@ -67,7 +67,6 @@ struct NowPlayingView: View {
                     dismiss()
                 }
             }
-            .environmentObject(snackBarViewModel)
 
             
         }
@@ -75,7 +74,9 @@ struct NowPlayingView: View {
 }
 
 struct PlayControlView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var isPresentQueue: Bool
     
     let durationTextColor = Color(white: 0.83)
@@ -96,42 +97,40 @@ struct PlayControlView: View {
                             SharedAsset.playlistPurple.swiftUIImage
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 30, height: 30)
+                                .frame(width: 28, height: 28)
                                 .frame(maxWidth: .infinity)
                                 .padding(.trailing, 5)
                         }else {
                             SharedAsset.playlist.swiftUIImage
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 30, height: 30)
+                                .frame(width: 28, height: 28)
                                 .frame(maxWidth: .infinity)
                                 .padding(.trailing, 5)
                         }
                     }
                     
                     //뒤로가기 버튼
-                    
-                    SharedAsset.playBack.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                        .frame(maxWidth: .infinity)
-                        .onTapGesture {
-                            playerViewModel.skipToPrevious()
-                        }
-                    
-                    
-                    
-                    
+                    Button(action: {
+                        playerViewModel.skipToPrevious()
+
+                    }, label: {
+                        SharedAsset.playBack.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 32, height: 32)
+                            .frame(maxWidth: .infinity)
+                    })
+
                     //재생, 멈춤 버튼
-                    if playerViewModel.isPlaying {
+                    if playerViewModel.isPlaying() {
                         Button(action: {
                             playerViewModel.pause()
                         }, label: {
                             SharedAsset.pauseBig.swiftUIImage
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 56, height: 56)
+                                .frame(width: 70, height: 70)
                                 .frame(maxWidth: .infinity)
                         })
                     }else {
@@ -141,29 +140,52 @@ struct PlayControlView: View {
                             SharedAsset.playBig.swiftUIImage
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 56, height: 56)
+                                .frame(width: 70, height: 70)
                                 .frame(maxWidth: .infinity)
                         })
                     }
                     
                     //앞으로 가기 버튼
-                    SharedAsset.playForward.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                        .frame(maxWidth: .infinity)
-                        .onTapGesture {
-                            playerViewModel.skipToNext()
-                        }
-                    
+                    Button(action: {
+                        playerViewModel.skipToNext()
+                    }, label: {
+                        SharedAsset.playForward.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 32, height: 32)
+                            .frame(maxWidth: .infinity)
+                    })
+                 
                     
                     
                     //북마크 버튼
-                    SharedAsset.bookmarkLight.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                        .frame(maxWidth: .infinity)
+                    Button(action: {
+                        guard let nowSong = playerViewModel.currentSong else {return}
+                        if playerViewModel.favoriteSongIds.contains(nowSong.id.rawValue) {
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: nowSong.id.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                        }else {
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: nowSong.id.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                        }
+                        
+                    }, label: {
+                        if playerViewModel.favoriteSongIds.contains(playerViewModel.currentSong?.id.rawValue ?? "") {
+                            SharedAsset.bookmarkFilled.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 32, height: 32)
+                                .frame(maxWidth: .infinity)
+                        }else {
+                            SharedAsset.bookmarkLight.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 32, height: 32)
+                                .frame(maxWidth: .infinity)
+                        }
+                       
+                    })
+          
                     
                 })
                 .padding(.horizontal, 33)
@@ -203,7 +225,6 @@ struct PlayingView: View {
             //상단바
             HStack(alignment: .bottom, content: {
                 Button(action: {
-//                    appCoordinator.bottomAnimationViewStatus = .remove
                     dismiss()
                 }, label: {
                     SharedAsset.downArrow.swiftUIImage
@@ -222,7 +243,7 @@ struct PlayingView: View {
             .padding(.horizontal, 20)
             .padding(.top, 19)
             
-            //선명한 앨범 커버(정방형)
+            //선명한 앨범 커버(정방형) 폰 기준 가로의 87%
             AsyncImage(url: playerViewModel.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()
@@ -232,15 +253,16 @@ struct PlayingView: View {
                     .resizable()
                     .scaledToFit()
             }
-            .frame(width: 390 - 52, height: 390 - 52)
-            .padding(.top, 26)
-            .padding(.bottom, 35)
+            .frame(width: getUIScreenBounds().width * 0.87, height: getUIScreenBounds().width * 0.87)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+            .padding(.top, 22)
+            .padding(.bottom, 30)
             
             //아티스트 이름 및 노래 이름, 추가버튼
             HStack(alignment: .top, spacing: 0, content: {
                 VStack(spacing: 6, content: {
                     ScrollView(.horizontal) {
-                        Text(playerViewModel.currentSong?.title ?? " ")
+                        Text(playerViewModel.currentSong?.title ?? "재생중인 음악이 없습니다.")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 23))
                             .foregroundStyle(Color.white)
                             .onAppear {
@@ -260,7 +282,7 @@ struct PlayingView: View {
                     .scrollIndicators(.hidden)
                     .scrollDisabled(true)
 
-                    Text(playerViewModel.currentSong?.artistName ?? " ")
+                    Text(playerViewModel.currentSong?.artistName ?? "--")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 20))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -269,16 +291,71 @@ struct PlayingView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.trailing, 20)
                 
-                SharedAsset.addPurpleCircleFilled.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 35, height: 35)
+                if playerViewModel.currentSong != nil {
+                    SharedAsset.addPurpleCircleFilled.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35, height: 35)
+                }else {
+                    SharedAsset.addGrayCircle.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35, height: 35)
+                }
                 
             })
-            .padding(.leading, 33)
-            .padding(.trailing, 26)
+            .padding(.horizontal, 25)
             
             Spacer()
+            
+            HStack{
+                Button(action: {
+                    if playerViewModel.isPlaying() {
+                        playerViewModel.setShuffleMode()
+                    }
+                }, label: {
+                    switch playerViewModel.shuffleState {
+                    case .off:
+                        SharedAsset.playRandomOff.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                    case .on:
+                        SharedAsset.playRandom.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                    }
+                    
+                })
+                Spacer()
+                Button(action: {
+                    if playerViewModel.isPlaying() {
+                        playerViewModel.setRepeatMode()
+                    }
+                }, label: {
+                    switch playerViewModel.repeatState {
+                    case .off:
+                        SharedAsset.playRepeatOff.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                    case .all:
+                        SharedAsset.playRepeatAll.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                    case .one:
+                        SharedAsset.playRepeatOneItem.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                    }
+                    
+                })
+            }
+            .padding(.horizontal, 25)
+            .padding(.bottom, 20)
             
             //슬라이드 바 및 재생시간
             VStack(spacing: 0, content: {
@@ -307,8 +384,8 @@ struct PlayingView: View {
                 })
                 .offset(y: -5)
             })
-            .padding(.horizontal, 33)
-            .padding(.bottom, 25)
+            .padding(.horizontal, 25)
+            .padding(.bottom, 18)
             
             
         }

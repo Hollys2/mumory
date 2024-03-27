@@ -13,14 +13,11 @@ struct AddSongView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var originPlaylist: MusicPlaylist
-    @State var isTapFavorite: Bool = true
-    @State var selectLineWidth: CGFloat = 55
-    
-    private let lineGray = Color(white: 0.31)
+    @State var selection: Int = 0
     private let noneSelectedColor = Color(white: 0.65)
     
     init(originPlaylist: MusicPlaylist) {
-        self.originPlaylist = originPlaylist
+        _originPlaylist = State<MusicPlaylist>.init(initialValue: originPlaylist)
     }
 
     var body: some View {
@@ -54,25 +51,22 @@ struct AddSongView: View {
                 
                 HStack(spacing: 0, content: {
                     Text("즐겨찾기")
-                        .font(isTapFavorite ?  SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                        .foregroundStyle(isTapFavorite ? .white : noneSelectedColor)
+                        .font(selection == 0 ?  SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                        .foregroundStyle(selection == 0 ? .white : noneSelectedColor)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .onTapGesture {
                             withAnimation (.linear(duration: 0.2)){
-                                isTapFavorite = true
-                                selectLineWidth = 55
+                                selection = 0
                             }
                         }
                     
                     Text("검색")
-                        .font(isTapFavorite ?  SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                        .foregroundStyle(isTapFavorite ? noneSelectedColor : .white)
-                        .frame(maxWidth: .infinity)
+                        .font(selection == 1 ?  SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(selection == 1 ? noneSelectedColor : .white)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .onTapGesture {
                             withAnimation (.linear(duration: 0.2)) {
-                                isTapFavorite = false
-                                selectLineWidth = 28
+                                selection = 1
                             }
                         }
                 })
@@ -81,41 +75,27 @@ struct AddSongView: View {
                 //선택시 움직이는 보라색 선
                 VStack(content: {
                     Rectangle()
-                        .frame(width: 390/2, height: 3)
+                        .frame(width: getUIScreenBounds().width/2, height: 3)
                         .foregroundStyle(.clear)
                         .overlay(content: {
                             Rectangle()
-                                .frame(width: selectLineWidth, height: 3)
+                                .frame(width: selection == 0 ? 55 : 28, height: 3)
                                 .foregroundStyle(ColorSet.mainPurpleColor)
                         })
                 })
-                .frame(maxWidth: .infinity, alignment: isTapFavorite ? .leading : .trailing)
+                .frame(maxWidth: .infinity, alignment: selection == 0 ? .leading : .trailing)
                 
                 Divider05()
                 
-                if isTapFavorite{
-                    AddSongFromFavoriteView(originPlaylist: $originPlaylist)
-                        .transition(.asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .leading)))
-                }else {
-                    AddSongFromSearchView(originPlaylist: $originPlaylist)
-                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
-                }
-        
-                
+                TabView(selection: $selection, content:  {
+                    AddSongFromFavoriteView(originPlaylist: $originPlaylist).tag(0)
+                    AddSongFromSearchView(originPlaylist: $originPlaylist).tag(1)
+                })
+                .tabViewStyle(.page)
             })
             
         }
-//        .onAppear(perform: {
-//            withAnimation {
-//                appCoordinator.isHiddenTabBar = true
-//            }
-//            
-//        })
-//        .onDisappear(perform: {
-//            withAnimation {
-//                appCoordinator.isHiddenTabBar = false
-//            }
-//        })
+
     }
 }
 

@@ -13,8 +13,9 @@ import Shared
 struct NotifyView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
     @State var notifications: [Notification] = []
+    private let notificationQueue = DispatchQueue(label: "notificationQueue")
+
     let db = FBManager.shared.db
 
 
@@ -67,12 +68,16 @@ struct NotifyView: View {
                                 
                             }
                         })
+                        
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(height: 90)
                     }
                     .refreshable {
                         await getNotification()
                     }
                     
-                    
+                
                 })
                 .padding(.top, currentUserData.topInset)
             }
@@ -85,23 +90,30 @@ struct NotifyView: View {
             }
     }
     
-    private func getNotification() async {
-        self.notifications.removeAll()
-        let query = db.collection("User").document(currentUserData.uId).collection("Notification")
-            .order(by: "date", descending: true)
-        
-        //페이징기능 만들기
-        //페이징기능때문에 안 본 알림이 몇개인지 알 수 있기는 한가..? 고민해보기
-        
-        guard let result = try? await query.getDocuments() else {
-            print("no data")
-            return
-        }
-        
-        result.documents.forEach { snapshot in
-            self.notifications.append(Notification(id: snapshot.documentID, data: snapshot.data()))
+    private func getNotification() {
+        Task {
+            do {
+                let result = try await db.collection("User").document(currentUserData.uId).collection("Notification")
+                    .order(by: "date", descending: true)
+                    .getDocuments()
+                
+                DispatchQueue.main.async {
+                    CATransaction.begin()
+                    self.notifications.removeAll()
+                    result.documents.forEach { snapshot in
+                        self.notifications.append(Notification(id: snapshot.documentID, data: snapshot.data()))
+                    }
+                    CATransaction.setCompletionBlock {
+                        print("알림받기 끝")
+                    }
+                    CATransaction.commit()
+                }
+            } catch {
+                print("Error: \(error)")
+            }
         }
     }
+
 }
 
 //struct ContentView_Previews: PreviewProvider {

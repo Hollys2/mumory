@@ -8,15 +8,13 @@
 
 import Foundation
 import Core
+import MusicKit
 
 public class CurrentUserData: ObservableObject {
     //사용자 정보 및 디바이스 크기 정보
     @Published public var uId: String = "" {
         didSet {
             DispatchQueue.main.async {
-                Task{
-                    self.user = await MumoriUser(uId: self.uId)
-                }
                 Task {
                     self.FriendRequestListener()
                     self.NotificationListener()
@@ -25,6 +23,9 @@ public class CurrentUserData: ObservableObject {
             }
         }
     }
+    @Published public var nickname: String = ""
+    @Published public var id: String = ""
+    @Published public var profileURL: URL?
     
     @Published public var user: MumoriUser = MumoriUser()
     
@@ -41,6 +42,9 @@ public class CurrentUserData: ObservableObject {
     @Published public var bottomInset: CGFloat = 0
     @Published public var playlistArray: [MusicPlaylist] = []
     
+    @Published public var fetchSongTask: Task<Void, Never>?
+    
+    public init(){}
     
     func FriendRequestListener() {
         DispatchQueue.main.async {
@@ -120,7 +124,83 @@ public class CurrentUserData: ObservableObject {
         }
     }
     
-    public init(){
+    public func savePlaylist() async -> [MusicPlaylist]{
+        let Firebase = FBManager.shared
+        let db = Firebase.db
+        return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
+            var playlists: [MusicPlaylist] = []
+            
+            let query = db.collection("User").document(uId).collection("Playlist")
+                .order(by: "date", descending: false)
+            
+            do {
+                let snapshot = try await query.getDocuments()
+                
+                snapshot.documents.forEach { document in
+                    
+                    taskGroup.addTask {
+                        let data = document.data()
+                        let title = data["title"] as? String ?? ""
+                        let isPublic = data["isPublic"] as? Bool ?? false
+                        let songIDs = data["songIds"] as? [String] ?? []
+                        let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+                        let id = document.reference.documentID
+                        var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
+                        
+                        var count = 0
+                        for id in playlist.songIDs {
+                            if count >= 4 {
+                                break
+                            }
+                            count += 1
+                            let musicItemID = MusicItemID(rawValue: id)
+                            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                            request.properties = [.genres, .artists]
+                            do {
+                                let response = try await request.response()
+                                guard let song = response.items.first else { continue }
+                                playlist.songs.append(song)
+                            } catch {
+                                print("Error fetching song: \(error)")
+                            }
+                        }
+                        return playlist
+                    }
+                    
+                }
+            } catch {
+                print(error)
+            }
+            
+            for await value in taskGroup {
+                playlists.append(value)
+            }
+            
+            return playlists.sorted(by: {$0.createdDate < $1.createdDate})
+        })
+        
     }
+    
+    public func requestMorePlaylistSong(playlistID: String) async -> [Song]{
+        let db = FBManager.shared.db
+        return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
+            var returnValue:[Song] = []
+            let query = db.collection("User").document(uId).collection("Playlist").document(playlistID)
+            guard let document = try? await query.getDocument() else {return returnValue}
+            guard let data = document.data() else {return returnValue}
+            
+            let songIds = data["songIds"] as? [String] ?? []
+            for id in songIds {
+                let musicItemID = MusicItemID(rawValue: id)
+                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                request.properties = [.genres, .artists]
+                guard let response = try? await request.response() else {return returnValue}
+                guard let song = response.items.first else {return returnValue}
+                returnValue.append(song)
+            }
 
+            return returnValue
+        }
+        
+    }
 }

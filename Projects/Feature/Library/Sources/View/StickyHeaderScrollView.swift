@@ -121,12 +121,12 @@ class UIStickyScrollViewController: UIViewController{
         return v
     }()
     
-    var refreshControl: UIRefreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
     var index = 0
     var hostingController: UIHostingController<AnyView> = UIHostingController(rootView: AnyView(EmptyView()))
     
     var refreshAction: () -> Void
-    
+    var refreshControl: UIRefreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
+
     init(refreshAction: @escaping () -> Void) {
         self.refreshAction = refreshAction
         super.init(nibName: nil, bundle: nil)
@@ -140,10 +140,6 @@ class UIStickyScrollViewController: UIViewController{
         scrollView.decelerationRate = .fast
         scrollView.showsHorizontalScrollIndicator = false
         refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
-//        refreshControl.bounds = CGRect(x: refreshControl.bounds.origin.x,
-//                                       y: -68,
-//                                       width: refreshControl.bounds.size.width,
-//                                       height: refreshControl.bounds.size.height)
         refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
         scrollView.refreshControl = refreshControl
 

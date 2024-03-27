@@ -56,10 +56,21 @@ struct MumoryApp: App {
                         .environmentObject(currentUserData)
                     
                     MiniPlayerView()
+                        .environmentObject(snackBarViewModel)
                         .environmentObject(playerViewModel)
                     
                 }
                 .ignoresSafeArea()
+                .environmentObject(snackBarViewModel)
+                .environmentObject(appCoordinator)
+                .environmentObject(locationManager)
+                .environmentObject(localSearchViewModel)
+                .environmentObject(mumoryDataViewModel)
+                .environmentObject(firebaseManager)
+                .environmentObject(keyboardResponder)
+                .environmentObject(currentUserData)
+                .environmentObject(playerViewModel)
+                
             }
         }
     }

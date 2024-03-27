@@ -94,6 +94,7 @@ struct SearchMusicViewInCreateMumory: View {
         .navigationBarBackButtonHidden()
         .background(.black)
         .onAppear {
+            playerViewModel.isShownMiniPlayer = false
             AnalyticsManager.shared.setScreenLog(screenTitle: "SearchMusicView")
         }
         

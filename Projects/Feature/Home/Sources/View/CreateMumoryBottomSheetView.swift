@@ -48,6 +48,7 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
@@ -522,6 +523,13 @@ public struct CreateMumoryBottomSheetView: View {
                     })
                     
                 })
+                .onAppear(perform: {
+                    playerViewModel.isShownMiniPlayer = false
+                    playerViewModel.pause()
+                })
+                .onDisappear {
+                    playerViewModel.isShownMiniPlayer = true
+                }
                 
 //                HStack(spacing: 0) {
 //

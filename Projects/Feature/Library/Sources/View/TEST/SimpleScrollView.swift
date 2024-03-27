@@ -14,7 +14,7 @@ import MusicKit
 struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
     @EnvironmentObject var currentUserData: CurrentUserData
     @Binding var contentOffset: CGPoint
-
+    var refreshAction: () -> Void = {}
     var content: () -> Content
 
     
@@ -24,7 +24,7 @@ struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
     }
 
     func makeUIViewController(context: Context) -> SimpleScrollViewController {
-        let vc = SimpleScrollViewController()
+        let vc = SimpleScrollViewController(refreshAction: refreshAction)
         vc.hostingController.rootView = AnyView(self.content())
         vc.scrollView.delegate = context.coordinator
         return vc
@@ -32,6 +32,7 @@ struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
 
     func updateUIViewController(_ viewController: SimpleScrollViewController, context: Context) {
         viewController.hostingController.rootView = AnyView(self.content())
+        viewController.refreshAction = refreshAction
         viewController.update()
 
         DispatchQueue.main.async {
@@ -56,6 +57,13 @@ struct SimpleScrollView<Content: View>: UIViewControllerRepresentable {
 
     }
 }
+extension SimpleScrollView {
+    func refreshAction(action: @escaping () -> Void) -> SimpleScrollView {
+        var view = self
+        view.refreshAction = action
+        return view
+    }
+}
 
 class SimpleScrollViewController: UIViewController{
     
@@ -70,11 +78,26 @@ class SimpleScrollViewController: UIViewController{
     var index = 0
 
     var hostingController: UIHostingController<AnyView> = UIHostingController(rootView: AnyView(EmptyView()))
+    
+    var refreshAction: () -> Void
+    var refreshControl: UIRefreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
+
+    init(refreshAction: @escaping () -> Void) {
+        self.refreshAction = refreshAction
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         print("inset: \(scrollView.verticalScrollIndicatorInsets.right)")
         self.hostingController.view.backgroundColor = .clear
+        
+        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+        scrollView.refreshControl = refreshControl
             
         self.view.addSubview(self.scrollView)
         self.pinEdges(of: self.scrollView, to: self.view)
@@ -101,5 +124,10 @@ class SimpleScrollViewController: UIViewController{
         self.hostingController.willMove(toParent: self)
         self.pinEdges(of: self.hostingController.view, to: self.scrollView)
         self.hostingController.didMove(toParent: self)
+    }
+    
+    @objc func refresh(){
+        self.refreshAction()
+        refreshControl.endRefreshing()
     }
 }

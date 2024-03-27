@@ -51,6 +51,8 @@ struct MyPlaylistView: View {
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: spacing, content: {
+                    
+                        
                         ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
@@ -62,6 +64,15 @@ struct MyPlaylistView: View {
                                     AnalyticsManager.shared.setSelectContentLog(title: "MyPlaylistViewItem")
                                 }
                         }
+                        if currentUserData.playlistArray.isEmpty {
+                            PlaylistSkeletonView(itemSize: 81)
+                            PlaylistSkeletonView(itemSize: 81)
+                            PlaylistSkeletonView(itemSize: 81)
+                            PlaylistSkeletonView(itemSize: 81)
+                            PlaylistSkeletonView(itemSize: 81)
+                            PlaylistSkeletonView(itemSize: 81)
+                        }
+                      
                         AddSongItem()
 
                     })
@@ -69,6 +80,7 @@ struct MyPlaylistView: View {
                 }
                 .padding(.top, 16)
                 .scrollIndicators(.hidden)
+                .scrollDisabled(currentUserData.playlistArray.isEmpty)
             })
             
             Spacer()
@@ -108,10 +120,14 @@ struct MyPlaylistView: View {
                 print("no id list")
                 return
             }
+            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                return
+            }
+            
             let id = document.reference.documentID
             
             withAnimation {
-                currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
+                currentUserData.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date))
                 fetchSongWithPlaylistID(playlistId: id)
             }
         }
