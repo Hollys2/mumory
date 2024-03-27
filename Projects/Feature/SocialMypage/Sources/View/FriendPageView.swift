@@ -471,10 +471,12 @@ struct FriendPlaylistView: View {
             guard let songIdentifiers = data["songIds"] as? [String] else {
                 return
             }
+            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                return
+            }
             let id = document.documentID
-            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic))
+            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, createdDate: date))
         }
-        
     }
     private func fetchSongInfo(songIdentifiers: [String]) async -> [Song] {
  

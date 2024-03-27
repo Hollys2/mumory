@@ -82,7 +82,7 @@ public struct PlayingMusicBarView: View {
                 .frame(width: 26, height: 26)
                 .rotationEffect(.degrees(-90))
                 .overlay {
-                    if playerViewModel.isPlaying {
+                    if playerViewModel.isPlaying() {
                         SharedAsset.pauseButtonTopbar.swiftUIImage
                             .resizable()
                             .scaledToFit()

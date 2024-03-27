@@ -51,7 +51,7 @@ struct PreviewMiniPlayer: View {
                 .frame(width: 35, height: 35)
                 .rotationEffect(.degrees(-90))
                 .overlay {
-                    if playerViewModel.isPlaying {
+                    if playerViewModel.isPlaying() {
                         SharedAsset.pauseButtonTopbar.swiftUIImage
                             .resizable()
                             .scaledToFit()

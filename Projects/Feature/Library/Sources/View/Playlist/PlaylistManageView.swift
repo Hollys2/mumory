@@ -16,14 +16,10 @@ struct PlaylistManageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var isCreatePlaylistCompleted: Bool = false
-    @State var playlistArray: [MusicPlaylist] = []
     @State var isShowCreatePopup: Bool = false
     @State var isEditing: Bool = false
     @State var editButtonHeight: CGFloat?
-    var cols: [GridItem] = [
-        GridItem(.flexible(minimum: 150, maximum: 170), spacing: 12),
-        GridItem(.flexible(minimum: 150, maximum: 170), spacing: 12)
-    ]
+    @State var itemSize: CGFloat = .zero
     var body: some View {
         ZStack(alignment: .top){
             LibraryColorSet.background.ignoresSafeArea()
@@ -103,11 +99,12 @@ struct PlaylistManageView: View {
                 
                 //플레이리스트 스크롤뷰
                 ScrollView(.vertical) {
-                    LazyVGrid(columns: cols, spacing: 30, content: {
+                    LazyVGrid(columns: [
+                        GridItem(.fixed(itemSize * 2), spacing: 12),
+                        GridItem(.fixed(itemSize * 2), spacing: 12)
+                    ], spacing: 30, content: {
                         ForEach(0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem_Big(playlist: $currentUserData.playlistArray[index], isEditing: $isEditing)
-                                .frame(minWidth: 170, minHeight: 215)
-                            
                         }
                         AddSongItemBig()
                             .opacity(isEditing ? 0 : 1)
@@ -119,6 +116,11 @@ struct PlaylistManageView: View {
                 }
                 .padding(.top, isEditing ? 0 : 10)
                 .scrollIndicators(.hidden)
+                .refreshable {
+                    Task {
+                        currentUserData.playlistArray = await currentUserData.savePlaylist()
+                    }
+                }
                 
              
             }
@@ -126,35 +128,13 @@ struct PlaylistManageView: View {
         }
         .onAppear {
             playerViewModel.miniPlayerMoveToBottom = true
+            itemSize = getUIScreenBounds().width * 0.21
+            UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistManageView")
         }
   
     }
-    
-    
-    private func fetchSongInfo(songIDs: [String]) async throws -> [Song] {
-        var songs: [Song] = []
-        
-        for id in songIDs{
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            let response = try await request.response()
-            guard let song = response.items.first else {
-                throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
-            }
-            songs.append(song)
-        }
-        
-        return songs
-    }
 }
-
-
-
-//#Preview {
-//    PlaylistView()
-//}
 
 struct EditButton: View {
     var body: some View {

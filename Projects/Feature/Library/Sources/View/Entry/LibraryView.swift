@@ -13,7 +13,6 @@ import MusicKit
 struct LibraryView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    @StateObject var snackbarViewModel: SnackBarViewModel = SnackBarViewModel()
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isTapMyMusic: Bool = true
@@ -22,16 +21,14 @@ struct LibraryView: View {
     @State var screenWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
     @State var scrollYOffset: CGFloat = 0
-    
-    @State var isLoadingPlaylist: Bool = false
-  
+      
     let topBarHeight = 68.0
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, refreshAction: {
                 Task {
-                    await getPlayList()
+                    currentUserData.playlistArray = await currentUserData.savePlaylist()
                 }
             }, content: {
                 
@@ -119,7 +116,7 @@ struct LibraryView: View {
             }
             .frame(height: topBarHeight, alignment: .center)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
-            .background(ColorSet.background.opacity(0.3))
+            .background(ColorSet.background)
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
                 if newValue == .up {
@@ -130,18 +127,6 @@ struct LibraryView: View {
                     }
                 }
             }
-//            .onChange(of: contentOffset.y, perform: { value in
-//                print("y offset: \(value)")
-//                if value < -30 {
-//                    if !isLoadingPlaylist {
-//                        isLoadingPlaylist = true
-//                        Task {
-//                            await getPlayList()
-//                        }
-//                        
-//                    }
-//                }
-//            })
             
             ColorSet.background
                 .ignoresSafeArea()
@@ -152,89 +137,10 @@ struct LibraryView: View {
         .onAppear(perform: {
             playerViewModel.miniPlayerMoveToBottom = false
             Task {
-                await getPlayList()
+                currentUserData.playlistArray = await currentUserData.savePlaylist()
             }
         })
         
     }
-    
-    private func getPlayList() async {
-        let Firebase = FBManager.shared
-        let db = Firebase.db
-        
-        currentUserData.playlistArray.removeAll()
-        
-        let query = db.collection("User").document(currentUserData.uId).collection("Playlist")
-            .order(by: "date", descending: false)
-        
-        guard let snapshot = try? await query.getDocuments() else {
-            return
-        }
-        var count = 0
-        snapshot.documents.forEach { document in
-            count += 1
-            print("count in looop: \(count)")
-            let data = document.data()
-            guard let title = data["title"] as? String else {
-                print("no title")
-                return
-            }
-            guard let isPublic = data["isPublic"] as? Bool else {
-                print("no private thing")
-                return
-            }
-            guard let songIDs = data["songIds"] as? [String] else {
-                print("no id list")
-                return
-            }
-            let id = document.reference.documentID
-            let playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic)
-            currentUserData.playlistArray.append(playlist)
-            fetchSong(playlist: $currentUserData.playlistArray[currentUserData.playlistArray.count-1])
-        }
-        isLoadingPlaylist = false
-    }
-
-    private func fetchSongWithPlaylistID(songIDs: [String]) async -> [Song] {
-        var count = 0
-        var returnValue: [Song] = []
-        for id in songIDs {
-            if count >= 4 {
-                break
-            }
-            count += 1
-            let musicItemID = MusicItemID(rawValue: id)
-            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            request.properties = [.genres, .artists]
-            guard let response = try? await request.response() else {continue}
-            guard let song = response.items.first else {continue}
-            returnValue.append(song)
-        }
-        return returnValue
-    }
-    
-    //새로고침 쭈욱 하면 여기서 튕김
-    private func fetchSong(playlist: Binding<MusicPlaylist>) {
-        var count = 0
-        Task {
-            for id in playlist.songIDs.wrappedValue {
-                if count >= 4 {
-                    break
-                }
-                count += 1
-                let musicItemID = MusicItemID(rawValue: id)
-                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                request.properties = [.genres, .artists]
-                guard let response = try? await request.response() else {continue}
-                guard let song = response.items.first else {continue}
-                playlist.songs.wrappedValue.append(song)
-            }
-        }
-    }
 }
-
-
-//#Preview {
-//    LibraryView()
-//}
 
