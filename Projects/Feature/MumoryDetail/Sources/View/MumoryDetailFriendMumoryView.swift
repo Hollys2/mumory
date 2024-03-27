@@ -27,7 +27,8 @@ struct MumoryDetailFriendMumoryScrollView: UIViewRepresentable {
 
         scrollView.delegate = context.coordinator
 
-        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.myMumorys.count)
+//        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.myMumorys.count)
+        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(3)
         scrollView.contentSize = CGSize(width: totalWidth, height: 212)
 
         scrollView.isPagingEnabled = true
@@ -88,8 +89,10 @@ extension MumoryDetailFriendMumoryScrollView.Coordinator: UIScrollViewDelegate {
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let page = Int(scrollView.contentOffset.x / (UIScreen.main.bounds.width - 30))
-//        self.parent.page = page
-        self.parent.appCoordinator.page = page
+
+//        withAnimation(.easeInOut(duration: 0.1)) {
+            self.parent.appCoordinator.page = page + 1
+//        }
     }
 }
 
@@ -99,7 +102,7 @@ struct MumoryDetailFriendMumoryScrollContentView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(self.mumoryDataViewModel.myMumorys, id: \.self) { mumory in
+            ForEach(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))), id: \.self) { mumory in
                 MumoryDetailFriendMumoryView(mumory: mumory)
                     .padding(.horizontal, 5)
             }
