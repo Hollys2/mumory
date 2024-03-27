@@ -16,12 +16,14 @@ struct MumoryCarouselUIViewRepresentable: UIViewRepresentable {
     
     @Binding var mumoryAnnotations: [Mumory]
     
+//    @EnvironmentObject private var appCoordinator: AppCoordinator
+    
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
         
         scrollView.delegate = context.coordinator
         
-        let totalWidth = (310 + 20) * CGFloat(mumoryAnnotations.count)
+        let totalWidth = getUIScreenBounds().width == 375 ? (296 + 20) * CGFloat(mumoryAnnotations.count) : (310 + 20) * CGFloat(mumoryAnnotations.count)
         scrollView.contentSize = CGSize(width: totalWidth, height: 1)
         
         scrollView.isPagingEnabled = true
@@ -70,7 +72,7 @@ struct MumoryList: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(mumoryAnnotations.indices, id: \.self) { index in
-                MumoryCard(mumoryAnnotation: $mumoryAnnotations[index], selectedIndex: index)
+                MumoryCard(mumory: $mumoryAnnotations[index], selectedIndex: index)
                     .padding(.horizontal, 10)
             }
         }
@@ -80,8 +82,7 @@ struct MumoryList: View {
 
 struct MumoryCard: View {
     
-    @Binding var mumoryAnnotation: Mumory
-    //    @Binding var annotationSelected: bool
+    @Binding var mumory: Mumory
     
     let selectedIndex: Int
     
@@ -89,24 +90,24 @@ struct MumoryCard: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     var body: some View {
-        
         ZStack {
+            
             VStack {
                 Rectangle()
                     .foregroundColor(.clear)
-                    .frame(width: 310, height: 310)
+                    .frame(width:  getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
                     .background(
-                        AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl) { phase in
+                        AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
                             switch phase {
                             case .success(let image):
                                 image
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(width: 310, height: 310)
+                                    .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
                             default:
                                 Rectangle()
                                     .foregroundColor(.clear)
-                                    .frame(width: 310, height: 310)
+                                    .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
                                     .background(Color(red: 0.25, green: 0.25, blue: 0.25))
                                     .overlay(
                                         Rectangle()
@@ -115,6 +116,7 @@ struct MumoryCard: View {
                                     )
                                     .overlay(
                                         SharedAsset.defaultArtwork.swiftUIImage
+                                            .resizable()
                                             .frame(width: 103, height: 124)
                                             .background(Color(red: 0.47, green: 0.47, blue: 0.47))
                                     )
@@ -122,25 +124,37 @@ struct MumoryCard: View {
                         }
                     )
                     .cornerRadius(15)
+                
                 Spacer()
             }
             
-            VStack {
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: 310, height: 310)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98).opacity(0), location: 0.35),
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98), location: 0.85),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 0.74),
-                            endPoint: UnitPoint(x: 0.5, y: 1)
+            ZStack(alignment: .topLeading) {
+                
+                VStack {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
+                        .background(
+                            LinearGradient(
+                                stops: [
+                                    Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98).opacity(0), location: 0.35),
+                                    Gradient.Stop(color: Color(red: 0.64, green: 0.52, blue: 0.98), location: 0.85),
+                                ],
+                                startPoint: UnitPoint(x: 0.5, y: 0.74),
+                                endPoint: UnitPoint(x: 0.5, y: 1)
+                            )
                         )
-                    )
-                    .cornerRadius(15)
-                Spacer()
+                        .cornerRadius(15)
+                    
+                    Spacer()
+                }
+                
+                if !self.mumory.isPublic {
+                    SharedAsset.lockMumoryPopup.swiftUIImage
+                        .resizable()
+                        .frame(width: 25, height: 25)
+                        .offset(x: 15, y: 15)
+                }
             }
             
             VStack {
@@ -148,7 +162,7 @@ struct MumoryCard: View {
                 Spacer()
                 
                 HStack(spacing: 5)  {
-                    Text(DateManager.formattedDate(date: self.mumoryAnnotation.date, dateFormat: "yyyy.M.d"))
+                    Text(DateManager.formattedDate(date: self.mumory.date, dateFormat: "yyyy.M.d"))
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                         .foregroundColor(.white)
                     
@@ -158,7 +172,7 @@ struct MumoryCard: View {
                         .resizable()
                         .frame(width: 17, height: 17)
                     
-                    Text("\(mumoryAnnotation.locationModel.locationTitle)")
+                    Text("\(mumory.locationModel.locationTitle)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                         .foregroundColor(.white)
                         .lineLimit(1)
@@ -173,13 +187,13 @@ struct MumoryCard: View {
                 
                 HStack {
                     VStack(spacing: 12) {
-                        Text("\(mumoryAnnotation.musicModel.title)")
+                        Text("\(mumory.musicModel.title)")
                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
                             .foregroundColor(.white)
                             .frame(width: 199, height: 13, alignment: .topLeading)
                             .lineLimit(1)
                         
-                        Text("\(mumoryAnnotation.musicModel.artist)")
+                        Text("\(mumory.musicModel.artist)")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 18))
                             .foregroundColor(.white)
                             .frame(width: 199, height: 13, alignment: .topLeading)
@@ -189,8 +203,8 @@ struct MumoryCard: View {
                     Spacer()
                     
                     Button(action: {
-                        mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
-                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
+                        mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage
                             .resizable()
@@ -201,7 +215,7 @@ struct MumoryCard: View {
                 .padding(.bottom, 22)
             } // VStack
         } // ZStack
-        .frame(width: 310, height: 418)
+        .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: 418)
         .background(Color(red: 0.64, green: 0.51, blue: 0.99))
         .cornerRadius(15)
     }

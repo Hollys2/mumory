@@ -65,18 +65,21 @@ public struct HomeView: View {
                             self.appCoordinator.isMumoryPopUpShown = false
                         }
                     
-                    MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
-                        .frame(height: 418)
-                        .padding(.horizontal, (UIScreen.main.bounds.width - 310) / 2 - 10)
-                    
-                    Button(action: {
-                        self.appCoordinator.isMumoryPopUpShown = false
-                    }, label: {
-                        SharedAsset.closeButtonMumoryPopup.swiftUIImage
-                            .resizable()
-                            .frame(width: 26, height: 26)
-                    })
-                    .offset(y: 209 + 13 + 25)
+                    VStack(spacing: 16) {
+                        
+                        MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
+                            .frame(height: 418)
+                            .padding(.horizontal, (UIScreen.main.bounds.width - (getUIScreenBounds().width == 375 ? 296 : 310)) / 2 - 10)
+                        
+                        Button(action: {
+                            self.appCoordinator.isMumoryPopUpShown = false
+                        }, label: {
+                            SharedAsset.closeButtonMumoryPopup.swiftUIImage
+                                .resizable()
+                                .frame(width: 26, height: 26)
+                        })
+                    }
+                    .offset(y: 10)
                 }
             }
             

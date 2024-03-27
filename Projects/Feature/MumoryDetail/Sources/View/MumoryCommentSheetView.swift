@@ -34,7 +34,7 @@ struct CommentView: View {
         
         HStack(alignment: .top,  spacing: 13) {
             
-            if comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) {
+            if comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) {
                 AsyncImage(url: user.profileImageURL) { phase in
                     switch phase {
                     case .success(let image):
@@ -80,18 +80,23 @@ struct CommentView: View {
                     Spacer().frame(height: 13)
                     
                     HStack(spacing: 5) {
-                        if self.comment.isPublic || self.comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) {
+                        if self.comment.isPublic || self.comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) {
                             Text("\(comment.nickname)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
-                            
-                            Text("・")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .frame(width: 4, alignment: .bottom)
+                        } else {
+                            Text(StringManager.maskString(comment.nickname))
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
                         }
+                        
+                        Text("・")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                            .frame(width: 4, alignment: .bottom)
                         
                         Text(DateManager.formattedCommentDate(date: comment.date))
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
@@ -117,9 +122,9 @@ struct CommentView: View {
                         
                     } // HStack
                 
-                    Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID })  ? comment.content : "비밀 댓글입니다.")
-                        .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID })  ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
-                        .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                    Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic)  ? comment.content : "비밀 댓글입니다.")
+                        .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) ? Font.custom("Pretendard", size: 14) : Font.custom("Pretendard", size: 14).weight(.medium))
+                        .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                         .lineSpacing(3)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding(.top, 11)
@@ -195,7 +200,7 @@ struct Reply: View {
         
         HStack(alignment: .top, spacing: 13) {
             
-            if comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) {
+            if comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) {
                 AsyncImage(url: user.profileImageURL) { phase in
                     switch phase {
                     case .success(let image):
@@ -239,18 +244,24 @@ struct Reply: View {
                 Spacer().frame(height: 13)
                 
                 HStack(spacing: 5) {
-                    if self.comment.isPublic || self.comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) {
+                    if self.comment.isPublic || self.comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) {
                         Text("\(comment.nickname)")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             .foregroundColor(.white)
                             .lineLimit(1)
                         
-                        Text("・")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                            .frame(width: 4, alignment: .bottom)
+                    } else {
+                        Text(StringManager.maskString(comment.nickname))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
                     }
+                    
+                    Text("・")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                        .frame(width: 4, alignment: .bottom)
                     
                     
                     Text(DateManager.formattedCommentDate(date: comment.date))
@@ -276,10 +287,10 @@ struct Reply: View {
                     })
                 } // HStack
                 
-                Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) ? comment.content : "비밀 댓글입니다.")
+                Text(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) ? comment.content : "비밀 댓글입니다.")
                     .lineSpacing(20)
-                    .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                    .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
+                    .font(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) ? SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                    .foregroundColor(comment.isPublic || comment.userDocumentID == currentUserData.user.uId || currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) || (mumory.uId == currentUserData.user.uId && !comment.isPublic) ? .white : Color(red: 0.64, green: 0.51, blue: 0.99))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
                     .padding(.top, 11)
                     .padding(.bottom, 15)
