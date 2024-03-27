@@ -257,7 +257,6 @@ struct MumoryDetailScrollContentView: View {
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                             .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                     }
-                    
                     Spacer().frame(height: 80)
                 }
                 
