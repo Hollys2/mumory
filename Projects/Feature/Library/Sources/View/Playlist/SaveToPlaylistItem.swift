@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct SaveToPlaylistItem: View {
-    @State var playlist: MusicPlaylist
+    var playlist: MusicPlaylist
     
     init(playlist: MusicPlaylist) {
         self.playlist = playlist

@@ -69,7 +69,7 @@ public struct MiniPlayerView: View {
             
             Spacer()
             
-            if playerViewModel.isPlaying{
+            if playerViewModel.isPlaying(){
                 SharedAsset.pause.swiftUIImage
                     .resizable()
                     .scaledToFit()

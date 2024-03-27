@@ -189,12 +189,16 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
+                    guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                        return
+                    }
+                    
                     let id = document.documentID
 
                     
                     withAnimation {
                         if !(id == "favorite") {
-                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic))
+                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date))
                         }
                     }
                     

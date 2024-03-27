@@ -17,13 +17,20 @@ struct PlayingInfo {
 }
 
 public class PlayerViewModel: ObservableObject {
+    enum ShuffleState {
+        case off
+        case on
+    }
+    enum RepeatState {
+        case off
+        case all
+        case one
+    }
+    
     @Published public var isShownMiniPlayer: Bool = false
     @Published var miniPlayerMoveToBottom: Bool = false
-    @Published var isPlayingViewPresent: Bool = false
     @Published var isShownPreview: Bool = false
-    @Published var isPlaying: Bool = false
     
-    @Published var playingInfo: PlayingInfo = PlayingInfo(playingTime: 0.0, playbackRate: 0.0)
     @Published var playQueue = ApplicationMusicPlayer.shared.queue
     @Published var queue: [Song] = []
     @Published var currentSong: Song?
@@ -31,14 +38,13 @@ public class PlayerViewModel: ObservableObject {
     
     @Published var favoriteSongIds: [String] = []
     @Published public var playlistArray: [MusicPlaylist] = []
-
-    @Published var isPresentNowPlayingView: Bool = false
-        
-    private var player = ApplicationMusicPlayer.shared
-    
-
     @Published var playingTime: TimeInterval = 0.0
-
+    @Published var isPresentNowPlayingView: Bool = false
+    @Published var shuffleState: ShuffleState = .off
+    @Published var repeatState: RepeatState = .off
+    private var player = ApplicationMusicPlayer.shared
+    var originQueue: [Song] = []
+    
     let db = FBManager.shared.db
     var timer: Timer?
     public init() {}
@@ -57,6 +63,7 @@ public class PlayerViewModel: ObservableObject {
     public func playNewSong(song: Song) {
         player.queue = [song]
         self.queue = [song]
+        self.originQueue = [song]
         self.queueTitle = ""
         isPresentNowPlayingView = true
         
@@ -64,7 +71,6 @@ public class PlayerViewModel: ObservableObject {
             do {
                 try await player.play()
                 DispatchQueue.main.async {
-                    self.isPlaying = true
                     self.currentSong = song
                     self.setPlayingTime()
                 }
@@ -77,12 +83,12 @@ public class PlayerViewModel: ObservableObject {
     public func playAll(title: String, songs: [Song]) {
         self.player.queue = .init(for: songs)
         self.queue = songs
+        self.originQueue = songs
         self.queueTitle = title
         Task {
             do {
                 try await player.play()
                 DispatchQueue.main.async {
-                    self.isPlaying = true
                     self.currentSong = self.playingSong()
                     self.setPlayingTime()
                 }
@@ -144,7 +150,6 @@ public class PlayerViewModel: ObservableObject {
     public func pause() {
         player.pause()
         DispatchQueue.main.async {
-            self.isPlaying = false
             self.timer?.invalidate()
         }
     }
@@ -154,7 +159,6 @@ public class PlayerViewModel: ObservableObject {
             do {
                 try await player.play()
                 DispatchQueue.main.async {
-                    self.isPlaying = true
                     self.setPlayingTime()
                 }
             }catch(let error) {
@@ -219,4 +223,39 @@ public class PlayerViewModel: ObservableObject {
         }
     }
         
+    
+    public func isPlaying() -> Bool {
+        return self.player.state.playbackStatus == .playing
+    }
+    
+    public func setShuffleMode() {
+        if self.shuffleState == .on {
+            self.shuffleState = .off
+            self.player.state.shuffleMode = .off
+            self.queue = self.player.queue.entries.map({ entry in
+                return queue.first(where: {$0.id == entry.item?.id})!
+            })
+        }else {
+            self.shuffleState = .on
+            self.player.state.shuffleMode = .songs
+            self.queue = self.player.queue.entries.map({ entry in
+                return queue.first(where: {$0.id == entry.item?.id})!
+            })
+        }
+    }
+    
+    public func setRepeatMode(){
+        let state = self.player.state.repeatMode
+        if state == MusicPlayer.RepeatMode.none {
+            self.repeatState = .all
+            self.player.state.repeatMode = .all
+        } else if state == .all {
+            self.repeatState = .one
+            self.player.state.repeatMode = .one
+        } else {
+            self.repeatState = .off
+            self.player.state.repeatMode = MusicPlayer.RepeatMode.none
+        }
+    }
+
 }

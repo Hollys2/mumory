@@ -83,6 +83,9 @@ struct FriendListView: View {
                 }
             })
         })
+        .onAppear(perform: {
+            results = currentUserData.friends
+        })
     }
 }
 

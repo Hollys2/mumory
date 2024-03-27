@@ -31,6 +31,10 @@ struct AddSongFromFavoriteView: View {
                     }
 
                 })
+                
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(height: 90)
             }
         }
         .onAppear(perform: {
@@ -68,9 +72,12 @@ struct AddSongFromFavoriteView: View {
                     print("no id list")
                     return
                 }
+                guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                    return
+                }
                 let id = snapshot.reference.documentID
                 
-                self.favoritePlaylist = MusicPlaylist(id: id, title: title, songIDs: songIds, isPublic: isPublic)
+                self.favoritePlaylist = MusicPlaylist(id: id, title: title, songIDs: songIds, isPublic: isPublic, createdDate: date)
             }
         }
     }

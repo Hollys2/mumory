@@ -15,19 +15,22 @@ public struct MusicPlaylist: Equatable, Hashable {
     public var songIDs: [String]
     public var isPublic: Bool
     public var songs: [Song] = []
+    public var createdDate: Date
     
-    public init(id: String, title: String, songIDs: [String], isPublic: Bool) {
+    public init(id: String, title: String, songIDs: [String], isPublic: Bool, createdDate: Date) {
         self.id = id
         self.title = title
         self.songIDs = songIDs
         self.isPublic = isPublic
+        self.createdDate = createdDate
     }
     
-    public init(id: String, title: String, songIDs: [String], isPublic: Bool, songs: [Song]) {
+    public init(id: String, title: String, songIDs: [String], isPublic: Bool, songs: [Song], createdDate: Date) {
         self.id = id
         self.title = title
         self.songIDs = songIDs
         self.isPublic = isPublic
         self.songs = songs
+        self.createdDate = createdDate
     }
 }

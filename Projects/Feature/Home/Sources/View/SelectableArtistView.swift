@@ -130,6 +130,7 @@ struct SelectableArtistView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             requestArtistSongs(offset: 0)
+            playerViewModel.isShownMiniPlayer = false
         })
     }
     
