@@ -136,7 +136,6 @@ extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate 
 }
 
 public struct MumoryDetailView: View {
-    
 
     @State var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()

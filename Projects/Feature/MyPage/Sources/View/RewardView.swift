@@ -10,6 +10,7 @@
 import SwiftUI
 import Shared
 
+
 public struct RewardView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -31,7 +32,6 @@ public struct RewardView: View {
             }
         }
         .background(SharedAsset.backgroundColor.swiftUIColor)
-        .preferredColorScheme(.dark)
     }
 }
 
@@ -53,7 +53,29 @@ struct RewardContentView: View {
         SharedAsset._30RecordReward.swiftUIImage
     ]
     
+    let locationRewards: [Image] = [
+        SharedAsset._1LocationReward.swiftUIImage,
+        SharedAsset._3LocationReward.swiftUIImage,
+        SharedAsset._7LocationReward.swiftUIImage,
+        SharedAsset._14LocationReward.swiftUIImage,
+        SharedAsset._30LocationReward.swiftUIImage
+    ]
     
+    let likeRewards: [Image] = [
+        SharedAsset._1LikeReward.swiftUIImage,
+        SharedAsset._3LikeReward.swiftUIImage,
+        SharedAsset._7LikeReward.swiftUIImage,
+        SharedAsset._14LikeReward.swiftUIImage,
+        SharedAsset._30LikeReward.swiftUIImage
+    ]
+    
+    let commentRewards: [Image] = [
+        SharedAsset._1CommentReward.swiftUIImage,
+        SharedAsset._3CommentReward.swiftUIImage,
+        SharedAsset._7CommentReward.swiftUIImage,
+        SharedAsset._14CommentReward.swiftUIImage,
+        SharedAsset._30CommentReward.swiftUIImage
+    ]
     
     var body: some View {
         

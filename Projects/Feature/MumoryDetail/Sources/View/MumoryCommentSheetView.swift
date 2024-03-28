@@ -359,7 +359,7 @@ public struct MumoryCommentSheetView: View {
         let dragGesture = DragGesture()
             .updating($dragState) { value, state, transaction in
                 var newTranslation = value.translation
-                
+                print("updating")
                 if self.offsetY + newTranslation.height < 0 {
                     newTranslation.height = -self.offsetY
                 }
@@ -482,14 +482,10 @@ public struct MumoryCommentSheetView: View {
                     }
                     .simultaneousGesture(DragGesture().onEnded { _ in
                         print("simultaneousGesture DragGesture")
-                        //                        isWritingReply = false
-                        //                        selectedComment = Comment()
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     })
                     .gesture(TapGesture(count: 1).onEnded {
                         print("gesture TapGesture")
-                        //                        isWritingReply = false
-                        //                        selectedComment = Comment()
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     })
                     
@@ -658,6 +654,7 @@ public struct MumoryCommentSheetView: View {
                 .offset(y: self.offsetY + self.dragState.translation.height)
                 .gesture(dragGesture)
                 .transition(.move(edge: .bottom))
+                .zIndex(1)
                 .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
                     PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
                         mumoryDataViewModel.isUpdating = true
@@ -685,7 +682,6 @@ public struct MumoryCommentSheetView: View {
                         
                     })
                 }
-                .zIndex(1)
             }
         }
     }

@@ -243,7 +243,6 @@ public struct MyMumoryView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .preferredColorScheme(.dark)
         .onAppear {
             self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
         }

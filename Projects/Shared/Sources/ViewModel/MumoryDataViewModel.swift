@@ -202,6 +202,7 @@ final public class MumoryDataViewModel: ObservableObject {
                         }
                     }
                 }
+                
                 print("fetchMumorys successfully!")
                 completion()
             } catch {

@@ -26,6 +26,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
         
+        mapView.overrideUserInterfaceStyle = .light
         mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
@@ -246,6 +247,13 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
                 artwork.clipsToBounds = true
                 artwork.loadImage(from: url)
                 clusterView.addSubview(artwork)
+                
+                if !mumoryAnnotation.isPublic {
+                    let imageView = UIImageView(frame: CGRect(x: (clusterView.frame.width - 34) / 2, y: (clusterView.frame.width - 34) / 2, width: 34, height: 34))
+                    let lockImage: UIImage = SharedAsset.musicPinPrivate.image
+                    imageView.image = lockImage
+                    clusterView.addSubview(imageView)
+                }
             } else {
                 print("ERROR: NO URL2")
             }

@@ -188,10 +188,6 @@ struct PlaylistView: View {
                             PlaylistMusicListSkeletonView()
                             PlaylistMusicListSkeletonView()
                             PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
                         }
                   
                         

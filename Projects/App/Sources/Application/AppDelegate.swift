@@ -24,8 +24,10 @@ class AppDelegate: NSObject, UIApplicationDelegate{
     
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        
-        print("AppDelegate Start")
+        var window: UIWindow?
+        if #available(iOS 13.0, *) {
+            window?.overrideUserInterfaceStyle = .dark
+        }
         
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
@@ -39,22 +41,11 @@ class AppDelegate: NSObject, UIApplicationDelegate{
         }
         application.registerForRemoteNotifications()
         
-//        Task {
-//            let authorizationStatus = await MusicAuthorization.request()
-//            if authorizationStatus == .authorized {
-//                print("음악 권한 받음")
-//            } else {
-//                print("음악 권한 거절")
-//            }
-//        }
-        
         //테스트용 키. 추후에 원본 키로 수정하기
         KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
         
         _ = RealmManager.init()
         
-        
-        print("AppDelegate End")
         return true
     }
     

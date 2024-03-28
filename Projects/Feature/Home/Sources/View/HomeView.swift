@@ -49,7 +49,7 @@ public struct HomeView: View {
                 
                 MumoryTabView(selectedTab: $appCoordinator.selectedTab)
             }
-            .rewardPopUp(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
+            .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
             
@@ -106,7 +106,6 @@ public struct HomeView: View {
                 } else {
                     print("음악 권한 거절")
                     DispatchQueue.main.async {
-                        // 권한 거절 안내 및 설정으로 이동 유도
                         self.showAlertToRedirectToSettings()
                     }
                 }

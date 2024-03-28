@@ -336,7 +336,6 @@ struct SearchLocationView: View {
                 .scrollIndicators(.hidden)   
             }
         } // VStack
-        .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
         .padding(.horizontal, 20)
         .frame(width: UIScreen.main.bounds.width + 1)

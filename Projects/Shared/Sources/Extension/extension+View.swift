@@ -17,3 +17,14 @@ extension View {
         generator.impactOccurred()
     }
 }
+
+extension View {
+    
+    public func bottomSheet(isShown: Binding<Bool>, mumoryBottomSheet: MumoryBottomSheet) -> some View {
+        self.modifier(BottomSheetViewModifier(isShown: isShown, mumoryBottomSheet: mumoryBottomSheet))
+    }
+    
+    public func rewardBottomSheet(isShown: Binding<Bool>) -> some View {
+        self.modifier(RewardBottomSheetViewModifier(isShown: isShown))
+    }
+}

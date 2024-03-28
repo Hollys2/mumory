@@ -55,8 +55,8 @@ struct MumoryMapView: View {
                     }
                 }
             }
+            .ignoresSafeArea()
             .preferredColorScheme(.light)
-            
             
             HStack {
                 
@@ -78,7 +78,6 @@ struct MumoryMapView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-
             }
             .frame(maxWidth: .infinity)
             .frame(height: 64)
@@ -87,6 +86,7 @@ struct MumoryMapView: View {
             .background(Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 0.898))
         }
         .ignoresSafeArea()
-        
+        .statusBarHidden(true)
     }
 }
+
