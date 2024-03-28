@@ -351,7 +351,6 @@ struct PlayingView: View {
                             .scaledToFit()
                             .frame(width: 28, height: 28)
                     }
-                    
                 })
             }
             .padding(.horizontal, 25)

@@ -101,7 +101,7 @@ struct MumoryDetailScrollContentView: View {
             VStack(spacing: 0) {
                 
                 Group {
-                    // MARK: Profile & Info
+
                     HStack(spacing: 8) {
                         AsyncImage(url: self.user.profileImageURL) { phase in
                             switch phase {
@@ -116,8 +116,12 @@ struct MumoryDetailScrollContentView: View {
                         .mask {Circle()}
                         .onTapGesture {
                             Task {
-                                let friend = await MumoriUser(uId: self.user.uId)
-                                appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                                if self.user.uId == currentUserData.user.uId {
+                                    appCoordinator.rootPath.append(MyPage.myPage)
+                                } else {
+                                    let friend = await MumoriUser(uId: self.user.uId)
+                                    appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                                }
                             }
                         }
                         
@@ -225,39 +229,46 @@ struct MumoryDetailScrollContentView: View {
                             }
                     })
                 
-                Spacer().frame(height: 92)
+                Spacer().frame(height: 70)
                 
-                Group {
-                    Text("같은 음악을 들은 친구 뮤모리")
-                        .font(
-                            Font.custom("Apple SD Gothic Neo", size: 18)
-                                .weight(.semibold)
-                        )
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.bottom, 24)
-                    
-                    MumoryDetailFriendMumoryScrollView()
-                        .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 212)
-                    
-                    Spacer().frame(height: 25)
-                    
-                    HStack(spacing: 10) {
+                if self.mumoryDataViewModel.myMumorys.count > 0 {
+                    Group {
+                        Text("같은 음악을 들은 친구 뮤모리")
+                            .font(
+                                Font.custom("Apple SD Gothic Neo", size: 18)
+                                    .weight(.semibold)
+                            )
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.bottom, 24)
                         
-                        ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count))
-                            .accentColor(SharedAsset.mainColor.swiftUIColor)
-                            .background(Color(red: 0.165, green: 0.165, blue: 0.165))
-                            .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
-                            .animation(.easeInOut(duration: 0.1), value: self.appCoordinator.page)
+                        MumoryDetailFriendMumoryScrollView()
+                            .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 212)
                         
-                        Text("\(self.appCoordinator.page)")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                            .foregroundColor(SharedAsset.mainColor.swiftUIColor)
-                        + Text(" / \(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count)")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                            .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                        Spacer().frame(height: 25)
+                        
+                        HStack(spacing: 10) {
+                            
+                            ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count))
+                                .accentColor(SharedAsset.mainColor.swiftUIColor)
+                                .background(Color(red: 0.165, green: 0.165, blue: 0.165))
+                                .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
+                                .animation(.easeInOut(duration: 0.1), value: self.appCoordinator.page)
+                            
+                            Text("\(self.appCoordinator.page)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                .foregroundColor(SharedAsset.mainColor.swiftUIColor)
+                            + Text(" / \(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                        }
+                        .padding(.bottom, 65)
+                        
+                        Rectangle()
+                            .fill(Color(red: 0.055, green: 0.055, blue: 0.055))
+                            .frame(width: getUIScreenBounds().width, height: 10)
+                            .padding(.bottom, 74)
                     }
-                    Spacer().frame(height: 80)
                 }
                 
                 Group {
@@ -269,7 +280,7 @@ struct MumoryDetailScrollContentView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Spacer().frame(height: 17)
+                    Spacer().frame(height: 13)
 
                     ForEach(0..<3) { _ in
                         MumoryDetailSameLocationMusicView()
@@ -283,12 +294,11 @@ struct MumoryDetailScrollContentView: View {
                         ZStack {
                             Rectangle()
                                 .foregroundColor(.clear)
-                                .frame(width: 330, height: 49)
-                                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-                                .cornerRadius(24)
+                                .frame(width: getUIScreenBounds().width - 40, height: 49)
+                                .cornerRadius(50)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 24)
-                                        .inset(by: 0.25)
+                                    RoundedRectangle(cornerRadius: 50)
+//                                        .inset(by: 0.25)
                                         .stroke(.white, lineWidth: 0.5)
                                 )
 

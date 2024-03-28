@@ -10,6 +10,7 @@ import SwiftUI
 import Shared
 import Core
 import MusicKit
+import _MapKit_SwiftUI
 
 struct FriendPageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -77,6 +78,9 @@ struct FriendPageView: View {
 struct KnownFriendPageView: View {
     let friend: MumoriUser
     let lineGray = Color(white: 0.37)
+    
+    @State private var isMapViewShown: Bool = false
+    @State private var mumorys: [Mumory] = []
 
     init(friend: MumoriUser) {
         self.friend = friend
@@ -89,15 +93,58 @@ struct KnownFriendPageView: View {
                 Divider05()
                 
                 //맵뷰 들어갈 공간
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 187)
-                                        
+                ZStack {
+                    Rectangle()
+                        .fill(Color.clear)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 187)
+                    
+                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: mumorys) { mumory in
+
+                        MapAnnotation(coordinate: mumory.locationModel.coordinate) {
+                            ZStack(alignment: .topLeading) {
+                                SharedAsset.musicPin.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 74, height: 81)
+                                
+                                AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                    default:
+                                        Color.clear
+                                    }
+                                }
+                                .frame(width: 60.65238, height: 60.65238)
+                                .cornerRadius(12)
+                                .offset(x: 6.74, y: 6.74)
+                            }
+                        }
+                    }
+                    .frame(width: getUIScreenBounds().width - 40, height: 129)
+                    .cornerRadius(10)
+                    .preferredColorScheme(.light)
+                    .onAppear {
+                        
+                    }
+                    
+                    SharedAsset.enlargeMapButton.swiftUIImage
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                        .offset(x: (getUIScreenBounds().width - 40) / 2 - 14 - 12, y: -(129 / 2) + 14 + 12 )
+                        .onTapGesture {
+                            self.isMapViewShown = true
+                        }
+                }
+                
                 Divider05()
                 
                 FriendPlaylistView(friend: friend)
             })
+        }
+        .fullScreenCover(isPresented: $isMapViewShown) {
+            MumoryMapView(isShown: self.$isMapViewShown, mumory: Mumory(), user: self.friend)
         }
     }
 }

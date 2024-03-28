@@ -38,6 +38,8 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var isCreating: Bool = false
     @Published public var isUpdating: Bool = false
     
+    @Published public var isRewardPopUpShown: Bool = false
+    
     private var tempMumory: [Mumory] = []
     
     private var lastDocument: DocumentSnapshot?
@@ -86,11 +88,11 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchMyMumoryListener(userDocumentID: String) -> ListenerRegistration {
+    public func fetchMyMumoryListener(uId: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
             .order(by: "date", descending: true)
-        let query = collectionReference.whereField("uId", isEqualTo: userDocumentID)
+        let query = collectionReference.whereField("uId", isEqualTo: uId)
         
         let listener = query.addSnapshotListener { snapshot, error in
             Task {
@@ -108,33 +110,21 @@ final public class MumoryDataViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                                 self.myMumorys.append(newMumory)
-//                                self.myMumorys.sort { $0.date > $1.date }
+                                self.myMumorys.sort { $0.date > $1.date }
                                 print("Document added: \(documentChange.document.documentID)")
+                                
+                                if self.myMumorys.count == 3 {
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                }
                             }
                         }
-//                        DispatchQueue.main.async {
-//                            var uniqueIds = Set<String>(self.myMumorys.map { $0.id })
-//
-//                            if uniqueIds.contains(documentChange.document.documentID) {
-//                                // 이미 배열에 같은 id를 가진 Mumory가 있는 경우
-//                                uniqueIds.remove(documentChange.document.documentID)
-//                                uniqueIds.insert(newMumory.id)
-//                                self.myMumorys = self.myMumorys.filter { $0.id != documentChange.document.documentID }
-//                                self.myMumorys.append(newMumory)
-//                                self.myMumorys.sort { $0.date > $1.date }
-//                                print("1Document updated: \(documentChange.document.documentID)")
-//                            } else {
-//                                // 배열에 같은 id를 가진 Mumory가 없는 경우
-//                                self.myMumorys.append(newMumory)
-//                                self.myMumorys.sort { $0.date > $1.date }
-//                                print("1Document added: \(documentChange.document.documentID)")
-//                            }
-//                        }
-
                         
                         if !self.filteredMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                             DispatchQueue.main.async {
                                 self.filteredMumorys.append(newMumory)
+                                self.filteredMumorys.sort { $0.date > $1.date }
                             }
                         }
                         
@@ -221,7 +211,9 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchEveryMumory() {
-        self.isUpdating = true
+        DispatchQueue.main.async {
+            self.isUpdating = true
+        }
         
         let db = FirebaseManager.shared.db
         
@@ -263,7 +255,6 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 if snapshot.documents.count < 10 {
                     print("No more documents to fetch")
-                    // 추가적인 작업 수행 가능
                 }
 //                else {
 //                    // 다음 페이지의 데이터 가져오기
@@ -276,10 +267,7 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchEveryMumory2() {
-        self.isUpdating = true
-        
         let db = FirebaseManager.shared.db
-        
            
         Task {
             var mumoryCollectionRef = db.collection("Mumory")
@@ -303,7 +291,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.everyMumorys = self.tempMumory
-                    self.lastDocument = snapshot.documents.last
+//                    self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
                 }
                 
@@ -419,7 +407,10 @@ final public class MumoryDataViewModel: ObservableObject {
             if let error = error {
                 print("Error deleting document: \(error.localizedDescription)")
             } else {
-                // Mumory 문서가 성공적으로 삭제된 경우 Comment 컬렉션 레퍼런스 가져오기
+                if let index = self.myMumorys.firstIndex(where: { $0.id == mumory.id }) {
+                    self.myMumorys.remove(at: index)
+                }
+
                 let commentsRef = db.collection("Mumory").document(mumory.id).collection("Comment")
                 
                 // Comment 컬렉션의 모든 문서 가져오기 및 삭제
@@ -504,33 +495,31 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func checkIsMyComment(mumoryId: String, parentId: String, currentUser: MumoriUser) -> Bool {
+    public func checkIsMyComment(mumoryId: String, reply: Comment, currentUser: MumoriUser) async -> Bool {
         let db = FirebaseManager.shared.db
-        let docReference = db.collection("Mumory").document(mumoryId).collection("Comment").document(parentId)
-        var isMyComment = false
+        let docReference = db.collection("Mumory").document(mumoryId).collection("Comment").document(reply.parentId)
         
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        docReference.getDocument { (querySnapshot, error) in
-            defer {
-                semaphore.signal()
-            }
+        do {
+            let documentSnapshot = try await docReference.getDocument()
             
-            if let error = error {
-                print("Error getting documents: \(error)")
-            } else if let documentSnapshot = querySnapshot, documentSnapshot.exists {
-                let documentData = documentSnapshot.data()
-                guard let uId = documentData?["uId"] as? String else { return }
+            if documentSnapshot.exists {
+                
+                guard let documentData = documentSnapshot.data() else { return false }
+                guard let uId = documentData["uId"] as? String else { return false }
                 
                 if currentUser.uId == uId {
-                    isMyComment = true
+                    return true
                 }
-                print("checkIsMyComment successfully")
+                
+            } else {
+                return false
             }
+        } catch {
+            print("Error checkIsMyComment: \(error.localizedDescription)")
+            return false
         }
         
-        semaphore.wait()
-        return isMyComment
+        return false
     }
 
 

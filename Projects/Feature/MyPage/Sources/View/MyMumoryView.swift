@@ -17,6 +17,9 @@ public struct MyMumoryView: View {
     @State private var isDatePickerShown: Bool = false
     @State private var isMyMumorySearchViewShown: Bool = false
     
+    @State private var isBlur: Bool = false
+    @State private var bluroffset: CGFloat = 0
+    
     @State private var filteredLocations: [String: [Mumory]] = [:]
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -99,68 +102,51 @@ public struct MyMumoryView: View {
                             
                             ZStack(alignment: .top) {
                                 
-                                ScrollView(showsIndicators: false) {
-                                    
-                                    VStack(spacing: 0) {
-                                        
-                                        ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
+//                                ScrollView(showsIndicators: false) {
+
+                                        VStack(spacing: 0) {
                                             
-                                            let spacing = calculateSpacing(forIndex: index)
-                                            
-                                            if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
-                                                ZStack(alignment: .topLeading) {
-                                                    Rectangle()
-                                                        .foregroundColor(.clear)
-                                                        .frame(height: 31)
-                                                        .overlay(
-                                                            Rectangle()
-                                                                .foregroundColor(.clear)
-                                                                .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                            alignment: .top
-                                                        )
-                                                    
-                                                    Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                        .foregroundColor(.white)
-                                                        .padding(.leading, 12)
-                                                        .offset(y: 21)
-                                                }
-                                                .padding(.top, 30)
-                                            }
-                                            
-                                            MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
-                                        }
-                                    } // VStack
-                                    .padding(.top, 45)
-                                } // ScrollView
-                                .background(
-                                    GeometryReader { geometry in
-                                        Color.clear
-                                            .onAppear {
-                                                let scrollView = UIScrollView.appearance()
-                                                scrollView.delegate = self.makeCoordinator()
+                                            ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
                                                 
-                                                self.scrollViewOffsetY = geometry.frame(in: .global).minY
+                                                if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
+                                                    ZStack(alignment: .topLeading) {
+                                                        Rectangle()
+                                                            .foregroundColor(.clear)
+                                                            .frame(height: 31)
+                                                            .overlay(
+                                                                Rectangle()
+                                                                    .foregroundColor(.clear)
+                                                                    .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                                    .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                                alignment: .top
+                                                            )
+                                                        
+                                                        Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                            .foregroundColor(.white)
+                                                            .padding(.leading, 12)
+                                                            .offset(y: 21)
+                                                    }
+                                                    .padding(.top, 30)
+                                                }
+                                                
+                                                MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
                                             }
-                                        //                                        .onChange(of: self.offset) { newValue in
-                                        //                                            // 스크롤이 변할 때
-                                        //                                            print("ScrollView offset changed1: \(newValue)")
-                                        //                                        }
-                                    }
-                                )
-                                
+                                        } // VStack
+                                        .padding(.top, 45)
+                                        .blurScroll(10)
+//                                } // ScrollView
+
                                 ZStack(alignment: .leading) {
                                     
                                     Rectangle()
-                                        .foregroundColor(.clear)
+                                        .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.9))
                                         .frame(width: getUIScreenBounds().width, height: 55)
-                                        .background(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.4).blur(radius: 5))
                                         .overlay(
                                             Rectangle()
                                                 .foregroundColor(.clear)
                                                 .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
+                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4))
                                             , alignment: .bottom
                                         )
                                     
@@ -168,7 +154,7 @@ public struct MyMumoryView: View {
                                         Text("\(Calendar.current.component(.month, from: self.selectedDate))월")
                                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                                             .foregroundColor(.white)
-
+                                        
                                         SharedAsset.dateButtonMypage.swiftUIImage
                                             .resizable()
                                             .frame(width: 15, height: 15)
@@ -178,7 +164,6 @@ public struct MyMumoryView: View {
                                         self.isDatePickerShown = true
                                     }
                                 }
-
                             }
                         } // VStack
                         .pageView()
@@ -208,9 +193,9 @@ public struct MyMumoryView: View {
 //                                    .padding(.horizontal, 20)
 //                                    .padding(.bottom, 12)
 //                                }
-                                LazyVGrid(columns: columns, spacing: 0) {
+                                LazyVGrid(columns: columns, spacing: 12) {
                                     
-                                    ForEach(filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
+                                    ForEach(self.filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
 
                                         RoundedSquareView(regionTitle: region, mumorys: mumories)
                                             .onTapGesture {
@@ -236,8 +221,13 @@ public struct MyMumoryView: View {
                                 print("region: \(region)")
                                 print("filteredLocations: \(filteredMumorys)")
                                 
+                                
                                 if !filteredMumorys.isEmpty {
-                                    self.filteredLocations[region] = filteredMumorys
+                                    let korea = ["서울특별시", "부산광역시", "인천광역시", "대구광역시", "경기도", "제주도", "대전광역시", "광주광역시", "울산광역시", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "세종특별자치시"]
+                                    
+                                    if korea.contains(region) {
+                                        self.filteredLocations[region] = filteredMumorys
+                                    }
                                 }
                             }
                             
@@ -254,6 +244,9 @@ public struct MyMumoryView: View {
         }
         .navigationBarBackButtonHidden(true)
         .preferredColorScheme(.dark)
+        .onAppear {
+            self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
+        }
         .sheet(isPresented: self.$isDatePickerShown, content: {
             MyMumoryDatePicker(selectedDate: self.$selectedDate)
                 .presentationDetents([.height(309)])
@@ -638,75 +631,6 @@ struct MumoryItemView: View {
     }
 }
 
-public struct MyMumoryDatePicker: View {
-    
-    @Binding var selectedDate: Date
-    
-    @State private var pickerDate: Date = Date()
-    @State private var selectedYear: Int = 0
-    @State private var selectedMonth: Int = 0
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
-    @Environment(\.dismiss) private var dismiss
-    
-//    public init() {}
-    
-    public var body: some View {
-        VStack(spacing: 0) {
-                  
-            Picker("Year and Month", selection: self.$pickerDate) {
-                ForEach(2000..<2030) { year in
-                    ForEach(1..<13) { month in
-                        Text("\(String(format: "%d", year))년 \(month)월")
-                            .tag(DateManager.getYearMonthDate(year: year, month: month))
-                            .foregroundColor(.white)
-                    }
-                }
-            }
-            .pickerStyle(WheelPickerStyle())
-            .onAppear {
-                self.selectedYear = Calendar.current.component(.year, from: self.selectedDate)
-                self.selectedMonth = Calendar.current.component(.month, from: self.selectedDate)
-                self.pickerDate = DateManager.getYearMonthDate(year: self.selectedYear, month: self.selectedMonth)
-            }
-            
-            Button(action: {
-                self.selectedDate = pickerDate
-                
-                let calendar = Calendar.current
-                let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
-                let range = ...lastDayOfMonth
-                let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
-                
-                for m in newDataBeforeSelectedDate {
-                    print("date: \(m.date)")
-                }
-                mumoryDataViewModel.filteredMumorys = newDataBeforeSelectedDate
-                
-                dismiss()
-            }) {
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: UIScreen.main.bounds.width - 40, height: 58)
-                        .background(Color(red: 0.64, green: 0.51, blue: 0.99))
-                        .cornerRadius(35)
-                    
-                    Text("완료")
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.black)
-                }
-            }
-        }
-        .frame(height: 309)
-        .padding(.vertical, 100)
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-    }
-}
-
 struct RoundedSquareView: View {
     
     let regionTitle: String
@@ -715,8 +639,8 @@ struct RoundedSquareView: View {
     let mumory: Mumory = Mumory()
     
     var body: some View {
-        
         ZStack(alignment: .topLeading) {
+            
             Rectangle()
               .foregroundColor(.clear)
               .frame(width: getUIScreenBounds().width * 0.435, height: getUIScreenBounds().width * 0.435)
@@ -874,8 +798,7 @@ struct RoundedSquareView: View {
                         )
                         .offset(x: 36)
                 }
-                                    
-                
+                                      
                 if self.mumorys.count > 4 {
                     SharedAsset.artworkFilterMypage.swiftUIImage
                         .resizable()
@@ -886,5 +809,73 @@ struct RoundedSquareView: View {
             }
             .offset(x: getUIScreenBounds().width * 0.435 - 36 - 32 - 15, y: getUIScreenBounds().width * 0.435 - 36 - 15)
         }
+    }
+}
+
+
+
+private struct BlurScroll: ViewModifier {
+    
+    let blur: CGFloat
+    let coordinateSpaceName = "scroll"
+    
+    @State private var scrollPosition: CGPoint = .zero
+    
+    func body(content: Content) -> some View {
+        
+        let gradient = LinearGradient(stops: [
+            .init(color: .white, location: 0.10),
+            .init(color: .clear, location: 0.25)],
+                                      startPoint: .bottom,
+                                      endPoint: .top)
+        
+        let invertedGradient = LinearGradient(stops: [
+            .init(color: .clear, location: 0.10),
+            .init(color: .white, location: 0.25)],
+                                              startPoint: .bottom,
+                                              endPoint: .top)
+        
+        GeometryReader { proxy in
+            ScrollView {
+                ZStack(alignment: .top) {
+                    
+                    content
+                    
+                    content
+                        .background(Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 0.9))
+                        .blur(radius: blur)
+                        .frame(height: proxy.size.height, alignment: .top)
+                        .mask {
+                            Rectangle()
+                                .frame(width: UIScreen.main.bounds.width, height: 55)
+                                .offset(y:  -scrollPosition.y - (proxy.size.height / 2) + (55 / 2))
+                        }
+                }
+                .background(GeometryReader { geo in
+                    Color.clear
+                        .preference(key: ScrollOffsetPreferenceKey.self,
+                                    value: geo.frame(in: .named(coordinateSpaceName)).origin)
+                })
+                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                    self.scrollPosition = value
+                }
+            }
+            .coordinateSpace(name: coordinateSpaceName)
+        }
+        .ignoresSafeArea()
+    }
+}
+
+//MARK: PreferenceKey
+private struct ScrollOffsetPreferenceKey: PreferenceKey {
+    
+    static var defaultValue: CGPoint = .zero
+    
+    static func reduce(value: inout CGPoint, nextValue: () -> CGPoint) { }
+}
+
+extension View {
+    func blurScroll(_ blur: CGFloat) -> some View {
+        modifier(BlurScroll(blur: blur))
     }
 }

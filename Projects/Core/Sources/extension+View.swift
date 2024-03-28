@@ -61,7 +61,7 @@ extension View {
     
     public func calendarPopup<Content: View>(show: Binding<Bool>, yOffset: CGFloat, @ViewBuilder content: @escaping () -> Content) -> some View {
         self
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+//            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(
                 ZStack(alignment: .topLeading) {
                     
@@ -70,20 +70,17 @@ extension View {
                         Color.black.opacity(0.01)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .ignoresSafeArea()
-                            .highPriorityGesture(DragGesture().onChanged() { _ in
-                            })
                             .onTapGesture {
                                 show.wrappedValue = false
                             }
-                            .offset(y: -16)
                         
                         content()
-                            .frame(width: 280, height: 279)
+                            .frame(width: 280)
                             .cornerRadius(15)
                             .offset(x: 50, y: yOffset + 8)
                     }
                 }
-                
+                    .preferredColorScheme(.dark)
                 , alignment: .topLeading
             )
     }

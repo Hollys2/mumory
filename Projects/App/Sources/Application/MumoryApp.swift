@@ -75,36 +75,3 @@ struct MumoryApp: App {
         }
     }
 }
-
-struct ContentView: View {
-    var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(spacing: 20) {
-                    ForEach(0..<5) { index in
-                        Button(action: {
-                            withAnimation {
-                                proxy.scrollTo(3, anchor: .top)
-                            }
-                        }) {
-                            Text("Button \(index)")
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(10)
-                                .id(index)
-                        }
-                        
-                    }
-                    Spacer()
-                }
-                .frame(height: 1500)
-                .background(.gray)
-            }
-            .frame(height: 500)
-            .background(.green)
-        }
-    }
-}
-
-

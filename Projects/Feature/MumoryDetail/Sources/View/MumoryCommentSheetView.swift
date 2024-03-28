@@ -33,7 +33,7 @@ struct CommentView: View {
     var body: some View {
         
         HStack(alignment: .top,  spacing: 13) {
-            if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) {
+            if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
                 SharedAsset.profileMumoryDetail.swiftUIImage
                     .resizable()
                     .frame(width: 28, height: 28)
@@ -66,11 +66,9 @@ struct CommentView: View {
                 
                 VStack(spacing: 0) {
                     
-                    Spacer().frame(height: 13)
-                    
                     HStack(spacing: 5) {
-                        if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) && comment.isPublic && self.commentUser.nickname != "탈퇴계정" {
-                            Text(StringManager.maskString(comment.nickname))
+                        if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                            Text(StringManager.maskString(self.commentUser.nickname))
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
@@ -80,7 +78,7 @@ struct CommentView: View {
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                 .frame(width: 4, alignment: .bottom)
-                        } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) && !comment.isPublic && self.commentUser.nickname != "탈퇴계정" {
+                        } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                             EmptyView()
                         } else {
                             Text("\(self.commentUser.nickname)")
@@ -118,14 +116,14 @@ struct CommentView: View {
                         })
                         
                     } // HStack
+                    .padding(.vertical, 9)
                 
-                    Text(mumory.uId != currentUserData.user.uId && !comment.isPublic && (currentUserData.friends.contains(where: { $0.uId == commentUser.uId}) || !currentUserData.friends.contains(where: { $0.uId == commentUser.uId})) ? "비밀 댓글입니다." : comment.content)
-                        .font(mumory.uId != currentUserData.user.uId && !comment.isPublic && (currentUserData.friends.contains(where: { $0.uId == commentUser.uId}) || !currentUserData.friends.contains(where: { $0.uId == commentUser.uId})) ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .foregroundColor(mumory.uId != currentUserData.user.uId && !comment.isPublic && (currentUserData.friends.contains(where: { $0.uId == commentUser.uId}) || !currentUserData.friends.contains(where: { $0.uId == commentUser.uId})) ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
-                        .lineSpacing(3)
+                    Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? "비밀 댓글입니다." : comment.content)
+                        .font(mumory.uId != currentUserData.user.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundColor(mumory.uId != currentUserData.user.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                        .lineSpacing(1)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .padding(.top, 9)
-                        .padding(.bottom, 15)
+                        .padding(.bottom, 12)
                 } // VStack
                 .padding(.horizontal, 15)
                 .background(
@@ -138,9 +136,12 @@ struct CommentView: View {
                 Spacer().frame(height: 15)
                 
                 Button(action: {
-                    scrollToComment()
+                    withAnimation {
+                        scrollToComment()
+                    }
                     isFocused.wrappedValue = true
                     selectedComment = comment
+                    print("selectedComment: \(selectedComment)")
                     isWritingReply = true
                     
                 }, label: {
@@ -148,6 +149,7 @@ struct CommentView: View {
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                 })
+                .disabled(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 12)
                 
@@ -159,7 +161,7 @@ struct CommentView: View {
         .padding(.top, 12)
         .onAppear {
             Task {
-                self.commentUser = await MumoriUser(uId: comment.userDocumentID)
+                self.commentUser = await MumoriUser(uId: comment.uId)
             }
         }
         
@@ -188,6 +190,7 @@ struct Reply: View {
     let mumory: Mumory
     
     @State private var commentUser: MumoriUser = MumoriUser()
+    @State private var isMyComment: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -196,7 +199,7 @@ struct Reply: View {
     var body: some View {
         
         HStack(alignment: .top, spacing: 13) {
-            if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) {
+            if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
                 SharedAsset.profileMumoryDetail.swiftUIImage
                     .resizable()
                     .frame(width: 28, height: 28)
@@ -227,11 +230,9 @@ struct Reply: View {
             
             VStack(spacing: 0) {
                 
-                Spacer().frame(height: 13)
-                
                 HStack(spacing: 5) {
-                    if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) && comment.isPublic && self.commentUser.nickname != "탈퇴계정" {
-                        Text(StringManager.maskString(comment.nickname))
+                    if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                        Text(StringManager.maskString(self.commentUser.nickname))
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             .foregroundColor(.white)
                             .lineLimit(1)
@@ -241,7 +242,18 @@ struct Reply: View {
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                             .frame(width: 4, alignment: .bottom)
-                    } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.userDocumentID }) && !comment.isPublic && self.commentUser.nickname != "탈퇴계정" {
+                    } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId &&  self.isMyComment && self.commentUser.nickname != "탈퇴계정" {
+                        Text(StringManager.maskString(self.commentUser.nickname))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        
+                        Text("・")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                            .frame(width: 4, alignment: .bottom)
+                    } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                         EmptyView()
                     } else {
                         Text("\(self.commentUser.nickname)")
@@ -256,7 +268,6 @@ struct Reply: View {
                             .frame(width: 4, alignment: .bottom)
                     }
                     
-                    
                     Text(DateManager.formattedCommentDate(date: comment.date))
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
@@ -268,7 +279,7 @@ struct Reply: View {
                     }
                     
                     Spacer()
-
+                    
                     Button(action: {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         mumoryDataViewModel.selectedComment = self.comment
@@ -279,15 +290,14 @@ struct Reply: View {
                             .frame(width: 18, height: 18)
                     })
                 } // HStack
-                
-                Text(mumory.uId != currentUserData.user.uId && !comment.isPublic && mumoryDataViewModel.checkIsMyComment(mumoryId: mumory.id, parentId: comment.parentId, currentUser: currentUserData.user) && (currentUserData.friends.contains(where: { $0.uId == commentUser.uId}) || !currentUserData.friends.contains(where: { $0.uId == commentUser.uId})) ? "비밀 댓글입니다." : comment.content)
-                    .font(mumory.uId != currentUserData.user.uId && !comment.isPublic && (currentUserData.friends.contains(where: { $0.uId == commentUser.uId}) || !currentUserData.friends.contains(where: { $0.uId == commentUser.uId})) ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundColor(mumory.uId != currentUserData.user.uId && !comment.isPublic && (currentUserData.friends.contains(where: { $0.uId == commentUser.uId}) || !currentUserData.friends.contains(where: { $0.uId == commentUser.uId})) ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
-                    .lineSpacing(3)
+                .padding(.vertical, 9)
+            
+                Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? "비밀 답글입니다." : comment.content)
+                    .font(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundColor(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                    .lineSpacing(1)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .padding(.top, 9)
-                    .padding(.bottom, 15)
-                
+                    .padding(.bottom, 12)
             } // VStack
             .padding(.horizontal, 15)
             .background(
@@ -303,8 +313,8 @@ struct Reply: View {
         .padding(.leading, 45)
         .onAppear {
             Task {
-                self.commentUser = await MumoriUser(uId: comment.userDocumentID)
-                print("commentUser: \(commentUser)")
+                self.commentUser = await MumoriUser(uId: comment.uId)
+                self.isMyComment = await mumoryDataViewModel.checkIsMyComment(mumoryId: mumory.id, reply: comment, currentUser: currentUserData.user)
             }
         }
     }
@@ -318,6 +328,7 @@ public struct MumoryCommentSheetView: View {
     @State var mumory: Mumory = Mumory()
     @State var comments: [Comment] = []
     @State var replies: [Comment] = []
+    @State var selectedCommentUser: MumoriUser = MumoriUser()
     
     @State private var commentText: String = ""
     //    @State private var replyText: String = ""
@@ -430,7 +441,6 @@ public struct MumoryCommentSheetView: View {
                                     CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment) {
                                         withAnimation {
                                             proxy.scrollTo(index, anchor: .top)
-                                            
                                         }
                                     }
                                     .id(index)
@@ -439,6 +449,35 @@ public struct MumoryCommentSheetView: View {
                                 Spacer(minLength: 0)
                             }
                             .frame(minHeight: keyboardResponder.keyboardHeight == .zero ? getUIScreenBounds().height - 72 - appCoordinator.safeAreaInsetsBottom - 72 - (UIScreen.main.bounds.height * 0.16) : getUIScreenBounds().height * 10)
+                        }
+                        .refreshable {
+                            self.commentText = ""
+                            self.isWritingReply = false
+                            self.selectedComment = Comment()
+                            
+                            mumory.commentCount = 0
+                            self.comments = []
+                            self.replies = []
+                            
+                            Task {
+                                self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id)
+                                
+                                let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id) ?? []
+                                for i in commentAndReply {
+                                    if i.parentId == "" {
+                                        self.comments.append(i)
+                                    } else {
+                                        self.replies.append(i)
+                                    }
+                                    self.comments.sort { $0.date < $1.date }
+                                    self.replies.sort { $0.date < $1.date }
+                                }
+                                
+                                mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+                            }
+                        }
+                        .onAppear {
+                            UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
                         }
                     }
                     .simultaneousGesture(DragGesture().onEnded { _ in
@@ -457,9 +496,10 @@ public struct MumoryCommentSheetView: View {
                     VStack(spacing: 0) {
                         
                         if self.isWritingReply {
+                            
                             HStack(spacing: 5) {
                                 
-                                Text("\(selectedComment.nickname)")
+                                Text(selectedComment.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == selectedComment.uId }) ? StringManager.maskString(self.selectedCommentUser.nickname) : "\(self.selectedCommentUser.nickname)")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                     .foregroundColor(.white) +
                                 Text("님에게 답글 남기는 중")
@@ -485,6 +525,11 @@ public struct MumoryCommentSheetView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: 36)
                             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+                            .onAppear {
+                                Task {
+                                    self.selectedCommentUser = await MumoriUser(uId: self.selectedComment.uId)
+                                }
+                            }
                         }
                         
                         HStack(spacing: 0) {
@@ -581,6 +626,7 @@ public struct MumoryCommentSheetView: View {
                     
                 } // VStack
                 .onAppear {
+                    mumory.commentCount = 0
                     self.comments = []
                     self.replies = []
                     
@@ -599,11 +645,12 @@ public struct MumoryCommentSheetView: View {
                         }
                         
                         mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
-
                     }
                 }
                 .onDisappear {
                     self.commentText = ""
+                    self.isWritingReply = false
+                    self.selectedComment = Comment()
                 }
                 .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                 .cornerRadius(23, corners: [.topLeft, .topRight])
@@ -647,7 +694,9 @@ public struct MumoryCommentSheetView: View {
         let cardDismiss = drag.translation.height > 100
         let offset = cardDismiss ? drag.translation.height : 0
         
-        self.offsetY = CGFloat(offset)
+        withAnimation(.spring(response: 0.1)) {
+            self.offsetY = CGFloat(offset)
+        }
         
         if cardDismiss {
             withAnimation(.spring(response: 0.1)) {

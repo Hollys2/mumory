@@ -50,6 +50,7 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
+    
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
@@ -212,14 +213,14 @@ public struct CreateMumoryBottomSheetView: View {
                                     
                                     TagContainerView(tags: self.$tags)
                                     
-                                    
                                     ContentContainerView(contentText: self.$contentText)
-                                        .id(1)
                                         .background(
                                             GeometryReader { geometry in
                                                 Color.clear
                                                     .onChange(of: geometry.frame(in: .global).maxY) { newValue in
-                                                        self.contentContainerYOffset = newValue
+                                                        DispatchQueue.main.async {
+                                                            self.contentContainerYOffset = newValue
+                                                        }
                                                     }
                                             }
                                         )
@@ -357,6 +358,7 @@ public struct CreateMumoryBottomSheetView: View {
                                 mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                     switch result {
                                     case .success:
+                                        self.generateHapticFeedback(style: .medium)
                                         print("뮤모리 만들기 성공")
                                         mumoryDataViewModel.isCreating = false
                                         
@@ -848,7 +850,6 @@ struct TagContainerView: View {
                         print("isFocued: \(newValue)")
                     })
                     .onChange(of: tags[index], perform: { newValue in
-                        
                         if newValue.count > 5 {
                             tags[index] = String(newValue.prefix(5))
                         }
@@ -948,9 +949,6 @@ struct ContentContainerView: View {
                             .allowsHitTesting(false)
                         , alignment: .topLeading
                     )
-                    .onChange(of: contentText) { newValue in
-                        //                        print("newValue: \(newValue)@")
-                    }
                 
                 Spacer()
             }
