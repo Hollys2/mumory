@@ -156,10 +156,8 @@ public struct CreateMumoryBottomSheetView: View {
                     .padding(.top, 26)
                     .padding(.bottom, 11)
                     .padding(.horizontal, 20)
-                    
-                    ScrollViewReader { reader in
                         
-                        ScrollView(showsIndicators: false) {
+                    ScrollView(showsIndicators: false) {
                             
                             VStack(spacing: 0) {
                                 
@@ -287,7 +285,6 @@ public struct CreateMumoryBottomSheetView: View {
                             .padding(.top, 20)
                             .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                         } // ScrollView
-                    }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
@@ -414,11 +411,6 @@ public struct CreateMumoryBottomSheetView: View {
                     })
                     
                 })
-                .onAppear(perform: {
-                    playerViewModel.isShownMiniPlayer = false
-                    playerViewModel.pause()
-                })
-    
                 
                 HStack(spacing: 0) {
                     
@@ -463,6 +455,13 @@ public struct CreateMumoryBottomSheetView: View {
                 .zIndex(2)
                 .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
             }
+        }
+        .onAppear(perform: {
+            playerViewModel.isShownMiniPlayer = false
+            playerViewModel.pause()
+        })
+        .onDisappear {
+            playerViewModel.isShownMiniPlayer = true
         }
     }
     
