@@ -101,17 +101,6 @@ struct SaveToPlaylistView: View {
         }
         .onAppear(perform: {
             getUserPlaylist()
-            appCoordinator.isHiddenTabBarWithoutAnimation = true
-            withAnimation {
-                appCoordinator.isHiddenTabBar = true
-            }
-        })
-        .onDisappear(perform: {
-            appCoordinator.isHiddenTabBarWithoutAnimation = false
-            withAnimation {
-                appCoordinator.isHiddenTabBar = false
-            }
-            
         })
     }
     
@@ -124,7 +113,7 @@ struct SaveToPlaylistView: View {
         if self.songIDs.count > 1 {
             //리스트로 저장할 때
             DispatchQueue.global(qos: .background ).async {
-                path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songIDs])]) { error in
+                path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion(songIDs)]) { error in
                     guard error == nil else {
                         return
                     }

@@ -16,6 +16,8 @@ struct MyPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var spacing: CGFloat = 0
+    @State var isPresentCreatePlaylistPopup: Bool = false
+
     var rows: [GridItem] = [
         GridItem(.fixed(215), spacing: 23),
         GridItem(.fixed(215), spacing: 23)
@@ -51,8 +53,6 @@ struct MyPlaylistView: View {
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows,spacing: spacing, content: {
-                    
-                        
                         ForEach( 0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
@@ -74,6 +74,12 @@ struct MyPlaylistView: View {
                         }
                       
                         AddSongItem()
+                            .onTapGesture {
+                                print("aaaaa")
+                                isPresentCreatePlaylistPopup = true
+                                print("bbbbbb")
+                            }
+                     
 
                     })
                     .padding(.horizontal, 20)
@@ -81,6 +87,7 @@ struct MyPlaylistView: View {
                 .padding(.top, 16)
                 .scrollIndicators(.hidden)
                 .scrollDisabled(currentUserData.playlistArray.isEmpty)
+           
             })
             
             Spacer()
@@ -89,6 +96,10 @@ struct MyPlaylistView: View {
         }
         .onAppear(perform: {
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
+        })
+        .fullScreenCover(isPresented: $isPresentCreatePlaylistPopup, content: {
+            CreatePlaylistPopupView()
+                .background(TransparentBackground())
         })
         
     }

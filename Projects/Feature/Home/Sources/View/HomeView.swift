@@ -194,9 +194,6 @@ public struct HomeView: View {
         .onAppear {
             playerViewModel.isShownMiniPlayer = false
         }
-        .onDisappear {
-            playerViewModel.isShownMiniPlayer = true
-        }
     }
     
     @ViewBuilder

@@ -13,8 +13,8 @@ import MusicKit
 struct FavoriteListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-
-    @State var songs: [Song] = []
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isLoading: Bool = false
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -47,7 +47,7 @@ struct FavoriteListView: View {
                     Spacer()
                     PlayAllButton()
                         .onTapGesture {
-                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: songs)
+                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs)
                             AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
                         }
                 }
@@ -59,50 +59,44 @@ struct FavoriteListView: View {
                 
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(songs, id: \.id) { song in
-                            FavoriteSongItem(song: song, list: $songs)
+                        ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
+                            FavoriteSongItem(song: song)
+                        }
+                        if isLoading {
+                            ForEach(0...7, id: \.self) { count in
+                                FavoriteSongSkeletonView().id(UUID())
+                            }
                         }
                     })
+                }
+                .refreshable {
+                    Task {
+                        self.isLoading = true
+                        currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
+                        self.isLoading = false
+                    }
                 }
         
             })
         }
         .onAppear {
             playerViewModel.miniPlayerMoveToBottom = true
-            fetchSongInfo(songIDs: playerViewModel.favoriteSongIds)
-        }
-    }
-    
-    private func fetchSongInfo(songIDs: [String]){
-        self.songs = []
-        
-        for id in songIDs {
+            UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             Task {
-                let musicItemID = MusicItemID(rawValue: id)
-                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                request.properties = [.genres, .artists]
-
-                guard let response = try? await request.response() else {
-                    return
-                }
-                guard let song = response.items.first else {
-                    print("no song")
-                    return
-                }
-                self.songs.append(song)
+                self.isLoading = true
+                currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
+                self.isLoading = false
             }
         }
-        
     }
+
 }
 
 struct FavoriteSongItem: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @Binding var list: [Song]
     let song: Song
-    init(song: Song, list: Binding<[Song]>) {
+    init(song: Song) {
         self.song = song
-        self._list = list
     }
     @State var bookmark: Image = SharedAsset.bookmarkFilled.swiftUIImage
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -117,13 +111,13 @@ struct FavoriteSongItem: View {
                         .scaledToFill()
                 } placeholder: {
                     Rectangle()
-                        .fill(ColorSet.darkGray)
+                        .fill(ColorSet.skeleton)
                 }
                 .frame(width: 57, height: 57)
                 .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
                 .padding(.trailing, 16)
                 
-                VStack(spacing: 0, content: {
+                VStack(spacing: 4, content: {
                     Text(song.title)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                         .foregroundStyle(Color.white)
@@ -170,12 +164,35 @@ struct FavoriteSongItem: View {
             .frame(height: 95)
             
         })
-  
-  
-        
-        
-
     }
-    
+}
 
+struct FavoriteSongSkeletonView: View {
+    @State var startAnimation: Bool = false
+    var body: some View {
+        HStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 5, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 57, height: 57)
+                .padding(.trailing, 16)
+
+            VStack(alignment: .leading, spacing: 7) {
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 91, height: 15)
+                
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 71, height: 11)
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 95)
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
 }

@@ -113,14 +113,14 @@ public struct PlayingMusicBarView: View {
             AsyncImage(url: currentUserData.user.profileImageURL) { image in
                 image
                     .resizable()
-                    .scaledToFill()
-                    .frame(width: 31, height: 31)
-                    .clipShape(Circle())
+                 
             } placeholder: {
-                Circle()
-                    .fill(ColorSet.background)
-                    .frame(width: 31, height: 31)
+                currentUserData.user.defaultProfileImage
+                    .resizable()
             }
+            .scaledToFill()
+            .frame(width: 31, height: 31)
+            .clipShape(Circle())
             .padding(.trailing, 14)
             .onTapGesture {
                 appCoordinator.setBottomAnimationPage(page: .myPage)

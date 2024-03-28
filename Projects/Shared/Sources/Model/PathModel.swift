@@ -79,14 +79,18 @@ public enum MumoryPage: Hashable {
         }
     }
 }
+public enum ShazamViewType {
+    case normal
+    case createMumory
+}
 
-public enum LibraryPage: Hashable{    
+public enum LibraryPage: Hashable{
     case chart
     case search(term: String)
     case playlistManage
     case artist(artist: Artist)
     case playlist(playlist: Binding<MusicPlaylist>)
-    case shazam
+    case shazam(type: ShazamViewType)
     case addSong(originPlaylist: MusicPlaylist)
     case play
     case saveToPlaylist(songs: [Song])
@@ -108,8 +112,8 @@ public enum LibraryPage: Hashable{
             return lhsArtist == rhsArtist
         case let (.playlist(lhsPlaylist), .playlist(rhsPlaylist)):
             return lhsPlaylist.wrappedValue == rhsPlaylist.wrappedValue
-        case (.shazam, .shazam):
-            return true
+        case let (.shazam(lhsShazamType), .shazam(rhsShazamType)):
+            return lhsShazamType == rhsShazamType
         case let (.addSong(originPlaylist: lhsOriginPlaylist), .addSong(originPlaylist: rhsOriginPlaylist)):
             return lhsOriginPlaylist == rhsOriginPlaylist
         case (.play, .play):
@@ -142,8 +146,9 @@ public enum LibraryPage: Hashable{
           case .playlist(let playlist):
               hasher.combine(5)
               hasher.combine(playlist.wrappedValue)
-          case .shazam:
+          case .shazam(let shazamViewType):
               hasher.combine(6)
+              hasher.combine(shazamViewType)
           case .addSong(let originPlaylist):
               hasher.combine(7)
               hasher.combine(originPlaylist)

@@ -25,6 +25,7 @@ struct PlaylistView: View {
     @State var isPresentModifyPlaylistView: Bool = false
     @State var selectedTab: Tab = .library
     @State private var region: MKCoordinateRegion?
+    @State private var isLoading: Bool = false
     
     @Binding var playlist: MusicPlaylist
     init(playlist: Binding<MusicPlaylist>){
@@ -158,10 +159,24 @@ struct PlaylistView: View {
                                         }
                                     }else {
                                         playerViewModel.playNewSong(song: song)
+                                        playerViewModel.isShownMiniPlayer = true
                                     }
                                 }
-                            Divider05()
-                            
+                        }
+                        
+                        if isLoading {
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
+                            PlaylistMusicListSkeletonView()
                         }
                   
                         
@@ -187,9 +202,11 @@ struct PlaylistView: View {
             }
             .refreshAction {
                 Task {
+                    self.isLoading = true
                     let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
                     guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                     currentUserData.playlistArray[index].songs = songs
+                    self.isLoading = false
                 }
             }
             
@@ -263,9 +280,11 @@ struct PlaylistView: View {
         .onAppear(perform: {
             playerViewModel.miniPlayerMoveToBottom = true
             Task {
+                isLoading = true
                 let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
                 guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                 currentUserData.playlistArray[index].songs = songs
+                isLoading = false
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
         })
@@ -296,7 +315,6 @@ struct PlaylistView: View {
     private func setEditMode(isEditing: Bool) {
         withAnimation {
             self.isEditing = isEditing
-            appCoordinator.isHiddenTabBar = isEditing
         }
     }
     private func deleteSongsFromPlaylist() {
@@ -454,3 +472,35 @@ private struct AddSongButtonInPlaylistView: View {
     }
 }
 
+struct PlaylistMusicListSkeletonView: View {
+    @State var startAnimation: Bool = true
+
+    var body: some View {
+        HStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 5, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 40, height: 40)
+                .padding(.trailing, 13)
+            
+            VStack(alignment: .leading, spacing: 5,content: {
+                Rectangle()
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 97, height: 14)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                
+                Rectangle()
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 24, height: 12)
+                    .clipShape(RoundedRectangle(cornerRadius: 5))
+            })
+            
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 20)
+        .frame(height: 70)
+        .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+        .onAppear(perform: {
+            startAnimation.toggle()
+        })
+    }
+}

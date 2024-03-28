@@ -91,10 +91,12 @@ struct AddSongView: View {
                     AddSongFromFavoriteView(originPlaylist: $originPlaylist).tag(0)
                     AddSongFromSearchView(originPlaylist: $originPlaylist).tag(1)
                 })
-                .tabViewStyle(.page)
+                .tabViewStyle(.page(indexDisplayMode: .never))
             })
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             
         }
+        .ignoresSafeArea()
 
     }
 }

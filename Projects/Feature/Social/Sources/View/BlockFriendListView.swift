@@ -101,7 +101,6 @@ struct BlockFriendItem: View {
                 .onTapGesture {
                     let query = Firebase.db.collection("User").document(currentUserData.uId)
                     query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
-                    self.currentUserData.blockFriends.removeAll(where: {$0.uId == self.friend.uId})
                 }
         })
         .padding(.horizontal, 20)

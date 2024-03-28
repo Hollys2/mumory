@@ -418,9 +418,7 @@ public struct CreateMumoryBottomSheetView: View {
                     playerViewModel.isShownMiniPlayer = false
                     playerViewModel.pause()
                 })
-                .onDisappear {
-                    playerViewModel.isShownMiniPlayer = true
-                }
+    
                 
                 HStack(spacing: 0) {
                     

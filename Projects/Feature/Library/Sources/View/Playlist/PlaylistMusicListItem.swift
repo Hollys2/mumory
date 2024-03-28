@@ -125,8 +125,9 @@ struct PlaylistMusicListItem: View {
                 
             })
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 15)
             .padding(.horizontal, 20)
+            .frame(height: 70)
+           
             
 
         

@@ -14,7 +14,6 @@ struct PlaylistItem: View {
     @Binding var playlist: MusicPlaylist
     
     var radius: CGFloat = 10
-    var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     let itemSize: CGFloat
     
     init(playlist: Binding<MusicPlaylist>,itemSize: CGFloat){
@@ -29,7 +28,7 @@ struct PlaylistItem: View {
                     //1번째 이미지
                     if playlist.songs.count < 1 {
                         Rectangle()
-                            .fill(emptyGray)
+                            .fill(ColorSet.skeleton)
                             .frame(width: itemSize, height: itemSize)
                     }else{
                         AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
@@ -38,7 +37,7 @@ struct PlaylistItem: View {
                                 .scaledToFill()
                         } placeholder: {
                             Rectangle()
-                                .foregroundStyle(emptyGray)
+                                .foregroundStyle(ColorSet.skeleton)
                         }
                         .frame(width: itemSize, height: itemSize)
                         
@@ -53,7 +52,7 @@ struct PlaylistItem: View {
                     //2번째 이미지
                     if playlist.songs.count < 2{
                         Rectangle()
-                            .fill(emptyGray)
+                            .fill(ColorSet.skeleton)
                             .frame(width: itemSize, height: itemSize)
                     }else{
                         AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
@@ -62,7 +61,7 @@ struct PlaylistItem: View {
                                 .scaledToFill()
                         } placeholder: {
                             Rectangle()
-                                .foregroundStyle(emptyGray)
+                                .foregroundStyle(ColorSet.skeleton)
                         }
                         .frame(width: itemSize, height: itemSize)
                         
@@ -81,7 +80,7 @@ struct PlaylistItem: View {
                     //3번째 이미지
                     if playlist.songs.count < 3 {
                         Rectangle()
-                            .fill(emptyGray)
+                            .fill(ColorSet.skeleton)
                             .frame(width: itemSize, height: itemSize)
                     }else{
                         AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
@@ -90,7 +89,7 @@ struct PlaylistItem: View {
                                 .scaledToFill()
                         } placeholder: {
                             Rectangle()
-                                .foregroundStyle(emptyGray)
+                                .foregroundStyle(ColorSet.skeleton)
                         }
                         .frame(width: itemSize, height: itemSize)
                         
@@ -105,7 +104,7 @@ struct PlaylistItem: View {
                     //4번째 이미지
                     if playlist.songs.count <  4 {
                         Rectangle()
-                            .fill(emptyGray)
+                            .fill(ColorSet.skeleton)
                             .frame(width: itemSize, height: itemSize)
                     }else{
                         AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
@@ -114,7 +113,7 @@ struct PlaylistItem: View {
                                 .scaledToFill()
                         } placeholder: {
                             Rectangle()
-                                .foregroundStyle(emptyGray)
+                                .foregroundStyle(ColorSet.skeleton)
                         }
                         .frame(width: itemSize, height: itemSize)
                         
@@ -164,7 +163,6 @@ struct PlaylistItem: View {
 
 public struct AddSongItem: View {
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
-    @State var isPresent: Bool = false
     public var body: some View {
         VStack(spacing: 0, content: {
             RoundedRectangle(cornerRadius: 10, style: .circular)
@@ -186,20 +184,13 @@ public struct AddSongItem: View {
             
         })
         .frame(height: 215)
-        .onTapGesture {
-            isPresent = true
-        }
-        .fullScreenCover(isPresented: $isPresent, content: {
-            CreatePlaylistPopupView()
-                .background(TransparentBackground())
-        })
+
     }
 }
 
 
 struct PlaylistSkeletonView: View {
     let itemSize: CGFloat
-    let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     let radius: CGFloat = 10
     @State var startAnimation: Bool = true
     init(itemSize: CGFloat) {
@@ -211,7 +202,7 @@ struct PlaylistSkeletonView: View {
             VStack(spacing: 0, content: {
                 HStack(spacing: 0, content: {
                     Rectangle()
-                        .fill(startAnimation ? emptyGray : ColorSet.subGray)
+                        .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
                         .frame(width: itemSize, height: itemSize)
                     
                     Rectangle()
@@ -220,7 +211,7 @@ struct PlaylistSkeletonView: View {
                         .foregroundStyle(ColorSet.background)
                     
                     Rectangle()
-                        .fill(startAnimation ? emptyGray : ColorSet.subGray)
+                        .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
                         .frame(width: itemSize, height: itemSize)
                 })
                 
@@ -232,7 +223,7 @@ struct PlaylistSkeletonView: View {
                 
                 HStack(spacing: 0, content: {
                     Rectangle()
-                        .fill(startAnimation ? emptyGray : ColorSet.subGray)
+                        .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
                         .frame(width: itemSize, height: itemSize)
                     
                     Rectangle()
@@ -241,7 +232,7 @@ struct PlaylistSkeletonView: View {
                         .foregroundStyle(ColorSet.background)
                     
                     Rectangle()
-                        .fill(startAnimation ? emptyGray : ColorSet.subGray)
+                        .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
                         .frame(width: itemSize, height: itemSize)
                 })
             })
@@ -250,13 +241,13 @@ struct PlaylistSkeletonView: View {
             
             
             Rectangle()
-                .fill(startAnimation ? emptyGray : ColorSet.subGray)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
                 .frame(width: 97, height: 14)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .padding(.top, 10)
             
             Rectangle()
-                .fill(startAnimation ? emptyGray : ColorSet.subGray)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
                 .frame(width: 24, height: 12)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
                 .padding(.top, 5)

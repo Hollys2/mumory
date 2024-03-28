@@ -55,11 +55,24 @@ public struct MumoryRecommendationView: View {
                     LazyHGrid(rows: rows, spacing: 0,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
-                            MusicChartItem(rank: index+1, song: song) //순위 곡 item
-                                .frame(width: getUIScreenBounds().width - 40)
+                            MusicChartItem(rank: index+1, song: song) //순위 곡 itemv
+                                .frame(width: getUIScreenBounds().width * 0.9, height: 70)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
+                                    playerViewModel.isShownMiniPlayer = true
                                 }
+                        }
+                        
+                        if musicChart.isEmpty {
+                            MusicChartSkeletonView()
+                            MusicChartSkeletonView()
+                            MusicChartSkeletonView()
+                            MusicChartSkeletonView(lineVisible: false)
+                            MusicChartSkeletonView()
+                            MusicChartSkeletonView()
+                            MusicChartSkeletonView()
+                            MusicChartSkeletonView(lineVisible: false)
+
                         }
                     })
                     .padding(.trailing, 33)

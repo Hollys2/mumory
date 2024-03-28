@@ -122,12 +122,21 @@ private struct RecommendationScrollView: View {
                 }
             
             ScrollView(.horizontal) {
-                LazyHStack (spacing: 0){
-                    ForEach(songs, id: \.self){ song in
-                        RecommendationMusicItem(song: song)
-                            .onTapGesture {
-                                playerViewModel.playNewSong(song: song)
-                            }
+                LazyHStack (spacing: 12){
+                    if songs.count < 4 {
+                        RecommendationMusicSkeletonView()
+                        RecommendationMusicSkeletonView()
+                        RecommendationMusicSkeletonView()
+                        RecommendationMusicSkeletonView()
+                    }else {
+                        ForEach(songs, id: \.self){ song in
+                            RecommendationMusicItem(song: song)
+                                .onTapGesture {
+                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.isShownMiniPlayer = true
+                                }
+                        }
+                        
                     }
                 }
                 .padding(.leading, 20)

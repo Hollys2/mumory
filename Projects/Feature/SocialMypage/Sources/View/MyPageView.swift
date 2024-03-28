@@ -36,7 +36,6 @@ public struct MyPageView: View {
                     Divider05()
                     
                     MyMumori()
-                        .frame(height: 283, alignment: .top)
                     
                     SubFunctionView()
                     
@@ -125,14 +124,15 @@ struct UserInfoView: View {
                 AsyncImage(url: currentUserData.user.profileImageURL) { image in
                     image
                         .resizable()
-                        .scaledToFill()
-                        .frame(width: 90, height: 90)
-                        .clipShape(Circle())
+
                 } placeholder: {
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: 90, height: 90)
+                    currentUserData.user.defaultProfileImage
+                        .resizable()
+
                 }
+                .scaledToFill()
+                .frame(width: 90, height: 90)
+                .clipShape(Circle())
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .offset(y: -40)
                 
@@ -146,6 +146,9 @@ struct UserInfoView: View {
             
             HStack(spacing: 8, content: {
                 SharedAsset.editProfile.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 15, height: 15)
                 
                 Text("프로필 편집")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -267,6 +270,7 @@ struct MyMumori: View {
                 .padding(.horizontal, 20)
                 
             }
+            .frame(height: getUIScreenBounds().width * 0.43)
             .scrollIndicators(.hidden)
             .padding(.bottom, 40)
         })

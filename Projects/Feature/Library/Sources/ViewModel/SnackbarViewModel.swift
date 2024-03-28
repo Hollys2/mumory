@@ -166,18 +166,23 @@ public struct SnackBarView: View {
         HStack(spacing: 0) {
             HStack(spacing: 0, content: {
                 Text("플레이리스트")
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 
+                
                 Text("\"\(snackBarViewModel.title)")
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
                 Text("\"")
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 
                 Text("에 추가되었습니다.")
                     .fixedSize()
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
             })
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -206,18 +211,22 @@ public struct SnackBarView: View {
         HStack(spacing: 0) {
             HStack(spacing: 0, content: {
                 Text("플레이리스트")
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 
                 Text("\"\(snackBarViewModel.title)")
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
                 Text("\"")
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 
                 Text("에서 삭제되었습니다.")
                     .fixedSize()
+                    .foregroundStyle(Color.black)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
             })
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -234,9 +243,11 @@ public struct SnackBarView: View {
     var PlaylistFailureView: some View {
         HStack(spacing: 0) {
             Text("이미 플레이리스트")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
             
             Text("\"\(snackBarViewModel.title)")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -246,6 +257,7 @@ public struct SnackBarView: View {
             
             Text("에 존재합니다.")
                 .fixedSize()
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
         }
         .lineLimit(1)
@@ -266,6 +278,7 @@ public struct SnackBarView: View {
                 .padding(.trailing, 8)
             
             Text("즐겨찾기 목록에 추가되었습니다.")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
             
             Spacer()
@@ -298,6 +311,7 @@ public struct SnackBarView: View {
                 .padding(.trailing, 8)
             
             Text("즐겨찾기 목록에서 삭제되었습니다.")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
             
         }
@@ -320,6 +334,7 @@ public struct SnackBarView: View {
                 .padding(.trailing, 8)
             
             Text("음악 URL 링크가 복사 되었습니다.")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
             
         }
@@ -335,6 +350,7 @@ public struct SnackBarView: View {
     var AlreadyReadAllNotificationView: some View {
         HStack(spacing: 0) {
             Text("알림을 모두 읽었습니다.")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
         }
         .lineLimit(1)

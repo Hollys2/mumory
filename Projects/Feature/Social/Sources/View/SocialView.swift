@@ -626,15 +626,13 @@ public struct SocialView: View {
                             image
                                 .resizable()
                         default:
-                            Color(red: 0.184, green: 0.184, blue: 0.184)
+                            currentUserData.user.defaultProfileImage
+                                .resizable()
                         }
                     }
+                    .scaledToFill()
                     .frame(width: 30, height: 30)
-                    .mask {Circle()}
-                    .overlay(
-                        Circle()
-                            .stroke(.white, lineWidth: 1)
-                    )
+                    .clipShape(Circle())
                 }
             } // HStack
             .frame(height: 68)

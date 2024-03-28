@@ -113,7 +113,6 @@ public struct MyRequestFriendItem: View {
                     guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
                         return
                     }
-                    currentUserData.friendRequests.removeAll(where: {$0.uId == friend.uId})
                 }
             }
             .background(TransparentBackground())
@@ -127,11 +126,9 @@ public func deleteFriendRequest(uId: String, friendUId: String) async -> Bool?{
     
     let deleteMyQuery = db.collection("User").document(uId).collection("Friend")
         .whereField("uId", isEqualTo: friendUId)
-        .whereField("type", isEqualTo: "request")
     
     let deleteFriendQuery = db.collection("User").document(friendUId).collection("Friend")
         .whereField("uId", isEqualTo: uId)
-        .whereField("type", isEqualTo: "recieve")
     
     guard let result = try? await deleteMyQuery.getDocuments() else {
         return nil

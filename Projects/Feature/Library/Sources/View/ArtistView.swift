@@ -92,6 +92,7 @@ struct ArtistView: View {
                             MusicListItem(song: song, type: .artist)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
+                                    playerViewModel.isShownMiniPlayer = true
                                 }
                         }
                         

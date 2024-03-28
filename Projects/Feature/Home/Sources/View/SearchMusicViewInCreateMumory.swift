@@ -75,7 +75,7 @@ struct SearchMusicViewInCreateMumory: View {
                 if term.count > 0 {
                     SearchMusicResultViewInCreateMumory(term: $term)
                 }else{
-                    SearchMusicEntryView(term: $term)
+                    SearchMusicEntryView(term: $term, shazamViewType: .createMumory)
                 }
                 
                 
@@ -149,7 +149,7 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(artistList){ artist in
+                            ForEach(artistList, id: \.id){ artist in
                                 SearchArtistItem(artist: artist)
                                     .onTapGesture {
                                         appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))
@@ -177,7 +177,7 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(musicList){ music in
+                            ForEach(musicList, id: \.id){ music in
                                 SearchSelectableSongItem(song: music)
                                     .onTapGesture {
                                         playerViewModel.setPreviewPlayer(tappedSong: music)

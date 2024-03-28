@@ -29,7 +29,7 @@ struct FriendPageView: View {
         ZStack(alignment: .top){
             ColorSet.background
             
-            if currentUserData.friends.contains(where: {$0.uId == friend.uId}){
+            if currentUserData.getFriendStatus(friend: friend) == .friend{
                 KnownFriendPageView(friend: friend)
             }else {
                 UnkownFriendPageView(friend: friend)
@@ -158,9 +158,11 @@ struct UnkownFriendPageView: View {
     
     let friend: MumoriUser
     let secretId: String
+    let secretNickname: String
     init(friend: MumoriUser) {
         self.friend = friend
-        secretId = String(friend.id.prefix(2)) + String(repeating: "*", count: friend.id.count-2)
+        secretId = friend.id.isEmpty ? "*******" : String(friend.id.prefix(2)) + String(repeating: "*", count: friend.id.count-2)
+        secretNickname = friend.nickname.isEmpty ? "*******" : String(friend.nickname.prefix(2)) + String(repeating: "*", count: friend.nickname.count-2)
     }
     
     var body: some View {
@@ -192,7 +194,7 @@ struct UnkownFriendPageView: View {
                 }
             
             VStack(alignment: .leading, spacing: 4, content: {
-                Text(friend.nickname)
+                Text(secretNickname)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -211,7 +213,7 @@ struct UnkownFriendPageView: View {
                         .padding(.bottom, 18)
             })
             .overlay {
-                SharedAsset.profileRed.swiftUIImage
+                friend.defaultProfileImage
                     .resizable()
                     .scaledToFill()
                     .frame(width: 90, height: 90)
@@ -220,36 +222,68 @@ struct UnkownFriendPageView: View {
                     .offset(y: -40)
             }
             .padding(.horizontal, 20)
-
-                HStack(spacing: 4, content: {
-                    if isRequested {
-                        SharedAsset.cancelAddFriend.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                    }else {
-                        SharedAsset.friendIconSocial.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                    }
+            
+            HStack(spacing: 4, content: {
+                
+                switch currentUserData.getFriendStatus(friend: friend) {
+                case .notFriend:
+                    SharedAsset.addFriend.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
                     
-                    Text(isRequested ? "요청 취소" : "친구 추가")
+                    Text("친구 추가")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                        .foregroundStyle(Color.black)
+                        .foregroundStyle(ColorSet.background)
                     
-                })
-                .frame(maxWidth: .infinity)
-                .frame(height: 45)
-                .background(isRequested ? ColorSet.charSubGray : ColorSet.mainPurpleColor)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-                .padding(.horizontal, 20)
-                .padding(.bottom, 22)
-                .onTapGesture {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentPopup = true
+                case .alreadySendRequest:
+                    SharedAsset.cancelFriendRequest.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                    
+                    Text("요청 취소")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
+                    
+                case .alreadyRecieveRequest:
+                    SharedAsset.acceptFriend.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                    
+                    Text("친구요청 수락")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
+                    
+                case .block:
+                    SharedAsset.blockFriend.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                    
+                    Text("차단 해제")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
+                    
+                default: EmptyView()
                 }
-               
+                
+            })
+            .frame(maxWidth: .infinity)
+            .frame(height: 45)
+            .background(currentUserData.getFriendStatus(friend: friend) == .block ? 
+                        ColorSet.subGray : currentUserData.getFriendStatus(friend: friend) == .alreadySendRequest ?
+                        ColorSet.charSubGray : ColorSet.mainPurpleColor)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+            .padding(.horizontal, 20)
+            .padding(.bottom, 22)
+            .onTapGesture {
+                UIView.setAnimationsEnabled(false)
+                isPresentPopup = true
+           
+            }
+            
         })
         .fullScreenCover(isPresented: $isPresentPopup, content: {
             PopupView
@@ -284,16 +318,9 @@ struct UnkownFriendPageView: View {
     //친구 요청, 삭제 팝업
     var PopupView: some View {
         VStack {
-            if isRequested {
-                TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
-                    Task{
-                        guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: self.friend.uId) else {
-                            return
-                        }
-                        isRequested = false
-                    }
-                }
-            } else {
+            
+            switch currentUserData.getFriendStatus(friend: friend) {
+            case .notFriend:
                 TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
                     let functions = FBManager.shared.functions
                     Task {
@@ -301,9 +328,35 @@ struct UnkownFriendPageView: View {
                             print("network error")
                             return
                         }
-                        isRequested = true
                     }
                 }
+            case .alreadySendRequest:
+                TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
+                    Task {
+                        guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
+                            return
+                        }
+                    }
+                }
+            case .alreadyRecieveRequest:
+                TwoButtonPopupView(title: "친구 요청을 수락하시겠습니까??", positiveButtonTitle: "요청수락") {
+                    let functions = FBManager.shared.functions
+                    Task {
+                        guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
+                            print("network error")
+                            return
+                        }
+                    }
+                }
+            case .block:
+                TwoButtonPopupView(title: "차단을 해제 하시겠습니까?", positiveButtonTitle: "차단해제") {
+                    Task{
+                        let db = FBManager.shared.db
+                        let query = db.collection("User").document(currentUserData.uId)
+                        query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
+                    }
+                }
+            default: EmptyView()
             }
         }
     }
@@ -387,9 +440,11 @@ struct FriendInfoView: View {
                             .frame(width: 90, height: 90)
                             .clipShape(Circle())
                     } placeholder: {
-                        Circle()
-                            .fill(Color.black)
+                        friend.defaultProfileImage
+                            .resizable()
+                            .scaledToFill()
                             .frame(width: 90, height: 90)
+                            .clipShape(Circle())
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .offset(y: -40)
@@ -602,13 +657,31 @@ struct FriendDeleteBlockBottomSheetView: View {
 
 
 public func blockFriend(uId: String, friendUId: String) {
-    let db = FBManager.shared.db
-    let query = db.collection("User").document(uId)
-    query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
-    query.updateData(["blockFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
-    
-    let friendQuery = db.collection("User").document(friendUId)
-    friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+
+    Task {
+        let db = FBManager.shared.db
+        let deleteDocQuery = db.collection("User").document(uId).collection("Friend")
+            .whereField("uId", isEqualTo: friendUId)
+        
+        guard let snapshot = try? await deleteDocQuery.getDocuments() else {
+            return
+        }
+        print("a")
+        snapshot.documents.forEach { document in
+            print("b")
+            document.reference.delete()
+        }
+        
+        let query = db.collection("User").document(uId)
+        try await query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+        print("c")
+        try await query.updateData(["blockFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
+        print("d")
+        
+        //탈퇴한회원이라면...?ㅜㅜ
+        let friendQuery = db.collection("User").document(friendUId)
+        try await friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+    }
 }
 
 public func deleteFriend(uId: String, friendUId: String){

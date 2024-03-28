@@ -178,16 +178,8 @@ struct PlaylistItem_Big: View {
                 .padding(.top, 5)
             
         }
-        .onTapGesture {
-            if playlist.id == "favorite"{
-                appCoordinator.rootPath.append(LibraryPage.favorite)
-            }else {
-                appCoordinator.rootPath.append(LibraryPage.playlist(playlist: $playlist))
-            }
-        }
-        
         .onAppear(perform: {
-            itemSize = getUIScreenBounds().width * 0.21
+            itemSize = getUIScreenBounds().width * 0.22
         })
         .fullScreenCover(isPresented: $isDeletePupupPresent, content: {
             TwoButtonPopupView(title: "해당 플레이리스트를 삭제하시겠습니까?", positiveButtonTitle: "플레이리스트 삭제", positiveAction: {
@@ -257,9 +249,8 @@ public struct AddSongItemBig: View {
             Spacer()
             
         })
-        .frame(height: 220)
         .onAppear(perform: {
-            itemSize = (getUIScreenBounds().width * 0.21) * 2 + 1
+            itemSize = (getUIScreenBounds().width * 0.22) * 2
         })
         .onTapGesture {
             isPresent = true

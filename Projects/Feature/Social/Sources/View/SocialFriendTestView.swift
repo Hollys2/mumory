@@ -118,14 +118,17 @@ struct SocialFriendTestView: View {
                     
                     if let friend = self.friendSearchResult {
                         VStack(spacing: 0) {
-                            if currentUserData.friends.contains(friend) {
+                            
+                            switch currentUserData.getFriendStatus(friend: friend) {
+                            case .friend:
                                 AlreadFriendItem(friend: friend)
-                            } else if currentUserData.friendRequests.contains(friend) {
-                                MyRequestFriendItem(friend: friend)
-                            } else if currentUserData.recievedRequests.contains(friend){
-                                RecievedRequestItem(friend: friend)
-                            } else {
+                            case .notFriend:
                                 FriendAddItem(friend: friend)
+                            case .alreadySendRequest:
+                                MyRequestFriendItem(friend: friend)
+                            case .alreadyRecieveRequest:
+                                RecievedRequestItem(friend: friend)
+                            default: EmptyView()
                             }
                  
                         }

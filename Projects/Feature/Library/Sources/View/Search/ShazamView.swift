@@ -23,6 +23,11 @@ struct ShazamView: View {
     @State var shazamHistory: [SHMediaItem] = []
     @State var selectedShazamHistory: [SHMediaItem] = []
     @State var isEditing: Bool = false
+    var type: ShazamViewType = .normal
+    init(){}
+    init(type: ShazamViewType) {
+        self.type = type
+    }
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -107,7 +112,12 @@ struct ShazamView: View {
                                     .onTapGesture {
                                         shazamManager.startOrEndListening()
                                     }
-                                PlayButton(enabled: shazamManager.shazamSong?.appleMusicID != nil)
+                                
+                                if self.type == .normal {
+                                    ShazamPlayButton(shazamItem: $shazamManager.shazamSong)
+                                }else {
+                                    ShazamAddButton(shazamItem: $shazamManager.shazamSong)
+                                }
                             })
                             .padding(.top, 25)
                         })
@@ -183,8 +193,8 @@ struct ShazamView: View {
                 }
                 .frame(height: 41)
                 .padding(.horizontal, 20)
-                .padding(.top, 40)
-                .padding(.bottom, 20)
+                .padding(.top, 30)
+                .padding(.bottom, 12)
                 
                 ScrollView(.horizontal) {
                     HStack(alignment: .center, spacing: 12) {
@@ -327,10 +337,11 @@ struct AgainButton: View {
     }
 }
 
-struct PlayButton: View {
-    var enabled: Bool = true
-    init(enabled: Bool) {
-        self.enabled = enabled
+struct ShazamPlayButton: View {
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @Binding var item: SHMatchedMediaItem?
+    init(shazamItem: Binding<SHMatchedMediaItem?>) {
+        self._item = shazamItem
     }
     var body: some View {
         HStack(alignment: .center, spacing: 6, content: {
@@ -345,8 +356,52 @@ struct PlayButton: View {
         })
         .padding(.horizontal, 15)
         .frame(height: 33)
-        .background(enabled ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+        .background(item?.appleMusicID != nil  ? ColorSet.mainPurpleColor : ColorSet.darkGray)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
+        .onTapGesture {
+            Task {
+                guard let appleMusicID = item?.appleMusicID else {return}
+                guard let song = await fetchSong(songID: appleMusicID) else {return}
+                playerViewModel.playNewSong(song: song)
+                playerViewModel.isShownMiniPlayer = true
+            }
+        }
+        .disabled(item?.appleMusicID == nil)
+    }
+}
+
+struct ShazamAddButton: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @Binding var item: SHMatchedMediaItem?
+    init(shazamItem: Binding<SHMatchedMediaItem?>) {
+        self._item = shazamItem
+    }
+    var body: some View {
+        HStack(alignment: .center, spacing: 6, content: {
+            SharedAsset.addBlackBig.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 19, height: 19)
+            
+            Text("음악 추가")
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                .foregroundStyle(Color.black)
+        })
+        .padding(.horizontal, 15)
+        .frame(height: 33)
+        .background(item?.appleMusicID != nil ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+        .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
+        .onTapGesture {
+            Task {
+                guard let appleMusicID = item?.appleMusicID else {return}
+                guard let title = item?.title else {return}
+                guard let artist = item?.artist else {return}
+                mumoryDataViewModel.choosedMusicModel = MusicModel(songID: MusicItemID(appleMusicID), title: title, artist: artist, artworkUrl: item?.artworkURL)
+                appCoordinator.rootPath.removeLast(2)
+            }
+        }
+        .disabled(item?.appleMusicID == nil)
     }
 }
 
@@ -418,3 +473,5 @@ struct ShazamHistoryItem: View {
         }
     }
 }
+
+
