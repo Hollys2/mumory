@@ -153,6 +153,7 @@ public struct CustomizationView: View {
         .onTapGesture {
             self.hideKeyboard()
         }
+        .disabled(isLoading)
         
     }
     private func setPadding(screen: CGSize) -> CGFloat {
@@ -184,7 +185,8 @@ public struct CustomizationView: View {
             "nickname": manager.nickname,
             "favoriteGenres": manager.selectedGenres.map({$0.id}),
             "notificationTime": manager.selectedTime,
-            "fcmToken": messaging.fcmToken ?? ""
+            "fcmToken": messaging.fcmToken ?? "",
+            "profileIndex": manager.randomProfileIndex
         ]
         
         userData.merge(await uploadProfileImage(uid: uid))
@@ -195,6 +197,7 @@ public struct CustomizationView: View {
         await uploadPlaylist(uid: uid)
         
         currentUserData.uId = uid
+        currentUserData.user = await MumoriUser(uId: uid)
         currentUserData.favoriteGenres = manager.selectedGenres.map({$0.id})
         
         isLoading = false
@@ -228,43 +231,30 @@ public struct CustomizationView: View {
             "isPublic": false,
             "date": Date()
         ]
-        
         try? await db.collection("User").document(uid).collection("Playlist").document("favorite").setData(playlist)
     }
     
     private func uploadProfileImage(uid: String) async -> [String: Any] {
         let storage = Firebase.storage
- 
-        if let data = manager.profileImageData {
-            let metaData = Firebase.storageMetadata()
-            metaData.contentType = "image/jpeg"
-            let path: String = "ProfileImage/\(uid).jpg"
-            let ref = storage.reference().child(path)
-            
-            
-            guard let result = try? await ref.putDataAsync(data, metadata: metaData) else {
-                return ["profileImageURL": ""]
-            }
-            
-            guard let url = try? await ref.downloadURL() else {
-                return ["profileImageURL": ""]
-            }
-            
-            let userData: [String: Any] = [
-                "profileImageURL": url.absoluteString
-            ]
-            return userData
-        }else {
-            let ref = storage.reference(withPath: manager.randomProfilePath)
-            
-            guard let url = try? await ref.downloadURL() else {
-                return ["profileImageURL": ""]
-            }
-            let userData: [String: Any] = [
-                "profileImageURL": url.absoluteString
-            ]
-            return userData
+        
+        guard let data = manager.profileImageData else {return ["profileImageURL": ""]}
+        let metaData = Firebase.storageMetadata()
+        metaData.contentType = "image/jpeg"
+        let path: String = "ProfileImage/\(uid).jpg"
+        let ref = storage.reference().child(path)
+        
+        guard let result = try? await ref.putDataAsync(data, metadata: metaData) else {
+            return ["profileImageURL": ""]
         }
+        
+        guard let url = try? await ref.downloadURL() else {
+            return ["profileImageURL": ""]
+        }
+        
+        let userData: [String: Any] = [
+            "profileImageURL": url.absoluteString
+        ]
+        return userData
         
     }
 }

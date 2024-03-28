@@ -38,17 +38,7 @@ struct SearchMusicResultView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.top, 130)
-                            .onChange(of: term, perform: { value in
-                                localTime = 0.0
-                                requestIndex = 0
-                            })
-                            .onChange(of: localTime, perform: { value in
-                                if localTime == 0.8 {
-                                    isLoading = true
-                                    requestArtist(term: term)
-                                    requestSong(term: term, index: 0)
-                                }
-                            })
+                      
                         
                     }else {
                         LazyVStack(spacing: 0, content: {
@@ -60,8 +50,9 @@ struct SearchMusicResultView: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(artistList){ artist in
+                            ForEach(artistList, id: \.id){ artist in
                                 SearchArtistItem(artist: artist)
+                                    .id(artist.id)
                                     .onTapGesture {
                                         appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
                                         let userDefault = UserDefaults.standard
@@ -85,10 +76,12 @@ struct SearchMusicResultView: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(musicList){ music in
+                            ForEach(musicList, id: \.id){ music in
                                 SearchSongItem(song: music)
+                                    .id(music.id)
                                     .onTapGesture {
                                         playerViewModel.playNewSong(song: music)
+                                        playerViewModel.isShownMiniPlayer = true
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == music.title})
@@ -105,7 +98,17 @@ struct SearchMusicResultView: View {
                     }
                 })
                 .frame(width: getUIScreenBounds().width)
-                
+                .onChange(of: term, perform: { value in
+                    localTime = 0.0
+                    requestIndex = 0
+                })
+                .onChange(of: localTime, perform: { value in
+                    if localTime == 0.8 {
+                        isLoading = true
+                        requestArtist(term: term)
+                        requestSong(term: term, index: 0)
+                    }
+                })
                 
                 
             }
@@ -121,6 +124,7 @@ struct SearchMusicResultView: View {
                     haveToLoadNextPage = false
                 }
             })
+
             
 
         }

@@ -77,7 +77,7 @@ struct MyMumoryItem: View {
             
         })
         .onAppear {
-            width = getUIScreenBounds().width < 380 ? 163 : 170
+            width = getUIScreenBounds().width * 0.43
             Task {
                 self.song = await fetchSong(songID: mumory.musicModel.songID.rawValue)
             }

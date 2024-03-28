@@ -80,6 +80,7 @@ struct UneditablePlaylistView: View {
                             UneditablePlaylistMusicListItem(song: song)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
+                                    playerViewModel.isShownMiniPlayer = true
                                 }
                             
                             Divider05()
@@ -101,7 +102,7 @@ struct UneditablePlaylistView: View {
                     
                     
                 })
-                .frame(width: getUIScreenBounds().width)
+                .frame(width: getUIScreenBounds().width + 1)
                 .frame(minHeight: getUIScreenBounds().height)
                 
             }
@@ -134,11 +135,6 @@ struct UneditablePlaylistView: View {
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
-//        .onAppear(perform: {
-//            Task {
-//                fetchSongInfo(songIDs: playlist.songIDs, songs: $songs)
-//            }
-//        })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isBottomSheetPresent)  {
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
@@ -149,30 +145,6 @@ struct UneditablePlaylistView: View {
         
         
     }
-    
-//    private func fetchSongInfo(songIDs: [String], songs: Binding<[Song]>) {
-//        if self.songs.count >= 50 {
-//            return
-//        }
-//        self.songs = []
-//        for id in songIDs {
-//            Task {
-//                let musicItemID = MusicItemID(rawValue: id)
-//                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-//                guard let response = try? await request.response() else {
-//                    return
-//                }
-//                guard let song = response.items.first else {
-//                    print("no song")
-//                    return
-//                }
-//                DispatchQueue.main.async {
-//                    self.songs.append(song)
-//                }
-//            }
-//        }
-//        isCompletedGetSongs = true
-//    }
 }
 
 struct UneditablePlaylistMusicListItem: View {

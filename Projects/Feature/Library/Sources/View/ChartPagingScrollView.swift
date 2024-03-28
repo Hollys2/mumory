@@ -88,7 +88,7 @@ class UIScrollPagingViewController: UIViewController, UIScrollViewDelegate {
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         
-        let cellWidth = scrollView.frame.size.width - 40
+        let cellWidth = UIScreen.main.bounds.width * 0.9
         let estimatedIndex = (scrollView.contentOffset.x) / cellWidth
         var index: Int
         

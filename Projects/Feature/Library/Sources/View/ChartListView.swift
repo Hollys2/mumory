@@ -69,7 +69,9 @@ struct ChartListView: View {
                         .padding(.trailing, 20)
                         .onTapGesture {
                             playerViewModel.playAll(title: "최신 인기곡", songs: songs)
-                            requestTop100(startIndex: searchIndex + 1)
+                            if searchIndex < 5 {
+                                requestTop100(startIndex: searchIndex + 1)
+                            }
                             AnalyticsManager.shared.setSelectContentLog(title: "ChartListViewPlayAllButton")
                         }
                 }
@@ -82,6 +84,10 @@ struct ChartListView: View {
                     LazyVStack(spacing: 0, content: {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
+                                .onTapGesture {
+                                    playerViewModel.playNewSong(song: songs[index])
+                                    playerViewModel.isShownMiniPlayer = true
+                                }
                         }
                     })
                     .frame(width: getUIScreenBounds().width)

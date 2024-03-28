@@ -90,6 +90,7 @@ struct RecommendationListView: View {
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
+                                    playerViewModel.isShownMiniPlayer = true
                                 }
                             Divider05()
                         }

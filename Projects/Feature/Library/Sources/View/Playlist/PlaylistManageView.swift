@@ -53,10 +53,8 @@ struct PlaylistManageView: View {
                         CompleteButton()
                             .transition(.opacity)
                             .onTapGesture {
-                                appCoordinator.isHiddenTabBarWithoutAnimation = false
                                 withAnimation {
                                     isEditing = false
-                                    appCoordinator.isHiddenTabBar = false
                                     editButtonHeight = nil
                                 }
                             }
@@ -95,16 +93,21 @@ struct PlaylistManageView: View {
                         }
                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistManageViewEditButton")
                     }
-                
-                
                 //플레이리스트 스크롤뷰
                 ScrollView(.vertical) {
                     LazyVGrid(columns: [
-                        GridItem(.fixed(itemSize * 2), spacing: 12),
-                        GridItem(.fixed(itemSize * 2), spacing: 12)
+                        GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12),
+                        GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12)
                     ], spacing: 30, content: {
                         ForEach(0 ..< currentUserData.playlistArray.count, id: \.self) { index in
                             PlaylistItem_Big(playlist: $currentUserData.playlistArray[index], isEditing: $isEditing)
+                                .onTapGesture {
+                                    if currentUserData.playlistArray[index].id == "favorite"{
+                                        appCoordinator.rootPath.append(LibraryPage.favorite)
+                                    }else {
+                                        appCoordinator.rootPath.append(LibraryPage.playlistWithIndex(index: index))
+                                    }
+                                }
                         }
                         AddSongItemBig()
                             .opacity(isEditing ? 0 : 1)

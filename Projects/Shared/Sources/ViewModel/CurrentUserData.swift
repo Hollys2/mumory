@@ -9,6 +9,7 @@
 import Foundation
 import Core
 import MusicKit
+import Firebase
 
 public class CurrentUserData: ObservableObject {
     //사용자 정보 및 디바이스 크기 정보
@@ -23,9 +24,6 @@ public class CurrentUserData: ObservableObject {
             }
         }
     }
-    @Published public var nickname: String = ""
-    @Published public var id: String = ""
-    @Published public var profileURL: URL?
     
     @Published public var user: MumoriUser = MumoriUser()
     
@@ -41,20 +39,27 @@ public class CurrentUserData: ObservableObject {
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
     @Published public var playlistArray: [MusicPlaylist] = []
-    
-    @Published public var fetchSongTask: Task<Void, Never>?
-    
+    @Published public var startAnimation: Bool = false
     public init(){}
     
+    var friendCollectionListener: ListenerRegistration?
+    var friendDocumentListener: ListenerRegistration?
+    var notificationListener: ListenerRegistration?
+    
+    
     func FriendRequestListener() {
+        print("FriendRequestListener")
         DispatchQueue.main.async {
             
             let db = FBManager.shared.db
-            db.collection("User").document(self.uId).collection("Friend").addSnapshotListener { snapshot, error in
+            self.friendCollectionListener = db.collection("User").document(self.uId).collection("Friend").addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
+                self.recievedRequests.removeAll()
+                self.friendRequests.removeAll()
                 snapshot.documentChanges.forEach { documentChange in
                     switch documentChange.type {
-                    case .added:
+                    case .added, .removed:
+                        print("friend collection change")
                         let data = documentChange.document.data()
                         guard let type = data["type"] as? String else {return}
                         if type == "recieve" {
@@ -66,7 +71,6 @@ public class CurrentUserData: ObservableObject {
                                     self.recievedRequests.append(user)
                                 }
                             }
-                            
                         } else if type == "request" {
                             guard let friendUId = data["uId"] as? String else {return}
                             Task {
@@ -76,6 +80,7 @@ public class CurrentUserData: ObservableObject {
                                 }
                             }
                         }
+                        
                     default: break
                     }
                 }
@@ -84,12 +89,15 @@ public class CurrentUserData: ObservableObject {
     }
     
     func FriendUpdateListener() {
+        print("FriendUpdateListener")
         DispatchQueue.main.async {
             let db = FBManager.shared.db
-            db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
+            self.friendDocumentListener = db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
+                print("friend update!!!")
                 guard let snapshot = snapshot else {return}
                 guard let friendIds = snapshot.get("friends") as? [String] else {return}
                 self.friends.removeAll()
+                self.blockFriends.removeAll()
                 friendIds.forEach { uid in
                     Task {
                         let user = await MumoriUser(uId: uid)
@@ -117,7 +125,7 @@ public class CurrentUserData: ObservableObject {
             .whereField("isRead", isEqualTo: false)
         
         DispatchQueue.main.async {
-            query.addSnapshotListener { snapshot, error in
+            self.notificationListener = query.addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
                 self.existUnreadNotification = (snapshot.count > 0)
             }
@@ -202,5 +210,26 @@ public class CurrentUserData: ObservableObject {
             return returnValue
         }
         
+    }
+    public enum FriendStatus{
+        case friend
+        case notFriend
+        case alreadySendRequest
+        case alreadyRecieveRequest
+        case block
+        
+    }
+    public func getFriendStatus(friend: MumoriUser) -> FriendStatus {
+        if self.friends.contains(friend) {
+            return .friend
+        }else if self.blockFriends.contains(friend) {
+            return .block
+        }else if self.friendRequests.contains(friend) {
+            return .alreadySendRequest
+        }else if self.recievedRequests.contains(friend) {
+            return .alreadyRecieveRequest
+        }else {
+            return .notFriend
+        }
     }
 }

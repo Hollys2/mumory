@@ -36,6 +36,7 @@ struct AddSongFromFavoriteView: View {
                     .fill(Color.clear)
                     .frame(height: 90)
             }
+            .ignoresSafeArea()
         }
         .onAppear(perform: {
             Task{

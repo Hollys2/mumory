@@ -12,37 +12,49 @@ import Core
 import PhotosUI
 import FirebaseFirestore
 
-//여기 내부에서만 사용하는 observable을 만들어서 사용할까??
+//여기 내부에서만 사용하는 observable을 만들어서 사용할까?? - 이게좋을듯함
 //아이템 내부에 type, status, value 정의해서 사용
 struct EditProfileView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @State private var editProfileData: EditProfileData = EditProfileData()
+    @StateObject private var editProfileViewModel: EditProfileViewModel = EditProfileViewModel()
     @State var isLoading: Bool = false
+    
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background
             ScrollView(.vertical) {
                 VStack(spacing: 33, content: {
-                    UserProfile(profileData: $editProfileData)
-                    NicknameStackView(profileData: $editProfileData)
-                    IdStackView(profileData: $editProfileData)
-                    BioStackView(profileData: $editProfileData)
+                    UserProfile()
+                        .environmentObject(editProfileViewModel)
+                    
+                    NicknameStackView()
+                        .environmentObject(editProfileViewModel)
+                    
+                    IdStackView()
+                        .environmentObject(editProfileViewModel)
+                    
+                    BioStackView()
+                        .environmentObject(editProfileViewModel)
+                    
                     Rectangle()
                         .fill(Color.clear)
                         .frame(height: 500)
                 })
             }
-            
-            LoadingAnimationView(isLoading: $isLoading)
+            LoadingAnimationView(isLoading: $editProfileViewModel.isLoading)
+                .frame(maxHeight: .infinity, alignment: .center)
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            editProfileData.nickname = currentUserData.user.nickname
-            editProfileData.id = currentUserData.user.id
-            editProfileData.bio = currentUserData.user.bio
-            editProfileData.profileURL = currentUserData.user.profileImageURL
-            editProfileData.backgroundURL = currentUserData.user.backgroundImageURL
+            DispatchQueue.main.async {
+                editProfileViewModel.nickname = currentUserData.user.nickname
+                editProfileViewModel.id = currentUserData.user.id
+                editProfileViewModel.bio = currentUserData.user.bio
+                editProfileViewModel.profileURL = currentUserData.user.profileImageURL
+                editProfileViewModel.backgroundURL = currentUserData.user.backgroundImageURL
+            }
         })
+        .disabled(editProfileViewModel.isLoading)
         
     }
 }
@@ -55,295 +67,152 @@ public struct ImageBundle {
 }
 private struct UserProfile: View {
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @Environment(\.dismiss) var dismiss
     @State var isPresentBackgroundBottomSheet: Bool = false
     @State var isPresentProfileBottomSheet: Bool = false
-
     let Firebase = FBManager.shared
-    
-    @Binding private var profileData: EditProfileData
-    
-    init(profileData: Binding<EditProfileData>) {
-        self._profileData = profileData
-    }
-    
-    @State var backgroundImageBundle: ImageBundle = ImageBundle()
-    @State var profileImageBundle: ImageBundle = ImageBundle()
     
     var body: some View {
         ZStack(alignment: .top){
-            
+            //배경이미지
+            VStack{
+                if let image = editProfileViewModel.backgroundImageBundle.image {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 165)
+                        .clipped()
+                }else {
+                    Rectangle()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 165)
+                        .foregroundStyle(ColorSet.darkGray)
+                }
+            }
+            .overlay {
+                ColorSet.background.opacity(0.4)
                 
-                //배경이미지
+                SharedAsset.camera.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                    .padding(.bottom, 24)
+            }
+            .onTapGesture {
+                isPresentBackgroundBottomSheet = true
+            }
+            .fullScreenCover(isPresented: $isPresentBackgroundBottomSheet) {
+                ImageSelectBottomSheet(isPresent: $isPresentBackgroundBottomSheet, imageBundle: $editProfileViewModel.backgroundImageBundle, photoType: .background)
+                    .background(TransparentBackground())
+            }
+            .onChange(of: editProfileViewModel.backgroundImageBundle.image) { value in
+                editProfileViewModel.backgroundStatus = .valid
+            }
+            .overlay {
+                //프로필 이미지
                 VStack{
-                    
-                    if let image = backgroundImageBundle.image {
+                    if let image = editProfileViewModel.profileImageBundle.image {
                         image
                             .resizable()
                             .scaledToFill()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 165)
-                            .clipped()
+                            .frame(width: 90, height: 90)
                     }else {
-                        Rectangle()
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 165)
-                            .foregroundStyle(ColorSet.darkGray)
+                        currentUserData.user.defaultProfileImage
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
+                        
                     }
                 }
-                .overlay {
+                .overlay(content: {
                     ColorSet.background.opacity(0.4)
                     
                     SharedAsset.camera.swiftUIImage
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .frame(maxHeight: .infinity, alignment: .bottom)
-                        .padding(.bottom, 24)
-                }
+                })
+                .clipShape(Circle())
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .offset(y: 50)
+                .padding(.trailing, 20)
                 .onTapGesture {
-                    isPresentBackgroundBottomSheet = true
+                    isPresentProfileBottomSheet = true
                 }
-                .fullScreenCover(isPresented: $isPresentBackgroundBottomSheet) {
-                    ImageSelectBottomSheet(isPresent: $isPresentBackgroundBottomSheet, imageBundle: $backgroundImageBundle, photoType: .background)
+                .fullScreenCover(isPresented: $isPresentProfileBottomSheet) {
+                    ImageSelectBottomSheet(isPresent: $isPresentProfileBottomSheet, imageBundle: $editProfileViewModel.profileImageBundle)
                         .background(TransparentBackground())
                 }
-                .onChange(of: backgroundImageBundle.image) { value in
-                    profileData.backgroundStatus = .valid
+                .onChange(of: editProfileViewModel.profileImageBundle.image) { value in
+                    editProfileViewModel.profileStatus = .valid
                 }
-                .overlay {
-                    //프로필 이미지
-                    VStack{
-                        if let image = profileImageBundle.image {
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(maxWidth: .infinity)
-                                .frame(width: 90, height: 90)
-                        }else {
-                            Circle()
-                                .fill(ColorSet.darkGray)
-                                .frame(width: 90, height: 90)
-                        }
-                    }
-                    .overlay(content: {
-                        ColorSet.background.opacity(0.4)
-                        
-                        SharedAsset.camera.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 24, height: 24)
-                    })
-                    .clipShape(Circle())
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                    .offset(y: 50)
-                    .padding(.trailing, 20)
-                    .onTapGesture {
-                        isPresentProfileBottomSheet = true
-                    }
-                    .fullScreenCover(isPresented: $isPresentProfileBottomSheet) {
-                        ImageSelectBottomSheet(isPresent: $isPresentProfileBottomSheet, imageBundle: $profileImageBundle)
-                            .background(TransparentBackground())
-                    }
-                    .onChange(of: profileImageBundle.image) { value in
-                        profileData.profileStatus = .valid
-                    }
-                }
-                
-                
-                
-      
-                
-                
-          
+            }
+            
             //상단바
             HStack(alignment: .center){
                 SharedAsset.xGradient.swiftUIImage
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture {
                         dismiss()
                     }
                 
-                Spacer()
                 
                 Text("프로필 편집")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 
-                Spacer()
-
+                
                 Text("완료")
                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
                     .foregroundStyle(Color.black)
                     .padding(.horizontal, 11)
                     .frame(height: 30)
-                    .background(profileData.isValid() ? ColorSet.mainPurpleColor : ColorSet.subGray)
+                    .background(editProfileViewModel.isValid() ? ColorSet.mainPurpleColor : ColorSet.subGray)
                     .clipShape(RoundedRectangle(cornerRadius: 31.5, style: .circular))
+                    .frame(maxWidth: .infinity, alignment: .trailing)
                     .onTapGesture {
+                        editProfileViewModel.isLoading = true
                         Task {
-                            await saveUserProfile(profileData: profileData)
-                            dismiss()
+                            await editProfileViewModel.saveUserProfile(uid: currentUserData.uId)
+                            DispatchQueue.main.async {
+                                currentUserData.user.nickname = editProfileViewModel.nickname
+                                currentUserData.user.id = editProfileViewModel.id
+                                currentUserData.user.bio = editProfileViewModel.bio
+                                currentUserData.user.profileImageURL = editProfileViewModel.profileURL
+                                currentUserData.user.backgroundImageURL = editProfileViewModel.backgroundURL
+                                editProfileViewModel.isLoading = false
+                                dismiss()
+                            }
+                            
                         }
                     }
-//                    .disabled(!profileData.isValid())
-                    
+                    .disabled(!editProfileViewModel.isValid())
+                
             }
             .padding(.horizontal, 20)
             .frame(height: 63)
             .padding(.top, currentUserData.topInset)
         }
-        .onAppear {
-            DispatchQueue.global().async {
-                guard let url = profileData.backgroundURL else {
-                    print("no url")
-                    return
-                }
-                guard let data = try? Data(contentsOf: url) else {
-                    print("no data")
-                    return
-                }
-                guard let uiImage = UIImage(data: data) else {
-                    print("no image")
-                    return
-                }
-                backgroundImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
-                DispatchQueue.main.async {
-                    backgroundImageBundle.image = Image(uiImage: uiImage)
-                    profileData.backgroundStatus = .normal
-                }
-            }                    
-            
-
-            
-            DispatchQueue.global().async {
-                guard let url = profileData.profileURL else {
-                    print("no url")
-                    return
-                }
-                guard let data = try? Data(contentsOf: url) else {
-                    print("no data")
-                    return
-                }
-                guard let uiImage = UIImage(data: data) else {
-                    print("no image")
-                    return
-                }
-                profileImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
-                DispatchQueue.main.async {
-                    profileImageBundle.image = Image(uiImage: uiImage)
-                    profileData.profileStatus = .normal
-                }
-            }
-            
-            
-        }
     }
     
     
-    private func saveUserProfile(profileData: EditProfileData) async {
-        let db = Firebase.db
-        let storage = Firebase.storage
-        let uid = currentUserData.uId
-        let query = db.collection("User").document(uid)
-        
-        var data: [String: Any] = [
-            "id": profileData.id,
-            "nickname": profileData.nickname,
-            "bio": profileData.bio
-        ]
-        
-        data.merge(await uploadBackground(uid: uid))
-        data.merge(await uploadProfile(uid: uid))
-
-        guard let result = try? await query.setData(data, merge: true) else {
-            print("update user profile error")
-            return
-        }
-        
-        currentUserData.user.nickname = profileData.nickname
-        currentUserData.user.id = profileData.id
-        currentUserData.user.bio = profileData.bio
-    }
     
-    private func uploadProfile(uid: String) async -> [String: Any] {
-        let storage = Firebase.storage
-        let db = Firebase.db
-        
-        if let profileData = profileImageBundle.data {
-            let metaData = Firebase.storageMetadata()
-            metaData.contentType = "image/jpeg"
-            let path: String = "ProfileImage/\(uid).jpg"
-            let reference = storage.reference(withPath: path)
-            guard let result = try? await reference.putDataAsync(profileData, metadata: metaData) else {
-                return [:]
-            }
-            guard let url = try? await reference.downloadURL() else {
-                return [:]
-            }
-            currentUserData.user.profileImageURL = url
-            return ["profileImageURL": url.absoluteString ]
-        }else {
-            guard let result = try? await storage.reference(withPath: "ProfileImage/\(uid).jpg").delete() else {
-                print("3")
-                return [:]
-            }
-            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["profileImageURL": Firebase.deleteFieldValue()]) else {
-                print("no delete")
-                return [:]
-            }
-            currentUserData.user.profileImageURL = nil
-            return [:]
-        }
-    }
-    
-    private func uploadBackground(uid: String) async -> [String: Any]{
-        let storage = Firebase.storage
-        let db = Firebase.db
-        
-        if let backgroundData = backgroundImageBundle.data {
-            let metaData = Firebase.storageMetadata()
-            metaData.contentType = "image/jpeg"
-            let path: String = "BackgroundImage/\(uid).jpg"
-            let reference = storage.reference(withPath: path)
-            
-            guard let result = try? await reference.putDataAsync(backgroundData, metadata: metaData) else {
-                print("1")
-                return [:]
-            }
-            guard let url = try? await reference.downloadURL() else {
-                print("2")
-                return [:]
-            }
-            currentUserData.user.backgroundImageURL = url
-            return ["backgroundImageURL": url.absoluteString]
-            
-        }else {
-            guard let result = try? await storage.reference(withPath: "BackgroundImage/\(uid).jpg").delete() else {
-                print("3")
-                return [:]
-            }
-            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["backgroundImageURL": Firebase.deleteFieldValue()]) else {
-                print("no delete")
-                return [:]
-            }
-            currentUserData.user.backgroundImageURL = nil
-            return [:]
-        }
-    }
 }
 
 private struct IdStackView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State private var isTappedInfo: Bool = false
     @State private var timer: Timer?
     let db = FBManager.shared.db
     
-    @Binding private var profileData: EditProfileData
-    init(profileData: Binding<EditProfileData>) {
-        self._profileData = profileData
-    }
     
     var body: some View {
         VStack(spacing: 12, content: {
@@ -373,11 +242,11 @@ private struct IdStackView: View {
                         //info아이콘 너비 + 아이콘과 해당 뷰 사이 너비
                         //overlay이기 때문에 아이콘 시작 위치에서 나타남.따라서 아이콘 너비만큼 옆으로 조금 밀어줘야함
                     }
-                    
-                Spacer()
-
                 
-                Text("\(profileData.id.count) ")
+                Spacer()
+                
+                
+                Text("\(editProfileViewModel.id.count) ")
                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                     .foregroundStyle(ColorSet.mainPurpleColor)
                 
@@ -388,24 +257,24 @@ private struct IdStackView: View {
             .frame(height: 17)
             
             
-            AuthTextFieldSmall(text: $profileData.id, prompt: "ID를 입력해 주세요!")
-                .onChange(of: profileData.id, perform: { value in
+            AuthTextFieldSmall(text: $editProfileViewModel.id, prompt: "ID를 입력해 주세요!")
+                .onChange(of: editProfileViewModel.id, perform: { value in
                     timer?.invalidate()
                     withAnimation {
-                        profileData.idStatus = .loading
+                        editProfileViewModel.idStatus = .loading
                     }
                     
                     if value.count > 15 {
-                        profileData.id = String(value.prefix(15))
+                        editProfileViewModel.id = String(value.prefix(15))
                     }
                     
                     if value == currentUserData.user.id {
                         withAnimation {
-                            profileData.idStatus = .normal
+                            editProfileViewModel.idStatus = .normal
                         }
                     }else {
                         timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: false, block: { timer in
-                            checkID(id: profileData.id.lowercased())
+                            checkID(id: editProfileViewModel.id.lowercased())
                         })
                     }
                 })
@@ -415,13 +284,13 @@ private struct IdStackView: View {
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
                     .foregroundStyle(ColorSet.D0Gray)
                     .frame(maxWidth: .infinity, alignment: .leading)
-
-                if !(profileData.idStatus == .normal || profileData.idStatus == .loading || profileData.id.isEmpty ) {
-                    Text(profileData.idStatus == .valid ? "•  사용할 수 있는 ID 입니다."
-                         : profileData.idStatus == .condition ? "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
+                
+                if !(editProfileViewModel.idStatus == .normal || editProfileViewModel.idStatus == .loading || editProfileViewModel.id.isEmpty ) {
+                    Text(editProfileViewModel.idStatus == .valid ? "•  사용할 수 있는 ID 입니다."
+                         : editProfileViewModel.idStatus == .condition ? "•  영어, 숫자, _(언더바)만 사용할 수 있습니다."
                          : "•  이미 사용 중인 ID입니다.")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundStyle(profileData.idStatus == .valid ? ColorSet.validGreen
+                    .foregroundStyle(editProfileViewModel.idStatus == .valid ? ColorSet.validGreen
                                      : ColorSet.errorRed)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -438,12 +307,12 @@ private struct IdStackView: View {
             Task {
                 let result = await checkDuplication(id: id)
                 withAnimation {
-                    profileData.idStatus = result
+                    editProfileViewModel.idStatus = result
                 }
             }
         }else {
             withAnimation {
-                profileData.idStatus = .condition
+                editProfileViewModel.idStatus = .condition
             }
         }
     }
@@ -459,13 +328,10 @@ private struct IdStackView: View {
 
 private struct NicknameStackView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State var timer: Timer?
     let db = FBManager.shared.db
     
-    @Binding private var profileData: EditProfileData
-    init(profileData: Binding<EditProfileData>) {
-        self._profileData = profileData
-    }
     
     var body: some View {
         VStack(spacing: 12, content: {
@@ -477,7 +343,7 @@ private struct NicknameStackView: View {
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                     .foregroundStyle(ColorSet.mainPurpleColor)
                 Spacer()
-                Text("\(profileData.nickname.count) ")
+                Text("\(editProfileViewModel.nickname.count) ")
                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                     .foregroundStyle(ColorSet.mainPurpleColor)
                 
@@ -486,36 +352,36 @@ private struct NicknameStackView: View {
                     .foregroundStyle(ColorSet.subGray)
             })
             .frame(height: 17)
-
             
-            AuthTextFieldSmall(text: $profileData.nickname, prompt: "닉네임을 입력해 주세요!")
-                .onChange(of: profileData.nickname, perform: { value in
+            
+            AuthTextFieldSmall(text: $editProfileViewModel.nickname, prompt: "닉네임을 입력해 주세요!")
+                .onChange(of: editProfileViewModel.nickname, perform: { value in
                     timer?.invalidate()
                     withAnimation {
-                        profileData.nicknameStatus = .loading
+                        editProfileViewModel.nicknameStatus = .loading
                     }
                     
-                    if profileData.nickname.count > 7 {
-                        profileData.nickname =  String(value.prefix(7))
+                    if editProfileViewModel.nickname.count > 7 {
+                        editProfileViewModel.nickname =  String(value.prefix(7))
                     }
                     
                     if value == currentUserData.user.nickname {
                         withAnimation {
-                            profileData.nicknameStatus = .normal
+                            editProfileViewModel.nicknameStatus = .normal
                         }
                     }else{
                         timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: false, block: { timer in
-                            checkNickname(nickname: profileData.nickname.lowercased())
+                            checkNickname(nickname: editProfileViewModel.nickname.lowercased())
                         })
                     }
                 })
             
-            if !(profileData.nicknameStatus == .normal || profileData.nicknameStatus == .loading || profileData.nickname.isEmpty) {
-                Text(profileData.nicknameStatus == .valid ? "•  사용할 수 있는 닉네임 입니다."
-                     : profileData.nicknameStatus == .condition ? "•  3자 이상 입력해주세요."
+            if !(editProfileViewModel.nicknameStatus == .normal || editProfileViewModel.nicknameStatus == .loading || editProfileViewModel.nickname.isEmpty) {
+                Text(editProfileViewModel.nicknameStatus == .valid ? "•  사용할 수 있는 닉네임 입니다."
+                     : editProfileViewModel.nicknameStatus == .condition ? "•  3~7자 사이로 영어,한글만 사용할 수 있습니다."
                      : "•  이미 사용 중인 닉네임입니다.")
                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                .foregroundStyle(profileData.nicknameStatus == .valid ? ColorSet.validGreen : ColorSet.errorRed)
+                .foregroundStyle(editProfileViewModel.nicknameStatus == .valid ? ColorSet.validGreen : ColorSet.errorRed)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 10)
                 .padding(.top, 2)
@@ -523,7 +389,7 @@ private struct NicknameStackView: View {
         })
         .padding(.horizontal, 20)
         .padding(.top, 70)
-
+        
     }
     
     private func checkNickname(nickname: String) {
@@ -533,13 +399,13 @@ private struct NicknameStackView: View {
             Task{
                 let result = await checkDuplication(nickname: nickname)
                 withAnimation {
-                    profileData.nicknameStatus = result
+                    editProfileViewModel.nicknameStatus = result
                 }
             }
         }else {
             DispatchQueue.main.async {
                 withAnimation {
-                    profileData.nicknameStatus = .condition
+                    editProfileViewModel.nicknameStatus = .condition
                 }
             }
         }
@@ -560,10 +426,7 @@ private struct NicknameStackView: View {
 
 struct BioStackView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    @Binding private var profileData: EditProfileData
-    init(profileData: Binding<EditProfileData>) {
-        self._profileData = profileData
-    }
+    @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     
     var body: some View {
         VStack(spacing: 12, content: {
@@ -572,7 +435,7 @@ struct BioStackView: View {
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                     .foregroundStyle(Color.white)
                 Spacer()
-                Text("\(profileData.bio.count) ")
+                Text("\(editProfileViewModel.bio.count) ")
                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
                     .foregroundStyle(ColorSet.mainPurpleColor)
                 
@@ -582,14 +445,14 @@ struct BioStackView: View {
             })
             .frame(height: 17)
             
-            AuthTextFieldSmall(text: $profileData.bio, prompt: "회원님에 대해 소개해주세요!")
-                .onChange(of: profileData.bio, perform: { value in
-                    if profileData.bio.count > 50 {
-                        profileData.bio = String(value.prefix(50))
+            AuthTextFieldSmall(text: $editProfileViewModel.bio, prompt: "회원님에 대해 소개해주세요!")
+                .onChange(of: editProfileViewModel.bio, perform: { value in
+                    if editProfileViewModel.bio.count > 50 {
+                        editProfileViewModel.bio = String(value.prefix(50))
                     }
-                    profileData.bioStatus = (value == currentUserData.user.bio) ? .normal : .valid
+                    editProfileViewModel.bioStatus = (value == currentUserData.user.bio) ? .normal : .valid
                 })
-
+            
         })
         .padding(.horizontal, 20)
     }
@@ -632,21 +495,69 @@ enum ErrorStatus {
     case condition
 }
 
-struct EditProfileData {
-    var id: String = ""
-    var idStatus: ErrorStatus = .normal
+class EditProfileViewModel: ObservableObject {
+    @Published var isLoading: Bool = false
+    @Published var id: String = ""
+    @Published var idStatus: ErrorStatus = .normal
+    @Published var nickname: String = ""
+    @Published var nicknameStatus: ErrorStatus = .normal
+    @Published var bio: String = ""
+    @Published var bioStatus: ErrorStatus = .normal
+    @Published var backgroundStatus: ErrorStatus = .normal
+    @Published var profileStatus: ErrorStatus = .normal
+    @Published var backgroundImageBundle: ImageBundle = ImageBundle()
+    @Published var profileImageBundle: ImageBundle = ImageBundle()
+    @Published var backgroundURL: URL? {
+        didSet {
+            Task {
+                guard let url = self.backgroundURL else {
+                    print("no url")
+                    return
+                }
+                guard let data = try? Data(contentsOf: url) else {
+                    print("no data")
+                    return
+                }
+                guard let uiImage = UIImage(data: data) else {
+                    print("no image")
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.backgroundImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
+                    self.backgroundImageBundle.image = Image(uiImage: uiImage)
+                    self.backgroundStatus = .normal
+                }
+   
+            }
+        }
+    }
+    @Published var profileURL: URL? {
+        didSet {
+            Task {
+                guard let url = self.profileURL else {
+                    print("no url")
+                    return
+                }
+                guard let data = try? Data(contentsOf: url) else {
+                    print("no data")
+                    return
+                }
+                guard let uiImage = UIImage(data: data) else {
+                    print("no image")
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.profileImageBundle.data = uiImage.jpegData(compressionQuality: 0.1)
+                    self.profileImageBundle.image = Image(uiImage: uiImage)
+                    self.profileStatus = .normal
+                }
     
-    var nickname: String = ""
-    var nicknameStatus: ErrorStatus = .normal
+            }
+        }
+    }
     
-    var bio: String = ""
-    var bioStatus: ErrorStatus = .normal
-    
-    var backgroundURL: URL?
-    var backgroundStatus: ErrorStatus = .normal
-    
-    var profileURL: URL?
-    var profileStatus: ErrorStatus = .normal
+    let db = FBManager.shared.db
+    let storage = FBManager.shared.storage
     
     func isValid() -> Bool {
         if idStatus == .normal && nicknameStatus == .normal && bioStatus == .normal && backgroundStatus == .normal && profileStatus == .normal {
@@ -663,5 +574,79 @@ struct EditProfileData {
         }
         return false
     }
+    
+    func saveUserProfile(uid: String) async {
+        let query = db.collection("User").document(uid)
+        
+        var data: [String: Any] = [
+            "id": self.id,
+            "nickname": self.nickname,
+            "bio": self.bio
+        ]
+        
+        let background = URL(string: await uploadBackground(uid: uid))
+        let profile = URL(string: await uploadProfile(uid: uid))
+        
+        DispatchQueue.main.async {
+            self.backgroundURL = background
+            self.profileURL = profile
+        }
+        
+        data.merge(["backgroundImageURL": background?.absoluteString ?? ""])
+        data.merge(["profileImageURL" : profile?.absoluteString ?? ""])
+        
+        guard let result = try? await query.updateData(data) else {return}
 
+    }
+    
+    private func uploadProfile(uid: String) async -> String {
+        if let profileData = profileImageBundle.data {
+            let metaData = FBManager.shared.storageMetadata()
+            metaData.contentType = "image/jpeg"
+            let path: String = "ProfileImage/\(uid).jpg"
+            let reference = storage.reference(withPath: path)
+            guard let result = try? await reference.putDataAsync(profileData, metadata: metaData) else {
+                return ""
+            }
+            guard let url = try? await reference.downloadURL() else {
+                return ""
+            }
+            return url.absoluteString
+        }else {
+            guard let result = try? await storage.reference(withPath: "ProfileImage/\(uid).jpg").delete() else {
+                return ""
+            }
+            guard let updateResult = try? await db.collection("User").document(uid).updateData(["profileImageURL": FBManager.Fieldvalue.delete()]) else {
+                return ""
+            }
+            return ""
+        }
+    }
+    
+    private func uploadBackground(uid: String) async -> String {
+        if let backgroundData = backgroundImageBundle.data {
+            let metaData = FBManager.shared.storageMetadata()
+            metaData.contentType = "image/jpeg"
+            let path: String = "BackgroundImage/\(uid).jpg"
+            let reference = storage.reference(withPath: path)
+            
+            guard let result = try? await reference.putDataAsync(backgroundData, metadata: metaData) else {
+                return ""
+            }
+            guard let url = try? await reference.downloadURL() else {
+                return ""
+            }
+            return url.absoluteString
+        }else {
+            guard let result = try? await storage.reference(withPath: "BackgroundImage/\(uid).jpg").delete() else {
+                return ""
+            }
+            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["backgroundImageURL": FBManager.shared.deleteFieldValue()]) else {
+                return ""
+            }
+            return ""
+        }
+    }
+    
 }
+

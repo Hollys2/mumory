@@ -13,9 +13,10 @@ import Shared
 struct NotifyView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @State var notifications: [Notification] = []
+    @StateObject var notificationViewModel: NotificationViewModel = NotificationViewModel()
     private let notificationQueue = DispatchQueue(label: "notificationQueue")
-
+    //observableobject를 만들면 너무 불필요한 게 되는데....음음음음음음
+    //binding으로 2단계 아래로 넘기자니 오히려 더 지저분함
     let db = FBManager.shared.db
 
 
@@ -43,9 +44,9 @@ struct NotifyView: View {
                     .padding(.horizontal, 20)
                     
                     HStack{
-                        UnreadText(notifications: $notifications)
+                        UnreadText(notifications: $notificationViewModel.notifications)
                         Spacer()
-                        ReadAllButton(notifications: $notifications)
+                        ReadAllButton(notifications: $notificationViewModel.notifications)
                     }
                     .padding(.vertical, 20)
                     .padding(.horizontal, 20)
@@ -54,14 +55,17 @@ struct NotifyView: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
-                            ForEach(notifications.indices, id: \.self) { index in
-                                switch(notifications[index].type) {
+                            ForEach(notificationViewModel.notifications.indices, id: \.self) { index in
+                                switch(notificationViewModel.notifications[index].type) {
                                 case .like:
-                                    NotifyLikeItem(notification: $notifications[index])
+                                    NotifyLikeItem(notification: $notificationViewModel.notifications[index])
+                                        .environmentObject(notificationViewModel)
                                 case .comment, .reply:
-                                    NotifyCommentItem(notification: $notifications[index])
+                                    NotifyCommentItem(notification: $notificationViewModel.notifications[index])
+                                        .environmentObject(notificationViewModel)
                                 case .friendAccept, .friendRequest:
-                                    NotifyFriendItem(notification: $notifications[index])
+                                    NotifyFriendItem(notification: $notificationViewModel.notifications[index])
+                                        .environmentObject(notificationViewModel)
                                 case .none:
                                     EmptyView()
                                 }
@@ -99,9 +103,9 @@ struct NotifyView: View {
                 
                 DispatchQueue.main.async {
                     CATransaction.begin()
-                    self.notifications.removeAll()
+                    notificationViewModel.notifications.removeAll()
                     result.documents.forEach { snapshot in
-                        self.notifications.append(Notification(id: snapshot.documentID, data: snapshot.data()))
+                        notificationViewModel.notifications.append(Notification(id: snapshot.documentID, data: snapshot.data()))
                     }
                     CATransaction.setCompletionBlock {
                         print("알림받기 끝")
@@ -137,11 +141,7 @@ struct UnreadText: View {
                 Text("개의 알림을 읽지 않았습니다.")
                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                     .foregroundStyle(Color(white: 0.52))
-                                
-
             }
-        
- 
     }
 }
 
@@ -149,6 +149,7 @@ struct NotifyLikeItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
     init(notification: Binding<Notification>) {
         self._notification = notification
@@ -196,11 +197,9 @@ struct NotifyLikeItem: View {
             .padding(.leading, 15)
 
 
-            SharedAsset.menu.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
-                .padding(.leading, 10)
+            NotifyMenuBotton(notification: self.notification)
+                .environmentObject(notificationViewModel)
+
         })
         .padding(.horizontal, 15)
         .frame(height: 90)
@@ -225,9 +224,8 @@ struct NotifyLikeItem: View {
                 }
                 self.notification.isRead = true
             }
-            //해당 알림과 관련된 페이지로 넘어가기
-  
         }
+
     }
     
 
@@ -237,6 +235,7 @@ struct NotifyCommentItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
     init(notification: Binding<Notification>) {
         self._notification = notification
@@ -290,11 +289,8 @@ struct NotifyCommentItem: View {
             .padding(.leading, 15)
 
 
-            SharedAsset.menu.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
-                .padding(.leading, 10)
+            NotifyMenuBotton(notification: self.notification)
+                .environmentObject(notificationViewModel)
         })
         .padding(.horizontal, 15)
         .frame(height: 90)
@@ -326,6 +322,7 @@ struct NotifyCommentItem: View {
 struct NotifyFriendItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
     init(notification: Binding<Notification>) {
         self._notification = notification
@@ -367,11 +364,8 @@ struct NotifyFriendItem: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
 
-            SharedAsset.menu.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
-                .padding(.leading, 10)
+            NotifyMenuBotton(notification: self.notification)
+                .environmentObject(notificationViewModel)
         })
         .padding(.horizontal, 15)
         .frame(height: 90)
@@ -457,25 +451,6 @@ struct Notification {
     }
 }
 
-//struct NotifyItem: View {
-//    let notification: Notification
-//    init(notification: Notification) {
-//        self.notification = notification
-//    }
-//    
-//    var body: some View {
-//        switch(notification.type) {
-//        case .like:
-//            NotifyLikeItem(notification: self.notification)
-//        case .comment, .reply:
-//            NotifyCommentItem(notification: self.notification)
-//        case .friendAccept, .friendRequest:
-//            NotifyFriendItem(notification: self.notification)
-//        case .none:
-//            EmptyView()
-//        }
-//    }
-//}
 
 private func dateToString(date: Date) -> String{
     let formatter = DateFormatter()
@@ -531,4 +506,53 @@ struct ReadAllButton: View {
                 }
             }
     }
+}
+
+struct NotifyMenuBotton: View {
+    @EnvironmentObject var notificationViewModel: NotificationViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isPresentBottomSheet: Bool = false
+    @State var isPresentPopup: Bool = false
+    let notification: Notification
+    let db = FBManager.shared.db
+    init(notification: Notification) {
+        self.notification = notification
+    }
+    var body: some View {
+        SharedAsset.menu.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: 22, height: 22)
+            .padding(.leading, 10)
+            .onTapGesture {
+                UIView.setAnimationsEnabled(false)
+                isPresentBottomSheet = true
+            }
+            .fullScreenCover(isPresented: $isPresentBottomSheet) {
+                BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                    BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "알림 삭제", type: .warning)
+                        .onTapGesture {
+                            isPresentBottomSheet = false
+                            Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+                                UIView.setAnimationsEnabled(false)
+                                isPresentPopup = true
+                            }
+                        }
+                }
+                .background(TransparentBackground())
+            }
+            .fullScreenCover(isPresented: $isPresentPopup) {
+                TwoButtonPopupView(title: "해당 알림을 삭제하시겠습니까?", positiveButtonTitle: "확인") {
+                    let query = db.collection("User").document(currentUserData.uId).collection("Notification").document(notification.id)
+                    query.delete()
+                    notificationViewModel.notifications.removeAll(where: {$0.id == self.notification.id})
+                }
+                .background(TransparentBackground())
+            }
+    }
+}
+
+
+class NotificationViewModel: ObservableObject {
+    @Published var notifications: [Notification] = []
 }

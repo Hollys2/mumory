@@ -11,18 +11,23 @@ import SwiftUI
 import Core
 
 
-public struct MumoriUser: Hashable{
+public struct MumoriUser: Hashable {
     public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
         return lhs.uId == rhs.uId
     }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(uId)
+    }
     
     public var uId: String = ""
-    public var nickname: String = ""
+    public var nickname: String = "탈퇴계정"
     public var id: String = ""
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
     public var bio: String = ""
-    public var friends: [String] = []
+    public var defaultProfileImage: Image = randomProfiles[0]
+    
+    public var friends: [String] = []//deprecated
     
     public init() {}
     
@@ -34,42 +39,25 @@ public struct MumoriUser: Hashable{
         if uId.isEmpty {
             nickname = "(알수없음)"
             return
+        }else {
+            let query = db.collection("User").whereField("uid", isEqualTo: uId)
+            guard let snapshot = try? await query.getDocuments() else {return}
+            guard let userDoc = snapshot.documents.first else {
+                nickname = "탈퇴계정"
+                return
+            }
+            let data = userDoc.data()
+            
+            self.nickname = data["nickname"] as? String ?? ""
+            self.id = data["id"] as? String ?? ""
+            self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")
+            self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
+            self.bio = data["bio"] as? String ?? ""
+            let profileIndex: Int = data["profileIndex"] as? Int ?? 0
+            self.defaultProfileImage = randomProfiles[profileIndex]
         }
-        
-        guard let document = try? await db.collection("User").document(uId).getDocument() else {
-            return
-        }
-        
-        guard let data = document.data() else {
-            return
-        }
-        
-        self.nickname = data["nickname"] as? String ?? ""
-        self.id = data["id"] as? String ?? ""
-        self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")
-        self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
-        self.bio = data["bio"] as? String ?? ""
     }
-    
-    public func fetchFriend(uId: String) async -> MumoriUser {
-        let query = FBManager.shared.db.collection("User").document(self.uId)
-        guard let data = try? await query.getDocument().data() else {return MumoriUser()}
-        guard let friends = data["friends"] as? [String] else {return MumoriUser()}
-        
-        var newUser = await MumoriUser(uId: uId)
-        newUser.friends = friends
-        return newUser
-    }
+
 }
 
-extension MumoriUser {
-    
-//    static func fromDocumentDataToMumory(_ documentData: [String: Any], uId: String) async -> MumoriUser? {
-//        
-//        guard let id = documentData["id"] as? String,
-//              let nickname = documentData["nickname"] as? String,
-//              let profileImageURL = documentData["profileImageURL"] as? URL else { return nil }
-//        
-//        return await self.init(uid: uId)
-//    }
-}
+public let randomProfiles: [Image] = [SharedAsset.profileRed.swiftUIImage, SharedAsset.profilePurple.swiftUIImage, SharedAsset.profileYellow.swiftUIImage, SharedAsset.profileOrange.swiftUIImage]

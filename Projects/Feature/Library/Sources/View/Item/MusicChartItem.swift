@@ -26,7 +26,7 @@ struct MusicChartItem: View {
                         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 5, height: 5), style: .circular))
                 }, placeholder: {
                     RoundedRectangle(cornerRadius: 5, style: .circular)
-                        .foregroundStyle(.gray)
+                        .fill(ColorSet.skeleton)
                         .frame(width: 40, height: 40)
 
                 })
@@ -68,19 +68,55 @@ struct MusicChartItem: View {
                         .background(TransparentBackground())
                     })
             }
-            .padding(.vertical, 15)
-            
+            .frame(height: 70)
+
             Divider05()
                 .opacity(rank%4 == 0 ? 0 : 1)
         }
         .padding(.leading, 20)
-       
-        }
 
+        }
 }
 
+struct MusicChartSkeletonView: View {
+    @State var startAnimation: Bool = false
+    var lineVisible: Bool = true
+    init(lineVisible: Bool) {
+        self.lineVisible = lineVisible
+    }
+    init(){}
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 16) {
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 40, height: 40)
+                
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 19, height: 20)
+                
+                VStack(alignment: .leading, spacing: 7) {
+                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                        .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                        .frame(width: 91, height: 15)
+                    
+                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                        .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                        .frame(width: 71, height: 11)
+                }
+                
+                Spacer()
+            }
+            .frame(width: getUIScreenBounds().width * 0.9, height: 70)
 
-
-//#Preview {
-//    BottomSheet()
-//}
+            Divider05()
+                .opacity(lineVisible ? 1 : 0)
+        }
+        .padding(.leading, 20)
+        .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+}

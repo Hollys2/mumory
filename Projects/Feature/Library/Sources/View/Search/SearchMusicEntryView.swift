@@ -17,6 +17,14 @@ struct SearchMusicEntryView: View {
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
     @State var popularSearchTerm: [String] = []
     @Binding var term: String
+    var shazamViewType: ShazamViewType = .normal
+    init(term: Binding<String>){
+        self._term = term
+    }
+    init(term: Binding<String>, shazamViewType: ShazamViewType) {
+        self._term = term
+        self.shazamViewType = shazamViewType
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -32,7 +40,7 @@ struct SearchMusicEntryView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundColor(.white)
                             .onTapGesture {
-                                appCoordinator.rootPath.append(LibraryPage.shazam)
+                                appCoordinator.rootPath.append(LibraryPage.shazam(type: self.shazamViewType))
                             }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

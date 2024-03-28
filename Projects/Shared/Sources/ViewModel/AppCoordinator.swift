@@ -62,8 +62,6 @@ public class AppCoordinator: ObservableObject {
     @Published public var isKeyboardButtonShown: Bool = false
     
     @Published public var selectedDate = Date()
-    @Published public var isHiddenTabBar: Bool = false
-    @Published public var isHiddenTabBarWithoutAnimation: Bool = false
     
     @Published public var bottomAnimationViewStatus: BottomAnimationPage = .remove
     

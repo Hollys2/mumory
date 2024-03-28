@@ -153,9 +153,9 @@ public struct SplashView: View {
                     case .playlist(playlist: let playlist):
                         PlaylistView(playlist: playlist)
                             .navigationBarBackButtonHidden()
-
-                    case .shazam:
-                        ShazamView()
+                        
+                    case .shazam(type: let type):
+                        ShazamView(type: type)
                             .navigationBarBackButtonHidden()
 
                     case .addSong(originPlaylist: let originPlaylist):
