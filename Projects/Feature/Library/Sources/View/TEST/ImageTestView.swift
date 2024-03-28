@@ -50,7 +50,3 @@ struct ImageTestView: View {
         }
     }
 }
-
-#Preview {
-    ImageTestView()
-}

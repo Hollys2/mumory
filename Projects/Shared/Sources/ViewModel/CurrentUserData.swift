@@ -35,6 +35,8 @@ public class CurrentUserData: ObservableObject {
     @Published public var recievedNewFriends: Bool = false
     @Published public var existUnreadNotification: Bool = false
     
+    @Published public var reward: Reward = .attendance(0)
+    
     //삭제 예정...
     @Published public var favoriteGenres: [Int] = []
     @Published public var topInset: CGFloat = 0

@@ -62,7 +62,6 @@ public struct CreateMumoryBottomSheetView: View {
         let dragGesture = DragGesture()
             .updating($dragState) { value, state, transaction in
                 var newTranslation = value.translation
-                
                 if self.offsetY + newTranslation.height < 0 {
                     newTranslation.height = -self.offsetY
                 }
@@ -299,7 +298,6 @@ public struct CreateMumoryBottomSheetView: View {
                         .labelsHidden()
                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
-                        .preferredColorScheme(.dark)
                         .environment(\.locale, Locale.init(identifier: "ko_KR"))
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {

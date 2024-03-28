@@ -80,7 +80,6 @@ extension View {
                             .offset(x: 50, y: yOffset + 8)
                     }
                 }
-                    .preferredColorScheme(.dark)
                 , alignment: .topLeading
             )
     }

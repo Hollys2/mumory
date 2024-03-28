@@ -72,8 +72,6 @@ public struct PlayingMusicBarView: View {
                 playerViewModel.isPresentNowPlayingView = true
 //                appCoordinator.setBottomAnimationPage(page: .play)
             }
- 
-            
             
             //재생버튼. 재생 여부에 따라 다르게 보여야함
             Circle()
@@ -124,6 +122,9 @@ public struct PlayingMusicBarView: View {
             .padding(.trailing, 14)
             .onTapGesture {
                 appCoordinator.setBottomAnimationPage(page: .myPage)
+            }
+            .onAppear {
+                print("currentUserData.user: \(currentUserData.user)")
             }
      
                         

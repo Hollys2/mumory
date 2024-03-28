@@ -62,7 +62,6 @@ public struct MonthlyStatView: View {
             }
         }
         .background(SharedAsset.backgroundColor.swiftUIColor)
-        .preferredColorScheme(.dark)
         .sheet(isPresented: self.$isDatePickerShown, content: {
             MyMumoryDatePicker(selectedDate: self.$selectedDate)
                 .presentationDetents([.height(309)])

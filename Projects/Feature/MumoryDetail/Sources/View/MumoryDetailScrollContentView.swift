@@ -41,7 +41,7 @@ struct MumoryDetailScrollContentView: View {
     @State var user: MumoriUser = MumoriUser()
     @State var isMapViewShown: Bool = false
     @State var playButtonOpacity: CGFloat = 1
-    
+
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -204,7 +204,7 @@ struct MumoryDetailScrollContentView: View {
 
                         // MARK: Image
                     if !(self.mumory.imageURLs ?? []).isEmpty {
-                        MumoryDetailImageScrollView(mumoryAnnotation: self.mumory)
+                        MumoryDetailImageScrollUIViewRepresentable(mumory: self.mumory)
                             .frame(width: UIScreen.main.bounds.width - 40 + 10, height: UIScreen.main.bounds.width - 40)
                             .padding(.bottom, 50 - 11)
                     }
@@ -299,7 +299,7 @@ struct MumoryDetailScrollContentView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 50)
 //                                        .inset(by: 0.25)
-                                        .stroke(.white, lineWidth: 0.5)
+                                        .stroke(Color(red: 0.475, green: 0.475, blue: 0.475), lineWidth: 0.5)
                                 )
 
                             Text("더보기")
@@ -326,6 +326,7 @@ struct MumoryDetailScrollContentView: View {
             Task {
                 self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await MumoriUser(uId: self.mumory.uId)
+                print("MumoryDetailScrollContentView onAppear")
             }
         }
     }

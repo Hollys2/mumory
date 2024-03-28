@@ -20,14 +20,12 @@ public struct MumoriUser: Hashable {
     }
     
     public var uId: String = ""
-    public var nickname: String = "탈퇴계정"
+    public var nickname: String = ""
     public var id: String = ""
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
     public var bio: String = ""
     public var defaultProfileImage: Image = randomProfiles[0]
-    
-    public var friends: [String] = []//deprecated
     
     public init() {}
     
@@ -37,16 +35,18 @@ public struct MumoriUser: Hashable {
         if uId.isEmpty {
             nickname = "(알수없음)"
             return
-        }else {
+        } else {
             let query = db.collection("User").whereField("uid", isEqualTo: uId)
             guard let snapshot = try? await query.getDocuments() else {return}
             guard let userDoc = snapshot.documents.first else {
                 nickname = "탈퇴계정"
                 return
             }
-            let data = userDoc.data()
             
-            self.nickname = data["nickname"] as? String ?? ""
+            let data = userDoc.data()
+
+            self.uId = uId
+            self.nickname = data["nickname"] as? String ?? "기본닉네임"
             self.id = data["id"] as? String ?? ""
             self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")
             self.backgroundImageURL = URL(string: data["backgroundImageURL"] as? String ?? "")
@@ -55,6 +55,6 @@ public struct MumoriUser: Hashable {
             self.defaultProfileImage = randomProfiles[profileIndex]
         }
     }
-
 }
+
 public let randomProfiles: [Image] = [SharedAsset.profileRed.swiftUIImage, SharedAsset.profilePurple.swiftUIImage, SharedAsset.profileYellow.swiftUIImage, SharedAsset.profileOrange.swiftUIImage]

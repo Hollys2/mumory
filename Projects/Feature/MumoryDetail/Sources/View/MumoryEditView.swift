@@ -284,7 +284,6 @@ public struct MumoryEditView: View {
                     .labelsHidden()
                     .accentColor(SharedAsset.mainColor.swiftUIColor)
                     .background(SharedAsset.backgroundColor.swiftUIColor)
-                    .preferredColorScheme(.dark)
             }
             .popup(show: self.$isPublishPopUpShown, content: {
                 PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: {

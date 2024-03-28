@@ -269,7 +269,6 @@ public struct SplashView: View {
                     checkCurrentUserAndGetUserData()
                 })
         }
-        
     }
     
     private func checkCurrentUserAndGetUserData() {
@@ -303,6 +302,7 @@ public struct SplashView: View {
             
             currentUserData.uId = user.uid
             currentUserData.user = await MumoriUser(uId: user.uid)
+            print("checkCurrentUserAndGetUserData: \(currentUserData.user)")
             currentUserData.favoriteGenres = favoriteGenres
             
             withAnimation {

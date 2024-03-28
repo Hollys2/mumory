@@ -152,8 +152,8 @@ struct MumoryCard: View {
                 if !self.mumory.isPublic {
                     SharedAsset.lockMumoryPopup.swiftUIImage
                         .resizable()
-                        .frame(width: 25, height: 25)
-                        .offset(x: 15, y: 15)
+                        .frame(width: 34, height: 34)
+                        .offset(x: 16, y: 16)
                 }
             }
             

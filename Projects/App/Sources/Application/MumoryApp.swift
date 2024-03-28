@@ -18,13 +18,13 @@ struct MumoryApp: App {
     @StateObject var currentUserData: CurrentUserData = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
-    @State private var region: MKCoordinateRegion?
     
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
                 ZStack {
                     SplashView()
+                        .preferredColorScheme(.dark)
 //                    MumoryEditView(mumoryAnnotation: Mumory())
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
@@ -70,7 +70,6 @@ struct MumoryApp: App {
                 .environmentObject(keyboardResponder)
                 .environmentObject(currentUserData)
                 .environmentObject(playerViewModel)
-                
             }
         }
     }
