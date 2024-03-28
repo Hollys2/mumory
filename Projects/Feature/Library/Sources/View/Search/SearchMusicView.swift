@@ -19,7 +19,6 @@ struct SearchMusicView: View {
     @State var term: String
     @State var musicList: MusicItemCollection<Song> = []
     @State var artistList: MusicItemCollection<Artist> = []
-    @State private var region: MKCoordinateRegion?
 
     var body: some View {
         ZStack{
@@ -81,7 +80,7 @@ struct SearchMusicView: View {
             }
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()

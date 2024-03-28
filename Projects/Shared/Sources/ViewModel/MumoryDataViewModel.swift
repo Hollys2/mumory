@@ -271,6 +271,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let db = FirebaseManager.shared.db
            
         Task {
+            
             var mumoryCollectionRef = db.collection("Mumory")
                 .order(by: "date", descending: true)
                 .limit(to: 10)
@@ -398,7 +399,10 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func deleteMumory(_ mumory: Mumory, completion: @escaping () -> Void) {
-        
+        DispatchQueue.main.async {
+            self.isUpdating = true
+        }
+
         let db = FirebaseManager.shared.db
         
         let documentReference = db.collection("Mumory").document(mumory.id)

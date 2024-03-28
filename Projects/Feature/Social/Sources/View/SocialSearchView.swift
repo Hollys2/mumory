@@ -34,25 +34,31 @@ struct PageTabView<Content: View, Label: View>: View {
             HStack(spacing: 0) {
                 label
             }
-            .overlay(
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: getUIScreenBounds().width, height: 0.3)
-                    .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
-                
-                , alignment: .bottom
-            )
+//            .overlay(
+//                Rectangle()
+//                    .foregroundColor(.clear)
+//                    .frame(width: getUIScreenBounds().width, height: 0.3)
+//                    .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
+//
+//                , alignment: .bottom
+//            )
             .onPreferenceChange(TabWidthPreferenceKey.self) { preferences in
                 for (index, width) in preferences {
                     tabWidths[index] = width
                 }
             }
+            
             Rectangle()
                 .fill(Color(red: 0.64, green: 0.51, blue: 0.99))
                 .frame(width: tabWidths[selection], height: 3)
                 .frame(width: getUIScreenBounds().width / 2, height: 3)
-                .offset(x: underlineOffset, y: -3.3)
+                .offset(x: underlineOffset, y: 0)
                 .animation(.easeInOut(duration: 0.2), value: selection)
+            
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(width: getUIScreenBounds().width, height: 0.3)
+                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
             
             TabView(selection: $selection) {
                 content
@@ -63,10 +69,7 @@ struct PageTabView<Content: View, Label: View>: View {
                     underlineOffset = getUIScreenBounds().width / CGFloat(2) * CGFloat(selection)
                 }
             }
-            
         }
-        
-        
     }
 }
 

@@ -56,7 +56,6 @@ struct MumoryMapView: View {
                 }
             }
             .ignoresSafeArea()
-            .preferredColorScheme(.light)
             
             HStack {
                 

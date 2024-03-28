@@ -124,7 +124,6 @@ struct KnownFriendPageView: View {
                     }
                     .frame(width: getUIScreenBounds().width - 40, height: 129)
                     .cornerRadius(10)
-                    .preferredColorScheme(.light)
                     .onAppear {
                         
                     }
@@ -145,6 +144,7 @@ struct KnownFriendPageView: View {
         }
         .fullScreenCover(isPresented: $isMapViewShown) {
             MumoryMapView(isShown: self.$isMapViewShown, mumory: Mumory(), user: self.friend)
+                .preferredColorScheme(.light)
         }
     }
 }

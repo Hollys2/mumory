@@ -41,6 +41,14 @@ struct CommentView: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
+            } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic {
+                SharedAsset.profileMumoryDetail.swiftUIImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
+                    }
             } else {
                 AsyncImage(url: commentUser.profileImageURL) { phase in
                     switch phase {
@@ -78,7 +86,7 @@ struct CommentView: View {
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                 .frame(width: 4, alignment: .bottom)
-                        } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                        } else if mumory.uId != currentUserData.user.uId && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                             EmptyView()
                         } else {
                             Text("\(self.commentUser.nickname)")
@@ -207,6 +215,14 @@ struct Reply: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
+            } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic && !self.isMyComment {
+                SharedAsset.profileMumoryDetail.swiftUIImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
+                    }
             } else {
                 AsyncImage(url: commentUser.profileImageURL) { phase in
                     switch phase {
@@ -253,7 +269,7 @@ struct Reply: View {
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                             .frame(width: 4, alignment: .bottom)
-                    } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                    } else if mumory.uId != currentUserData.user.uId && !comment.isPublic && currentUserData.user.uId != comment.uId && !self.isMyComment && self.commentUser.nickname != "탈퇴계정" {
                         EmptyView()
                     } else {
                         Text("\(self.commentUser.nickname)")

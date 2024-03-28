@@ -233,6 +233,7 @@ public struct MumoryDetailView: View {
             
             ZStack {
                 Color.clear
+                    .ignoresSafeArea()
                 
                 LoadingAnimationView(isLoading: self.$mumoryDataViewModel.isUpdating)
             }
@@ -256,6 +257,8 @@ public struct MumoryDetailView: View {
                     print("뮤모리 삭제 성공")
                     appCoordinator.isDeleteMumoryPopUpViewShown = false
                     appCoordinator.rootPath.removeLast()
+                    
+                    mumoryDataViewModel.fetchEveryMumory2()
                 }
             })
         })

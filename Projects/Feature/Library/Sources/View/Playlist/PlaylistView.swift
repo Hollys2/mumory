@@ -24,7 +24,6 @@ struct PlaylistView: View {
     @State var selectedSongsForDelete: [Song] = []
     @State var isPresentModifyPlaylistView: Bool = false
     @State var selectedTab: Tab = .library
-    @State private var region: MKCoordinateRegion?
     @State private var isLoading: Bool = false
     
     @Binding var playlist: MusicPlaylist

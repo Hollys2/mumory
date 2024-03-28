@@ -17,7 +17,6 @@ import Shared
 
 public struct HomeView: View {
     
-    @State private var region: MKCoordinateRegion?
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
     
@@ -38,7 +37,7 @@ public struct HomeView: View {
             VStack(spacing: 0) {
                 switch appCoordinator.selectedTab {
                 case .home:
-                    mapView
+                    HomeMapView()
                 case .social:
                     SocialView(isShown: self.$isSocialSearchViewShown)
                 case .library:
@@ -51,7 +50,7 @@ public struct HomeView: View {
             }
             .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
             
             MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
                 .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
@@ -138,66 +137,6 @@ public struct HomeView: View {
 //        }
     }
     
-    var mapView: some View {
-        
-        ZStack {
-            
-            HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
-                .preferredColorScheme(.light)
-                .onAppear {
-                    print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
-                }
-                .onDisappear {
-                    print("HomeMapViewRepresentable onDisappear")
-                    //                    self.listener?.remove()
-                }
-            
-            VStack(spacing: 0) {
-                
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 95)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.9), location: 0.08),
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 0),
-                            endPoint: UnitPoint(x: 0.5, y: 1)
-                        )
-                    )
-                
-                Spacer()
-                
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 159.99997)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 1),
-                            endPoint: UnitPoint(x: 0.5, y: 0)
-                        )
-                    )
-                    .offset(y: 89)
-            }
-            .allowsHitTesting(false)
-            
-            VStack {
-                PlayingMusicBarView()
-                    .offset(y: appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 12 : 16))
-                
-                Spacer()
-            }
-        }
-        .onAppear {
-            playerViewModel.isShownMiniPlayer = false
-        }
-    }
     
     @ViewBuilder
     private func MyPageBottomAnimationView() -> some View {

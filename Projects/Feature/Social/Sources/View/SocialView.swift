@@ -654,7 +654,10 @@ public struct SocialView: View {
                 ZStack {
                     Color.black
                         .opacity(0.1)
+                        .ignoresSafeArea()
+                    
                     LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
+                        .offset(y: 89)
                 }
             }
         }
