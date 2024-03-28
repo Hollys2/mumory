@@ -511,9 +511,130 @@ struct BottomSheetViewModifier: ViewModifier {
     }
 }
 
+struct RewardPopUpModifier: ViewModifier {
+    
+    @Binding var isShown: Bool
+    
+    @State private var translation: CGSize = .zero
+    
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                if value.translation.height > 0 {
+                    DispatchQueue.main.async {
+                        self.translation.height = value.translation.height
+                    }
+                }
+            }
+            .onEnded { value in
+                if value.translation.height > 50 {
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                        self.isShown = false
+                    }
+                }
+                DispatchQueue.main.async {
+                    self.translation.height = 0
+                }
+            }
+    }
+    
+    func body(content: Content) -> some View {
+        
+        ZStack(alignment: .bottom) {
+            
+            Color.clear
+            
+            content
+                
+            
+            if isShown {
+                Color.black.opacity(0.5)
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.2)) {
+                            self.isShown = false
+                        }
+                    }
+                
+                RewardPopUpView(isShown: self.$isShown)
+                    .offset(y: self.translation.height)
+                    .gesture(dragGesture)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+                    .padding(.bottom, 27)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
 extension View {
     
     public func bottomSheet(isShown: Binding<Bool>, mumoryBottomSheet: MumoryBottomSheet) -> some View {
         self.modifier(BottomSheetViewModifier(isShown: isShown, mumoryBottomSheet: mumoryBottomSheet))
+    }
+    
+    public func rewardPopUp(isShown: Binding<Bool>) -> some View {
+        self.modifier(RewardPopUpModifier(isShown: isShown))
+    }
+}
+
+public struct RewardPopUpView: View {
+    
+    @Binding var isShown: Bool
+    
+    public var body: some View {
+        
+        ZStack {
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(width: getUIScreenBounds().width * 0.964, height: 349)
+                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+                .cornerRadius(15)
+            
+            VStack(spacing: 0) {
+                Spacer().frame(height: 35)
+                
+                SharedAsset._1AttendanceReward.swiftUIImage
+                    .resizable()
+                    .frame(width: getUIScreenBounds().width * 0.287, height: getUIScreenBounds().width * 0.287)
+                
+                Spacer().frame(height: 21)
+                
+                Text("뮤모리 5개 기록")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                
+                Spacer().frame(height: 16)
+                
+                Text("지금까지 뮤모리를 5개 기록하셨네요. 나만의 뮤모리를 더 많이 남겨보세요!")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
+                    .frame(width: 296, alignment: .top)
+                
+                Spacer()
+                
+                Rectangle()
+                    .foregroundColor(.clear)
+                    .frame(width: getUIScreenBounds().width * 0.861, height: 58)
+                    .background(Color(red: 0.64, green: 0.51, blue: 0.99))
+                    .cornerRadius(35)
+                    .overlay(
+                        Text("확인")
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.black)
+                    )
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.2)) {
+                            self.isShown = false
+                        }
+                    }
+                
+                Spacer().frame(height: 30)
+            }
+        }
+        .frame(height: 349)
     }
 }

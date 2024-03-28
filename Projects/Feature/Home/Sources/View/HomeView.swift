@@ -29,8 +29,6 @@ public struct HomeView: View {
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var withdrawViewModel: WithdrawViewModel
     
-
-    
     public init(){}
     
     public var body: some View {
@@ -51,11 +49,12 @@ public struct HomeView: View {
                 
                 MumoryTabView(selectedTab: $appCoordinator.selectedTab)
             }
+            .rewardPopUp(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
             
             MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.userDocumentID == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
             
             if self.appCoordinator.isMumoryPopUpShown {
                 ZStack {
@@ -102,7 +101,7 @@ public struct HomeView: View {
                 let authorizationStatus = await MusicAuthorization.request()
                 if authorizationStatus == .authorized {
                     print("음악 권한 받음")
-                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(userDocumentID: self.currentUserData.uId)
+                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
                 } else {
                     print("음악 권한 거절")
                     DispatchQueue.main.async {
@@ -141,12 +140,10 @@ public struct HomeView: View {
         ZStack {
             
             HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown, region: $region)
+                .preferredColorScheme(.light)
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
                 }
-                .onChange(of: self.currentUserData.user.uId, perform: { newValue in
-                    print("HomeMapViewRepresentable onAppear2: \(newValue)")
-                })
                 .onDisappear {
                     print("HomeMapViewRepresentable onDisappear")
                     //                    self.listener?.remove()

@@ -144,7 +144,6 @@ struct RewardContentView: View {
                                         VStack(spacing: 13) {
                                             
                                             ZStack {
-                                                
                                                 switch i {
                                                 case 0:
                                                     attendanceRewards[index]
@@ -247,12 +246,10 @@ struct RewardContentView: View {
                                                 }
                                             }
                                             
-                                            
                                             Text("첫 출석")
                                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                                 .multilineTextAlignment(.center)
                                                 .foregroundColor(.white)
-                                            
                                         }
                                     }
                                 }

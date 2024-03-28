@@ -13,7 +13,7 @@ public struct Comment: Codable, Hashable {
     
     public var id: String
     
-    public let userDocumentID: String
+    public let uId: String
     public let nickname: String
     public let parentId: String
     public let mumoryId: String
@@ -24,7 +24,7 @@ public struct Comment: Codable, Hashable {
     
     public init(id: String, uId: String, nickname: String, parentId: String, mumoryId: String, date: Date, content: String, isPublic: Bool) {
         self.id = id
-        self.userDocumentID = uId
+        self.uId = uId
         self.nickname = nickname
         self.parentId = parentId
         self.mumoryId = mumoryId
@@ -34,7 +34,7 @@ public struct Comment: Codable, Hashable {
     }
     
     public init?(id: String, data: [String: Any]) {
-        guard let userDocumentID = data["uId"] as? String,
+        guard let uId = data["uId"] as? String,
               let nickname = data["nickname"] as? String,
               let parentId = data["parentId"] as? String,
               let mumoryId = data["mumoryId"] as? String,
@@ -47,7 +47,7 @@ public struct Comment: Codable, Hashable {
         }
 
         self.id = id
-        self.userDocumentID = userDocumentID
+        self.uId = uId
         self.nickname = nickname
         self.parentId = parentId
         self.mumoryId = mumoryId
@@ -58,7 +58,7 @@ public struct Comment: Codable, Hashable {
     
     public init() {
         self.id = ""
-        self.userDocumentID = ""
+        self.uId = ""
         self.nickname = ""
         self.parentId = ""
         self.mumoryId = ""
@@ -71,7 +71,7 @@ public struct Comment: Codable, Hashable {
 extension Comment {
     public func toDictionary() -> [String: Any] {
         return [
-            "uId": userDocumentID,
+            "uId": uId,
             "nickname": nickname,
             "parentId": parentId,
             "mumoryId": mumoryId,
@@ -82,7 +82,7 @@ extension Comment {
     }
     
     static func fromDocumentData(_ documentData: [String: Any], commentDocumentID: String, comments: [Comment]) -> Comment? {
-        guard let userDocumentID = documentData["uId"] as? String,
+        guard let uId = documentData["uId"] as? String,
               let nickname = documentData["nickname"] as? String,
               let parentId = documentData["parentId"] as? String,
               let mumoryId = documentData["mumoryId"] as? String,
@@ -92,6 +92,6 @@ extension Comment {
         else {
             return nil
         }
-        return Comment(id: commentDocumentID, uId: userDocumentID, nickname: nickname, parentId: parentId, mumoryId: mumoryId, date: date.dateValue(), content: content, isPublic: isPublic)
+        return Comment(id: commentDocumentID, uId: uId, nickname: nickname, parentId: parentId, mumoryId: mumoryId, date: date.dateValue(), content: content, isPublic: isPublic)
     }
 }

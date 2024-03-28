@@ -329,7 +329,7 @@ struct ContentView: View {
             HStack(spacing: 10) {
                 let sortedLocationsArray = filteredLocations.sorted(by: { $0.key < $1.key })
 
-                ForEach(Array(sortedLocationsArray.enumerated()), id: \.element.key) { index, element in
+                ForEach(Array(sortedLocationsArray.prefix(3).enumerated()), id: \.element.key) { index, element in
                     let region = element.key
                     let mumories = element.value
                     

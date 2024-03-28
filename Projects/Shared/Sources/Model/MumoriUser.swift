@@ -27,6 +27,7 @@ public struct MumoriUser: Hashable {
         let db = FBManager.shared.db
         guard let document = try? await db.collection("User").document(uId).getDocument() else { return }
         guard let data = document.data() else {
+            print("uId: \(uId)")
             self.nickname = "탈퇴계정"
             return
         }

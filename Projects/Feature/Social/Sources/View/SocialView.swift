@@ -51,13 +51,17 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
 
         scrollView.subviews.forEach { $0.removeFromSuperview() }
         scrollView.addSubview(hostingController.view)
-
         
         context.coordinator.scrollView = scrollView
+
+//        let refreshControl = UIRefreshControl()
+////        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+//        refreshControl.tintColor = .orange
+//        scrollView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
+//        scrollView.refreshControl = refreshControl
         
         return scrollView
     }
-    
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
 //        print("updateUIView: SocialScrollViewRepresentable")
@@ -94,21 +98,23 @@ extension SocialScrollViewRepresentable {
         var topBarOffsetY: CGFloat = 0.0
         var oldMumoryAnnotations: [Mumory] = [] // immutatable if it is declared in SocialScrollViewRepresentable
         
+        var isRefreshing = false
+        
         init(parent: SocialScrollViewRepresentable) {
             self.parent = parent
             super.init()
         }
         
-        func handleRefreshControl() {
+        @objc func handleRefreshControl() {
             print("handleRefreshControl")
-            self.parent.mumoryDataViewModel.isUpdating = true
             parent.mumoryDataViewModel.fetchEveryMumory2()
         }
         
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
             let offsetY = scrollView.contentOffset.y
             
-            if offsetY < -100 {
+            if offsetY < -70 {
+                self.parent.mumoryDataViewModel.isUpdating = true
                 handleRefreshControl()
             }
         }
@@ -134,13 +140,15 @@ extension SocialScrollViewRepresentable {
             preOffsetY = offsetY
             
             if offsetY >= contentHeight - scrollViewHeight {
-                if !self.parent.mumoryDataViewModel.isUpdating {
-                    print("END")
-                    self.parent.mumoryDataViewModel.isUpdating = true
-                    self.parent.mumoryDataViewModel.fetchEveryMumory()
+                if !isRefreshing {
+                    isRefreshing = true
+                    parent.onRefresh()
                 }
+            } else {
+                isRefreshing = false
             }
         }
+
     }
 }
 
@@ -373,8 +381,7 @@ struct SocialItemView: View {
                             
                             // MARK: Tag
                             if let tags = self.mumory.tags {
-                                let uniqueTags = Array(Set(tags))
-                                ForEach(uniqueTags, id: \.self) { tag in
+                                ForEach(tags, id: \.self) { tag in
                                     
                                     HStack(alignment: .center, spacing: 5) {
                                     
@@ -455,6 +462,8 @@ struct SocialItemView: View {
                 VStack(spacing: 0) {
                     
                     Button(action: {
+                        self.generateHapticFeedback(style: .medium)
+                        
                         isButtonDisabled = true
 
                         Task {
@@ -571,7 +580,8 @@ public struct SocialView: View {
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
-                print("onRefresh!")
+                print("onRefresh: () -> Void")
+                mumoryDataViewModel.fetchEveryMumory()
             }) {
                 SocialScrollCotentView()
                     .environmentObject(self.appCoordinator)
