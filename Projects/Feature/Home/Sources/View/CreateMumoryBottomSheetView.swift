@@ -18,9 +18,6 @@ public struct CreateMumoryBottomSheetView: View {
     
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
-    @Binding private var newRegion: MKCoordinateRegion?
-    
-    @State private var bottomBarHeight: CGFloat = 55
     
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
@@ -51,10 +48,9 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>) {
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
-        self._newRegion = newRegion
     }
     
     public var body: some View {
@@ -364,7 +360,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
 
-                                        self.newRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                                        self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                         
                                         appCoordinator.selectedTab = .home
                                         
@@ -656,7 +652,7 @@ struct ContainerView: View {
                                                 .aspectRatio(contentMode: .fit)
                                                 .frame(width: 36, height: 36)
                                         default:
-                                            Color.purple
+                                            Color.clear
                                                 .frame(width: 36, height: 36)
                                         }
                                     }
