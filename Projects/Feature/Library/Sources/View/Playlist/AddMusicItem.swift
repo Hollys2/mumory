@@ -14,14 +14,16 @@ import Core
 struct AddMusicItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    
-    let songID: String
     @Binding var originPlaylist: MusicPlaylist
     @State var isSnackBarPresent: Bool = false
-    @State var song: Song?
+    let song: Song
+    init(song: Song, originPlaylist: Binding<MusicPlaylist>) {
+        self._originPlaylist = originPlaylist
+        self.song = song
+    }
     var body: some View {
         HStack(spacing: 0, content: {
-            AsyncImage(url: song?.artwork?.url(width: 300, height: 300)) { image in
+            AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
                 image
                     .resizable()
                     .frame(width: 40, height: 40)
@@ -35,14 +37,14 @@ struct AddMusicItem: View {
             
             
             VStack(content: {
-                Text(song?.title ?? "")
+                Text(song.title ?? "")
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
-                Text(song?.artistName ?? "")
+                Text(song.artistName ?? "")
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(LibraryColorSet.lightGrayTitle)
@@ -57,23 +59,19 @@ struct AddMusicItem: View {
                 .frame(width: 31, height: 31)
                 .onTapGesture {
                     hideKeyboard()
-                    addMusicToPlaylist()
+                    addMusicToPlaylist(song: song)
                     
                 }
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
         .frame(height: 70)
-        .onAppear(perform: {
-            Task{
-                await fetchSongInfo(songID: songID)
-            }
-        })
         
     }
-    private func addMusicToPlaylist() {
+    private func addMusicToPlaylist(song: Song) {
         let Firebase = FBManager.shared
         let db = Firebase.db
+        let songID = song.id.rawValue
         
         if !originPlaylist.songIDs.contains(songID) {
             //선택한 곡이 기존 플리에 없을 때 - 추가 진행
@@ -82,41 +80,22 @@ struct AddMusicItem: View {
             let songData: [String: Any] = [
                 "songIds" : FBManager.Fieldvalue.arrayUnion([songID])
             ]
+            let monthlyStatData: [String: Any] = [
+                "date": Date(),
+                "songId": songID,
+                "type": "playlist"
+            ]
             db.collection("User").document(currentUserData.uId).collection("Playlist").document(originPlaylist.id)
                 .updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songID])])
+            db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
-            snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songId: songID)
+            snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songIds: [songID])
             guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
             currentUserData.playlistArray[index].songIDs.append(songID)
-
-            guard let song = self.song else {return}
             currentUserData.playlistArray[index].songs.append(song)
-            
-            currentUserData.playlistArray.first(where: {$0.id == "favorite"})
-
-
         }else {
             //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함
             snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: originPlaylist.title)
-        }
-    }
-    
-    private func fetchSongInfo(songID: String) async {
-        let musicItemID = MusicItemID(rawValue: songID)
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        request.properties = [.genres, .artists]
-        do {
-            let response = try await request.response()
-            
-            guard let song = response.items.first else {
-                print("no song")
-                return
-            }
-            DispatchQueue.main.async {
-                self.song = song
-            }
-        } catch {
-            print("Error: \(error)")
         }
     }
 }

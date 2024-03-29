@@ -21,7 +21,7 @@ struct ArtistView: View {
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
-    
+    @State private var isLoading: Bool = false
     let artist: Artist
     init(artist: Artist) {
         self.artist = artist
@@ -94,7 +94,7 @@ struct ArtistView: View {
                                 }
                         }
                         
-                        if songs.isEmpty {
+                        if isLoading {
                             SongListSkeletonView()
                         }
                         
@@ -144,21 +144,11 @@ struct ArtistView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                Task {
-                    let albums = await requestArtistAlbum()
-                    for album in albums {
-                        guard let tracks = album.tracks else {continue}
-                        for track in tracks {
-                            Task {
-                                guard let song = await fetchSong(songID: track.id.rawValue) else {return}
-                                self.songs.append(song)
-                            }
-                        }
-                    }
-                }
+            Task {
+                self.isLoading = true
+                self.songs = await requestArtistSongs()
+                self.isLoading = false
             }
-   
         })
     }
     
@@ -169,75 +159,62 @@ struct ArtistView: View {
                 guard let albums = detailedArtist.albums else {return []}
                 var returnValue: [Album] = []
                 
-                for album in albums {
-                    print("aa")
-                    taskGroup.addTask {
-                        print("bb")
-                        return await fetchDetailAlbum(albumID: album.id.rawValue)
+                if albums.count > 1 {
+                    for album in albums {
+                        print("aa")
+                        taskGroup.addTask {
+                            print("bb")
+                            return await fetchDetailAlbum(albumID: album.id.rawValue)
+                        }
                     }
+                    
+                    for await value in taskGroup {
+                        print("cc")
+                        guard let album = value else {print("no album");return []}
+                        print("album title: \(album.title)")
+                        returnValue.append(album)
+                    }
+                }else {
+                    guard let album = albums.first else {return []}
+                    return [album]
                 }
-                
-                for await value in taskGroup {
-                    print("cc")
-                    guard let album = value else {print("no album");return []}
-                    print("album title: \(album.title)")
-                    returnValue.append(album)
-                }
-                
                 return returnValue
             }
+            print("5555")
             
             var totalSongs: [Song] = []
             
-            albums.forEach { album in
-                print("dd")
-                taskGroup.addTask {
-                    print("ee")
-                    guard let tracks = album.tracks else {return []}
-                    var songs: [Song] = []
-                    for track in tracks {
-                        guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
-                        print("song title: \(song.title)")
-                        songs.append(song)
+            if albums.count > 1 {
+                albums.forEach { album in
+                    taskGroup.addTask {
+                        guard let tracks = album.tracks else {return []}
+                        var songs: [Song] = []
+                        for track in tracks {
+                            guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
+                            songs.append(song)
+                        }
+                        return songs
                     }
-                    return songs
+                }
+                
+                for await songs in taskGroup {
+                    totalSongs.append(contentsOf: songs)
+                }
+                
+            }else {
+                guard let album = albums.first else {print("no album");return []}
+                guard let tracks = album.tracks else {print("no track");return []}
+                for track in tracks {
+                    guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
+                    totalSongs.append(song)
                 }
             }
             
-            for await songs in taskGroup {
-                print("ee")
-                totalSongs.append(contentsOf: songs)
-            }
+ 
             
             return totalSongs
         }
     }
-    
-    private func requestArtistAlbum() async -> [Album] {
-        return await withTaskGroup(of: Album?.self) { taskGroup -> [Album] in
-            guard let detailedArtist = await fetchDetailArtist(artistID: artist.id.rawValue) else {return []}
-            guard let albums = detailedArtist.albums else {return []}
-            var returnValue: [Album] = []
-            
-            for album in albums {
-                print("aa")
-                taskGroup.addTask {
-                    print("bb")
-                    return await fetchDetailAlbum(albumID: album.id.rawValue)
-                }
-            }
-            
-            for await value in taskGroup {
-                print("cc")
-                guard let album = value else {print("no album");return []}
-                print("album title: \(album.title)")
-                returnValue.append(album)
-            }
-            
-            return returnValue
-        }
-    }
-
 }
 
 

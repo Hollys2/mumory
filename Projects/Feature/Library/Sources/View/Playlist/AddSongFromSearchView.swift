@@ -49,7 +49,7 @@ struct AddSongFromSearchView: View {
                 SimpleScrollView(contentOffset: $scrollOffset) {
                     LazyVStack(spacing: 0, content: {
                         ForEach(songs, id: \.self) { song in
-                            AddMusicItem(songID: song.id.rawValue, originPlaylist: $originPlaylist)
+                            AddMusicItem(song: song, originPlaylist: $originPlaylist)
                         }
                     })
                     .frame(width: getUIScreenBounds().width)

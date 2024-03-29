@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import MusicKit
 
 public struct MusicGenre: Hashable{
     public let name: String
@@ -112,3 +112,5 @@ public struct MusicGenreHelper{
 
     ]
 }
+
+

@@ -30,7 +30,7 @@ public class PlayerViewModel: ObservableObject {
     @Published public var isShownMiniPlayer: Bool = false
     @Published var miniPlayerMoveToBottom: Bool = false
     @Published var isShownPreview: Bool = false
-    
+    @Published var userWantsInvisible: Bool = false
     @Published var playQueue = ApplicationMusicPlayer.shared.queue
     @Published var queue: [Song] = []
     @Published var currentSong: Song?
@@ -67,7 +67,7 @@ public class PlayerViewModel: ObservableObject {
         self.originQueue = [song]
         self.queueTitle = ""
         isPresentNowPlayingView = true
-        
+        isShownMiniPlayer = true
         Task {
             do {
                 try await player.play()
@@ -201,6 +201,12 @@ public class PlayerViewModel: ObservableObject {
         let query = db.collection("User").document(uid).collection("Playlist").document("favorite")
         query.updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songId])])
         self.favoriteSongIds.append(songId)
+        let monthlyStatData: [String: Any] = [
+            "date": Date(),
+            "songId": songId,
+            "type": "favorite"
+        ]
+        db.collection("User").document(uid).collection("MonthlyStat").addDocument(data: monthlyStatData)
     }
     
     public func removeFromFavorite(uid: String, songId: String) {
@@ -268,4 +274,15 @@ public class PlayerViewModel: ObservableObject {
         }
     }
 
+    public func hiddenMiniPlayerByUser() {
+        userWantsInvisible = true
+    }
+    
+    public func setMiniPlayerVisibiliy(isHidden: Bool) {
+        if isHidden {
+            isShownMiniPlayer = false
+        }else {
+            isShownMiniPlayer = self.userWantsInvisible ? false : true
+        }
+    }
 }
