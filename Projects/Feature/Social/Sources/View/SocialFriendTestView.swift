@@ -41,9 +41,14 @@ struct SocialFriendTestView: View {
                 //상단바
                 HStack(spacing: 0) {
                     Button(action: {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            self.appCoordinator.isAddFriendViewShown = false
+                        if appCoordinator.isAddFriendViewShown {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                self.appCoordinator.isAddFriendViewShown = false
+                            }
+                        }else {
+                            self.appCoordinator.rootPath.removeLast()
                         }
+                        
                     }, label: {
                         SharedAsset.closeButtonSearchFriend.swiftUIImage
                             .resizable()
@@ -151,9 +156,9 @@ struct SocialFriendTestView: View {
                 }
                 
             })
-       
+            .padding(.top, appCoordinator.isAddFriendViewShown ? appCoordinator.safeAreaInsetsTop : 0)       
         }
-        .padding(.top, appCoordinator.safeAreaInsetsTop)
+        .navigationBarBackButtonHidden()
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
                 SocialFriendBottomSheet()

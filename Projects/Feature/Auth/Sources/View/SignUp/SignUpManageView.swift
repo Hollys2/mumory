@@ -61,7 +61,7 @@ struct SignUpManageView: View {
                         
                     }
                     .padding(.horizontal, 20)
-                    .frame(height: 63)
+                    .frame(height: 65)
                     //가입 절차 인디케이터(회색, 흰색 라인)
                     ZStack{
                         Rectangle()

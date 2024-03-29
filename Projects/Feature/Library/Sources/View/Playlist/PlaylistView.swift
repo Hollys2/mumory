@@ -179,14 +179,7 @@ struct PlaylistView: View {
                         }
                         
                         if isLoading {
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
-                            PlaylistMusicListSkeletonView()
+                            SongListSkeletonView()
                         }
                   
                         
@@ -259,7 +252,7 @@ struct PlaylistView: View {
                 
                 
             })
-            .frame(height: 50)
+            .frame(height: 65)
             .padding(.top, currentUserData.topInset)
             
             
@@ -487,10 +480,19 @@ private struct AddSongButtonInPlaylistView: View {
     }
 }
 
-struct PlaylistMusicListSkeletonView: View {
+struct SongListSkeletonView: View {
     @State var startAnimation: Bool = true
-
+    
     var body: some View {
+        ForEach(0...10, id: \.self) { index in
+            SongSkeletonItem
+        }
+        .onAppear(perform: {
+            startAnimation.toggle()
+        })
+    }
+    
+    var SongSkeletonItem: some View {
         HStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 5, style: .circular)
                 .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
@@ -514,8 +516,7 @@ struct PlaylistMusicListSkeletonView: View {
         .padding(.horizontal, 20)
         .frame(height: 70)
         .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
-        .onAppear(perform: {
-            startAnimation.toggle()
-        })
+
     }
+
 }

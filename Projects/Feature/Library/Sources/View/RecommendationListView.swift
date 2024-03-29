@@ -142,7 +142,7 @@ struct RecommendationListView: View {
                         isBottomSheetPresent = true
                     }
             })
-            .frame(height: 50)
+            .frame(height: 65)
             .padding(.top, currentUserData.topInset)
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)

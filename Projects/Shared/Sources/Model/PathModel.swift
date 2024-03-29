@@ -23,6 +23,7 @@ public enum MumoryPage: Hashable {
     case friend(friend: MumoriUser)
     case friendPlaylist(playlist: Binding<MusicPlaylist>)
     case friendPlaylistManage(friend: MumoriUser, playlist: Binding<[MusicPlaylist]>)
+    case searchFriend
     
     public static func == (lhs: MumoryPage, rhs: MumoryPage) -> Bool {
         switch (lhs, rhs) {
@@ -76,6 +77,8 @@ public enum MumoryPage: Hashable {
             hasher.combine(11)
             hasher.combine(friend)
             hasher.combine(playlist.wrappedValue)
+        case .searchFriend:
+            hasher.combine(12)
         }
     }
 }

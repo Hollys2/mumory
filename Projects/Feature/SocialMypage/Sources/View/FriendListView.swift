@@ -35,14 +35,18 @@ struct FriendListView: View {
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundStyle(Color.white)
                     Spacer()
-                    SharedAsset.addFriendOnSocial.swiftUIImage
+                    
+                    (currentUserData.recievedNewFriends ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            self.appCoordinator.rootPath.append(MumoryPage.searchFriend)
+                        }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 20)
-                .frame(height: 63)
+                .frame(height: 65)
                 
                 Divider05()
                 

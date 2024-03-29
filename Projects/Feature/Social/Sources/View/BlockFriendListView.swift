@@ -36,7 +36,7 @@ struct BlockFriendListView: View {
                         .frame(width: 30, height: 30)
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 77)
+                .frame(height: 65)
                 
                 Divider05()
                 

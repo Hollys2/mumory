@@ -19,6 +19,7 @@ struct FavoriteListView: View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             VStack(spacing: 0, content: {
+                //상단바
                 HStack(content: {
                     SharedAsset.back.swiftUIImage
                         .resizable()
@@ -37,7 +38,7 @@ struct FavoriteListView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                 })
-                .frame(height: 63)
+                .frame(height: 65)
                 .padding(.horizontal, 20)
                 
                 HStack(alignment: .bottom){
@@ -79,6 +80,10 @@ struct FavoriteListView: View {
                                 FavoriteSongSkeletonView().id(UUID())
                             }
                         }
+                        
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(height: 90)
                     })
                 }
                 .refreshable {

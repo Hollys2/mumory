@@ -127,7 +127,7 @@ struct UneditablePlaylistView: View {
                         isBottomSheetPresent = true
                     }
             })
-            .frame(height: 50)
+            .frame(height: 65)
             .padding(.top, currentUserData.topInset)
 
         }

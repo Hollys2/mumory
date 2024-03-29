@@ -29,6 +29,7 @@ struct FriendPageView: View {
         ZStack(alignment: .top){
             ColorSet.background
             
+            //친구 여부에 따라 친구 페이지 혹은 모르는 사람 페이지 띄우기
             if currentUserData.getFriendStatus(friend: friend) == .friend{
                 KnownFriendPageView(friend: friend)
             }else {
@@ -36,6 +37,7 @@ struct FriendPageView: View {
 
             }
             
+            //상단바
             HStack{
                 SharedAsset.back.swiftUIImage
                     .resizable()
@@ -57,7 +59,7 @@ struct FriendPageView: View {
                     }
             }
             .padding(.horizontal, 20)
-            .frame(height: 44)
+            .frame(height: 65)
             .padding(.top, currentUserData.topInset)
         }
         .ignoresSafeArea()
@@ -92,16 +94,20 @@ struct KnownFriendPageView: View {
     var body: some View {
         ScrollView{
             VStack(spacing: 0, content: {
+                //구성: 프로필 뷰, 맵뷰, 뮤모리뷰, 플레이리스트뷰
+                
+                //친구 프로필 뷰
                 FriendInfoView(friend: friend)
                 
                 Divider05()
                 
+                //맵뷰
                 ZStack {
                     Rectangle()
                         .fill(Color.clear)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 187)
-                    
+                        .frame(height: 195)
+
                     Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: self.mumorys) { mumory in
 
                         MapAnnotation(coordinate: mumory.locationModel.coordinate) {
@@ -139,7 +145,15 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
+                FriendMumoryView(friend: self.friend, mumorys: $mumorys)
+                
+                Divider05()
+                
                 FriendPlaylistView(friend: friend)
+                
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(height: 110)
             })
         }
         .fullScreenCover(isPresented: $isMapViewShown) {
@@ -247,7 +261,7 @@ struct UnkownFriendPageView: View {
                         .scaledToFit()
                         .frame(width: 22, height: 22)
                     
-                    Text("요청 취소")
+                    Text("요청취소")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.background)
                     
@@ -517,6 +531,7 @@ struct FriendPlaylistView: View {
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0, content: {
+                //ooo의 플레이리스트
                 HStack(spacing: 0, content: {
                     Text("\(friend.nickname)의 플레이리스트")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
@@ -538,6 +553,7 @@ struct FriendPlaylistView: View {
                     appCoordinator.rootPath.append(MumoryPage.friendPlaylistManage(friend: self.friend, playlist: $playlists))
                 }
                 
+                //플리 가로 스크롤뷰
                 ScrollView(.horizontal) {
                     HStack(alignment: .top, spacing: 10, content: {
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
@@ -546,9 +562,10 @@ struct FriendPlaylistView: View {
                                     appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlist: $playlists[index]))
                                 }
                         }
-                        .padding(.horizontal, 20)
                     })
+                    .padding(.horizontal, 20)
                 }
+                .scrollIndicators(.hidden)
             })
         }
         .onAppear {
@@ -671,17 +688,13 @@ public func blockFriend(uId: String, friendUId: String) {
         guard let snapshot = try? await deleteDocQuery.getDocuments() else {
             return
         }
-        print("a")
         snapshot.documents.forEach { document in
-            print("b")
             document.reference.delete()
         }
         
         let query = db.collection("User").document(uId)
         try await query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
-        print("c")
         try await query.updateData(["blockFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
-        print("d")
         
         //탈퇴한회원이라면...?ㅜㅜ
         let friendQuery = db.collection("User").document(friendUId)
@@ -721,21 +734,16 @@ struct DeleteFriendBottomSheetView: View {
 
 struct PlaylistItemTest: View {
     @Binding var playlist: MusicPlaylist
-//    @State var songs: [Song] = []
-    
     var radius: CGFloat = 10
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     let itemSize: CGFloat
-    
     init(playlist: Binding<MusicPlaylist>,itemSize: CGFloat){
         self._playlist = playlist
         self.itemSize = itemSize
     }
     
     var body: some View {
-        ZStack(alignment: .top){
-            
-            VStack(spacing: 0){
+        VStack(spacing: 0){
                 VStack(spacing: 0, content: {
                     HStack(spacing: 0, content: {
                         //1번째 이미지
@@ -869,13 +877,6 @@ struct PlaylistItemTest: View {
                     .padding(.top, 5)
                 
             }
-            
-        }
-//        .onAppear(perform: {
-//            Task{
-//                self.songs = await fetchSongInfo(songIDs: playlist.songIDs)
-//            }
-//        })
     }
     
     private func fetchSongInfo(songIDs: [String]) async -> [Song]{
@@ -900,7 +901,64 @@ struct PlaylistItemTest: View {
     
 }
 
+struct FriendMumoryView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @Binding private var mumorys: [Mumory]
+    let friend: MumoriUser
 
+    init(friend: MumoriUser, mumorys: Binding<[Mumory]>) {
+        self.friend = friend
+        self._mumorys = mumorys
+    }
+    var body: some View {
+        VStack(spacing: 0, content: {
+            
+            HStack(spacing: 0, content: {
+                
+                Text("\(friend.nickname) 뮤모리")
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                    .foregroundStyle(Color.white)
+                
+                Spacer()
+                
+                Text("\(mumorys.count)")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(ColorSet.charSubGray)
+                    .padding(.trailing, 3)
+                
+                SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .frame(width: 17, height: 17)
+                    .scaledToFit()
+            })
+            .padding(.horizontal, 20)
+            .frame(height: 67)
+            .onTapGesture {
+                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
+            }
+            
+            ScrollView(.horizontal) {
+                HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
+                    if mumorys.isEmpty {
+                        MumorySkeletonView()
+                    }
+                    ForEach(mumorys.prefix(10), id: \.id) { mumory in
+                        MyMumoryItem(mumory: mumory)
+                            .onTapGesture {
+                                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                            }
+                    }
+                })
+                .padding(.horizontal, 20)
+                
+            }
+            .frame(height: getUIScreenBounds().width * 0.43)
+            .scrollIndicators(.hidden)
+            .padding(.bottom, 40)
+        })
+
+    }
+}
 
 
 public func fetchSongToPlaylist(playlistArray: Binding<[MusicPlaylist]>) {
@@ -921,3 +979,5 @@ public func fetchSongToPlaylist(playlistArray: Binding<[MusicPlaylist]>) {
         }
     }
 }
+
+

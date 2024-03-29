@@ -51,6 +51,7 @@ struct ActivityListView: View {
     @State var date: Date = Date()
     @State var isPresentDatePicker: Bool = false
     @State var activityList: [String: [Activity]] = [:]
+    @State var isLoadig: Bool = false
     
     let db = FBManager.shared.db
     
@@ -79,7 +80,8 @@ struct ActivityListView: View {
                         .frame(width: 30, height: 30)
                 })
                 .padding(.horizontal, 20)
-                .frame(height: 63)
+                .frame(height: 65)
+                
                 HStack(spacing: 6, content: {
                     SelectionButtonView(type: .all, title: "전체", selection: $selection)
                     SelectionButtonView(type: .like, title: "좋아요", selection: $selection)
@@ -90,76 +92,85 @@ struct ActivityListView: View {
                 .onChange(of: selection) { newValue in
                     pagingCursor = nil
                     Task {
-                        await getActivity(type: newValue, date: self.date, pagingCorsor: self.$pagingCursor)
+                        await getActivity(type: newValue, date: self.date, pagingCorsor: self.$pagingCursor, isLoading: $isLoadig)
                     }
                 }
                 
                 Divider05()
                     
-              
-                ScrollView {
-                    VStack(spacing: 0, content: {
-                        ForEach(activityList.keys.sorted(by: > ), id: \.self) { date in
-                            Section {
-                                ForEach((activityList[date]) ?? [] , id: \.self) { activity in
-                                   ActivityItem(activity: activity)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 0, content: {
+                            ForEach(activityList.keys.sorted(by: > ), id: \.self) { date in
+                                Section {
+                                    ForEach((activityList[date]) ?? [] , id: \.self) { activity in
+                                       ActivityItem(activity: activity)
+                                    }
+                                } header: {
+                                    Text(date)
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                        .foregroundStyle(Color.white)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.leading, 12)
+                                        .frame(height: 60)
+                                                 
+                                    Divider03()
                                 }
-                            } header: {
-                                Text(date)
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                    .foregroundStyle(Color.white)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(.leading, 12)
-                                    .frame(height: 60)
+                            }
+                            
+                            if isLoadig {
+                                ActivitySkeletonView()
+                            }else {
                                 
-                                Divider03()
+                                if activityList.isEmpty {
+                                    Text("활동 내역이 없습니다")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                        .foregroundStyle(ColorSet.subGray)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.top, getUIScreenBounds().height * 0.15)
+                                }
                             }
-
-                        }
-                        
-                        if activityList.isEmpty {
-                            Text("활동 내역이 없습니다")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .foregroundStyle(ColorSet.subGray)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                    })
-                    .padding(.top, 55)
-                }
-                .overlay {
-                    
-                    VStack(spacing: 0){
-                        HStack(spacing: 6){
-                            Text(DateText(date: date))
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                                .foregroundStyle(Color.white)
                             
-                            SharedAsset.downArraowCircle.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 15, height: 15)
-                            
-                            Spacer()
-                        }
-                        .padding(.leading, 20)
-                        .frame(height: 55)
-                        .background(ColorSet.background.opacity(0.9))
-                        .background(.ultraThinMaterial)
-                        .onTapGesture {
-                            UIView.setAnimationsEnabled(false)
-                            isPresentDatePicker = true
-                        }
-                        .onChange(of: date, perform: { value in
-                            pagingCursor = nil
-                            Task {
-                                await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor)
-                            }
                         })
-                        
-                        Divider03()
+                        .padding(.top, 55)
                     }
-                    .frame(maxHeight: .infinity, alignment: .top)
+     
+                    .overlay {
+                        
+                        VStack(spacing: 0){
+                            HStack(spacing: 6){
+                                Text(DateText(date: date))
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                    .foregroundStyle(Color.white)
+                                
+                                SharedAsset.downArraowCircle.swiftUIImage
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 15, height: 15)
+                                
+                                Spacer()
+                            }
+                            .padding(.leading, 20)
+                            .frame(height: 55)
+                            .background(ColorSet.background.opacity(0.9))
+                            .background(.ultraThinMaterial)
+                            .onTapGesture {
+                                UIView.setAnimationsEnabled(false)
+                                isPresentDatePicker = true
+                            }
+                            .onChange(of: date, perform: { value in
+                                pagingCursor = nil
+                                Task {
+                                    await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor, isLoading: $isLoadig)
+                                }
+                            })
+                            
+                            Divider03()
+                        }
+                        .frame(maxHeight: .infinity, alignment: .top)
+                    }
                 }
+            
             })
         }
         .preferredColorScheme(.dark)
@@ -202,7 +213,8 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
     
-    private func getActivity(type: ActivityType, date: Date, pagingCorsor: Binding<FBManager.Document?>) async {
+    private func getActivity(type: ActivityType, date: Date, pagingCorsor: Binding<FBManager.Document?>, isLoading: Binding<Bool>) async {
+        isLoading.wrappedValue = true
         if pagingCorsor.wrappedValue == nil {
             activityList.removeAll()
         }
@@ -246,6 +258,7 @@ struct ActivityListView: View {
                 }
                 self.activityList[dateString]?.append(Activity(type: type, songId: songId, mumoryId: mumoryId, friendNickname: friendNickname, myNickname: currentUserData.user.nickname, content: content))
             }
+            isLoading.wrappedValue = false
             
         }
         
@@ -288,13 +301,18 @@ struct DatePickerView: View {
     @Binding var date: Date
     var dateArray: [Date] = []
     @State var selectDate: Date = Date()
+    
     init(date: Binding<Date>){
         self._date = date
         self.selectDate = Date()
         
         let calendar = Calendar.current
-        let startDateComponents = DateComponents(year: 2023, month: 1)
-        let endDateComponents = DateComponents(year: 2026, month: 12)
+        
+        let components: Set<Calendar.Component> = [.year, .month]
+        let originDate = calendar.dateComponents(components, from: self.date)
+        
+        let startDateComponents = DateComponents(year: 2024, month: 1)
+        let endDateComponents = DateComponents(year: originDate.year, month: originDate.month)
         
         guard let startDate = calendar.date(from: startDateComponents),
               let endDate = calendar.date(from: endDateComponents) else {
@@ -307,6 +325,7 @@ struct DatePickerView: View {
             dateArray.append(currentDate)
             currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate)!
         }
+        selectDate = endDate
     }
     
     var body: some View {
@@ -329,6 +348,10 @@ struct DatePickerView: View {
                     }
             })
       
+        }
+        .onAppear {
+            guard let thisMonth = dateArray.last else {return}
+            selectDate = thisMonth
         }
  
     }
@@ -418,4 +441,68 @@ struct ActivityItem: View {
     }
     
 
+}
+
+struct ActivitySkeletonView: View {
+    @State var startAnimation: Bool = false
+    var body: some View {
+        VStack(spacing: 0) {
+            Header
+            
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+            ActivitySkeletonItem
+
+        }
+        .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+    
+    var Header: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            RoundedRectangle(cornerRadius: 5, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 125, height: 14)
+                .padding(.leading, 12)
+                .frame(height: 60)
+            
+            Divider03()
+
+        }
+    }
+    
+    var ActivitySkeletonItem: some View {
+        HStack(spacing: 0) {
+            Circle()
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 38, height: 38)
+                .padding(.leading, 15)
+                .padding(.trailing, 12)
+            
+            RoundedRectangle(cornerRadius: 5, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 56, height: 56)
+                .padding(.trailing, 15)
+
+            
+            VStack(alignment: .leading, spacing: 8) {
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 207, height: 14)
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 160, height: 14)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: 90)
+    }
 }

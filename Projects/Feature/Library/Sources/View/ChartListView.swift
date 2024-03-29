@@ -53,7 +53,7 @@ struct ChartListView: View {
                             appCoordinator.rootPath.append(LibraryPage.search(term: ""))
                         }
                 })
-                .frame(height: 63)
+                .frame(height: 65)
                 .padding(.top, appCoordinator.safeAreaInsetsTop)
                 
                 HStack(alignment: .bottom){

@@ -59,10 +59,11 @@ public class CurrentUserData: ObservableObject {
                 self.recievedRequests.removeAll()
                 self.friendRequests.removeAll()
                 snapshot.documentChanges.forEach { documentChange in
+                    let data = documentChange.document.data()
+                    guard let type = data["type"] as? String else {return}
+                    
                     switch documentChange.type {
-                    case .added, .removed:
-                        let data = documentChange.document.data()
-                        guard let type = data["type"] as? String else {return}
+                    case .added:
                         if type == "recieve" {
                             guard let friendUId = data["uId"] as? String else {return}
                             Task {
@@ -78,6 +79,21 @@ public class CurrentUserData: ObservableObject {
                                 let user = await MumoriUser(uId: friendUId)
                                 DispatchQueue.main.async {
                                     self.friendRequests.append(user)
+                                }
+                            }
+                        }
+                    case .removed:
+                        guard let friendUId = data["uId"] as? String else {return}
+                        if type == "recieve" {
+                            Task {
+                                DispatchQueue.main.async {
+                                    self.recievedRequests.removeAll(where: {$0.uId == friendUId})
+                                }
+                            }
+                        } else if type == "request" {
+                            Task {
+                                DispatchQueue.main.async {
+                                    self.friendRequests.removeAll(where: {$0.uId == friendUId})
                                 }
                             }
                         }

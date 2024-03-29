@@ -50,7 +50,7 @@ struct UneditablePlaylistManageView: View {
                     
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 40)
+                .frame(height: 65)
 
             
      

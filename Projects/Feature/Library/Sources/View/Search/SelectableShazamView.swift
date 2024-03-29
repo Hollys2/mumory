@@ -40,7 +40,7 @@ struct SelectableShazamView: View {
                         }
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 63)
+                .frame(height: 65)
                 
                 
                 if shazamManager.isRecording {
