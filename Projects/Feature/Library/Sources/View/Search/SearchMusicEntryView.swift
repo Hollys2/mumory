@@ -114,14 +114,20 @@ struct SearchMusicEntryView: View {
                                     }
                             }
                         }
+                        .padding(.horizontal, 20)
                         
                         LazyVStack(content: {
-                            ForEach(recentSearchObject.recentSearchList, id: \.self) { string in
-                                RecentSearchItem(title: string)
-                                    .environmentObject(recentSearchObject)
-                                    .onTapGesture {
-                                        term = string
-                                    }
+                            ForEach(recentSearchObject.recentSearchList, id: \.self) { title in
+                                RecentSearchItem(title: title, deleteAction: {
+                                    recentSearchObject.recentSearchList.removeAll(where: {$0 == title})
+                                    let userDefault = UserDefaults.standard
+                                    guard var result = userDefault.value(forKey: "recentSearchList") as? [String] else {return}
+                                    result.removeAll(where: {$0 == title})
+                                    userDefault.set(result, forKey: "recentSearchList")
+                                })
+                                .onTapGesture {
+                                    term = title
+                                }
                             }
                             if recentSearchObject.recentSearchList.isEmpty {
                                 Text("최근 검색내역이 없습니다")
@@ -130,10 +136,9 @@ struct SearchMusicEntryView: View {
                                     .frame(height: 50)
                             }
                         })
-                        .padding(.top, 25)
+                        .padding(.top, 11)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
                     .padding(.top, 20)
                     .padding(.bottom, 15)
                     .background(ColorSet.moreDeepGray)

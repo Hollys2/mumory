@@ -42,7 +42,7 @@ public class PlayerViewModel: ObservableObject {
     @Published var isPresentNowPlayingView: Bool = false
     @Published var shuffleState: ShuffleState = .off
     @Published var repeatState: RepeatState = .off
-    @Published var isPlayingValue: Bool = false
+    @Published var isPlaying: Bool = false
     private var player = ApplicationMusicPlayer.shared
     var originQueue: [Song] = []
     
@@ -73,6 +73,7 @@ public class PlayerViewModel: ObservableObject {
                 try await player.play()
                 DispatchQueue.main.async {
                     self.currentSong = song
+                    self.isPlaying = true
                     self.setPlayingTime()
                 }
             } catch {
@@ -95,6 +96,7 @@ public class PlayerViewModel: ObservableObject {
                 try await player.play()
                 DispatchQueue.main.async {
                     self.currentSong = self.playingSong()
+                    self.isPlaying = true
                     self.setPlayingTime()
                 }
             } catch {
@@ -156,6 +158,7 @@ public class PlayerViewModel: ObservableObject {
         player.pause()
         DispatchQueue.main.async {
             self.timer?.invalidate()
+            self.isPlaying = false
         }
     }
     
@@ -165,6 +168,7 @@ public class PlayerViewModel: ObservableObject {
                 try await player.play()
                 DispatchQueue.main.async {
                     self.setPlayingTime()
+                    self.isPlaying = true
                 }
             }catch(let error) {
                 print("failed to play music: \(error.localizedDescription)")
@@ -185,6 +189,7 @@ public class PlayerViewModel: ObservableObject {
         self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { timer in
             DispatchQueue.main.async {
                 self.playingTime = self.player.playbackTime
+                self.isPlaying = self.player.state.playbackStatus == .playing
             }
             if Int(self.player.playbackTime) == 0 {
                 self.currentSong = self.playingSong()
@@ -229,7 +234,7 @@ public class PlayerViewModel: ObservableObject {
     }
         
     
-    public func isPlaying() -> Bool {
+    public func isPlayerPlaying() -> Bool {
         return self.player.state.playbackStatus == .playing
     }
     

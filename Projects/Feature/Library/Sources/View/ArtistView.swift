@@ -23,7 +23,6 @@ struct ArtistView: View {
     @State private var requestIndex: Int = 0
     
     let artist: Artist
-    
     init(artist: Artist) {
         self.artist = artist
     }
@@ -73,9 +72,9 @@ struct ArtistView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
+                                    guard !songs.isEmpty else {return}
                                     playerViewModel.playAll(title: artist.name , songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "ArtistViewPlayAllButton")
-
                                 }
                         })
                         .padding(.horizontal, 20)
@@ -93,6 +92,10 @@ struct ArtistView: View {
                                     playerViewModel.playNewSong(song: song)
                                     playerViewModel.isShownMiniPlayer = true
                                 }
+                        }
+                        
+                        if songs.isEmpty {
+                            SongListSkeletonView()
                         }
                         
                         Rectangle()
@@ -128,7 +131,7 @@ struct ArtistView: View {
                     }
                 
             })
-            .frame(height: 50)
+            .frame(height: 65)
             .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                 BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
@@ -141,34 +144,100 @@ struct ArtistView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            requestArtistSongs(offset: 0)
+            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                Task {
+                    let albums = await requestArtistAlbum()
+                    for album in albums {
+                        guard let tracks = album.tracks else {continue}
+                        for track in tracks {
+                            Task {
+                                guard let song = await fetchSong(songID: track.id.rawValue) else {return}
+                                self.songs.append(song)
+                            }
+                        }
+                    }
+                }
+            }
+   
         })
     }
     
-    private func requestArtistSongs(offset: Int) {
-        print("request")
-        let artistName = artist.name
-        var request = MusicCatalogSearchRequest(term: artist.name, types: [Song.self])
-        request.includeTopResults = true
-        request.limit = 20
-        request.offset = offset * 20
-        Task{
-            do {
-                let response = try await request.response()
-                if response.songs.count > 0 {
-                    requestArtistSongs(offset: offset + 1)
+    private func requestArtistSongs() async -> [Song] {
+        return await withTaskGroup(of: [Song].self) { taskGroup -> [Song] in
+            let albums = await withTaskGroup(of: Album?.self) { taskGroup -> [Album] in
+                guard let detailedArtist = await fetchDetailArtist(artistID: artist.id.rawValue) else {return []}
+                guard let albums = detailedArtist.albums else {return []}
+                var returnValue: [Album] = []
+                
+                for album in albums {
+                    print("aa")
+                    taskGroup.addTask {
+                        print("bb")
+                        return await fetchDetailAlbum(albumID: album.id.rawValue)
+                    }
                 }
                 
-                DispatchQueue.main.async {
-                    songs += response.songs.filter({$0.artistName == artistName})
+                for await value in taskGroup {
+                    print("cc")
+                    guard let album = value else {print("no album");return []}
+                    print("album title: \(album.title)")
+                    returnValue.append(album)
                 }
                 
-            }catch(let error){
-                print("request error: \(error.localizedDescription)")
+                return returnValue
             }
+            
+            var totalSongs: [Song] = []
+            
+            albums.forEach { album in
+                print("dd")
+                taskGroup.addTask {
+                    print("ee")
+                    guard let tracks = album.tracks else {return []}
+                    var songs: [Song] = []
+                    for track in tracks {
+                        guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
+                        print("song title: \(song.title)")
+                        songs.append(song)
+                    }
+                    return songs
+                }
+            }
+            
+            for await songs in taskGroup {
+                print("ee")
+                totalSongs.append(contentsOf: songs)
+            }
+            
+            return totalSongs
         }
-        
     }
+    
+    private func requestArtistAlbum() async -> [Album] {
+        return await withTaskGroup(of: Album?.self) { taskGroup -> [Album] in
+            guard let detailedArtist = await fetchDetailArtist(artistID: artist.id.rawValue) else {return []}
+            guard let albums = detailedArtist.albums else {return []}
+            var returnValue: [Album] = []
+            
+            for album in albums {
+                print("aa")
+                taskGroup.addTask {
+                    print("bb")
+                    return await fetchDetailAlbum(albumID: album.id.rawValue)
+                }
+            }
+            
+            for await value in taskGroup {
+                print("cc")
+                guard let album = value else {print("no album");return []}
+                print("album title: \(album.title)")
+                returnValue.append(album)
+            }
+            
+            return returnValue
+        }
+    }
+
 }
 
 

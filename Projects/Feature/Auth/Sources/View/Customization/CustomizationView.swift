@@ -52,7 +52,7 @@ public struct CustomizationView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 63)
+                .frame(height: 65)
                 
                 ZStack{
                     Rectangle()

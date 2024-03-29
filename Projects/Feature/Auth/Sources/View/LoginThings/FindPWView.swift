@@ -33,7 +33,7 @@ struct FindPWView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
-                .frame(height: 63)
+                .frame(height: 65)
                 
                 //상단 타이틀
                 Text("비밀번호 재설정")

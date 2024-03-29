@@ -130,7 +130,7 @@ struct ArtistOfSongView: View {
                     })
                 
             })
-            .frame(height: 50)
+            .frame(height: 65)
             .padding(.top, currentUserData.topInset)
             
 

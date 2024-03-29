@@ -47,7 +47,7 @@ struct ShazamView: View {
                         }
                 }
                 .padding(.horizontal, 20)
-                .frame(height: 63)
+                .frame(height: 65)
                 
                 
                 if shazamManager.isRecording {
@@ -215,6 +215,7 @@ struct ShazamView: View {
                         ForEach(shazamHistory, id: \.self) { item in
                             ShazamHistoryItem(shazamItem: item, selectedShazamHistory: $selectedShazamHistory, isEditing: $isEditing)
                                 .onTapGesture {
+                                    guard isEditing == false else {return}
                                     let shazamItem = item as SHMediaItem
                                     guard let appleMusicID = shazamItem.appleMusicID else {return}
                                     
@@ -242,60 +243,66 @@ struct ShazamView: View {
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             
             //하단 편집 바
-            HStack(alignment: .center){
-                Text(selectedShazamHistory.count == shazamHistory.count ? "전체선택 해제" : "전체선택")
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                    .foregroundStyle(Color.white)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .onTapGesture {
-                        if selectedShazamHistory.count == shazamHistory.count {
-                            selectedShazamHistory = []
-                        }else {
-                            selectedShazamHistory = shazamHistory
-                        }
-                    }
-                
-                Divider()
-                    .ignoresSafeArea()
-                    .frame(width: 1, height: 32)
-                    .background(ColorSet.skeleton02)
-                
-                
-                HStack(alignment: .center, spacing: 10) {
-                    Text("삭제")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                        .foregroundStyle(selectedShazamHistory.isEmpty ? ColorSet.subGray : ColorSet.accentRed)
-                    
-                    if !selectedShazamHistory.isEmpty {
-                        Text("\(selectedShazamHistory.count)")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                            .foregroundStyle(Color.black)
-                            .frame(height: 19)
-                            .padding(.horizontal, 7)
-                            .background(ColorSet.accentRed)
-                            .clipShape(RoundedRectangle(cornerRadius: 40, style: .circular))
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .onTapGesture {
-                    if !selectedShazamHistory.isEmpty {
-                        shazamHistory.forEach { item in
-                            if selectedShazamHistory.contains(item) {
-                                shazamHistory.removeAll(where: {$0 == item})
+            VStack(spacing: 0) {
+                Divider05()
+                HStack(alignment: .center){
+                    Text(selectedShazamHistory.count == shazamHistory.count ? "전체선택 해제" : "전체선택")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                        .foregroundStyle(Color.white)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .onTapGesture {
+                            if selectedShazamHistory.count == shazamHistory.count {
+                                selectedShazamHistory = []
+                            }else {
+                                selectedShazamHistory = shazamHistory
                             }
                         }
-                        let result = shazamHistory.map({$0.shazamID ?? ""})
-                        UserDefaults.standard.setValue(result, forKey: "shazamHistory")
-                        isEditing = false
+                    
+                    Divider()
+                        .frame(width: 1, height: 30)
+                        .background(ColorSet.skeleton02)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .padding(.top, 13)
+                    
+                    
+                    HStack(alignment: .center, spacing: 10) {
+                        Text("삭제")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                            .foregroundStyle(selectedShazamHistory.isEmpty ? ColorSet.subGray : ColorSet.accentRed)
+                        
+                        if !selectedShazamHistory.isEmpty {
+                            Text("\(selectedShazamHistory.count)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                .foregroundStyle(Color.black)
+                                .frame(height: 19)
+                                .padding(.horizontal, 7)
+                                .background(ColorSet.accentRed)
+                                .clipShape(RoundedRectangle(cornerRadius: 40, style: .circular))
+                        }
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .onTapGesture {
+                        if !selectedShazamHistory.isEmpty {
+                            shazamHistory.forEach { item in
+                                if selectedShazamHistory.contains(item) {
+                                    shazamHistory.removeAll(where: {$0 == item})
+                                }
+                            }
+                            let result = shazamHistory.map({$0.shazamID ?? ""})
+                            UserDefaults.standard.setValue(result, forKey: "shazamHistory")
+                            isEditing = false
+                        }
+                    }
+            
                 }
-        
+                .frame(height: 88)
+                .background(ColorSet.darkGray)
             }
-            .frame(height: 88)
-            .background(ColorSet.darkGray)
+            .frame(maxHeight: .infinity, alignment: .bottom)
             .offset(y: isEditing ? 0 : 90)
             .animation(.default, value: isEditing)
-            .frame(maxHeight: .infinity, alignment: .bottom)
+
+
 
         }
         .ignoresSafeArea()

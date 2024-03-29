@@ -41,7 +41,7 @@ struct TermsOfServiceForSocialView: View {
                         
                         Spacer()
                     }
-                    .frame(height: 63)
+                    .frame(height: 65)
                     
                     Text("서비스 이용약관에\n동의해주세요!")
                         .foregroundColor(.white)

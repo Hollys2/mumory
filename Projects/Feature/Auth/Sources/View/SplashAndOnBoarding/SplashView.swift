@@ -121,6 +121,8 @@ public struct SplashView: View {
                         UneditablePlaylistView(playlist: playlist)
                     case .friendPlaylistManage(friend: let friend, playlist: let playlist):
                         UneditablePlaylistManageView(friend: friend, playlistArray: playlist)
+                    case .searchFriend:
+                        SocialFriendTestView()
                     }
                 }
                 .navigationDestination(for: LibraryPage.self) { page in

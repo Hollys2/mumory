@@ -102,3 +102,46 @@ struct MyMumoryItem: View {
         return song
     }
 }
+
+
+struct MumorySkeletonView: View {
+    @State var startAnimation: Bool = false
+    var body: some View {
+        ForEach(0...6, id: \.self) { index in
+          MumorySkeletonItem
+        }
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+    
+    
+    var MumorySkeletonItem: some View {
+        VStack(spacing: 0) {
+            RoundedRectangle(cornerRadius: 10, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: getUIScreenBounds().width * 0.43, height: getUIScreenBounds().width * 0.43)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 35, style: .circular)
+                        .fill(startAnimation ? ColorSet.skeleton02 : Color(white: 0.35))
+                        .frame(width: 62, height: 21)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .padding(11)
+                    
+                    Circle()
+                        .fill(startAnimation ? ColorSet.skeleton02 : Color(white: 0.35))
+                        .frame(width: 21, height: 21)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        .padding(11)
+                    
+                    RoundedRectangle(cornerRadius: 35, style: .circular)
+                        .fill(startAnimation ? ColorSet.skeleton02 : Color(white: 0.35))
+                        .frame(width: getUIScreenBounds().width * 0.43 - 22, height: 21)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .padding(.bottom, 11)
+                }
+        }
+        .animation(.easeIn(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+    }
+}
+

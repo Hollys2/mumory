@@ -193,35 +193,13 @@ public struct SocialSearchView: View {
                     }
                     .padding([.horizontal, .top], 20)
                     .padding(.bottom, 11)
-
+                    
                     if !self.recentSearches.isEmpty {
                         ForEach(self.recentSearches, id: \.self) { value in
-                            
-                            HStack {
-                                
-                                SharedAsset.searchIconCreateMumory.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 23, height: 23)
-                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-
-                                Text(value)
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                    .foregroundColor(.white)
-
-                                Spacer()
-
-                                Button(action: {
-                                    self.recentSearches.removeAll { $0 == value }
-                                    UserDefaults.standard.set(self.recentSearches, forKey: "socialSearch")
-                                }) {
-                                    Image(systemName: "xmark")
-                                        .frame(width: 19, height: 19)
-                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                }
+                            RecentSearchItem(title: value) {
+                                self.recentSearches.removeAll { $0 == value }
+                                UserDefaults.standard.set(self.recentSearches, forKey: "socialSearch")
                             }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .padding(.horizontal, 20)
                             .onTapGesture {
                                 self.isSearching = true
                                 self.searchText = value

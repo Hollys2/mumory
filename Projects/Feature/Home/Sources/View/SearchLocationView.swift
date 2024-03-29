@@ -239,33 +239,11 @@ struct SearchLocationView: View {
                             
                             if !self.localSearchViewModel.recentSearches.isEmpty {
                                 ForEach(self.localSearchViewModel.recentSearches, id: \.self) { value in
-                                    
-                                    HStack {
-                                        SharedAsset.searchIconCreateMumory.swiftUIImage
-                                            .resizable()
-                                            .frame(width: 23, height: 23)
-                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        
-                                        Text("\(value.locationTitle)")
-                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                            .foregroundColor(.white)
-                                        
-                                        Spacer()
-                                        
-                                        Button(action: {
-                                            self.localSearchViewModel.removeRecentSearch(value)
-                                        }) {
-                                            Image(systemName: "xmark")
-                                                .frame(width: 19, height: 19)
-                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                        }
+                                    RecentSearchItem(title: value.locationTitle) {
+                                        self.localSearchViewModel.removeRecentSearch(value)
                                     }
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
-                                    .padding(.horizontal, 20)
                                     .onTapGesture {
                                         mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, coordinate: CLLocationCoordinate2D(latitude: value.latitude, longitude: value.longitude))
-                                        
                                         appCoordinator.rootPath.removeLast()
                                     }
                                 }
@@ -339,7 +317,7 @@ struct SearchLocationView: View {
         .navigationBarBackButtonHidden(true)
         .padding(.horizontal, 20)
         .frame(width: UIScreen.main.bounds.width + 1)
-        .padding(.top, 12)
+        .padding(.top, 60)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .loadingLottie(localSearchViewModel.isSearching)
         .onDisappear {

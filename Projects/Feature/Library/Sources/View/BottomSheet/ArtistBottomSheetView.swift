@@ -13,6 +13,7 @@ import MusicKit
 struct ArtistBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     let artist: Artist
     let songs: [Song]
@@ -62,6 +63,7 @@ struct ArtistBottomSheetView: View {
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
                 .onTapGesture {
                     UIPasteboard.general.string = artist.url?.absoluteString
+                    snackBarViewModel.setSnackBar(type: .copy, status: .success)
                     dismiss()
                 }
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")

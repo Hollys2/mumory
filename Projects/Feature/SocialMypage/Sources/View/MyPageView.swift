@@ -16,7 +16,7 @@ public struct MyPageView: View {
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
+    @State var isTapBackButton: Bool = false
     @State var isPresentEditProfile: Bool = false
     let lineGray = Color(white: 0.37)
     public var body: some View {
@@ -52,12 +52,14 @@ public struct MyPageView: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
+                        isTapBackButton = true
                         if appCoordinator.bottomAnimationViewStatus == .myPage {
                             appCoordinator.setBottomAnimationPage(page: .remove)
                         }else {
                             appCoordinator.rootPath.removeLast()
                         }
                     }
+                    .disabled(isTapBackButton)
                 
                 Spacer()
                 
@@ -232,7 +234,6 @@ struct MyMumori: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @State var spacing: CGFloat = .zero
     let Firebase = FBManager.shared
 
     var body: some View {
@@ -263,12 +264,16 @@ struct MyMumori: View {
             }
             
             ScrollView(.horizontal) {
-                HStack(spacing: spacing, content: {
+                HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
                     ForEach(mumoryDataViewModel.myMumorys.prefix(10), id: \.id) { mumory in
                         MyMumoryItem(mumory: mumory)
                             .onTapGesture {
                                 appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                             }
+                    }
+                    
+                    if mumoryDataViewModel.myMumorys.isEmpty {
+                        MumorySkeletonView()
                     }
                 })
                 .padding(.horizontal, 20)
@@ -278,9 +283,7 @@ struct MyMumori: View {
             .scrollIndicators(.hidden)
             .padding(.bottom, 40)
         })
-        .onAppear {
-            spacing = getUIScreenBounds().width < 380 ? 8 : 12
-        }
+
     }
 }
 
