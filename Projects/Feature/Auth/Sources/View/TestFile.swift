@@ -20,6 +20,7 @@ struct TestFile: View {
                 .foregroundColor(.white)
             
             SharedAsset.xWhiteCircle.swiftUIImage
+                .resizable()
                 .frame(width: 23, height: 23)
                 .padding(.trailing, 17)
                 .padding(.leading, 5)
