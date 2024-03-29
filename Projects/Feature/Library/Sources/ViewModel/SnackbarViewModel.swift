@@ -30,9 +30,9 @@ public class SnackBarViewModel: ObservableObject {
     
     struct RecentSaveData{
         var playlistId: String
-        var songId: String
+        var songIds: [String]
     }
-    var recentSaveData = RecentSaveData(playlistId: "", songId: "")
+    var recentSaveData = RecentSaveData(playlistId: "", songIds: [])
 
     public func setSnackBarAboutPlaylist(status: SnackbarStatus, playlistTitle: String) {
         self.timer?.invalidate()
@@ -69,14 +69,14 @@ public class SnackBarViewModel: ObservableObject {
         })
     }
     
-    public func setRecentSaveData(playlist: MusicPlaylist, songId: String) {
-        self.recentSaveData = RecentSaveData(playlistId: playlist.id, songId: songId)
+    public func setRecentSaveData(playlist: MusicPlaylist, songIds: [String]) {
+        self.recentSaveData = RecentSaveData(playlistId: playlist.id, songIds: songIds)
     }
     
     public func removeRecentSaveData(uId: String) {
         let db = FBManager.shared.db
         db.collection("User").document(uId).collection("Playlist").document(self.recentSaveData.playlistId)
-            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove([self.recentSaveData.songId])])
+            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(self.recentSaveData.songIds)])
         setSnackBar(type: .playlist, status: .delete)
     }
     public func setPresentValue(isPresent: Bool) {

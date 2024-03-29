@@ -304,15 +304,15 @@ struct DatePickerView: View {
     
     init(date: Binding<Date>){
         self._date = date
-        self.selectDate = Date()
-        
         let calendar = Calendar.current
         
         let components: Set<Calendar.Component> = [.year, .month]
         let originDate = calendar.dateComponents(components, from: self.date)
+        let thisMonthDate = calendar.dateComponents(components, from: Date())
+        
         
         let startDateComponents = DateComponents(year: 2024, month: 1)
-        let endDateComponents = DateComponents(year: originDate.year, month: originDate.month)
+        let endDateComponents = DateComponents(year: thisMonthDate.year, month: thisMonthDate.month)
         
         guard let startDate = calendar.date(from: startDateComponents),
               let endDate = calendar.date(from: endDateComponents) else {
@@ -350,8 +350,7 @@ struct DatePickerView: View {
       
         }
         .onAppear {
-            guard let thisMonth = dateArray.last else {return}
-            selectDate = thisMonth
+            selectDate = date
         }
  
     }

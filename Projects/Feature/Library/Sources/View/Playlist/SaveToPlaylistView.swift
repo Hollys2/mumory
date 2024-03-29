@@ -119,6 +119,14 @@ struct SaveToPlaylistView: View {
                     guard error == nil else {
                         return
                     }
+                    guard let firstSongId = songIDs.first else {return}
+                    let monthlyStatData = [
+                        "date": Date(),
+                        "songId": firstSongId,
+                        "type": "playlist"
+                    ]
+                    db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
+                    snackBarViewModel.setRecentSaveData(playlist: to, songIds: songIDs)
                     snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                 }
             }
@@ -128,7 +136,6 @@ struct SaveToPlaylistView: View {
             guard let song = self.songIDs.first else {
                 return
             }
-            
             //이미 있으면 실패 스낵바, 없으면 저장
             if to.songIDs.contains(song) {
                 snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
@@ -138,7 +145,13 @@ struct SaveToPlaylistView: View {
                         guard error == nil else {
                             return
                         }
-                        snackBarViewModel.setRecentSaveData(playlist: to, songId: song)
+                        let monthlyStatData = [
+                            "date": Date(),
+                            "songId": song,
+                            "type": "playlist"
+                        ]
+                        db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
+                        snackBarViewModel.setRecentSaveData(playlist: to, songIds: [song])
                         snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                     }
                 }

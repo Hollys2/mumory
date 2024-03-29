@@ -212,19 +212,68 @@ public class CurrentUserData: ObservableObject {
             guard let document = try? await query.getDocument() else {return returnValue}
             guard let data = document.data() else {return returnValue}
             
-            let songIds = data["songIds"] as? [String] ?? []
+            var songIds = data["songIds"] as? [String] ?? []
             for id in songIds {
-                let musicItemID = MusicItemID(rawValue: id)
-                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                request.properties = [.genres, .artists]
-                guard let response = try? await request.response() else {return returnValue}
-                guard let song = response.items.first else {return returnValue}
+                taskGroup.addTask {
+                    let musicItemID = MusicItemID(rawValue: id)
+                    var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                    guard let response = try? await request.response() else {return nil}
+                    guard let song = response.items.first else {return nil}
+                    return song
+                }
+            }
+            
+            for await value in taskGroup {
+                guard let song = value else {continue}
                 returnValue.append(song)
             }
-
-            return returnValue
+            songIds.removeAll { songId in
+                return !returnValue.contains(where: {$0.id.rawValue == songId})
+            }
+            var songs = songIds.map { songId in
+                return returnValue.first(where: {$0.id.rawValue == songId})!
+            }
+            
+            return songs
         }
-        
+    }
+    
+    public func refreshPlaylist(playlistId: String) async {
+        let db = FBManager.shared.db
+        let songs = await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
+            var returnValue:[Song] = []
+            let query = db.collection("User").document(uId).collection("Playlist").document(playlistId)
+            guard let document = try? await query.getDocument() else {return returnValue}
+            guard let data = document.data() else {return returnValue}
+            
+            var songIds = data["songIds"] as? [String] ?? []
+            for id in songIds {
+                taskGroup.addTask {
+                    let musicItemID = MusicItemID(rawValue: id)
+                    var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                    guard let response = try? await request.response() else {return nil}
+                    guard let song = response.items.first else {return nil}
+                    return song
+                }
+            }
+            
+            for await value in taskGroup {
+                guard let song = value else {continue}
+                returnValue.append(song)
+            }
+            songIds.removeAll { songId in
+                return !returnValue.contains(where: {$0.id.rawValue == songId})
+            }
+            var songs = songIds.map { songId in
+                return returnValue.first(where: {$0.id.rawValue == songId})!
+            }
+            
+            return songs
+        }
+        guard let index = self.playlistArray.firstIndex(where: {$0.id == playlistId}) else {return}
+        DispatchQueue.main.async {
+            self.playlistArray[index].songs = songs
+        }
     }
     public enum FriendStatus{
         case friend

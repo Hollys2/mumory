@@ -75,12 +75,14 @@ struct NowPlayingView: View {
             }
             .preferredColorScheme(.dark)
             .background(.ultraThinMaterial.opacity(isPresentQueue ? 0 : 1))
-            
-            SnackBarView {
+    
+            SnackBarView(additionalAction: {
                 Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { timer in
                     dismiss()
                 }
-            }
+            })
+            .frame(width: getUIScreenBounds().width)
+
 
             
         }
