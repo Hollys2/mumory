@@ -124,6 +124,10 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
+                FriendMumoryView(friend: self.friend, mumorys: $mumorys)
+                
+                Divider05()
+                
                 FriendMumoryView(friend: self.friend, mumorys: self.mumorys, isLoading: $isLoading)
                 
                 Divider05()
