@@ -50,8 +50,6 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
-    
-    
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
