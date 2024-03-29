@@ -207,126 +207,126 @@ public struct MyMumoryView: View {
                         .pageView()
                         .tag(1)
                         .onAppear {
-                            let dispatchGroup = DispatchGroup()
-                            
-                            var results: [(Mumory, country: String?, administrativeArea: String?)] = []
-                            
-                            for mumory in mumoryDataViewModel.myMumorys {
-                                dispatchGroup.enter() // 비동기 작업 시작
-                                
-                                let geocoder = CLGeocoder()
-                                geocoder.reverseGeocodeLocation(CLLocation(latitude: mumory.locationModel.coordinate.latitude, longitude: mumory.locationModel.coordinate.longitude)) { placemarks, error in
-                                    defer { dispatchGroup.leave() } // 비동기 작업 종료
-                                    
-                                    guard let placemark = placemarks?.first, error == nil else {
-                                        print("Error: ", error?.localizedDescription ?? "Unknown error")
-                                        return
-                                    }
-                                    
-                                    let country = placemark.country
-                                    let administrativeArea = placemark.administrativeArea
-                                    
-                                    results.append((mumory, country, administrativeArea))
-                                }
-                            }
-                            
-                            dispatchGroup.notify(queue: .main) {
-                                filteredLocations = [:]
-                                for result in results {
-                                    let (mumory, country, administrativeArea) = result
-                                    if var country = country, let administrativeArea = administrativeArea {
-                                        if country != "대한민국" {
-                                            if country == "영국" {
-                                                country += " 🇬🇧"
-                                            } else if country == "미국" {
-                                                country += " 🇺🇸"
-                                            } else if country == "이탈리아" {
-                                                country += " 🇮🇹"
-                                            } else if country == "프랑스" {
-                                                country += " 🇫🇷"
-                                            } else if country == "독일" {
-                                                country += " 🇩🇪"
-                                            } else if country == "일본" {
-                                                country += " 🇯🇵"
-                                            } else if country == "중국" {
-                                                country += " 🇨🇳"
-                                            } else if country == "캐나다" {
-                                                country += " 🇨🇦"
-                                            } else if country == "오스트레일리아" {
-                                                country += " 🇦🇹"
-                                            } else if country == "브라질" {
-                                                country += " 🇧🇷"
-                                            } else if country == "인도" {
-                                                country += " 🇮🇳"
-                                            } else if country == "러시아" {
-                                                country += " 🇷🇺"
-                                            } else if country == "호주" {
-                                                country += " 🇦🇺"
-                                            } else if country == "멕시코" {
-                                                country += " 🇲🇽"
-                                            } else if country == "인도네시아" {
-                                                country += " 🇮🇩"
-                                            } else if country == "터키" {
-                                                country += " 🇹🇷"
-                                            } else if country == "사우디아라비아" {
-                                                country += " 🇸🇦"
-                                            } else if country == "스페인" {
-                                                country += " 🇪🇸"
-                                            } else if country == "네덜란드" {
-                                                country += " 🇳🇱"
-                                            } else if country == "스위스" {
-                                                country += " 🇨🇭"
-                                            } else if country == "아르헨티나" {
-                                                country += " 🇦🇷"
-                                            } else if country == "스웨덴" {
-                                                country += " 🇸🇪"
-                                            } else if country == "폴란드" {
-                                                country += " 🇵🇱"
-                                            } else if country == "벨기에" {
-                                                country += " 🇧🇪"
-                                            } else if country == "태국" {
-                                                country += " 🇹🇭"
-                                            } else if country == "이란" {
-                                                country += " 🇮🇷"
-                                            } else if country == "오스트리아" {
-                                                country += " 🇦🇹"
-                                            } else if country == "노르웨이" {
-                                                country += " 🇳🇴"
-                                            } else if country == "아랍에미리트" {
-                                                country += " 🇦🇪"
-                                            } else if country == "나이지리아" {
-                                                country += " 🇳🇬"
-                                            } else if country == "남아프리카공화국" {
-                                                country += " 🇿🇦"
-                                            } else {
-                                                country = "기타 🏁"
-                                            }
-
-                                            // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                                            if var countryMumories = filteredLocations[country] {
-                                                // 존재하는 경우 해당 배열에 뮤모리 추가
-                                                countryMumories.append(mumory)
-                                                // 딕셔너리에 업데이트
-                                                filteredLocations[country] = countryMumories
-                                            } else {
-                                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                                filteredLocations[country] = [result.0]
-                                            }
-                                        } else {
-                                            if var countryMumories = filteredLocations[administrativeArea] {
-                                                // 존재하는 경우 해당 배열에 뮤모리 추가
-                                                countryMumories.append(mumory)
-                                                // 딕셔너리에 업데이트
-                                                filteredLocations[administrativeArea] = countryMumories
-                                            } else {
-                                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                                filteredLocations[administrativeArea] = [result.0]
-                                            }
-                                        }
-                                    }
-                                }
-                                print("FUCK: \(filteredLocations)")
-                            }
+//                            let dispatchGroup = DispatchGroup()
+//
+//                            var results: [(Mumory, country: String?, administrativeArea: String?)] = []
+//
+//                            for mumory in mumoryDataViewModel.myMumorys {
+//                                dispatchGroup.enter() // 비동기 작업 시작
+//
+//                                let geocoder = CLGeocoder()
+//                                geocoder.reverseGeocodeLocation(CLLocation(latitude: mumory.locationModel.coordinate.latitude, longitude: mumory.locationModel.coordinate.longitude)) { placemarks, error in
+//                                    defer { dispatchGroup.leave() } // 비동기 작업 종료
+//
+//                                    guard let placemark = placemarks?.first, error == nil else {
+//                                        print("Error: ", error?.localizedDescription ?? "Unknown error")
+//                                        return
+//                                    }
+//
+//                                    let country = placemark.country
+//                                    let administrativeArea = placemark.administrativeArea
+//
+//                                    results.append((mumory, country, administrativeArea))
+//                                }
+//                            }
+//
+//                            dispatchGroup.notify(queue: .main) {
+//                                filteredLocations = [:]
+//                                for result in results {
+//                                    let (mumory, country, administrativeArea) = result
+//                                    if var country = country, let administrativeArea = administrativeArea {
+//                                        if country != "대한민국" {
+//                                            if country == "영국" {
+//                                                country += " 🇬🇧"
+//                                            } else if country == "미국" {
+//                                                country += " 🇺🇸"
+//                                            } else if country == "이탈리아" {
+//                                                country += " 🇮🇹"
+//                                            } else if country == "프랑스" {
+//                                                country += " 🇫🇷"
+//                                            } else if country == "독일" {
+//                                                country += " 🇩🇪"
+//                                            } else if country == "일본" {
+//                                                country += " 🇯🇵"
+//                                            } else if country == "중국" {
+//                                                country += " 🇨🇳"
+//                                            } else if country == "캐나다" {
+//                                                country += " 🇨🇦"
+//                                            } else if country == "오스트레일리아" {
+//                                                country += " 🇦🇹"
+//                                            } else if country == "브라질" {
+//                                                country += " 🇧🇷"
+//                                            } else if country == "인도" {
+//                                                country += " 🇮🇳"
+//                                            } else if country == "러시아" {
+//                                                country += " 🇷🇺"
+//                                            } else if country == "호주" {
+//                                                country += " 🇦🇺"
+//                                            } else if country == "멕시코" {
+//                                                country += " 🇲🇽"
+//                                            } else if country == "인도네시아" {
+//                                                country += " 🇮🇩"
+//                                            } else if country == "터키" {
+//                                                country += " 🇹🇷"
+//                                            } else if country == "사우디아라비아" {
+//                                                country += " 🇸🇦"
+//                                            } else if country == "스페인" {
+//                                                country += " 🇪🇸"
+//                                            } else if country == "네덜란드" {
+//                                                country += " 🇳🇱"
+//                                            } else if country == "스위스" {
+//                                                country += " 🇨🇭"
+//                                            } else if country == "아르헨티나" {
+//                                                country += " 🇦🇷"
+//                                            } else if country == "스웨덴" {
+//                                                country += " 🇸🇪"
+//                                            } else if country == "폴란드" {
+//                                                country += " 🇵🇱"
+//                                            } else if country == "벨기에" {
+//                                                country += " 🇧🇪"
+//                                            } else if country == "태국" {
+//                                                country += " 🇹🇭"
+//                                            } else if country == "이란" {
+//                                                country += " 🇮🇷"
+//                                            } else if country == "오스트리아" {
+//                                                country += " 🇦🇹"
+//                                            } else if country == "노르웨이" {
+//                                                country += " 🇳🇴"
+//                                            } else if country == "아랍에미리트" {
+//                                                country += " 🇦🇪"
+//                                            } else if country == "나이지리아" {
+//                                                country += " 🇳🇬"
+//                                            } else if country == "남아프리카공화국" {
+//                                                country += " 🇿🇦"
+//                                            } else {
+//                                                country = "기타 🏁"
+//                                            }
+//
+//                                            // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
+//                                            if var countryMumories = filteredLocations[country] {
+//                                                // 존재하는 경우 해당 배열에 뮤모리 추가
+//                                                countryMumories.append(mumory)
+//                                                // 딕셔너리에 업데이트
+//                                                filteredLocations[country] = countryMumories
+//                                            } else {
+//                                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+//                                                filteredLocations[country] = [result.0]
+//                                            }
+//                                        } else {
+//                                            if var countryMumories = filteredLocations[administrativeArea] {
+//                                                // 존재하는 경우 해당 배열에 뮤모리 추가
+//                                                countryMumories.append(mumory)
+//                                                // 딕셔너리에 업데이트
+//                                                filteredLocations[administrativeArea] = countryMumories
+//                                            } else {
+//                                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+//                                                filteredLocations[administrativeArea] = [result.0]
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                                print("FUCK: \(filteredLocations)")
+//                            }
                             
 //                            for (region, boundary) in MapConstant.boundaries {
 //                                let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
@@ -363,6 +363,127 @@ public struct MyMumoryView: View {
             self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.currentUserData.user.uId) { myMumorys in
                 self.myMumorys = myMumorys
                 print("myMumorys: \(myMumorys)")
+            }
+            
+            let dispatchGroup = DispatchGroup()
+            
+            var results: [(Mumory, country: String?, administrativeArea: String?)] = []
+            
+            for mumory in mumoryDataViewModel.myMumorys {
+                dispatchGroup.enter() // 비동기 작업 시작
+                
+                let geocoder = CLGeocoder()
+                geocoder.reverseGeocodeLocation(CLLocation(latitude: mumory.locationModel.coordinate.latitude, longitude: mumory.locationModel.coordinate.longitude)) { placemarks, error in
+                    defer { dispatchGroup.leave() } // 비동기 작업 종료
+                    
+                    guard let placemark = placemarks?.first, error == nil else {
+                        print("Error: ", error?.localizedDescription ?? "Unknown error")
+                        return
+                    }
+                    
+                    let country = placemark.country
+                    let administrativeArea = placemark.administrativeArea
+                    
+                    results.append((mumory, country, administrativeArea))
+                }
+            }
+            
+            dispatchGroup.notify(queue: .main) {
+                filteredLocations = [:]
+                for result in results {
+                    let (mumory, country, administrativeArea) = result
+                    if var country = country, let administrativeArea = administrativeArea {
+                        if country != "대한민국" {
+                            if country == "영국" {
+                                country += " 🇬🇧"
+                            } else if country == "미국" {
+                                country += " 🇺🇸"
+                            } else if country == "이탈리아" {
+                                country += " 🇮🇹"
+                            } else if country == "프랑스" {
+                                country += " 🇫🇷"
+                            } else if country == "독일" {
+                                country += " 🇩🇪"
+                            } else if country == "일본" {
+                                country += " 🇯🇵"
+                            } else if country == "중국" {
+                                country += " 🇨🇳"
+                            } else if country == "캐나다" {
+                                country += " 🇨🇦"
+                            } else if country == "오스트레일리아" {
+                                country += " 🇦🇹"
+                            } else if country == "브라질" {
+                                country += " 🇧🇷"
+                            } else if country == "인도" {
+                                country += " 🇮🇳"
+                            } else if country == "러시아" {
+                                country += " 🇷🇺"
+                            } else if country == "호주" {
+                                country += " 🇦🇺"
+                            } else if country == "멕시코" {
+                                country += " 🇲🇽"
+                            } else if country == "인도네시아" {
+                                country += " 🇮🇩"
+                            } else if country == "터키" {
+                                country += " 🇹🇷"
+                            } else if country == "사우디아라비아" {
+                                country += " 🇸🇦"
+                            } else if country == "스페인" {
+                                country += " 🇪🇸"
+                            } else if country == "네덜란드" {
+                                country += " 🇳🇱"
+                            } else if country == "스위스" {
+                                country += " 🇨🇭"
+                            } else if country == "아르헨티나" {
+                                country += " 🇦🇷"
+                            } else if country == "스웨덴" {
+                                country += " 🇸🇪"
+                            } else if country == "폴란드" {
+                                country += " 🇵🇱"
+                            } else if country == "벨기에" {
+                                country += " 🇧🇪"
+                            } else if country == "태국" {
+                                country += " 🇹🇭"
+                            } else if country == "이란" {
+                                country += " 🇮🇷"
+                            } else if country == "오스트리아" {
+                                country += " 🇦🇹"
+                            } else if country == "노르웨이" {
+                                country += " 🇳🇴"
+                            } else if country == "아랍에미리트" {
+                                country += " 🇦🇪"
+                            } else if country == "나이지리아" {
+                                country += " 🇳🇬"
+                            } else if country == "남아프리카공화국" {
+                                country += " 🇿🇦"
+                            } else {
+                                country = "기타 🏁"
+                            }
+
+                            // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
+                            if var countryMumories = filteredLocations[country] {
+                                // 존재하는 경우 해당 배열에 뮤모리 추가
+                                countryMumories.append(mumory)
+                                // 딕셔너리에 업데이트
+                                filteredLocations[country] = countryMumories
+                            } else {
+                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                                filteredLocations[country] = [result.0]
+                            }
+                        } else {
+                            if var countryMumories = filteredLocations[administrativeArea] {
+                                // 존재하는 경우 해당 배열에 뮤모리 추가
+                                countryMumories.append(mumory)
+                                // 딕셔너리에 업데이트
+                                filteredLocations[administrativeArea] = countryMumories
+                            } else {
+                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                                filteredLocations[administrativeArea] = [result.0]
+                            }
+                        }
+                    }
+                }
+                print("FUCK: \(filteredLocations)")
             }
         }
         .sheet(isPresented: self.$isDatePickerShown, content: {
