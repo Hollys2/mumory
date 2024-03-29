@@ -320,9 +320,9 @@ struct PlayingView: View {
                 Image(asset: {
                     switch playerViewModel.shuffleState {
                     case .off:
-                        SharedAsset.playRandomOff
+                        return SharedAsset.playRandomOff
                     case .on:
-                        SharedAsset.playRandom
+                        return SharedAsset.playRandom
                     }
                 }())
                 .resizable()
@@ -338,11 +338,11 @@ struct PlayingView: View {
                 Image(asset: {
                     switch playerViewModel.repeatState {
                     case .off:
-                        SharedAsset.playRepeatOff
+                        return SharedAsset.playRepeatOff
                     case .all:
-                        SharedAsset.playRepeatAll
+                        return SharedAsset.playRepeatAll
                     case .one:
-                        SharedAsset.playRepeatOneItem
+                        return SharedAsset.playRepeatOneItem
                     }
                 }())
                 .resizable()
