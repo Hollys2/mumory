@@ -649,17 +649,6 @@ public struct SocialView: View {
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
-            
-            if mumoryDataViewModel.isUpdating {
-                ZStack {
-                    Color.black
-                        .opacity(0.1)
-                        .ignoresSafeArea()
-                    
-                    LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
-                        .offset(y: 89)
-                }
-            }
         }
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {

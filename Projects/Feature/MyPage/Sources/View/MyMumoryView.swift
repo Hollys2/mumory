@@ -850,11 +850,13 @@ private struct BlurScroll: ViewModifier {
                                 .offset(y:  -scrollPosition.y - (proxy.size.height / 2) + (55 / 2))
                         }
                 }
-                .background(GeometryReader { geo in
-                    Color.clear
-                        .preference(key: ScrollOffsetPreferenceKey.self,
-                                    value: geo.frame(in: .named(coordinateSpaceName)).origin)
-                })
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .preference(key: ScrollOffsetPreferenceKey.self,
+                                        value: geo.frame(in: .named(coordinateSpaceName)).origin)
+                    }
+                )
                 .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
                     self.scrollPosition = value
                 }

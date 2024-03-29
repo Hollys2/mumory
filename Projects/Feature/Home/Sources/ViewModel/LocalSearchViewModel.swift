@@ -47,6 +47,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
             searchCompleter.queryFragment = queryFragment
         }
     }
+    @Published var isSearching: Bool = false
     
     private let searchCompleter = MKLocalSearchCompleter()
     
@@ -66,6 +67,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
 //            .debounce(for: .seconds(0.3), scheduler: RunLoop.main)
             .removeDuplicates()
             .sink(receiveValue: { value in
+                self.isSearching = true
                 self.searchAddress(value)
             })
 //            .store(in: &cancellables)
@@ -77,6 +79,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
         } else {
             self.searchCompleter.queryFragment = queryFragment
         }
+        self.isSearching = false
     }
 
     

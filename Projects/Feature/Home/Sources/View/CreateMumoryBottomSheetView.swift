@@ -8,10 +8,12 @@
 
 
 import SwiftUI
+import MapKit
 import PhotosUI
+import Combine
+
 import Core
 import Shared
-import MapKit
 
 
 public struct CreateMumoryBottomSheetView: View {
@@ -47,6 +49,8 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
+    
+    
     
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
         self._isSheetShown = isSheetShown
@@ -184,11 +188,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         .background {
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onAppear {
-                                                        self.calendarYOffset = geometry.frame(in: .global).maxY
-                                                    }
                                                     .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                        // Update calendarYOffset when the offset changes
                                                         self.calendarYOffset = newOffset
                                                     }
                                             }
@@ -210,10 +210,10 @@ public struct CreateMumoryBottomSheetView: View {
                                         .background(
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newValue in
-                                                        DispatchQueue.main.async {
-                                                            self.contentContainerYOffset = newValue
-                                                        }
+                                                    .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global).maxY)
+                                                    .onPreferenceChange(ViewPositionKey.self) { newValue in
+                                                        self.contentContainerYOffset = newValue ?? 0
+                                                        print("contentContainerYOffset: \(contentContainerYOffset)")
                                                     }
                                             }
                                         )
@@ -278,7 +278,8 @@ public struct CreateMumoryBottomSheetView: View {
                                 .padding(.horizontal, 20)
                             } // VStack
                             .padding(.top, 20)
-                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+//                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                         } // ScrollView
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -447,7 +448,7 @@ public struct CreateMumoryBottomSheetView: View {
                     , alignment: .top
                 )
                 .zIndex(2)
-                .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+                .offset(y:  keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
             }
         }
         .onAppear(perform: {
@@ -481,6 +482,15 @@ public struct CreateMumoryBottomSheetView: View {
         }
     }
 }
+
+struct ViewPositionKey: PreferenceKey {
+    static var defaultValue: CGFloat? = nil
+    
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
+        value = nextValue()
+    }
+}
+
 
 enum DragState {
     case inactive
