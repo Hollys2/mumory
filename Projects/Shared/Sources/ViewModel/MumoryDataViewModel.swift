@@ -78,6 +78,9 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("Error: ", error?.localizedDescription ?? "Unknown error")
                 return }
             
+//            print("placemark.country: \(String(describing: placemark.country))")
+//            print("placemark.administrativeArea: \(String(describing: placemark.administrativeArea))")
+            
             let locationTitle = placemark.name ?? ""
             let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
             let coordinate = location.coordinate
@@ -156,6 +159,7 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchMumory(documentID: String) async -> Mumory {
+        self.isUpdating = true
         let db = FirebaseManager.shared.db
         let docRef = db.collection("Mumory").document(documentID)
         
@@ -180,6 +184,10 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchFriendsMumorys(uId: String, completion: @escaping ([Mumory]) -> Void) {
+        DispatchQueue.main.async {
+            self.isUpdating = true
+        }
+        
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").whereField("uId", isEqualTo: uId)
         
@@ -197,15 +205,6 @@ final public class MumoryDataViewModel: ObservableObject {
                     let documentData = document.data()
                     guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
-                    print("newMumory: \(newMumory)")
-                    
-//                    if !self.friendsMumorys.contains(where: { $0.id == newMumory.id }) {
-//                        print("유후")
-//                        DispatchQueue.main.async {
-//                            self.friendsMumorys.append(newMumory)
-//                            self.friendsMumorys.sort { $0.date > $1.date }
-//                        }
-//                    }
                     result.append(newMumory)
                     result.sort { $0.date > $1.date }
                 }

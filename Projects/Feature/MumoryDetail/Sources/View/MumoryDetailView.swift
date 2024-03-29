@@ -258,7 +258,8 @@ public struct MumoryDetailView: View {
                     appCoordinator.isDeleteMumoryPopUpViewShown = false
                     appCoordinator.rootPath.removeLast()
                     
-                    mumoryDataViewModel.fetchEveryMumory2()
+//                    mumoryDataViewModel.fetchEveryMumory2(completion: ([Mumory]) -> Void)
+                    appCoordinator.isFirstTabSelected = false
                 }
             })
         })

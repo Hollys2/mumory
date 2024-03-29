@@ -18,7 +18,7 @@ struct MumoryMapView: View {
     @Binding private var isShown: Bool
     let mumory: Mumory
     let user: MumoriUser
-    @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
+//    @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
@@ -26,13 +26,12 @@ struct MumoryMapView: View {
         self._isShown = isShown
         self.mumory = mumory
         self.user = user
-        self._region = State(initialValue: MKCoordinateRegion(center: mumory.coordinate, span: MapConstant.defaultSpan))
     }
     
     var body: some View {
         ZStack(alignment: .top) {
 
-            Map(coordinateRegion: .constant(region), annotationItems: [mumory]) { m in
+            Map(coordinateRegion: .constant(MKCoordinateRegion(center: self.mumory.coordinate, span: MapConstant.defaultSpan)), annotationItems: [mumory]) { m in
 
                 MapAnnotation(coordinate: m.locationModel.coordinate) {
                     ZStack(alignment: .topLeading) {
@@ -85,7 +84,6 @@ struct MumoryMapView: View {
             .background(Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 0.898))
         }
         .ignoresSafeArea()
-        .statusBarHidden(true)
     }
 }
 

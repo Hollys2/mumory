@@ -18,7 +18,7 @@ struct MumoryApp: App {
     @StateObject var currentUserData: CurrentUserData = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
-    
+
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in

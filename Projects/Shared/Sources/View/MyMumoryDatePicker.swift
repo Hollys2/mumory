@@ -57,7 +57,7 @@ public struct MyMumoryDatePicker: View {
                 for m in newDataBeforeSelectedDate {
                     print("date: \(m.date)")
                 }
-                mumoryDataViewModel.filteredMumorys = newDataBeforeSelectedDate
+                mumoryDataViewModel.myMumorys = newDataBeforeSelectedDate
                 
                 dismiss()
             }) {

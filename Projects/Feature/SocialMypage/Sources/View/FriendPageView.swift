@@ -127,11 +127,6 @@ struct KnownFriendPageView: View {
                     }
                     .frame(width: getUIScreenBounds().width - 40, height: 129)
                     .cornerRadius(10)
-                    .onAppear {
-                        self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
-                            self.mumorys = mumorys
-                        }
-                    }
                     
                     SharedAsset.enlargeMapButton.swiftUIImage
                         .resizable()
@@ -150,6 +145,11 @@ struct KnownFriendPageView: View {
         .fullScreenCover(isPresented: $isMapViewShown) {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
                 .preferredColorScheme(.light)
+        }
+        .onAppear {
+            self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
+                self.mumorys = mumorys
+            }
         }
     }
 }

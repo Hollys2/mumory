@@ -136,13 +136,13 @@ struct MumoryDetailScrollContentView: View {
                             
                             HStack(spacing: 0) {
 
-                                Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumory.isPublic))
+                                Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumoryDataViewModel.selectedMumoryAnnotation.isPublic))
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
 
-                                if !self.mumory.isPublic {
+                                if !self.mumoryDataViewModel.selectedMumoryAnnotation.isPublic {
                                     Image(uiImage: SharedAsset.lockMumoryDatail.image)
                                         .resizable()
                                         .frame(width: 18, height: 18)

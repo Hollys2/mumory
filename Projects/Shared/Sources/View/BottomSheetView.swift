@@ -69,7 +69,9 @@ public struct MumoryBottomSheet {
                     mumoryAnnotation.isPublic.toggle()
                     mumoryDataViewModel.updateMumory(mumoryAnnotation) {
                         mumoryDataViewModel.isUpdating = false
+                        mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                     }
+                    
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기") {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -90,9 +92,11 @@ public struct MumoryBottomSheet {
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
                     mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
+                    withAnimation(.easeOut(duration: 0.1)) {
+                        self.appCoordinator.isSocialMenuSheetViewShown = false
+                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
-                        self.appCoordinator.isSocialMenuSheetViewShown = false
                     }
                 }),
                 BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {

@@ -8,7 +8,10 @@
 
 
 import SwiftUI
+import CoreLocation
+
 import Shared
+
 
 public struct MyMumoryView: View {
     
@@ -20,10 +23,12 @@ public struct MyMumoryView: View {
     @State private var isBlur: Bool = false
     @State private var bluroffset: CGFloat = 0
     
+    @State private var myMumorys: [Mumory] = []
     @State private var filteredLocations: [String: [Mumory]] = [:]
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @State private var offset: CGFloat = 0.0
     @State private var scrollViewOffsetY: CGFloat = 0.0
@@ -98,7 +103,6 @@ public struct MyMumoryView: View {
                         }
                         
                     } content: {
-                        VStack(spacing: 0) {
                             
                             ZStack(alignment: .top) {
                                 
@@ -165,7 +169,6 @@ public struct MyMumoryView: View {
                                     }
                                 }
                             }
-                        } // VStack
                         .pageView()
                         .tag(0)
                         
@@ -185,14 +188,6 @@ public struct MyMumoryView: View {
                                 .padding(.bottom, 17)
                                 .padding(.horizontal, 20)
                                 
-//                                ForEach(filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
-//
-//                                    LazyHStack(spacing: 11) {
-//                                        RoundedSquareView(regionTitle: region, mumorys: mumories)
-//                                    }
-//                                    .padding(.horizontal, 20)
-//                                    .padding(.bottom, 12)
-//                                }
                                 LazyVGrid(columns: columns, spacing: 12) {
                                     
                                     ForEach(self.filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
@@ -212,25 +207,145 @@ public struct MyMumoryView: View {
                         .pageView()
                         .tag(1)
                         .onAppear {
-                            for (region, boundary) in MapConstant.boundaries {
-                                let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
-                                    let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
-                                    let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
-                                    return latInRange && lonInRange
-                                }
-                                print("region: \(region)")
-                                print("filteredLocations: \(filteredMumorys)")
+                            let dispatchGroup = DispatchGroup()
+                            
+                            var results: [(Mumory, country: String?, administrativeArea: String?)] = []
+                            
+                            for mumory in mumoryDataViewModel.myMumorys {
+                                dispatchGroup.enter() // 비동기 작업 시작
                                 
-                                
-                                if !filteredMumorys.isEmpty {
-                                    let korea = ["서울특별시", "부산광역시", "인천광역시", "대구광역시", "경기도", "제주도", "대전광역시", "광주광역시", "울산광역시", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "세종특별자치시"]
+                                let geocoder = CLGeocoder()
+                                geocoder.reverseGeocodeLocation(CLLocation(latitude: mumory.locationModel.coordinate.latitude, longitude: mumory.locationModel.coordinate.longitude)) { placemarks, error in
+                                    defer { dispatchGroup.leave() } // 비동기 작업 종료
                                     
-                                    if korea.contains(region) {
-                                        self.filteredLocations[region] = filteredMumorys
+                                    guard let placemark = placemarks?.first, error == nil else {
+                                        print("Error: ", error?.localizedDescription ?? "Unknown error")
+                                        return
                                     }
+                                    
+                                    let country = placemark.country
+                                    let administrativeArea = placemark.administrativeArea
+                                    
+                                    results.append((mumory, country, administrativeArea))
                                 }
                             }
                             
+                            dispatchGroup.notify(queue: .main) {
+                                filteredLocations = [:]
+                                for result in results {
+                                    let (mumory, country, administrativeArea) = result
+                                    if var country = country, let administrativeArea = administrativeArea {
+                                        if country != "대한민국" {
+                                            if country == "영국" {
+                                                country += " 🇬🇧"
+                                            } else if country == "미국" {
+                                                country += " 🇺🇸"
+                                            } else if country == "이탈리아" {
+                                                country += " 🇮🇹"
+                                            } else if country == "프랑스" {
+                                                country += " 🇫🇷"
+                                            } else if country == "독일" {
+                                                country += " 🇩🇪"
+                                            } else if country == "일본" {
+                                                country += " 🇯🇵"
+                                            } else if country == "중국" {
+                                                country += " 🇨🇳"
+                                            } else if country == "캐나다" {
+                                                country += " 🇨🇦"
+                                            } else if country == "오스트레일리아" {
+                                                country += " 🇦🇹"
+                                            } else if country == "브라질" {
+                                                country += " 🇧🇷"
+                                            } else if country == "인도" {
+                                                country += " 🇮🇳"
+                                            } else if country == "러시아" {
+                                                country += " 🇷🇺"
+                                            } else if country == "호주" {
+                                                country += " 🇦🇺"
+                                            } else if country == "멕시코" {
+                                                country += " 🇲🇽"
+                                            } else if country == "인도네시아" {
+                                                country += " 🇮🇩"
+                                            } else if country == "터키" {
+                                                country += " 🇹🇷"
+                                            } else if country == "사우디아라비아" {
+                                                country += " 🇸🇦"
+                                            } else if country == "스페인" {
+                                                country += " 🇪🇸"
+                                            } else if country == "네덜란드" {
+                                                country += " 🇳🇱"
+                                            } else if country == "스위스" {
+                                                country += " 🇨🇭"
+                                            } else if country == "아르헨티나" {
+                                                country += " 🇦🇷"
+                                            } else if country == "스웨덴" {
+                                                country += " 🇸🇪"
+                                            } else if country == "폴란드" {
+                                                country += " 🇵🇱"
+                                            } else if country == "벨기에" {
+                                                country += " 🇧🇪"
+                                            } else if country == "태국" {
+                                                country += " 🇹🇭"
+                                            } else if country == "이란" {
+                                                country += " 🇮🇷"
+                                            } else if country == "오스트리아" {
+                                                country += " 🇦🇹"
+                                            } else if country == "노르웨이" {
+                                                country += " 🇳🇴"
+                                            } else if country == "아랍에미리트" {
+                                                country += " 🇦🇪"
+                                            } else if country == "나이지리아" {
+                                                country += " 🇳🇬"
+                                            } else if country == "남아프리카공화국" {
+                                                country += " 🇿🇦"
+                                            } else {
+                                                country = "기타 🏁"
+                                            }
+
+                                            // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
+                                            if var countryMumories = filteredLocations[country] {
+                                                // 존재하는 경우 해당 배열에 뮤모리 추가
+                                                countryMumories.append(mumory)
+                                                // 딕셔너리에 업데이트
+                                                filteredLocations[country] = countryMumories
+                                            } else {
+                                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                                                filteredLocations[country] = [result.0]
+                                            }
+                                        } else {
+                                            if var countryMumories = filteredLocations[administrativeArea] {
+                                                // 존재하는 경우 해당 배열에 뮤모리 추가
+                                                countryMumories.append(mumory)
+                                                // 딕셔너리에 업데이트
+                                                filteredLocations[administrativeArea] = countryMumories
+                                            } else {
+                                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                                                filteredLocations[administrativeArea] = [result.0]
+                                            }
+                                        }
+                                    }
+                                }
+                                print("FUCK: \(filteredLocations)")
+                            }
+                            
+//                            for (region, boundary) in MapConstant.boundaries {
+//                                let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
+//                                    let latInRange = boundary.latitude.min <= mumory.locationModel.coordinate.latitude && mumory.locationModel.coordinate.latitude <= boundary.latitude.max
+//                                    let lonInRange = boundary.longitude.min <= mumory.locationModel.coordinate.longitude && mumory.locationModel.coordinate.longitude <= boundary.longitude.max
+//                                    return latInRange && lonInRange
+//                                }
+//                                print("region: \(region)")
+//                                print("filteredLocations: \(filteredMumorys)")
+//
+//
+//                                if !filteredMumorys.isEmpty {
+//                                    let korea = ["서울특별시", "부산광역시", "인천광역시", "대구광역시", "경기도", "제주도", "대전광역시", "광주광역시", "울산광역시", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "세종특별자치시"]
+//
+//                                    if korea.contains(region) {
+//                                        self.filteredLocations[region] = filteredMumorys
+//                                    }
+//                                }
+//                            }
                         }
                     }
                 }
@@ -245,6 +360,10 @@ public struct MyMumoryView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
+            self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.currentUserData.user.uId) { myMumorys in
+                self.myMumorys = myMumorys
+                print("myMumorys: \(myMumorys)")
+            }
         }
         .sheet(isPresented: self.$isDatePickerShown, content: {
             MyMumoryDatePicker(selectedDate: self.$selectedDate)
@@ -678,7 +797,7 @@ struct RoundedSquareView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(regionTitle)
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: getUIScreenBounds().width <= 375 ? 16 : 18))
                     .foregroundColor(.white)
 
                 Text(DateManager.formattedRegionDate(date: self.mumorys[0].date))
@@ -706,36 +825,6 @@ struct RoundedSquareView: View {
             .offset(x: 15, y: getUIScreenBounds().width * 0.435 - 24 - 15)
             
             ZStack {
-                if self.mumorys.count >= 4 {
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: 36, height: 36)
-                        .background(
-                            AsyncImage(url: self.mumorys[3].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                case .failure:
-                                    Text("Failed to load image")
-                                case .empty:
-                                    ProgressView()
-                                default:
-                                    Color(red: 0.18, green: 0.18, blue: 0.18)
-                                }
-                            }
-                                .frame(width: 36, height: 36)
-                                .clipped()
-                        )
-                        .cornerRadius(5)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5)
-                                .inset(by: 0.5)
-                                .stroke(.white, lineWidth: 1)
-                        )
-                }
-                
                 if self.mumorys.count >= 3 {
                     Rectangle()
                         .foregroundColor(.clear)
@@ -764,7 +853,6 @@ struct RoundedSquareView: View {
                                 .inset(by: 0.5)
                                 .stroke(.white, lineWidth: 1)
                         )
-                        .offset(x: 18)
                 }
                 
                 if self.mumorys.count >= 2 {
@@ -795,10 +883,41 @@ struct RoundedSquareView: View {
                                 .inset(by: 0.5)
                                 .stroke(.white, lineWidth: 1)
                         )
+                        .offset(x: 18)
+                }
+                
+                if self.mumorys.count >= 1 {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 36, height: 36)
+                        .background(
+                            AsyncImage(url: self.mumorys[0].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                                switch phase {
+                                case .success(let image):
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                case .failure:
+                                    Text("Failed to load image")
+                                case .empty:
+                                    ProgressView()
+                                default:
+                                    Color(red: 0.18, green: 0.18, blue: 0.18)
+                                }
+                            }
+                                .frame(width: 36, height: 36)
+                                .clipped()
+                        )
+                        .cornerRadius(5)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .inset(by: 0.5)
+                                .stroke(.white, lineWidth: 1)
+                        )
                         .offset(x: 36)
                 }
                                       
-                if self.mumorys.count > 4 {
+                if self.mumorys.count > 3 {
                     SharedAsset.artworkFilterMypage.swiftUIImage
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -806,7 +925,7 @@ struct RoundedSquareView: View {
                         .offset(x: 36)
                 }
             }
-            .offset(x: getUIScreenBounds().width * 0.435 - 36 - 32 - 15, y: getUIScreenBounds().width * 0.435 - 36 - 15)
+            .offset(x: getUIScreenBounds().width * 0.435 - 84, y: getUIScreenBounds().width * 0.435 - 36 - 15)
         }
     }
 }

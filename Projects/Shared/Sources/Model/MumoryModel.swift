@@ -45,10 +45,16 @@ public struct LocationModel: Identifiable {
     public var locationSubtitle: String
     public var coordinate: CLLocationCoordinate2D
     
-    public init(locationTitle: String, locationSubtitle: String, coordinate: CLLocationCoordinate2D) {
+    public var country: String?
+    public var administrativeArea: String?
+    
+    public init(locationTitle: String, locationSubtitle: String, coordinate: CLLocationCoordinate2D, country: String? = nil, administrativeArea: String? = nil) {
         self.locationTitle = locationTitle
         self.locationSubtitle = locationSubtitle
         self.coordinate = coordinate
+        
+        self.country = country
+        self.administrativeArea = administrativeArea
     }
 }
 
