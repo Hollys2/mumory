@@ -42,6 +42,7 @@ public class PlayerViewModel: ObservableObject {
     @Published var isPresentNowPlayingView: Bool = false
     @Published var shuffleState: ShuffleState = .off
     @Published var repeatState: RepeatState = .off
+    @Published var isPlayingValue: Bool = false
     private var player = ApplicationMusicPlayer.shared
     var originQueue: [Song] = []
     
