@@ -1,17 +1,29 @@
 {
   "images" : [
     {
+<<<<<<<< HEAD:Projects/Shared/Resources/Assets.xcassets/x_whiteCircle.imageset/Contents.json
       "filename" : "X_BT.png",
+========
+      "filename" : "Image 29.png",
+>>>>>>>> 30-refactoring:Projects/Shared/Resources/Assets.xcassets/Reward/1-comment-reward.imageset/Contents.json
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+<<<<<<<< HEAD:Projects/Shared/Resources/Assets.xcassets/x_whiteCircle.imageset/Contents.json
       "filename" : "X_BT@2x.png",
+========
+      "filename" : "Image 29@2x.png",
+>>>>>>>> 30-refactoring:Projects/Shared/Resources/Assets.xcassets/Reward/1-comment-reward.imageset/Contents.json
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+<<<<<<<< HEAD:Projects/Shared/Resources/Assets.xcassets/x_whiteCircle.imageset/Contents.json
       "filename" : "X_BT@3x.png",
+========
+      "filename" : "Image 29@3x.png",
+>>>>>>>> 30-refactoring:Projects/Shared/Resources/Assets.xcassets/Reward/1-comment-reward.imageset/Contents.json
       "idiom" : "universal",
       "scale" : "3x"
     }
