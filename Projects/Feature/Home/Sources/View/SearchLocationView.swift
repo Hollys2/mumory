@@ -29,7 +29,7 @@ struct AddressRow: View {
                         let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
                         mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
                         
-                        self.localSearchViewModel.addRecentSearch(RecentLocationSearch(locationTitle: result.title, locationSubTitle: result.subtitle, latitude: region.center.longitude, longitude: region.center.latitude))
+                        self.localSearchViewModel.addRecentSearch(RecentLocationSearch(locationTitle: result.title, locationSubTitle: result.subtitle, latitude: region.center.latitude, longitude: region.center.longitude))
                     }
                 } else {
                     print("ERROR: 해당하는 주소가 없습니다.")
@@ -86,6 +86,7 @@ struct SearchLocationView: View {
         VStack(spacing: 0) {
             
             HStack {
+                
                 ZStack(alignment: .leading) {
                     TextField("", text: $localSearchViewModel.queryFragment,
                               prompt: Text("위치 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
@@ -315,9 +316,8 @@ struct SearchLocationView: View {
             }
         } // VStack
         .navigationBarBackButtonHidden(true)
+        .padding(.top, appCoordinator.safeAreaInsetsTop + 12)
         .padding(.horizontal, 20)
-        .frame(width: UIScreen.main.bounds.width + 1)
-        .padding(.top, 60)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .loadingLottie(localSearchViewModel.isSearching)
         .onDisappear {

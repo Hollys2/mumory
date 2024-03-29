@@ -61,13 +61,13 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
         let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !mumoryIds.contains($0.id) }
         uiView.removeAnnotations(annotationsToRemove)
         
-//        for annotation in self.mumoryDataViewModel.myMumorys {
-//            if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
-//                if existingAnnotation != annotation {
-//                    uiView.removeAnnotation(existingAnnotation)
-//                }
-//            }
-//        }
+        for annotation in self.mumoryDataViewModel.myMumorys {
+            if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
+                if existingAnnotation != annotation {
+                    uiView.removeAnnotation(existingAnnotation)
+                }
+            }
+        }
         
         uiView.addAnnotations(self.mumoryDataViewModel.myMumorys)
         

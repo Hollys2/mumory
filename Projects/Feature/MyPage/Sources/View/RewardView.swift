@@ -21,7 +21,7 @@ public struct RewardView: View {
         
         VStack(spacing: 0) {
             
-            TopBarView(title: "리워드", rightBarButtonNavigationPath: nil, paddingBottom: 28)
+            TopBarView(title: "리워드", rightBarButtonNavigationPath: nil, paddingBottom: 16)
             
             ZStack(alignment: .top) {
                 
@@ -76,6 +76,8 @@ struct RewardContentView: View {
         SharedAsset._14CommentReward.swiftUIImage,
         SharedAsset._30CommentReward.swiftUIImage
     ]
+    
+    var rewards: [Reward] = [.attendance(0), .record(0), .location(0), .like(0), .comment(0)]
     
     var body: some View {
         
@@ -199,7 +201,7 @@ struct RewardContentView: View {
                                                         .resizable()
                                                         .frame(width: getUIScreenBounds().width * 0.082, height: getUIScreenBounds().width * 0.082)
                                                 case 2:
-                                                    recordRewards[index]
+                                                    locationRewards[index]
                                                         .resizable()
                                                         .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
                                                         .blur(radius: 3)
@@ -220,7 +222,7 @@ struct RewardContentView: View {
                                                         .resizable()
                                                         .frame(width: getUIScreenBounds().width * 0.082, height: getUIScreenBounds().width * 0.082)
                                                 case 3:
-                                                    recordRewards[index]
+                                                    likeRewards[index]
                                                         .resizable()
                                                         .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
                                                         .blur(radius: 3)
@@ -241,7 +243,7 @@ struct RewardContentView: View {
                                                         .resizable()
                                                         .frame(width: getUIScreenBounds().width * 0.082, height: getUIScreenBounds().width * 0.082)
                                                 case 4:
-                                                    recordRewards[index]
+                                                    commentRewards[index]
                                                         .resizable()
                                                         .frame(width: getUIScreenBounds().width * 0.179, height: getUIScreenBounds().width * 0.179)
                                                         .blur(radius: 3)
@@ -267,11 +269,13 @@ struct RewardContentView: View {
                                                     EmptyView()
                                                 }
                                             }
+
+//                                            self.rewards[i].a
                                             
-                                            Text("첫 출석")
-                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                                                .multilineTextAlignment(.center)
-                                                .foregroundColor(.white)
+//                                            Text("첫 출석")
+//                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+//                                                .multilineTextAlignment(.center)
+//                                                .foregroundColor(.white)
                                         }
                                     }
                                 }

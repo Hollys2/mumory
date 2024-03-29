@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "3-attendance-reward.png",
+      "filename" : "Reward_02.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "3-attendance-reward@2x.png",
+      "filename" : "Reward_02@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "3-attendance-reward@3x.png",
+      "filename" : "Reward_02@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

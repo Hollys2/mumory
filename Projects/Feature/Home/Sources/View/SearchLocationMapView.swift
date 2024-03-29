@@ -177,6 +177,7 @@ public struct SearchLocationMapView: View {
             
         }
         .ignoresSafeArea()
+        .statusBarHidden(true)
     }
 }
 

@@ -56,8 +56,7 @@ public struct TopBarView: View {
                 .multilineTextAlignment(.center)
                 .foregroundColor(.white)
         }
-        .padding(.top, 19)
-        .padding(.bottom, self.paddingBottom)
+        .frame(height: 65)
         .padding(.horizontal, 20)
         .overlay(
             Rectangle()

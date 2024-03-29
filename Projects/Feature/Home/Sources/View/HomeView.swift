@@ -38,6 +38,19 @@ public struct HomeView: View {
                 switch appCoordinator.selectedTab {
                 case .home:
                     HomeMapView()
+                        .onAppear {
+                            self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { mumorys in
+                                DispatchQueue.main.async {
+                                    self.mumoryDataViewModel.myMumorys = mumorys
+                                    self.mumoryDataViewModel.isUpdating = false
+                                }
+                                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                                
+                            }
+                        }
+                        .onDisappear {
+                            self.listener?.remove()
+                        }
                 case .social:
                     SocialView(isShown: self.$isSocialSearchViewShown)
                 case .library:
@@ -111,7 +124,13 @@ public struct HomeView: View {
                 let authorizationStatus = await MusicAuthorization.request()
                 if authorizationStatus == .authorized {
                     print("음악 권한 받음")
-                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+//                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                    
+//                    self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { mumorys in
+//                        DispatchQueue.main.async {
+//                            self.mumoryDataViewModel.myMumorys = mumorys
+//                        }
+//                    }
                 } else {
                     print("음악 권한 거절")
                     DispatchQueue.main.async {

@@ -133,7 +133,6 @@ struct KnownFriendPageView: View {
                     }
                     .frame(width: getUIScreenBounds().width - 40, height: 129)
                     .cornerRadius(10)
-       
                     
                     SharedAsset.enlargeMapButton.swiftUIImage
                         .resizable()

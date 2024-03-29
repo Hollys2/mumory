@@ -653,7 +653,7 @@ public struct SocialView: View {
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
             if !appCoordinator.isFirstTabSelected {
-                mumoryDataViewModel.fetchEveryMumory()
+                mumoryDataViewModel.fetchEveryMumory2()
                 appCoordinator.isFirstTabSelected = true
             }
             
