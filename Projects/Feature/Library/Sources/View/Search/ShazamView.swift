@@ -16,6 +16,9 @@ struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+
     @State var startsRecording: Bool = false
     @State var isPresentBottomSheet: Bool = false
     @State var isListen: Bool = false
@@ -78,22 +81,33 @@ struct ShazamView: View {
                                     .foregroundStyle(.gray)
                             }
                             .overlay(content: {
-                                SharedAsset.menu.swiftUIImage
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 30, height: 30)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                                    .padding(.trailing, 5)
-                                    .padding(.top, 8)
-                                    .onTapGesture {
-                                        guard let appleMusicID = shazamManager.shazamSong?.appleMusicID else {
-                                            print("no apple music")
-                                            return
-//                                            UIView.setAnimationsEnabled(false)
-//                                            isPresentBottomSheet = true
+                                if let appleMusicID = shazamManager.shazamSong?.appleMusicID {
+                                    SharedAsset.menu.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 30, height: 30)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                                        .padding(.trailing, 5)
+                                        .padding(.top, 8)
+                                        .onTapGesture {
+                                            Task {
+                                                print("tap menu")
+                                                guard let recieveSong = await fetchSong(songID: appleMusicID) else {return}
+                                                self.song = recieveSong
+                                                UIView.setAnimationsEnabled(false)
+                                                isPresentBottomSheet = true
+                                            }
                                         }
-                                        print("yes apple music")
-                                    }
+                                }else {
+                                    Color.black.opacity(0.7)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                                    
+                                    Text("애플 뮤직에\n등록되지 않은\n음악 입니다 :(")
+                                        .multilineTextAlignment(.center)
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                        .foregroundStyle(Color.white)
+                                }
+                        
                             })
                             .padding(.top, 36)
                             
@@ -200,6 +214,23 @@ struct ShazamView: View {
                     HStack(alignment: .center, spacing: 12) {
                         ForEach(shazamHistory, id: \.self) { item in
                             ShazamHistoryItem(shazamItem: item, selectedShazamHistory: $selectedShazamHistory, isEditing: $isEditing)
+                                .onTapGesture {
+                                    let shazamItem = item as SHMediaItem
+                                    guard let appleMusicID = shazamItem.appleMusicID else {return}
+                                    
+                                    if self.type == .createMumory {
+                                        guard let title = shazamItem.title else {return}
+                                        guard let artist = shazamItem.artist else {return}
+                                        let artwork = shazamItem.artworkURL
+                                        mumoryDataViewModel.choosedMusicModel = MusicModel(songID: MusicItemID(rawValue: appleMusicID), title: title, artist: artist, artworkUrl: artwork)
+                                        appCoordinator.rootPath.removeLast(2)
+                                    }else {
+                                        Task {
+                                            guard let song = await fetchSong(songID: appleMusicID) else {return}
+                                            playerViewModel.playNewSong(song: song)
+                                        }
+                                    }
+                                }
                         }
                     }
                     .padding(.horizontal, 20)
@@ -273,18 +304,11 @@ struct ShazamView: View {
                 isListen.toggle()
             }
         })
-        .onChange(of: shazamManager.shazamSong, perform: { newValue in
-            Task {
-                self.song = await fetchSong(songID: shazamManager.shazamSong?.appleMusicID ?? "")
-            }
-        })
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
-            if let song = self.song {
-                BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                    SongBottomSheetView(song: song)
-                }
-                .background(TransparentBackground())
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                SongBottomSheetView(song: song!)//흠흠흠흠흠.... state변수임에도 바뀐 값 인식 못 하는듯... 어카지???????????
             }
+            .background(TransparentBackground())
         }
         .onAppear(perform: {
             shazamManager.startOrEndListening()
@@ -378,13 +402,13 @@ struct ShazamAddButton: View {
         self._item = shazamItem
     }
     var body: some View {
-        HStack(alignment: .center, spacing: 6, content: {
+        HStack(alignment: .center, spacing: 2, content: {
             SharedAsset.addBlackBig.swiftUIImage
                 .resizable()
                 .scaledToFit()
                 .frame(width: 19, height: 19)
             
-            Text("음악 추가")
+            Text("음악추가")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                 .foregroundStyle(Color.black)
         })
@@ -421,16 +445,23 @@ struct ShazamHistoryItem: View {
                 image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 105, height: 105)
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-
             } placeholder: {
                 Rectangle()
                     .fill(ColorSet.moreDeepGray)
-                    .frame(width: 105, height: 105)
             }
-            .padding(.bottom, 10)
+            .frame(width: 105, height: 105)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
             .overlay {
+                if shazamItem.appleMusicID == nil {
+                    Color.black.opacity(0.7)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                    
+                    Text("애플 뮤직에\n등록되지 않은\n음악 입니다 :(")
+                        .multilineTextAlignment(.center)
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                        .foregroundStyle(Color.white)
+                }
+                
                 if isEditing {
                     SharedAsset.checkTranslucent.swiftUIImage
                         .resizable()
@@ -455,18 +486,21 @@ struct ShazamHistoryItem: View {
                         }
 
                 }
-
             }
+            .padding(.bottom, 10)
+
+
+
             
             Text(shazamItem.title ?? "")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                .foregroundStyle(Color.white)
+                .foregroundStyle(shazamItem.appleMusicID == nil ? ColorSet.subGray : Color.white)
                 .frame(width: 105, alignment: .leading)
                 .lineLimit(1)
             
             Text(shazamItem.artist ?? "")
                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                .foregroundStyle(ColorSet.charSubGray)
+                .foregroundStyle(shazamItem.appleMusicID == nil ? ColorSet.subGray : Color.white)
                 .frame(width: 105, alignment: .leading)
                 .lineLimit(1)
 

@@ -14,12 +14,9 @@ import Core
 import Firebase
 import FirebaseAuth
 
+
 public struct SplashView: View {
-    enum initPage {
-        case login
-        case onBoarding
-        case home
-    }
+  
     
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -35,10 +32,7 @@ public struct SplashView: View {
     @State var isInitialSettingDone = false
     @State var goToLoginView: Bool = false
     @State var isEndSplash: Bool = false
-    @State var page: initPage = .login
-    
-    @State private var listener: ListenerRegistration?
-    
+        
     public init() {
     }
     
@@ -47,7 +41,7 @@ public struct SplashView: View {
             NavigationStack(path: $appCoordinator.rootPath) {
                 ZStack(alignment: .top) {
                     VStack(spacing: 0) {
-                        switch(page){
+                        switch(appCoordinator.initPage){
                         case .login:
                             LoginView()
                         case .onBoarding:
@@ -197,8 +191,8 @@ public struct SplashView: View {
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                      
-                    case .notification:
-                        NotificationView()
+                    case .notification(iconHidden: let hidden):
+                        NotificationView(homeIconHidden: hidden)
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                          
@@ -294,7 +288,7 @@ public struct SplashView: View {
                   let id = data["id"] as? String,
                   let isCheckedServiceNewsNotification = data["isSubscribedToService"] as? Bool,
                   let favoriteGenres = data["favoriteGenres"] as? [Int] else {
-                page = .login
+                appCoordinator.initPage = .login
                 withAnimation {
                     isInitialSettingDone = true
                 }
@@ -308,7 +302,7 @@ public struct SplashView: View {
             withAnimation {
                 isInitialSettingDone = true
             }
-            page = .home
+            appCoordinator.initPage = .home
             try await db.collection("User").document(user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {
                 return

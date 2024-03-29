@@ -102,6 +102,7 @@ private struct UserProfile: View {
                     .padding(.bottom, 24)
             }
             .onTapGesture {
+                UIView.setAnimationsEnabled(false)
                 isPresentBackgroundBottomSheet = true
             }
             .fullScreenCover(isPresented: $isPresentBackgroundBottomSheet) {
@@ -140,6 +141,7 @@ private struct UserProfile: View {
                 .offset(y: 50)
                 .padding(.trailing, 20)
                 .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
                     isPresentProfileBottomSheet = true
                 }
                 .fullScreenCover(isPresented: $isPresentProfileBottomSheet) {

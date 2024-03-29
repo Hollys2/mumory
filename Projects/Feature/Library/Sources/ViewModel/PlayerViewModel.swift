@@ -80,8 +80,12 @@ public class PlayerViewModel: ObservableObject {
             
         }
     }
-    public func playAll(title: String, songs: [Song]) {
-        self.player.queue = .init(for: songs)
+    public func playAll(title: String, songs: [Song], startingItem: Song? = nil) {
+        if let startingItem = startingItem {
+            self.player.queue = .init(for: songs, startingAt: startingItem)
+        }else {
+            self.player.queue = .init(for: songs)
+        }
         self.queue = songs
         self.originQueue = songs
         self.queueTitle = title

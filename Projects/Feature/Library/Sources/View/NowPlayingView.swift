@@ -194,6 +194,7 @@ struct PlayControlView: View {
                             playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: nowSong.id.rawValue)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }else {
+                            self.generateHapticFeedback(style: .medium)
                             playerViewModel.addToFavorite(uid: currentUserData.uId, songId: nowSong.id.rawValue)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
@@ -231,7 +232,7 @@ struct PlayingView: View {
     @State var titleWidth: CGFloat = 0
     @State private var startAnimation : Bool = false
     @State var changeOffset: CGFloat = .zero
-
+    @State var isPresentAddBottomSheet: Bool = false
     
     let delay: Double = 1.0
     let artistTextColor = Color(white: 0.89)
@@ -291,11 +292,17 @@ struct PlayingView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.trailing, 20)
                 
+                //추가버튼
                 if playerViewModel.currentSong != nil {
                     SharedAsset.addPurpleCircleFilled.swiftUIImage
                         .resizable()
                         .scaledToFit()
                         .frame(width: 35, height: 35)
+                        .onTapGesture {
+                            print("taptaptap")
+                            UIView.setAnimationsEnabled(false)
+                            isPresentAddBottomSheet = true
+                        }
                 }else {
                     SharedAsset.addGrayCircle.swiftUIImage
                         .resizable()
@@ -309,45 +316,42 @@ struct PlayingView: View {
             Spacer()
             
             HStack{
-                Button(action: {
-                    playerViewModel.setShuffleMode()
-                }, label: {
+                //랜덤 버튼
+                Image(asset: {
                     switch playerViewModel.shuffleState {
                     case .off:
-                        SharedAsset.playRandomOff.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 28, height: 28)
+                        SharedAsset.playRandomOff
                     case .on:
-                        SharedAsset.playRandom.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 28, height: 28)
+                        SharedAsset.playRandom
                     }
-                    
-                })
+                }())
+                .resizable()
+                .scaledToFit()
+                .frame(width: 28, height: 28)
+                .onTapGesture {
+                    playerViewModel.setShuffleMode()
+                }
+  
                 Spacer()
-                Button(action: {
-                    playerViewModel.setRepeatMode()
-                }, label: {
+                
+                //곡 반복 버튼
+                Image(asset: {
                     switch playerViewModel.repeatState {
                     case .off:
-                        SharedAsset.playRepeatOff.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 28, height: 28)
+                        SharedAsset.playRepeatOff
                     case .all:
-                        SharedAsset.playRepeatAll.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 28, height: 28)
+                        SharedAsset.playRepeatAll
                     case .one:
-                        SharedAsset.playRepeatOneItem.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 28, height: 28)
+                        SharedAsset.playRepeatOneItem
                     }
-                })
+                }())
+                .resizable()
+                .scaledToFit()
+                .frame(width: 28, height: 28)
+                .onTapGesture {
+                    playerViewModel.setRepeatMode()
+                }
+                
             }
             .padding(.horizontal, 25)
             .padding(.bottom, 16)
@@ -384,9 +388,43 @@ struct PlayingView: View {
             
             
         }
+        .fullScreenCover(isPresented: $isPresentAddBottomSheet) {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentAddBottomSheet) {
+                PlayingViewBottomSheet()
+            }
+            .background(TransparentBackground())
+        }
     }
+}
 
+struct PlayingViewBottomSheet: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @Environment(\.dismiss) var dismiss
     
+    var body: some View {
+        VStack(spacing: 0) {
+            BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
+                .onTapGesture {
+                    guard let song = playerViewModel.currentSong else {return}
+                    appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
+                    dismiss()
+                    playerViewModel.isPresentNowPlayingView = false
+
+                }
+            BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 만들기", type: .accent)
+                .onTapGesture {
+                    guard let song = playerViewModel.currentSong else {return}
+                    appCoordinator.selectedTab = .home
+                    appCoordinator.rootPath = NavigationPath()
+                    mumoryDataViewModel.choosedMusicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    appCoordinator.isCreateMumorySheetShown = true
+                    dismiss()
+                    playerViewModel.isPresentNowPlayingView = false
+                }
+        }
+    }
 }
 
 struct QueueView: View {
@@ -445,6 +483,16 @@ struct QueueView: View {
                                     }
                                     playerViewModel.changeCurrentEntry(song: song)
                                 }
+//                                .highPriorityGesture(
+//                                    TapGesture()
+//                                        .onEnded({ _ in
+//                                            withAnimation {
+//                                                proxy.scrollTo(song.id, anchor: .top)
+//                                            }
+//                                            playerViewModel.changeCurrentEntry(song: song)
+//                                        })
+//                                )
+                            
                         }
                     }
                     
@@ -592,6 +640,7 @@ struct PlayTogetherItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
+                        self.generateHapticFeedback(style: .medium)
                         playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
@@ -604,21 +653,26 @@ struct PlayTogetherItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
-                .fullScreenCover(isPresented: $isPresentBottomSheet) {
-                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                        //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거
-                        //현재 MusicListItem은 북마크 버튼이 있는 아이템이라 즐겨찾기 추가 버튼이 음악 아이템 내부에 원래 있음
-                        SongBottomSheetView(song: song, types: [.withoutBookmark])
-                    }
-                    .background(TransparentBackground())
-                }
+       
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 15)
         .frame(height: 70)
         .background(ColorSet.background)
-        
+//        .onLongPressGesture {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거
+                //현재 MusicListItem은 북마크 버튼이 있는 아이템이라 즐겨찾기 추가 버튼이 음악 아이템 내부에 원래 있음
+                SongBottomSheetView(song: song, types: [.withoutBookmark])
+            }
+            .background(TransparentBackground())
+        }
     }
 }
 
@@ -643,27 +697,30 @@ struct MarqueeText: View {
                 .onAppear {
                     guard let song = playerViewModel.currentSong else {return}
                     titleWidth = getTextWidth(term: song.title)
-                    changeOffset = titleWidth < 280 ? 0 : -titleWidth
-                    withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(2, autoreverses: true)) {
-                        startAnimation.toggle()
+                    changeOffset = 0
+                    //현재 startAnimation: false, changeOffset: -400. 현재 위치 -400
+                    //false -> true / -400 -> 0 / 왼 -> 오 / 끝나는 위치: 0
+                    //시작 위치: -400, 끝나는 위치: 0 => 3회반복 (false -> true)
+                    //false -> true -> false -> true / -400 -> 0 -> -400 -> 0
+                    //0 -> -400 -> 0 -> -400 -> 0 / 0이 아니라 -400에 가잇음;;; - 아 결국 끝나는 곳이 false니까..!
+                    //음ㅣㄹ알단킵
+                    withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(5, autoreverses: true)) {
+                        changeOffset = titleWidth < 280 ? 0 : -titleWidth
+                        startAnimation = true
                     }
                 }
                 .onChange(of: playerViewModel.currentSong, perform: { value in
                     guard let song = value else {return}
+                    startAnimation = false
+                    changeOffset = 0
                     self.id = UUID()
                     titleWidth = getTextWidth(term: song.title)
                     changeOffset = titleWidth < 280 ? 0 : -titleWidth
-                    withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(2, autoreverses: true)) {
-                        startAnimation.toggle()
+                    withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(3, autoreverses: true)) {
+                        startAnimation = true
                     }
-                    Timer.scheduledTimer(withTimeInterval: 8.0, repeats: false) { timer in
-                        changeOffset = 0
-                    }
-                    //애니메이션이 끝나면 음수로 가거나...어쩌구...
-                    //이 부분 해결하기
                 })
-                .offset(x: startAnimation ? changeOffset: 0 )
-//                .animation(.linear(duration: 4.0).delay(2.0).repeatCount(1, autoreverses: true), value: startAnimation)
+                .offset(x: startAnimation ? 0 : changeOffset )
         }
         .scrollIndicators(.hidden)
         .scrollDisabled(true)

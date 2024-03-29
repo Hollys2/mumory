@@ -37,14 +37,16 @@ struct FavoriteListView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                 })
-                .frame(height: 40)
+                .frame(height: 63)
                 .padding(.horizontal, 20)
                 
                 HStack(alignment: .bottom){
-                    Text("\(playerViewModel.favoriteSongIds.count)곡")
+                    Text("\(currentUserData.playlistArray[0].songIDs.count)곡")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.subGray)
+                    
                     Spacer()
+                    
                     PlayAllButton()
                         .onTapGesture {
                             playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs)
@@ -61,6 +63,16 @@ struct FavoriteListView: View {
                     LazyVStack(spacing: 0, content: {
                         ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
                             FavoriteSongItem(song: song)
+                                .onTapGesture {
+                                    playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
+                                }
+//                                .highPriorityGesture(
+//                                    TapGesture()
+//                                        .onEnded({ _ in
+//                                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
+//                                        })
+//                                )
+                            
                         }
                         if isLoading {
                             ForEach(0...7, id: \.self) { count in
@@ -80,7 +92,6 @@ struct FavoriteListView: View {
             })
         }
         .onAppear {
-            playerViewModel.miniPlayerMoveToBottom = true
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             Task {
                 self.isLoading = true
@@ -93,77 +104,91 @@ struct FavoriteListView: View {
 }
 
 struct FavoriteSongItem: View {
+
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @State var isPresentBottomSheet: Bool = false
     let song: Song
     init(song: Song) {
         self.song = song
     }
-    @State var bookmark: Image = SharedAsset.bookmarkFilled.swiftUIImage
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
-        VStack(spacing: 0, content: {
-            HStack(spacing: 0, content: {
-                AsyncImage(url: song.artwork?.url(width: 200, height: 200)) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } placeholder: {
-                    Rectangle()
-                        .fill(ColorSet.skeleton)
-                }
-                .frame(width: 57, height: 57)
-                .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
-                .padding(.trailing, 16)
+        HStack(spacing: 0, content: {
+            AsyncImage(url: song.artwork?.url(width: 200, height: 200)) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder: {
+                Rectangle()
+                    .fill(ColorSet.skeleton)
+            }
+            .frame(width: 57, height: 57)
+            .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
+            .padding(.trailing, 16)
+            
+            VStack(spacing: 4, content: {
+                Text(song.title)
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                    .foregroundStyle(Color.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 
-                VStack(spacing: 4, content: {
-                    Text(song.title)
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                        .foregroundStyle(Color.white)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                    
-                    Text(song.artistName)
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .foregroundStyle(Color(white: 0.72))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                })
-                .padding(.trailing, 27)
-                
-                if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
-                    SharedAsset.bookmarkFilled.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .padding(.trailing, 20)
-                        .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
-                            snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
-                        }
-                }else {
-                    SharedAsset.bookmark.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24)
-                        .padding(.trailing, 20)
-                        .onTapGesture {
-                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
-                            snackBarViewModel.setSnackBar(type: .favorite, status: .success)
-                        }
-                }
-                
-                SharedAsset.menu.swiftUIImage
+                Text(song.artistName)
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(Color(white: 0.72))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            })
+            .padding(.trailing, 27)
+            
+            if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                SharedAsset.bookmarkFilled.swiftUIImage
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 30, height: 30)
-            })
-            .padding(.horizontal, 20)
-            .background(ColorSet.background)
-            .frame(height: 95)
+                    .frame(width: 24, height: 24)
+                    .padding(.trailing, 20)
+                    .onTapGesture {
+                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                    }
+            }else {
+                SharedAsset.bookmark.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .padding(.trailing, 20)
+                    .onTapGesture {
+                        self.generateHapticFeedback(style: .medium)
+                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                    }
+            }
             
+            SharedAsset.menu.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBottomSheet = true
+                }
         })
+        .padding(.horizontal, 20)
+        .frame(height: 95)
+        .background(ColorSet.background)
+//        .onLongPressGesture(perform: {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        })
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                SongBottomSheetView(song: song, types: [.withoutBookmark])
+            }
+            .background(TransparentBackground())
+        }
     }
 }
 

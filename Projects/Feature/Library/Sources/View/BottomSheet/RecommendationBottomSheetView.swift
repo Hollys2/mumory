@@ -67,17 +67,20 @@ private struct MiniPlaylistImage: View {
                 //1번째 이미지
                 if songs.count < 1 {
                     Rectangle()
+                        .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
-                        .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageSize, height: imageSize)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageSize, height: imageSize)
-                            .foregroundStyle(emptyGray)
+                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .frame(width: imageSize, height: imageSize)
+                        default:
+                            Rectangle()
+                                .fill(ColorSet.skeleton)
+                                .frame(width: imageSize, height: imageSize)
+                        }
                     }
                 }
                 
@@ -89,17 +92,20 @@ private struct MiniPlaylistImage: View {
                 //2번째 이미지
                 if songs.count < 2{
                     Rectangle()
+                        .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
-                        .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageSize, height: imageSize)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageSize, height: imageSize)
-                            .foregroundStyle(emptyGray)
+                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .frame(width: imageSize, height: imageSize)
+                        default:
+                            Rectangle()
+                                .fill(ColorSet.skeleton)
+                                .frame(width: imageSize, height: imageSize)
+                        }
                     }
                 }
                 
@@ -115,17 +121,20 @@ private struct MiniPlaylistImage: View {
                 //3번째 이미지
                 if songs.count < 3 {
                     Rectangle()
+                        .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
-                        .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[2].artwork?.url(width: 100, height: 100) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageSize, height: imageSize)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageSize, height: imageSize)
-                            .foregroundStyle(emptyGray)
+                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .frame(width: imageSize, height: imageSize)
+                        default:
+                            Rectangle()
+                                .fill(ColorSet.skeleton)
+                                .frame(width: imageSize, height: imageSize)
+                        }
                     }
                 }
                 
@@ -137,17 +146,20 @@ private struct MiniPlaylistImage: View {
                 //4번째 이미지
                 if songs.count <  4 {
                     Rectangle()
+                        .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
-                        .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[3].artwork?.url(width: 100, height: 100) ?? URL(string: "")) { image in
-                        image
-                            .resizable()
-                            .frame(width: imageSize, height: imageSize)
-                    } placeholder: {
-                        Rectangle()
-                            .frame(width: imageSize, height: imageSize)
-                            .foregroundStyle(emptyGray)
+                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .frame(width: imageSize, height: imageSize)
+                        default:
+                            Rectangle()
+                                .fill(ColorSet.skeleton)
+                                .frame(width: imageSize, height: imageSize)
+                        }
                     }
                 }
                 

@@ -61,12 +61,7 @@ struct QueueItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
-                .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                        SongBottomSheetView(song: song)
-                    }
-                    .background(TransparentBackground())
-                })
+         
 
             
         })
@@ -75,6 +70,17 @@ struct QueueItem: View {
         .background(playerViewModel.playingSong() == self.song ? Color.black : ColorSet.background)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .circular))
         .padding(.horizontal, 15)
+//        .onLongPressGesture {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                SongBottomSheetView(song: song)
+            }
+            .background(TransparentBackground())
+        })
     }
 
 }

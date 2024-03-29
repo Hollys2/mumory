@@ -82,6 +82,7 @@ struct MusicListItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
+                        self.generateHapticFeedback(style: .medium)
                         playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
@@ -94,22 +95,27 @@ struct MusicListItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
-                .fullScreenCover(isPresented: $isPresentBottomSheet) {
-                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                        //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거
-                        //현재 MusicListItem은 북마크 버튼이 있는 아이템이라 즐겨찾기 추가 버튼이 음악 아이템 내부에 원래 있음
-                        SongBottomSheetView(song: song,
-                                            types: type == .artist ? [.withoutArtist, .withoutBookmark] : [.withoutBookmark])
-                    }
-                    .background(TransparentBackground())
-                }
+       
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 20)
         .frame(height: 70)
         .background(ColorSet.background)
-        
+//        .onLongPressGesture {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거
+                //현재 MusicListItem은 북마크 버튼이 있는 아이템이라 즐겨찾기 추가 버튼이 음악 아이템 내부에 원래 있음
+                SongBottomSheetView(song: song,
+                                    types: type == .artist ? [.withoutArtist, .withoutBookmark] : [.withoutBookmark])
+            }
+            .background(TransparentBackground())
+        }
     }
 }
 

@@ -84,10 +84,14 @@ struct ChartListView: View {
                     LazyVStack(spacing: 0, content: {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
-                                .onTapGesture {
-                                    playerViewModel.playNewSong(song: songs[index])
+                                .simultaneousGesture(TapGesture().onEnded({ _ in
+                                    playerViewModel.playAll(title: "최신 인기곡", songs: songs, startingItem: songs[index])
+                                    if searchIndex < 5 {
+                                        requestTop100(startIndex: searchIndex + 1)
+                                    }
                                     playerViewModel.isShownMiniPlayer = true
-                                }
+                                }))
+                        
                         }
                     })
                     .frame(width: getUIScreenBounds().width)
@@ -111,16 +115,11 @@ struct ChartListView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
-            playerViewModel.miniPlayerMoveToBottom = true
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }
     
-    private func getUpdateDateText() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "M월 d일에 업데이트됨"
-        return dateFormatter.string(from: Date())
-    }
+
     
     private func requestChart(index: Int){
         searchIndex = index
@@ -167,3 +166,9 @@ struct ChartListView: View {
 //#Preview {
 //    ChartListView()
 //}
+
+public func getUpdateDateText() -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "M월 d일에 업데이트됨"
+    return dateFormatter.string(from: Date())
+}

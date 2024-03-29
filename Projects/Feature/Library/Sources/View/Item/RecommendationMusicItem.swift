@@ -11,6 +11,7 @@ import Shared
 import MusicKit
 
 public struct RecommendationMusicItem: View {
+    @State var isPresentBottomSheet: Bool = false
     let song: Song
     init(song: Song) {
         self.song = song
@@ -45,6 +46,17 @@ public struct RecommendationMusicItem: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
             
+        }
+//        .onLongPressGesture {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                SongBottomSheetView(song: song)
+            }
+            .background(TransparentBackground())
         }
 
     }

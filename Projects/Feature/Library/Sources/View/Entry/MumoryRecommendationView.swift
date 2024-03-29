@@ -34,6 +34,10 @@ public struct MumoryRecommendationView: View {
     @State var musicChart: MusicItemCollection<Song> = []
     @State var chartChangeDetectValue: Bool = false
     @State var testValue: CGFloat = 200
+    
+    @State var mostPostedSongs: [Song] = []
+    @State var similiarTasteSongs: [Song] = []
+    @State var selection: Int = 0
     public init() {
         
     }
@@ -56,11 +60,17 @@ public struct MumoryRecommendationView: View {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             let song = musicChart[index]
                             MusicChartItem(rank: index+1, song: song) //순위 곡 itemv
-                                .frame(width: getUIScreenBounds().width * 0.9, height: 70)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
                                     playerViewModel.isShownMiniPlayer = true
                                 }
+//                                .highPriorityGesture(
+//                                    TapGesture()
+//                                        .onEnded({ _ in
+//                                            playerViewModel.playNewSong(song: song)
+//                                            playerViewModel.isShownMiniPlayer = true
+//                                        })
+//                                )
                         }
                         
                         if musicChart.isEmpty {
@@ -84,6 +94,29 @@ public struct MumoryRecommendationView: View {
                 
                 FavoriteGenreRecommendationView()
                 
+                Divider03()
+                    .padding(.vertical, 50)
+                
+
+
+                TabView(selection: $selection){
+                    ExtraRecommendationView(type: .mostPosted, songs: $mostPostedSongs).tag(0)
+                    ExtraRecommendationView(type: .similiarTaste, songs: $similiarTasteSongs).tag(1)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .frame(height: 450)
+                
+                HStack(spacing: 8, content: {
+                    Circle()
+                        .fill(selection == 0 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+                        .frame(width: 6, height: 6)
+                    
+                    Circle()
+                        .fill(selection == 1 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+                        .frame(width: 6, height: 6)
+                })
+                .padding(.top, 25)
+                
                 Rectangle()
                     .foregroundStyle(Color.clear)
                     .frame(height: 90)
@@ -94,6 +127,10 @@ public struct MumoryRecommendationView: View {
         }
         .onAppear(perform: {
             searchChart(offset: 0)
+            Task {
+                mostPostedSongs = await getMostPostedSongs()
+                similiarTasteSongs = await getSimiliarTasteSongs()
+            }
             AnalyticsManager.shared.setScreenLog(screenTitle: "MumoryRecommendationView")
         })
         
@@ -112,9 +149,42 @@ public struct MumoryRecommendationView: View {
             chartChangeDetectValue = !chartChangeDetectValue
     
         }
+    }
+    
+    private func getMostPostedSongs() async -> [Song] {
+        let db = FBManager.shared.db
+        let query = db.collection("RecordData")
+            .order(by: "count", descending: true)
+            .limit(to: 5)
+        var songIds: [String] = []
+        guard let snapshots = try? await query.getDocuments() else {return []}
+        snapshots.documents.forEach { document in
+            let data = document.data()
+            guard let songId = data["songId"] as? String else {return}
+            songIds.append(songId)
+        }
         
+        return await fetchSongs(songIDs: songIds)
+    }
+    
+    private func getSimiliarTasteSongs() async -> [Song]{
+        let db = FBManager.shared.db
+        let myRandomFavoriteGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
         
-        
+        let query = db.collection("User")
+            .whereField("favoriteGenres", arrayContains: myRandomFavoriteGenre)
+            
+        guard let snapshots = try? await query.getDocuments() else {print("a");return []}
+        var documents = snapshots.documents.shuffled()
+        documents.removeAll(where: {$0.documentID == currentUserData.uId})
+        guard let docID = documents.first?.documentID else {print("b");return []}
+        print("doc id: \(docID)")
+        guard let favoriteDoc = try? await db.collection("User").document(docID).collection("Playlist").document("favorite").getDocument() else {print("c");return []}
+        guard let data = favoriteDoc.data() else {print("d");return []}
+        guard var songIds = data["songIds"] as? [String] else {print("e");return []}
+        songIds = songIds.shuffled()
+        songIds = Array(songIds.prefix(5))
+        return await fetchSongs(songIDs: songIds)
     }
 }
 
@@ -137,3 +207,5 @@ private struct SubTitle: View {
 
 
 
+
+  

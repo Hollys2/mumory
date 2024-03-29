@@ -176,7 +176,7 @@ public enum MyPage: Hashable {
     case myPage
     case setting
     case account
-    case notification
+    case notification(iconHidden: Bool = false)
     case setPW
     case question
     case emailVerification
@@ -194,4 +194,10 @@ public enum Tab {
     case social
     case library
     case notification
+}
+
+public enum InitPage {
+    case login
+    case onBoarding
+    case home
 }

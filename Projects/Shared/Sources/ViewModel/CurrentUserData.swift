@@ -46,10 +46,9 @@ public class CurrentUserData: ObservableObject {
     var friendCollectionListener: ListenerRegistration?
     var friendDocumentListener: ListenerRegistration?
     var notificationListener: ListenerRegistration?
-    
+
     
     func FriendRequestListener() {
-        print("FriendRequestListener")
         DispatchQueue.main.async {
             
             let db = FBManager.shared.db
@@ -60,7 +59,6 @@ public class CurrentUserData: ObservableObject {
                 snapshot.documentChanges.forEach { documentChange in
                     switch documentChange.type {
                     case .added, .removed:
-                        print("friend collection change")
                         let data = documentChange.document.data()
                         guard let type = data["type"] as? String else {return}
                         if type == "recieve" {
@@ -90,11 +88,9 @@ public class CurrentUserData: ObservableObject {
     }
     
     func FriendUpdateListener() {
-        print("FriendUpdateListener")
         DispatchQueue.main.async {
             let db = FBManager.shared.db
             self.friendDocumentListener = db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
-                print("friend update!!!")
                 guard let snapshot = snapshot else {return}
                 guard let friendIds = snapshot.get("friends") as? [String] else {return}
                 self.friends.removeAll()
@@ -232,5 +228,21 @@ public class CurrentUserData: ObservableObject {
         }else {
             return .notFriend
         }
+    }
+    
+    public func removeAllData(){
+        uId = ""
+        user = MumoriUser()
+        friends.removeAll()
+        blockFriends.removeAll()
+        friendRequests.removeAll()
+        recievedRequests.removeAll()
+        recievedNewFriends = false
+        existUnreadNotification = false
+        favoriteGenres.removeAll()
+        playlistArray.removeAll()
+        friendCollectionListener?.remove()
+        friendDocumentListener?.remove()
+        notificationListener?.remove()
     }
 }

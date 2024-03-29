@@ -130,7 +130,6 @@ struct PlaylistManageView: View {
 
         }
         .onAppear {
-            playerViewModel.miniPlayerMoveToBottom = true
             itemSize = getUIScreenBounds().width * 0.21
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistManageView")

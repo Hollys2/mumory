@@ -66,20 +66,18 @@ struct RecommendationListView: View {
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.top, 5)
                         
-                        
-                        HStack(alignment: .bottom,spacing: 8, content: {
+                        HStack(alignment: .bottom){
                             Text("\(songs.count)곡")
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                                 .foregroundStyle(ColorSet.subGray)
+                            
                             Spacer()
                             
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡", songs: songs)
-                                    AnalyticsManager.shared.setSelectContentLog(title: "RecommendationListViewPlayAllButton")
-
+                                    playerViewModel.playAll(title: title, songs: songs)
                                 }
-                        })
+                        }
                         .padding(.horizontal, 20)
                         .padding(.bottom, 15)
                         .padding(.top, 30)
@@ -89,9 +87,17 @@ struct RecommendationListView: View {
                         ForEach(songs, id: \.self) { song in
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.playAll(title: title, songs: songs, startingItem: song)
                                     playerViewModel.isShownMiniPlayer = true
                                 }
+//                                .highPriorityGesture(
+//                                    TapGesture()
+//                                        .onEnded({ _ in
+//                                            playerViewModel.playAll(title: title, songs: songs, startingItem: song)
+//                                            playerViewModel.isShownMiniPlayer = true
+//                                        })
+//                                )
+                    
                             Divider05()
                         }
                         
@@ -146,7 +152,6 @@ struct RecommendationListView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
-            playerViewModel.miniPlayerMoveToBottom = true
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {

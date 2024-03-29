@@ -124,6 +124,7 @@ struct SetPWView: View {
         .onTapGesture {
             self.hideKeyboard()
         }
+        .disabled(isLoading)
     }
 
     

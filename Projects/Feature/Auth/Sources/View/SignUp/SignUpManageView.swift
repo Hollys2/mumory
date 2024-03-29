@@ -134,11 +134,6 @@ struct SignUpManageView: View {
             }
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()
-            //회원가입이 완료 되었을 때 다음 화면으로 이동
-//            .navigationDestination(isPresented: $isSignUpCompleted) {
-//                StartCostomizationView()
-//                    .environmentObject(customManager)
-//            }
             .gesture(DragGesture().onEnded({ gesture in
                 if gesture.location.x - gesture.startLocation.x > 80 {
                     isTapBackButton = true
@@ -155,6 +150,7 @@ struct SignUpManageView: View {
             .onTapGesture {
                 self.hideKeyboard()
             }
+            .disabled(isLoading)
         
     }
     

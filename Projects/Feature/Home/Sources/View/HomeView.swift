@@ -97,6 +97,7 @@ public struct HomeView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear {
+            playerViewModel.miniPlayerMoveToBottom = false
             Task {
                 let authorizationStatus = await MusicAuthorization.request()
                 if authorizationStatus == .authorized {
@@ -110,6 +111,9 @@ public struct HomeView: View {
                     }
                 }
             }
+        }
+        .onDisappear {
+            playerViewModel.miniPlayerMoveToBottom = true
         }
     }
     

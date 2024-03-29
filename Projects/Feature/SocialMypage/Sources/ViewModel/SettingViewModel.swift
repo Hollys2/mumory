@@ -13,6 +13,7 @@ class SettingViewModel: ObservableObject{
     @Published var email: String = ""
     @Published var signinMethod: String = ""
     @Published var nickname: String = ""
+    @Published var isLoading: Bool = false
     @Published var notificationTime: Int = 0 {
         didSet {
             db.collection("User").document(uid).setData(["notificationTime": notificationTime], merge: true)
@@ -30,7 +31,6 @@ class SettingViewModel: ObservableObject{
     }
     @Published var isSubscribedToSocial = false {
         didSet {
-            print("touch, uid: \(self.uid)")
             db.collection("User").document(uid).setData(["isSubscribedToSocial": isSubscribedToSocial], merge: true)
             if isSubscribedToSocial {
                 messaging.subscribe(toTopic: "Social")
@@ -41,6 +41,7 @@ class SettingViewModel: ObservableObject{
     }
     var uid: String = "" {
         didSet {
+            isLoading = true
             Task {
                 guard let document = try? await db.collection("User").document(uid).getDocument() else {
                     return
@@ -64,6 +65,7 @@ class SettingViewModel: ObservableObject{
                     self.email = email
                     self.nickname = nickname
                     self.notificationTime = notificationTime
+                    self.isLoading = false
                 }
             }
         }

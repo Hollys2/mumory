@@ -25,18 +25,21 @@ struct ArtistBottomSheetView: View {
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 13, content: {
-                AsyncImage(url: artist.artwork?.url(width: 300, height: 300)) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 60, height: 60)
-                        .clipShape(Circle())
-                        
-                } placeholder: {
-                    Circle()
-                        .frame(width: 60, height: 60)
-                        .foregroundStyle(.gray)
+                AsyncImage(url: artist.artwork?.url(width: 300, height: 300),transaction: Transaction(animation: .default)) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 60, height: 60)
+                            .clipShape(Circle())
+                    default:
+                        Circle()
+                            .frame(width: 60, height: 60)
+                            .foregroundStyle(.gray)
+                    }
                 }
+
 
               
                 Text(artist.name)

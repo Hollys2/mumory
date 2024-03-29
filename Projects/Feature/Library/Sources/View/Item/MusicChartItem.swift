@@ -69,13 +69,20 @@ struct MusicChartItem: View {
                     })
             }
             .frame(height: 70)
+            .background(ColorSet.background)
+//            .onLongPressGesture {
+//                self.generateHapticFeedback(style: .medium)
+//                UIView.setAnimationsEnabled(false)
+//                isBottomSheerPresent = true
+//            }
 
             Divider05()
                 .opacity(rank%4 == 0 ? 0 : 1)
         }
         .padding(.leading, 20)
+        .frame(width: getUIScreenBounds().width * 0.9)
 
-        }
+    }
 }
 
 struct MusicChartSkeletonView: View {
@@ -108,15 +115,18 @@ struct MusicChartSkeletonView: View {
                 
                 Spacer()
             }
-            .frame(width: getUIScreenBounds().width * 0.9, height: 70)
+            .frame(height: 70)
 
             Divider05()
                 .opacity(lineVisible ? 1 : 0)
         }
         .padding(.leading, 20)
+        .frame(width: getUIScreenBounds().width * 0.9)
         .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
         .onAppear {
             startAnimation.toggle()
         }
     }
 }
+
+

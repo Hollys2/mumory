@@ -44,8 +44,8 @@ struct AuthTextField: View {
     
     func getPrompt() -> Text {
         return Text(prompt)
-            .foregroundColor(Color(red: 0.77, green: 0.77, blue: 0.77))
-            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 18))
+            .foregroundColor(ColorSet.charSubGray)
+            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
     }
 }
 

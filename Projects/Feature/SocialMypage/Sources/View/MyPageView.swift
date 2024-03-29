@@ -52,7 +52,11 @@ public struct MyPageView: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
-                        appCoordinator.setBottomAnimationPage(page: .remove)
+                        if appCoordinator.bottomAnimationViewStatus == .myPage {
+                            appCoordinator.setBottomAnimationPage(page: .remove)
+                        }else {
+                            appCoordinator.rootPath.removeLast()
+                        }
                     }
                 
                 Spacer()
@@ -71,7 +75,7 @@ public struct MyPageView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            settingViewModel.uid = currentUserData.user.uId
+            settingViewModel.uid = currentUserData.uId
             AnalyticsManager.shared.setScreenLog(screenTitle: "MyPageView")
         }
     }

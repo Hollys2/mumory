@@ -135,6 +135,14 @@ private struct RecommendationScrollView: View {
                                     playerViewModel.playNewSong(song: song)
                                     playerViewModel.isShownMiniPlayer = true
                                 }
+//                                .highPriorityGesture(
+//                                    TapGesture()
+//                                        .onEnded({ _ in
+//                                            playerViewModel.playNewSong(song: song)
+//                                            playerViewModel.isShownMiniPlayer = true
+//                                        })
+//                                )
+                            
                         }
                         
                     }

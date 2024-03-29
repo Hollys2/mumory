@@ -39,17 +39,22 @@ struct SongBottomSheetView: View {
      
             VStack(spacing: 0, content: {
                 HStack(alignment: .center,spacing: 0,content: {
-                    AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 60, height: 60)
-                            .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
-                    } placeholder: {
-                        RoundedRectangle(cornerRadius: 5, style: .circular)
-                            .frame(width: 60, height: 60)
-                            .foregroundStyle(ColorSet.lightGray)
+                    
+                    AsyncImage(url: song.artwork?.url(width: 300, height: 300),transaction: Transaction(animation: .default)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFill()
+                                .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
+                        default:
+                            RoundedRectangle(cornerRadius: 5, style: .circular)
+                                .fill(ColorSet.skeleton)
+                        }
                     }
+                    .frame(width: 60, height: 60)
+
+
 
                     
                     VStack(alignment: .leading, spacing: 5, content: {
@@ -104,6 +109,7 @@ struct SongBottomSheetView: View {
                     }else{
                         BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                             .onTapGesture {
+                                self.generateHapticFeedback(style: .medium)
                                 playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
                                 dismiss()
                                 snackBarViewModel.setSnackBar(type: .favorite, status: .success)

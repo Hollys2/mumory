@@ -84,7 +84,6 @@ struct ActivityListView: View {
                     SelectionButtonView(type: .all, title: "전체", selection: $selection)
                     SelectionButtonView(type: .like, title: "좋아요", selection: $selection)
                     SelectionButtonView(type: .comment, title: "댓글", selection: $selection)
-                    SelectionButtonView(type: .friend, title: "친구", selection: $selection)
                 })
                 .padding(.leading, 20)
                 .padding(.bottom, 31)
@@ -98,15 +97,12 @@ struct ActivityListView: View {
                 Divider05()
                     
               
-                
-                Divider05()
-                
                 ScrollView {
                     VStack(spacing: 0, content: {
                         ForEach(activityList.keys.sorted(by: > ), id: \.self) { date in
                             Section {
                                 ForEach((activityList[date]) ?? [] , id: \.self) { activity in
-                                   ActivityTestItem(activity: activity)
+                                   ActivityItem(activity: activity)
                                 }
                             } header: {
                                 Text(date)
@@ -116,44 +112,57 @@ struct ActivityListView: View {
                                     .padding(.leading, 12)
                                     .frame(height: 60)
                                 
-                                Divider05()
+                                Divider03()
                             }
 
+                        }
+                        
+                        if activityList.isEmpty {
+                            Text("활동 내역이 없습니다")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .foregroundStyle(ColorSet.subGray)
+                                .frame(maxWidth: .infinity, alignment: .center)
                         }
                     })
                     .padding(.top, 55)
                 }
                 .overlay {
                     
-                    HStack(spacing: 6){
-                        Text(DateText(date: date))
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                            .foregroundStyle(Color.white)
-                        
-                        SharedAsset.downArraowCircle.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
-                        
-                        Spacer()
-                    }
-                    .padding(.leading, 20)
-                    .frame(height: 55)
-                    .background(ColorSet.background.opacity(0.9))
-                    .frame(maxHeight: .infinity, alignment: .top)
-                    .onTapGesture {
-                        UIView.setAnimationsEnabled(false)
-                        isPresentDatePicker = true
-                    }
-                    .onChange(of: date, perform: { value in
-                        pagingCursor = nil
-                        Task {
-                            await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor)
+                    VStack(spacing: 0){
+                        HStack(spacing: 6){
+                            Text(DateText(date: date))
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                .foregroundStyle(Color.white)
+                            
+                            SharedAsset.downArraowCircle.swiftUIImage
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 15, height: 15)
+                            
+                            Spacer()
                         }
-                    })
+                        .padding(.leading, 20)
+                        .frame(height: 55)
+                        .background(ColorSet.background.opacity(0.9))
+                        .background(.ultraThinMaterial)
+                        .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
+                            isPresentDatePicker = true
+                        }
+                        .onChange(of: date, perform: { value in
+                            pagingCursor = nil
+                            Task {
+                                await getActivity(type: selection, date: value, pagingCorsor: self.$pagingCursor)
+                            }
+                        })
+                        
+                        Divider03()
+                    }
+                    .frame(maxHeight: .infinity, alignment: .top)
                 }
             })
         }
+        .preferredColorScheme(.dark)
         .onAppear{
             let calendar = Calendar.current
             let components: Set<Calendar.Component> = [.year, .month]
@@ -331,7 +340,7 @@ struct DatePickerView: View {
     }
 }
 
-struct ActivityTestItem: View {
+struct ActivityItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -342,57 +351,53 @@ struct ActivityTestItem: View {
     @State var song: Song?
     
     var body: some View {
-        VStack(spacing: 0, content: {
-            HStack(spacing: 0, content: {
-                Circle()
-                    .fill(ColorSet.Gray34)
-                    .frame(width: 38, height: 38)
-                    .overlay {
-                        //타입이 좋아요인지 댓글인지에 따라 다른 아이콘
-                        if activity.type == "like" {
-                            SharedAsset.notifyLike.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 24, height: 24)
-                        }else if activity.type == "comment" || activity.type == "reply" {
-                            SharedAsset.notifyComment.swiftUIImage  
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 24, height: 24)
-                        }
+        HStack(spacing: 0, content: {
+            Circle()
+                .fill(ColorSet.Gray34)
+                .frame(width: 38, height: 38)
+                .overlay {
+                    //타입이 좋아요인지 댓글인지에 따라 다른 아이콘
+                    if activity.type == "like" {
+                        SharedAsset.notifyLike.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                    }else if activity.type == "comment" || activity.type == "reply" {
+                        SharedAsset.notifyComment.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
                     }
-                
-                AsyncImage(url: self.song?.artwork?.url(width: 300, height: 300)) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } placeholder: {
-                    Rectangle()
                 }
-                .frame(width: 57, height: 57)
-                .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
-                .padding(.leading, 12)
-                
-                Text(activity.activityText)
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
-                    .foregroundStyle(Color.white)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 15)
-
-                SharedAsset.menu.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 22, height: 22)
-                    .padding(.leading, 10)
-            })
-            .padding(.horizontal, 15)
-            .frame(height: 90)
-            .frame(maxWidth: .infinity)
-            .background(ColorSet.background)
             
-            Divider05()
+            AsyncImage(url: self.song?.artwork?.url(width: 300, height: 300)) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder: {
+                Rectangle()
+            }
+            .frame(width: 57, height: 57)
+            .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))
+            .padding(.leading, 12)
+            
+            Text(activity.activityText)
+                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                .foregroundStyle(Color.white)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 15)
+            
+            SharedAsset.menu.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 22, height: 22)
+                .padding(.leading, 10)
         })
+        .padding(.horizontal, 15)
+        .frame(height: 90)
+        .frame(maxWidth: .infinity)
+        .background(ColorSet.background)
         .onAppear{
             Task {
                 self.song = await fetchSong(songID: activity.songId)
@@ -406,6 +411,8 @@ struct ActivityTestItem: View {
                 }
             }
         }
+        
+
 
 
     }

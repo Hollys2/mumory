@@ -71,15 +71,15 @@ public struct SelectGenreView: View {
                                     ForEach(genreList, id: \.self){ genre in
                                         Text(genre.name)
                                             .font(manager.contains(genre: genre) ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                            .foregroundStyle(manager.contains(genre: genre) ? Color.black : ColorSet.subGray)
                                             .padding(.horizontal, 19)
                                             .padding(.vertical, 8)
-                                            .background(manager.contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-                                            .foregroundStyle(manager.contains(genre: genre) ? Color.black : ColorSet.subGray)
+                                            .background(manager.contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.background)
+                                            .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
                                             .overlay(content: {
-                                                RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
+                                                RoundedRectangle(cornerRadius: 30, style: .circular)
                                                     .stroke(ColorSet.subGray, lineWidth: manager.contains(genre: genre) ? 0 : 1)
                                             })
-                                            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                             .onTapGesture {
                                                 manager.appendGenre(genre: genre)
                                             }

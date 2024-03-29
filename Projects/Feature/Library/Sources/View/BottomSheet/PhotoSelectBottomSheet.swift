@@ -20,6 +20,7 @@ public struct PhotoSelectBottomSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State var backgroundOpacity = 0.0
     @State var yOffset: CGFloat = 0
+    @State var isPresentBottomSheet = false
     @Binding public var isPresent: Bool
     @Binding var selectedItem: PhotosPickerItem?
     public var type: photoType = .profile
@@ -50,82 +51,91 @@ public struct PhotoSelectBottomSheet: View {
                         backgroundOpacity = 0
                         dismiss()
                     }
-                VStack(spacing: 0, content: {
-                    SharedAsset.dragIndicator.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 47)
-                        .padding(.top, 11)
-                        .padding(.bottom, 2)
-                    
-                 
+                
+                if isPresentBottomSheet {
                     VStack(spacing: 0, content: {
+                        SharedAsset.dragIndicator.swiftUIImage
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 47)
+                            .padding(.top, 11)
+                            .padding(.bottom, 2)
                         
-                        PhotosPicker(selection: $selectedItem, matching: .images) {
-                            HStack(spacing: 0, content: {
-                                SharedAsset.upload.swiftUIImage
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 30, height: 30)
-                                
-                                Text("\(typeString) 사진 업로드" )
-                                    .padding(.leading, 12)
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
-                                    .foregroundStyle(Color.white)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            })
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .padding(.horizontal, 20)
-                            .background(ColorSet.background)
-                        }
                         
-                        if selectedItem != nil {
-                            Divider03()
-                                .padding(.horizontal, 2)
+                        VStack(spacing: 0, content: {
                             
-                            HStack(spacing: 0, content: {
-                                SharedAsset.delete.swiftUIImage
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 30, height: 30)
-                                
-                                Text("\(typeString) 사진 지우기")
-                                    .padding(.leading, 12)
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
-                                    .foregroundStyle(Color.white)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            })
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .padding(.horizontal, 20)
-                            .background(ColorSet.background)
-                            .onTapGesture {
-                                selectedItem = nil
-                                dismiss()
+                            PhotosPicker(selection: $selectedItem, matching: .images) {
+                                HStack(spacing: 0, content: {
+                                    SharedAsset.upload.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 30, height: 30)
+                                    
+                                    Text("\(typeString) 사진 업로드" )
+                                        .padding(.leading, 12)
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                        .foregroundStyle(Color.white)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                })
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .padding(.horizontal, 20)
+                                .background(ColorSet.background)
                             }
-
-                        }
+                            
+                            if selectedItem != nil {
+                                Divider03()
+                                    .padding(.horizontal, 2)
+                                
+                                HStack(spacing: 0, content: {
+                                    SharedAsset.delete.swiftUIImage
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 30, height: 30)
+                                    
+                                    Text("\(typeString) 사진 지우기")
+                                        .padding(.leading, 12)
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                                        .foregroundStyle(Color.white)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                })
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 55)
+                                .padding(.horizontal, 20)
+                                .background(ColorSet.background)
+                                .onTapGesture {
+                                    selectedItem = nil
+                                    dismiss()
+                                }
+                                
+                            }
+                        })
+                        .background(ColorSet.background)
+                        .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 9)
+                        
+                        
+                        
                     })
-                    .background(ColorSet.background)
+                    .frame(maxWidth: .infinity)
+                    .background(ColorSet.moreDeepGray)
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-                    .padding(.horizontal, 9)
-                    .padding(.vertical, 9)
-                    
-                    
-                    
-                })
-                .frame(maxWidth: .infinity)
-                .background(ColorSet.moreDeepGray)
-                .cornerRadius(15, corners: [.allCorners])
-                .padding(.horizontal, 7)
-                .offset(y: yOffset)
-                .gesture(drag)
+                    .padding(.horizontal, 7)
+                    .offset(y: yOffset)
+                    .gesture(drag)
+                }
                 
             })
             .onAppear(perform: {
-                withAnimation(.easeIn(duration: 0.5)){
+                UIView.setAnimationsEnabled(true)
+                withAnimation(.easeOut(duration: 0.2)){
                     backgroundOpacity = 0.7
+                }
+                Timer.scheduledTimer(withTimeInterval: 0.01, repeats: false) { timer in
+                    withAnimation(.easeOut(duration: 0.13)) {
+                        isPresentBottomSheet = true
+                    }
                 }
             })
             .onChange(of: isPresent, perform: { value in

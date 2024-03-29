@@ -40,7 +40,10 @@ struct AccountManageView: View {
                         .frame(width: 30, height: 30)
                         .onTapGesture {
                             appCoordinator.bottomAnimationViewStatus = .remove
-                            appCoordinator.rootPath.removeLast(2)
+                            appCoordinator.isSocialCommentSheetViewShown = false
+                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                            appCoordinator.selectedTab = .home
+                            appCoordinator.rootPath = NavigationPath()
                         }
                 }
                 .frame(maxWidth: .infinity)

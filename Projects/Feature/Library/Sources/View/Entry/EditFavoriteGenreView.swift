@@ -37,13 +37,13 @@ struct EditFavoriteGenreView: View {
                                     .font(contains(genre: genre) ? SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                     .padding(.horizontal, 19)
                                     .padding(.vertical, 8)
-                                    .background(contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
+                                    .background(contains(genre: genre) ? ColorSet.mainPurpleColor : ColorSet.background)
                                     .foregroundStyle(contains(genre: genre) ? Color.black : ColorSet.subGray)
+                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                     .overlay(content: {
                                         RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular)
                                             .stroke(ColorSet.subGray, lineWidth: contains(genre: genre) ? 0 : 1)
                                     })
-                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
                                     .onTapGesture {
                                         addOrDelete(genre: genre)
                                     }

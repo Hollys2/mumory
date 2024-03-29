@@ -82,8 +82,10 @@ struct SaveToPlaylistView: View {
                 Divider05()
                 
                 Rectangle()
+                    .fill(Color.black)
                     .frame(maxWidth: .infinity)
                     .frame(height: 16)
+                
                 Divider05()
                 
                 

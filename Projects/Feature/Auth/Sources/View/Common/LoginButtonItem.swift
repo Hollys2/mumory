@@ -56,6 +56,7 @@ struct KakaoLoginButton: View {
             
             Text("카카오로 로그인")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                .foregroundStyle(Color.black)
                 .padding(.leading, 18)
         }
         .padding(.top, 18)

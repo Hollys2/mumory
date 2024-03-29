@@ -132,8 +132,7 @@ struct PlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
-                                        AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewPlayAllButton")
+                                        playerViewModel.playAll(title: playlist.title, songs: playlist.songs)
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -158,10 +157,26 @@ struct PlaylistView: View {
                                             selectedSongsForDelete.append(song)
                                         }
                                     }else {
-                                        playerViewModel.playNewSong(song: song)
+                                        playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: song)
                                         playerViewModel.isShownMiniPlayer = true
                                     }
                                 }
+//                                .highPriorityGesture(
+//                                    TapGesture()
+//                                        .onEnded({ _ in
+//                                            if isEditing{
+//                                                if selectedSongsForDelete.contains(song) {
+//                                                    selectedSongsForDelete.removeAll(where: {$0.id == song.id})
+//                                                }else {
+//                                                    selectedSongsForDelete.append(song)
+//                                                }
+//                                            }else {
+//                                                playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: song)
+//                                                playerViewModel.isShownMiniPlayer = true
+//                                            }
+//                                        })
+//                                )
+                            
                         }
                         
                         if isLoading {
@@ -253,32 +268,27 @@ struct PlaylistView: View {
             .padding(.top, currentUserData.topInset)
             
             
-            //삭제버튼
-            if isEditing {
-                VStack{
-                    Spacer()
-                    DeleteSongButton(title: "삭제", isEnabled: selectedSongsForDelete.count > 0, deleteSongCount: selectedSongsForDelete.count) {
-                        UIView.setAnimationsEnabled(false)
-                        isSongDeletePopupPresent = true
-                    }
-                    .padding(.bottom, currentUserData.bottomInset-10)
-                }
-                .transition(.opacity)
-                .fullScreenCover(isPresented: $isSongDeletePopupPresent, content: {
-                    TwoButtonPopupView(title: "\(selectedSongsForDelete.count)개의 음악을 삭제하시겠습니까?", positiveButtonTitle: "음악 삭제") {
-                        // 삭제버튼 action
-                        deleteSongsFromPlaylist()
-                    }
-                    .background(TransparentBackground())
-                })
-            }
+            SharedAsset.underGradientLarge.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .opacity(isEditing ? 1 : 0)
             
+            //삭제버튼
+            DeleteSongButton(title: "삭제", isEnabled: selectedSongsForDelete.count > 0, deleteSongCount: selectedSongsForDelete.count) {
+                UIView.setAnimationsEnabled(false)
+                isSongDeletePopupPresent = true
+            }
+            .shadow(color: Color.black.opacity(0.25), radius: 10, y: 6)
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, currentUserData.bottomInset-10)
+            .opacity(isEditing ? 1 : 0)
+
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
-            playerViewModel.miniPlayerMoveToBottom = true
             Task {
                 isLoading = true
                 let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
@@ -288,6 +298,7 @@ struct PlaylistView: View {
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
         })
+        //플레이리스트의 바텀시트
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
                 PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
@@ -297,10 +308,19 @@ struct PlaylistView: View {
             }
             .background(TransparentBackground())
         })
+        //플레이리스트 이름 수정 바텀시트
         .fullScreenCover(isPresented: $isPresentModifyPlaylistView) {
             ModifyPlaylistPopupView(playlist: $playlist)
                 .background(TransparentBackground())
         }
+        //음악 삭제 확인 팝업
+        .fullScreenCover(isPresented: $isSongDeletePopupPresent, content: {
+            TwoButtonPopupView(title: "\(selectedSongsForDelete.count)개의 음악을 삭제하시겠습니까?", positiveButtonTitle: "음악 삭제") {
+                // 삭제버튼 action
+                deleteSongsFromPlaylist()
+            }
+            .background(TransparentBackground())
+        })
     }
     
     private func fetchSong(songId: String) async -> Song? {

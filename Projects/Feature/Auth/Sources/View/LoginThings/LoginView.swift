@@ -107,7 +107,6 @@ public struct LoginView: View {
                 //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
                 signInWithAppleManager.isUserAuthenticated = false
             })
-    
         
             
     }
@@ -157,8 +156,8 @@ public struct LoginView: View {
             print("No root view controller")
             return
         }
-        
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
+            isLoading = false
             if let error = error{
                 print("google error: \(error)")
             }else{

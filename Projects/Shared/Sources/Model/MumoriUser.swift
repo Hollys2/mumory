@@ -20,7 +20,7 @@ public struct MumoriUser: Hashable {
     }
     
     public var uId: String = ""
-    public var nickname: String = "탈퇴계정"
+    public var nickname: String = ""
     public var id: String = ""
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
@@ -35,17 +35,18 @@ public struct MumoriUser: Hashable {
         let db = FBManager.shared.db
         
         if uId.isEmpty {
+            print("uid empty")
             nickname = "(알수없음)"
             return
         }else {
             let query = db.collection("User").whereField("uid", isEqualTo: uId)
-            guard let snapshot = try? await query.getDocuments() else {return}
+            guard let snapshot = try? await query.getDocuments() else {print("nouser");return}
             guard let userDoc = snapshot.documents.first else {
                 nickname = "탈퇴계정"
                 return
             }
             let data = userDoc.data()
-            
+            self.uId = uId
             self.nickname = data["nickname"] as? String ?? ""
             self.id = data["id"] as? String ?? ""
             self.profileImageURL = URL(string: data["profileImageURL"] as? String ?? "")

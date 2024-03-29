@@ -28,8 +28,6 @@ struct PlaylistMusicListItem: View {
     
     var body: some View {
             HStack(spacing: 0, content: {
-                
-              
                 //편집시에만 체크박스가 보이도록함
                 if isEditing{
                     HStack{
@@ -99,6 +97,7 @@ struct PlaylistMusicListItem: View {
                                 .frame(width: 20, height: 20)
                                 .padding(.trailing, 23)
                                 .onTapGesture {
+                                    self.generateHapticFeedback(style: .medium)
                                     playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                 }
@@ -112,12 +111,6 @@ struct PlaylistMusicListItem: View {
                                 UIView.setAnimationsEnabled(false)
                                 isPresentBottomSheet = true
                             }
-                            .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-                                BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                                    SongBottomSheetView(song: song, types: [.withoutBookmark])
-                                }
-                                .background(TransparentBackground())
-                            })
                     }
                     .animation(.default, value: isEditing)
                   
@@ -127,8 +120,18 @@ struct PlaylistMusicListItem: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .frame(height: 70)
-           
-            
+            .background(ColorSet.background)
+//            .onLongPressGesture {
+//                self.generateHapticFeedback(style: .medium)
+//                UIView.setAnimationsEnabled(false)
+//                isPresentBottomSheet = true
+//            }
+            .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+                BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                    SongBottomSheetView(song: song, types: [.withoutBookmark])
+                }
+                .background(TransparentBackground())
+            })
 
         
     }

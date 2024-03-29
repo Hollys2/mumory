@@ -134,11 +134,12 @@ struct CreatePlaylistPopupView: View {
                         .foregroundStyle(.black)
                         .padding(.vertical, 17)
                         .padding(.horizontal, 25)
-                        .background(LibraryColorSet.purpleBackground)
+                        .background(playlistTitle.isEmpty ? ColorSet.subGray : ColorSet.mainPurpleColor)
                         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
                         .padding(.horizontal, 30)
                         .padding(.top, 40)
                 })
+                .disabled(playlistTitle.isEmpty)
             }
             .padding(.top, 20)
             .padding(.bottom, 44)

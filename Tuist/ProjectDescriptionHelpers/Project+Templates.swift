@@ -97,7 +97,7 @@ extension Project {
                 [
                     "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
                 ],
-            "UIUserInterfaceStyle": "Light",
+            "UIUserInterfaceStyle": "Dark",
             "CFBundleVersion": "\(bundleVersion)",
             "CFBundleShortVersionString": "\(appStoreVersion)",
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름

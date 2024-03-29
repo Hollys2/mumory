@@ -37,7 +37,7 @@ struct NotifyView: View {
                             .scaledToFit()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                appCoordinator.rootPath.append(MyPage.notification)
+                                appCoordinator.rootPath.append(MyPage.notification(iconHidden: true))
                             }
                     }
                     .frame(height: 63)
@@ -468,6 +468,22 @@ public func fetchSong(songID: String) async -> Song? {
         return nil
     }
     return song
+}
+
+public func fetchSongs(songIDs: [String]) async -> [Song]{
+    var returnValue: [Song] = []
+    for id in songIDs {
+        let musicItemID = MusicItemID(rawValue: id)
+        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        guard let response = try? await request.response() else {
+            continue
+        }
+        guard let song = response.items.first else {
+            continue
+        }
+        returnValue.append(song)
+    }
+    return returnValue
 }
 
 struct ReadAllButton: View {

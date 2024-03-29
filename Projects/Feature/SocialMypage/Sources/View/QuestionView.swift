@@ -55,7 +55,10 @@ struct QuestionView: View {
                             .frame(width: 30, height: 30)
                             .onTapGesture {
                                 appCoordinator.bottomAnimationViewStatus = .remove
-                                appCoordinator.rootPath.removeLast(2)
+                                appCoordinator.isSocialCommentSheetViewShown = false
+                                appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                                appCoordinator.selectedTab = .home
+                                appCoordinator.rootPath = NavigationPath()
                             }
                     }
                     .frame(maxWidth: .infinity)
@@ -154,12 +157,13 @@ struct QuestionView: View {
             .onTapGesture {
                 hideKeyboard()
             }
+            .disabled(isLoading)
     }
     
     private func getPrompt() -> Text {
         return Text("제목을 입력하세요.")
-            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
-            .foregroundColor(ColorSet.charSubGray)
+            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+            .foregroundColor(ColorSet.subGray)
     }
     
     private func uploadQuestion(){

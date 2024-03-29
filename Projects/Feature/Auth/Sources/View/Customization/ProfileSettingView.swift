@@ -70,6 +70,7 @@ struct ProfileSettingView: View {
                         .frame(width: 140, height: 140)
                         .padding(.top, 25)
                         .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
                             isPresentBottomSheet = true
                         }
                         .onChange(of: selectedItem, perform: { value in

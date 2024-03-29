@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "x_whiteCircle.png",
+      "filename" : "X_BT.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "_X_BT@2x.png",
+      "filename" : "X_BT@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "_X_BT@3x.png",
+      "filename" : "X_BT@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -292,7 +292,7 @@ struct SearchFriendTextField: View {
     func getPrompt() -> Text {
         return Text(prompt)
             .foregroundColor(ColorSet.subGray)
-            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
+            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
     }
 }
 

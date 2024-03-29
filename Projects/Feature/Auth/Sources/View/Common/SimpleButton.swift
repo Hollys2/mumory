@@ -22,7 +22,7 @@ struct WhiteButton: View {
         .frame(maxWidth: .infinity)
         .frame(height: 58)
         .foregroundColor(.black)
-        .background(isEnabled ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+        .background(isEnabled ? ColorSet.mainPurpleColor : ColorSet.subGray)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
         .shadow(color: showShadow ? Color.black.opacity(0.25) : Color.clear, radius: 10, y: 6)
 

@@ -103,7 +103,8 @@ struct SearchMusicViewInCreateMumory: View {
     
     private func searchPlaceHolder() -> Text {
         return Text("노래 및 아티스트 검색")
-            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+            .foregroundColor(ColorSet.subGray)
     }
 }
 

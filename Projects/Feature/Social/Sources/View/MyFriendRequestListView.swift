@@ -91,18 +91,23 @@ public struct MyRequestFriendItem: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             
             
-            
-            Text("요청 취소")
-                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                .foregroundColor(.black)
-                .padding(.horizontal, 16)
-                .frame(height: 33)
-                .background(ColorSet.subGray)
-                .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
-                .onTapGesture {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentDeletePopup = true
-                }
+            HStack(spacing: 2) {
+                SharedAsset.cancelFriendRequest.swiftUIImage
+                    .resizable()
+                    .frame(width: 17, height: 17)
+                
+                Text("요청취소")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                    .foregroundColor(.black)
+            }
+            .padding(.horizontal, 16)
+            .frame(height: 33)                
+            .background(ColorSet.subGray)
+            .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
+            .onTapGesture {
+                UIView.setAnimationsEnabled(false)
+                isPresentDeletePopup = true
+            }
         })
         .padding(.horizontal, 20)
         .background(ColorSet.background)

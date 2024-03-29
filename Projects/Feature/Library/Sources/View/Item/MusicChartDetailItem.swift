@@ -71,6 +71,8 @@ struct MusicChartDetailItem: View {
                         playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
+           
+           
             }else {
                 SharedAsset.bookmark.swiftUIImage
                     .resizable()
@@ -78,9 +80,12 @@ struct MusicChartDetailItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
+                        self.generateHapticFeedback(style: .medium)
                         playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
+               
+           
             }
             
             SharedAsset.menu.swiftUIImage
@@ -92,10 +97,14 @@ struct MusicChartDetailItem: View {
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 15)
-        .padding(.bottom, 15)
-        .padding(.leading, 20)
-        .padding(.trailing, 20)
+        .frame(height: 70)
+        .padding(.horizontal, 20)
+        .background(ColorSet.background)
+//        .onLongPressGesture(minimumDuration: 0.7, perform: {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        })
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
                 SongBottomSheetView(song: song,

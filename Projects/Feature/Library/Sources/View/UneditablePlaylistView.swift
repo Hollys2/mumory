@@ -77,7 +77,7 @@ struct UneditablePlaylistView: View {
                         
                         //플레이리스트 곡 목록
                         ForEach(playlist.songs, id: \.self) { song in
-                            UneditablePlaylistMusicListItem(song: song)
+                            MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
                                     playerViewModel.isShownMiniPlayer = true
@@ -92,8 +92,6 @@ struct UneditablePlaylistView: View {
                         Rectangle()
                             .foregroundStyle(.clear)
                             .frame(height: playlist.songs.count == 0 ? 1000 : isCompletedGetSongs ? 500 : 1000)
-                        
-                        
                     })
                     .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
                     .frame(width: getUIScreenBounds().width, alignment: .center)
@@ -147,92 +145,6 @@ struct UneditablePlaylistView: View {
     }
 }
 
-struct UneditablePlaylistMusicListItem: View {
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
-    var song: Song
-        @State var isPresentBottomSheet: Bool = false
-
-    init( song: Song) {
-        self.song = song
-    }
-    
-    var body: some View {
-        
-        HStack(spacing: 0, content: {
-            AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
-                image
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .clipShape(RoundedRectangle(cornerRadius: 5,style: .circular))
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 5, style: .circular)
-                    .foregroundStyle(.gray)
-                    .frame(width: 40, height: 40)
-            }
-            .padding(.trailing, 13)
-            
-            
-            VStack(content: {
-                Text(song.title)
-                    .frame(maxWidth: .infinity,alignment: .leading)
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(.white)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                
-                Text(song.artistName)
-                    .frame(maxWidth: .infinity,alignment: .leading)
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundStyle(LibraryColorSet.lightGrayTitle)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            })
-                        
-            if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
-                SharedAsset.bookmarkFilled.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .padding(.trailing, 23)
-                    .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
-                        snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
-                    }
-            }else {
-                SharedAsset.bookmark.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .padding(.trailing, 23)
-                    .onTapGesture {
-                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
-                        snackBarViewModel.setSnackBar(type: .favorite, status: .success)
-                    }
-            }
-            
-            SharedAsset.menu.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
-                .onTapGesture {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentBottomSheet = true
-                }
-        })
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 15)
-        .padding(.horizontal, 20)
-        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                SongBottomSheetView(song: song, types: [.withoutBookmark])
-            }
-            .background(TransparentBackground())
-        })
-        
-    }
-}
 
 public struct PlaylistImageTest: View {
     @State var imageWidth: CGFloat = 0

@@ -116,8 +116,7 @@ public struct MiniPlayerView: View {
             
         })
         .frame(maxWidth: .infinity)
-        .padding(.top, 15)
-        .padding(.bottom, 15)
+        .frame(height: 70)
         .background(ColorSet.background)
         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
         .overlay( /// apply a rounded border
@@ -127,9 +126,11 @@ public struct MiniPlayerView: View {
         .padding(.bottom, 10)
         .padding(.horizontal, 8)
         .padding(.bottom, playerViewModel.miniPlayerMoveToBottom ? 15 : 89)
+        .offset(y: playerViewModel.isShownMiniPlayer ? 0 : 200)
         .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
         .frame(maxHeight: .infinity, alignment: .bottom)
         .animation(.linear(duration: 0.2), value: playerViewModel.miniPlayerMoveToBottom)
+        .animation(.linear(duration: 0.2), value: playerViewModel.isShownMiniPlayer)
         .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
             NowPlayingView()
         }

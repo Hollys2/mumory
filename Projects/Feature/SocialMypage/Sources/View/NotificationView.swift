@@ -19,9 +19,14 @@ struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
-    
+    @EnvironmentObject var currentUserData: CurrentUserData
     @State var isEntireOn: Bool = false
     @State var checkedResult = 0
+    var homeIconHidden: Bool = false
+    init(homeIconHidden: Bool) {
+        self.homeIconHidden = homeIconHidden
+    }
+    init(){}
 
     var body: some View {
         ZStack{
@@ -46,8 +51,12 @@ struct NotificationView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
+                        .opacity(homeIconHidden ? 0 : 1)
                         .onTapGesture {
                             appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.isSocialCommentSheetViewShown = false
+                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                            appCoordinator.selectedTab = .home
                             appCoordinator.rootPath = NavigationPath()
                         }
                 }
@@ -102,7 +111,15 @@ struct NotificationView: View {
                 Spacer()
             })
             
+            LoadingAnimationView(isLoading: $settingViewModel.isLoading)
+            
         }
+        .onAppear {
+            if settingViewModel.uid.isEmpty {
+                settingViewModel.uid = currentUserData.uId
+            }
+        }
+        .disabled(settingViewModel.isLoading)
     }
     
 }

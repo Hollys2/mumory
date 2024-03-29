@@ -53,17 +53,22 @@ struct SearchSongItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
-                .fullScreenCover(isPresented: $isPresentBottomSheet) {
-                    BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                        SongBottomSheetView(song: song)
-                    }
-                    .background(TransparentBackground())
-                }
+         
         })
         .padding(.vertical, 19)
         .padding(.leading, 20)
         .background(ColorSet.background)
-
+//        .onLongPressGesture {
+//            self.generateHapticFeedback(style: .medium)
+//            UIView.setAnimationsEnabled(false)
+//            isPresentBottomSheet = true
+//        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                SongBottomSheetView(song: song)
+            }
+            .background(TransparentBackground())
+        }
     }
     
     

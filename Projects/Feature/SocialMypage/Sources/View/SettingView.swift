@@ -27,9 +27,7 @@ struct SettingView: View {
     @State var isShowingWithdrawPopup = false
     @State var isLoading: Bool = false
     
-    var body: some View {
-        //테스트때문에 navigationStack 추가함. 이후 삭제하기
-        
+    var body: some View {        
         ZStack{
             ColorSet.background.ignoresSafeArea()
             
@@ -54,7 +52,10 @@ struct SettingView: View {
                         .frame(width: 30, height: 30)
                         .onTapGesture {
                             appCoordinator.bottomAnimationViewStatus = .remove
-                            appCoordinator.rootPath.removeLast()
+                            appCoordinator.selectedTab = .home
+                            appCoordinator.isSocialCommentSheetViewShown = false
+                            appCoordinator.isMumoryDetailCommentSheetViewShown = false
+                            appCoordinator.rootPath = NavigationPath()
                         }
                 }
                 .frame(maxWidth: .infinity)
@@ -70,7 +71,7 @@ struct SettingView: View {
                 
                 SettingItem(title: "알림")
                     .onTapGesture {
-                        appCoordinator.rootPath.append(MyPage.notification)
+                        appCoordinator.rootPath.append(MyPage.notification(iconHidden: false))
                     }
                 
                 SettingItem(title: "1:1 문의")
@@ -89,9 +90,15 @@ struct SettingView: View {
                         let Firebase = FBManager.shared
                         do {
                             try Firebase.auth.signOut()
+                            for key in UserDefaults.standard.dictionaryRepresentation().keys {
+                                UserDefaults.standard.removeObject(forKey: key.description)
+                            }
+                            currentUserData.removeAllData()
                             print("로그아웃 완료")
                             appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.initPage = .login
                             appCoordinator.rootPath = NavigationPath()
+                            
                             
                         }catch {
                             print("signout error: \(error)")
@@ -130,6 +137,7 @@ struct SettingView: View {
             LoadingAnimationView(isLoading: $isLoading)
             
         }
+        .disabled(isLoading)
         
     }
     
@@ -214,7 +222,12 @@ struct SettingView: View {
                         if let error = error {
                             print("delete document error: \(error)")
                         }else {
+                            for key in UserDefaults.standard.dictionaryRepresentation().keys {
+                                UserDefaults.standard.removeObject(forKey: key.description)
+                            }
+                            currentUserData.removeAllData()
                             appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.initPage = .home
                             appCoordinator.rootPath = NavigationPath()
                         }
                     }
@@ -270,5 +283,39 @@ private struct LogoutButton: View {
                 RoundedRectangle(cornerRadius: 30, style: .circular)
                     .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
             )
+    }
+}
+
+private func removeMyData(uid: String) async {
+    let Firebase = FBManager.shared
+    let db = Firebase.db
+    let storage = Firebase.storage
+    
+    //내가 요청했거나, 나에게 요청했던 기록 삭제
+    let deleteFriendCollectionQuery = db.collectionGroup("Friend").whereField("uId", isEqualTo: uid)
+    guard let snapshot = try? await deleteFriendCollectionQuery.getDocuments() else {return}
+    snapshot.documents.forEach { document in
+        document.reference.delete()
+    }
+    
+    //나랑 친구였던 사람들의 친구목록에서 나 삭제
+    let deleteFriendQuery = db.collection("User").whereField("friend", arrayContains: uid)
+    guard let deleteFriendSnapshot = try? await deleteFriendQuery.getDocuments() else {return}
+    deleteFriendSnapshot.documents.forEach { document in
+        document.reference.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uid])])
+    }
+    
+    //나를 블락했던 사람들의 목록에서 나 삭제
+    let deleteBlockQuery = db.collection("User").whereField("blockFriend", arrayContains: uid)
+    guard let deleteBlockSnapshot = try? await deleteBlockQuery.getDocuments() else {return}
+    deleteBlockSnapshot.documents.forEach { document in
+        document.reference.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([uid])])
+    }
+    
+    guard let result = try? await storage.reference(withPath: "ProfileImage/\(uid).jpg").delete() else {
+        return
+    }
+    guard let result = try? await storage.reference(withPath: "BackgroundImage/\(uid).jpg").delete() else {
+        return
     }
 }
