@@ -42,6 +42,7 @@ public struct MumoryTabView: View {
                 
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
+                        appCoordinator.scrollToTop = true
                         selectedTab = .social
                     }
                 

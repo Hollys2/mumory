@@ -76,15 +76,19 @@ struct FriendPageView: View {
 }
 
 struct KnownFriendPageView: View {
+    
     let friend: MumoriUser
     let lineGray = Color(white: 0.37)
     
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
+    
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
 
     init(friend: MumoriUser) {
         self.friend = friend
     }
+    
     var body: some View {
         ScrollView{
             VStack(spacing: 0, content: {
@@ -92,14 +96,13 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                //맵뷰 들어갈 공간
                 ZStack {
                     Rectangle()
                         .fill(Color.clear)
                         .frame(maxWidth: .infinity)
                         .frame(height: 187)
                     
-                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: mumorys) { mumory in
+                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: self.mumorys) { mumory in
 
                         MapAnnotation(coordinate: mumory.locationModel.coordinate) {
                             ZStack(alignment: .topLeading) {
@@ -124,9 +127,10 @@ struct KnownFriendPageView: View {
                     }
                     .frame(width: getUIScreenBounds().width - 40, height: 129)
                     .cornerRadius(10)
-                    .preferredColorScheme(.light)
                     .onAppear {
-                        
+                        self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
+                            self.mumorys = mumorys
+                        }
                     }
                     
                     SharedAsset.enlargeMapButton.swiftUIImage
@@ -144,7 +148,8 @@ struct KnownFriendPageView: View {
             })
         }
         .fullScreenCover(isPresented: $isMapViewShown) {
-            MumoryMapView(isShown: self.$isMapViewShown, mumory: Mumory(), user: self.friend)
+            FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
+                .preferredColorScheme(.light)
         }
     }
 }

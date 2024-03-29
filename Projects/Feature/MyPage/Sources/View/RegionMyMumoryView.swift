@@ -151,7 +151,6 @@ public struct RegionMyMumoryView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .preferredColorScheme(.dark)
         .sheet(isPresented: self.$isDatePickerShown, content: {
             MyMumoryDatePicker(selectedDate: self.$selectedDate)
                 .presentationDetents([.height(309)])

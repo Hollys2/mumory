@@ -8,17 +8,23 @@
 
 
 import SwiftUI
-import Foundation
+import MapKit
 import MusicKit
+
+import Firebase
 
 
 public class AppCoordinator: ObservableObject {
     
-    @Published public var currentUser: MumoriUser = MumoriUser()
-
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var initPage: InitPage = .login
     @Published public var selectedTab: Tab = .home
+    
+    
+    @Published public var scrollToTop: Bool = false
+    @Published public var createdMumoryRegion: MKCoordinateRegion?
+    @Published public var listener: ListenerRegistration?
+    
     @Published public var offsetY: CGFloat = .zero
     @Published public var isCreateMumorySheetShown: Bool = false
     @Published public var isSearchLocationViewShown = false

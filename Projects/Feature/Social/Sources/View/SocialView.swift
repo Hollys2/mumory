@@ -64,9 +64,14 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-//        print("updateUIView: SocialScrollViewRepresentable")
+        if self.appCoordinator.scrollToTop {
+            uiView.setContentOffset(CGPoint(x: 0, y: -appCoordinator.safeAreaInsetsTop), animated: true)
+            DispatchQueue.main.async {
+                self.appCoordinator.scrollToTop = false
+            }
+        }
+        
         if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
-
             let hostingController = UIHostingController(rootView: self.content()
                 .environmentObject(self.mumoryDataViewModel)
                 .environmentObject(self.currentUserData))
@@ -108,6 +113,10 @@ extension SocialScrollViewRepresentable {
         @objc func handleRefreshControl() {
             print("handleRefreshControl")
             parent.mumoryDataViewModel.fetchEveryMumory2()
+        }
+        
+        @objc func scrollToTop() {
+//               scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
         }
         
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
@@ -533,7 +542,6 @@ struct SocialItemView: View {
                             .foregroundColor(.white)
                             .padding(.top, 6)
                     }
-                    
                 }
                 .offset(x: UIScreen.main.bounds.width - 20 - 42 - 17)
                 .alignmentGuide(VerticalAlignment.top) { d in
@@ -578,6 +586,7 @@ public struct SocialView: View {
         ZStack(alignment: .top) {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                 print("onRefresh: () -> Void")
@@ -640,17 +649,8 @@ public struct SocialView: View {
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
-            
-            if mumoryDataViewModel.isUpdating {
-                ZStack {
-                    Color.black
-                        .opacity(0.1)
-                    LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
-                }
-            }
         }
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
-        .preferredColorScheme(.dark)
         .onAppear {
             if !appCoordinator.isFirstTabSelected {
                 mumoryDataViewModel.fetchEveryMumory()

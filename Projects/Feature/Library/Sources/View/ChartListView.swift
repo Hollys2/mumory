@@ -20,7 +20,6 @@ struct ChartListView: View {
     @State var scrollDirection: ScrollDirection = .up
     @State var songs: [Song] = []
     @State var searchIndex = 0
-    @State private var region: MKCoordinateRegion?
     let dateTextColor = Color(red: 0.51, green: 0.51, blue: 0.51)
     
     var body: some View {
@@ -108,7 +107,7 @@ struct ChartListView: View {
                 })
             })
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
             
         }
         .ignoresSafeArea()

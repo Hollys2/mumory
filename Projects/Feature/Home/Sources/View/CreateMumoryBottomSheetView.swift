@@ -8,19 +8,18 @@
 
 
 import SwiftUI
+import MapKit
 import PhotosUI
+import Combine
+
 import Core
 import Shared
-import MapKit
 
 
 public struct CreateMumoryBottomSheetView: View {
     
     @Binding var isSheetShown: Bool
     @Binding var offsetY: CGFloat
-    @Binding private var newRegion: MKCoordinateRegion?
-    
-    @State private var bottomBarHeight: CGFloat = 55
     
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
@@ -51,10 +50,11 @@ public struct CreateMumoryBottomSheetView: View {
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>, newRegion: Binding<MKCoordinateRegion?>) {
+    
+    
+    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
         self._isSheetShown = isSheetShown
         self._offsetY = offsetY
-        self._newRegion = newRegion
     }
     
     public var body: some View {
@@ -62,7 +62,6 @@ public struct CreateMumoryBottomSheetView: View {
         let dragGesture = DragGesture()
             .updating($dragState) { value, state, transaction in
                 var newTranslation = value.translation
-                
                 if self.offsetY + newTranslation.height < 0 {
                     newTranslation.height = -self.offsetY
                 }
@@ -156,10 +155,8 @@ public struct CreateMumoryBottomSheetView: View {
                     .padding(.top, 26)
                     .padding(.bottom, 11)
                     .padding(.horizontal, 20)
-                    
-                    ScrollViewReader { reader in
                         
-                        ScrollView(showsIndicators: false) {
+                    ScrollView(showsIndicators: false) {
                             
                             VStack(spacing: 0) {
                                 
@@ -191,11 +188,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         .background {
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onAppear {
-                                                        self.calendarYOffset = geometry.frame(in: .global).maxY
-                                                    }
                                                     .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                        // Update calendarYOffset when the offset changes
                                                         self.calendarYOffset = newOffset
                                                     }
                                             }
@@ -217,10 +210,10 @@ public struct CreateMumoryBottomSheetView: View {
                                         .background(
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newValue in
-                                                        DispatchQueue.main.async {
-                                                            self.contentContainerYOffset = newValue
-                                                        }
+                                                    .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global).maxY)
+                                                    .onPreferenceChange(ViewPositionKey.self) { newValue in
+                                                        self.contentContainerYOffset = newValue ?? 0
+                                                        print("contentContainerYOffset: \(contentContainerYOffset)")
                                                     }
                                             }
                                         )
@@ -285,9 +278,9 @@ public struct CreateMumoryBottomSheetView: View {
                                 .padding(.horizontal, 20)
                             } // VStack
                             .padding(.top, 20)
-                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+//                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                         } // ScrollView
-                    }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
@@ -302,7 +295,6 @@ public struct CreateMumoryBottomSheetView: View {
                         .labelsHidden()
                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
-                        .preferredColorScheme(.dark)
                         .environment(\.locale, Locale.init(identifier: "ko_KR"))
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {
@@ -369,7 +361,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
 
-                                        self.newRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                                        self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                         
                                         appCoordinator.selectedTab = .home
                                         
@@ -414,11 +406,6 @@ public struct CreateMumoryBottomSheetView: View {
                     })
                     
                 })
-                .onAppear(perform: {
-                    playerViewModel.isShownMiniPlayer = false
-                    playerViewModel.pause()
-                })
-    
                 
                 HStack(spacing: 0) {
                     
@@ -461,8 +448,15 @@ public struct CreateMumoryBottomSheetView: View {
                     , alignment: .top
                 )
                 .zIndex(2)
-                .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+                .offset(y:  keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
             }
+        }
+        .onAppear(perform: {
+            playerViewModel.isShownMiniPlayer = false
+            playerViewModel.pause()
+        })
+        .onDisappear {
+            playerViewModel.isShownMiniPlayer = true
         }
     }
     
@@ -488,6 +482,15 @@ public struct CreateMumoryBottomSheetView: View {
         }
     }
 }
+
+struct ViewPositionKey: PreferenceKey {
+    static var defaultValue: CGFloat? = nil
+    
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
+        value = nextValue()
+    }
+}
+
 
 enum DragState {
     case inactive
@@ -659,7 +662,7 @@ struct ContainerView: View {
                                                 .aspectRatio(contentMode: .fit)
                                                 .frame(width: 36, height: 36)
                                         default:
-                                            Color.purple
+                                            Color.clear
                                                 .frame(width: 36, height: 36)
                                         }
                                     }

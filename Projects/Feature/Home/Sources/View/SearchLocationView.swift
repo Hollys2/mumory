@@ -336,12 +336,12 @@ struct SearchLocationView: View {
                 .scrollIndicators(.hidden)   
             }
         } // VStack
-        .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
         .padding(.horizontal, 20)
         .frame(width: UIScreen.main.bounds.width + 1)
         .padding(.top, 12)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .loadingLottie(localSearchViewModel.isSearching)
         .onDisappear {
             appCoordinator.isSearchLocationViewShown = false
             localSearchViewModel.queryFragment = ""

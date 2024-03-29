@@ -18,14 +18,15 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     typealias UIViewType = MKMapView
     
     @Binding var annotationSelected: Bool
-    @Binding var region: MKCoordinateRegion?
     
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var locationManager: LocationManager
     
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
         
+        mapView.overrideUserInterfaceStyle = .light
         mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
@@ -56,35 +57,24 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-        
-        
-        // Remove annotations that are no longer in myMumoryAnnotations
-//        let currentAnnotationIDs = Set(uiView.annotations.compactMap { ($0 as? Mumory)?.id })
-        let newAnnotationIDs = Set(self.mumoryDataViewModel.myMumorys.map { $0.id })
-        let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !newAnnotationIDs.contains($0.id) }
+        let mumoryIds = self.mumoryDataViewModel.myMumorys.map { $0.id }
+        let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !mumoryIds.contains($0.id) }
         uiView.removeAnnotations(annotationsToRemove)
         
-        for annotation in self.mumoryDataViewModel.myMumorys {
-            // Find the corresponding annotation in the map view
-            if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
-                // Compare properties of the annotation in the map view with the updated annotation
-                if existingAnnotation != annotation {
-                    // Remove the existing annotation from the map view
-                    uiView.removeAnnotation(existingAnnotation)
-                    
-                    // Add the updated annotation to the map view
-//                    uiView.addAnnotation(annotation)
-                }
-            }
-        }
+//        for annotation in self.mumoryDataViewModel.myMumorys {
+//            if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
+//                if existingAnnotation != annotation {
+//                    uiView.removeAnnotation(existingAnnotation)
+//                }
+//            }
+//        }
         
-        let sortedAnnotations = self.mumoryDataViewModel.myMumorys.sorted(by: { $0.date > $1.date })
-        uiView.addAnnotations(sortedAnnotations)
-
-        if let newRegion = self.region {
+        uiView.addAnnotations(self.mumoryDataViewModel.myMumorys)
+        
+        if let newRegion = self.appCoordinator.createdMumoryRegion {
             uiView.setRegion(newRegion, animated: true)
             DispatchQueue.main.async {
-                self.region = nil
+                self.appCoordinator.createdMumoryRegion = nil
             }
         }
     }
@@ -190,10 +180,8 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
         
         if annotation is MKUserLocation {
             let annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "CustomUserLocation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "CustomUserLocation")
-            
             annotationView.image = SharedAsset.userLocation.image
             annotationView.frame = CGRect(x: 0, y: 0, width: 47, height: 47)
-            
             annotationView.zPriority = .max
             
             return annotationView
@@ -232,41 +220,37 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             let topAnnotation = sortedAnnotations.first
             let clusterView = mapView.dequeueReusableAnnotationView(withIdentifier: "ClusterView") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "ClusterView")
             
-            print("cluster.memberAnnotations.count: \(cluster.memberAnnotations.count)")
-            
             clusterView.isUserInteractionEnabled = true
             clusterView.image = SharedAsset.musicPin.image
             clusterView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
             if let mumoryAnnotation = topAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
-                
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
                 artwork.layer.cornerRadius = 12
                 artwork.clipsToBounds = true
                 artwork.loadImage(from: url)
                 clusterView.addSubview(artwork)
+                
+                if !mumoryAnnotation.isPublic {
+                    let imageView = UIImageView(frame: CGRect(x: (clusterView.frame.width - 34) / 2, y: (clusterView.frame.width - 34) / 2, width: 34, height: 34))
+                    let lockImage: UIImage = SharedAsset.musicPinPrivate.image
+                    imageView.image = lockImage
+                    clusterView.addSubview(imageView)
+                }
             } else {
                 print("ERROR: NO URL2")
-            }
-            
-            for subview in clusterView.subviews {
-                if let hostingController = subview as? UIHostingController<AnyView> {
-                    if let countView = hostingController.rootView as? CountView {
-                        // countView에 접근할 수 있습니다.
-                    }
-                }
             }
             
             if cluster.memberAnnotations.count > 1 {
                 let countView = CountView(text: String(cluster.memberAnnotations.count))
                 let hostingController = UIHostingController(rootView: countView)
+                hostingController.view.frame.origin = CGPoint(x: 74 - 5.5, y: 8)
+
                 clusterView.addSubview(hostingController.view)
             }
-            
             return clusterView
         }
-        
         return nil
     }
     
@@ -318,36 +302,19 @@ struct CountSwiftUIView: View {
     
     let text: String
     
-    @State private var textWidth: CGFloat = .zero
-    
     init(text: String) {
         self.text = text
     }
     
     var body: some View {
-        HStack(alignment: .center, spacing: 0) {
-            Text("\(text)")
-                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                .multilineTextAlignment(.center)
-                .foregroundColor(.black)
-                .frame(minWidth: 9)
-                .frame(height: 10)
-                .fixedSize(horizontal: true, vertical: false)
-                .background {
-                    GeometryReader { geometry in
-                        Color.clear
-                            .onAppear {
-                                self.textWidth = geometry.size.width
-                                print("self.textWidth: \(self.textWidth)")
-                            }
-                    }
-                }
-        }
-        .padding(.vertical, 7)
-        .padding(.horizontal, 8)
-        .background(SharedAsset.mainColor.swiftUIColor)
-        .cornerRadius(12)
-        .offset(x: (self.textWidth + 16) / 2 + 56, y: 12 - 6)
+        Text(self.text)
+            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+            .foregroundColor(.black)
+            .fixedSize()
+            .frame(minWidth: 25, alignment: .center)
+            .frame(height: 24)
+            .background(SharedAsset.mainColor.swiftUIColor)
+            .cornerRadius(12)
     }
 }
 
@@ -362,16 +329,11 @@ struct CountView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let hostingController = UIHostingController(rootView: CountSwiftUIView(text: text))
         let hostingView = hostingController.view!
-        
         hostingView.backgroundColor = .clear
-        
         return hostingView
     }
     
     func updateUIView(_ uiView: UIView, context: Context) {
-        let hostingController = UIHostingController(rootView: CountSwiftUIView(text: text))
-        let hostingView = hostingController.view!
-        hostingView.backgroundColor = .clear
     }
 }
 

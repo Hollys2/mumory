@@ -22,7 +22,6 @@ struct RecommendationListView: View {
     @State var songIDs: [String] = []
     @State var songs: [Song] = []
     @State var isCompletedGetSongs: Bool = false
-    @State private var region: MKCoordinateRegion?
 
     let genreID: Int
     let title: String
@@ -146,7 +145,7 @@ struct RecommendationListView: View {
             .frame(height: 50)
             .padding(.top, currentUserData.topInset)
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
   
         }
         .ignoresSafeArea()

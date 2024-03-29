@@ -34,25 +34,23 @@ struct PageTabView<Content: View, Label: View>: View {
             HStack(spacing: 0) {
                 label
             }
-            .overlay(
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(width: getUIScreenBounds().width, height: 0.3)
-                    .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
-                
-                , alignment: .bottom
-            )
             .onPreferenceChange(TabWidthPreferenceKey.self) { preferences in
                 for (index, width) in preferences {
                     tabWidths[index] = width
                 }
             }
+            
             Rectangle()
                 .fill(Color(red: 0.64, green: 0.51, blue: 0.99))
                 .frame(width: tabWidths[selection], height: 3)
                 .frame(width: getUIScreenBounds().width / 2, height: 3)
-                .offset(x: underlineOffset, y: -3.3)
+                .offset(x: underlineOffset, y: 0)
                 .animation(.easeInOut(duration: 0.2), value: selection)
+            
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(width: getUIScreenBounds().width, height: 0.3)
+                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
             
             TabView(selection: $selection) {
                 content
@@ -63,10 +61,7 @@ struct PageTabView<Content: View, Label: View>: View {
                     underlineOffset = getUIScreenBounds().width / CGFloat(2) * CGFloat(selection)
                 }
             }
-            
         }
-        
-        
     }
 }
 
@@ -78,6 +73,8 @@ public struct SocialSearchView: View {
     @State private var currentTabSelection: Int = 0
     @State private var isRecentSearch: Bool = false
     @State private var recentSearches: [String] = []
+
+    @State private var isSearching: Bool = false
     
     @StateObject var friendManager: FriendManager = .init()
     
@@ -105,13 +102,15 @@ public struct SocialSearchView: View {
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .submitLabel(.search)
                     .onSubmit {
-                        mumoryDataViewModel.isUpdating = true
-                        
-                        mumoryDataViewModel.searchedMumoryAnnotations = []
+                        self.isSearching = true
+
                         friendManager.searchedFriends = []
+                        mumoryDataViewModel.searchedMumoryAnnotations = []
                         
-                        mumoryDataViewModel.searchMumoryByContent(self.searchText)
                         friendManager.searchFriend(nickname: self.searchText)
+                        mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                            self.isSearching = false
+                        }
                         
                         recentSearches.insert(self.searchText, at: 0)
                         var uniqueRecentSearches: [String] = []
@@ -224,13 +223,16 @@ public struct SocialSearchView: View {
                             .frame(height: 50)
                             .padding(.horizontal, 20)
                             .onTapGesture {
+                                self.isSearching = true
                                 self.searchText = value
                                 
                                 mumoryDataViewModel.searchedMumoryAnnotations = []
                                 friendManager.searchedFriends = []
                                 
-                                mumoryDataViewModel.searchMumoryByContent(self.searchText)
                                 friendManager.searchFriend(nickname: self.searchText)
+                                mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                                    self.isSearching = false
+                                }
                                 
                                 recentSearches.insert(self.searchText, at: 0)
                                 recentSearches = Array(Set(recentSearches).prefix(10))
@@ -424,6 +426,7 @@ public struct SocialSearchView: View {
         .simultaneousGesture(TapGesture(count: 1).onEnded({
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }))
+        .loadingLottie(self.isSearching)
     }
 }
 

@@ -275,7 +275,7 @@ public struct MumoryEditView: View {
                     } // VStack
                     .padding(.top, 20)
                     .padding(.bottom, 50)
-                    .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                    .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                 } // ScrollView
             } // VStack
             .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - appCoordinator.safeAreaInsetsTop) {
@@ -284,7 +284,6 @@ public struct MumoryEditView: View {
                     .labelsHidden()
                     .accentColor(SharedAsset.mainColor.swiftUIColor)
                     .background(SharedAsset.backgroundColor.swiftUIColor)
-                    .preferredColorScheme(.dark)
             }
             .popup(show: self.$isPublishPopUpShown, content: {
                 PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: {

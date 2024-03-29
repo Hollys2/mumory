@@ -41,6 +41,14 @@ struct CommentView: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
+            } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic {
+                SharedAsset.profileMumoryDetail.swiftUIImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
+                    }
             } else {
                 AsyncImage(url: commentUser.profileImageURL) { phase in
                     switch phase {
@@ -78,7 +86,7 @@ struct CommentView: View {
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                 .frame(width: 4, alignment: .bottom)
-                        } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                        } else if mumory.uId != currentUserData.user.uId && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                             EmptyView()
                         } else {
                             Text("\(self.commentUser.nickname)")
@@ -207,6 +215,14 @@ struct Reply: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
+            } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic && !self.isMyComment {
+                SharedAsset.profileMumoryDetail.swiftUIImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
+                    }
             } else {
                 AsyncImage(url: commentUser.profileImageURL) { phase in
                     switch phase {
@@ -253,7 +269,7 @@ struct Reply: View {
                             .multilineTextAlignment(.center)
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                             .frame(width: 4, alignment: .bottom)
-                    } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                    } else if mumory.uId != currentUserData.user.uId && !comment.isPublic && currentUserData.user.uId != comment.uId && !self.isMyComment && self.commentUser.nickname != "탈퇴계정" {
                         EmptyView()
                     } else {
                         Text("\(self.commentUser.nickname)")
@@ -359,7 +375,7 @@ public struct MumoryCommentSheetView: View {
         let dragGesture = DragGesture()
             .updating($dragState) { value, state, transaction in
                 var newTranslation = value.translation
-                
+                print("updating")
                 if self.offsetY + newTranslation.height < 0 {
                     newTranslation.height = -self.offsetY
                 }
@@ -482,14 +498,10 @@ public struct MumoryCommentSheetView: View {
                     }
                     .simultaneousGesture(DragGesture().onEnded { _ in
                         print("simultaneousGesture DragGesture")
-                        //                        isWritingReply = false
-                        //                        selectedComment = Comment()
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     })
                     .gesture(TapGesture(count: 1).onEnded {
                         print("gesture TapGesture")
-                        //                        isWritingReply = false
-                        //                        selectedComment = Comment()
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     })
                     
@@ -658,6 +670,7 @@ public struct MumoryCommentSheetView: View {
                 .offset(y: self.offsetY + self.dragState.translation.height)
                 .gesture(dragGesture)
                 .transition(.move(edge: .bottom))
+                .zIndex(1)
                 .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
                     PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
                         mumoryDataViewModel.isUpdating = true
@@ -685,7 +698,6 @@ public struct MumoryCommentSheetView: View {
                         
                     })
                 }
-                .zIndex(1)
             }
         }
     }

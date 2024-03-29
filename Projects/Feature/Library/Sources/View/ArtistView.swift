@@ -21,7 +21,6 @@ struct ArtistView: View {
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
-    @State private var region: MKCoordinateRegion?
     
     let artist: Artist
     
@@ -138,7 +137,7 @@ struct ArtistView: View {
                 .background(TransparentBackground())
             })
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY, newRegion: self.$region)
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
         }
         .ignoresSafeArea()
         .onAppear(perform: {
