@@ -179,7 +179,7 @@ final public class MumoryDataViewModel: ObservableObject {
         return Mumory()
     }
     
-    public func fetchMumorys(uId: String, completion: @escaping () -> Void) {
+    public func fetchFriendsMumorys(uId: String, completion: @escaping ([Mumory]) -> Void) {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").whereField("uId", isEqualTo: uId)
         
@@ -191,20 +191,27 @@ final public class MumoryDataViewModel: ObservableObject {
                     self.friendsMumorys = []
                 }
                 
+                var result: [Mumory] = []
+                
                 for document in snapshot.documents {
                     let documentData = document.data()
                     guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
-                    if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
-                        DispatchQueue.main.async {
-                            self.friendsMumorys.append(newMumory)
-                            self.friendsMumorys.sort { $0.date > $1.date }
-                        }
-                    }
+                    print("newMumory: \(newMumory)")
+                    
+//                    if !self.friendsMumorys.contains(where: { $0.id == newMumory.id }) {
+//                        print("유후")
+//                        DispatchQueue.main.async {
+//                            self.friendsMumorys.append(newMumory)
+//                            self.friendsMumorys.sort { $0.date > $1.date }
+//                        }
+//                    }
+                    result.append(newMumory)
+                    result.sort { $0.date > $1.date }
                 }
                 
                 print("fetchMumorys successfully!")
-                completion()
+                completion(result)
             } catch {
                 print("Error fetchMumorys: \(error.localizedDescription)")
             }
@@ -676,7 +683,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func searchMumoryByContent(_ searchString: String) {
+    public func searchMumoryByContent(_ searchString: String, completion: @escaping ()-> Void) {
         
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
@@ -706,8 +713,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
                     return content1.count < content2.count
                 }
-                
-                self.isUpdating = false
+                completion()
             }
         }
     }

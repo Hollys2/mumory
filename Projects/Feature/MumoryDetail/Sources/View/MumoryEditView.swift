@@ -275,7 +275,7 @@ public struct MumoryEditView: View {
                     } // VStack
                     .padding(.top, 20)
                     .padding(.bottom, 50)
-                    .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                    .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                 } // ScrollView
             } // VStack
             .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - appCoordinator.safeAreaInsetsTop) {

@@ -92,6 +92,16 @@ public struct HomeView: View {
             if self.isSocialSearchViewShown {
                 SocialSearchView(isShown: self.$isSocialSearchViewShown)
             }
+            
+            if mumoryDataViewModel.isUpdating {
+                ZStack {
+                    Color.black
+                        .opacity(0.1)
+                        .ignoresSafeArea()
+                    
+                    LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
+                }
+            }
         } // ZStack
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()

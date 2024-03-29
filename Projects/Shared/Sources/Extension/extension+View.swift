@@ -8,6 +8,7 @@
 
 
 import SwiftUI
+import Lottie
 
 extension View {
 
@@ -26,5 +27,32 @@ extension View {
     
     public func rewardBottomSheet(isShown: Binding<Bool>) -> some View {
         self.modifier(RewardBottomSheetViewModifier(isShown: isShown))
+    }
+}
+
+
+private struct LoadingLottie: ViewModifier {
+    
+    var isShown: Bool
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            content
+            
+            if self.isShown {
+                LottieView(animation: .named("loading", bundle: .module))
+                    .looping()
+                    .frame(width: UIScreen.main.bounds.width * 0.16, height: UIScreen.main.bounds.width * 0.16)
+            }
+
+        }
+        .ignoresSafeArea()
+    }
+}
+
+extension View {
+
+    public func loadingLottie(_ isShown: Bool) -> some View {
+        modifier(LoadingLottie(isShown: isShown))
     }
 }

@@ -18,6 +18,7 @@ public struct MyMumorySearchView: View {
     @State private var currentTabSelection: Int = 0
     @State private var isRecentSearch: Bool = false
     @State private var recentSearches: [String] = []
+    @State private var isSearching: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -41,8 +42,12 @@ public struct MyMumorySearchView: View {
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .submitLabel(.search)
                     .onSubmit {
+                        self.isSearching = true
+                        
                         mumoryDataViewModel.searchedMumoryAnnotations = []
-                        mumoryDataViewModel.searchMumoryByContent(self.searchText)
+                        mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                            self.isSearching = false
+                        }
                         
                         recentSearches.insert(self.searchText, at: 0)
                         var uniqueRecentSearches: [String] = []
@@ -153,11 +158,14 @@ public struct MyMumorySearchView: View {
                             .frame(height: 50)
                             .padding(.horizontal, 20)
                             .onTapGesture {
+                                self.isSearching = true
+
                                 self.searchText = value
                                 
                                 mumoryDataViewModel.searchedMumoryAnnotations = []
-                                
-                                mumoryDataViewModel.searchMumoryByContent(self.searchText)
+                                mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                                    self.isSearching = false
+                                }
                                 
                                 recentSearches.insert(self.searchText, at: 0)
                                 recentSearches = Array(Set(recentSearches).prefix(10))
