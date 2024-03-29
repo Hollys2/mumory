@@ -159,7 +159,10 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchMumory(documentID: String) async -> Mumory {
-        self.isUpdating = true
+        DispatchQueue.main.async {
+            self.isUpdating = true
+        }
+        
         let db = FirebaseManager.shared.db
         let docRef = db.collection("Mumory").document(documentID)
         
@@ -171,8 +174,10 @@ final public class MumoryDataViewModel: ObservableObject {
                 guard let documentData = documentSnapshot.data(),
                       let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentSnapshot.documentID) else { return Mumory() }
                 
+                DispatchQueue.main.async {
+                    self.isUpdating = false
+                }
                 return newMumory
-      
             } else {
                 print("Document does not exist")
             }   
