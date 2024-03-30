@@ -34,7 +34,6 @@ public struct MyPageView: View {
                     SimpleFriendView()
                         .frame(height: 195, alignment: .top)
                     
-                    
                     Divider05()
                     
                     MyMumori()
@@ -109,6 +108,7 @@ struct UserInfoView: View {
                 LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
             }
             
+            
             VStack(alignment: .leading, spacing: 4, content: {
                 Text(currentUserData.user.nickname)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
@@ -126,9 +126,6 @@ struct UserInfoView: View {
                     .foregroundStyle(ColorSet.subGray)
                     .frame(height: 52, alignment: .bottom)
                     .padding(.bottom, 18)
-                
-                
-                
             })
             .overlay {
                 AsyncImage(url: currentUserData.user.profileImageURL) { image in
@@ -145,14 +142,8 @@ struct UserInfoView: View {
                 .clipShape(Circle())
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .offset(y: -40)
-                
             }
             .padding(.horizontal, 20)
-            
-            
-            
-            
-            
             
             HStack(spacing: 8, content: {
                 SharedAsset.editProfile.swiftUIImage
@@ -263,9 +254,7 @@ struct MyMumori: View {
 
     var body: some View {
         VStack(spacing: 0, content: {
-            
             HStack(spacing: 0, content: {
-                
                 Text("나의 뮤모리")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundStyle(Color.white)
@@ -340,12 +329,10 @@ struct MyMumori: View {
 
 struct SubFunctionView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
     let lineGray = Color(white: 0.37)
     
     var body: some View {
         VStack(spacing: 0) {
-            
             Divider05()
             
             HStack(spacing: 0, content: {
@@ -366,7 +353,6 @@ struct SubFunctionView: View {
             .onTapGesture {
                 appCoordinator.rootPath.append(MyPage.reward)
             }
-            
             
             Divider05()
             

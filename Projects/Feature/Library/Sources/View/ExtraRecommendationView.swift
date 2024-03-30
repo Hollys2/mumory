@@ -30,7 +30,7 @@ struct ExtraRecommendationView: View {
         case .mostPosted:
             self.title = "뮤모리 사용자가 많이 기록한 음악"
         case .similiarTaste:
-            self.title = "비슷한 취향을 가진 사람들이 찜한 음악"
+            self.title = "비슷한 취향의 사용자가 즐겨찾기한 음악"
         }
     }
     
