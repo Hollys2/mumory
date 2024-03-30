@@ -28,13 +28,14 @@ struct NowPlayingView: View {
             AsyncImage(url: playerViewModel.playingSong()?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()
+                    .scaledToFill()
             } placeholder: {
                 Rectangle()
-                    .fill(Color(white: 0.28))
+                    .fill(ColorSet.charSubGray)
             }
             .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height)
             .overlay {
-                Color.black.opacity(0.4)
+                Color.black.opacity(0.3)
                 
                 ColorSet.background.opacity(isPresentQueue ? 1 : 0)
             }
@@ -65,6 +66,7 @@ struct NowPlayingView: View {
                             }
                         })
                 }
+                .scrollIndicators(.hidden)
                 .scrollDisabled(isPresentQueue)
                 .onChange(of: isPresentQueue) { newValue in
                     if isPresentQueue{
@@ -504,6 +506,7 @@ struct QueueView: View {
                     }
                     
                 }
+                .scrollIndicators(.hidden)
 //                .overlay(content: {
 //                    VStack(content: {
 //                        Spacer()
@@ -561,6 +564,7 @@ private func getTextWidth(term: String) -> CGFloat {
 
 
 struct PlayTogetherView: View {
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @Binding var songs: [Song]
     init(songs: Binding<[Song]>) {
         self._songs = songs
@@ -575,12 +579,24 @@ struct PlayTogetherView: View {
                 .padding(.leading, 15)
                 .padding(.bottom, 12)
             
-            VStack(spacing: 0) {
-                ForEach(songs, id: \.id) { song in
-                    PlayTogetherItem(song: song)
+            if let currentSong = playerViewModel.currentSong {
+                VStack(spacing: 0) {
+                    ForEach(songs, id: \.id) { song in
+                        PlayTogetherItem(song: song)
+                            .onTapGesture {
+                                playerViewModel.playNewSong(song: song)
+                            }
+                    }
                 }
+                .padding(.bottom, 25)
+            }else {
+                Text("재생중인 음악이 없습니다.")
+                    .foregroundStyle(ColorSet.subGray)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .multilineTextAlignment(.center)
+                    .padding(.bottom, 30)
+                    .frame(height: 280)
             }
-            .padding(.bottom, 25)
             
         }
         .frame(width: getUIScreenBounds().width * 0.92)
@@ -727,27 +743,7 @@ struct MarqueeText: View {
                     withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(3, autoreverses: true)) {
                         startAnimation = true
                     }
-                    
-                    
-//                    Task {
-//                        guard let newsong = await fetchDetailSong(songID: song.id.rawValue) else {return}
-//                        guard let firstArtist = newsong.artists?.first else {return}
-//                        guard let artist = await fetchDetailArtist(artistID: firstArtist.id.rawValue) else {print("error111");return}
-//                        print("artist: \(artist.name)")
-//                        artist.fullAlbums?.forEach({ album in
-//                            print("artist full album title: \(album.title)")
-//                        })
-//                        artist.albums?.forEach({ album in
-//                            print("artist album title: \(album.title)")
-//                            album.tracks?.forEach({ track in
-//                                print("song title: \(track.title)")
-//                            })
-//                        })
-//                        artist.appearsOnAlbums?.forEach({ album in
-//                            print("appear album title: \(album.title)")
-//                        })
-//                        print("-------------")
-//                    }
+
                     
                 })
                 .offset(x: startAnimation ? 0 : changeOffset )
