@@ -43,7 +43,7 @@ struct MusicChartDetailItem: View {
                 .foregroundStyle(LibraryColorSet.purpleBackground)
                 .padding(.trailing, 14)
             
-            VStack(spacing: 1, content: {
+            VStack(spacing: 3, content: {
                 Text(song.title)
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -71,8 +71,6 @@ struct MusicChartDetailItem: View {
                         playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
-           
-           
             }else {
                 SharedAsset.bookmark.swiftUIImage
                     .resizable()
@@ -84,8 +82,6 @@ struct MusicChartDetailItem: View {
                         playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
-               
-           
             }
             
             SharedAsset.menu.swiftUIImage
