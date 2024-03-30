@@ -278,7 +278,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchEveryMumory2() {
+    public func fetchEveryMumory2(completionHandler: @escaping (Result<Void, Error>) -> Void) {
         let db = FirebaseManager.shared.db
            
         Task {
@@ -306,6 +306,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     self.everyMumorys = self.tempMumory
 //                    self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
+                    completionHandler(.success(()))
                 }
                 
                 print("fetchSocialMumory2 successfully!")

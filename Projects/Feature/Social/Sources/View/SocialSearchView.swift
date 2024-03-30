@@ -275,16 +275,7 @@ public struct SocialSearchView: View {
                                             .resizable()
                                     }
                                     .frame(width: 50, height: 50)
-                                    .onTapGesture {
-                                        Task {
-                                            if friend.uId == currentUserData.user.uId {
-                                                appCoordinator.rootPath.append(MyPage.myPage)
-                                            } else {
-                                                let friend = await MumoriUser(uId: friend.uId)
-                                                appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
-                                            }
-                                        }
-                                    }
+                                    .mask {Circle()}
 
                                     Spacer().frame(width: 15)
 
@@ -308,6 +299,16 @@ public struct SocialSearchView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 70)
+                                .onTapGesture {
+                                    Task {
+                                        if friend.uId == currentUserData.user.uId {
+                                            appCoordinator.rootPath.append(MyPage.myPage)
+                                        } else {
+                                            let friend = await MumoriUser(uId: friend.uId)
+                                            appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                                        }
+                                    }
+                                }
                             }
                         }
                         .frame(height: 70 * CGFloat(friendManager.searchedFriends.count) + 30)
