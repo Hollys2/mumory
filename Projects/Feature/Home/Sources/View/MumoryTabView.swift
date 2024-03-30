@@ -54,6 +54,7 @@ public struct MumoryTabView: View {
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             appCoordinator.isCreateMumorySheetShown = true
                             appCoordinator.offsetY = CGFloat.zero
+                            playerViewModel.setPlayerVisibility(isShown: false)
                         }
                     }
                 

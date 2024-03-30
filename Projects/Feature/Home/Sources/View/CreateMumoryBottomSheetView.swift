@@ -86,7 +86,7 @@ public struct CreateMumoryBottomSheetView: View {
                             self.contentText.removeAll()
                             photoPickerViewModel.removeAllSelectedImages()
                             self.imageURLs.removeAll()
-                            
+                            playerViewModel.setPlayerVisibility(isShown: true)
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 self.appCoordinator.isCreateMumorySheetShown = false
                             }
@@ -114,7 +114,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         self.contentText.removeAll()
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
-                                        
+                                        playerViewModel.setPlayerVisibility(isShown: true)
                                         withAnimation(.easeInOut(duration: 0.2)) {
                                             self.appCoordinator.isCreateMumorySheetShown = false
                                         }
@@ -279,6 +279,8 @@ public struct CreateMumoryBottomSheetView: View {
                             .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
 //                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                         } // ScrollView
+                    .scrollIndicators(.hidden)
+
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
@@ -367,7 +369,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")
                                     }
                                 }
-
+                                playerViewModel.setPlayerVisibility(isShown: true)
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
@@ -397,7 +399,7 @@ public struct CreateMumoryBottomSheetView: View {
                         self.imageURLs.removeAll()
                         
                         self.isDeletePopUpShown = false
-                        
+                        playerViewModel.setPlayerVisibility(isShown: true)
                         withAnimation(.easeInOut(duration: 0.2)) {
                             self.appCoordinator.isCreateMumorySheetShown = false
                         }
@@ -448,13 +450,6 @@ public struct CreateMumoryBottomSheetView: View {
                 .zIndex(2)
                 .offset(y:  keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
             }
-        }
-        .onAppear(perform: {
-            playerViewModel.isShownMiniPlayer = false
-            playerViewModel.pause()
-        })
-        .onDisappear {
-            playerViewModel.isShownMiniPlayer = true
         }
     }
     

@@ -12,6 +12,8 @@ import Shared
 struct AddSongView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+
     @State var originPlaylist: MusicPlaylist
     @State var selection: Int = 0
     private let noneSelectedColor = Color(white: 0.65)
@@ -97,6 +99,12 @@ struct AddSongView: View {
             
         }
         .ignoresSafeArea()
+        .onAppear {
+            playerViewModel.setPlayerVisibility(isShown: false)
+        }
+        .onDisappear {
+            playerViewModel.setPlayerVisibility(isShown: true)
+        }
 
     }
 }

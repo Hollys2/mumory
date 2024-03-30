@@ -39,15 +39,27 @@ struct BlockFriendListView: View {
                 .frame(height: 65)
                 
                 Divider05()
-                
-                ScrollView {
-                    LazyVStack(spacing: 0, content: {
-                        ForEach(currentUserData.blockFriends, id: \.uId){ friend in
-                            BlockFriendItem(friend: friend)
-                        }
-                    })
+                if currentUserData.blockFriends.isEmpty {
+                    VStack(spacing: 20) {
+                        Text("차단한 친구가 없어요")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                            .foregroundStyle(Color.white)
+                        
+                        Text("친구를 차단하면 여기에 표시됩니다.")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .foregroundStyle(ColorSet.subGray)
+                    }
+                    .padding(.top, getUIScreenBounds().height * 0.25)
+                }else {
+                    ScrollView {
+                        LazyVStack(spacing: 0, content: {
+                            ForEach(currentUserData.blockFriends, id: \.uId){ friend in
+                                BlockFriendItem(friend: friend)
+                            }
+                        })
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                
             }
         }
 
@@ -73,9 +85,11 @@ struct BlockFriendItem: View {
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
             } placeholder: {
-                Circle()
-                    .fill(ColorSet.darkGray)
-                    .frame(width: 50)
+                friend.defaultProfileImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
             }
             
             VStack(alignment: .leading, spacing: 1, content: {

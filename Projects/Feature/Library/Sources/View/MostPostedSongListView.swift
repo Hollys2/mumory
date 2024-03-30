@@ -17,13 +17,12 @@ struct MostPostedSongListView: View {
     @State var contentOffset: CGPoint = .zero
     @State var viewWidth: CGFloat = .zero
     @State var scrollDirection: ScrollDirection = .up
-    @State var songs: [Song] = []
+    @Binding var songs: [Song]
     @State var searchIndex = 0
-    @Binding var songIds: [String]
     let dateTextColor = Color(red: 0.51, green: 0.51, blue: 0.51)
     
-    init(songIds: Binding<[String]>) {
-        self._songIds = songIds
+    init(songs: Binding<[Song]>) {
+        self._songs = songs
     }
     
     var body: some View {
@@ -61,7 +60,7 @@ struct MostPostedSongListView: View {
                 .padding(.top, appCoordinator.safeAreaInsetsTop)
                 
                 HStack(alignment: .bottom){
-                    Text("\(songIds.count)곡")
+                    Text("\(songs.count)곡")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.subGray)
                         .padding(.leading, 20)
@@ -82,11 +81,10 @@ struct MostPostedSongListView: View {
                 
                 ScrollWrapperWithIndex(songs: $songs, index: $searchIndex, contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
                     LazyVStack(spacing: 0, content: {
-                        ForEach(0..<songs.count, id: \.self) { index in
+                        ForEach(songs.indices, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
                                 .simultaneousGesture(TapGesture().onEnded({ _ in
                                     playerViewModel.playAll(title: "뮤모리 사용자가 많이 기록한 음악", songs: songs, startingItem: songs[index])
-                                    playerViewModel.isShownMiniPlayer = true
                                 }))
                         
                         }
@@ -97,6 +95,7 @@ struct MostPostedSongListView: View {
                         .foregroundStyle(.clear)
                         .frame(height: 87)
                 }
+                .scrollIndicators(.hidden)
                 .ignoresSafeArea()
             })
             
@@ -106,9 +105,6 @@ struct MostPostedSongListView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
-            Task {
-                songs = await fetchSongs(songIDs: songIds)
-            }
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }

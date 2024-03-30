@@ -145,7 +145,7 @@ public struct MumoryDetailView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     public var body: some View {
         
         ZStack(alignment: .top) {
@@ -239,6 +239,7 @@ public struct MumoryDetailView: View {
             }
         } // ZStack
         .onAppear {
+            playerViewModel.setPlayerVisibility(isShown: false)
             Task {
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await MumoriUser(uId: self.mumory.uId)

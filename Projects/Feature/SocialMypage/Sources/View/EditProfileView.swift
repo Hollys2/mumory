@@ -41,6 +41,8 @@ struct EditProfileView: View {
                         .frame(height: 500)
                 })
             }
+            .scrollIndicators(.hidden)
+            
             LoadingAnimationView(isLoading: $editProfileViewModel.isLoading)
                 .frame(maxHeight: .infinity, alignment: .center)
         }

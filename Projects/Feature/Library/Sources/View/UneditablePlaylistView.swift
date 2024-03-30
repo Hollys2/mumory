@@ -80,7 +80,6 @@ struct UneditablePlaylistView: View {
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
-                                    playerViewModel.isShownMiniPlayer = true
                                 }
                             
                             Divider05()
@@ -111,6 +110,7 @@ struct UneditablePlaylistView: View {
                     isLoading = false
                 }
             }
+            .scrollIndicators(.hidden)
             
             
             //상단바 - z축 최상위

@@ -94,7 +94,7 @@ public struct MyRecentMumoryView: View {
 
 struct NoMumoryView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-
+    @EnvironmentObject var playerViewModel: PlayerViewModel 
     var body: some View {
         VStack(alignment: .center,spacing: 0, content: {
             Text("나의 뮤모리를 기록하고")
@@ -119,6 +119,7 @@ struct NoMumoryView: View {
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
                         appCoordinator.offsetY = CGFloat.zero
+                        playerViewModel.setPlayerVisibility(isShown: false)
                     }
                 }
 

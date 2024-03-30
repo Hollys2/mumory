@@ -97,6 +97,7 @@ struct SelectableArtistView: View {
                 .frame(width: getUIScreenBounds().width)
 
             }
+            .scrollIndicators(.hidden)
             .ignoresSafeArea()
 
             //상단바 - z축 최상위
@@ -130,7 +131,6 @@ struct SelectableArtistView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             requestArtistSongs(offset: 0)
-            playerViewModel.isShownMiniPlayer = false
         })
     }
     

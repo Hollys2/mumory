@@ -133,6 +133,7 @@ struct SongBottomSheetView: View {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
                                 }
+                                playerViewModel.setPlayerVisibility(isShown: false)
                             }
                             
                         }
@@ -317,6 +318,7 @@ struct OptionalSongBottomSheetView: View {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
                                 }
+                                playerViewModel.setPlayerVisibility(isShown: false)
                             }
                             
                         }

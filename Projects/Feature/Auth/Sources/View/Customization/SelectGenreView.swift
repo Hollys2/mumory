@@ -97,6 +97,8 @@ public struct SelectGenreView: View {
                             .frame(width: 10, height: 200)
                     })
                 }
+                .scrollIndicators(.hidden)
+
         }
         .onAppear(perform: {
         })

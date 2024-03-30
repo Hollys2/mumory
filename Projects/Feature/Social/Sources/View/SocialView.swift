@@ -198,7 +198,8 @@ struct SocialItemView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
-
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
+    
     let mumory: Mumory
     
     var body: some View {
@@ -520,7 +521,7 @@ struct SocialItemView: View {
                     
                     Button(action: {
                         self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
-                        
+                        playerViewModel.setPlayerVisibility(isShown: false)
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             self.appCoordinator.isSocialCommentSheetViewShown = true
                             appCoordinator.offsetY = CGFloat.zero

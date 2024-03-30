@@ -88,7 +88,6 @@ struct ChartListView: View {
                                     if searchIndex < 5 {
                                         requestTop100(startIndex: searchIndex + 1)
                                     }
-                                    playerViewModel.isShownMiniPlayer = true
                                 }))
                         
                         }

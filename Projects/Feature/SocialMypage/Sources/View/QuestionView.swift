@@ -149,6 +149,7 @@ struct QuestionView: View {
                             Spacer()
                         })
                     }
+                    .scrollIndicators(.hidden)
 
                 }
                 

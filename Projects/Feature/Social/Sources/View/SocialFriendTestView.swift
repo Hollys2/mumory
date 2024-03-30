@@ -31,7 +31,7 @@ struct SocialFriendTestView: View {
     @State private var friendSearchResult: MumoriUser?
     @State private var isPresentFriendBottomSheet: Bool = false
     @State private var friendRequestStatus: FriendRequestStatus = .valid
- 
+    @State private var isLoading: Bool = false
     
     let db = FBManager.shared.db
     var body: some View {
@@ -106,57 +106,93 @@ struct SocialFriendTestView: View {
                 .padding(.top, 20)
 
                 Divider05()
-                
-                if itemSelection == 0 {
-                    //친구 추가 - selection: 0
-                    SearchFriendTextField(text: $searchText, prompt: "ID검색")
-                        .submitLabel(.search)
-                        .padding(.top, 22)
-                        .onSubmit {
-                            searchFriend()
-                        }
-                        .onChange(of: searchText) { newValue in
-                            if searchText.isEmpty {
-                                self.friendSearchResult = nil
+                ScrollView {
+                    if itemSelection == 0 {
+                        //친구 추가 - selection: 0
+                        SearchFriendTextField(text: $searchText, prompt: "ID검색")
+                            .submitLabel(.search)
+                            .padding(.top, 22)
+                            .onSubmit {
+                                isLoading = true
+                                searchFriend(id: searchText)
                             }
-                        }
-                    
-                    if let friend = self.friendSearchResult {
-                        VStack(spacing: 0) {
-                            
-                            switch currentUserData.getFriendStatus(friend: friend) {
-                            case .friend:
-                                AlreadFriendItem(friend: friend)
-                            case .notFriend:
-                                FriendAddItem(friend: friend)
-                            case .alreadySendRequest:
-                                MyRequestFriendItem(friend: friend)
-                            case .alreadyRecieveRequest:
-                                RecievedRequestItem(friend: friend)
-                            default: EmptyView()
+                            .onChange(of: searchText) { newValue in
+                                if searchText.isEmpty {
+                                    self.friendSearchResult = nil
+                                }
                             }
-                 
-                        }
-                        .padding(.top, 15)
-                    }
-                    
-                }else {
-                    //친구 요청 - selection: 1
-                    ScrollView {
-                        LazyVStack(spacing: 0, content: {
-                            ForEach(currentUserData.recievedRequests, id: \.self) { friend in
-                                RecievedRequestItem(friend: friend)
+                        
+                        if searchText.isEmpty {
+                            Text("특별한 순간과 음악 취향을 공유하고\n싶은 친구들을 초대해보세요")
+                                .foregroundStyle(ColorSet.charSubGray)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .multilineTextAlignment(.center)
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                .padding(.top, getUIScreenBounds().height * 0.2)
+                        } else if let friend = self.friendSearchResult {
+                            VStack(spacing: 0) {
+                                
+                                switch currentUserData.getFriendStatus(friend: friend) {
+                                case .friend:
+                                    AlreadFriendItem(friend: friend)
+                                case .notFriend:
+                                    FriendAddItem(friend: friend)
+                                case .alreadySendRequest:
+                                    MyRequestFriendItem(friend: friend)
+                                case .alreadyRecieveRequest:
+                                    RecievedRequestItem(friend: friend)
+                                default: EmptyView()
+                                }
+                     
                             }
-                        })
+                            .padding(.top, 15)
+                        }
+//                        else {
+//                            Text("검색 결과가 없습니다")
+//                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+//                                .foregroundStyle(ColorSet.subGray)
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                                .padding(.top, getUIScreenBounds().height * 0.2)
+//                        }
+                        
+                    }else {
+                        //친구 요청 - selection: 1
+                        if currentUserData.recievedRequests.isEmpty {
+                            VStack(spacing: 20) {
+                                Text("받은 친구 요청 내력이 없어요")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                    .foregroundStyle(Color.white)
+                                
+                                Text("친구 요청을 받으면 여기에 표시됩니다.")
+                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                    .foregroundStyle(ColorSet.subGray)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, getUIScreenBounds().height * 0.25)
+                        }
+                        ScrollView {
+                            LazyVStack(spacing: 0, content: {
+                                ForEach(currentUserData.recievedRequests, id: \.self) { friend in
+                                    RecievedRequestItem(friend: friend)
+                                }
+                            })
+                        }
+                        .scrollIndicators(.hidden)
+                        .onAppear {
+                            currentUserData.recievedNewFriends = false
+                        }
+                  
                     }
-                    .onAppear {
-                        currentUserData.recievedNewFriends = false
-                    }
-              
                 }
+          
+                
                 
             })
             .padding(.top, appCoordinator.isAddFriendViewShown ? appCoordinator.safeAreaInsetsTop : 0)       
+            
+            LoadingAnimationView(isLoading: $isLoading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
         }
         .navigationBarBackButtonHidden()
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
@@ -168,17 +204,19 @@ struct SocialFriendTestView: View {
 
     }
     
-    private func searchFriend(){
+    private func searchFriend(id: String){
+        guard id != currentUserData.user.id else {return}
         friendRequestStatus = .loading
+        self.friendSearchResult = nil
         Task {
             let query = db.collection("User")
-                .whereField("id", isEqualTo: searchText)
+                .whereField("id", isEqualTo: id)
             
-            guard let snapshot = try? await query.getDocuments() else {return}
-            guard let doc = snapshot.documents.first else {return}
+            guard let snapshot = try? await query.getDocuments() else {isLoading = false; return}
+            guard let doc = snapshot.documents.first else {isLoading = false; return}
             let blockFriends = (doc.data()["blockFriends"] as? [String]) ?? []
-            if blockFriends.contains(currentUserData.uId){return}
-            guard let friendUID = doc.data()["uid"] as? String else {return}
+            if blockFriends.contains(currentUserData.uId){isLoading = false; return}
+            guard let friendUID = doc.data()["uid"] as? String else {isLoading = false; return}
             
             if currentUserData.friends.contains(where: {$0.uId == friendUID}) {
                 friendRequestStatus = .alreadyFriend
@@ -191,47 +229,9 @@ struct SocialFriendTestView: View {
             }
             
             self.friendSearchResult = await MumoriUser(uId: friendUID)
+            isLoading = false
         }
     }
-
-//
-//    private func getMyRequestFriendList(){
-//        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
-//            .whereField("type", isEqualTo: "request")
-//        Task {
-//            guard let snapshot = try? await query.getDocuments() else {
-//                return
-//            }
-//            snapshot.documents.forEach { document in
-//                guard let uid = document.data()["uId"] as? String else {
-//                    return
-//                }
-//                Task {
-//                    myRequestFriendList.append(await MumoriUser(uId: uid))
-//                }
-//            }
-//        }
-//    }
-//    
-//    private func getFriendRequest(){
-//        self.friendRequestList.removeAll()
-//        Task{
-//            let query = db.collection("User").document(currentUserData.uId).collection("Friend")
-//                .whereField("type", isEqualTo: "recieve")
-//        
-//            guard let docs = try? await query.getDocuments() else {
-//                return
-//            }
-//            docs.documents.forEach { doc in
-//                guard let uid = doc.data()["uId"] as? String else {
-//                    return
-//                }
-//                Task {
-//                    friendRequestList.append(await MumoriUser(uId: uid))
-//                }
-//            }
-//        }
-//    }
 }
 
 struct FindFriendSelectItem: View {
@@ -255,7 +255,6 @@ struct FindFriendSelectItem: View {
             .onTapGesture {
                 self.selection = self.type
             }
-        
     }
 }
 
@@ -272,9 +271,7 @@ struct SearchFriendTextField: View {
                 .foregroundColor(.white)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            
-            
-            
+                        
             SharedAsset.xWhiteCircle.swiftUIImage
                 .resizable()
                 .scaledToFit()
@@ -285,7 +282,6 @@ struct SearchFriendTextField: View {
                 .onTapGesture {
                     text = ""
                 }
-            
         }
         .frame(maxWidth: .infinity)
         .frame(height: 45)
@@ -316,9 +312,11 @@ struct AlreadFriendItem: View {
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
             } placeholder: {
-                Circle()
-                    .fill(ColorSet.darkGray)
-                    .frame(width: 50)
+                friend.defaultProfileImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
             }
             
             VStack(alignment: .leading, spacing: 1, content: {
@@ -362,9 +360,11 @@ struct FriendAddItem: View {
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
             } placeholder: {
-                Circle()
-                    .fill(ColorSet.darkGray)
-                    .frame(width: 50)
+                friend.defaultProfileImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
             }
             
             VStack(alignment: .leading, spacing: 1, content: {
@@ -441,9 +441,11 @@ struct RecievedRequestItem: View {
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
             } placeholder: {
-                Circle()
-                    .fill(ColorSet.darkGray)
-                    .frame(width: 50)
+                friend.defaultProfileImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
             }
             .padding(.trailing, 13)
             

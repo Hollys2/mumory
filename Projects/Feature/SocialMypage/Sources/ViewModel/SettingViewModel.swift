@@ -41,31 +41,33 @@ class SettingViewModel: ObservableObject{
     }
     var uid: String = "" {
         didSet {
-            isLoading = true
-            Task {
-                guard let document = try? await db.collection("User").document(uid).getDocument() else {
-                    return
-                }
-                guard let data = document.data() else {
-                    return
-                }
-                guard let email = data["email"] as? String,
-                      let nickname = data["nickname"] as? String,
-                      let signInMethod = data["signInMethod"] as? String,
-                      let isSubscribedToService = data["isSubscribedToService"] as? Bool,
-                      let isSubscribedToSocial = data["isSubscribedToSocial"] as? Bool,
-                      let notificationTime = data["notificationTime"] as? Int else {
-                    return
-                }
-                
-                DispatchQueue.main.async {
-                    self.signinMethod = signInMethod
-                    self.isSubscribedToSocial = isSubscribedToSocial
-                    self.isSubscribedToService = isSubscribedToService
-                    self.email = email
-                    self.nickname = nickname
-                    self.notificationTime = notificationTime
-                    self.isLoading = false
+            if uid != "" {
+                isLoading = true
+                Task {
+                    guard let document = try? await db.collection("User").document(uid).getDocument() else {
+                        return
+                    }
+                    guard let data = document.data() else {
+                        return
+                    }
+                    guard let email = data["email"] as? String,
+                          let nickname = data["nickname"] as? String,
+                          let signInMethod = data["signInMethod"] as? String,
+                          let isSubscribedToService = data["isSubscribedToService"] as? Bool,
+                          let isSubscribedToSocial = data["isSubscribedToSocial"] as? Bool,
+                          let notificationTime = data["notificationTime"] as? Int else {
+                        return
+                    }
+                    
+                    DispatchQueue.main.async {
+                        self.signinMethod = signInMethod
+                        self.isSubscribedToSocial = isSubscribedToSocial
+                        self.isSubscribedToService = isSubscribedToService
+                        self.email = email
+                        self.nickname = nickname
+                        self.notificationTime = notificationTime
+                        self.isLoading = false
+                    }
                 }
             }
         }

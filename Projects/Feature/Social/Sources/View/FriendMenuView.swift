@@ -96,6 +96,7 @@ struct FriendMenuView: View {
                     FriendItemView(type: .unblockFriend, friend: FriendSearch(nickname: "", id: ""), isSendFriendRequestPopUpShown: self.$isSendFriendRequestPopUpShown, isAcceptFriendRequestPopUpShown: self.$isAcceptFriendRequestPopUpShown, isDeleteFriendRequestPopUpShown: self.$isDeleteFriendRequestPopUpShown, isCancelFriendRequestPopUpShown: self.$isCancelFriendRequestPopUpShown, isUnblockFriendPopUpShown: self.$isUnblockFriendPopUpShown)
                 }
             }
+            .scrollIndicators(.hidden)
         }
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .navigationBarBackButtonHidden(true)

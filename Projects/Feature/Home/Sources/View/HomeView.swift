@@ -122,7 +122,6 @@ public struct HomeView: View {
                 UserDefaults.standard.set(true, forKey: "firstRun")
                 UserDefaults.standard.set(Date(), forKey: "firstLogined")
             }
-            
             playerViewModel.miniPlayerMoveToBottom = false
             
             Task {

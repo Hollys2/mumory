@@ -123,10 +123,10 @@ public struct SplashView: View {
                         UneditablePlaylistManageView(friend: friend, playlistArray: playlist)
                     case .searchFriend:
                         SocialFriendTestView()
-                    case .mostPostedSongList(songIds: let songIds):
-                        MostPostedSongListView(songIds: songIds)
-                    case .similarTasteList(songIds: let songIds):
-                        SimilarTasteListView(songIds: songIds)
+                    case .mostPostedSongList(songs: let songs):
+                        MostPostedSongListView(songs: songs)
+                    case .similarTasteList(songs: let songs):
+                        SimilarTasteListView(songs: songs)
                     case .myRecentMumorySongList:
                         MyRecentMumoryListView()
                     }

@@ -17,11 +17,10 @@ struct SimilarTasteListView: View {
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
-    @Binding var songIds: [String]
-    @State var songs: [Song] = []
+    @Binding var songs: [Song]
     
-    init(songIds: Binding<[String]>) {
-        self._songIds = songIds
+    init(songs: Binding<[Song]>) {
+        self._songs = songs
     }
     var body: some View {
         ZStack(alignment: .top){
@@ -59,7 +58,7 @@ struct SimilarTasteListView: View {
                             .padding(.top, 5)
                         
                         HStack(alignment: .bottom){
-                            Text("\(songIds.count)곡")
+                            Text("\(songs.count)곡")
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                                 .foregroundStyle(ColorSet.subGray)
                             
@@ -80,7 +79,6 @@ struct SimilarTasteListView: View {
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "비슷한 취향을 가진 사람들이 찜한 음악", songs: songs, startingItem: song)
-                                    playerViewModel.isShownMiniPlayer = true
                                 }
 //                                .highPriorityGesture(
 //                                    TapGesture()
@@ -89,14 +87,13 @@ struct SimilarTasteListView: View {
 //                                            playerViewModel.isShownMiniPlayer = true
 //                                        })
 //                                )
-                    
+                            
                             Divider05()
-                     
+                            
                         }
                         
-                        if !(songs.count == songIds.count) {
-                            
-                                SongListSkeletonView(isLineShown: true)
+                        if songs.isEmpty {
+                            SongListSkeletonView(isLineShown: true)
                         }
                         
                         
@@ -117,6 +114,7 @@ struct SimilarTasteListView: View {
                 .frame(minHeight: getUIScreenBounds().height)
                 
             }
+            .scrollIndicators(.hidden)
             
             
             //상단바 - z축 최상위
@@ -150,10 +148,6 @@ struct SimilarTasteListView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
-            Task {
-                print("songids count: \(songIds.count)")
-                self.songs = await fetchSongs(songIDs: songIds)
-            }
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
