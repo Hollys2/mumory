@@ -19,6 +19,7 @@ public struct HomeView: View {
     
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
+    @State private var isCreateMumoryPopUpViewShown: Bool = true
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -31,26 +32,12 @@ public struct HomeView: View {
     public init(){}
     
     public var body: some View {
-        
         ZStack(alignment: .bottom) {
             
             VStack(spacing: 0) {
                 switch appCoordinator.selectedTab {
                 case .home:
                     HomeMapView()
-                        .onAppear {
-                            self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { mumorys in
-                                DispatchQueue.main.async {
-                                    self.mumoryDataViewModel.myMumorys = mumorys
-                                    self.mumoryDataViewModel.isUpdating = false
-                                }
-                                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                                
-                            }
-                        }
-                        .onDisappear {
-                            self.listener?.remove()
-                        }
                 case .social:
                     SocialView(isShown: self.$isSocialSearchViewShown)
                 case .library:
@@ -59,7 +46,19 @@ public struct HomeView: View {
                     NotifyView()
                 }
                 
-                MumoryTabView(selectedTab: $appCoordinator.selectedTab)
+                ZStack(alignment: .top) {
+                    MumoryTabView(selectedTab: $appCoordinator.selectedTab)
+                    
+                    CreateMumoryPopUpView()
+                        .offset(y: -41)
+                        .opacity(self.isCreateMumoryPopUpViewShown ? 1: 0)
+                        .animation(.easeInOut(duration: 1), value: self.isCreateMumoryPopUpViewShown)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
+                                self.isCreateMumoryPopUpViewShown = false
+                            }
+                        }
+                }
             }
             .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
             
@@ -119,18 +118,30 @@ public struct HomeView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear {
+            if UserDefaults.standard.object(forKey: "firstRun") == nil {
+                UserDefaults.standard.set(true, forKey: "firstRun")
+                UserDefaults.standard.set(Date(), forKey: "firstLogined")
+            }
+            
             playerViewModel.miniPlayerMoveToBottom = false
+            
             Task {
                 let authorizationStatus = await MusicAuthorization.request()
                 if authorizationStatus == .authorized {
                     print("음악 권한 받음")
-//                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
                     
-//                    self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { mumorys in
-//                        DispatchQueue.main.async {
-//                            self.mumoryDataViewModel.myMumorys = mumorys
-//                        }
-//                    }
+                    if !appCoordinator.isFirst {
+                        print("한번")
+                        self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { mumorys in
+                            DispatchQueue.main.async {
+                                self.mumoryDataViewModel.myMumorys = mumorys
+                                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                                self.mumoryDataViewModel.isUpdating = false
+                            }
+                        }
+                        
+                        appCoordinator.isFirst = true
+                    }
                 } else {
                     print("음악 권한 거절")
                     DispatchQueue.main.async {
@@ -159,11 +170,11 @@ public struct HomeView: View {
         alertController.addAction(cancelAction)
         
         UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
-//        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-//            if let window = windowScene.windows.first {
-//                window.rootViewController?.present(alertController, animated: true, completion: nil)
-//            }
-//        }
+        //        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+        //            if let window = windowScene.windows.first {
+        //                window.rootViewController?.present(alertController, animated: true, completion: nil)
+        //            }
+        //        }
     }
     
     

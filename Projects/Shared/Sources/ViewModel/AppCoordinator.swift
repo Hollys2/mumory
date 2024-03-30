@@ -51,6 +51,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isDeleteMumoryPopUpViewShown = false
     @Published public var isLoading = false
     @Published public var isFirstTabSelected: Bool = false
+    @Published public var isFirst: Bool = false
     
     @Published public var isTestViewShown = true
     

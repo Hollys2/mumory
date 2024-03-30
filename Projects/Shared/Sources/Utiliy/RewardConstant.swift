@@ -86,6 +86,23 @@ public enum Reward {
     public var subTitles: [String] {
         switch self {
         case .attendance:
+            return ["첫 출석", "3일 연속", "1주 연속", "2주 연속", "30일 연속"]
+        case .record:
+            return ["첫 기록", "5개 기록", "10개 기록", "20개 기록", "50개 기록"]
+        case .location:
+            return ["지역 2곳", "지역 3곳", "지역 5곳", "지역 10곳", "지역 15곳"]
+        case .like:
+            return ["첫 좋아요", "5개", "15개", "30개", "50개"]
+        case .comment:
+            return ["첫 댓글", "5개", "10개", "20개", "40개"]
+        case .none:
+            return []
+        }
+    }
+    
+    public var content: [String] {
+        switch self {
+        case .attendance:
             return [
                 "뮤모리 출석 1일차 입니다. 꾸준히 출석해서 리워드를 받아보세요!",
                 "뮤모리에 3일 연속 출석하셨네요. 꾸준히 출석해서 리워드를 받아보세요!",
@@ -167,15 +184,15 @@ public enum Reward {
     public var subTitle: String {
         switch self {
         case .attendance(let index):
-            return self.subTitles[index]
+            return self.content[index]
         case .record(let index):
-            return self.subTitles[index]
+            return self.content[index]
         case .location(let index):
-            return self.subTitles[index]
+            return self.content[index]
         case .like(let index):
-            return self.subTitles[index]
+            return self.content[index]
         case .comment(let index):
-            return self.subTitles[index]
+            return self.content[index]
         case .none:
             return ""
         }

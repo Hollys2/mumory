@@ -15,6 +15,8 @@ import Shared
 
 struct HomeMapView: View {
     
+    @State private var isAppleMusicPopUpShown: Bool = true
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
@@ -31,10 +33,7 @@ struct HomeMapView: View {
                 .onAppear {
                     print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
                 }
-                .onDisappear {
-                    print("HomeMapViewRepresentable onDisappear")
-                    //                    self.listener?.remove()
-                }
+
             
             VStack(spacing: 0) {
                 
@@ -73,7 +72,11 @@ struct HomeMapView: View {
             
             VStack {
                 PlayingMusicBarView()
-                    .offset(y: appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 12 : 16))
+                    .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 12 : 16))
+                
+                AppleMusicPopUpView(isShown: self.$isAppleMusicPopUpShown)
+                    .padding(.top, 15)
+                    .opacity(self.isAppleMusicPopUpShown ? 1 : 0)
                 
                 Spacer()
             }
