@@ -35,6 +35,7 @@ public struct MonthlyStatView: View {
                     ContentView(date: self.$selectedDate)
                         .frame(height: 1000)
                 }
+                .frame(width: getUIScreenBounds().width - 40)
                 
                 ZStack(alignment: .leading) {
                     Rectangle()
@@ -74,7 +75,6 @@ public struct MonthlyStatView: View {
 struct ContentView: View {
     
     @Binding var date: Date
-    
     
     @State var mumoryMonthly: [Mumory] = []
     @State var mumoriesCountByMonth: [Int] = Array(repeating: 0, count: 12)

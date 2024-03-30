@@ -22,6 +22,7 @@ public struct MyMumoryDatePicker: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @Environment(\.dismiss) private var dismiss
+
     
     public init(selectedDate: Binding<Date>) {
         self._selectedDate = selectedDate
@@ -31,8 +32,8 @@ public struct MyMumoryDatePicker: View {
         VStack(spacing: 0) {
                   
             Picker("Year and Month", selection: self.$pickerDate) {
-                ForEach(getPastYears(), id: \.self) { year in
-                    ForEach(getMonths(forYear: year), id: \.self) { month in
+                ForEach(getMumoryDate().keys.sorted().reversed(), id: \.self) { year in
+                    ForEach(getMumoryDate()[year]!, id: \.self) { month in
                         Text("\(String(format: "%d", year))년 \(month)월")
                             .tag(DateManager.getYearMonthDate(year: year, month: month))
                             .foregroundColor(.white)
@@ -47,6 +48,7 @@ public struct MyMumoryDatePicker: View {
             }
             
             Button(action: {
+                print("pickerDate: \(pickerDate)")
                 self.selectedDate = pickerDate
                 
                 let calendar = Calendar.current
@@ -54,11 +56,11 @@ public struct MyMumoryDatePicker: View {
                 let range = ...lastDayOfMonth
                 let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
                 
-                for m in newDataBeforeSelectedDate {
-                    print("date: \(m.date)")
+                mumoryDataViewModel.filteredMumorys = []
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    mumoryDataViewModel.filteredMumorys = newDataBeforeSelectedDate
                 }
-                mumoryDataViewModel.myMumorys = newDataBeforeSelectedDate
-                
+
                 dismiss()
             }) {
                 ZStack {
@@ -97,6 +99,40 @@ public struct MyMumoryDatePicker: View {
         }
         
         return months
+    }
+    
+    func getMumoryDate() -> [Int: [Int]]{
+        
+        var yearMonthDictionary = [Int: [Int]]()
+        // Mumory 배열을 순회하면서 연도와 월을 추출하여 배열에 추가
+        
+        let mumoryArray: [Mumory] = mumoryDataViewModel.myMumorys
+        
+        // 딕셔너리를 생성하여 연도를 키로 하고 해당 연도에 속하는 월의 배열을 값으로 함
+//        var yearMonthDictionary = [Int: [Int]]()
+        
+        // Mumory 배열을 순회하면서 연도와 월을 추출하여 딕셔너리에 추가
+        for mumory in mumoryArray {
+            let mumoryYear = Calendar.current.component(.year, from: mumory.date)
+            let mumoryMonth = Calendar.current.component(.month, from: mumory.date)
+            
+            // 딕셔너리에 이미 해당 연도가 있는지 확인하고 없으면 새로운 배열을 생성하여 추가
+            if yearMonthDictionary[mumoryYear] == nil {
+                yearMonthDictionary[mumoryYear] = [mumoryMonth]
+            } else {
+                // 이미 해당 연도가 있는 경우 해당 연도의 배열에 월을 추가
+                yearMonthDictionary[mumoryYear]?.append(mumoryMonth)
+            }
+        }
+        
+        // 값으로 저장된 배열에서 중복을 제거하고 내림차순으로 정렬
+        for (year, months) in yearMonthDictionary {
+            yearMonthDictionary[year] = Array(Set(months)).sorted(by: >)
+        }
+
+        
+        // 결과 확인
+        return yearMonthDictionary
     }
 
 }
