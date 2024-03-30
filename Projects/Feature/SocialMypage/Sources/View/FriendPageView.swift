@@ -165,7 +165,9 @@ struct KnownFriendPageView: View {
         .onAppear {
             self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
                 self.mumorys = mumorys
-                isLoading = false
+                DispatchQueue.main.async {
+                    mumoryDataViewModel.isUpdating = false
+                }
             }
         }
     }

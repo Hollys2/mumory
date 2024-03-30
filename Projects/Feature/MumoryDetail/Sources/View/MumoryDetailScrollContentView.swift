@@ -290,19 +290,19 @@ struct MumoryDetailScrollContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Spacer().frame(height: 13)
-
-                    ForEach(0..<3) { _ in
-                        MumoryDetailSameLocationMusicView()
-                    }
                     
                     VStack(spacing: 0) {
                         Text("현재 데이터를 모으는 중으로 추후에 업데이트 될 예정입니다!")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
-                            .frame(width: 191)
-                            .background(.red)
+                            .multilineTextAlignment(.center)
+                            .frame(width: 210)
                     }
                     .frame(height: 334 - 25)
+
+                    ForEach(0..<3) { _ in
+                        MumoryDetailSameLocationMusicView()
+                    }
 
                     Spacer().frame(height: 25)
 
