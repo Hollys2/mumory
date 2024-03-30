@@ -159,23 +159,26 @@ struct CommentView: View {
                 
                 Spacer().frame(height: 15)
                 
-                Button(action: {
-                    withAnimation {
-                        scrollToComment()
-                    }
-                    isFocused.wrappedValue = true
-                    selectedComment = comment
-                    print("selectedComment: \(selectedComment)")
-                    isWritingReply = true
+                if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
                     
-                }, label: {
-                    Text("답글 달기")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                })
-                .disabled(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 12)
+                    Button(action: {
+                        withAnimation {
+                            scrollToComment()
+                        }
+                        isFocused.wrappedValue = true
+                        selectedComment = comment
+                        print("selectedComment: \(selectedComment)")
+                        isWritingReply = true
+                        
+                    }, label: {
+                        Text("답글 달기")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                    })
+                    .disabled(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 12)
+                }
                 
                 Spacer().frame(height: 13)
             } // VStack

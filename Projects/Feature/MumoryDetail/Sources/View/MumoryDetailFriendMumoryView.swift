@@ -105,6 +105,7 @@ struct MumoryDetailFriendMumoryScrollContentView: View {
             ForEach(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))), id: \.self) { mumory in
                 MumoryDetailFriendMumoryView(mumory: mumory)
                     .padding(.horizontal, 5)
+
             }
         }
     }
@@ -312,6 +313,9 @@ struct MumoryDetailFriendMumoryView: View {
             Task {
                 self.user = await MumoriUser(uId: mumory.uId)
             }
+        }
+        .onTapGesture {
+            self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
         }
     }
 }

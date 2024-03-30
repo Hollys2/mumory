@@ -42,6 +42,7 @@ struct MumoryDetailReactionBarView: View {
             HStack(alignment: .center) {
                 
                 Button(action: {
+                    self.generateHapticFeedback(style: .medium)
                     isButtonDisabled = true
 
                     Task {

@@ -23,7 +23,6 @@ public struct MyMumoryView: View {
     @State private var isBlur: Bool = false
     @State private var bluroffset: CGFloat = 0
     
-    @State private var myMumorys: [Mumory] = []
     @State private var filteredLocations: [String: [Mumory]] = [:]
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -107,38 +106,70 @@ public struct MyMumoryView: View {
                             ZStack(alignment: .top) {
                                 
 //                                ScrollView(showsIndicators: false) {
-
-                                        VStack(spacing: 0) {
+                                ScrollViewReader { proxy in
+                                    
+                                    VStack(spacing: 0) {
+                                        
+                                        ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
                                             
-                                            ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
-                                                
-//                                                if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
-                                                    ZStack(alignment: .topLeading) {
-                                                        Rectangle()
-                                                            .foregroundColor(.clear)
-                                                            .frame(height: 31)
-                                                            .overlay(
-                                                                Rectangle()
-                                                                    .foregroundColor(.clear)
-                                                                    .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                                    .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                                alignment: .top
-                                                            )
-                                                        
-                                                        Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                            .foregroundColor(.white)
-                                                            .padding(.leading, 12)
-                                                            .offset(y: 21)
-                                                    }
-                                                    .padding(.top, 30)
-//                                                }
-                                                
-                                                MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
+                                            if index == 0 {
+                                                ZStack(alignment: .topLeading) {
+                                                    Rectangle()
+                                                        .foregroundColor(.clear)
+                                                        .frame(height: 31)
+                                                        .overlay(
+                                                            Rectangle()
+                                                                .foregroundColor(.clear)
+                                                                .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                            alignment: .top
+                                                        )
+                                                    
+                                                    Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                        .foregroundColor(.white)
+                                                        .padding(.leading, 12)
+                                                        .offset(y: 21)
+                                                }
                                             }
-                                        } // VStack
-                                        .padding(.top, 45)
-                                        .blurScroll(10)
+                                            
+                                            if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
+                                                ZStack(alignment: .topLeading) {
+                                                    Rectangle()
+                                                        .foregroundColor(.clear)
+                                                        .frame(height: 31)
+                                                        .overlay(
+                                                            Rectangle()
+                                                                .foregroundColor(.clear)
+                                                                .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                            alignment: .top
+                                                        )
+                                                    
+                                                    Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                        .foregroundColor(.white)
+                                                        .padding(.leading, 12)
+                                                        .offset(y: 21)
+                                                }
+                                                .padding(.top, 30)
+                                            }
+                                            
+                                            MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
+                                                .id(Int(index))
+                                        }
+                                        
+                                        Spacer(minLength: 0)
+                                    } // VStack
+                                    .padding(.top, 55)
+                                    .blurScroll(10)
+                                    .onChange(of: mumoryDataViewModel.filteredMumorys) { _ in
+//                                        withAnimation {
+//                                            print("FUCKYOU")
+//                                            proxy.scrollTo(0, anchor: .top)
+//                                        }
+                                    }
+                                }
 //                                } // ScrollView
 
                                 ZStack(alignment: .leading) {
@@ -220,14 +251,9 @@ public struct MyMumoryView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
-            self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.currentUserData.user.uId) { myMumorys in
-                self.myMumorys = myMumorys
-                print("myMumorys: \(myMumorys)")
-                DispatchQueue.main.async {
-                    self.mumoryDataViewModel.isUpdating = false
-                }
-            }
             
+            mumoryDataViewModel.filteredMumorys = mumoryDataViewModel.myMumorys
+
             let dispatchGroup = DispatchGroup()
             
             var results: [(Mumory, country: String?, administrativeArea: String?)] = []
@@ -346,7 +372,6 @@ public struct MyMumoryView: View {
                         }
                     }
                 }
-                print("FUCK: \(filteredLocations)")
             }
         }
         .fullScreenCover(isPresented: $isDatePickerShown, content: {
