@@ -27,6 +27,7 @@ public enum MumoryPage: Hashable {
     case mostPostedSongList(songs: Binding<[Song]>)
     case similarTasteList(songs: Binding<[Song]>)
     case myRecentMumorySongList
+    case report
     
     public static func == (lhs: MumoryPage, rhs: MumoryPage) -> Bool {
         switch (lhs, rhs) {
@@ -91,6 +92,8 @@ public enum MumoryPage: Hashable {
             hasher.combine(songs.wrappedValue)
         case .myRecentMumorySongList:
             hasher.combine(15)
+        case .report:
+            hasher.combine(16)
  
         }
     }

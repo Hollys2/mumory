@@ -35,7 +35,7 @@ struct MusicChartItem: View {
                     .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 16))
                     .foregroundStyle(LibraryColorSet.purpleBackground)
                 
-                VStack(content: {
+                VStack(spacing: 3,content: {
                     Text(song.title)
                         .frame(maxWidth: .infinity,alignment: .leading)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))

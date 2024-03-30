@@ -596,6 +596,7 @@ public struct SocialView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @ObservedObject var firebaseManager = FirebaseManager.shared
     
@@ -721,6 +722,7 @@ public struct SocialView: View {
             }
             
             FirebaseManager.shared.observeFriendRequests()
+            playerViewModel.setPlayerVisibility(isShown: true, moveToBottom: false)
             print("SocialView onAppear")
         }
         .onDisappear {

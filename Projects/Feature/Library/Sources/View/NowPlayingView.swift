@@ -36,7 +36,6 @@ struct NowPlayingView: View {
             .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height)
             .overlay {
                 Color.black.opacity(0.3)
-                
                 ColorSet.background.opacity(isPresentQueue ? 1 : 0)
             }
             
@@ -674,6 +673,7 @@ struct PlayTogetherItem: View {
             SharedAsset.menu.swiftUIImage
                 .frame(width: 22, height: 22)
                 .onTapGesture {
+                    guard let song = playerViewModel.currentSong else {return}
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
@@ -714,7 +714,7 @@ struct MarqueeText: View {
     }
     var body: some View {
         ScrollView(.horizontal) {
-            Text(song?.title ?? "재생중인 어쩌구가 업시용")
+            Text(song?.title ?? "재생 중인 음악이 없습니다.")
                 .id(self.id)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                 .foregroundStyle(Color.white)

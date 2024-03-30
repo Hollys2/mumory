@@ -37,6 +37,9 @@ struct FavoriteListView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            
+                        }
                 })
                 .frame(height: 65)
                 .padding(.horizontal, 20)

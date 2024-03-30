@@ -408,7 +408,6 @@ public struct CreateMumoryBottomSheetView: View {
                 })
                 
                 HStack(spacing: 0) {
-                    
                     Group {
                         Text("전체공개")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
