@@ -14,14 +14,14 @@ struct UneditablePlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    
+    @State var isLoading: Bool = false
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
-//    @State var songs: [Song] = []
-    @Binding var playlist: MusicPlaylist
     @State var isCompletedGetSongs: Bool = false
-            
-    init(playlist: Binding<MusicPlaylist>){
+    @Binding var playlist: MusicPlaylist
+    let friend: MumoriUser
+    init(friend: MumoriUser, playlist: Binding<MusicPlaylist>){
+        self.friend = friend
         self._playlist = playlist
     }
     
@@ -91,7 +91,7 @@ struct UneditablePlaylistView: View {
                         //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
                         Rectangle()
                             .foregroundStyle(.clear)
-                            .frame(height: playlist.songs.count == 0 ? 1000 : isCompletedGetSongs ? 500 : 1000)
+                            .frame(height: isLoading ? 1000 : playlist.songs.count < 10 ? 400 : 90)
                     })
                     .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
                     .frame(width: getUIScreenBounds().width, alignment: .center)
@@ -103,6 +103,13 @@ struct UneditablePlaylistView: View {
                 .frame(width: getUIScreenBounds().width + 1)
                 .frame(minHeight: getUIScreenBounds().height)
                 
+            }
+            .refreshAction {
+                Task {
+                    isLoading = true
+                    playlist.songs = await requestPlaylistSong(uId: friend.uId, playlistID: playlist.id)
+                    isLoading = false
+                }
             }
             
             
@@ -139,6 +146,13 @@ struct UneditablePlaylistView: View {
             }
             .background(TransparentBackground())
         })
+        .onAppear {
+            Task {
+                isLoading = true
+                playlist.songs = await requestPlaylistSong(uId: friend.uId, playlistID: playlist.id)
+                isLoading = false
+            }
+        }
         
         
         
@@ -255,4 +269,38 @@ public struct PlaylistImageTest: View {
     }
     
     
+}
+
+public func requestPlaylistSong(uId: String, playlistID: String) async -> [Song]{
+    let db = FBManager.shared.db
+    return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
+        var returnValue:[Song] = []
+        let query = db.collection("User").document(uId).collection("Playlist").document(playlistID)
+        guard let document = try? await query.getDocument() else {return returnValue}
+        guard let data = document.data() else {return returnValue}
+        
+        var songIds = data["songIds"] as? [String] ?? []
+        for id in songIds {
+            taskGroup.addTask {
+                let musicItemID = MusicItemID(rawValue: id)
+                var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                guard let response = try? await request.response() else {return nil}
+                guard let song = response.items.first else {return nil}
+                return song
+            }
+        }
+        
+        for await value in taskGroup {
+            guard let song = value else {continue}
+            returnValue.append(song)
+        }
+        songIds.removeAll { songId in
+            return !returnValue.contains(where: {$0.id.rawValue == songId})
+        }
+        var songs = songIds.map { songId in
+            return returnValue.first(where: {$0.id.rawValue == songId})!
+        }
+        
+        return songs
+    }
 }

@@ -188,7 +188,7 @@ struct PlaylistView: View {
                         //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
                         Rectangle()
                             .foregroundStyle(.clear)
-                            .frame(height: playlist.songIDs.count == playlist.songs.count ? 500 : 1000)
+                            .frame(height: isLoading ? 1000 : playlist.songs.count < 10 ? 400 : 90)
                         
                         
                     })
@@ -482,10 +482,17 @@ private struct AddSongButtonInPlaylistView: View {
 
 struct SongListSkeletonView: View {
     @State var startAnimation: Bool = true
-    
+    var isLineShown: Bool = false
+    init(){}
+    init(isLineShown: Bool) {
+        self.isLineShown = isLineShown
+    }
     var body: some View {
         ForEach(0...10, id: \.self) { index in
             SongSkeletonItem
+            if isLineShown {
+                Divider05()
+            }
         }
         .onAppear(perform: {
             startAnimation.toggle()

@@ -53,7 +53,6 @@ struct PlaylistBottomSheetView: View {
                     dismiss()
                     appCoordinator.rootPath.append(LibraryPage.addSong(originPlaylist: playlist))
                 }
-            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트 삭제", type: .warning)
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
             

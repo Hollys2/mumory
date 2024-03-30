@@ -14,6 +14,8 @@ public struct MyRecentMumoryView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
+
     @State var musicList: [Song] = []
     @State var exists: Bool = false
     @State var spacing: CGFloat = 0
@@ -29,6 +31,11 @@ public struct MyRecentMumoryView: View {
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                 Spacer()
                 SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .frame(width: 17, height: 17)
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.myRecentMumorySongList)
+                    }
             })
             .padding(.horizontal, 20)
             .padding(.vertical, 10)

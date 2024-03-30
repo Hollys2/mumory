@@ -12,8 +12,9 @@ import MusicKit
 
 struct UneditablePlaylistManageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    let friend: MumoriUser
     @Binding var playlistArray: [MusicPlaylist]
+    let friend: MumoriUser
+
     init(friend: MumoriUser, playlistArray: Binding<[MusicPlaylist]>) {
         self.friend = friend
         self._playlistArray = playlistArray
@@ -62,7 +63,7 @@ struct UneditablePlaylistManageView: View {
                             UneditablePlaylistBigItem(playlist: $playlistArray[index])
                                 .frame(minWidth: 170, minHeight: 215)
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlist: $playlistArray[index]))
+                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(friend: friend, playlist: $playlistArray[index]))
                                 }
                             
                         }

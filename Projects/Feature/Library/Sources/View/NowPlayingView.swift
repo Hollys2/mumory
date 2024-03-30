@@ -18,7 +18,6 @@ struct NowPlayingView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentQueue: Bool = false
     @State var playTogetherSongs: [Song] = []
- 
     init() {
         UISlider.appearance().setThumbImage(UIImage(asset: SharedAsset.playSphere)?.resized(to: CGSize(width: 10.45, height: 10)), for: .normal)
     }
@@ -223,7 +222,8 @@ struct PlayingView: View {
     @State private var startAnimation : Bool = false
     @State var changeOffset: CGFloat = .zero
     @State var isPresentAddBottomSheet: Bool = false
-    
+    @State var isPresentSongBottmSheet: Bool = false
+
     let delay: Double = 1.0
     let artistTextColor = Color(white: 0.89)
     let durationTextColor = Color(white: 0.83)
@@ -248,6 +248,10 @@ struct PlayingView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentSongBottmSheet = true
+                    }
                 
             })
             .frame(height: 63)
@@ -390,6 +394,13 @@ struct PlayingView: View {
             }
             .background(TransparentBackground())
         }
+        .fullScreenCover(isPresented: $isPresentSongBottmSheet) {
+            BottomSheetWrapper(isPresent: $isPresentSongBottmSheet) {
+                OptionalSongBottomSheetView(song: $playerViewModel.currentSong, types: [.inPlayingView])
+            }
+            .background(TransparentBackground())
+        }
+        
     }
 }
 
