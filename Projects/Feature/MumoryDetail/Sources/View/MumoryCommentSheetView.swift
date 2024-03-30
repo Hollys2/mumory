@@ -34,7 +34,8 @@ struct CommentView: View {
         
         HStack(alignment: .top,  spacing: 13) {
             if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
-                SharedAsset.profileMumoryDetail.swiftUIImage
+//                SharedAsset.profileMumoryDetail.swiftUIImage
+                commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
                     .mask { Circle() }
@@ -42,7 +43,8 @@ struct CommentView: View {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
             } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic {
-                SharedAsset.profileMumoryDetail.swiftUIImage
+//                SharedAsset.profileMumoryDetail.swiftUIImage
+                commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
                     .mask { Circle() }

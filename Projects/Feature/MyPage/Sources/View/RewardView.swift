@@ -78,6 +78,8 @@ struct RewardContentView: View {
     ]
     
     var rewards: [Reward] = [.attendance(0), .record(0), .location(0), .like(0), .comment(0)]
+    let attendanceReward: Reward = Reward.attendance(0)
+    
     
     var body: some View {
         
@@ -270,12 +272,10 @@ struct RewardContentView: View {
                                                 }
                                             }
 
-//                                            self.rewards[i].a
-                                            
-//                                            Text("첫 출석")
-//                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-//                                                .multilineTextAlignment(.center)
-//                                                .foregroundColor(.white)
+                                            Text(rewards[i].subTitles[index])
+                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                                .multilineTextAlignment(.center)
+                                                .foregroundColor(.white)
                                         }
                                     }
                                 }

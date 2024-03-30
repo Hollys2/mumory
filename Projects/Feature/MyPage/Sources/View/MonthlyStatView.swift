@@ -54,17 +54,19 @@ public struct MonthlyStatView: View {
                     }
                     .padding(.leading, 12)
                     .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            self.isDatePickerShown = true
-                        }
+                        UIView.setAnimationsEnabled(false)
+                        self.isDatePickerShown = true
                     }
                 }
             }
         }
         .background(SharedAsset.backgroundColor.swiftUIColor)
-        .sheet(isPresented: self.$isDatePickerShown, content: {
-            MyMumoryDatePicker(selectedDate: self.$selectedDate)
-                .presentationDetents([.height(309)])
+        .fullScreenCover(isPresented: $isDatePickerShown, content: {
+            BottomSheetWrapper(isPresent: $isDatePickerShown) {
+                MyMumoryDatePicker(selectedDate: self.$selectedDate)
+                    .frame(height: 309)
+            }
+            .background(TransparentBackground())
         })
     }
 }
