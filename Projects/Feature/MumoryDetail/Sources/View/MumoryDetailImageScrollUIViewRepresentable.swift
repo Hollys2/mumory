@@ -23,7 +23,6 @@ struct MumoryDetailImageScrollUIViewRepresentable: UIViewRepresentable {
         scrollView.delegate = context.coordinator
 
         let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((self.mumory.imageURLs ?? []).count)
-        scrollView.contentSize = CGSize(width: totalWidth, height: 0)
 
         scrollView.isPagingEnabled = true
         scrollView.contentMode = .scaleToFill
@@ -35,7 +34,8 @@ struct MumoryDetailImageScrollUIViewRepresentable: UIViewRepresentable {
 
         let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumory))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
-
+        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        scrollView.contentSize = CGSize(width: totalWidth, height: contentHeight)
         scrollView.addSubview(hostingController.view)
         
         scrollView.backgroundColor = .clear
@@ -46,13 +46,15 @@ struct MumoryDetailImageScrollUIViewRepresentable: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
         let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat((self.mumory.imageURLs ?? []).count)
-        uiView.contentSize = CGSize(width: totalWidth, height: 1)
         
         let hostingController = UIHostingController(rootView: MumoryDetailImageScrollContentView(mumoryAnnotation: self.mumory))
-        hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: UIScreen.main.bounds.width - 40)
         
-        uiView.subviews.forEach { $0.removeFromSuperview() }
-        uiView.addSubview(hostingController.view)
+        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: contentHeight)
+        uiView.contentSize = CGSize(width: totalWidth, height: contentHeight)
+        
+//        uiView.subviews.forEach { $0.removeFromSuperview() }
+//        uiView.addSubview(hostingController.view)
         
         uiView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear

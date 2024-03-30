@@ -19,7 +19,6 @@ public struct HomeView: View {
     
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
-    @State private var isCreateMumoryPopUpViewShown: Bool = true
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -50,14 +49,7 @@ public struct HomeView: View {
                     MumoryTabView(selectedTab: $appCoordinator.selectedTab)
                     
                     CreateMumoryPopUpView()
-                        .offset(y: -41)
-                        .opacity(self.isCreateMumoryPopUpViewShown ? 1: 0)
-                        .animation(.easeInOut(duration: 1), value: self.isCreateMumoryPopUpViewShown)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
-                                self.isCreateMumoryPopUpViewShown = false
-                            }
-                        }
+                            .offset(y: -41)
                 }
             }
             .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
@@ -154,7 +146,7 @@ public struct HomeView: View {
             playerViewModel.miniPlayerMoveToBottom = true
         }
     }
-    
+
     func showAlertToRedirectToSettings() {
         let alertController = UIAlertController(title: "음악 권한 허용", message: "뮤모리를 이용하려면 음악 권한이 필요합니다. 설정으로 이동하여 권한을 허용해주세요.", preferredStyle: .alert)
         let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) in

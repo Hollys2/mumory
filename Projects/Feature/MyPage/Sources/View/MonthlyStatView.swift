@@ -52,7 +52,7 @@ public struct MonthlyStatView: View {
                             .resizable()
                             .frame(width: 15, height: 15)
                     }
-                    .padding(.leading, 12)
+                    .offset(x: 24)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
                         self.isDatePickerShown = true

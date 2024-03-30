@@ -80,6 +80,7 @@ public struct SocialSearchView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     public init(isShown: Binding<Bool>) {
         self._isShown = isShown
@@ -264,10 +265,26 @@ public struct SocialSearchView: View {
                                 HStack(spacing: 0) {
 
                                     Spacer().frame(width: 15)
-
-                                    SharedAsset.profileMumoryDetail.swiftUIImage
-                                        .resizable()
-                                        .frame(width: 50, height: 50)
+                                    
+                                    AsyncImage(url: friend.profileImageURL) { image in
+                                        image
+                                            .resizable()
+                                         
+                                    } placeholder: {
+                                        friend.defaultProfileImage
+                                            .resizable()
+                                    }
+                                    .frame(width: 50, height: 50)
+                                    .onTapGesture {
+                                        Task {
+                                            if friend.uId == currentUserData.user.uId {
+                                                appCoordinator.rootPath.append(MyPage.myPage)
+                                            } else {
+                                                let friend = await MumoriUser(uId: friend.uId)
+                                                appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
+                                            }
+                                        }
+                                    }
 
                                     Spacer().frame(width: 15)
 
