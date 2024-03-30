@@ -211,7 +211,6 @@ public struct CreateMumoryBottomSheetView: View {
                                                     .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global).maxY)
                                                     .onPreferenceChange(ViewPositionKey.self) { newValue in
                                                         self.contentContainerYOffset = newValue ?? 0
-                                                        print("contentContainerYOffset: \(contentContainerYOffset)")
                                                     }
                                             }
                                         )
@@ -296,6 +295,7 @@ public struct CreateMumoryBottomSheetView: View {
                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         .environment(\.locale, Locale.init(identifier: "ko_KR"))
+                        .zIndex(3)
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {

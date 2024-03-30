@@ -33,8 +33,12 @@ struct CommentView: View {
     var body: some View {
         
         HStack(alignment: .top,  spacing: 13) {
-            if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
-//                SharedAsset.profileMumoryDetail.swiftUIImage
+            if currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                commentUser.defaultProfileImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+            } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
                 commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
@@ -43,7 +47,6 @@ struct CommentView: View {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
             } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic {
-//                SharedAsset.profileMumoryDetail.swiftUIImage
                 commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
@@ -77,7 +80,9 @@ struct CommentView: View {
                 VStack(spacing: 0) {
                     
                     HStack(spacing: 5) {
-                        if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                        if currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                            EmptyView()
+                        } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                             Text(StringManager.maskString(self.commentUser.nickname))
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
@@ -103,14 +108,20 @@ struct CommentView: View {
                                 .frame(width: 4, alignment: .bottom)
                         }
                         
-                        Text(DateManager.formattedCommentDate(date: comment.date))
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                        
-                        if !comment.isPublic {
-                            SharedAsset.commentLockMumoryDetail.swiftUIImage
-                                .resizable()
-                                .frame(width: 15, height: 15)
+                        if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                            Text(DateManager.formattedCommentDate(date: comment.date))
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                            
+                            if !comment.isPublic {
+                                SharedAsset.commentLockMumoryDetail.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 15, height: 15)
+                            }
+                        } else {
+                            Text("차단된 사용자의 댓글입니다.")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                         }
                         
                         Spacer()
@@ -124,16 +135,19 @@ struct CommentView: View {
                                 .resizable()
                                 .frame(width: 18, height: 18)
                         })
+                        .disabled(currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}))
                         
                     } // HStack
                     .padding(.vertical, 9)
                 
-                    Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? "비밀 댓글입니다." : comment.content)
-                        .font(mumory.uId != currentUserData.user.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                        .foregroundColor(mumory.uId != currentUserData.user.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
-                        .lineSpacing(1)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .padding(.bottom, 12)
+                    if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                        Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? "비밀 댓글입니다." : comment.content)
+                            .font(mumory.uId != currentUserData.user.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                            .foregroundColor(mumory.uId != currentUserData.user.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                            .lineSpacing(1)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                            .padding(.bottom, 12)
+                    }
                 } // VStack
                 .padding(.horizontal, 15)
                 .background(
@@ -209,8 +223,13 @@ struct Reply: View {
     var body: some View {
         
         HStack(alignment: .top, spacing: 13) {
-            if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
-                SharedAsset.profileMumoryDetail.swiftUIImage
+            if currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                commentUser.defaultProfileImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+            } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && currentUserData.user.uId != comment.uId {
+                commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
                     .mask { Circle() }
@@ -218,7 +237,7 @@ struct Reply: View {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
             } else if mumory.uId != currentUserData.user.uId && currentUserData.user.uId != comment.uId && !comment.isPublic && !self.isMyComment {
-                SharedAsset.profileMumoryDetail.swiftUIImage
+                commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
                     .mask { Circle() }
@@ -249,7 +268,9 @@ struct Reply: View {
             VStack(spacing: 0) {
                 
                 HStack(spacing: 5) {
-                    if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
+                    if currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                        EmptyView()
+                    } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                         Text(StringManager.maskString(self.commentUser.nickname))
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             .foregroundColor(.white)
@@ -286,15 +307,22 @@ struct Reply: View {
                             .frame(width: 4, alignment: .bottom)
                     }
                     
-                    Text(DateManager.formattedCommentDate(date: comment.date))
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                        .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
-                    
-                    if !comment.isPublic {
-                        SharedAsset.commentLockMumoryDetail.swiftUIImage
-                            .resizable()
-                            .frame(width: 15, height: 15)
+                    if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                        Text(DateManager.formattedCommentDate(date: comment.date))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                        
+                        if !comment.isPublic {
+                            SharedAsset.commentLockMumoryDetail.swiftUIImage
+                                .resizable()
+                                .frame(width: 15, height: 15)
+                        }
+                    } else {
+                        Text("차단된 사용자의 답글입니다.")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                     }
+                    
                     
                     Spacer()
                     
@@ -310,12 +338,14 @@ struct Reply: View {
                 } // HStack
                 .padding(.vertical, 9)
             
-                Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? "비밀 답글입니다." : comment.content)
-                    .font(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundColor(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
-                    .lineSpacing(1)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .padding(.bottom, 12)
+                if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+                    Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? "비밀 답글입니다." : comment.content)
+                        .font(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundColor(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? Color(red: 0.64, green: 0.51, blue: 0.99) : .white)
+                        .lineSpacing(1)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .padding(.bottom, 12)
+                }
             } // VStack
             .padding(.horizontal, 15)
             .background(

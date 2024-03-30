@@ -338,7 +338,7 @@ struct MumoryDetailScrollContentView: View {
         } // VStack
         .ignoresSafeArea()
         .fullScreenCover(isPresented: self.$isMapViewShown) {
-            MumoryMapView(isShown: self.$isMapViewShown, mumory: self.mumory, user: self.user)
+            FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: [self.mumory], user: self.user)
         }
         .onAppear {
             Task {
