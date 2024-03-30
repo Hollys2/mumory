@@ -53,8 +53,8 @@ struct MumoryDetailImageScrollUIViewRepresentable: UIViewRepresentable {
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: contentHeight)
         uiView.contentSize = CGSize(width: totalWidth, height: contentHeight)
         
-//        uiView.subviews.forEach { $0.removeFromSuperview() }
-//        uiView.addSubview(hostingController.view)
+        uiView.subviews.forEach { $0.removeFromSuperview() }
+        uiView.addSubview(hostingController.view)
         
         uiView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
