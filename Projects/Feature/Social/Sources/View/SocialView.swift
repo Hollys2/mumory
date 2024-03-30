@@ -40,7 +40,9 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
 
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
-        
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.backgroundColor = .gray
+
         let hostingController = UIHostingController(rootView: self.content()
             .environmentObject(self.mumoryDataViewModel)
             .environmentObject(self.currentUserData))
@@ -48,43 +50,50 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
 
         scrollView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
         hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: height)
-
-        scrollView.subviews.forEach { $0.removeFromSuperview() }
-        scrollView.addSubview(hostingController.view)
         
-        context.coordinator.scrollView = scrollView
+        hostingController.view.backgroundColor = .blue
 
-//        let refreshControl = UIRefreshControl()
-////        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
-//        refreshControl.tintColor = .orange
-//        scrollView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
-//        scrollView.refreshControl = refreshControl
+        let refreshControl = UIRefreshControl()
+//        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+        refreshControl.tintColor = .orange
+        scrollView.refreshControl = refreshControl
+        scrollView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
+        scrollView.contentInset.top = 200
+//        scrollView.subviews.forEach { $0.removeFromSuperview() }
+        scrollView.addSubview(hostingController.view)
         
         return scrollView
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        if self.appCoordinator.scrollToTop {
-            uiView.setContentOffset(CGPoint(x: 0, y: -appCoordinator.safeAreaInsetsTop), animated: true)
-            DispatchQueue.main.async {
-                self.appCoordinator.scrollToTop = false
-            }
-        }
-        
-        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
-            let hostingController = UIHostingController(rootView: self.content()
-                .environmentObject(self.mumoryDataViewModel)
-                .environmentObject(self.currentUserData))
-            let height = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-
-            uiView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
-            hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: height)
-
-            uiView.subviews.forEach { $0.removeFromSuperview() }
-            uiView.addSubview(hostingController.view)
-
-            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumorys
-        }
+//        uiView.contentInsetAdjustmentBehavior = .never
+//        if self.appCoordinator.scrollToTop {
+//            uiView.setContentOffset(CGPoint(x: 0, y: -appCoordinator.safeAreaInsetsTop), animated: true)
+//            DispatchQueue.main.async {
+//                self.appCoordinator.scrollToTop = false
+//            }
+//        }
+//
+//        if context.coordinator.oldMumoryAnnotations != mumoryDataViewModel.everyMumorys {
+//            let hostingController = UIHostingController(rootView: self.content()
+//                .environmentObject(self.mumoryDataViewModel)
+//                .environmentObject(self.currentUserData))
+//            let height = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+//
+//            uiView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
+//            hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: height)
+//
+//            uiView.subviews.forEach { $0.removeFromSuperview() }
+//            uiView.addSubview(hostingController.view)
+//
+//            context.coordinator.oldMumoryAnnotations = mumoryDataViewModel.everyMumorys
+//        }
+//
+//        let refreshControl = UIRefreshControl(frame: CGRect(x: 0, y: 100, width: 100, height: 100))
+//        //        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+//        refreshControl.tintColor = .orange
+//        uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
+//        uiView.refreshControl = refreshControl
     }
     
     func makeCoordinator() -> Coordinator {
@@ -98,7 +107,6 @@ extension SocialScrollViewRepresentable {
         
         let parent: SocialScrollViewRepresentable
         
-        var scrollView: UIScrollView?
         var preOffsetY: CGFloat = 0.0
         var topBarOffsetY: CGFloat = 0.0
         var oldMumoryAnnotations: [Mumory] = [] // immutatable if it is declared in SocialScrollViewRepresentable
@@ -110,9 +118,19 @@ extension SocialScrollViewRepresentable {
             super.init()
         }
         
-        @objc func handleRefreshControl() {
-            print("handleRefreshControl")
-            parent.mumoryDataViewModel.fetchEveryMumory2()
+        @objc func handleRefreshControl(sender: UIRefreshControl) {
+            sender.endRefreshing()
+//            parent.mumoryDataViewModel.fetchEveryMumory2 { result in
+//                switch result {
+//
+//                case .success():
+////                    sender.endRefreshing()
+//                    print("새로고침 성공")
+//                case .failure(_):
+//                    print("새로고침 실패")
+//                    break
+//                }
+//            }
         }
         
         @objc func scrollToTop() {
@@ -120,12 +138,12 @@ extension SocialScrollViewRepresentable {
         }
         
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-            let offsetY = scrollView.contentOffset.y
+//            let offsetY = scrollView.contentOffset.y
             
-            if offsetY < -70 {
-                self.parent.mumoryDataViewModel.isUpdating = true
-                handleRefreshControl()
-            }
+//            if offsetY < -70 {
+//                self.parent.mumoryDataViewModel.isUpdating = true
+//                handleRefreshControl(sender: <#UIRefreshControl#>)
+//            }
         }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -181,7 +199,8 @@ struct SocialScrollCotentView: View {
             .padding(.top, 68 + 25)
         } // VStack
         .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 68 + 25)
-        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+//        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .background(.pink)
         .ignoresSafeArea()
     }
 }
@@ -632,7 +651,8 @@ public struct SocialView: View {
             
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                 print("onRefresh: () -> Void")
-                mumoryDataViewModel.fetchEveryMumory()
+//                mumoryDataViewModel.fetchEveryMumory()
+                
             }) {
                 SocialScrollCotentView()
                     .environmentObject(self.appCoordinator)
@@ -689,13 +709,14 @@ public struct SocialView: View {
             .frame(height: 68)
             .padding(.horizontal, 20)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
-            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+//            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+            .background(.clear)
             .offset(y: -self.offsetY)
         }
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
             if !appCoordinator.isFirstTabSelected {
-                mumoryDataViewModel.fetchEveryMumory2()
+//                mumoryDataViewModel.fetchEveryMumory2()
                 appCoordinator.isFirstTabSelected = true
             }
             

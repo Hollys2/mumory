@@ -259,8 +259,8 @@ public struct MyMumoryView: View {
                         if country != "대한민국" {
                             if country == "영국" {
                                 country += " 🇬🇧"
-                            } else if country == "미국" {
-                                country += " 🇺🇸"
+                            } else if country == "미합중국" {
+                                country = "미국 🇺🇸"
                             } else if country == "이탈리아" {
                                 country += " 🇮🇹"
                             } else if country == "프랑스" {
@@ -912,7 +912,7 @@ struct RoundedSquareView: View {
                         .offset(x: 36)
                 }
             }
-            .offset(x: getUIScreenBounds().width * 0.435 - 84, y: getUIScreenBounds().width * 0.435 - 36 - 15)
+            .offset(x: getUIScreenBounds().width * 0.435 - 72 - 15, y: getUIScreenBounds().width * 0.435 - 36 - 15)
         }
     }
 }
