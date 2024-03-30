@@ -230,6 +230,7 @@ struct SearchMusicResultViewInCreateMumory: View {
                 })
                 .frame(width: getUIScreenBounds().width)
             }
+            .scrollIndicators(.hidden)
             .ignoresSafeArea()
             .scrollIndicators(.hidden)
             

@@ -23,9 +23,9 @@ struct ExtraRecommendationView: View {
     @State var offset: CGPoint = .zero
     var type: RecommendationType
     let title: String
-    init(type: RecommendationType, songIds: Binding<[String]>) {
+    init(type: RecommendationType, songs: Binding<[Song]>) {
         self.type = type
-        self._songIds = songIds
+        self._songs = songs
         switch type {
         case .mostPosted:
             self.title = "뮤모리 사용자가 많이 기록한 음악"
@@ -36,7 +36,7 @@ struct ExtraRecommendationView: View {
     
     var body: some View {
         VStack(spacing: 0, content: {
-            AsyncImage(url: firstSong?.artwork?.url(width: 500, height: 500)) { image in
+            AsyncImage(url: songs.first?.artwork?.url(width: 500, height: 500)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -134,7 +134,7 @@ struct ExtraRecommendationItem: View {
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
-                AsyncImage(url: song?.artwork?.url(width: 300, height: 300)) { image in
+                AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
                     image
                         .resizable()
                         .frame(width: 40, height: 40)
@@ -154,14 +154,14 @@ struct ExtraRecommendationItem: View {
                 }
                 
                 VStack(spacing: 1, content: {
-                    Text(song?.title ?? "")
+                    Text(song.title)
                         .frame(maxWidth: .infinity,alignment: .leading)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     
-                    Text(song?.artistName ?? "")
+                    Text(song.artistName)
                         .frame(maxWidth: .infinity,alignment: .leading)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(LibraryColorSet.lightGrayTitle)

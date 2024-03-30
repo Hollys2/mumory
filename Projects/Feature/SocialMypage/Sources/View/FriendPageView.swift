@@ -84,7 +84,7 @@ struct KnownFriendPageView: View {
     
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
-    
+    @State private var isLoading: Bool = true
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
 
     init(friend: MumoriUser) {
@@ -146,7 +146,7 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendMumoryView(friend: self.friend, mumorys: $mumorys)
+                FriendMumoryView(friend: self.friend, mumorys: $mumorys, isLoading: $isLoading)
                 
                 Divider05()
                 
@@ -157,6 +157,7 @@ struct KnownFriendPageView: View {
                     .frame(height: 110)
             })
         }
+        .scrollIndicators(.hidden)
         .fullScreenCover(isPresented: $isMapViewShown) {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
                 .preferredColorScheme(.light)
@@ -164,6 +165,7 @@ struct KnownFriendPageView: View {
         .onAppear {
             self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
                 self.mumorys = mumorys
+                isLoading = false
             }
         }
     }
@@ -521,6 +523,7 @@ struct FriendInfoView: View {
 
 struct FriendPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @State var isLoading: Bool = false
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
@@ -558,11 +561,25 @@ struct FriendPlaylistView: View {
                 ScrollView(.horizontal) {
                     HStack(alignment: .top, spacing: 10, content: {
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
-                            PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
+                            PlaylistItemTest(playlist: $playlists[index], itemSize: getUIScreenBounds().width * 0.215)
                                 .onTapGesture {
                                     appCoordinator.rootPath.append(MumoryPage.friendPlaylist(friend: friend, playlist: $playlists[index]))
                                 }
                         }
+                        
+//                        if isLoading || playlists.isEmpty{
+//                            ForEach(0...10, id: \.self) { index in
+//                                PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
+//                            }
+//                            
+//                        }else if playlists.isEmpty {
+//                      
+//                            Text("플레이리스트가 없습니다")
+//                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+//                                .frame(maxWidth: .infinity, alignment: .center)
+//                                .foregroundColor(ColorSet.subGray)
+//                            
+//                        }
                     })
                     .padding(.horizontal, 20)
                 }
@@ -572,8 +589,10 @@ struct FriendPlaylistView: View {
         .onAppear {
             if self.playlists.isEmpty {
                 Task {
+                    isLoading = true
                     await getPlaylist()
                     fetchSongToPlaylist(playlistArray: $playlists)
+                    isLoading = false
                 }
             }
         }
@@ -906,11 +925,13 @@ struct PlaylistItemTest: View {
 struct FriendMumoryView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @Binding private var mumorys: [Mumory]
+    @Binding private var isLoading: Bool
     let friend: MumoriUser
 
-    init(friend: MumoriUser, mumorys: Binding<[Mumory]>) {
+    init(friend: MumoriUser, mumorys: Binding<[Mumory]>, isLoading: Binding<Bool>) {
         self.friend = friend
         self._mumorys = mumorys
+        self._isLoading = isLoading
     }
     var body: some View {
         VStack(spacing: 0, content: {
@@ -939,24 +960,35 @@ struct FriendMumoryView: View {
                 self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
             }
             
-            ScrollView(.horizontal) {
-                HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
-                    if mumorys.isEmpty {
-                        MumorySkeletonView()
-                    }
-                    ForEach(mumorys.prefix(10), id: \.id) { mumory in
-                        MyMumoryItem(mumory: mumory)
-                            .onTapGesture {
-                                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+            if isLoading {
+                MumorySkeletonView()
+            }else {
+                if mumorys.isEmpty {
+                    Text("뮤모리 기록이 없습니다")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.subGray)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: getUIScreenBounds().width * 0.43)
+                        .padding(.bottom, 40)
+
+                } else {
+                    ScrollView(.horizontal) {
+                        HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
+                            ForEach(mumorys.prefix(10), id: \.id) { mumory in
+                                MyMumoryItem(mumory: mumory)
+                                    .onTapGesture {
+                                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                                    }
                             }
+                        })
+                        .padding(.horizontal, 20)
+                        
                     }
-                })
-                .padding(.horizontal, 20)
-                
+                    .frame(height: getUIScreenBounds().width * 0.43)
+                    .scrollIndicators(.hidden)
+                    .padding(.bottom, 40)
+                }
             }
-            .frame(height: getUIScreenBounds().width * 0.43)
-            .scrollIndicators(.hidden)
-            .padding(.bottom, 40)
         })
 
     }

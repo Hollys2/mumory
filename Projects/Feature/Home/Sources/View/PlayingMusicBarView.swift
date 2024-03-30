@@ -122,6 +122,7 @@ public struct PlayingMusicBarView: View {
             .padding(.trailing, 14)
             .onTapGesture {
                 appCoordinator.setBottomAnimationPage(page: .myPage)
+                playerViewModel.setPlayerVisibility(isShown: true, moveToBottom: true)
             }
             .onAppear {
                 print("currentUserData.user: \(currentUserData.user)")
