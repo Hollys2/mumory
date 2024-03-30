@@ -25,11 +25,12 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     @EnvironmentObject var currentUserData: CurrentUserData
     
     func makeUIView(context: Context) -> UIScrollView {
+        print("FUCK111")
         let scrollView = UIScrollView()
         
         scrollView.delegate = context.coordinator
         
-        scrollView.contentMode = .scaleToFill
+        scrollView.isScrollEnabled = true
         scrollView.bounces = false
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
@@ -39,14 +40,16 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
             .environmentObject(mumoryDataViewModel)
             .environmentObject(currentUserData)
         )
+        
         let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
         
         scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: x)
+        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
         
         scrollView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
         
+        scrollView.subviews.forEach { $0.removeFromSuperview() }
         scrollView.addSubview(hostingController.view)
         
         return scrollView
@@ -54,16 +57,40 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
+        print("FUCK222")
+   
         let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
             .environmentObject(appCoordinator)
             .environmentObject(mumoryDataViewModel)
             .environmentObject(currentUserData)
         )
-        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
+        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+
         
-        uiView.contentSize = CGSize(width: 0, height: x) // 수평 스크롤 차단을 위해 너비를 0으로 함
-        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: x)
+        if context.coordinator.contentHeight != contentHeight {
+           
+
+            uiView.contentSize = CGSize(width: 0, height: contentHeight) // 수평 스크롤 차단을 위해 너비를 0으로 함
+            hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
+            
+            uiView.backgroundColor = .clear
+            hostingController.view.backgroundColor = .clear
+
+            uiView.subviews.forEach { $0.removeFromSuperview() }
+            uiView.addSubview(hostingController.view)
+
+            context.coordinator.contentHeight = contentHeight
+        }
+    
+
+//        hostingController.view.setNeedsLayout()
+//        hostingController.view.layoutIfNeeded()
+
+//        let contentSize = hostingController.view.sizeThatFits(
+//             CGSize(width: UIScreen.main.bounds.width, height: CGFloat.infinity)
+//         )
+//
+//        uiView.contentSize = CGSize(width: 0, height: contentSize.height) // 수평 스크롤 차단을 위해 너비를 0으로 함
     }
     
     func makeCoordinator() -> Coordinator {
@@ -76,6 +103,7 @@ extension MumoryDetailScrollViewRepresentable {
     class Coordinator: NSObject {
         
         let parent: MumoryDetailScrollViewRepresentable
+        var contentHeight: CGFloat = .zero
         //        var previousOffset: CGFloat = 0.0
         
         init(parent: MumoryDetailScrollViewRepresentable) {
@@ -118,6 +146,7 @@ enum ScrollBoundary {
 }
 
 extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
+    
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y

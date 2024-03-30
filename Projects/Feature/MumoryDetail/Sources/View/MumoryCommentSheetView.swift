@@ -453,20 +453,42 @@ public struct MumoryCommentSheetView: View {
                         
                         ScrollView(showsIndicators: false) {
                             
-                            VStack(spacing: 0) {
-
-                                ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
-                                    CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment) {
-                                        withAnimation {
-                                            proxy.scrollTo(index, anchor: .top)
-                                        }
+                            ZStack(alignment: .top) {
+                                
+                                Color.clear
+                                
+                                if self.comments.isEmpty {
+                                    VStack(spacing: 21) {
+                                        
+                                        Text("아직 댓글이 없어요")
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity, alignment: .center)
+                                        
+                                        Text("가장 먼저 댓글을 달아 친구들과 소통해보세요 !")
+                                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
+                                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                                            .lineSpacing(3)
+                                            .fixedSize(horizontal: true, vertical: true)
                                     }
-                                    .id(index)
+                                    .offset(y: 130)
                                 }
                                 
-                                Spacer(minLength: 0)
+                                VStack(spacing: 0) {
+                                    
+                                    ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
+                                        CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment) {
+                                            withAnimation {
+                                                proxy.scrollTo(index, anchor: .top)
+                                            }
+                                        }
+                                        .id(index)
+                                    }
+                                    
+                                    Spacer(minLength: 0)
+                                }
+                                .frame(minHeight: keyboardResponder.keyboardHeight == .zero ? getUIScreenBounds().height - 72 - appCoordinator.safeAreaInsetsBottom - 72 - (UIScreen.main.bounds.height * 0.16) : getUIScreenBounds().height * 10)
                             }
-                            .frame(minHeight: keyboardResponder.keyboardHeight == .zero ? getUIScreenBounds().height - 72 - appCoordinator.safeAreaInsetsBottom - 72 - (UIScreen.main.bounds.height * 0.16) : getUIScreenBounds().height * 10)
                         }
                         .refreshable {
                             self.commentText = ""
@@ -613,7 +635,7 @@ public struct MumoryCommentSheetView: View {
                                             .resizable()
                                             .frame(width: 20, height: 20)
                                     })
-                                    .disabled(isButtonDisabled)
+                                    .disabled(isButtonDisabled || commentText.isEmpty)
                                     .padding(.trailing, 10)
                                 }
                             )

@@ -572,6 +572,8 @@ public struct SocialView: View {
     @State private var isAddFriendNotification: Bool = false
     @State private var friendRequests: [String] = []
     
+    @State var startAnimation: Bool = true
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -587,6 +589,45 @@ public struct SocialView: View {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+//            SharedAsset.socialInitView.swiftUIImage
+//                .resizable()
+//                .aspectRatio(contentMode: .fit)
+//                .frame(width: getUIScreenBounds().width - 20)
+//                .offset(y: 68 + 25)
+//                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+//                .onAppear {
+//                    startAnimation.toggle()
+//                }
+            ZStack(alignment: .center) {
+                
+                Color.clear
+                
+                VStack(spacing: 0) {
+                    
+                    SharedAsset.socialInitIcon.swiftUIImage
+                        .resizable()
+                        .frame(width: 96.74, height: 57)
+                        .padding(.bottom, 39)
+                    
+                    Text("아직 뮤모리가 기록되지 않았어요")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.bottom, 21)
+                    
+                    Text("친구들을 초대해서 나만의 좋은 음악과")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                        .fixedSize(horizontal: true, vertical: true)
+                        .padding(.bottom, 3)
+                    
+                    Text("특별한 순간을 공유해보세요!")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                        .fixedSize(horizontal: true, vertical: true)
+                }
+            }
             
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                 print("onRefresh: () -> Void")

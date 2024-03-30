@@ -108,31 +108,32 @@ struct KnownFriendPageView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
 
-                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: self.mumorys) { mumory in
-
-                        MapAnnotation(coordinate: mumory.locationModel.coordinate) {
-                            ZStack(alignment: .topLeading) {
-                                SharedAsset.musicPin.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 74, height: 81)
-                                
-                                AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                    default:
-                                        Color.clear
-                                    }
-                                }
-                                .frame(width: 60.65238, height: 60.65238)
-                                .cornerRadius(12)
-                                .offset(x: 6.74, y: 6.74)
-                            }
-                        }
-                    }
-                    .frame(width: getUIScreenBounds().width - 40, height: 129)
-                    .cornerRadius(10)
+//                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: self.mumorys) { mumory in
+//
+//                        MapAnnotation(coordinate: mumory.locationModel.coordinate) {
+//                            ZStack(alignment: .topLeading) {
+//                                SharedAsset.musicPin.swiftUIImage
+//                                    .resizable()
+//                                    .frame(width: 74, height: 81)
+//
+//                                AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
+//                                    switch phase {
+//                                    case .success(let image):
+//                                        image
+//                                            .resizable()
+//                                    default:
+//                                        Color.clear
+//                                    }
+//                                }
+//                                .frame(width: 60.65238, height: 60.65238)
+//                                .cornerRadius(12)
+//                                .offset(x: 6.74, y: 6.74)
+//                            }
+//                        }
+//                    }
+                    FriendMapViewRepresentable(friendMumorys: self.mumorys)
+                        .frame(width: getUIScreenBounds().width - 40, height: 129)
+                        .cornerRadius(10)
                     
                     SharedAsset.enlargeMapButton.swiftUIImage
                         .resizable()

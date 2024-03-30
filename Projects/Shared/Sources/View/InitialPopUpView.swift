@@ -12,6 +12,12 @@ import SwiftUI
 
 public struct CreateMumoryPopUpView: View {
     
+    @AppStorage("isFirstTimeLaunch") var isFirstTimeLaunch: Bool = {
+        let defaultValue = true
+        UserDefaults.standard.register(defaults: ["isFirstTimeLaunch": defaultValue])
+        return UserDefaults.standard.bool(forKey: "isFirstTimeLaunch")
+    }()
+    
     public init() {}
     
     public var body: some View {
@@ -19,30 +25,20 @@ public struct CreateMumoryPopUpView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 146, height: 35)
-    }
-    
-    private func isPopUpShown() -> Bool {
-        guard let lastViewedDate = UserDefaults.standard.object(forKey: "lastLogined") as? Date else {
-            return true
-        }
-        
-        let currentDate = Date()
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.day], from: lastViewedDate, to: currentDate)
-        
-        if let monthsPassed = components.month, monthsPassed >= 1 {
-            return false
-        }
-        
-        if let daysPassed = components.day, daysPassed >= 3 {
-            return true
-        } else {
-            return false
-        }
+            .opacity(self.isFirstTimeLaunch ? 1: 0)
+            .animation(.easeInOut(duration: 1), value: self.isFirstTimeLaunch)
+            .onAppear {
+                print("isFirstTimeLaunch: \(isFirstTimeLaunch)")
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
+                    UserDefaults.standard.set(false, forKey: "isFirstTimeLaunch")
+                }
+            }
     }
 }
 
 public struct AppleMusicPopUpView: View {
+    
+//    @AppStorage("isFirstTimeLaunch") var isFirstTimeLaunch: Bool = true
     
     @Binding private var isShown: Bool
     
@@ -71,15 +67,14 @@ public struct AppleMusicPopUpView: View {
                 .frame(width: 17, height: 17)
                 .padding(.trailing, 11)
                 .onTapGesture {
-                    self.isShown = false
-                    
                     UserDefaults.standard.set(Date(), forKey: "lastPopUpClosedDate")
+                    self.isShown = false
                 }
         }
         .frame(width: getUIScreenBounds().width - 40, height: 67)
         .background(Color(red: 0.64, green: 0.51, blue: 0.99))
         .cornerRadius(10)
-        .opacity(self.isAppleMusicPopUpShown() ? 1 : 0)
+        .opacity(self.isShown ? 1 : 0)
     }
     
     func isAppleMusicPopUpShown() -> Bool {
@@ -94,12 +89,11 @@ public struct AppleMusicPopUpView: View {
         if let monthsPassed = components.month, monthsPassed < 1 {
             if let daysPassed = components.day, daysPassed % 3 == 0 {
                 if let lastPopUpClosedDate = UserDefaults.standard.object(forKey: "lastPopUpClosedDate") as? Date {
-                    let timeSinceLastPopUpClosed = calendar.dateComponents([.second], from: lastPopUpClosedDate, to: currentDate)
-                    print("FUCK: \(timeSinceLastPopUpClosed.second)")
-                    if let daysPassedSinceLastPopUpClosed = timeSinceLastPopUpClosed.second, daysPassedSinceLastPopUpClosed >= 0 {
-                        return false
-                    } else {
+                    let timeSinceLastPopUpClosed = calendar.dateComponents([.day], from: lastPopUpClosedDate, to: currentDate)
+                    if let daysPassedSinceLastPopUpClosed = timeSinceLastPopUpClosed.day, daysPassedSinceLastPopUpClosed >= 3 {
                         return true
+                    } else {
+                        return false
                     }
                 } else {
                     return true // 최초 실행 시에는 팝업을 표시합니다.

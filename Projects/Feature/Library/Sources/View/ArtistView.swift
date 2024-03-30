@@ -73,6 +73,7 @@ struct ArtistView: View {
                             PlayAllButton()
                                 .onTapGesture {
                                     guard !songs.isEmpty else {return}
+                                    guard !songs.isEmpty else {return}
                                     playerViewModel.playAll(title: artist.name , songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "ArtistViewPlayAllButton")
                                 }
@@ -131,6 +132,7 @@ struct ArtistView: View {
                     }
                 
             })
+            .frame(height: 65)
             .frame(height: 65)
             .padding(.top, currentUserData.topInset)
             .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
