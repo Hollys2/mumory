@@ -47,8 +47,8 @@ public struct MumoryEditView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var dateManager: DateManager
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
-    
-    
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
+
     public init(mumoryAnnotation: Mumory) {
         self._mumoryAnnotation = State(initialValue: mumoryAnnotation)
         self._calendarDate = State(initialValue: mumoryAnnotation.date)
@@ -408,5 +408,8 @@ public struct MumoryEditView: View {
         }
         .toolbar(.hidden)
         .ignoresSafeArea()
+        .onAppear {
+            playerViewModel.setPlayerVisibility(isShown: false)
+        }
     }
 }

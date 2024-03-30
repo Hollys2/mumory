@@ -149,6 +149,7 @@ struct SearchMusicEntryView: View {
                     
                 }
             }
+            .scrollIndicators(.hidden)
 
         }
         .onAppear(perform: {

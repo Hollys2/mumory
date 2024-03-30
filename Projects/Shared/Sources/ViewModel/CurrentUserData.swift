@@ -16,6 +16,7 @@ public class CurrentUserData: ObservableObject {
     //사용자 정보 및 디바이스 크기 정보
     @Published public var uId: String = "" {
         didSet {
+            guard !uId.isEmpty else {return}
             DispatchQueue.main.async {
                 Task {
                     self.FriendRequestListener()

@@ -60,7 +60,7 @@ struct ArtistBottomSheetView: View {
                     dismiss()
                     appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: songs))
                 }
-            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
+            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (아티스트 URL 링크 복사)")
                 .onTapGesture {
                     UIPasteboard.general.string = artist.url?.absoluteString
                     snackBarViewModel.setSnackBar(type: .copy, status: .success)

@@ -138,7 +138,7 @@ struct ActivityListView: View {
                         })
                         .padding(.top, 55)
                     }
-     
+                    .scrollIndicators(.hidden)
                     .overlay {
                         
                         VStack(spacing: 0){

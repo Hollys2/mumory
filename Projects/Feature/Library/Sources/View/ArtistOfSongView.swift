@@ -102,6 +102,7 @@ struct ArtistOfSongView: View {
                 .frame(width: getUIScreenBounds().width)
 
             }
+            .scrollIndicators(.hidden)
 
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {

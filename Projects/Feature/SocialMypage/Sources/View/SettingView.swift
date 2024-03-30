@@ -98,12 +98,9 @@ struct SettingView: View {
                             appCoordinator.bottomAnimationViewStatus = .remove
                             appCoordinator.initPage = .login
                             appCoordinator.rootPath = NavigationPath()
-                            
-                            
                         }catch {
                             print("signout error: \(error)")
                         }
-                        
                         Firebase.messaging.deleteToken { error in
                             print(error?.localizedDescription)
                         }

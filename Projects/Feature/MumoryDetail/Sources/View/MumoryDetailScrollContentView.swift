@@ -92,7 +92,7 @@ struct MumoryDetailScrollContentView: View {
                     .onTapGesture {
                         Task {
                             guard let song = await fetchSong(songId: self.mumory.musicModel.songID.rawValue) else {return}
-                            playerViewModel.playNewSong(song: song)
+                            playerViewModel.playNewSongShowingPlayingView(song: song)
                         }
                     }
 

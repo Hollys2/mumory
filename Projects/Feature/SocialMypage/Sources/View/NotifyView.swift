@@ -51,36 +51,43 @@ struct NotifyView: View {
                     .padding(.vertical, 20)
                     .padding(.horizontal, 20)
                     
-                    Divider05()
-                    
-                    ScrollView {
-                        LazyVStack(spacing: 0, content: {
-                            ForEach(notificationViewModel.notifications.indices, id: \.self) { index in
-                                switch(notificationViewModel.notifications[index].type) {
-                                case .like:
-                                    NotifyLikeItem(notification: $notificationViewModel.notifications[index])
-                                        .environmentObject(notificationViewModel)
-                                case .comment, .reply:
-                                    NotifyCommentItem(notification: $notificationViewModel.notifications[index])
-                                        .environmentObject(notificationViewModel)
-                                case .friendAccept, .friendRequest:
-                                    NotifyFriendItem(notification: $notificationViewModel.notifications[index])
-                                        .environmentObject(notificationViewModel)
-                                case .none:
-                                    EmptyView()
-                                }
-                                
-                            }
-                        })
+                    if notificationViewModel.notifications.isEmpty {
+                        Text("최근 알림이 없습니다.")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .foregroundStyle(ColorSet.subGray)
+                            .padding(.top, getUIScreenBounds().height * 0.25)
+                    }else  {
                         
-                        Rectangle()
-                            .fill(Color.clear)
-                            .frame(height: 90)
+                        ScrollView {
+                            LazyVStack(spacing: 0, content: {
+                                ForEach(notificationViewModel.notifications.indices, id: \.self) { index in
+                                    switch(notificationViewModel.notifications[index].type) {
+                                    case .like:
+                                        NotifyLikeItem(notification: $notificationViewModel.notifications[index])
+                                            .environmentObject(notificationViewModel)
+                                    case .comment, .reply:
+                                        NotifyCommentItem(notification: $notificationViewModel.notifications[index])
+                                            .environmentObject(notificationViewModel)
+                                    case .friendAccept, .friendRequest:
+                                        NotifyFriendItem(notification: $notificationViewModel.notifications[index])
+                                            .environmentObject(notificationViewModel)
+                                    case .none:
+                                        EmptyView()
+                                    }
+                                    
+                                }
+                            })
+                            
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 90)
+                        }
+                        .refreshable {
+                            await getNotification()
+                        }
+                        .scrollIndicators(.hidden)
                     }
-                    .refreshable {
-                        await getNotification()
-                    }
-                    
                 
                 })
                 .padding(.top, currentUserData.topInset)

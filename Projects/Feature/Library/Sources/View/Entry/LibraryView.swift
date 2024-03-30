@@ -91,6 +91,7 @@ struct LibraryView: View {
         
                 
             })
+            .scrollIndicators(.hidden)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
 
            

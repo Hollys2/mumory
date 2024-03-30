@@ -50,6 +50,7 @@ struct TOSDetailView: View {
                     }
 
                 }
+                .scrollIndicators(.hidden)
 
          
             })

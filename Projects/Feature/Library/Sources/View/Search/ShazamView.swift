@@ -187,20 +187,13 @@ struct ShazamView: View {
                             }
                         
                     }else {
-                        HStack(spacing: 6, content: {
-                            SharedAsset.editMumoryDetailMenu.swiftUIImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 12, height: 12)
-                            
-                            Text("편집")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                .foregroundStyle(ColorSet.subGray)
-                        })
-                        .onTapGesture {
-                            selectedShazamHistory.removeAll()
-                            isEditing = true
-                        }
+                        Text("편집")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                            .foregroundStyle(ColorSet.subGray)
+                            .onTapGesture {
+                                selectedShazamHistory.removeAll()
+                                isEditing = true
+                            }
                     }
                     
                     
@@ -245,11 +238,12 @@ struct ShazamView: View {
             //하단 편집 바
             VStack(spacing: 0) {
                 Divider05()
-                HStack(alignment: .center){
+                HStack(alignment: .top){
                     Text(selectedShazamHistory.count == shazamHistory.count ? "전체선택 해제" : "전체선택")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 8)
                         .onTapGesture {
                             if selectedShazamHistory.count == shazamHistory.count {
                                 selectedShazamHistory = []
@@ -259,10 +253,9 @@ struct ShazamView: View {
                         }
                     
                     Divider()
-                        .frame(width: 1, height: 30)
+                        .frame(width: 1, height: 35)
                         .background(ColorSet.skeleton02)
                         .frame(maxHeight: .infinity, alignment: .top)
-                        .padding(.top, 13)
                     
                     
                     HStack(alignment: .center, spacing: 10) {
@@ -281,6 +274,7 @@ struct ShazamView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 8)
                     .onTapGesture {
                         if !selectedShazamHistory.isEmpty {
                             shazamHistory.forEach { item in
@@ -295,6 +289,7 @@ struct ShazamView: View {
                     }
             
                 }
+                .padding(.top, 15)
                 .frame(height: 88)
                 .background(ColorSet.darkGray)
             }
@@ -394,7 +389,6 @@ struct ShazamPlayButton: View {
                 guard let appleMusicID = item?.appleMusicID else {return}
                 guard let song = await fetchSong(songID: appleMusicID) else {return}
                 playerViewModel.playNewSong(song: song)
-                playerViewModel.isShownMiniPlayer = true
             }
         }
         .disabled(item?.appleMusicID == nil)

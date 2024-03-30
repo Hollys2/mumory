@@ -15,8 +15,13 @@ public enum RecommendationType {
     case similiarTaste
 }
 struct ExtraRecommendationView: View {
-    var type: RecommendationType
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+
     @Binding var songs: [Song]
+    @State var firstSong: Song?
+    @State var offset: CGPoint = .zero
+    var type: RecommendationType
     let title: String
     init(type: RecommendationType, songs: Binding<[Song]>) {
         self.type = type
@@ -44,7 +49,7 @@ struct ExtraRecommendationView: View {
             .overlay {
                 Color.black.opacity(0.4)
                 LinearGradient(colors: [ColorSet.moreDeepGray, Color.clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.8))
-                VStack(alignment: .leading, spacing: 0, content: {
+                VStack(alignment: .leading, spacing: 5, content: {
                     Text(title)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundStyle(Color.white)
@@ -57,15 +62,53 @@ struct ExtraRecommendationView: View {
                 })
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(20)
+                
+                SharedAsset.nextSetting.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.trailing, 15)
+                    .padding(.top, 20)
+                    .onTapGesture {
+                        switch type {
+                        case .mostPosted:
+                            appCoordinator.rootPath.append(MumoryPage.mostPostedSongList(songs: $songs))
+                        case .similiarTaste:
+                            appCoordinator.rootPath.append(MumoryPage.similarTasteList(songs: $songs))
+                        }
+                    }
             }
+            SimpleScrollView(contentOffset: $offset) {
+                LazyVStack(spacing: 0, content: {
+                    if songs.isEmpty {
+                        if type == .mostPosted {
+                            MusicChartSkeletonLongView()
+                        }else if type == .similiarTaste {
+                            SongListSkeletonView()
+                        }
+                    }else {
+                        ForEach(songs.indices, id: \.self) { index in
+                            ExtraRecommendationItem(song: songs[index], rank: index, type: self.type)
+                                .onTapGesture {
+                                    playerViewModel.playAll(title: title, songs: songs, startingItem: songs[index])
+                                }
+                        }
+                    }
+                })
+                .frame(width: getUIScreenBounds().width * 0.9)
+            }
+            .scrollIndicators(.hidden)
+            .onChange(of: offset, perform: { value in
+                if offset.y < 0 {
+                    offset.y = 0
+                }
+            })
             
-            ForEach(songs.indices, id: \.self) { index in
-                ExtraRecommendationItem(rank: index, song: songs[index], type: self.type)
-            }
         })
         .frame(width: getUIScreenBounds().width * 0.9)
+        .background(ColorSet.moreDeepGray)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-
 
 
     }
@@ -78,11 +121,16 @@ struct ExtraRecommendationItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false
-    
+    let song: Song
     var rank: Int
-    var song: Song
     var type: RecommendationType
-
+    
+    init(song: Song, rank: Int, type: RecommendationType) {
+        self.song = song
+        self.rank = rank
+        self.type = type
+    }
+    
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -136,13 +184,10 @@ struct ExtraRecommendationItem: View {
             .frame(height: 70)
             .background(ColorSet.moreDeepGray)
             
-//            Divider03()
-
         })
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                SongBottomSheetView(song: song,
-                                    types: [.withoutBookmark])
+                SongBottomSheetView(song: song)
             }
             .background(TransparentBackground())
         }

@@ -29,7 +29,7 @@ struct CommentView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    
+
     var body: some View {
         
         HStack(alignment: .top,  spacing: 13) {
@@ -367,6 +367,8 @@ public struct MumoryCommentSheetView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+
     
     public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
         self._isSheetShown = isSheetShown
@@ -393,6 +395,7 @@ public struct MumoryCommentSheetView: View {
                 Color.black.opacity(0.6)
                     .ignoresSafeArea()
                     .onTapGesture {
+                        playerViewModel.setPlayerVisibility(isShown: true)
                         withAnimation(.easeInOut(duration: 0.1)) {
                             self.isSheetShown = false
                         }
@@ -430,6 +433,7 @@ public struct MumoryCommentSheetView: View {
                             Spacer()
                             
                             Button(action: {
+                                playerViewModel.setPlayerVisibility(isShown: true)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     self.isSheetShown = false
                                 }
@@ -735,6 +739,7 @@ public struct MumoryCommentSheetView: View {
         }
         
         if cardDismiss {
+            playerViewModel.setPlayerVisibility(isShown: true)
             withAnimation(.spring(response: 0.1)) {
                 self.offsetY = .zero
                 self.isSheetShown = false

@@ -236,6 +236,8 @@ struct ProfileSettingView: View {
                             .frame(height: 150)
                     }
                 }
+                .scrollIndicators(.hidden)
+
                 
             }
             .onAppear(perform: {

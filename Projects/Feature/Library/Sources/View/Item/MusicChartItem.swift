@@ -85,7 +85,7 @@ struct MusicChartItem: View {
     }
 }
 
-struct MusicChartSkeletonView: View {
+struct MusicChartSkeletonShortView: View {
     @State var startAnimation: Bool = false
     var lineVisible: Bool = true
     init(lineVisible: Bool) {
@@ -130,3 +130,49 @@ struct MusicChartSkeletonView: View {
 }
 
 
+struct MusicChartSkeletonLongView: View {
+    @State var startAnimation: Bool = false
+    var lineVisible: Bool = true
+    init(lineVisible: Bool) {
+        self.lineVisible = lineVisible
+    }
+    init(){}
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(0...10, id: \.self) { index in
+                SkeletonItem
+            }
+        }
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+    
+    var SkeletonItem: some View {
+        HStack(spacing: 16) {
+            RoundedRectangle(cornerRadius: 5, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 40, height: 40)
+            
+            RoundedRectangle(cornerRadius: 5, style: .circular)
+                .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                .frame(width: 19, height: 20)
+            
+            VStack(alignment: .leading, spacing: 7) {
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 91, height: 15)
+                
+                RoundedRectangle(cornerRadius: 5, style: .circular)
+                    .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                    .frame(width: 71, height: 11)
+            }
+            
+            Spacer()
+        }
+        .frame(height: 70)
+        .padding(.leading, 20)
+        .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
+    }
+    
+}

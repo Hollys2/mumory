@@ -36,7 +36,7 @@ public struct MumoryRecommendationView: View {
     @State var testValue: CGFloat = 200
     
     @State var mostPostedSongs: [Song] = []
-    @State var similiarTasteSongs: [Song] = []
+    @State var similarTasteSongs: [Song] = []
     @State var selection: Int = 0
     public init() {
         
@@ -62,7 +62,6 @@ public struct MumoryRecommendationView: View {
                             MusicChartItem(rank: index+1, song: song) //순위 곡 itemv
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
-                                    playerViewModel.isShownMiniPlayer = true
                                 }
 //                                .highPriorityGesture(
 //                                    TapGesture()
@@ -74,20 +73,21 @@ public struct MumoryRecommendationView: View {
                         }
                         
                         if musicChart.isEmpty {
-                            MusicChartSkeletonView()
-                            MusicChartSkeletonView()
-                            MusicChartSkeletonView()
-                            MusicChartSkeletonView(lineVisible: false)
-                            MusicChartSkeletonView()
-                            MusicChartSkeletonView()
-                            MusicChartSkeletonView()
-                            MusicChartSkeletonView(lineVisible: false)
+                            MusicChartSkeletonShortView()
+                            MusicChartSkeletonShortView()
+                            MusicChartSkeletonShortView()
+                            MusicChartSkeletonShortView(lineVisible: false)
+                            MusicChartSkeletonShortView()
+                            MusicChartSkeletonShortView()
+                            MusicChartSkeletonShortView()
+                            MusicChartSkeletonShortView(lineVisible: false)
 
                         }
                     })
                     .padding(.trailing, 33)
                 }
                 .frame(height: 300)
+                .scrollIndicators(.hidden)
                 
                 Divider03()
                     .padding(.top, 15)
@@ -101,10 +101,10 @@ public struct MumoryRecommendationView: View {
 
                 TabView(selection: $selection){
                     ExtraRecommendationView(type: .mostPosted, songs: $mostPostedSongs).tag(0)
-                    ExtraRecommendationView(type: .similiarTaste, songs: $similiarTasteSongs).tag(1)
+                    ExtraRecommendationView(type: .similiarTaste, songs: $similarTasteSongs).tag(1)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .frame(height: 450)
+                .frame(height: 420)
                 
                 HStack(spacing: 8, content: {
                     Circle()
@@ -127,9 +127,11 @@ public struct MumoryRecommendationView: View {
         }
         .onAppear(perform: {
             searchChart(offset: 0)
-            Task {
-                mostPostedSongs = await getMostPostedSongs()
-                similiarTasteSongs = await getSimiliarTasteSongs()
+            if mostPostedSongs.isEmpty || similarTasteSongs.isEmpty {
+                Task {
+                    mostPostedSongs = await getMostPostedSongs()
+                    similarTasteSongs = await getSimiliarTasteSongs()
+                }
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "MumoryRecommendationView")
         })
@@ -152,39 +154,86 @@ public struct MumoryRecommendationView: View {
     }
     
     private func getMostPostedSongs() async -> [Song] {
-        let db = FBManager.shared.db
-        let query = db.collection("RecordData")
-            .order(by: "count", descending: true)
-            .limit(to: 5)
-        var songIds: [String] = []
-        guard let snapshots = try? await query.getDocuments() else {return []}
-        snapshots.documents.forEach { document in
-            let data = document.data()
-            guard let songId = data["songId"] as? String else {return}
-            songIds.append(songId)
+        return await withTaskGroup(of: String?.self) { taskGroup -> [Song] in
+            let db = FBManager.shared.db
+            let query = db.collection("RecordData")
+                .order(by: "count", descending: true)
+                .limit(to: 50)
+            var songs: [Song] = []
+            
+            guard let snapshots = try? await query.getDocuments() else {return []}
+            snapshots.documents.forEach { document in
+                taskGroup.addTask {
+                    let data = document.data()
+                    guard let songId = data["songId"] as? String else {return nil}
+                    return songId
+                }
+            }
+            
+            for await value in taskGroup {
+                guard let songId = value else {continue}
+                guard let song = await fetchSong(songID: songId) else {continue}
+                songs.append(song)
+            }
+            
+            return songs
         }
-        
-        return await fetchSongs(songIDs: songIds)
     }
     
     private func getSimiliarTasteSongs() async -> [Song]{
         let db = FBManager.shared.db
-        let myRandomFavoriteGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
-        
-        let query = db.collection("User")
-            .whereField("favoriteGenres", arrayContains: myRandomFavoriteGenre)
+        let songIds: [String] = await withTaskGroup(of: [String].self) { taskGroup -> [String] in
+            var songIds: [String] = []
+            for favoriteGenre in currentUserData.favoriteGenres {
+                let query = db.collection("User")
+                    .whereField("favoriteGenres", arrayContains: favoriteGenre)
+                guard let snapshots = try? await query.getDocuments() else {print("a");return []}
+                var documents = snapshots.documents.shuffled()
+                documents.removeAll(where: {$0.documentID == currentUserData.uId})
+                
+                for document in documents {
+                    taskGroup.addTask {
+                        guard let favoriteDoc = try? await db.collection("User").document(document.documentID).collection("Playlist").document("favorite").getDocument() else {print("c");return []}
+                        guard let data = favoriteDoc.data() else {print("d");return []}
+                        guard var songIds = data["songIds"] as? [String] else {print("e");return []}
+                        return songIds
+                    }
+                }
+            }
             
-        guard let snapshots = try? await query.getDocuments() else {print("a");return []}
-        var documents = snapshots.documents.shuffled()
-        documents.removeAll(where: {$0.documentID == currentUserData.uId})
-        guard let docID = documents.first?.documentID else {print("b");return []}
-        print("doc id: \(docID)")
-        guard let favoriteDoc = try? await db.collection("User").document(docID).collection("Playlist").document("favorite").getDocument() else {print("c");return []}
-        guard let data = favoriteDoc.data() else {print("d");return []}
-        guard var songIds = data["songIds"] as? [String] else {print("e");return []}
-        songIds = songIds.shuffled()
-        songIds = Array(songIds.prefix(5))
-        return await fetchSongs(songIDs: songIds)
+            for await value in taskGroup {
+                songIds.append(contentsOf: value)
+                if songIds.count > 50 {
+                    let set: Set = Set(songIds)
+                    songIds = Array(set)
+                    songIds.shuffle()
+                    return songIds
+                }
+            }
+            
+            let set: Set = Set(songIds)
+            songIds = Array(set)
+            songIds.shuffle()
+            return songIds
+        }
+        
+        return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
+            var songs: [Song] = []
+            
+            songIds.forEach { songId in
+                taskGroup.addTask {
+                    return await fetchSong(songID: songId)
+                }
+            }
+            
+            for await value in taskGroup {
+                guard let song = value else {continue}
+                songs.append(song)
+            }
+            
+            return songs
+        }
+
     }
 }
 

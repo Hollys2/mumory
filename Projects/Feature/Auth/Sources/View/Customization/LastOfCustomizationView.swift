@@ -139,6 +139,8 @@ struct LastOfCustomizationView: View {
                         
                     }
                 }
+                .scrollIndicators(.hidden)
+
             } else {
                 VStack(spacing: 0){
                     Text("프로필 생성이 완료되었습니다!")

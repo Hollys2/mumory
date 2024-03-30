@@ -14,6 +14,8 @@ public struct MyRecentMumoryView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
+
     @State var musicList: [Song] = []
     @State var exists: Bool = false
     @State var spacing: CGFloat = 0
@@ -29,6 +31,11 @@ public struct MyRecentMumoryView: View {
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                 Spacer()
                 SharedAsset.next.swiftUIImage
+                    .resizable()
+                    .frame(width: 17, height: 17)
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.myRecentMumorySongList)
+                    }
             })
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
@@ -87,7 +94,7 @@ public struct MyRecentMumoryView: View {
 
 struct NoMumoryView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-
+    @EnvironmentObject var playerViewModel: PlayerViewModel 
     var body: some View {
         VStack(alignment: .center,spacing: 0, content: {
             Text("나의 뮤모리를 기록하고")
@@ -112,6 +119,7 @@ struct NoMumoryView: View {
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         appCoordinator.isCreateMumorySheetShown = true
                         appCoordinator.offsetY = CGFloat.zero
+                        playerViewModel.setPlayerVisibility(isShown: false)
                     }
                 }
 

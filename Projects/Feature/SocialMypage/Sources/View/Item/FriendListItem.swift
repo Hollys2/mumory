@@ -29,9 +29,11 @@ struct FriendListItem: View {
                     .frame(width: 55, height: 55)
                     .clipShape(Circle())
             } placeholder: {
-                Circle()
-                    .fill(ColorSet.darkGray)
-                    .frame(width: 55)
+                friend.defaultProfileImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
             }
             
             VStack(alignment: .leading, spacing: 1, content: {

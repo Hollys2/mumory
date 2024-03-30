@@ -133,7 +133,6 @@ private struct RecommendationScrollView: View {
                             RecommendationMusicItem(song: song)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
-                                    playerViewModel.isShownMiniPlayer = true
                                 }
 //                                .highPriorityGesture(
 //                                    TapGesture()

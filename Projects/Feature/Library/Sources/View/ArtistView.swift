@@ -72,6 +72,7 @@ struct ArtistView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
+                                    guard isLoading == false else {return}
                                     guard !songs.isEmpty else {return}
                                     guard !songs.isEmpty else {return}
                                     playerViewModel.playAll(title: artist.name , songs: songs)
@@ -91,7 +92,6 @@ struct ArtistView: View {
                             MusicListItem(song: song, type: .artist)
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
-                                    playerViewModel.isShownMiniPlayer = true
                                 }
                         }
                         
@@ -109,7 +109,8 @@ struct ArtistView: View {
                 .frame(width: getUIScreenBounds().width)
 
             }
-
+            .scrollIndicators(.hidden)
+            
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
                 SharedAsset.backGradient.swiftUIImage

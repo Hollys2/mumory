@@ -94,7 +94,6 @@ struct SearchMusicViewInCreateMumory: View {
         .navigationBarBackButtonHidden()
         .background(.black)
         .onAppear {
-            playerViewModel.isShownMiniPlayer = false
             AnalyticsManager.shared.setScreenLog(screenTitle: "SearchMusicView")
         }
         
@@ -225,6 +224,7 @@ struct SearchMusicResultViewInCreateMumory: View {
                 
                 
             }
+            .scrollIndicators(.hidden)
             .ignoresSafeArea()
             .onAppear(perform: {
                 self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
