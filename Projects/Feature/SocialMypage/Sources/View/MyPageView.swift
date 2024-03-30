@@ -56,6 +56,9 @@ public struct MyPageView: View {
                     .onTapGesture {
                         isTapBackButton = true
                         if appCoordinator.bottomAnimationViewStatus == .myPage {
+                            if appCoordinator.selectedTab == .home {
+                                playerViewModel.setPlayerVisibility(isShown: false)
+                            }
                             appCoordinator.setBottomAnimationPage(page: .remove)
                             if appCoordinator.selectedTab == .social {
                                 Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
