@@ -70,7 +70,7 @@ struct HomeMapView: View {
             }
             .allowsHitTesting(false)
             
-            VStack {
+            VStack(spacing: 0) {
                 PlayingMusicBarView()
                     .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 12 : 16))
                 

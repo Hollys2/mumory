@@ -242,27 +242,36 @@ struct MumoryDetailScrollContentView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 24)
                         
-                        MumoryDetailFriendMumoryScrollView()
-                            .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 212)
-                        
-                        Spacer().frame(height: 25)
-                        
-                        HStack(spacing: 10) {
+                        VStack(spacing: 0) {
+                            MumoryDetailFriendMumoryScrollView()
+                                .frame(width: UIScreen.main.bounds.width - 40 + 10, height: 212)
                             
-                            ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count))
-                                .accentColor(SharedAsset.mainColor.swiftUIColor)
-                                .background(Color(red: 0.165, green: 0.165, blue: 0.165))
-                                .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
-                                .animation(.easeInOut(duration: 0.1), value: self.appCoordinator.page)
+                            Spacer().frame(height: 25)
                             
-                            Text("\(self.appCoordinator.page)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
-                                .foregroundColor(SharedAsset.mainColor.swiftUIColor)
-                            + Text(" / \(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count)")
-                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                            HStack(spacing: 10) {
+                                
+                                ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count))
+                                    .accentColor(SharedAsset.mainColor.swiftUIColor)
+                                    .background(Color(red: 0.165, green: 0.165, blue: 0.165))
+                                    .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
+                                    .animation(.easeInOut(duration: 0.1), value: self.appCoordinator.page)
+                                
+                                Text("\(self.appCoordinator.page)")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                    .foregroundColor(SharedAsset.mainColor.swiftUIColor)
+                                + Text(" / \(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))).count)")
+                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                    .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                            }
+                            .padding(.bottom, 65)
+                        }
+                        
+                        VStack(spacing: 0) {
+                            Text("아직 같은 음악을 들은 친구가 없습니다.")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                         }
-                        .padding(.bottom, 65)
+                        .frame(height: 334 - 25)
                         
                         Rectangle()
                             .fill(Color(red: 0.055, green: 0.055, blue: 0.055))
@@ -285,6 +294,15 @@ struct MumoryDetailScrollContentView: View {
                     ForEach(0..<3) { _ in
                         MumoryDetailSameLocationMusicView()
                     }
+                    
+                    VStack(spacing: 0) {
+                        Text("현재 데이터를 모으는 중으로 추후에 업데이트 될 예정입니다!")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
+                            .frame(width: 191)
+                            .background(.red)
+                    }
+                    .frame(height: 334 - 25)
 
                     Spacer().frame(height: 25)
 

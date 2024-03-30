@@ -112,7 +112,7 @@ public struct MyMumoryView: View {
                                             
                                             ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
                                                 
-                                                if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
+//                                                if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
                                                     ZStack(alignment: .topLeading) {
                                                         Rectangle()
                                                             .foregroundColor(.clear)
@@ -132,7 +132,7 @@ public struct MyMumoryView: View {
                                                             .offset(y: 21)
                                                     }
                                                     .padding(.top, 30)
-                                                }
+//                                                }
                                                 
                                                 MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
                                             }
