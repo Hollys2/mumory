@@ -560,7 +560,7 @@ struct FriendPlaylistView: View {
                         ForEach( 0 ..< playlists.count, id: \.self) { index in
                             PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlist: $playlists[index]))
+                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(friend: friend, playlist: $playlists[index]))
                                 }
                         }
                     })
@@ -870,6 +870,7 @@ struct PlaylistItemTest: View {
                     .truncationMode(.tail)
                     .padding(.top, 10)
                     .foregroundStyle(.white)
+                    .frame(width: itemSize * 2)
                 
                 Text("\(playlist.songIDs.count)곡")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
