@@ -19,6 +19,7 @@ public struct HomeView: View {
     
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
+    @State private var isCreateMumoryPopUpViewShown: Bool = true
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
