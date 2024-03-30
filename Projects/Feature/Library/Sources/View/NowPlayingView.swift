@@ -68,7 +68,6 @@ struct NowPlayingView: View {
 //                            }
 //                        })
                 }
-                .scrollIndicators(.hidden)
                 .scrollDisabled(isPresentQueue)
                 .onChange(of: isPresentQueue) { newValue in
                     if isPresentQueue{
@@ -630,7 +629,6 @@ private func getTextWidth(term: String) -> CGFloat {
 
 
 struct PlayTogetherView: View {
-    @EnvironmentObject var playerViewModel: PlayerViewModel
     @Binding var songs: [Song]
     init(songs: Binding<[Song]>) {
         self._songs = songs
@@ -645,24 +643,12 @@ struct PlayTogetherView: View {
                 .padding(.leading, 15)
                 .padding(.bottom, 12)
             
-            if let currentSong = playerViewModel.currentSong {
-                VStack(spacing: 0) {
-                    ForEach(songs, id: \.id) { song in
-                        PlayTogetherItem(song: song)
-                            .onTapGesture {
-                                playerViewModel.playNewSong(song: song)
-                            }
-                    }
+            VStack(spacing: 0) {
+                ForEach(songs, id: \.id) { song in
+                    PlayTogetherItem(song: song)
                 }
-                .padding(.bottom, 25)
-            }else {
-                Text("재생중인 음악이 없습니다.")
-                    .foregroundStyle(ColorSet.subGray)
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 30)
-                    .frame(height: 280)
             }
+            .padding(.bottom, 25)
             
         }
         .frame(width: getUIScreenBounds().width * 0.92)
