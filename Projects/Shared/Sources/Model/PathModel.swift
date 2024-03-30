@@ -24,8 +24,8 @@ public enum MumoryPage: Hashable {
     case friendPlaylist(friend: MumoriUser, playlist: Binding<MusicPlaylist>)
     case friendPlaylistManage(friend: MumoriUser, playlist: Binding<[MusicPlaylist]>)
     case searchFriend
-    case mostPostedSongList(songIds: Binding<[String]>)
-    case similarTasteList(songIds: Binding<[String]>)
+    case mostPostedSongList(songs: Binding<[Song]>)
+    case similarTasteList(songs: Binding<[Song]>)
     case myRecentMumorySongList
     
     public static func == (lhs: MumoryPage, rhs: MumoryPage) -> Bool {
@@ -83,12 +83,12 @@ public enum MumoryPage: Hashable {
             hasher.combine(playlist.wrappedValue)
         case .searchFriend:
             hasher.combine(12)
-        case .mostPostedSongList(songIds: let songIds):
+        case .mostPostedSongList(songs: let songs):
             hasher.combine(13)
-            hasher.combine(songIds.wrappedValue)
-        case .similarTasteList(songIds: let songIds):
+            hasher.combine(songs.wrappedValue)
+        case .similarTasteList(songs: let songs):
             hasher.combine(14)
-            hasher.combine(songIds.wrappedValue)
+            hasher.combine(songs.wrappedValue)
         case .myRecentMumorySongList:
             hasher.combine(15)
  

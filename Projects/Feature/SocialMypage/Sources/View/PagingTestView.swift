@@ -55,6 +55,7 @@ public struct PagingTestView: View {
                     Text(title)
                 }
             }
+            .scrollIndicators(.hidden)
         }
         .onAppear(perform: {
             getDocs()

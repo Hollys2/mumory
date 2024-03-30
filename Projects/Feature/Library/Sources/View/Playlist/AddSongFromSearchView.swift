@@ -20,9 +20,8 @@ struct AddSongFromSearchView: View {
     @State var localTimer = 0.0
     @State var searchIndex = 0
     @State var songs: MusicItemCollection<Song> = []
-    
     @State var scrollOffset: CGPoint = .zero
-    
+    @State var isLoading: Bool = false
     private let lineGray = Color(white: 0.31)
 
     var body: some View {
@@ -35,6 +34,7 @@ struct AddSongFromSearchView: View {
                         DispatchQueue.main.async {
                             localTimer = 0
                             songs = []
+                            isLoading = true
                         }
                     })
                     .onChange(of: localTimer, perform: { value in
@@ -54,6 +54,7 @@ struct AddSongFromSearchView: View {
                     })
                     .frame(width: getUIScreenBounds().width)
                 }   
+                .scrollIndicators(.hidden)
                 .ignoresSafeArea()
                 .onChange(of: scrollOffset, perform: { value in
                     //아이템 높이: 70. 첫 페이지에서는 offset이 700일 때 다음 페이지 요청을 보내고, 두번째 페이지에서는 2100일 때 요청을 보냄...반복
@@ -65,6 +66,16 @@ struct AddSongFromSearchView: View {
                 
                     
             })
+            
+            if songs.isEmpty && !isLoading {
+                Text("검색 후 음악을 추가해보세요")
+                    .foregroundStyle(ColorSet.subGray)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .padding(.top, getUIScreenBounds().height * 0.25)
+            }
+            
+            LoadingAnimationView(isLoading: $isLoading)
+                .padding(.top, getUIScreenBounds().height * 0.25)
         }
         .onAppear(perform: {
             timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true, block: { timer in
@@ -77,6 +88,7 @@ struct AddSongFromSearchView: View {
     }
     
     private func searchSong(term: String, index: Int) {
+        isLoading = songs.isEmpty
         Task {
             var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
             request.limit = 20
@@ -86,6 +98,7 @@ struct AddSongFromSearchView: View {
                 let response = try await request.response()
                 DispatchQueue.main.async {
                     self.songs += response.songs
+                    isLoading = false
                 }
             }catch(let error) {
                 print("error: \(error.localizedDescription)")
@@ -116,9 +129,6 @@ struct SongSearchTextField: View {
             }                    
             .padding(.leading, 10)
             .opacity(term.isEmpty ? 0 : 1)
-
-
-          
         })
         .padding(.leading, 25)
         .padding(.trailing, 17)

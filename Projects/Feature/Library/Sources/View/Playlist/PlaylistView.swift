@@ -126,6 +126,7 @@ struct PlaylistView: View {
                                     .onTapGesture {
                                         self.selectedSongsForDelete.removeAll()
                                         setEditMode(isEditing: true)
+                                        playerViewModel.setPlayerVisibility(isShown: false)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewEditButton")
                                     }
                                 
@@ -144,6 +145,12 @@ struct PlaylistView: View {
                         .padding(.horizontal, 20)
                         .padding(.bottom, 15)
                         
+                        if playlist.songs.isEmpty {
+                            Text("음악이 없습니다")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .foregroundStyle(ColorSet.subGray)
+                                .padding(.top, getUIScreenBounds().height * 0.15)
+                        }
                         //플레이리스트 곡 목록
                         ForEach(playlist.songs, id: \.self) { song in
                             PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongs: $selectedSongsForDelete)
@@ -157,7 +164,6 @@ struct PlaylistView: View {
                                         }
                                     }else {
                                         playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: song)
-                                        playerViewModel.isShownMiniPlayer = true
                                     }
                                 }
 //                                .highPriorityGesture(
@@ -212,6 +218,7 @@ struct PlaylistView: View {
                     self.isLoading = false
                 }
             }
+            .scrollIndicators(.hidden)
             
             
             //상단바 - z축 최상위
@@ -230,6 +237,7 @@ struct PlaylistView: View {
                 if isEditing {
                     Button(action: {
                         setEditMode(isEditing: false)
+                        playerViewModel.setPlayerVisibility(isShown: true)
                     }, label: {
                         Text("완료")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))

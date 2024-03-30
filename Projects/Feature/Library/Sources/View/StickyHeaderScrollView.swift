@@ -118,6 +118,7 @@ class UIStickyScrollViewController: UIViewController{
         let v = UIScrollView()
         v.isPagingEnabled = false
         v.clipsToBounds = false
+        v.showsVerticalScrollIndicator = false
         return v
     }()
     

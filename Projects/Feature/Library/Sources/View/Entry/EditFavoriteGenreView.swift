@@ -60,6 +60,7 @@ struct EditFavoriteGenreView: View {
                     .foregroundStyle(Color.clear)
                     .frame(width: 10, height: 150)
             }
+            .scrollIndicators(.hidden)
                 
             
             HStack(alignment: .center, spacing: 0) {

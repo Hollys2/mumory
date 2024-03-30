@@ -16,6 +16,8 @@ public struct MyPageView: View {
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+
     @State var isTapBackButton: Bool = false
     @State var isPresentEditProfile: Bool = false
     let lineGray = Color(white: 0.37)
@@ -44,6 +46,7 @@ public struct MyPageView: View {
                         .frame(height: 200)
                 })
             }
+            .scrollIndicators(.hidden)
             
             //상단바
             HStack{
@@ -55,6 +58,7 @@ public struct MyPageView: View {
                         isTapBackButton = true
                         if appCoordinator.bottomAnimationViewStatus == .myPage {
                             appCoordinator.setBottomAnimationPage(page: .remove)
+                            playerViewModel.setPlayerVisibility(isShown: false)
                         }else {
                             appCoordinator.rootPath.removeLast()
                         }
@@ -204,20 +208,40 @@ struct SimpleFriendView: View {
                 appCoordinator.rootPath.append(MyPage.friendList)
             }
             
-            ScrollView(.horizontal) {
-                HStack(spacing: 12, content: {
-                    ForEach(currentUserData.friends, id: \.self) { friend in
-                        FriendHorizontalItem(user: friend)
-                            .onTapGesture {
-                                appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
-                            }
-                    }
-                })
-                .fixedSize()
-                .padding(.horizontal, 20)
+            if currentUserData.friends.isEmpty {
+                VStack(spacing: 25) {
+                    Text("서로의 일상과 음악 취향을\n공유하고 싶은 친구들을 초대해보세요")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                        .foregroundStyle(ColorSet.subGray)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("친구 초대하러 가기")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        .foregroundStyle(ColorSet.mainPurpleColor)
+                        .frame(height: 30)
+                        .padding(.horizontal, 10)
+                        .background(ColorSet.darkGray)
+                        .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
+                        .onTapGesture {
+                            appCoordinator.rootPath.append(MumoryPage.searchFriend)
+                        }
+                }
+            }else {
+                ScrollView(.horizontal) {
+                    HStack(spacing: 12, content: {
+                        ForEach(currentUserData.friends, id: \.self) { friend in
+                            FriendHorizontalItem(user: friend)
+                                .onTapGesture {
+                                    appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
+                                }
+                        }
+                    })
+                    .fixedSize()
+                    .padding(.horizontal, 20)
+                }
+                .scrollIndicators(.hidden)
+                .padding(.bottom, 37)
             }
-            .scrollIndicators(.hidden)
-            .padding(.bottom, 37)
         })
     }
 }
@@ -234,6 +258,7 @@ struct MyMumori: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     let Firebase = FBManager.shared
 
     var body: some View {
@@ -263,25 +288,51 @@ struct MyMumori: View {
                 self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
             }
             
-            ScrollView(.horizontal) {
-                HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
-                    ForEach(mumoryDataViewModel.myMumorys.prefix(10), id: \.id) { mumory in
-                        MyMumoryItem(mumory: mumory)
-                            .onTapGesture {
-                                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
-                            }
-                    }
+            if mumoryDataViewModel.myMumorys.isEmpty {
+                VStack(spacing: 25) {
+                    Text("음악과 일상 기록을 통해\n나만의 뮤모리를 채워보세요")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                        .foregroundStyle(ColorSet.subGray)
+                        .multilineTextAlignment(.center)
                     
-                    if mumoryDataViewModel.myMumorys.isEmpty {
-                        MumorySkeletonView()
-                    }
-                })
-                .padding(.horizontal, 20)
-                
+                    Text("뮤모리 기록하러 가기")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                        .foregroundStyle(ColorSet.mainPurpleColor)
+                        .frame(height: 30)
+                        .padding(.horizontal, 10)
+                        .background(ColorSet.darkGray)
+                        .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
+                        .onTapGesture {
+                            appCoordinator.setBottomAnimationPage(page: .remove)
+                            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                                withAnimation(Animation.easeInOut(duration: 0.1)) {
+                                    appCoordinator.isCreateMumorySheetShown = true
+                                    appCoordinator.offsetY = CGFloat.zero
+                                    playerViewModel.setPlayerVisibility(isShown: false)
+                                }
+                            }
+                            
+                        }
+                }
+                .frame(height: getUIScreenBounds().width * 0.43)
+
+            }else {
+                ScrollView(.horizontal) {
+                    HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
+                        ForEach(mumoryDataViewModel.myMumorys.prefix(10), id: \.id) { mumory in
+                            MyMumoryItem(mumory: mumory)
+                                .onTapGesture {
+                                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                                }
+                        }
+                    })
+                    .padding(.horizontal, 20)
+                    
+                }
+                .frame(height: getUIScreenBounds().width * 0.43)
+                .scrollIndicators(.hidden)
+                .padding(.bottom, 40)
             }
-            .frame(height: getUIScreenBounds().width * 0.43)
-            .scrollIndicators(.hidden)
-            .padding(.bottom, 40)
         })
 
     }

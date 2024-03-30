@@ -15,6 +15,7 @@ struct SaveToPlaylistView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var playlistArray: [MusicPlaylist] = []
     @State var isCreatePopupPresent: Bool = false
@@ -103,7 +104,11 @@ struct SaveToPlaylistView: View {
         }
         .onAppear(perform: {
             getUserPlaylist()
+            playerViewModel.setPlayerVisibility(isShown: false)
         })
+        .onDisappear {
+            playerViewModel.setPlayerVisibility(isShown: true)
+        }
     }
     
     private func saveSongToPlaylist(to: MusicPlaylist)  {

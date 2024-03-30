@@ -967,6 +967,7 @@ private struct BlurScroll: ViewModifier {
                     self.scrollPosition = value
                 }
             }
+            .scrollIndicators(.hidden)
             .coordinateSpace(name: coordinateSpaceName)
         }
         .ignoresSafeArea()

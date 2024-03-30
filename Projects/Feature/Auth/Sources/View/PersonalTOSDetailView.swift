@@ -50,6 +50,7 @@ struct PersonalTOSDetailView: View {
                     }
 
                 }
+                .scrollIndicators(.hidden)
 
          
             })

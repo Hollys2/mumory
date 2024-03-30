@@ -14,7 +14,7 @@ struct FavoriteListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    @State var isLoading: Bool = false
+    @State var isLoading: Bool = true
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -60,10 +60,32 @@ struct FavoriteListView: View {
                 Divider05()
                     .padding(.top, 15)
                 
+                if !isLoading && currentUserData.playlistArray[0].songIDs.isEmpty {
+                    VStack(spacing: 25) {
+                        Text("즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .multilineTextAlignment(.center)
+                        
+                        Text("추천 음악 보러가기")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .foregroundStyle(ColorSet.mainPurpleColor)
+                            .frame(height: 30)
+                            .padding(.horizontal, 10)
+                            .background(ColorSet.darkGray)
+                            .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
+                            .onTapGesture {
+                                let myRandomGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
+                                appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: myRandomGenre))
+                            }
+                    }
+                    .padding(.top, getUIScreenBounds().height * 0.25)
+            
+                }
+                
                 ScrollView {
                     LazyVStack(spacing: 0, content: {
                         ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
-                            FavoriteSongItem(song: song)
+                            SongListBigItem(song: song)
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
                                 }
@@ -93,13 +115,13 @@ struct FavoriteListView: View {
                         self.isLoading = false
                     }
                 }
+                .scrollIndicators(.hidden)
         
             })
         }
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             Task {
-                self.isLoading = true
                 currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
                 self.isLoading = false
             }
@@ -108,16 +130,25 @@ struct FavoriteListView: View {
 
 }
 
-struct FavoriteSongItem: View {
-
+struct SongListBigItem: View {
+    enum ViewType {
+        case favorite
+        case recentMumory
+    }
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false
     let song: Song
+    var type: ViewType = .favorite
     init(song: Song) {
         self.song = song
     }
+    init(song: Song, type: ViewType) {
+        self.song = song
+        self.type = type
+    }
+    
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -128,6 +159,11 @@ struct FavoriteSongItem: View {
             } placeholder: {
                 Rectangle()
                     .fill(ColorSet.skeleton)
+            }
+            .overlay {
+                if type == .recentMumory {
+                    LinearGradient(colors: [ColorSet.mainPurpleColor, Color.clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.6 ))
+                }
             }
             .frame(width: 57, height: 57)
             .clipShape(RoundedRectangle(cornerRadius: 5, style: .circular))

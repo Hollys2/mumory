@@ -87,7 +87,6 @@ struct RecommendationListView: View {
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
                                     playerViewModel.playAll(title: title, songs: songs, startingItem: song)
-                                    playerViewModel.isShownMiniPlayer = true
                                 }
 //                                .highPriorityGesture(
 //                                    TapGesture()
@@ -118,6 +117,7 @@ struct RecommendationListView: View {
                 .frame(minHeight: getUIScreenBounds().height)
                 
             }
+            .scrollIndicators(.hidden)
             
             
             //상단바 - z축 최상위

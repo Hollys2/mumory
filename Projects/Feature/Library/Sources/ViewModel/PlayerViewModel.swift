@@ -30,7 +30,7 @@ public class PlayerViewModel: ObservableObject {
     @Published public var isShownMiniPlayer: Bool = false
     @Published var miniPlayerMoveToBottom: Bool = false
     @Published var isShownPreview: Bool = false
-    @Published var userWantsInvisible: Bool = false
+    @Published var userWantsShown: Bool = true
     @Published var playQueue = ApplicationMusicPlayer.shared.queue
     @Published var queue: [Song] = []
     @Published var currentSong: Song?
@@ -66,8 +66,29 @@ public class PlayerViewModel: ObservableObject {
         self.queue = [song]
         self.originQueue = [song]
         self.queueTitle = ""
-        isPresentNowPlayingView = true
-        isShownMiniPlayer = true
+        self.setPlayerVisibilityByUser(isShown: true)
+        Task {
+            do {
+                try await player.play()
+                DispatchQueue.main.async {
+                    self.currentSong = song
+                    self.isPlaying = true
+                    self.setPlayingTime()
+                }
+            } catch {
+                print("Failed to prepare to play with error: \(error).")
+            }
+            
+        }
+    }
+    
+    public func playNewSongShowingPlayingView(song: Song){
+        player.queue = [song]
+        self.queue = [song]
+        self.originQueue = [song]
+        self.queueTitle = ""
+        self.setPlayerVisibilityByUser(isShown: true)
+        self.isPresentNowPlayingView = true
         Task {
             do {
                 try await player.play()
@@ -91,6 +112,7 @@ public class PlayerViewModel: ObservableObject {
         self.queue = songs
         self.originQueue = songs
         self.queueTitle = title
+        self.setPlayerVisibilityByUser(isShown: true)
         Task {
             do {
                 try await player.play()
@@ -274,15 +296,17 @@ public class PlayerViewModel: ObservableObject {
         }
     }
 
-    public func hiddenMiniPlayerByUser() {
-        userWantsInvisible = true
+    public func setPlayerVisibilityByUser(isShown: Bool) {
+        self.userWantsShown = isShown
+        self.isShownMiniPlayer = isShown
     }
     
-    public func setMiniPlayerVisibiliy(isHidden: Bool) {
-        if isHidden {
-            isShownMiniPlayer = false
-        }else {
-            isShownMiniPlayer = self.userWantsInvisible ? false : true
-        }
+    public func setPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
+        self.miniPlayerMoveToBottom = moveToBottom
+        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+    }
+    
+    public func setPlayerVisibility(isShown: Bool) {
+        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
     }
 }

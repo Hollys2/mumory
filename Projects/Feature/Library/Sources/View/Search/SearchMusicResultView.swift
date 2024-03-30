@@ -30,17 +30,15 @@ struct SearchMusicResultView: View {
     @State private var isLoading: Bool = false
     
     var body: some View {
-        ZStack{
+        ZStack(alignment: .top){
             ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize){
                 VStack(spacing: 0, content: {
-                    if musicList.count == 0 && artistList.count == 0 {
+                    if !isLoading && musicList.count == 0 && artistList.count == 0 {
                         Text("검색 결과가 없습니다")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.top, 130)
-                      
-                        
-                    }else {
+                    }else if !musicList.isEmpty || !artistList.isEmpty{
                         LazyVStack(spacing: 0, content: {
                             Text("아티스트")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -81,7 +79,6 @@ struct SearchMusicResultView: View {
                                     .id(music.id)
                                     .onTapGesture {
                                         playerViewModel.playNewSong(song: music)
-                                        playerViewModel.isShownMiniPlayer = true
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == music.title})
@@ -101,10 +98,12 @@ struct SearchMusicResultView: View {
                 .onChange(of: term, perform: { value in
                     localTime = 0.0
                     requestIndex = 0
+                    isLoading = true
+                    artistList = []
+                    musicList = []
                 })
                 .onChange(of: localTime, perform: { value in
                     if localTime == 0.8 {
-                        isLoading = true
                         requestArtist(term: term)
                         requestSong(term: term, index: 0)
                     }
@@ -113,6 +112,7 @@ struct SearchMusicResultView: View {
                 
             }
             .ignoresSafeArea()
+            .scrollIndicators(.hidden)
             .onChange(of: offset, perform: { value in
                 if offset.y/contentSize.height > 0.7 {
                     if !haveToLoadNextPage {
@@ -126,6 +126,8 @@ struct SearchMusicResultView: View {
             })
 
             
+            LoadingAnimationView(isLoading: $isLoading)
+                .padding(.top, getUIScreenBounds().height * 0.25)
 
         }
         .onAppear(perform: {
@@ -167,6 +169,7 @@ struct SearchMusicResultView: View {
                 let response = try await request.response()
                 DispatchQueue.main.async {
                     self.musicList += response.songs
+                    isLoading = false
                 }
             }catch(let error) {
                 print("error: \(error.localizedDescription)")

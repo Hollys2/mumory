@@ -21,6 +21,7 @@ struct MumoryDetailReactionBarView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     var body: some View {
         
@@ -80,6 +81,7 @@ struct MumoryDetailReactionBarView: View {
                 
                 Button(action: {
                     mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                    playerViewModel.setPlayerVisibility(isShown: false)
                     withAnimation(.easeInOut(duration: 0.1)) {
                         self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
                     }

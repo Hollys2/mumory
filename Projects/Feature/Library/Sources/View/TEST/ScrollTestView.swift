@@ -26,6 +26,7 @@ struct ScrollTestView: View {
                 .background(.yellow)
                 
             }
+            .scrollIndicators(.hidden)
             .onChange(of: contentOffset, perform: { value in
                 print(value)
             })

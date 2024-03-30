@@ -109,7 +109,7 @@ public struct MiniPlayerView: View {
                 .frame(width: 20, height: 20)
                 .padding(.trailing, 20)
                 .onTapGesture {
-                    playerViewModel.hiddenMiniPlayerByUser()
+                    playerViewModel.setPlayerVisibilityByUser(isShown: false)
                 }
             
             

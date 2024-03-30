@@ -252,7 +252,7 @@ public struct LoginView: View {
         }
     }
         
-    private func checkInitialSetting(uid: String, email: String?, method: String) async{
+    private func checkInitialSetting(uid: String, email: String?, method: String) async {
         //로그인 기록 및 uid 셋팅
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
@@ -276,24 +276,18 @@ public struct LoginView: View {
             guard let id = data["id"] as? String,
                   let nickname = data["nickname"] as? String else {
                 //커스텀 마무리 안 한 기존 회원
-//                self.goToCustomization = true
-                
-                //루트패스 수정
                 appCoordinator.rootPath.append(MumoryPage.customization)
                 return
             }
-
             
             currentUserData.uId = uid
+            currentUserData.user = await MumoriUser(uId: uid)
             currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
             try? await query.updateData(["fcmToken": fcmToken])
-            
-            //루트패스 수정
-//            isLoginCompleted = true
+            appCoordinator.selectedTab = .home
             appCoordinator.rootPath.append(MumoryPage.home)
         }else {
             //신규 회원
-            
             var userData: [String: Any] = [
                 "uid": uid,
                 "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
@@ -303,8 +297,6 @@ public struct LoginView: View {
             
             try? await snapshot.reference.setData(userData)
             self.isLoading = false
-//            self.goToCustomization = true
-            //루트패스
             appCoordinator.rootPath.append(MumoryPage.customization)
         }
 
