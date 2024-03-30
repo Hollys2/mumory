@@ -111,6 +111,7 @@ struct MumoryDetailFriendMumoryScrollContentView: View {
             ForEach(Array(self.mumoryDataViewModel.sameSongFriendMumorys.prefix(min(3, self.mumoryDataViewModel.sameSongFriendMumorys.count))), id: \.self) { mumory in
                 MumoryDetailFriendMumoryView(mumory: mumory)
                     .padding(.horizontal, 5)
+
             }
         }
     }
