@@ -77,6 +77,7 @@ public func fetchSongs(songIDs: [String]) async -> [Song]{
     return returnValue
 }
 
+// MonthlyStat 컬렉션 데이터 가져오기
 public func getModeGenre(songIds: [String]) async -> String {
     
     let songs = await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in

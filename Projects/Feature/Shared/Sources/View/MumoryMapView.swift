@@ -161,7 +161,6 @@ struct FriendMumoryMapView: View {
             .background(Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 0.898))
         }
         .ignoresSafeArea()
-        .statusBarHidden(true)
     }
 }
 
