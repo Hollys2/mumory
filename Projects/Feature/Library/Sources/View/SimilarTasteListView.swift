@@ -45,7 +45,7 @@ struct SimilarTasteListView: View {
                         .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
-                        Text("비슷한 취향을 가진 사람들이 찜한 음악")
+                        Text("비슷한 취향의 사용자가\n즐겨찾기한 음악")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                             .frame(width: getUIScreenBounds().width, alignment: .center)
                             .multilineTextAlignment(.center)
@@ -66,7 +66,7 @@ struct SimilarTasteListView: View {
                             
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "비슷한 취향을 가진 사람들이 찜한 음악", songs: songs)
+                                    playerViewModel.playAll(title: "비슷한 취향의 사용자가 즐겨찾기한 음악", songs: songs)
                                 }
                         }
                         .padding(.horizontal, 20)
@@ -78,7 +78,7 @@ struct SimilarTasteListView: View {
                         ForEach(songs, id: \.self) { song in
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "비슷한 취향을 가진 사람들이 찜한 음악", songs: songs, startingItem: song)
+                                    playerViewModel.playAll(title: "비슷한 취향의 사용자가 즐겨찾기한 음악", songs: songs, startingItem: song)
                                 }
 //                                .highPriorityGesture(
 //                                    TapGesture()
@@ -152,7 +152,7 @@ struct SimilarTasteListView: View {
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                RecommendationBottomSheetView(songs: songs, title: "비슷한 취향을 가진 사람들이 찜한 음악")
+                RecommendationBottomSheetView(songs: songs, title: "비슷한 취향의 사용자가 즐겨찾기한 음악")
             }
             .background(TransparentBackground())
         })
