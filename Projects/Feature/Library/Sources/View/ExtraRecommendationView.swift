@@ -15,12 +15,15 @@ public enum RecommendationType {
     case similiarTaste
 }
 struct ExtraRecommendationView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @Binding var songIds: [String]
+    @State var firstSong: Song?
+    @State var offset: CGPoint = .zero
     var type: RecommendationType
-    @Binding var songs: [Song]
     let title: String
-    init(type: RecommendationType, songs: Binding<[Song]>) {
+    init(type: RecommendationType, songIds: Binding<[String]>) {
         self.type = type
-        self._songs = songs
+        self._songIds = songIds
         switch type {
         case .mostPosted:
             self.title = "뮤모리 사용자가 많이 기록한 음악"
@@ -31,7 +34,7 @@ struct ExtraRecommendationView: View {
     
     var body: some View {
         VStack(spacing: 0, content: {
-            AsyncImage(url: songs.first?.artwork?.url(width: 500, height: 500)) { image in
+            AsyncImage(url: firstSong?.artwork?.url(width: 500, height: 500)) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -44,7 +47,7 @@ struct ExtraRecommendationView: View {
             .overlay {
                 Color.black.opacity(0.4)
                 LinearGradient(colors: [ColorSet.moreDeepGray, Color.clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.8))
-                VStack(alignment: .leading, spacing: 0, content: {
+                VStack(alignment: .leading, spacing: 5, content: {
                     Text(title)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundStyle(Color.white)
@@ -57,15 +60,48 @@ struct ExtraRecommendationView: View {
                 })
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(20)
+                
+                SharedAsset.nextSetting.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 17, height: 17)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(.trailing, 15)
+                    .padding(.top, 20)
+                    .onTapGesture {
+                        switch type {
+                        case .mostPosted:
+                            appCoordinator.rootPath.append(MumoryPage.mostPostedSongList(songIds: $songIds))
+                        case .similiarTaste:
+                            appCoordinator.rootPath.append(MumoryPage.similarTasteList(songIds: $songIds))
+                        }
+                    }
             }
+            SimpleScrollView(contentOffset: $offset) {
+                LazyVStack(spacing: 0, content: {
+                    ForEach(songIds.indices, id: \.self) { index in
+                        ExtraRecommendationItem(songId: songIds[index], rank: index, type: self.type)
+                    }
+                })
+                .frame(width: getUIScreenBounds().width * 0.9)
+            }
+            .scrollIndicators(.hidden)
+            .onChange(of: offset, perform: { value in
+                if offset.y < 0 {
+                    offset.y = 0
+                }
+            })
             
-            ForEach(songs.indices, id: \.self) { index in
-                ExtraRecommendationItem(rank: index, song: songs[index], type: self.type)
-            }
         })
         .frame(width: getUIScreenBounds().width * 0.9)
+        .background(ColorSet.moreDeepGray)
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-
+        .onAppear(perform: {
+            Task {
+                guard let firstSongId = songIds.first else {return}
+                self.firstSong = await fetchSong(songID: firstSongId)
+            }
+        })
 
 
     }
@@ -78,15 +114,21 @@ struct ExtraRecommendationItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false
-    
+    @State var song: Song?
+    var songId: String
     var rank: Int
-    var song: Song
     var type: RecommendationType
-
+    
+    init(songId: String, rank: Int, type: RecommendationType) {
+        self.songId = songId
+        self.rank = rank
+        self.type = type
+    }
+    
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
-                AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
+                AsyncImage(url: song?.artwork?.url(width: 300, height: 300)) { image in
                     image
                         .resizable()
                         .frame(width: 40, height: 40)
@@ -106,14 +148,14 @@ struct ExtraRecommendationItem: View {
                 }
                 
                 VStack(spacing: 1, content: {
-                    Text(song.title)
+                    Text(song?.title ?? "")
                         .frame(maxWidth: .infinity,alignment: .leading)
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     
-                    Text(song.artistName)
+                    Text(song?.artistName ?? "")
                         .frame(maxWidth: .infinity,alignment: .leading)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(LibraryColorSet.lightGrayTitle)
@@ -136,13 +178,15 @@ struct ExtraRecommendationItem: View {
             .frame(height: 70)
             .background(ColorSet.moreDeepGray)
             
-//            Divider03()
-
+        })
+        .onAppear(perform: {
+            Task {
+                self.song = await fetchSong(songID: self.songId)
+            }
         })
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                SongBottomSheetView(song: song,
-                                    types: [.withoutBookmark])
+                OptionalSongBottomSheetView(song: $song)
             }
             .background(TransparentBackground())
         }

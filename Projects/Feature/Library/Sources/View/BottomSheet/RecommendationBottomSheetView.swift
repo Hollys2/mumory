@@ -45,7 +45,6 @@ struct RecommendationBottomSheetView: View {
                     dismiss()
                     appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: songs))
                 }
-            BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기")
       
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
             

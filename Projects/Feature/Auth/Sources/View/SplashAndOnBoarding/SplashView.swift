@@ -117,12 +117,18 @@ public struct SplashView: View {
                     case .friend(friend: let friend):
                         FriendPageView(friend: friend)
                             .navigationBarBackButtonHidden()
-                    case .friendPlaylist(playlist: let playlist):
-                        UneditablePlaylistView(playlist: playlist)
+                    case .friendPlaylist(friend: let friend, playlist: let playlist):
+                        UneditablePlaylistView(friend: friend, playlist: playlist)
                     case .friendPlaylistManage(friend: let friend, playlist: let playlist):
                         UneditablePlaylistManageView(friend: friend, playlistArray: playlist)
                     case .searchFriend:
                         SocialFriendTestView()
+                    case .mostPostedSongList(songIds: let songIds):
+                        MostPostedSongListView(songIds: songIds)
+                    case .similarTasteList(songIds: let songIds):
+                        SimilarTasteListView(songIds: songIds)
+                    case .myRecentMumorySongList:
+                        MyRecentMumoryListView()
                     }
                 }
                 .navigationDestination(for: LibraryPage.self) { page in
