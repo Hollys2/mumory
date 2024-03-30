@@ -96,7 +96,7 @@ public struct AppleMusicPopUpView: View {
                 if let lastPopUpClosedDate = UserDefaults.standard.object(forKey: "lastPopUpClosedDate") as? Date {
                     let timeSinceLastPopUpClosed = calendar.dateComponents([.second], from: lastPopUpClosedDate, to: currentDate)
                     print("FUCK: \(timeSinceLastPopUpClosed.second)")
-                    if let daysPassedSinceLastPopUpClosed = timeSinceLastPopUpClosed.second, daysPassedSinceLastPopUpClosed >= 1 {
+                    if let daysPassedSinceLastPopUpClosed = timeSinceLastPopUpClosed.second, daysPassedSinceLastPopUpClosed >= 0 {
                         return false
                     } else {
                         return true
