@@ -98,7 +98,7 @@ struct EditFavoriteGenreView: View {
                 Button {
                     saveGenre()
                 } label: {
-                    WhiteButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6)
+                    MumorySimpleButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6)
                         .padding(.bottom, 20 + appCoordinator.safeAreaInsetsBottom)
                         .padding(.horizontal, 20)
                         

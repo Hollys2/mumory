@@ -51,8 +51,8 @@ struct SignUpManageView: View {
                         
                         Text(manager.getNavigationTitle())
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                        
                             .foregroundColor(.white)
+                        
                         Spacer()
 
                         Rectangle()
@@ -119,7 +119,7 @@ struct SignUpManageView: View {
                         }
                         
                     }, label: {
-                        WhiteButton(title: manager.getButtonTitle(), isEnabled: isLoading ? false : manager.isButtonEnabled())
+                        MumorySimpleButton(title: manager.getButtonTitle(), isEnabled: isLoading ? false : manager.isButtonEnabled())
                             .padding(.leading, 20)
                             .padding(.trailing, 20)
                             .padding(.bottom, 20)

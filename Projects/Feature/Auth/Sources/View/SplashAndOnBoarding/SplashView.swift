@@ -88,7 +88,7 @@ public struct SplashView: View {
                     }
                 }
                 .navigationDestination(for: MumoryPage.self) { page in
-                    switch(page){
+                    switch(page) {
                     case .customization:
                         TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
                             .environmentObject(customizationManageViewModel)
@@ -132,6 +132,8 @@ public struct SplashView: View {
                     case .report:
                         ReportView()
                             .environmentObject(settingViewModel)
+                    case .mumoryReport(mumoryId: let mumoryId):
+                        ReportView(mumoryId: mumoryId)
                     }
                 }
                 .navigationDestination(for: LibraryPage.self) { page in

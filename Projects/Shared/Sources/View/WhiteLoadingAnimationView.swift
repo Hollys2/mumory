@@ -1,15 +1,15 @@
 //
-//  LoadingAnimationView.swift
+//  WhiteLoadingAnimationView.swift
 //  Shared
 //
-//  Created by 제이콥 on 2/27/24.
+//  Created by 제이콥 on 3/31/24.
 //  Copyright © 2024 hollys. All rights reserved.
 //
 
 import SwiftUI
 import Lottie
 
-public struct LoadingAnimationView: View {
+public struct WhiteLoadingAnimationView: View {
     @Binding var isLoading: Bool
     
     public init(isLoading: Binding<Bool>) {
@@ -19,17 +19,12 @@ public struct LoadingAnimationView: View {
     public var body: some View {
         ZStack(alignment: .center){
             
-            LottieView(animation: .named("loading", bundle: .module))
+            LottieView(animation: .named("whiteLoading", bundle: .module))
                 .looping()
                 .opacity(isLoading ? 1 : 0)
-                .frame(width: getUIScreenBounds().width * 0.16, height: getUIScreenBounds().width * 0.16)
+                .frame(width: getUIScreenBounds().width * 0.11, height: getUIScreenBounds().width * 0.11)
         }
         .ignoresSafeArea()
     }
 }
 
-
-
-//#Preview {
-//    LoadingAnimationView(isLoading: .constant(true))
-//}

@@ -220,6 +220,3 @@ struct ArtistView: View {
 
 
 
-//#Preview {
-//    ArtistView()
-//}

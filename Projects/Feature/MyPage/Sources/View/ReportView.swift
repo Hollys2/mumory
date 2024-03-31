@@ -18,7 +18,12 @@ struct ReportView: View {
     @State var content: String = ""
     @State var email: String = ""
     @State var isLoading: Bool = false
+    var mumoryId: String = ""
     init() {
+         UITextView.appearance().backgroundColor = .clear
+     }
+    
+    init(mumoryId: String) {
          UITextView.appearance().backgroundColor = .clear
      }
     var body: some View {
@@ -169,7 +174,7 @@ struct ReportView: View {
             }
             
             
-            WhiteButton(title: "보내기", isEnabled: !title.isEmpty && !content.isEmpty && !settingViewModel.email.isEmpty && !settingViewModel.nickname.isEmpty)
+            MumorySimpleButton(title: "보내기", isEnabled: !title.isEmpty && !content.isEmpty && !settingViewModel.email.isEmpty && !settingViewModel.nickname.isEmpty)
                 .padding(20)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .onTapGesture {
@@ -203,13 +208,16 @@ struct ReportView: View {
     
     private func saveReport() {
         let db = FBManager.shared.db
-        let data = [
+        var data = [
             "uId": settingViewModel.uid,
             "email": settingViewModel.email,
             "title": title,
             "content": content,
             "type": menuTitle
         ]
+        if !mumoryId.isEmpty {
+            data.merge(["mumoryId": mumoryId])
+        }
         db.collection("Report").addDocument(data: data)
         
     }

@@ -124,7 +124,7 @@ public struct CustomizationView: View {
                         }
                     }
                 }, label: {
-                    WhiteButton(title: manager.getButtonTitle(), isEnabled: manager.isButtonEnabled())
+                    MumorySimpleButton(title: manager.getButtonTitle(), isEnabled: manager.isButtonEnabled())
                         .padding(.bottom, 20)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
