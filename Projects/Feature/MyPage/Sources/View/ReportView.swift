@@ -215,6 +215,3 @@ struct ReportView: View {
     }
 }
 
-#Preview {
-    ReportView()
-}
