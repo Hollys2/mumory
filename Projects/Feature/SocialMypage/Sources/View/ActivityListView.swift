@@ -24,14 +24,16 @@ struct Activity: Hashable{
     let myNickname: String
     var content: String = ""
     let activityText: String
+    let commentId: String
     
-    init(type: String, songId: String, mumoryId: String, friendNickname: String, myNickname: String, content: String) {
+    init(type: String, songId: String, mumoryId: String, friendNickname: String, myNickname: String, content: String, commentId: String) {
         self.type = type
         self.songId = songId
         self.mumoryId = mumoryId
         self.friendNickname = friendNickname
         self.myNickname = myNickname
         self.content = content
+        self.commentId = commentId
         
         if type == "like" {
             activityText = "\(myNickname)님이 \(friendNickname)님의 뮤모리 를 공감합니다."
@@ -104,7 +106,7 @@ struct ActivityListView: View {
                             ForEach(activityList.keys.sorted(by: > ), id: \.self) { date in
                                 Section {
                                     ForEach((activityList[date]) ?? [] , id: \.self) { activity in
-                                       ActivityItem(activity: activity)
+                                        ActivityItem(activity: activity, activityList: $activityList)
                                     }
                                 } header: {
                                     Text(date)
@@ -252,11 +254,12 @@ struct ActivityListView: View {
                 guard let mumoryId = data["mumoryId"] as? String else {return}
                 let content = (data["content"] as? String) ?? ""
                 let dateString = formatter.string(from: date)
+                let commentId = data["commentId"] as? String ?? ""
                 
                 if !self.activityList.keys.contains(dateString) {
                     self.activityList[dateString] = []
                 }
-                self.activityList[dateString]?.append(Activity(type: type, songId: songId, mumoryId: mumoryId, friendNickname: friendNickname, myNickname: currentUserData.user.nickname, content: content))
+                self.activityList[dateString]?.append(Activity(type: type, songId: songId, mumoryId: mumoryId, friendNickname: friendNickname, myNickname: currentUserData.user.nickname, content: content, commentId: commentId))
             }
             isLoading.wrappedValue = false
             
@@ -366,11 +369,15 @@ struct ActivityItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
-    let activity: Activity
-    init(activity: Activity) {
-        self.activity = activity
-    }
+    @State var isPresentBottomSheet: Bool = false
     @State var song: Song?
+    @Binding var activityList: [String: [Activity]]
+    @State var isLoading: Bool = false
+    let activity: Activity
+    init(activity: Activity, activityList: Binding<[String: [Activity]]>) {
+        self.activity = activity
+        self._activityList = activityList
+    }
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -415,6 +422,10 @@ struct ActivityItem: View {
                 .scaledToFit()
                 .frame(width: 22, height: 22)
                 .padding(.leading, 10)
+                .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBottomSheet = true
+                }
         })
         .padding(.horizontal, 15)
         .frame(height: 90)
@@ -425,6 +436,12 @@ struct ActivityItem: View {
                 self.song = await fetchSong(songID: activity.songId)
             }
         }
+        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                ActivityBottomSheet(activity: activity, activityList: $activityList, isLoading: $isLoading)
+            }
+            .background(TransparentBackground())
+        })
         .onTapGesture {
             if self.activity.type == "like" || self.activity.type == "comment" || self.activity.type == "reply" {
                 Task{
@@ -433,13 +450,81 @@ struct ActivityItem: View {
                 }
             }
         }
-        
+        .onChange(of: isLoading) { newValue in
+            print(newValue)
+        }
+    }
+}
 
-
-
+struct ActivityBottomSheet: View {
+    let activity: Activity
+    let functions = FBManager.shared.functions
+    @Binding var activityList: [String: [Activity]]
+    @Binding var isLoading: Bool
+    init(activity: Activity, activityList: Binding<[String: [Activity]]>, isLoading: Binding<Bool>) {
+        self.activity = activity
+        self._activityList = activityList
+        self._isLoading = isLoading
+    }
+       
+    var body: some View {
+        if activity.type == "like" {
+            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "좋아요 취소", type: .warning)
+                .onTapGesture {
+                    isLoading = true
+                    functions.httpsCallable("like").call(["mumoryId": activity.mumoryId]) { result, error in
+                        isLoading = false
+                        guard error == nil else {return}
+                        for element in activityList {
+                            let key = element.key
+                            guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
+                                && $0.mumoryId == self.activity.mumoryId
+                                && $0.songId == self.activity.songId}) else {continue}
+                            activityList[key]?.remove(at: index)
+                        }
+                    }
+                  
+                }
+            
+        }else if activity.type == "comment" {
+            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
+                .onTapGesture {
+                    Task {
+                        self.isLoading = true
+                        await deleteComment(commentId: self.activity.commentId, mumoryId: self.activity.mumoryId)
+                        self.isLoading = false
+                    }
+                  
+                }
+        } else if activity.type == "reply" {
+            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
+                .onTapGesture {
+                    self.isLoading = true
+                    let db = FBManager.shared.db
+                    db.collection("Mumory").document(self.activity.mumoryId).collection("Comment").document(self.activity.commentId).delete()
+                    for element in activityList {
+                        let key = element.key
+                        guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
+                            && $0.commentId == self.activity.commentId}) else {continue}
+                        activityList[key]?.remove(at: index)
+                    }
+                    self.isLoading = false
+                }
+        }
     }
     
-
+    
+    private func deleteComment(commentId: String, mumoryId: String) async {
+        let db = FBManager.shared.db
+        guard let deleteResult = try? await db.collection("Mumory").document(mumoryId).collection("Comment").document(commentId).delete() else {return}
+        let query = db.collection("Mumory").document(mumoryId).collection("Comment")
+            .whereField("parentId", isEqualTo: commentId)
+        
+        guard let snapshots = try? await query.getDocuments() else {return}
+        snapshots.documents.forEach { doc in
+            doc.reference.delete()
+        }
+    }
 }
 
 struct ActivitySkeletonView: View {

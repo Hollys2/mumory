@@ -55,7 +55,10 @@ struct PlaylistBottomSheetView: View {
                 }
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트 삭제", type: .warning)
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
-            
+                .onTapGesture {
+                    dismiss()
+                    appCoordinator.rootPath.append(MumoryPage.report)
+                }
         })
         .padding(.bottom, 15)
         .background(ColorSet.background)

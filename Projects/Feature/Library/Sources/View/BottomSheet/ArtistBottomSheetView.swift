@@ -67,6 +67,10 @@ struct ArtistBottomSheetView: View {
                     dismiss()
                 }
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                .onTapGesture {
+                    dismiss()
+                    appCoordinator.rootPath.append(MumoryPage.report)
+                }
            
         })
         .background(ColorSet.background)
