@@ -12,6 +12,7 @@ import Shared
 struct MyFriendRequestListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @State var status: FriendRequestStatus = .normal
     let db = FBManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
@@ -55,12 +56,19 @@ struct MyFriendRequestListView: View {
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
                             ForEach(currentUserData.friendRequests, id: \.self){ friend in
-                                MyRequestFriendItem(friend: friend)
+                                MyRequestFriendItem(friend: friend, status: $status)
                             }
                         })
                     }
                     .scrollIndicators(.hidden)
                 }
+            }
+            
+            
+            if status == .friendProcessLoading || status == .loading {
+                LoadingAnimationView(isLoading: .constant(true))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, getUIScreenBounds().height * 0.5)
             }
         }
 
@@ -72,11 +80,14 @@ struct MyFriendRequestListView: View {
 public struct MyRequestFriendItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentDeletePopup: Bool = false
-    var friend: MumoriUser
-    public init(friend: MumoriUser) {
-        self.friend = friend
-    }
+    @Binding var status: FriendRequestStatus
+    let friend: MumoriUser
     let Firebase = FBManager.shared
+
+    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
+        self.friend = friend
+        self._status = status
+    }
     
     public var body: some View {
         HStack(spacing: 13, content: {
@@ -129,10 +140,13 @@ public struct MyRequestFriendItem: View {
         .frame(height: 84)
         .fullScreenCover(isPresented: $isPresentDeletePopup) {
             TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
+                status = .friendProcessLoading
                 Task {
                     guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
+                        status = .normal
                         return
                     }
+                    status = .normal
                 }
             }
             .background(TransparentBackground())
@@ -153,14 +167,16 @@ public func deleteFriendRequest(uId: String, friendUId: String) async -> Bool?{
     guard let result = try? await deleteMyQuery.getDocuments() else {
         return nil
     }
-    guard let deleteResult = try? await result.documents.first?.reference.delete() else {
-        return nil
+    result.documents.forEach { doc in
+        doc.reference.delete()
     }
+
     guard let resultFriend = try? await deleteFriendQuery.getDocuments() else {
         return nil
     }
-    guard let deleteResultFriend = try? await resultFriend.documents.first?.reference.delete() else {
-        return nil
+    resultFriend.documents.forEach { doc in
+        doc.reference.delete()
     }
+    
     return true
 }

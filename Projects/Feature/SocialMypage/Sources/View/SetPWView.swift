@@ -92,7 +92,7 @@ struct SetPWView: View {
                 
                 
                 //로그인 버튼(재사용)
-                WhiteButton(title: "비밀번호 찾기", isEnabled: true)
+                MumorySimpleButton(title: "비밀번호 찾기", isEnabled: true)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 30)

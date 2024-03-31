@@ -14,11 +14,14 @@ import Shared
 //아이템: 친구 추가, 요청/수락, 요청취소, 차단해제
 //바텀시트,
 public enum FriendRequestStatus {
+    case normal
     case loading
     case valid
     case alreadyFriend
     case alreadyRequest
     case alreadyRecieve
+    case noResult
+    case friendProcessLoading
 }
 
 struct SocialFriendTestView: View {
@@ -33,10 +36,7 @@ struct SocialFriendTestView: View {
     
     @State private var friendSearchResult: MumoriUser?
     @State private var isPresentFriendBottomSheet: Bool = false
-    @State private var friendRequestStatus: FriendRequestStatus = .valid
-    @State private var isLoading: Bool = false
-    @State private var noResult: Bool = false
-    @State private var tapSearch: Bool = false
+    @State private var status: FriendRequestStatus = .normal
     //검색 결과가 있는지
     //지금 검색을 한 상태인건지
     //초반에 나오는 문구....
@@ -115,16 +115,17 @@ struct SocialFriendTestView: View {
                 
                 Divider05()
                 if itemSelection == 0 {
-                    //친구 추가 - selection: 0
+                    //친구 추가 페이지 - selection: 0
                     SearchFriendTextField(text: $searchText, prompt: "ID검색")
                         .submitLabel(.search)
                         .padding(.top, 22)
                         .onSubmit {
-                            tapSearch = true
-                            searchFriend(id: searchText, isLoading: $isLoading, noResult: $noResult)
+                            status = .loading
+                            friendSearchResult = nil
+                            searchFriend(id: searchText)
                         }
                         .onChange(of: searchText) { newValue in
-                            tapSearch = false
+                            status = .normal
                             if searchText.isEmpty {
                                 self.friendSearchResult = nil
                             }
@@ -132,7 +133,7 @@ struct SocialFriendTestView: View {
                     
                     
                     
-                    if searchText.isEmpty {
+                    if status == .normal {
                         Text("특별한 순간과 음악 취향을 공유하고\n싶은 친구들을 초대해보세요")
                             .foregroundStyle(ColorSet.charSubGray)
                             .frame(maxWidth: .infinity, alignment: .center)
@@ -140,24 +141,32 @@ struct SocialFriendTestView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             .padding(.top, getUIScreenBounds().height * 0.2)
                         
-                    } else if let friend = self.friendSearchResult {
+                    } else if status == .noResult {
+                        Text("검색 결과가 없습니다")
+                            .foregroundStyle(ColorSet.subGray)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .multilineTextAlignment(.center)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .padding(.top, getUIScreenBounds().height * 0.2)
+                    }else if let friend = self.friendSearchResult {
                         VStack(spacing: 0) {
                             switch currentUserData.getFriendStatus(friend: friend) {
                             case .friend:
-                                AlreadFriendItem(friend: friend)
+                                AlreadFriendItem(friend: friend, status: $status)
                             case .notFriend:
-                                FriendAddItem(friend: friend)
+                                FriendAddItem(friend: friend, status: $status)
                             case .alreadySendRequest:
-                                MyRequestFriendItem(friend: friend)
+                                MyRequestFriendItem(friend: friend, status: $status)
                             case .alreadyRecieveRequest:
-                                RecievedRequestItem(friend: friend)
+                                RecievedRequestItem(friend: friend, status: $status)
                             default: EmptyView()
                             }
                         }
                         .padding(.top, 15)
                     }
+                    
                 }else {
-                    //친구 요청 - selection: 1
+                    //친구 요청 페이지 - selection: 1
                     if currentUserData.recievedRequests.isEmpty {
                         VStack(spacing: 20) {
                             Text("받은 친구 요청 내력이 없어요")
@@ -174,7 +183,7 @@ struct SocialFriendTestView: View {
                         ScrollView {
                             LazyVStack(spacing: 0, content: {
                                 ForEach(currentUserData.recievedRequests, id: \.self) { friend in
-                                    RecievedRequestItem(friend: friend)
+                                    RecievedRequestItem(friend: friend, status: $status)
                                 }
                             })
                         }
@@ -190,8 +199,13 @@ struct SocialFriendTestView: View {
             })
             .padding(.top, appCoordinator.isAddFriendViewShown ? appCoordinator.safeAreaInsetsTop : 0)       
             
-            LoadingAnimationView(isLoading: $isLoading)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            
+            if status == .friendProcessLoading || status == .loading {
+                LoadingAnimationView(isLoading: .constant(true))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, getUIScreenBounds().height * 0.5)
+            }
+   
 
         }
         .navigationBarBackButtonHidden()
@@ -201,50 +215,48 @@ struct SocialFriendTestView: View {
             }
             .background(TransparentBackground())
         })
+        .disabled(status == .friendProcessLoading)
 
     }
     
-    private func searchFriend(id: String, isLoading: Binding<Bool>, noResult: Binding<Bool>){
-        guard id != currentUserData.user.id else {return}
-        self.friendSearchResult = nil
+    private func searchFriend(id: String){
+        guard id != currentUserData.user.id else {
+            status = .noResult
+            return
+        }
         Task {
             let query = db.collection("User")
                 .whereField("id", isEqualTo: id)
             
             guard let snapshot = try? await query.getDocuments() else {
-                noResult.wrappedValue = false
-                isLoading.wrappedValue = false
+                status = .noResult
                 return
             }
             guard let doc = snapshot.documents.first else {
-                noResult.wrappedValue = false
-                isLoading.wrappedValue = false
+                status = .noResult
                 return
             }
             let blockFriends = (doc.data()["blockFriends"] as? [String]) ?? []
             if blockFriends.contains(currentUserData.uId){
-                noResult.wrappedValue = false
-                isLoading.wrappedValue = false
+                status = .noResult
                 return
             }
             guard let friendUID = doc.data()["uid"] as? String else {
-                noResult.wrappedValue = false
-                isLoading.wrappedValue = false
+                status = .noResult
                 return
             }
             
             if currentUserData.friends.contains(where: {$0.uId == friendUID}) {
-                friendRequestStatus = .alreadyFriend
+                status = .alreadyFriend
             }else if currentUserData.recievedRequests.contains(where: {$0.uId == friendUID}) {
-                friendRequestStatus = .alreadyRecieve
+                status = .alreadyRecieve
             }else if currentUserData.friendRequests.contains(where: {$0.uId == friendUID}) {
-                friendRequestStatus = .alreadyRequest
+                status = .alreadyRequest
             }else {
-                friendRequestStatus = .valid
+                status = .valid
             }
             
             self.friendSearchResult = await MumoriUser(uId: friendUID)
-            isLoading.wrappedValue = false
         }
     }
 }
@@ -314,8 +326,10 @@ struct SearchFriendTextField: View {
 
 struct AlreadFriendItem: View {
     let friend: MumoriUser
-    init(friend: MumoriUser) {
+    @Binding var status: FriendRequestStatus
+    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
         self.friend = friend
+        self._status = status
     }
     
     var body: some View {
@@ -360,8 +374,10 @@ struct AlreadFriendItem: View {
 
 struct FriendAddItem: View {
     let friend: MumoriUser
-    init(friend: MumoriUser) {
+    @Binding var status: FriendRequestStatus
+    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
         self.friend = friend
+        self._status = status
     }
     let Firebase = FBManager.shared
     @State var isPresentRequestPopup: Bool = false
@@ -419,29 +435,34 @@ struct FriendAddItem: View {
         .frame(height: 84)
         .fullScreenCover(isPresented: $isPresentRequestPopup) {
             TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
-                request()
+                status = .friendProcessLoading
+                let functions = Firebase.functions
+                Task {
+                    guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
+                        status = .valid
+                        print("network error")
+                        return
+                    }
+                    status = .alreadyRequest
+                }
             }
             .background(TransparentBackground())
         }
     }
     
     private func request(){
-        let functions = Firebase.functions
-        Task {
-            guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
-                print("network error")
-                return
-            }
-        }
+     
     }
 }
 
 struct RecievedRequestItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
-    var friend: MumoriUser
+    @Binding var status: FriendRequestStatus
     var uId: String = ""
-    init(friend: MumoriUser) {
+    let friend: MumoriUser
+    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
         self.friend = friend
+        self._status = status
     }
     @State var isPresentDeletePopup: Bool = false
     @State var isPresentAcceptPopup: Bool = false
@@ -526,6 +547,7 @@ struct RecievedRequestItem: View {
     }
     
     private func deleteRequest() {
+        status = .friendProcessLoading
         let query = db.collection("User").document(currentUserData.uId).collection("Friend")
             .whereField("uId", isEqualTo: friend.uId)
             .whereField("type", isEqualTo: "recieve")
@@ -537,12 +559,13 @@ struct RecievedRequestItem: View {
                 return
             }
             currentUserData.recievedRequests.removeAll(where: {$0.uId == friend.uId})
+            status = .normal
         }
     }
     
     private func acceptRequest(){
+        status = .friendProcessLoading
         let functions = FBManager.shared.functions
-
         Task {
             guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
                 print("network error")
@@ -550,6 +573,7 @@ struct RecievedRequestItem: View {
             }
             currentUserData.recievedRequests.removeAll(where: {$0.uId == friend.uId})
             currentUserData.friends.append(friend)
+            status = .normal
         }
     }
 }

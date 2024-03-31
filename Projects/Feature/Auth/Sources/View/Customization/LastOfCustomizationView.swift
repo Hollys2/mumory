@@ -258,7 +258,7 @@ struct LastOfCustomizationView: View {
             
             VStack{
                 Spacer()
-                WhiteButton(title: "시작하기", isEnabled: true)
+                MumorySimpleButton(title: "시작하기", isEnabled: true)
                     .padding(.bottom, 20)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)

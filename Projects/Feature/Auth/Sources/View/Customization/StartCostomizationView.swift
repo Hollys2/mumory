@@ -54,7 +54,7 @@ struct StartCostomizationView: View {
                         .environmentObject(manager)
                 } label: {
                     //enable을 true로 설정하면 배경이 보라색으로 바뀜
-                    WhiteButton(title: "시작하기", isEnabled: true)
+                    MumorySimpleButton(title: "시작하기", isEnabled: true)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .padding(.bottom, 20)
