@@ -104,8 +104,29 @@ public struct AppleMusicPopUpView: View {
     }
 }
 
+public struct MonthlyStatGenrePopUpView: View {
+    
+    @State private var isShown: Bool = true
+    
+    public init() {}
+    
+    public var body: some View {
+        Image(uiImage: SharedAsset.monthlyStatPopup.image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 242, height: 28)
+            .opacity(self.isShown ? 1: 0)
+            .animation(.easeInOut(duration: 1), value: self.isShown)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 8) {
+                    self.isShown = false
+                }
+            }
+    }
+}
+
 //struct HomeView_Previews: PreviewProvider {
 //    static var previews: some View {
-
+//        MonthlyStatPopUpView()
 //    }
 //}
