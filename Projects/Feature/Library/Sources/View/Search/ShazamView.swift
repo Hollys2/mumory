@@ -308,7 +308,7 @@ struct ShazamView: View {
         })
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                SongBottomSheetView(song: song!)//흠흠흠흠흠.... state변수임에도 바뀐 값 인식 못 하는듯... 어카지???????????
+                OptionalSongBottomSheetView(song: $song)
             }
             .background(TransparentBackground())
         }

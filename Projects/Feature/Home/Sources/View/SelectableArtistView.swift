@@ -20,8 +20,9 @@ struct SelectableArtistView: View {
     @State private var songs: [Song] = []
     @State private var haveToLoadNextPage: Bool = false
     @State private var requestIndex: Int = 0
+    @State private var isLoading: Bool = false
+
     let artist: Artist
-    
     init(artist: Artist) {
         self.artist = artist
     }
@@ -45,9 +46,6 @@ struct SelectableArtistView: View {
             .overlay {
                 ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
             }
-
-
-        
             
             ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize) {
                 LazyVStack(spacing: 0, content: {
@@ -67,14 +65,16 @@ struct SelectableArtistView: View {
                             .padding(.horizontal, 20)
                         
                         //곡 개수와 전체 재생 버튼
-                        Text(songs.count > 0 ? "\(songs.count)곡" : "")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                            .foregroundStyle(ColorSet.subGray)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 20)
-                            .padding(.leading, 1)
-                            .padding(.top, 39)
-                            .padding(.bottom, 18)
+                        HStack(alignment: .bottom, spacing: 0, content: {
+                            Text(songs.count > 0 ? "\(songs.count)곡" : "")
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                                .foregroundStyle(ColorSet.subGray)
+                            Spacer()
+                        })
+                        .padding(.horizontal, 20)
+                        .padding(.leading, 1)
+                        .padding(.top, 39)
+                        .padding(.bottom, 18)
                         
                         //구분선
                         Divider05()
@@ -85,6 +85,10 @@ struct SelectableArtistView: View {
                                 .onTapGesture {
                                     playerViewModel.setPreviewPlayer(tappedSong: song)
                                 }
+                        }
+                        
+                        if isLoading {
+                            SongListSkeletonView()
                         }
                         
                         Rectangle()
@@ -98,8 +102,7 @@ struct SelectableArtistView: View {
 
             }
             .scrollIndicators(.hidden)
-            .ignoresSafeArea()
-
+            
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
                 SharedAsset.backGradient.swiftUIImage
@@ -118,45 +121,81 @@ struct SelectableArtistView: View {
                     .padding(.trailing, 20)
                 
             })
-            .frame(height: 50)
-            .padding(.top, currentUserData.topInset)
-            
-            PreviewMiniPlayer()
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
-                .offset(y: playerViewModel.isShownPreview ? 0 : 120)
-                .animation(.spring(), value: playerViewModel.isShownPreview)
-            
+            .frame(height: 65)
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            requestArtistSongs(offset: 0)
+            Task {
+                self.isLoading = true
+                self.songs = await requestArtistSongs()
+                self.isLoading = false
+            }
         })
     }
     
-    private func requestArtistSongs(offset: Int) {
-        print("request")
-        let artistName = artist.name
-        var request = MusicCatalogSearchRequest(term: artist.name, types: [Song.self])
-        request.includeTopResults = true
-        request.limit = 20
-        request.offset = offset * 20
-        Task{
-            do {
-                let response = try await request.response()
-                if response.songs.count > 0 {
-                    requestArtistSongs(offset: offset + 1)
-                }
+    private func requestArtistSongs() async -> [Song] {
+        return await withTaskGroup(of: [Song].self) { taskGroup -> [Song] in
+            let albums = await withTaskGroup(of: Album?.self) { taskGroup -> [Album] in
+                guard let detailedArtist = await fetchDetailArtist(artistID: artist.id.rawValue) else {return []}
+                guard let albums = detailedArtist.albums else {return []}
+                var returnValue: [Album] = []
                 
-                DispatchQueue.main.async {
-                    songs += response.songs.filter({$0.artistName == artistName})
+                if albums.count > 1 {
+                    for album in albums {
+                        print("aa")
+                        taskGroup.addTask {
+                            print("bb")
+                            return await fetchDetailAlbum(albumID: album.id.rawValue)
+                        }
+                    }
+                    
+                    for await value in taskGroup {
+                        print("cc")
+                        guard let album = value else {print("no album");return []}
+                        print("album title: \(album.title)")
+                        returnValue.append(album)
+                    }
+                }else {
+                    guard let album = albums.first else {return []}
+                    return [album]
                 }
-                
-            }catch(let error){
-                print("request error: \(error.localizedDescription)")
+                return returnValue
             }
+            print("5555")
+            
+            var totalSongs: [Song] = []
+            
+            if albums.count > 1 {
+                albums.forEach { album in
+                    taskGroup.addTask {
+                        guard let tracks = album.tracks else {return []}
+                        var songs: [Song] = []
+                        for track in tracks {
+                            guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
+                            songs.append(song)
+                        }
+                        return songs
+                    }
+                }
+                
+                for await songs in taskGroup {
+                    totalSongs.append(contentsOf: songs)
+                }
+                
+            }else {
+                guard let album = albums.first else {print("no album");return []}
+                guard let tracks = album.tracks else {print("no track");return []}
+                for track in tracks {
+                    guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
+                    totalSongs.append(song)
+                }
+            }
+            
+ 
+            
+            return totalSongs
         }
-        
     }
 }
 

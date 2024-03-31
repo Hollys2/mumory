@@ -72,7 +72,7 @@ struct EmailLoginView: View {
                     .frame(height: isLoginError ? nil : 0)
                 
                 //로그인 버튼(재사용)
-                WhiteButton(title: "로그인 하기", isEnabled: email.count > 0 && password.count > 0)
+                MumorySimpleButton(title: "로그인 하기", isEnabled: email.count > 0 && password.count > 0)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 20)

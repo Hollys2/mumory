@@ -39,7 +39,7 @@ struct OnBoardingManageView: View {
             
             VStack{
                 Spacer()
-                WhiteButton(title: "시작하기", isEnabled: true)
+                MumorySimpleButton(title: "시작하기", isEnabled: true)
                     .padding(20)
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.login)

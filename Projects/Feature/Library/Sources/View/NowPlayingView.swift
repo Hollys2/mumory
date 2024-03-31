@@ -250,6 +250,7 @@ struct PlayingView: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
+                        guard let song = playerViewModel.currentSong else {return}
                         UIView.setAnimationsEnabled(false)
                         isPresentSongBottmSheet = true
                     }

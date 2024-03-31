@@ -105,7 +105,7 @@ struct TermsOfServiceForSocialView: View {
                         isTOSDone = true
                         appCoordinator.rootPath.append(MumoryPage.startCustomization)
                     }, label: {
-                        WhiteButton(title: "회원가입", isEnabled: isCheckedFirstItem && isCheckedSecondItem)
+                        MumorySimpleButton(title: "회원가입", isEnabled: isCheckedFirstItem && isCheckedSecondItem)
                             .padding(.bottom, 20)
                             .padding(.leading, 20)
                             .padding(.trailing, 20)

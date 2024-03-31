@@ -71,7 +71,7 @@ struct EmailLoginForWithdrawView: View {
                     .frame(height: isLoginError ? nil : 0)
                 
                 //로그인 버튼(재사용)
-                WhiteButton(title: "로그인", isEnabled: true)
+                MumorySimpleButton(title: "로그인", isEnabled: true)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 20)
