@@ -33,7 +33,6 @@ public struct MonthlyStatView: View {
                 ScrollView(showsIndicators: false) {
                     
                     ContentView(date: self.$selectedDate)
-                        .frame(height: 1000)
                 }
                 .frame(width: getUIScreenBounds().width - 40)
                 
@@ -64,7 +63,7 @@ public struct MonthlyStatView: View {
         .background(SharedAsset.backgroundColor.swiftUIColor)
         .fullScreenCover(isPresented: $isDatePickerShown, content: {
             BottomSheetWrapper(isPresent: $isDatePickerShown) {
-                MyMumoryDatePicker(selectedDate: self.$selectedDate)
+                MonthlyStatDatePicker(selectedDate: self.$selectedDate)
                     .frame(height: 309)
             }
             .background(TransparentBackground())
@@ -111,17 +110,29 @@ struct ContentView: View {
                         .foregroundColor(.white)
                     
                     Group {
-                        Text("-")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                            .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                        
-                        + Text("  입니다")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                            .foregroundColor(.white)
+
+                        HStack(spacing: 0) {
+                            
+                            Text("-")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
+                                .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                            
+                            + Text("  입니다")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                        }
+                        .overlay(
+                            MonthlyStatGenrePopUpView()
+                                .offset(x: 6, y: 3)
+                                .zIndex(3)
+                            , alignment: .trailing
+                        )
                     }
                 }
-                .padding(.horizontal, 20)
                 .padding(.top, 28)
+                .padding(.horizontal, 20)
                 
                 SharedAsset.infoIconMonthlyStat.swiftUIImage
                     .resizable()
@@ -227,8 +238,6 @@ struct ContentView: View {
                             .padding(.horizontal, 20)
                         }
                         .onAppear {
-//                            proxy.scrollTo(0)
-                            
                             var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
                             let calendar = Calendar.current
                             let year = calendar.component(.year, from: Date())
@@ -239,11 +248,12 @@ struct ContentView: View {
                             let month = calendar.component(.month, from: self.date)
                             self.days = daysInMonth[month - 1]
                             self.mumoryMonthly = mumoryDataViewModel.filteredMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+//                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys
                             
                             for mumory in self.mumoryMonthly {
-                //                for day in (1...self.days) {
-                //                    print("day: \(d)")
-                //                }
+                                //                for day in (1...self.days) {
+                                //                    print("day: \(d)")
+                                //                }
                                 let day = Calendar.current.component(.day, from: mumory.date)
                                 
                                 // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
@@ -258,15 +268,55 @@ struct ContentView: View {
                             }
                             
                             for day in 1...self.days {
-                                 if self.mumoryDaily[day] == nil {
-                                     self.mumoryDaily[day] = []
-                                 }
-                             }
+                                if self.mumoryDaily[day] == nil {
+                                    self.mumoryDaily[day] = []
+                                }
+                            }
                             
-                            print("mumoryDaily: \(mumoryDaily)")
+//                            print("mumoryDaily: \(mumoryDaily)")
                             
                             proxy.scrollTo(0, anchor: .trailing)
                         }
+                        .onChange(of: self.date, perform: { _ in
+                            //                            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+                            //                            let calendar = Calendar.current
+                            //                            let year = calendar.component(.year, from: Date())
+                            //                            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+                            //                            if isLeapYear {
+                            //                                daysInMonth[1] = 29
+                            //                            }
+                            //                            let month = calendar.component(.month, from: self.date)
+                            //                            self.days = daysInMonth[month - 1]
+                            //                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys
+
+                            for mumory in self.mumoryMonthly {
+                                //                for day in (1...self.days) {
+                                //                    print("day: \(d)")
+                                //                }
+                                let day = Calendar.current.component(.day, from: mumory.date)
+
+                                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
+                                if var mumories = self.mumoryDaily[day] {
+                                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
+                                    mumories.append(mumory)
+                                    self.mumoryDaily[day] = mumories
+                                } else {
+                                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
+                                    self.mumoryDaily[day] = [mumory]
+                                }
+                            }
+
+                            for day in 1...self.days {
+                                if self.mumoryDaily[day] == nil {
+                                    self.mumoryDaily[day] = []
+                                }
+                            }
+
+                            print("mumoryDaily: \(mumoryDaily)")
+
+                            proxy.scrollTo(0, anchor: .trailing)
+                        })
                         .padding(.top, 25)
                     }
                     
@@ -325,7 +375,6 @@ struct ContentView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 15)
-                .padding(.leading, 20)
             
             HStack(spacing: 10) {
                 let sortedLocationsArray = filteredLocations.sorted(by: { $0.key < $1.key })
@@ -377,14 +426,12 @@ struct ContentView: View {
                 Spacer(minLength: 0)
             }
             .padding(.top, 15)
-            .padding(.horizontal, 20)
             
             Text("음악 활동")
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 30)
-                .padding(.leading, 20)
             
             HStack(spacing: 10) {
                 
@@ -412,10 +459,10 @@ struct ContentView: View {
                 }
             }
             .padding(.top, 15)
-            .padding(.horizontal, 20)
             
             Spacer()
         }
+        .frame(width: getUIScreenBounds().width - 40)
         .padding(.top, 65)
         .onAppear {
             for (region, boundary) in MapConstant.boundaries {
