@@ -129,6 +129,9 @@ public struct SplashView: View {
                         SimilarTasteListView(songs: songs)
                     case .myRecentMumorySongList:
                         MyRecentMumoryListView()
+                    case .report:
+                        ReportView()
+                            .environmentObject(settingViewModel)
                     }
                 }
                 .navigationDestination(for: LibraryPage.self) { page in

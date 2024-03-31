@@ -151,6 +151,10 @@ struct SongBottomSheetView: View {
                             snackBarViewModel.setSnackBar(type: .copy, status: .success)
                         }
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                        .onTapGesture {
+                            dismiss()
+                            appCoordinator.rootPath.append(MumoryPage.report)
+                        }
                 }
                 
             })
@@ -272,6 +276,10 @@ struct OptionalSongBottomSheetView: View {
                             snackBarViewModel.setSnackBar(type: .copy, status: .success)
                         }
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                        .onTapGesture {
+                            dismiss()
+                            appCoordinator.rootPath.append(MumoryPage.report)
+                        }
                 }else {
                     if !types.contains(.withoutArtist) {
                         BottomSheetItem(image: SharedAsset.artist.swiftUIImage, title: "아티스트 노래 목록 보기")
@@ -338,6 +346,10 @@ struct OptionalSongBottomSheetView: View {
                             snackBarViewModel.setSnackBar(type: .copy, status: .success)
                         }
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                        .onTapGesture {
+                            dismiss()
+                            appCoordinator.rootPath.append(MumoryPage.report)
+                        }
                 }
                 
             })

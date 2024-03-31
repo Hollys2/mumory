@@ -106,9 +106,6 @@ struct SaveToPlaylistView: View {
             getUserPlaylist()
             playerViewModel.setPlayerVisibility(isShown: false)
         })
-        .onDisappear {
-            playerViewModel.setPlayerVisibility(isShown: true)
-        }
     }
     
     private func saveSongToPlaylist(to: MusicPlaylist)  {

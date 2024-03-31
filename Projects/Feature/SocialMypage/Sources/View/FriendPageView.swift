@@ -108,29 +108,6 @@ struct KnownFriendPageView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
 
-//                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: self.mumorys) { mumory in
-//
-//                        MapAnnotation(coordinate: mumory.locationModel.coordinate) {
-//                            ZStack(alignment: .topLeading) {
-//                                SharedAsset.musicPin.swiftUIImage
-//                                    .resizable()
-//                                    .frame(width: 74, height: 81)
-//
-//                                AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
-//                                    switch phase {
-//                                    case .success(let image):
-//                                        image
-//                                            .resizable()
-//                                    default:
-//                                        Color.clear
-//                                    }
-//                                }
-//                                .frame(width: 60.65238, height: 60.65238)
-//                                .cornerRadius(12)
-//                                .offset(x: 6.74, y: 6.74)
-//                            }
-//                        }
-//                    }
                     FriendMapViewRepresentable(friendMumorys: self.mumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
@@ -569,19 +546,17 @@ struct FriendPlaylistView: View {
                                 }
                         }
                         
-//                        if isLoading || playlists.isEmpty{
-//                            ForEach(0...10, id: \.self) { index in
-//                                PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
-//                            }
-//                            
-//                        }else if playlists.isEmpty {
-//                      
-//                            Text("플레이리스트가 없습니다")
-//                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-//                                .frame(maxWidth: .infinity, alignment: .center)
-//                                .foregroundColor(ColorSet.subGray)
-//                            
-//                        }
+                        if isLoading {
+                            ForEach(0...10, id: \.self) { index in
+                                PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
+                            }
+                        }else if playlists.isEmpty {
+                            Text("플레이리스트가 없습니다")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .foregroundColor(ColorSet.subGray)
+                        }
+                        
                     })
                     .padding(.horizontal, 20)
                 }
@@ -937,9 +912,7 @@ struct FriendMumoryView: View {
     }
     var body: some View {
         VStack(spacing: 0, content: {
-            
             HStack(spacing: 0, content: {
-                
                 Text("\(friend.nickname) 뮤모리")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundStyle(Color.white)
@@ -964,7 +937,7 @@ struct FriendMumoryView: View {
             
             if isLoading {
                 MumorySkeletonView()
-            }else {
+            } else {
                 if mumorys.isEmpty {
                     Text("뮤모리 기록이 없습니다")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -972,7 +945,6 @@ struct FriendMumoryView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .frame(height: getUIScreenBounds().width * 0.43)
                         .padding(.bottom, 40)
-
                 } else {
                     ScrollView(.horizontal) {
                         HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {

@@ -20,9 +20,12 @@ public enum FriendRequestStatus {
     case alreadyRequest
     case alreadyRecieve
 }
-struct SocialFriendTestView: View {
 
-    
+struct SocialFriendTestView: View {
+    enum FriendSearchStatus {
+        case noResult
+        
+    }
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State private var itemSelection = 0
@@ -32,6 +35,11 @@ struct SocialFriendTestView: View {
     @State private var isPresentFriendBottomSheet: Bool = false
     @State private var friendRequestStatus: FriendRequestStatus = .valid
     @State private var isLoading: Bool = false
+    @State private var noResult: Bool = false
+    @State private var tapSearch: Bool = false
+    //검색 결과가 있는지
+    //지금 검색을 한 상태인건지
+    //초반에 나오는 문구....
     
     let db = FBManager.shared.db
     var body: some View {
@@ -104,72 +112,65 @@ struct SocialFriendTestView: View {
                 .padding(.leading, 20)
                 .padding(.bottom, 31)
                 .padding(.top, 20)
-
+                
                 Divider05()
-                ScrollView {
-                    if itemSelection == 0 {
-                        //친구 추가 - selection: 0
-                        SearchFriendTextField(text: $searchText, prompt: "ID검색")
-                            .submitLabel(.search)
-                            .padding(.top, 22)
-                            .onSubmit {
-                                isLoading = true
-                                searchFriend(id: searchText)
-                            }
-                            .onChange(of: searchText) { newValue in
-                                if searchText.isEmpty {
-                                    self.friendSearchResult = nil
-                                }
-                            }
-                        
-                        if searchText.isEmpty {
-                            Text("특별한 순간과 음악 취향을 공유하고\n싶은 친구들을 초대해보세요")
-                                .foregroundStyle(ColorSet.charSubGray)
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .multilineTextAlignment(.center)
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                .padding(.top, getUIScreenBounds().height * 0.2)
-                        } else if let friend = self.friendSearchResult {
-                            VStack(spacing: 0) {
-                                
-                                switch currentUserData.getFriendStatus(friend: friend) {
-                                case .friend:
-                                    AlreadFriendItem(friend: friend)
-                                case .notFriend:
-                                    FriendAddItem(friend: friend)
-                                case .alreadySendRequest:
-                                    MyRequestFriendItem(friend: friend)
-                                case .alreadyRecieveRequest:
-                                    RecievedRequestItem(friend: friend)
-                                default: EmptyView()
-                                }
-                     
-                            }
-                            .padding(.top, 15)
+                if itemSelection == 0 {
+                    //친구 추가 - selection: 0
+                    SearchFriendTextField(text: $searchText, prompt: "ID검색")
+                        .submitLabel(.search)
+                        .padding(.top, 22)
+                        .onSubmit {
+                            tapSearch = true
+                            searchFriend(id: searchText, isLoading: $isLoading, noResult: $noResult)
                         }
-//                        else {
-//                            Text("검색 결과가 없습니다")
-//                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-//                                .foregroundStyle(ColorSet.subGray)
-//                                .frame(maxWidth: .infinity, alignment: .center)
-//                                .padding(.top, getUIScreenBounds().height * 0.2)
-//                        }
-                        
-                    }else {
-                        //친구 요청 - selection: 1
-                        if currentUserData.recievedRequests.isEmpty {
-                            VStack(spacing: 20) {
-                                Text("받은 친구 요청 내력이 없어요")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                                    .foregroundStyle(Color.white)
-                                
-                                Text("친구 요청을 받으면 여기에 표시됩니다.")
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                    .foregroundStyle(ColorSet.subGray)
+                        .onChange(of: searchText) { newValue in
+                            tapSearch = false
+                            if searchText.isEmpty {
+                                self.friendSearchResult = nil
                             }
+                        }
+                    
+                    
+                    
+                    if searchText.isEmpty {
+                        Text("특별한 순간과 음악 취향을 공유하고\n싶은 친구들을 초대해보세요")
+                            .foregroundStyle(ColorSet.charSubGray)
                             .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, getUIScreenBounds().height * 0.25)
+                            .multilineTextAlignment(.center)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .padding(.top, getUIScreenBounds().height * 0.2)
+                        
+                    } else if let friend = self.friendSearchResult {
+                        VStack(spacing: 0) {
+                            switch currentUserData.getFriendStatus(friend: friend) {
+                            case .friend:
+                                AlreadFriendItem(friend: friend)
+                            case .notFriend:
+                                FriendAddItem(friend: friend)
+                            case .alreadySendRequest:
+                                MyRequestFriendItem(friend: friend)
+                            case .alreadyRecieveRequest:
+                                RecievedRequestItem(friend: friend)
+                            default: EmptyView()
+                            }
                         }
+                        .padding(.top, 15)
+                    }
+                }else {
+                    //친구 요청 - selection: 1
+                    if currentUserData.recievedRequests.isEmpty {
+                        VStack(spacing: 20) {
+                            Text("받은 친구 요청 내력이 없어요")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                .foregroundStyle(Color.white)
+                            
+                            Text("친구 요청을 받으면 여기에 표시됩니다.")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                .foregroundStyle(ColorSet.subGray)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, getUIScreenBounds().height * 0.25)
+                    }else {
                         ScrollView {
                             LazyVStack(spacing: 0, content: {
                                 ForEach(currentUserData.recievedRequests, id: \.self) { friend in
@@ -181,10 +182,9 @@ struct SocialFriendTestView: View {
                         .onAppear {
                             currentUserData.recievedNewFriends = false
                         }
-                  
                     }
                 }
-          
+                
                 
                 
             })
@@ -204,19 +204,34 @@ struct SocialFriendTestView: View {
 
     }
     
-    private func searchFriend(id: String){
+    private func searchFriend(id: String, isLoading: Binding<Bool>, noResult: Binding<Bool>){
         guard id != currentUserData.user.id else {return}
-        friendRequestStatus = .loading
         self.friendSearchResult = nil
         Task {
             let query = db.collection("User")
                 .whereField("id", isEqualTo: id)
             
-            guard let snapshot = try? await query.getDocuments() else {isLoading = false; return}
-            guard let doc = snapshot.documents.first else {isLoading = false; return}
+            guard let snapshot = try? await query.getDocuments() else {
+                noResult.wrappedValue = false
+                isLoading.wrappedValue = false
+                return
+            }
+            guard let doc = snapshot.documents.first else {
+                noResult.wrappedValue = false
+                isLoading.wrappedValue = false
+                return
+            }
             let blockFriends = (doc.data()["blockFriends"] as? [String]) ?? []
-            if blockFriends.contains(currentUserData.uId){isLoading = false; return}
-            guard let friendUID = doc.data()["uid"] as? String else {isLoading = false; return}
+            if blockFriends.contains(currentUserData.uId){
+                noResult.wrappedValue = false
+                isLoading.wrappedValue = false
+                return
+            }
+            guard let friendUID = doc.data()["uid"] as? String else {
+                noResult.wrappedValue = false
+                isLoading.wrappedValue = false
+                return
+            }
             
             if currentUserData.friends.contains(where: {$0.uId == friendUID}) {
                 friendRequestStatus = .alreadyFriend
@@ -229,7 +244,7 @@ struct SocialFriendTestView: View {
             }
             
             self.friendSearchResult = await MumoriUser(uId: friendUID)
-            isLoading = false
+            isLoading.wrappedValue = false
         }
     }
 }

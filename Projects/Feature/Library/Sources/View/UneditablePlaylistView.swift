@@ -143,6 +143,7 @@ struct UneditablePlaylistView: View {
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isBottomSheetPresent)  {
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                
             }
             .background(TransparentBackground())
         })

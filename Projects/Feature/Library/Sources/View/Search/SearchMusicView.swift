@@ -85,9 +85,9 @@ struct SearchMusicView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
- 
-
-
+        .onAppear {
+            playerViewModel.setPlayerVisibility(isShown: false)
+        }
     }
 
     
