@@ -299,25 +299,19 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
         
+        mapView.delegate = context.coordinator
         mapView.overrideUserInterfaceStyle = .light
         mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
+        mapView.showsUserLocation = false
         
         mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan), animated: true)
         mapView.setRegion(MKCoordinateRegion(center: self.friendMumorys.first?.coordinate ?? MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSpan), animated: true)
-        
         context.coordinator.mapView = mapView
-//        context.coordinator.setGPSButton()
-//        context.coordinator.setCompassButton()
-        
-        mapView.delegate = context.coordinator
-        
-//        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tappedMap))
-//        mapView.addGestureRecognizer(tapGesture)
-        
+                
         return mapView
     }
     

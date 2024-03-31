@@ -11,25 +11,20 @@ import SwiftUI
 import Shared
 
 
-struct MumoryDetailFriendMumoryScrollView: UIViewRepresentable {
+struct MumoryDetailFriendMumoryScrollUIViewRepresentable: UIViewRepresentable {
 
-//    typealias UIViewType = UIScrollView
+    let mumory: Mumory
     
-//    @Binding var mumoryAnnotations: [MumoryAnnotation]
-//    @Binding var annotationSelected: Bool
-//    @Binding var page: Int
+    @State var oldFriendMumorys: [Mumory] = []
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
-
         scrollView.delegate = context.coordinator
 
-//        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.myMumorys.count)
-        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(3)
-        scrollView.contentSize = CGSize(width: totalWidth, height: 212)
+//        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.friendMumorys.count)
 
         scrollView.isPagingEnabled = true
         scrollView.contentMode = .scaleToFill
@@ -39,10 +34,12 @@ struct MumoryDetailFriendMumoryScrollView: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
 
-        let hostingController = UIHostingController(rootView: MumoryDetailFriendMumoryScrollContentView()
+        let hostingController = UIHostingController(rootView: MumoryDetailFriendMumoryScrollContentView(mumory: self.mumory)
             .environmentObject(mumoryDataViewModel))
-        hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: 212)
-
+        let contentWidth = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
+        hostingController.view.frame = CGRect(x: 0, y: 0, width: contentWidth, height: 212)
+        
+        scrollView.contentSize = CGSize(width: contentWidth, height: 212)
         scrollView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
 
@@ -52,19 +49,23 @@ struct MumoryDetailFriendMumoryScrollView: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-//        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.myMumorys.count)
-//        uiView.contentSize = CGSize(width: totalWidth, height: 212)
-//
-//        uiView.subviews.forEach { $0.removeFromSuperview() }
-//
-//        let hostingController = UIHostingController(rootView: MumoryDetailFriendMumoryScrollContentView())
-//        hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: 212)
-//        hostingController.view.bounds = uiView.bounds
-//
-//        uiView.backgroundColor = .clear
-//        hostingController.view.backgroundColor = .clear
-//
-//        uiView.addSubview(hostingController.view)
+        if self.oldFriendMumorys.count != self.mumoryDataViewModel.friendMumorys.count {
+            let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.friendMumorys.count)
+            let hostingController = UIHostingController(rootView: MumoryDetailFriendMumoryScrollContentView(mumory: self.mumory)
+                .environmentObject(mumoryDataViewModel))
+            let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+            hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: contentHeight)
+            uiView.contentSize = CGSize(width: totalWidth, height: contentHeight)
+
+            uiView.subviews.forEach { $0.removeFromSuperview() }
+            uiView.backgroundColor = .clear
+            hostingController.view.backgroundColor = .clear
+            uiView.addSubview(hostingController.view)
+
+            DispatchQueue.main.async {
+                self.oldFriendMumorys = self.mumoryDataViewModel.friendMumorys
+            }
+        }
     }
     
     func makeCoordinator() -> Coordinator {
@@ -72,20 +73,20 @@ struct MumoryDetailFriendMumoryScrollView: UIViewRepresentable {
     }
 }
 
-extension MumoryDetailFriendMumoryScrollView {
+extension MumoryDetailFriendMumoryScrollUIViewRepresentable {
     
     class Coordinator: NSObject {
         
-        let parent: MumoryDetailFriendMumoryScrollView
+        let parent: MumoryDetailFriendMumoryScrollUIViewRepresentable
         
-        init(parent: MumoryDetailFriendMumoryScrollView) {
+        init(parent: MumoryDetailFriendMumoryScrollUIViewRepresentable) {
             self.parent = parent
             super.init()
         }
     }
 }
 
-extension MumoryDetailFriendMumoryScrollView.Coordinator: UIScrollViewDelegate {
+extension MumoryDetailFriendMumoryScrollUIViewRepresentable.Coordinator: UIScrollViewDelegate {
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let page = Int(scrollView.contentOffset.x / (UIScreen.main.bounds.width - 30))
@@ -98,14 +99,18 @@ extension MumoryDetailFriendMumoryScrollView.Coordinator: UIScrollViewDelegate {
 
 struct MumoryDetailFriendMumoryScrollContentView: View {
     
+    let mumory: Mumory
+    
+    @State var date: String = ""
+    
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(Array(self.mumoryDataViewModel.myMumorys.prefix(min(3, self.mumoryDataViewModel.myMumorys.count))), id: \.self) { mumory in
+            ForEach(Array(self.mumoryDataViewModel.friendMumorys.prefix(min(3, self.mumoryDataViewModel.friendMumorys.count))), id: \.self) { mumory in
                 MumoryDetailFriendMumoryView(mumory: mumory)
                     .padding(.horizontal, 5)
-
             }
         }
     }

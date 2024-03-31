@@ -25,7 +25,6 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     @EnvironmentObject var currentUserData: CurrentUserData
     
     func makeUIView(context: Context) -> UIScrollView {
-        print("FUCK111")
         let scrollView = UIScrollView()
         
         scrollView.delegate = context.coordinator
@@ -57,8 +56,6 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        print("FUCK222")
-   
         let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
             .environmentObject(appCoordinator)
             .environmentObject(mumoryDataViewModel)
@@ -109,39 +106,7 @@ extension MumoryDetailScrollViewRepresentable {
             self.parent = parent
             super.init()
         }
-        
-        func handleScrollDirection(_ direction: ScrollDirection) {
-            switch direction {
-            case .up:
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    parent.appCoordinator.isNavigationBarShown = true
-                }
-            case .down:
-                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                    parent.appCoordinator.isNavigationBarShown = false
-                }
-            }
-        }
-        
-        func handleScrollBoundary(_ view: ScrollBoundary) {
-            switch view {
-            case .above:
-                parent.appCoordinator.isNavigationBarColored = false
-            case .below:
-                parent.appCoordinator.isNavigationBarColored = true
-            }
-        }
     }
-}
-
-enum ScrollDirection {
-    case up
-    case down
-}
-
-enum ScrollBoundary {
-    case above
-    case below
 }
 
 extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
@@ -266,13 +231,23 @@ public struct MumoryDetailView: View {
                 LoadingAnimationView(isLoading: self.$mumoryDataViewModel.isUpdating)
             }
         } // ZStack
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .onAppear {
             playerViewModel.setPlayerVisibility(isShown: false)
+            
             Task {
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await MumoriUser(uId: self.mumory.uId)
                 print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
             }
+            
+            Task {
+                for friend in self.currentUserData.friends {
+                    await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
+                    print("친구뮤모리: \(mumoryDataViewModel.friendMumorys)")
+                }
+            }
+            
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()

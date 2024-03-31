@@ -133,7 +133,9 @@ struct ContentView: View {
                         )
                         .onAppear {
                             Task {
+                                // 뮤모리 외 MonthlyStat 컬렉션 추후 사용하기
                                 let mumorySongIds: [String] = self.mumoryMonthly.map { $0.musicModel.songID.rawValue }
+                                
                                 self.favoriteGenre = await getModeGenre(songIds: mumorySongIds)
                             }
                         }

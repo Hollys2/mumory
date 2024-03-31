@@ -54,6 +54,14 @@ struct CommentView: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
+            } else if mumory.uId == currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.uId != currentUserData.user.uId {
+                commentUser.defaultProfileImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
+                    }
             } else {
                 AsyncImage(url: commentUser.profileImageURL) { phase in
                     switch phase {
@@ -95,6 +103,18 @@ struct CommentView: View {
                                 .frame(width: 4, alignment: .bottom)
                         } else if mumory.uId != currentUserData.user.uId && !comment.isPublic && currentUserData.user.uId != comment.uId && self.commentUser.nickname != "탈퇴계정" {
                             EmptyView()
+                        } else if mumory.uId == currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.uId != currentUserData.user.uId {
+                            Text(StringManager.maskString(self.commentUser.nickname))
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                            
+                            Text("・")
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                                .frame(width: 4, alignment: .bottom)
+                            
                         } else {
                             Text("\(self.commentUser.nickname)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
@@ -247,6 +267,14 @@ struct Reply: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
+            } else if mumory.uId == currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.uId != currentUserData.user.uId {
+                commentUser.defaultProfileImage
+                    .resizable()
+                    .frame(width: 28, height: 28)
+                    .mask { Circle() }
+                    .onTapGesture {
+                        appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
+                    }
             } else {
                 AsyncImage(url: commentUser.profileImageURL) { phase in
                     switch phase {
@@ -285,6 +313,17 @@ struct Reply: View {
                             .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                             .frame(width: 4, alignment: .bottom)
                     } else if mumory.uId != currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && !comment.isPublic && currentUserData.user.uId != comment.uId &&  self.isMyComment && self.commentUser.nickname != "탈퇴계정" {
+                        Text(StringManager.maskString(self.commentUser.nickname))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        
+                        Text("・")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
+                            .frame(width: 4, alignment: .bottom)
+                    } else if mumory.uId == currentUserData.user.uId && !currentUserData.friends.contains(where: { $0.uId == comment.uId }) && comment.uId != currentUserData.user.uId {
                         Text(StringManager.maskString(self.commentUser.nickname))
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
                             .foregroundColor(.white)
@@ -699,6 +738,9 @@ public struct MumoryCommentSheetView: View {
                     
                 } // VStack
                 .onAppear {
+                    print(currentUserData.friends)
+                    
+                    
                     mumory.commentCount = 0
                     self.comments = []
                     self.replies = []

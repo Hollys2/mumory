@@ -26,9 +26,10 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var musicModels: [MusicModel] = []
     
     @Published public var myMumorys: [Mumory] = []
-    @Published public var friendsMumorys: [Mumory] = []
+    @Published public var friendMumorys: [Mumory] = []
     @Published public var everyMumorys: [Mumory] = []
     @Published public var filteredMumorys: [Mumory] = []
+    @Published public var surroundingMumorys: [Mumory] = []
     
     @Published public var mumoryComments: [Comment] = []
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
@@ -201,7 +202,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 let snapshot = try await collectionReference.getDocuments()
                 
                 DispatchQueue.main.async {
-                    self.friendsMumorys = []
+                    self.friendMumorys = []
                 }
                 
                 var result: [Mumory] = []
@@ -214,7 +215,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     result.sort { $0.date > $1.date }
                 }
                 
-                print("fetchMumorys successfully!")
+                print("fetchMumorys successfully: \(result)!")
                 completion(result)
             } catch {
                 print("Error fetchMumorys: \(error.localizedDescription)")
@@ -343,6 +344,67 @@ final public class MumoryDataViewModel: ObservableObject {
         } catch {
             print("Error fetching documents: \(error)")
             return -1
+        }
+    }
+    
+    public func sameSongFriendMumory(friend: MumoriUser, songId: String) async {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory")
+            .whereField("uId", isEqualTo: friend.uId)
+            .whereField("songId", isEqualTo: songId)
+            
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            
+            self.tempMumory = []
+            
+            for document in querySnapshot.documents {
+                let documentData = document.data()
+                guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
+                
+                DispatchQueue.main.async {
+                    self.tempMumory.append(newMumory)
+                    self.tempMumory.sort { $0.date > $1.date }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.friendMumorys = self.tempMumory                    
+            }
+        } catch {
+            print("Error sameSongFriendMumory: \(error)")
+        }
+    }
+    
+    public func surroundingFriendMumory(friend: MumoriUser, mumory: Mumory) async {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory")
+            .whereField("uId", isEqualTo: friend.uId)
+            .whereField("longitude", isGreaterThan: mumory.locationModel.coordinate.longitude - 0.01)
+            .whereField("longitude", isLessThan: mumory.locationModel.coordinate.longitude + 0.01)
+            .whereField("latitude", isGreaterThan: mumory.locationModel.coordinate.latitude - 0.01)
+            .whereField("latitude", isLessThan: mumory.locationModel.coordinate.latitude + 0.01)
+            
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            
+            self.tempMumory = []
+            
+            for document in querySnapshot.documents {
+                let documentData = document.data()
+                guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
+                
+                DispatchQueue.main.async {
+                    self.tempMumory.append(newMumory)
+                    self.tempMumory.sort { $0.date > $1.date }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.surroundingMumorys = self.tempMumory
+            }
+        } catch {
+            print("Error sameSongFriendMumory: \(error)")
         }
     }
     
@@ -484,7 +546,6 @@ final public class MumoryDataViewModel: ObservableObject {
         } catch {
             print("Error getting document: \(error)")
         }
-        
     }
     
     public func fetchCommentReply(mumoryDocumentID: String) {
