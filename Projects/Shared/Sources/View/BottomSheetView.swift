@@ -86,7 +86,7 @@ public struct MumoryBottomSheet {
                     
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
-                    self.appCoordinator.rootPath.append(MumoryView)
+                    self.appCoordinator.rootPath.append(MumoryPage.report)
                 }
             ]
         case .mumorySocialView:
@@ -103,6 +103,12 @@ public struct MumoryBottomSheet {
                 BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
+                    withAnimation(.easeOut(duration: 0.1)) {
+                        self.appCoordinator.isSocialMenuSheetViewShown = false
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {                    
+                        self.appCoordinator.rootPath.append(MumoryPage.report)
+                    }
                 }
             ]
             
@@ -118,14 +124,14 @@ public struct MumoryBottomSheet {
             } else {
                 return [
                     BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
-
+                        self.appCoordinator.rootPath.append(MumoryPage.report)
                     })
                 ]
             }
         case .mumoryCommentFriendView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
-
+                    self.appCoordinator.rootPath.append(MumoryPage.report)
                 })
             ]
         case .addFriend:
@@ -636,3 +642,8 @@ public struct LocationInputBottomSheetView: View {
         .cornerRadius(15)
     }
 }
+
+
+
+
+

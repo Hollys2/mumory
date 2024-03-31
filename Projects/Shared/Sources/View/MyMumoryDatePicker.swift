@@ -175,9 +175,12 @@ public struct MonthlyStatDatePicker: View {
             }
             
             Button(action: {
-                self.selectedDate = pickerDate
+                var components = DateComponents()
+                components.year = Calendar.current.component(.year, from: self.pickerDate)
+                components.month = Calendar.current.component(.month, from: self.pickerDate)
+                components.day = pickerDate.lastDayOfMonth()
+                self.selectedDate = Calendar.current.date(from: components) ?? Date()
                 
-                let calendar = Calendar.current
                 let selectedYear = Calendar.current.component(.year, from: pickerDate)
                 let selectedMonth = Calendar.current.component(.month, from: pickerDate)
                 let filteredMumorys = mumoryDataViewModel.myMumorys.filter { mumory in
@@ -229,3 +232,10 @@ public struct MonthlyStatDatePicker: View {
     }
 }
 
+extension Date {
+    func lastDayOfMonth() -> Int? {
+        let calendar = Calendar.current
+        guard let range = calendar.range(of: .day, in: .month, for: self) else { return nil }
+        return range.upperBound - 1
+    }
+}
