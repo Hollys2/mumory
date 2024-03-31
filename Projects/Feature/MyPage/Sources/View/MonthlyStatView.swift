@@ -87,6 +87,8 @@ struct ContentView: View {
     @State var bottomPadding: CGFloat = 0
     @State var isPopUpViewShown: Bool = false
     
+    @State private var favoriteGenre: String = "-"
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -110,10 +112,10 @@ struct ContentView: View {
                         .foregroundColor(.white)
                     
                     Group {
-
+                        
                         HStack(spacing: 0) {
                             
-                            Text("-")
+                            Text(self.favoriteGenre)
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             
@@ -126,9 +128,15 @@ struct ContentView: View {
                         .overlay(
                             MonthlyStatGenrePopUpView()
                                 .offset(x: 6, y: 3)
-                                .zIndex(3)
+                                .opacity(self.favoriteGenre == "-" ? 1 : 0)
                             , alignment: .trailing
                         )
+                        .onAppear {
+                            Task {
+                                let mumorySongIds: [String] = self.mumoryMonthly.map { $0.musicModel.songID.rawValue }
+                                self.favoriteGenre = await getModeGenre(songIds: mumorySongIds)
+                            }
+                        }
                     }
                 }
                 .padding(.top, 28)
@@ -226,95 +234,22 @@ struct ContentView: View {
                                                     .frame(width: 32, height: 32)
                                                     .overlay(
                                                         Text(count > 0 ? "+\(count)" : "")
-                                                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                                                                .multilineTextAlignment(.center)
-                                                                .foregroundColor(.black)
+                                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                                                            .multilineTextAlignment(.center)
+                                                            .foregroundColor(.black)
                                                     )
                                                     .offset(y: 12)
                                             )
                                     }
+                                    
                                 }
                             }
                             .padding(.horizontal, 20)
                         }
                         .onAppear {
-                            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-                            let calendar = Calendar.current
-                            let year = calendar.component(.year, from: Date())
-                            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
-                            if isLeapYear {
-                                daysInMonth[1] = 29
-                            }
-                            let month = calendar.component(.month, from: self.date)
-                            self.days = daysInMonth[month - 1]
-                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
-//                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys
-                            
-                            for mumory in self.mumoryMonthly {
-                                //                for day in (1...self.days) {
-                                //                    print("day: \(d)")
-                                //                }
-                                let day = Calendar.current.component(.day, from: mumory.date)
-                                
-                                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
-                                if var mumories = self.mumoryDaily[day] {
-                                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
-                                    mumories.append(mumory)
-                                    self.mumoryDaily[day] = mumories
-                                } else {
-                                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
-                                    self.mumoryDaily[day] = [mumory]
-                                }
-                            }
-                            
-                            for day in 1...self.days {
-                                if self.mumoryDaily[day] == nil {
-                                    self.mumoryDaily[day] = []
-                                }
-                            }
-                            
-//                            print("mumoryDaily: \(mumoryDaily)")
-                            
                             proxy.scrollTo(0, anchor: .trailing)
                         }
                         .onChange(of: self.date, perform: { _ in
-                            //                            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-                            //                            let calendar = Calendar.current
-                            //                            let year = calendar.component(.year, from: Date())
-                            //                            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
-                            //                            if isLeapYear {
-                            //                                daysInMonth[1] = 29
-                            //                            }
-                            //                            let month = calendar.component(.month, from: self.date)
-                            //                            self.days = daysInMonth[month - 1]
-                            //                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
-                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys
-
-                            for mumory in self.mumoryMonthly {
-                                //                for day in (1...self.days) {
-                                //                    print("day: \(d)")
-                                //                }
-                                let day = Calendar.current.component(.day, from: mumory.date)
-
-                                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
-                                if var mumories = self.mumoryDaily[day] {
-                                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
-                                    mumories.append(mumory)
-                                    self.mumoryDaily[day] = mumories
-                                } else {
-                                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
-                                    self.mumoryDaily[day] = [mumory]
-                                }
-                            }
-
-                            for day in 1...self.days {
-                                if self.mumoryDaily[day] == nil {
-                                    self.mumoryDaily[day] = []
-                                }
-                            }
-
-                            print("mumoryDaily: \(mumoryDaily)")
-
                             proxy.scrollTo(0, anchor: .trailing)
                         })
                         .padding(.top, 25)
@@ -325,7 +260,7 @@ struct ContentView: View {
                         .frame(width: getUIScreenBounds().width * 0.82, height: 0.5)
                         .background(Color(red: 0.28, green: 0.28, blue: 0.28))
                         .padding(.top, 27)
-        
+                    
                     HStack(spacing: 0) {
                         
                         ZStack(alignment: .leading) {
@@ -374,11 +309,11 @@ struct ContentView: View {
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 15)
+                .padding(.top, 30)
             
             HStack(spacing: 10) {
                 let sortedLocationsArray = filteredLocations.sorted(by: { $0.key < $1.key })
-
+                
                 ForEach(Array(sortedLocationsArray.prefix(3).enumerated()), id: \.element.key) { index, element in
                     let region = element.key
                     let mumories = element.value
@@ -423,7 +358,9 @@ struct ContentView: View {
                         )
                 }
                 
-                Spacer(minLength: 0)
+                if sortedLocationsArray.count < 3 {
+                    Spacer(minLength: 0)
+                }
             }
             .padding(.top, 15)
             
@@ -477,14 +414,96 @@ struct ContentView: View {
                 }
             }
             
-            for mumory in mumoryDataViewModel.myMumorys {
-                let month = Calendar.current.component(.month, from: mumory.date)
-                mumoriesCountByMonth[month - 1] += 1
+            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+            let calendar = Calendar.current
+            let year = calendar.component(.year, from: Date())
+            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+            if isLeapYear {
+                daysInMonth[1] = 29
+            }
+            let month = calendar.component(.month, from: self.date)
+            self.days = daysInMonth[month - 1]
+            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+            //                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys
+            
+            for mumory in self.mumoryMonthly {
+                let day = Calendar.current.component(.day, from: mumory.date)
                 
-                mumoriesLikeCount += mumory.likes.count
+                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
+                if var mumories = self.mumoryDaily[day] {
+                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
+                    mumories.append(mumory)
+                    self.mumoryDaily[day] = mumories
+                } else {
+                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
+                    self.mumoryDaily[day] = [mumory]
+                }
+            }
+            
+            for day in 1...self.days {
+                if self.mumoryDaily[day] == nil {
+                    self.mumoryDaily[day] = []
+                }
+            }
+            
+            for mumory in self.mumoryMonthly {
+                for uId in mumory.likes {
+                    if uId != currentUserData.user.uId {
+                        mumoriesLikeCount += 1
+                    }
+                }
+                
                 mumoriesCommentCount += mumory.commentCount
             }
         }
+        .onChange(of: self.date, perform: { _ in
+            print("처음")
+            self.mumoryDaily = [:]
+            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+            let calendar = Calendar.current
+            let year = calendar.component(.year, from: Date())
+            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+            if isLeapYear {
+                daysInMonth[1] = 29
+            }
+            let month = calendar.component(.month, from: self.date)
+            self.days = daysInMonth[month - 1]
+            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+            //                            self.mumoryMonthly = mumoryDataViewModel.filteredMumorys
+            
+            for mumory in self.mumoryMonthly {
+                let day = Calendar.current.component(.day, from: mumory.date)
+                
+                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
+                if var mumories = self.mumoryDaily[day] {
+                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
+                    mumories.append(mumory)
+                    self.mumoryDaily[day] = mumories
+                } else {
+                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
+                    self.mumoryDaily[day] = [mumory]
+                }
+            }
+            
+            for day in 1...self.days {
+                if self.mumoryDaily[day] == nil {
+                    self.mumoryDaily[day] = []
+                }
+            }
+            
+            mumoriesLikeCount = 0
+            mumoriesCommentCount = 0
+            
+            for mumory in self.mumoryMonthly {
+                for uId in mumory.likes {
+                    if uId != currentUserData.user.uId {
+                        mumoriesLikeCount += 1
+                    }
+                }
+                
+                mumoriesCommentCount += mumory.commentCount
+            }
+        })
     }
 }
 

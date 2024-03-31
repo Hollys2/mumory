@@ -113,6 +113,6 @@ public func getModeGenre(songIds: [String]) async -> String {
     let result = genres.sorted { value1, value2 in
         return value1.value > value2.value
     }
-    guard let modeGenre = result.first?.key else {return "--"}
+    guard let modeGenre = result.first?.key else {return "-"}
     return modeGenre
 }

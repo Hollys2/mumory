@@ -138,7 +138,7 @@ struct CommentView: View {
                         .disabled(currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}))
                         
                     } // HStack
-                    .padding(.vertical, 9)
+                    .padding(.vertical, !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) ? 9 : 14)
                 
                     if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
                         Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId ? "비밀 댓글입니다." : comment.content)
@@ -339,7 +339,7 @@ struct Reply: View {
                             .frame(width: 18, height: 18)
                     })
                 } // HStack
-                .padding(.vertical, 9)
+                .padding(.vertical, !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) ? 9 : 14)
             
                 if !currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
                     Text(mumory.uId != currentUserData.uId && !comment.isPublic && comment.uId != currentUserData.user.uId && !self.isMyComment ? "비밀 답글입니다." : comment.content)
@@ -718,6 +718,7 @@ public struct MumoryCommentSheetView: View {
                         }
                         
                         mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+//                        mumory.commentCount = comments.count
                     }
                 }
                 .onDisappear {

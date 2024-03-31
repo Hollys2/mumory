@@ -110,6 +110,7 @@ public struct HomeView: View {
         } // ZStack
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
             if UserDefaults.standard.object(forKey: "firstRun") == nil {
                 UserDefaults.standard.set(true, forKey: "firstRun")

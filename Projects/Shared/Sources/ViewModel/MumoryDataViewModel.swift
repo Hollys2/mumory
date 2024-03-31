@@ -539,8 +539,6 @@ final public class MumoryDataViewModel: ObservableObject {
         return false
     }
 
-
-
     public static func fetchComment(mumoryId: String) async -> [Comment]? {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
@@ -558,13 +556,14 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 comments.append(newComment)
             }
-            print("fetchComment 성공")
+            print("fetchComment 성공: \(comments)")
             return comments
         } catch {
             print("Error fetching documents: \(error)")
             return nil
         }
     }
+    
 
     //                    let replyRef = db.collection("Comment").document(commentID).collection("Reply")
     //
