@@ -82,10 +82,10 @@ struct HomeMapView: View {
             }
         }
         .onAppear {
-            playerViewModel.setPlayerVisibility(isShown: false, moveToBottom: false)
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false, moveToBottom: false)
         }
         .onDisappear {
-            playerViewModel.setPlayerVisibility(isShown: true)
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
         }
     }
 }

@@ -24,6 +24,8 @@ public class SignUpManageViewModel: ObservableObject{
     
     @Published var isCheckedRequiredItems: Bool = false
     @Published var isCheckedServiceNewsNotification: Bool = false
+    
+    @Published var isLoading: Bool = false
 
     public func getNavigationTitle() -> String {
         switch(step){

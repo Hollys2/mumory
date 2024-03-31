@@ -121,6 +121,7 @@ public struct LoginView: View {
                 //앱로그인
                 if let error = error{
                     //카카오 로그인 실패
+                    isLoading = false
                     print("kakao login error: \(error)")
                 }else if authToken != nil {
                     //카카오 로그인 성공
@@ -133,6 +134,7 @@ public struct LoginView: View {
             UserApi.shared.loginWithKakaoAccount { authToken, error in
                 //계정로그인
                 if let error = error{
+                    isLoading = false
                     print("kakao acount login error: \(error)")
                 }else if authToken != nil{
                     print("login successful with account")
@@ -157,9 +159,9 @@ public struct LoginView: View {
             return
         }
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
-            isLoading = false
             if let error = error{
                 print("google error: \(error)")
+                isLoading = false
             }else{
                 print("google login success")
                 guard let idToken = result?.user.idToken?.tokenString else {print("no idToken");return}
@@ -169,11 +171,13 @@ public struct LoginView: View {
                 
                 Auth.auth().signIn(with: credential){(result, error) in
                     if let error = error {
+                        isLoading = false
                         print("create user error: \(error)")
                     }else if let user = result?.user{
                         print("success creating or login user ")
                         Task {
                             await checkInitialSetting(uid: user.uid, email: user.email, method: "Google")
+                            isLoading = false
                         }
                     }
                 }

@@ -31,6 +31,8 @@ struct SocialFriendTestView: View {
     }
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+
     @State private var itemSelection = 0
     @State private var searchText = ""
     
@@ -50,6 +52,7 @@ struct SocialFriendTestView: View {
                 HStack(spacing: 0) {
                     Button(action: {
                         if appCoordinator.isAddFriendViewShown {
+                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 self.appCoordinator.isAddFriendViewShown = false
                             }
@@ -220,6 +223,7 @@ struct SocialFriendTestView: View {
     }
     
     private func searchFriend(id: String){
+        status = .loading
         guard id != currentUserData.user.id else {
             status = .noResult
             return

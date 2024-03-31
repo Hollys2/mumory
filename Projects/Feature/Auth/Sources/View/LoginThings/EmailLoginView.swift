@@ -72,7 +72,7 @@ struct EmailLoginView: View {
                     .frame(height: isLoginError ? nil : 0)
                 
                 //로그인 버튼(재사용)
-                MumorySimpleButton(title: "로그인 하기", isEnabled: email.count > 0 && password.count > 0)
+                MumoryLoadingButton(title: "로그인 하기", isEnabled: email.count > 0 && password.count > 0, isLoading: $isLoading)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 20)
@@ -97,8 +97,6 @@ struct EmailLoginView: View {
                 Spacer()
             })
             
-            
-            LoadingAnimationView(isLoading: $isLoading)
         }
         .background(LibraryColorSet.background)
         .navigationBarBackButtonHidden()
@@ -133,7 +131,7 @@ struct EmailLoginView: View {
         }
         try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
         currentUserData.uId = result.user.uid
-        
+        currentUserData.user = await MumoriUser(uId: result.user.uid)
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         

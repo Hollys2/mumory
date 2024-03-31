@@ -34,7 +34,7 @@ struct AddSongFromSearchView: View {
                         DispatchQueue.main.async {
                             localTimer = 0
                             songs = []
-                            isLoading = true
+                            isLoading = !term.isEmpty
                         }
                     })
                     .onChange(of: localTimer, perform: { value in

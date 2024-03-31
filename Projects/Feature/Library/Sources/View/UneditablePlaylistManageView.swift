@@ -13,6 +13,7 @@ import MusicKit
 struct UneditablePlaylistManageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @State var itemSize: CGFloat = .zero
+    @State var isPresentBottomSheet: Bool = false
     @Binding var playlistArray: [MusicPlaylist]
     let friend: MumoriUser
 
@@ -45,6 +46,10 @@ struct UneditablePlaylistManageView: View {
                     SharedAsset.menuWhite.swiftUIImage
                         .resizable()
                         .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
+                            isPresentBottomSheet = true
+                        }
                     
                 }
                 .padding(.horizontal, 20)
@@ -83,6 +88,16 @@ struct UneditablePlaylistManageView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             itemSize = getUIScreenBounds().width * 0.21
+        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                    .onTapGesture {
+                        isPresentBottomSheet = false
+                        appCoordinator.rootPath.append(MumoryPage.report)
+                    }
+            }
+            .background(TransparentBackground())
         }
   
     }

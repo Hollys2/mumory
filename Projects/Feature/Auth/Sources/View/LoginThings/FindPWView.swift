@@ -70,7 +70,7 @@ struct FindPWView: View {
                 
                 
                 //로그인 버튼(재사용)
-                MumorySimpleButton(title: "비밀번호 찾기", isEnabled: true)
+                MumoryLoadingButton(title: "비밀번호 찾기", isEnabled: true, isLoading: $isLoading)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 30)
@@ -90,7 +90,6 @@ struct FindPWView: View {
                 Spacer()
             })
             
-            LoadingAnimationView(isLoading: $isLoading)
             
         }
         .background(LibraryColorSet.background)

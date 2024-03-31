@@ -17,14 +17,11 @@ struct CreatePlaylistPopupView: View {
     }
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
-    
+    @State var isLoading: Bool = false
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
     @State var backgroundOpacity = 0.0
-    
     var title: String = "새 플레이리스트"
-
-    
     let titleMaxLength = 30
     
     var body: some View {
@@ -128,17 +125,11 @@ struct CreatePlaylistPopupView: View {
                 Button(action: {
                     createPlaylist()
                 }, label: {
-                    Text("만들기")
-                        .frame(maxWidth: .infinity)
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
-                        .foregroundStyle(.black)
-                        .padding(.vertical, 17)
-                        .padding(.horizontal, 25)
-                        .background(playlistTitle.isEmpty ? ColorSet.subGray : ColorSet.mainPurpleColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
+                    MumoryLoadingButton(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
                         .padding(.horizontal, 30)
                         .padding(.top, 40)
                 })
+                .frame(height: 50)
                 .disabled(playlistTitle.isEmpty)
             }
             .padding(.top, 20)
@@ -163,6 +154,7 @@ struct CreatePlaylistPopupView: View {
     }
     
     private func createPlaylist() {
+        isLoading = true
         let Firebase = FBManager.shared
         let db = Firebase.db
         
@@ -176,6 +168,7 @@ struct CreatePlaylistPopupView: View {
         db.collection("User").document(currentUserData.uId).collection("Playlist").addDocument(data: data) { error in
             if error == nil {
                 print("success")
+                isLoading = false
                 dismiss()
             }
         }

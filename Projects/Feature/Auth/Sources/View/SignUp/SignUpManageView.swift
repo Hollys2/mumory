@@ -21,7 +21,6 @@ struct SignUpManageView: View {
 //    @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State private var isSignUpCompleted = false
-    @State private var isLoading = false
     @State private var isSignUpErrorShowing: Bool = false
     @State private var isTapBackButton: Bool = false
     
@@ -110,7 +109,7 @@ struct SignUpManageView: View {
                     Button(action: {
                         //마지막 페이지에서 다음 버튼 클릭했을 때 실행
                         if manager.step == 2{
-                            isLoading = true
+                            manager.isLoading = true
                             createUser(email: manager.email, password: manager.password)
                         }else{
                             withAnimation {
@@ -119,16 +118,13 @@ struct SignUpManageView: View {
                         }
                         
                     }, label: {
-                        MumorySimpleButton(title: manager.getButtonTitle(), isEnabled: isLoading ? false : manager.isButtonEnabled())
+                        MumoryLoadingButton(title: manager.getButtonTitle(), isEnabled: manager.isButtonEnabled(), isLoading: $manager.isLoading)
                             .padding(.leading, 20)
                             .padding(.trailing, 20)
                             .padding(.bottom, 20)
                     })
-                    .disabled(!(isLoading ? false : manager.isButtonEnabled()))
+                    .disabled(manager.isLoading || !manager.isButtonEnabled())
                 }
-                
-                //로딩 애니메이션
-                LoadingAnimationView(isLoading: $isLoading)
                 
                 SignUpErrorPopup(isShowing: $isSignUpErrorShowing)
             }
@@ -150,8 +146,8 @@ struct SignUpManageView: View {
             .onTapGesture {
                 self.hideKeyboard()
             }
-            .disabled(isLoading)
-        
+            .disabled(manager.isLoading)
+
     }
     
     //스크린 별 상단 라인 너비 조절(스텝 별 길이 상이)
@@ -169,7 +165,7 @@ struct SignUpManageView: View {
         auth.createUser(withEmail: email, password: password) { data, error in
             if let error = error {
                 print("create user error: \(error)")
-                isLoading = false
+                manager.isLoading = false
                 isSignUpErrorShowing = true
             }else {
                 print("create user success")
@@ -210,10 +206,10 @@ struct SignUpManageView: View {
             if let error = error {
                 print("firestore error \(error)")
                 isSignUpErrorShowing = true
-                isLoading = false
+                manager.isLoading = false
             }else {
                 print("firestore upload user data successful")
-                isLoading = false
+                manager.isLoading = false
                 isSignUpCompleted = true
                 appCoordinator.rootPath.append(MumoryPage.startCustomization)
             }

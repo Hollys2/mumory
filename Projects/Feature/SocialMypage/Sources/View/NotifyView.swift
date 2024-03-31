@@ -13,6 +13,7 @@ import Shared
 struct NotifyView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject var notificationViewModel: NotificationViewModel = NotificationViewModel()
     private let notificationQueue = DispatchQueue(label: "notificationQueue")
     //observableobject를 만들면 너무 불필요한 게 되는데....음음음음음음
@@ -57,7 +58,7 @@ struct NotifyView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.top, getUIScreenBounds().height * 0.25)
-                    }else  {
+                    } else {
                         
                         ScrollView {
                             LazyVStack(spacing: 0, content: {
@@ -93,6 +94,7 @@ struct NotifyView: View {
                 .padding(.top, currentUserData.topInset)
             }
             .onAppear{
+                playerViewModel.setPlayerVisibility(isShown: true)
                 Task{
                     await getNotification()
                 }
@@ -393,6 +395,57 @@ struct NotifyFriendItem: View {
     }
 }
 
+struct NotifyPostItem: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var notificationViewModel: NotificationViewModel
+    @Binding var notification: Notification
+    init(notification: Binding<Notification>) {
+        self._notification = notification
+    }
+    let db = FBManager.shared.db
+    
+    var body: some View {
+        HStack(spacing: 0, content: {
+            Circle()
+                .fill(ColorSet.Gray34)
+                .frame(width: 38, height: 38)
+                .overlay {
+                    SharedAsset.notifyPost.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                }
+            
+            
+            VStack(alignment: .leading, spacing: 7, content: {
+                
+                Text("지금까지 \(10)개의 뮤모리가 기록되었습니다. 매일매일 나만의 장소에서 음악을 기록해 보세요!")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(Color.white)
+                    .lineLimit(2)
+                
+                Text(dateToString(date: notification.date))
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 13))
+                    .foregroundStyle(ColorSet.subGray)
+                
+            })
+            .padding(.leading, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+
+            NotifyMenuBotton(notification: self.notification)
+                .environmentObject(notificationViewModel)
+        })
+        .padding(.horizontal, 15)
+        .frame(height: 90)
+        .background(notification.isRead ? ColorSet.background : ColorSet.moreDeepGray)
+        .onTapGesture {
+            
+        }
+    }
+}
+
 enum NotificationType {
     case like
     case comment
@@ -412,6 +465,7 @@ struct Notification {
     var mumoriId: String = ""
     var content: String = ""
     var friendUId: String = ""
+    var mumoryCount: Int = 0
     
     init(id: String, data: [String: Any]) {
         self.id = id

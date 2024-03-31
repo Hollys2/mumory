@@ -81,6 +81,7 @@ public struct SocialSearchView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(isShown: Binding<Bool>) {
         self._isShown = isShown
@@ -162,6 +163,7 @@ public struct SocialSearchView: View {
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.white)
                     .onTapGesture {
+                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                         self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
                         self.isShown = false
                     }

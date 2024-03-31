@@ -38,6 +38,7 @@ public struct InputEmailView: View {
                         localTimer = 0
                         errorText = ""
                         manager.isValidEmail = false
+                        manager.isLoading = false
                     })
                     .onChange(of: localTimer, perform: { value in
                         if localTimer == 0.8 {
@@ -85,7 +86,7 @@ public struct InputEmailView: View {
     }
     
     private func checkValidEmail(){
-        print("check valid email")
+        manager.isLoading = true
         let db = FBManager.shared.db
         
         let emailCheckQuery = db.collection("User").whereField("email", isEqualTo: email)
@@ -101,6 +102,7 @@ public struct InputEmailView: View {
                     errorText = "이미 사용 중인 이메일입니다."
                     manager.isValidEmail = false
                 }
+                manager.isLoading = false
             }
         }
     }

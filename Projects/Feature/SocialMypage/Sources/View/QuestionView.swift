@@ -139,7 +139,7 @@ struct QuestionView: View {
                             Button(action: {
                                 uploadQuestion()
                             }, label: {
-                                MumorySimpleButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0)
+                                MumoryLoadingButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0, isLoading: $isLoading)
                                     .padding(.leading, 20)
                                     .padding(.trailing, 20)
                             })
@@ -153,7 +153,6 @@ struct QuestionView: View {
 
                 }
                 
-                LoadingAnimationView(isLoading: $isLoading)
             }
             .onTapGesture {
                 hideKeyboard()
@@ -186,6 +185,7 @@ struct QuestionView: View {
         
         db.collection("Question").addDocument(data: questionData) { error in
             if let error = error {
+                isLoading = false
                 print("error: \(error)")
             }else {
                 isLoading = false

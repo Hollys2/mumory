@@ -143,7 +143,10 @@ struct UneditablePlaylistView: View {
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isBottomSheetPresent)  {
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
-                
+                    .onTapGesture {
+                        isBottomSheetPresent = false
+                        appCoordinator.rootPath.append(MumoryPage.report)
+                    }
             }
             .background(TransparentBackground())
         })

@@ -116,11 +116,12 @@ struct NoMumoryView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
                 .padding(.top, 25)
                 .onTapGesture {
-                    withAnimation(Animation.easeInOut(duration: 0.1)) {
-                        appCoordinator.isCreateMumorySheetShown = true
-                        appCoordinator.offsetY = CGFloat.zero
-                        playerViewModel.setPlayerVisibility(isShown: false)
-                    }
+                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+                        withAnimation(Animation.easeInOut(duration: 0.1)) {
+                            appCoordinator.isCreateMumorySheetShown = true
+                            appCoordinator.offsetY = CGFloat.zero
+                        }
+        
                 }
 
         })
