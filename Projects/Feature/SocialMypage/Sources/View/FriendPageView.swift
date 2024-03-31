@@ -81,12 +81,12 @@ struct KnownFriendPageView: View {
     
     let friend: MumoriUser
     let lineGray = Color(white: 0.37)
-    
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
     @State private var isLoading: Bool = true
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    
+    @State private var playlists: [MusicPlaylist] = []
+    @State private var isPlaylistLoading: Bool = true
     init(friend: MumoriUser) {
         self.friend = friend
     }
@@ -127,7 +127,7 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendPlaylistView(friend: friend)
+                FriendPlaylistView(friend: friend, playlists: $playlists, isLoading: $isPlaylistLoading)
                 
                 Rectangle()
                     .fill(Color.clear)
@@ -145,8 +145,57 @@ struct KnownFriendPageView: View {
                 DispatchQueue.main.async {
                     mumoryDataViewModel.isUpdating = false
                 }
+                if self.playlists.isEmpty {
+                    Task {
+                        isPlaylistLoading = true
+                        await getPlaylist()
+                        fetchSongToPlaylist(playlistArray: $playlists)
+                        isPlaylistLoading = false
+                    }
+                }
             }
         }
+    }
+    
+    private func getPlaylist() async {
+        self.playlists.removeAll()
+        let db = FBManager.shared.db
+        guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
+            print("error")
+            return
+        }
+        for document in snapshot.documents {
+            let data = document.data()
+            guard let isPublic = data["isPublic"] as? Bool else {
+                return
+            }
+            if !isPublic {continue}
+            guard let title = data["title"] as? String else {
+                return
+            }
+            guard let songIdentifiers = data["songIds"] as? [String] else {
+                return
+            }
+            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                return
+            }
+            let id = document.documentID
+            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, createdDate: date))
+        }
+    }
+    private func fetchSongInfo(songIdentifiers: [String]) async -> [Song] {
+        
+        var songs: [Song] = []
+        for id in songIdentifiers {
+            let musicItemID = MusicItemID(rawValue: id)
+            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            let response = try? await request.response()
+            guard let song = response?.items.first else {
+                continue
+            }
+            songs.append(song)
+        }
+        return songs
     }
 }
 
@@ -172,7 +221,7 @@ struct UnkownFriendPageView: View {
                 UnknownFriendInfoView
                 Divider10()
                 UnknownFriendContentView
-                    .padding(.top, 90)
+                    .padding(.top, getUIScreenBounds().height * 0.1)
             })
         }
         .onAppear{
@@ -523,14 +572,16 @@ struct FriendInfoView: View {
 
 struct FriendPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @State var isLoading: Bool = false
     let friend: MumoriUser
-    init(friend: MumoriUser) {
+    init(friend: MumoriUser, playlists: Binding<[MusicPlaylist]>, isLoading: Binding<Bool>) {
         self.friend = friend
+        self._playlists = playlists
+        self._isLoading = isLoading
     }
     
     let db = FBManager.shared.db
-    @State var playlists: [MusicPlaylist] = []
+    @Binding var playlists: [MusicPlaylist]
+    @Binding var isLoading: Bool
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -584,61 +635,15 @@ struct FriendPlaylistView: View {
                 .scrollIndicators(.hidden)
             })
         }
-        .onAppear {
-            if self.playlists.isEmpty {
-                Task {
-                    isLoading = true
-                    await getPlaylist()
-                    fetchSongToPlaylist(playlistArray: $playlists)
-                    isLoading = false
-                }
-            }
-        }
+
     }
-    private func getPlaylist() async {
-        self.playlists.removeAll()
-        guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
-            print("error")
-            return
-        }
-        for document in snapshot.documents {
-            let data = document.data()
-            guard let isPublic = data["isPublic"] as? Bool else {
-                return
-            }
-            if !isPublic {continue}
-            guard let title = data["title"] as? String else {
-                return
-            }
-            guard let songIdentifiers = data["songIds"] as? [String] else {
-                return
-            }
-            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
-                return
-            }
-            let id = document.documentID
-            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, createdDate: date))
-        }
-    }
-    private func fetchSongInfo(songIdentifiers: [String]) async -> [Song] {
-        
-        var songs: [Song] = []
-        for id in songIdentifiers {
-            let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            let response = try? await request.response()
-            guard let song = response?.items.first else {
-                continue
-            }
-            songs.append(song)
-        }
-        return songs
-    }
+
 }
 
 
 
 struct FriendPageCommonBottomSheetView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @Environment(\.dismiss) var dismiss
     let friend: MumoriUser
@@ -657,6 +662,10 @@ struct FriendPageCommonBottomSheetView: View {
                 }
             Divider05()
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                .onTapGesture {
+                    dismiss()
+                    appCoordinator.rootPath.append(MumoryPage.report)
+                }
         })
     }
     
@@ -957,7 +966,14 @@ struct FriendMumoryView: View {
             }
             
             if isLoading {
-                MumorySkeletonView()
+                ScrollView(.horizontal) {
+                    HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
+                        MumorySkeletonView()
+                    })
+                    .padding(.horizontal, 20)
+                }
+                .frame(height: getUIScreenBounds().width * 0.43)
+                .padding(.bottom, 40)
             } else {
                 if mumorys.isEmpty {
                     Text("뮤모리 기록이 없습니다")
