@@ -256,6 +256,14 @@ public struct MumoryDetailView: View {
                     print("주변뮤모리: \(mumoryDataViewModel.surroundingMumorys)")
                 }
             }
+            
+            Task {
+                for friend in self.currentUserData.friends {
+                    await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
+                    print("친구뮤모리: \(mumoryDataViewModel.friendMumorys)")
+                }
+            }
+            
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
