@@ -84,6 +84,7 @@ struct KnownFriendPageView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
+    @State private var firstMumorys: [Mumory] = []
     @State private var isLoading: Bool = true
     @State private var playlists: [MusicPlaylist] = []
     @State private var isPlaylistLoading: Bool = true
@@ -108,7 +109,7 @@ struct KnownFriendPageView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
                     
-                    FriendMapViewRepresentable(friendMumorys: self.mumorys)
+                    FriendMapViewRepresentable(friendMumorys: self.firstMumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
                     
@@ -137,11 +138,15 @@ struct KnownFriendPageView: View {
         .scrollIndicators(.hidden)
         .fullScreenCover(isPresented: $isMapViewShown) {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
-                .preferredColorScheme(.light)
         }
         .onAppear {
             self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
+                print("KnownFriendPageView fetchFriendsMumorys 성공")
+                if !mumorys.isEmpty, let firstMumory = mumorys.first {
+                    self.firstMumorys = [firstMumory]
+                }
                 self.mumorys = mumorys
+                
                 DispatchQueue.main.async {
                     mumoryDataViewModel.isUpdating = false
                 }

@@ -281,11 +281,12 @@ public struct MyMumoryView: View {
                 filteredLocations = [:]
                 for result in results {
                     let (mumory, country, administrativeArea) = result
+                    print("country: \(String(describing: country))")
                     if var country = country, let administrativeArea = administrativeArea {
                         if country != "대한민국" {
                             if country == "영국" {
                                 country += " 🇬🇧"
-                            } else if country == "미합중국" {
+                            } else if country == "미 합중국" {
                                 country = "미국 🇺🇸"
                             } else if country == "이탈리아" {
                                 country += " 🇮🇹"
