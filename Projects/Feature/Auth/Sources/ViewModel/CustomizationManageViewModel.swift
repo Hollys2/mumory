@@ -27,6 +27,8 @@ public class CustomizationManageViewModel: ObservableObject{
     
     @Published var profileImageData: Data?
     @Published var profileImage: Image?
+    @Published var isLoading: Bool = false
+    
     
     var randomProfileIndex: Int
     var randomProfilePath: String

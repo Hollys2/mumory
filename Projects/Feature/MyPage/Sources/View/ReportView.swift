@@ -12,7 +12,8 @@ import Shared
 struct ReportView: View {
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator   
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var menuTitle: String = "신고 유형을 선택해주세요."
     @State var title: String = ""
     @State var content: String = ""
@@ -138,7 +139,7 @@ struct ReportView: View {
                         .padding(.horizontal, 20)
                         .overlay {
                             RoundedRectangle(cornerRadius: 10, style: .circular)
-                                .stroke(Color.white, lineWidth: 0.5)
+                                .stroke(Color.white, lineWidth: 1)
                                 .frame(height: 50)
                         }
                         .padding(.horizontal, 20)
@@ -172,9 +173,7 @@ struct ReportView: View {
                 }
                 .scrollIndicators(.visible)
             }
-            
-            
-            MumorySimpleButton(title: "보내기", isEnabled: !title.isEmpty && !content.isEmpty && !settingViewModel.email.isEmpty && !settingViewModel.nickname.isEmpty)
+            MumoryLoadingButton(title: "보내기", isEnabled: !title.isEmpty && !content.isEmpty && !settingViewModel.email.isEmpty && !settingViewModel.nickname.isEmpty, isLoading: $isLoading)
                 .padding(20)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .onTapGesture {
@@ -186,13 +185,17 @@ struct ReportView: View {
                     }
                 }
                 .disabled(title.isEmpty || content.isEmpty || settingViewModel.email.isEmpty || settingViewModel.nickname.isEmpty)
-            
-            LoadingAnimationView(isLoading: $isLoading)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
         }
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             settingViewModel.uid = currentUserData.uId
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+        })
+        .onDisappear(perform: {
+            if appCoordinator.selectedTab == .library {
+                playerViewModel.setPlayerVisibility(isShown: true)
+            }
         })
         .onTapGesture {
             hideKeyboard()

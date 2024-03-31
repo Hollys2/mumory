@@ -23,7 +23,6 @@ public struct CustomizationView: View {
     @State var isUploadPlaylistCompleted = false
     @State var isCustomizationDone = false
     
-    @State var isLoading: Bool = false
     @State var isTapBackButton: Bool = false
     
     let Firebase = FBManager.shared
@@ -124,7 +123,7 @@ public struct CustomizationView: View {
                         }
                     }
                 }, label: {
-                    MumorySimpleButton(title: manager.getButtonTitle(), isEnabled: manager.isButtonEnabled())
+                    MumoryLoadingButton(title: manager.getButtonTitle(), isEnabled: manager.isButtonEnabled(), isLoading: $manager.isLoading)
                         .padding(.bottom, 20)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
@@ -133,7 +132,6 @@ public struct CustomizationView: View {
                 
             }
             
-            LoadingAnimationView(isLoading: $isLoading)
             
         }
         .navigationBarBackButtonHidden()
@@ -153,7 +151,7 @@ public struct CustomizationView: View {
         .onTapGesture {
             self.hideKeyboard()
         }
-        .disabled(isLoading)
+        .disabled(manager.isLoading)
         
     }
     private func setPadding(screen: CGSize) -> CGFloat {
@@ -170,7 +168,7 @@ public struct CustomizationView: View {
     }
     
     private func uploadUserData() async{
-        isLoading = true
+        manager.isLoading = true
         let db = Firebase.db
         let auth = Firebase.auth
         let messaging = Firebase.messaging
@@ -200,7 +198,7 @@ public struct CustomizationView: View {
         currentUserData.user = await MumoriUser(uId: uid)
         currentUserData.favoriteGenres = manager.selectedGenres.map({$0.id})
         
-        isLoading = false
+        manager.isLoading = false
         isCustomizationDone = true
         appCoordinator.rootPath.append(MumoryPage.lastOfCustomization)
     }

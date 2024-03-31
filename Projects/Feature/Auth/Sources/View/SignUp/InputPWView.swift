@@ -93,6 +93,7 @@ struct InputPWView: View {
         }
         .onAppear(perform: {
             //앞페이지에서 뒤로가기 했을 때 이전에 작성해놓은 비밀번호가 다시 보일 수 있도록 함
+            manager.isLoading = false
             if manager.isValidPassword && manager.isValidConfirmPassword{
                 password = manager.password
                 confirmPassword = manager.password

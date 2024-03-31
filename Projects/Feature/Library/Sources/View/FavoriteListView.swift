@@ -15,6 +15,7 @@ struct FavoriteListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isLoading: Bool = true
+    @State var isPresentBottomSheet: Bool = false
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -38,7 +39,8 @@ struct FavoriteListView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            
+                            UIView.setAnimationsEnabled(false)
+                            isPresentBottomSheet = true
                         }
                 })
                 .frame(height: 65)
@@ -128,6 +130,16 @@ struct FavoriteListView: View {
                 currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
                 self.isLoading = false
             }
+        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                    .onTapGesture {
+                        isPresentBottomSheet = false
+                        appCoordinator.rootPath.append(MumoryPage.report)
+                    }
+            }
+            .background(TransparentBackground())
         }
     }
 

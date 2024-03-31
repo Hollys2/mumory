@@ -14,7 +14,7 @@ struct EditFavoriteGenreView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
-
+    @State var isLoading: Bool = false
     @State var selectedGenres: [Int] = []
     
     var body: some View {
@@ -98,7 +98,7 @@ struct EditFavoriteGenreView: View {
                 Button {
                     saveGenre()
                 } label: {
-                    MumorySimpleButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6)
+                    MumoryLoadingButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6, isLoading: $isLoading)
                         .padding(.bottom, 20 + appCoordinator.safeAreaInsetsBottom)
                         .padding(.horizontal, 20)
                         
@@ -113,6 +113,7 @@ struct EditFavoriteGenreView: View {
     }
     
     private func saveGenre() {
+        isLoading = true
         let Firebase = FBManager.shared
         let db = Firebase.db
         let data = [
@@ -122,8 +123,10 @@ struct EditFavoriteGenreView: View {
         db.collection("User").document(currentUserData.uId).setData(data, merge: true) { error in
             if error == nil {
                 currentUserData.favoriteGenres = selectedGenres
+                isLoading
                 dismiss()
             }else {
+                isLoading
                 print(error!)
             }
         }

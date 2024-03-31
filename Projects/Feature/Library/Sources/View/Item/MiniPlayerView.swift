@@ -129,8 +129,6 @@ public struct MiniPlayerView: View {
         .offset(y: playerViewModel.isShownMiniPlayer ? 0 : 200)
         .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
         .frame(maxHeight: .infinity, alignment: .bottom)
-        .animation(.linear(duration: 0.2), value: playerViewModel.miniPlayerMoveToBottom)
-        .animation(.linear(duration: 0.2), value: playerViewModel.isShownMiniPlayer)
         .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
             NowPlayingView()
         }

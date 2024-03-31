@@ -129,11 +129,11 @@ struct SongBottomSheetView: View {
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
+                                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
                                 }
-                                playerViewModel.setPlayerVisibility(isShown: false)
                             }
                             
                         }
@@ -322,11 +322,11 @@ struct OptionalSongBottomSheetView: View {
                                 guard let unwrappedSong = self.song else {return}
                                 let musicModel = MusicModel(songID: unwrappedSong.id, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
+                                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
                                 }
-                                playerViewModel.setPlayerVisibility(isShown: false)
                             }
                             
                         }

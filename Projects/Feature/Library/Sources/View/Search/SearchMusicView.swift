@@ -82,12 +82,12 @@ struct SearchMusicView: View {
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
         }
+        .onAppear(perform: {
+            playerViewModel.setPlayerVisibility(isShown: true, moveToBottom: true)
+        })
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
-        .onAppear {
-            playerViewModel.setPlayerVisibility(isShown: false)
-        }
     }
 
     

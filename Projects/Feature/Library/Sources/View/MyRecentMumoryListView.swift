@@ -81,10 +81,10 @@ struct MyRecentMumoryListView: View {
                             .onTapGesture {
                                 appCoordinator.rootPath.removeLast()
                                 Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                                         appCoordinator.isCreateMumorySheetShown = true
                                         appCoordinator.offsetY = CGFloat.zero
-                                        playerViewModel.setPlayerVisibility(isShown: false)
                                     }
                                 }
                             }

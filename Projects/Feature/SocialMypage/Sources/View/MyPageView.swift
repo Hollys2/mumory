@@ -56,10 +56,12 @@ public struct MyPageView: View {
                     .onTapGesture {
                         isTapBackButton = true
                         if appCoordinator.bottomAnimationViewStatus == .myPage {
-                            if appCoordinator.selectedTab == .home {
-                                playerViewModel.setPlayerVisibility(isShown: false)
-                            }
                             appCoordinator.setBottomAnimationPage(page: .remove)
+                            if appCoordinator.selectedTab == .social {
+                                Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
+                                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
+                                }
+                            }
                         }else {
                             appCoordinator.rootPath.removeLast()
                         }
@@ -306,6 +308,8 @@ struct MyMumori: View {
                         }
                 }
                 .frame(height: getUIScreenBounds().width * 0.43)
+                .padding(.bottom, 40)
+
 
             }else {
                 ScrollView(.horizontal) {

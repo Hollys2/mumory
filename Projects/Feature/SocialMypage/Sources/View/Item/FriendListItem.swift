@@ -32,7 +32,7 @@ struct FriendListItem: View {
                 friend.defaultProfileImage
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 50, height: 50)
+                    .frame(width: 55, height: 55)
                     .clipShape(Circle())
             }
             

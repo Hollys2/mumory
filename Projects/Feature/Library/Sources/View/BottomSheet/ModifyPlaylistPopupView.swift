@@ -21,7 +21,7 @@ struct ModifyPlaylistPopupView: View {
     @State var playlistTitle: String = ""
     @State var isPublic: Bool = true
     @State var backgroundOpacity = 0.0
-    
+    @State var isLoading: Bool = false
     @Binding var playlist: MusicPlaylist
     init(playlist: Binding<MusicPlaylist>) {
         self._playlist = playlist
@@ -38,6 +38,8 @@ struct ModifyPlaylistPopupView: View {
                 HStack{
                     Spacer()
                     SharedAsset.playerX.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: 25, height: 25)
                         .padding(.trailing, 20)
                         .onTapGesture {
@@ -124,21 +126,16 @@ struct ModifyPlaylistPopupView: View {
                     .padding(.top, 15)
                     .menuStyle(DarkMenuStyle())
                 }
+            
                 
                 Button(action: {
                     modifyPlaylist()
                 }, label: {
-                    Text("만들기")
-                        .frame(maxWidth: .infinity)
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
-                        .foregroundStyle(.black)
-                        .padding(.vertical, 17)
-                        .padding(.horizontal, 25)
-                        .background(playlistTitle.isEmpty ? ColorSet.subGray : ColorSet.mainPurpleColor)
-                        .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
+                    MumoryLoadingButton(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
                         .padding(.horizontal, 30)
                         .padding(.top, 40)
                 })
+                .frame(height: 50)
                 .disabled(playlistTitle.isEmpty)
 
             }
@@ -166,6 +163,7 @@ struct ModifyPlaylistPopupView: View {
     }
     
     private func modifyPlaylist() {
+        isLoading = true
         playlist.title = self.playlistTitle
         playlist.isPublic = self.isPublic
         
@@ -178,6 +176,7 @@ struct ModifyPlaylistPopupView: View {
         ])
         
         dismiss()
+        isLoading = false
     }
 }
 

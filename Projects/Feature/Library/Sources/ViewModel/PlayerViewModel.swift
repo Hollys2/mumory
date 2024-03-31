@@ -301,12 +301,29 @@ public class PlayerViewModel: ObservableObject {
         self.isShownMiniPlayer = isShown
     }
     
+    public func setPlayerVisibilityByUserWithoutAnimation(isShown: Bool) {
+        self.userWantsShown = isShown
+        self.isShownMiniPlayer = isShown
+    }
+    
     public func setPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
-        self.miniPlayerMoveToBottom = moveToBottom
-        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+        withAnimation(.linear(duration: 0.2)) {
+            self.miniPlayerMoveToBottom = moveToBottom
+            isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+        }
     }
     
     public func setPlayerVisibility(isShown: Bool) {
+        withAnimation(.linear(duration: 0.2)) {
+            isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+        }
+    }
+    public func setPlayerVisibilityWithoutAnimation(isShown: Bool){
+        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+    }
+    
+    public func setPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
+        self.miniPlayerMoveToBottom = moveToBottom
         isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
     }
 }
