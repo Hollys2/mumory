@@ -30,7 +30,7 @@ public struct MumoryTabView: View {
                 
                 Image(uiImage: selectedTab == .home ? SharedAsset.homeOnTabbar.image : SharedAsset.homeOffTabbar.image )
                     .resizable()
-                    .frame(width: 31, height: 43)
+                    .frame(width: 25, height: 41)
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
                         selectedTab = .home
