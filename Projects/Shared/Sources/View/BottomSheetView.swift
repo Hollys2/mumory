@@ -86,6 +86,7 @@ public struct MumoryBottomSheet {
                     
                 },
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
+                    self.appCoordinator.rootPath.append(MumoryView)
                 }
             ]
         case .mumorySocialView:
