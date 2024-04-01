@@ -728,12 +728,6 @@ public struct MumoryCommentSheetView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 72)
                         .overlay(
-                            Rectangle()
-                                .fill(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                                .frame(height: 0.5)
-                            , alignment: .top
-                        )
-                        .overlay(
                             ZStack {
                                 SharedAsset.commentInitialPopup.swiftUIImage
                                     .resizable()
