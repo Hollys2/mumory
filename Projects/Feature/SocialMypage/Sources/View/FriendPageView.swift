@@ -84,7 +84,7 @@ struct KnownFriendPageView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
-    @State private var firstMumorys: [Mumory] = []
+    @State private var firstMumory: Mumory = Mumory()
     @State private var isLoading: Bool = true
     @State private var playlists: [MusicPlaylist] = []
     @State private var isPlaylistLoading: Bool = true
@@ -109,7 +109,7 @@ struct KnownFriendPageView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
                     
-                    FriendMapViewRepresentable(friendMumorys: self.firstMumorys)
+                    FriendMapViewRepresentable(friendMumorys: self.mumoryDataViewModel.friendMumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
                     
@@ -124,7 +124,7 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendMumoryView(friend: self.friend, mumorys: $mumorys, isLoading: $isLoading)
+                FriendMumoryView(friend: self.friend, mumorys: self.mumorys, isLoading: $isLoading)
                 
                 Divider05()
                 
@@ -140,15 +140,21 @@ struct KnownFriendPageView: View {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
         }
         .onAppear {
-            self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
-                print("KnownFriendPageView fetchFriendsMumorys 성공")
-                if !mumorys.isEmpty, let firstMumory = mumorys.first {
-                    self.firstMumorys = [firstMumory]
-                }
-                self.mumorys = mumorys
+            self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { result in
                 
-                DispatchQueue.main.async {
-                    mumoryDataViewModel.isUpdating = false
+                switch result {
+                case .success(let mumorys):
+                    if !mumorys.isEmpty, let firstMumory = mumorys.first {
+                        self.firstMumory = firstMumory
+                    }
+                    self.mumorys = mumorys
+                    
+                    DispatchQueue.main.async {
+                        mumoryDataViewModel.friendMumorys = mumorys
+                        mumoryDataViewModel.isUpdating = false
+                    }
+                case .failure(let err):
+                    print("ERROR: \(err)")
                 }
                 if self.playlists.isEmpty {
                     Task {
@@ -576,7 +582,10 @@ struct FriendInfoView: View {
 }
 
 struct FriendPlaylistView: View {
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var currentUserData: CurrentUserData
+    
     let friend: MumoriUser
     init(friend: MumoriUser, playlists: Binding<[MusicPlaylist]>, isLoading: Binding<Bool>) {
         self.friend = friend
@@ -936,13 +945,13 @@ struct PlaylistItemTest: View {
 
 struct FriendMumoryView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @Binding private var mumorys: [Mumory]
+    let mumorys: [Mumory]
     @Binding private var isLoading: Bool
     let friend: MumoriUser
     
-    init(friend: MumoriUser, mumorys: Binding<[Mumory]>, isLoading: Binding<Bool>) {
+    init(friend: MumoriUser, mumorys: [Mumory], isLoading: Binding<Bool>) {
         self.friend = friend
-        self._mumorys = mumorys
+        self.mumorys = mumorys
         self._isLoading = isLoading
     }
     var body: some View {
@@ -967,7 +976,7 @@ struct FriendMumoryView: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .onTapGesture {
-                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
+                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(friend), mumoryAnnotation: Mumory()))
             }
             
             if isLoading {

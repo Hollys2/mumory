@@ -283,7 +283,8 @@ public struct CreateMumoryBottomSheetView: View {
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
-                .padding(.top, appCoordinator.safeAreaInsetsTop + 16)
+//                .padding(.top, appCoordinator.safeAreaInsetsTop + 16)
+                .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
                 .offset(y: self.offsetY + self.dragState.translation.height)
                 .gesture(dragGesture)
                 .transition(.move(edge: .bottom))
@@ -308,7 +309,7 @@ public struct CreateMumoryBottomSheetView: View {
                         
                         if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
                            let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                            mumoryDataViewModel.isCreating = true
+                            mumoryDataViewModel.isLoading = true
 
                             let dispatchGroup = DispatchGroup()
 
@@ -352,7 +353,7 @@ public struct CreateMumoryBottomSheetView: View {
                                     case .success:
                                         self.generateHapticFeedback(style: .medium)
                                         print("뮤모리 만들기 성공")
-                                        mumoryDataViewModel.isCreating = false
+                                        mumoryDataViewModel.isLoading = false
                                         
                                         mumoryDataViewModel.choosedMusicModel = nil
                                         mumoryDataViewModel.choosedLocationModel = nil

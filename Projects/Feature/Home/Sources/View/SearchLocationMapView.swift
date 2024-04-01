@@ -15,7 +15,7 @@ import _MapKit_SwiftUI
 @available(iOS 16.0, *)
 public struct SearchLocationMapView: View {
     
-    @State var locationModel: LocationModel = .init(locationTitle: "", locationSubtitle: "", coordinate: CLLocationCoordinate2D())
+    @State var locationModel: LocationModel = .init()
     
     @State private var locationTitleText: String = ""
     @State private var translation: CGSize = .zero

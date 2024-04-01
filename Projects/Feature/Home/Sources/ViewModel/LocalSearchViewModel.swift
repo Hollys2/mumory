@@ -20,12 +20,16 @@ struct RecentLocationSearch: Codable, Hashable {
     var locationSubTitle: String
     var latitude: Double
     var longitude: Double
-    
+    var country: String
+    var administrativeArea: String
+
     static func == (lhs: RecentLocationSearch, rhs: RecentLocationSearch) -> Bool {
         return lhs.locationTitle == rhs.locationTitle &&
                lhs.locationSubTitle == rhs.locationSubTitle &&
                lhs.latitude == rhs.latitude &&
-               lhs.longitude == rhs.longitude
+               lhs.longitude == rhs.longitude &&
+               lhs.country == rhs.country &&
+               lhs.administrativeArea == rhs.administrativeArea
     }
 }
 
@@ -61,6 +65,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
 //        searchCompleter.region = MKCoordinateRegion(MKMapRect.world)
 //        searchCompleter.resultTypes = MKLocalSearchCompleter.ResultType([.address])
         searchCompleter.resultTypes = .pointOfInterest
+        searchCompleter.pointOfInterestFilter = .includingAll
         
         cancellable = $queryFragment
             .debounce(for: .seconds(0.3), scheduler: DispatchQueue.main)
@@ -83,24 +88,29 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
     }
 
     
-    func getRegion(localSearchCompletion: MKLocalSearchCompletion, completion: @escaping (MKCoordinateRegion?) -> Void) {
+    func getRegion(localSearchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {
         let request = MKLocalSearch.Request(completion: localSearchCompletion)
-        
         Task {
             do {
                 let response = try await MKLocalSearch(request: request).start()
-                if let coordinate = response.mapItems.first?.placemark.coordinate {
-                    print("response.mapItems.first is not nil")
-                    let region = MKCoordinateRegion(center: coordinate, span: MapConstant.defaultSpan)
-                    completion(region)
-                } else {
-                    print("response.mapItems.first is nil")
-                    let region = response.boundingRegion
-                    completion(region)
+
+                if let placemark = response.mapItems.first?.placemark {
+
+//                    let coutry = placemark.country ?? ""
+//                    let administrativeArea = placemark.administrativeArea ?? ""
+//                    let locationTitle = placemark.name ?? ""
+//                    let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
+                    let coordinate = placemark.coordinate
+//                    let region = MKCoordinateRegion(center: coordinate, span: MapConstant.defaultSpan)
+//                    print("coutry: \(String(describing: coutry))")
+//                    print("administrativeArea: \(String(describing: administrativeArea))")
+                    completion(coordinate)
+                    
+//                    completion(LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: coordinate, country: coutry, administrativeArea: administrativeArea))
                 }
             } catch {
                 print("Error getting region:", error.localizedDescription)
-                completion(nil)
+                completion(CLLocationCoordinate2D())
             }
         }
     }
@@ -149,14 +159,10 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
             print("Encoding Error: \(error)")
         }
     }
-    
-    
 }
 
 extension LocalSearchViewModel: MKLocalSearchCompleterDelegate {
     public func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
         self.results = completer.results
-        
-        print("results = \(self.results)")
     }
 }

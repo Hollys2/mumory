@@ -39,8 +39,6 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
            let decodedCoordinate = try? JSONDecoder().decode(CodableCoordinate.self, from: encodedCoordinate),
            let encodedSpan = UserDefaults.standard.data(forKey: "lastCenterSpan"),
            let decodedSpan = try? JSONDecoder().decode(CodableCoordinateSpan.self, from: encodedSpan) {
-            print("decodedCoordinate.toCoordinate: \(decodedCoordinate.toCoordinate)")
-            print("decodedCoordinate.toSpan: \(decodedSpan.toSpan)")
             mapView.setRegion(MKCoordinateRegion(center: decodedCoordinate.toCoordinate, span: decodedSpan.toSpan), animated: true)
         }
         
@@ -112,7 +110,7 @@ extension HomeMapViewRepresentable {
             guard let mapView = self.mapView else { return }
             
             let button = UIButton(type: .custom)
-            button.frame = CGRect(x: mapView.bounds.width - 48 - 22, y: mapView.bounds.height - 48 - 24, width: 48, height: 48)
+            button.frame = CGRect(x: mapView.bounds.width - 48 - 15, y: mapView.bounds.height - 48 - 24, width: 48, height: 48)
             button.autoresizingMask = [.flexibleTopMargin, .flexibleLeftMargin]
             button.setImage(SharedAsset.gps.image, for: .normal)
             button.addTarget(self, action:#selector(self.tappedGPSButton), for:.touchUpInside)
@@ -308,8 +306,7 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
         mapView.isRotateEnabled = false
         mapView.showsUserLocation = false
         
-        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan), animated: true)
-        mapView.setRegion(MKCoordinateRegion(center: self.friendMumorys.first?.coordinate ?? MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSpan), animated: true)
+        mapView.setRegion(MKCoordinateRegion(center: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaCoordinate2D : self.friendMumorys.first!.coordinate, span: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaSpan : MapConstant.defaultSpan), animated: true)
         context.coordinator.mapView = mapView
                 
         return mapView
@@ -330,7 +327,7 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
         
         uiView.addAnnotations(self.friendMumorys)
         
-        uiView.setRegion(MKCoordinateRegion(center: self.friendMumorys.first?.coordinate ?? MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSpan), animated: true)
+//        uiView.setRegion(MKCoordinateRegion(center: self.friendMumorys.first?.coordinate ?? MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSpan), animated: true)
     }
     
     func makeCoordinator() -> Coordinator {

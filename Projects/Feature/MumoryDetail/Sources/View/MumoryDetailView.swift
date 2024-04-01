@@ -40,10 +40,10 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
             .environmentObject(currentUserData)
         )
         
-        let x = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
         
-        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: x)
-        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: x)
+        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
+        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
         
         scrollView.backgroundColor = .clear
         hostingController.view.backgroundColor = .clear
@@ -115,7 +115,9 @@ extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         
-        self.parent.contentOffsetY = offsetY
+        DispatchQueue.main.async {
+            self.parent.contentOffsetY = offsetY
+        }
         
         let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
         
@@ -139,15 +141,14 @@ public struct MumoryDetailView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    
+    
     public var body: some View {
         
         ZStack(alignment: .top) {
             
             Color(red: 0.09, green: 0.09, blue: 0.09)
-            
-            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
-            
+                        
             ZStack(alignment: .bottomLeading) {
                 
                 AsyncImage(url: mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
@@ -187,7 +188,12 @@ public struct MumoryDetailView: View {
                 .padding(.leading, 20)
             } // ZStack
             
+                
             MumoryDetailScrollViewRepresentable(mumory: self.mumory, contentOffsetY: self.$offsetY)
+            
+            if mumoryDataViewModel.isUpdating {
+                MumoryDetailLoadingView()
+            }
             
             HStack {
                 
@@ -224,6 +230,9 @@ public struct MumoryDetailView: View {
                 MumoryDetailReactionBarView(mumory: self.mumory, isOn: true)
             }
             
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+            
             ZStack {
                 Color.clear
                     .ignoresSafeArea()
@@ -239,15 +248,14 @@ public struct MumoryDetailView: View {
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await MumoriUser(uId: self.mumory.uId)
                 print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
-            }
-            
-            Task {
+                
                 for friend in self.currentUserData.friends {
                     await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
-                    print("친구뮤모리: \(mumoryDataViewModel.friendMumorys)")
+                    await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
+                    print("친구뮤모리: \(mumoryDataViewModel.sameSongFriendMumorys)")
+                    print("주변뮤모리: \(mumoryDataViewModel.surroundingMumorys)")
                 }
             }
-            
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
@@ -261,11 +269,331 @@ public struct MumoryDetailView: View {
                     print("뮤모리 삭제 성공")
                     appCoordinator.isDeleteMumoryPopUpViewShown = false
                     appCoordinator.rootPath.removeLast()
-                    
-//                    mumoryDataViewModel.fetchEveryMumory2(completion: ([Mumory]) -> Void)
                     appCoordinator.isFirstTabSelected = false
                 }
             })
         })
     }
 }
+
+public struct MumoryDetailLoadingView: View {
+    
+    @State var startAnimation: Bool = true
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    public var body: some View {
+        ScrollView {
+            
+            ZStack(alignment: .top) {
+                
+                Color(red: 0.184, green: 0.184, blue: 0.184)
+                    .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height)
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    
+                    ZStack(alignment: .bottomLeading) {
+                        
+                        SharedAsset.albumFilterMumoryDetail.swiftUIImage
+                            .resizable()
+                            .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                            .offset(y: -appCoordinator.safeAreaInsetsTop)
+                        
+                        Rectangle()
+                            .fill(SharedAsset.backgroundColor.swiftUIColor)
+                            .frame(width: UIScreen.main.bounds.width, height: 64)
+                            .background(
+                                LinearGradient(
+                                    stops: [
+                                        Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09), location: 0.38),
+                                        Gradient.Stop(color: Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0), location: 0.59),
+                                    ],
+                                    startPoint: UnitPoint(x: 0.5, y: 1.28),
+                                    endPoint: UnitPoint(x: 0.5, y: 0.56)
+                                )
+                            )
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            RoundedRectangle(cornerRadius: 5, style: .circular)
+                                .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                .frame(width: 255, height: 23)
+                            
+                            RoundedRectangle(cornerRadius: 5, style: .circular)
+                                .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                .frame(width: 86, height: 18)
+                        }
+                        .padding(.leading, 20)
+                    } // ZStack
+                    
+                    SharedAsset.backgroundColor.swiftUIColor
+                    
+                    HStack(spacing: 0) {
+                        Circle()
+                            .fill(self.startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                            .frame(width: 38, height: 38)
+                        
+                        Spacer().frame(width: 8)
+                        
+                        VStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 5, style: .circular)
+                                .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                .frame(width: 95, height: 14)
+                            
+                            HStack {
+                                RoundedRectangle(cornerRadius: 5, style: .circular)
+                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                    .frame(width: 60, height: 14)
+                                
+                                Spacer()
+                                
+                                RoundedRectangle(cornerRadius: 5, style: .circular)
+                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                    .frame(width: 124, height: 14)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 68)
+                    .background(SharedAsset.backgroundColor.swiftUIColor)
+                    
+                    HStack(spacing: 8) {
+                        ForEach(0..<3) { _ in
+                            RoundedRectangle(cornerRadius: 40, style: .circular)
+                                .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                .frame(width: 75, height: 28)
+                        }
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 55)
+                    .background(SharedAsset.backgroundColor.swiftUIColor)
+                    
+                    
+                    VStack(alignment: .leading, spacing: 0) {
+                        RoundedRectangle(cornerRadius: 40, style: .circular)
+                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                            .frame(width: getUIScreenBounds().width - 40, height: 15)
+                        
+                        RoundedRectangle(cornerRadius: 40, style: .circular)
+                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                            .frame(width: 313, height: 15)
+                            .padding(.top, 13)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 24)
+                    .background(SharedAsset.backgroundColor.swiftUIColor)
+                    
+                    
+                    Rectangle()
+                        .fill(self.startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                        .frame(width: getUIScreenBounds().width - 40, height: getUIScreenBounds().width - 40)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 21)
+                        .background(SharedAsset.backgroundColor.swiftUIColor)
+                        .clipped()
+                }
+            }
+        }
+        .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height)
+        .scrollDisabled(true)
+        .ignoresSafeArea()
+        .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: self.startAnimation)
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+}
+
+public struct SocialLoadingView: View {
+    
+    @State var startAnimation: Bool = true
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    public var body: some View {
+        ScrollView {
+            
+            ZStack(alignment: .top) {
+                
+                SharedAsset.backgroundColor.swiftUIColor
+                    .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height)
+                
+                VStack(spacing: 0) {
+                    
+                    Rectangle()
+                        .fill(SharedAsset.backgroundColor.swiftUIColor)
+                        .frame(height: 68)
+                        .padding(.top, appCoordinator.safeAreaInsetsTop)
+                    
+                    Group {
+                        HStack(spacing: 0) {
+                            Circle()
+                                .fill(self.startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                                .frame(width: 38, height: 38)
+                            
+                            Spacer().frame(width: 8)
+                            
+                            VStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 5, style: .circular)
+                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                    .frame(width: 95, height: 14)
+                                
+                                HStack {
+                                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                                        .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                        .frame(width: 60, height: 14)
+                                    
+                                    Spacer()
+                                    
+                                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                                        .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                        .frame(width: 124, height: 14)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 15, style: .circular)
+                                .fill(self.startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                                .frame(width: getUIScreenBounds().width - 20, height: getUIScreenBounds().width - 20)
+                            
+                            VStack(spacing: 0) {
+                                RoundedRectangle(cornerRadius: 5, style: .circular)
+                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                    .frame(width: 139, height: 12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.top, 22)
+                                    .padding(.horizontal, 20)
+                                
+                                Spacer()
+                                
+                                HStack(alignment: .bottom, spacing: 0) {
+                                    
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        
+                                        HStack(spacing: 8) {
+                                            
+                                            ForEach(0..<2) { _ in
+                                                RoundedRectangle(cornerRadius: 40, style: .circular)
+                                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                                    .frame(width: 75, height: 28)
+                                            }
+                                            Spacer()
+                                        }
+                                        
+                                        RoundedRectangle(cornerRadius: 5, style: .circular)
+                                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                            .frame(width: 258, height: 12)
+                                    }
+                                    
+                                    VStack(spacing: 12) {
+                                        Circle()
+                                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                            .frame(width: 42, height: 42)
+                                        
+                                        Circle()
+                                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                            .frame(width: 42, height: 42)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 27)
+                            }
+                            .frame(width: getUIScreenBounds().width - 20, height: getUIScreenBounds().width - 20)
+                        }
+                        .padding(.top, 14)
+                    }
+                    
+                    Group {
+                        HStack(spacing: 0) {
+                            Circle()
+                                .fill(self.startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                                .frame(width: 38, height: 38)
+                            
+                            Spacer().frame(width: 8)
+                            
+                            VStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 5, style: .circular)
+                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                    .frame(width: 95, height: 14)
+                                
+                                HStack {
+                                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                                        .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                        .frame(width: 60, height: 14)
+                                    
+                                    Spacer()
+                                    
+                                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                                        .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                        .frame(width: 124, height: 14)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.top, 40)
+                        
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 15, style: .circular)
+                                .fill(self.startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
+                                .frame(width: getUIScreenBounds().width - 20, height: getUIScreenBounds().width - 20)
+                            
+                            VStack(spacing: 0) {
+                                RoundedRectangle(cornerRadius: 5, style: .circular)
+                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                    .frame(width: 139, height: 12)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.top, 22)
+                                    .padding(.horizontal, 20)
+                                
+                                Spacer()
+                                
+                                HStack(alignment: .bottom, spacing: 0) {
+                                    
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        
+                                        HStack(spacing: 8) {
+                                            
+                                            ForEach(0..<2) { _ in
+                                                RoundedRectangle(cornerRadius: 40, style: .circular)
+                                                    .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                                    .frame(width: 75, height: 28)
+                                            }
+                                            Spacer()
+                                        }
+                                        
+                                        RoundedRectangle(cornerRadius: 5, style: .circular)
+                                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                            .frame(width: 258, height: 12)
+                                    }
+                                    
+                                    VStack(spacing: 12) {
+                                        Circle()
+                                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                            .frame(width: 42, height: 42)
+                                        
+                                        Circle()
+                                            .fill(self.startAnimation ? ColorSet.skeleton02 : ColorSet.skeleton03)
+                                            .frame(width: 42, height: 42)
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.bottom, 27)
+                            }
+                            .frame(width: getUIScreenBounds().width - 20, height: getUIScreenBounds().width - 20)
+                        }
+                        .padding(.top, 14)
+                    }
+                }
+                .padding(.top, 25)
+            }
+        }
+        .scrollDisabled(true)
+        .ignoresSafeArea()
+        .animation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: self.startAnimation)
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+}
+

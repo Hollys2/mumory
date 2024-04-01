@@ -49,8 +49,8 @@ struct MumoryDetailFriendMumoryScrollUIViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        if self.oldFriendMumorys.count != self.mumoryDataViewModel.friendMumorys.count {
-            let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.friendMumorys.count)
+        if self.oldFriendMumorys.count != self.mumoryDataViewModel.sameSongFriendMumorys.count {
+            let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.sameSongFriendMumorys.count)
             let hostingController = UIHostingController(rootView: MumoryDetailFriendMumoryScrollContentView(mumory: self.mumory)
                 .environmentObject(mumoryDataViewModel))
             let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
@@ -63,7 +63,7 @@ struct MumoryDetailFriendMumoryScrollUIViewRepresentable: UIViewRepresentable {
             uiView.addSubview(hostingController.view)
 
             DispatchQueue.main.async {
-                self.oldFriendMumorys = self.mumoryDataViewModel.friendMumorys
+                self.oldFriendMumorys = self.mumoryDataViewModel.sameSongFriendMumorys
             }
         }
     }
@@ -108,7 +108,7 @@ struct MumoryDetailFriendMumoryScrollContentView: View {
     
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(Array(self.mumoryDataViewModel.friendMumorys.prefix(min(3, self.mumoryDataViewModel.friendMumorys.count))), id: \.self) { mumory in
+            ForEach(Array(self.mumoryDataViewModel.sameSongFriendMumorys.prefix(min(3, self.mumoryDataViewModel.sameSongFriendMumorys.count))), id: \.self) { mumory in
                 MumoryDetailFriendMumoryView(mumory: mumory)
                     .padding(.horizontal, 5)
             }

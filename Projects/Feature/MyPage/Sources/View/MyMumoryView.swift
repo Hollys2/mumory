@@ -15,6 +15,8 @@ import Shared
 
 public struct MyMumoryView: View {
     
+    let user: MumoriUser
+    
     @State private var selectedDate: Date = Date()
     @State private var currentTabSelection: Int = 0
     @State private var isDatePickerShown: Bool = false
@@ -22,8 +24,6 @@ public struct MyMumoryView: View {
     
     @State private var isBlur: Bool = false
     @State private var bluroffset: CGFloat = 0
-    
-    @State private var filteredLocations: [String: [Mumory]] = [:]
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -38,47 +38,49 @@ public struct MyMumoryView: View {
         GridItem(.flexible(), spacing: 0)
     ]
     
-    public init() {}
+    public init(user: MumoriUser) {
+        self.user = user
+    }
     
     public var body: some View {
         ZStack {
             
             VStack(spacing: 0) {
-                
+
                 VStack(spacing: 0) {
-                    
+
                     Spacer().frame(height: self.appCoordinator.safeAreaInsetsTop + 19)
-                    
-                HStack(spacing: 0) {
-                    
-                    Button(action: {
-                        self.appCoordinator.rootPath.removeLast()
-                    }, label: {
-                        SharedAsset.backButtonTopBar.swiftUIImage
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                    })
-                    
-                    Spacer()
-                    
-                    TopBarTitleView(title: "나의 뮤모리")
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        self.isMyMumorySearchViewShown = true
-                    }, label: {
-                        SharedAsset.searchButtonMypage.swiftUIImage
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                    })
-                }
+
+                    HStack(spacing: 0) {
+
+                        Button(action: {
+                            self.appCoordinator.rootPath.removeLast()
+                        }, label: {
+                            SharedAsset.backButtonTopBar.swiftUIImage
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                        })
+
+                        Spacer()
+
+                        TopBarTitleView(title: self.user.uId == currentUserData.user.uId ? "나의 뮤모리" : "\(self.user.nickname)의 뮤모리")
+
+                        Spacer()
+
+                        Button(action: {
+                            self.isMyMumorySearchViewShown = true
+                        }, label: {
+                            SharedAsset.searchButtonMypage.swiftUIImage
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                        })
+                    }
                     .padding(.horizontal, 20)
-                    
+
                     Spacer().frame(height: 13)
-                    
+
                     PageTabView(selection: $currentTabSelection) {
-                        
+
                         ForEach(Array(["타임라인", "지역"].enumerated()), id: \.element) { index, title in
                             Text(title)
                                 .font(
@@ -100,133 +102,127 @@ public struct MyMumoryView: View {
                                     }
                                 }
                         }
-                        
-                    } content: {
-                            
-                            ZStack(alignment: .top) {
-                                
-//                                ScrollView(showsIndicators: false) {
-                                ScrollViewReader { proxy in
-                                    
-                                    VStack(spacing: 0) {
-                                        
-                                        ForEach(Array(mumoryDataViewModel.filteredMumorys.enumerated()), id: \.element) { index, mumory in
-                                            
-                                            if index == 0 {
-                                                ZStack(alignment: .topLeading) {
-                                                    Rectangle()
-                                                        .foregroundColor(.clear)
-                                                        .frame(height: 31)
-                                                        .overlay(
-                                                            Rectangle()
-                                                                .foregroundColor(.clear)
-                                                                .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                            alignment: .top
-                                                        )
-                                                    
-                                                    Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                        .foregroundColor(.white)
-                                                        .padding(.leading, 12)
-                                                        .offset(y: 21)
-                                                }
-                                            }
-                                            
-                                            if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.filteredMumorys[index - 1]) {
-                                                ZStack(alignment: .topLeading) {
-                                                    Rectangle()
-                                                        .foregroundColor(.clear)
-                                                        .frame(height: 31)
-                                                        .overlay(
-                                                            Rectangle()
-                                                                .foregroundColor(.clear)
-                                                                .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                            alignment: .top
-                                                        )
-                                                    
-                                                    Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                        .foregroundColor(.white)
-                                                        .padding(.leading, 12)
-                                                        .offset(y: 21)
-                                                }
-                                                .padding(.top, 30)
-                                            }
-                                            
-                                            MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
-                                                .id(Int(index))
-                                        }
-                                        
-                                        Spacer(minLength: 0)
-                                    } // VStack
-                                    .padding(.top, 55)
-                                    .blurScroll(10)
-                                    .onChange(of: mumoryDataViewModel.filteredMumorys) { _ in
-//                                        withAnimation {
-//                                            print("FUCKYOU")
-//                                            proxy.scrollTo(0, anchor: .top)
-//                                        }
-                                    }
-                                }
-//                                } // ScrollView
 
-                                ZStack(alignment: .leading) {
-                                    
-                                    Rectangle()
-                                        .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.9))
-                                        .frame(width: getUIScreenBounds().width, height: 55)
-                                        .overlay(
-                                            Rectangle()
-                                                .foregroundColor(.clear)
-                                                .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4))
-                                            , alignment: .bottom
-                                        )
-                                    
-                                    HStack(spacing: 6) {
-                                        Text("\(Calendar.current.component(.month, from: self.selectedDate))월")
-                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                                            .foregroundColor(.white)
-                                        
-                                        SharedAsset.dateButtonMypage.swiftUIImage
-                                            .resizable()
-                                            .frame(width: 15, height: 15)
+                    } content: {
+
+                        ZStack(alignment: .top) {
+
+                            //                                ScrollView(showsIndicators: false) {
+                            ScrollViewReader { proxy in
+
+                                VStack(spacing: 0) {
+
+                                    ForEach(Array(mumoryDataViewModel.monthlyMumorys.enumerated()), id: \.element) { index, mumory in
+
+                                        if index == 0 {
+                                            ZStack(alignment: .topLeading) {
+                                                Rectangle()
+                                                    .foregroundColor(.clear)
+                                                    .frame(height: 31)
+                                                    .overlay(
+                                                        Rectangle()
+                                                            .foregroundColor(.clear)
+                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                        alignment: .top
+                                                    )
+
+                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                    .foregroundColor(.white)
+                                                    .padding(.leading, 12)
+                                                    .offset(y: 21)
+                                            }
+                                        }
+
+                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.monthlyMumorys[index - 1]) {
+                                            ZStack(alignment: .topLeading) {
+                                                Rectangle()
+                                                    .foregroundColor(.clear)
+                                                    .frame(height: 31)
+                                                    .overlay(
+                                                        Rectangle()
+                                                            .foregroundColor(.clear)
+                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                        alignment: .top
+                                                    )
+
+                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                    .foregroundColor(.white)
+                                                    .padding(.leading, 12)
+                                                    .offset(y: 21)
+                                            }
+                                            .padding(.top, 30)
+                                        }
+
+                                        MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
+                                            .id(Int(index))
                                     }
-                                    .padding(.leading, 12)
-                                    .onTapGesture {
-                                        UIView.setAnimationsEnabled(false)
-                                        self.isDatePickerShown = true
-                                    }
+
+                                    Spacer(minLength: 0)
+                                } // VStack
+                                .padding(.top, 55)
+                                .blurScroll(10)
+                            }
+                            //                                } // ScrollView
+
+                            ZStack(alignment: .leading) {
+
+                                Rectangle()
+                                    .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.9))
+                                    .frame(width: getUIScreenBounds().width, height: 55)
+                                    .overlay(
+                                        Rectangle()
+                                            .foregroundColor(.clear)
+                                            .frame(width: getUIScreenBounds().width, height: 0.3)
+                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4))
+                                        , alignment: .bottom
+                                    )
+
+                                HStack(spacing: 6) {
+                                    Text("\(Calendar.current.component(.month, from: self.selectedDate))월")
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                        .foregroundColor(.white)
+
+                                    SharedAsset.dateButtonMypage.swiftUIImage
+                                        .resizable()
+                                        .frame(width: 15, height: 15)
+                                }
+                                .padding(.leading, 12)
+                                .onTapGesture {
+                                    UIView.setAnimationsEnabled(false)
+                                    self.isDatePickerShown = true
                                 }
                             }
+                        }
                         .pageView()
                         .tag(0)
-                        
+
                         ScrollView(showsIndicators: false) {
-                            
+
                             VStack(spacing: 0) {
-                                
+
                                 HStack(spacing: 0) {
-                                    
-                                    Text("지역 \(self.filteredLocations.count)곳에서 기록함")
+
+                                    Text("지역 \(self.mumoryDataViewModel.locationMumorys.count)곳에서 기록함")
                                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                    
+
                                     Spacer()
                                 }
                                 .padding(.top, 16)
                                 .padding(.bottom, 17)
                                 .padding(.horizontal, 20)
-                                
+
                                 LazyVGrid(columns: columns, spacing: 12) {
-                                    
-                                    ForEach(self.filteredLocations.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
+
+                                    ForEach(self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
 
                                         RoundedSquareView(regionTitle: region, mumorys: mumories)
                                             .onTapGesture {
-                                                self.appCoordinator.rootPath.append(MumoryView(type: .regionMyMumoryView, mumoryAnnotation: Mumory(), region: region, mumorys: mumories))
+                                                self.appCoordinator.rootPath.append(MumoryView(type: .regionMyMumoryView(self.user), mumoryAnnotation: Mumory(), region: region, mumorys: mumories))
                                             }
                                     }
                                 }
@@ -250,134 +246,119 @@ public struct MyMumoryView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
-            
-            mumoryDataViewModel.filteredMumorys = mumoryDataViewModel.myMumorys
-
-            let dispatchGroup = DispatchGroup()
-            
-            var results: [(Mumory, country: String?, administrativeArea: String?)] = []
-            
-            for mumory in mumoryDataViewModel.myMumorys {
-                dispatchGroup.enter() // 비동기 작업 시작
-                
-                let geocoder = CLGeocoder()
-                geocoder.reverseGeocodeLocation(CLLocation(latitude: mumory.locationModel.coordinate.latitude, longitude: mumory.locationModel.coordinate.longitude)) { placemarks, error in
-                    defer { dispatchGroup.leave() } // 비동기 작업 종료
-                    
-                    guard let placemark = placemarks?.first, error == nil else {
-                        print("Error: ", error?.localizedDescription ?? "Unknown error")
-                        return
-                    }
-                    
-                    let country = placemark.country
-                    let administrativeArea = placemark.administrativeArea
-                    
-                    results.append((mumory, country, administrativeArea))
-                }
+            if self.user.uId == self.currentUserData.user.uId {
+                self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
+                mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys
+            } else {
+                self.selectedDate = self.mumoryDataViewModel.friendMumorys.first?.date ?? Date()
+                mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.friendMumorys
             }
             
-            dispatchGroup.notify(queue: .main) {
-                filteredLocations = [:]
-                for result in results {
-                    let (mumory, country, administrativeArea) = result
-                    print("country: \(String(describing: country))")
-                    if var country = country, let administrativeArea = administrativeArea {
-                        if country != "대한민국" {
-                            if country == "영국" {
-                                country += " 🇬🇧"
-                            } else if country == "미 합중국" {
-                                country = "미국 🇺🇸"
-                            } else if country == "이탈리아" {
-                                country += " 🇮🇹"
-                            } else if country == "프랑스" {
-                                country += " 🇫🇷"
-                            } else if country == "독일" {
-                                country += " 🇩🇪"
-                            } else if country == "일본" {
-                                country += " 🇯🇵"
-                            } else if country == "중국" {
-                                country += " 🇨🇳"
-                            } else if country == "캐나다" {
-                                country += " 🇨🇦"
-                            } else if country == "오스트레일리아" {
-                                country += " 🇦🇹"
-                            } else if country == "브라질" {
-                                country += " 🇧🇷"
-                            } else if country == "인도" {
-                                country += " 🇮🇳"
-                            } else if country == "러시아" {
-                                country += " 🇷🇺"
-                            } else if country == "호주" {
-                                country += " 🇦🇺"
-                            } else if country == "멕시코" {
-                                country += " 🇲🇽"
-                            } else if country == "인도네시아" {
-                                country += " 🇮🇩"
-                            } else if country == "터키" {
-                                country += " 🇹🇷"
-                            } else if country == "사우디아라비아" {
-                                country += " 🇸🇦"
-                            } else if country == "스페인" {
-                                country += " 🇪🇸"
-                            } else if country == "네덜란드" {
-                                country += " 🇳🇱"
-                            } else if country == "스위스" {
-                                country += " 🇨🇭"
-                            } else if country == "아르헨티나" {
-                                country += " 🇦🇷"
-                            } else if country == "스웨덴" {
-                                country += " 🇸🇪"
-                            } else if country == "폴란드" {
-                                country += " 🇵🇱"
-                            } else if country == "벨기에" {
-                                country += " 🇧🇪"
-                            } else if country == "태국" {
-                                country += " 🇹🇭"
-                            } else if country == "이란" {
-                                country += " 🇮🇷"
-                            } else if country == "오스트리아" {
-                                country += " 🇦🇹"
-                            } else if country == "노르웨이" {
-                                country += " 🇳🇴"
-                            } else if country == "아랍에미리트" {
-                                country += " 🇦🇪"
-                            } else if country == "나이지리아" {
-                                country += " 🇳🇬"
-                            } else if country == "남아프리카공화국" {
-                                country += " 🇿🇦"
-                            } else {
-                                country = "기타 🏁"
-                            }
-
-                            // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                            if var countryMumories = filteredLocations[country] {
-                                // 존재하는 경우 해당 배열에 뮤모리 추가
-                                countryMumories.append(mumory)
-                                // 딕셔너리에 업데이트
-                                filteredLocations[country] = countryMumories
-                            } else {
-                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                filteredLocations[country] = [result.0]
-                            }
-                        } else {
-                            if var countryMumories = filteredLocations[administrativeArea] {
-                                // 존재하는 경우 해당 배열에 뮤모리 추가
-                                countryMumories.append(mumory)
-                                // 딕셔너리에 업데이트
-                                filteredLocations[administrativeArea] = countryMumories
-                            } else {
-                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                filteredLocations[administrativeArea] = [result.0]
-                            }
-                        }
+            mumoryDataViewModel.locationMumorys = [:]
+            
+            for mumory in mumoryDataViewModel.monthlyMumorys {
+                var country = mumory.locationModel.country
+                let administrativeArea = mumory.locationModel.administrativeArea
+                
+                print("country: \(country)")
+                print("administrativeArea: \(administrativeArea)")
+                
+                if country != "대한민국" {
+                    if country == "영국" {
+                        country += " 🇬🇧"
+                    } else if country == "미 합중국" {
+                        country = "미국 🇺🇸"
+                    } else if country == "이탈리아" {
+                        country += " 🇮🇹"
+                    } else if country == "프랑스" {
+                        country += " 🇫🇷"
+                    } else if country == "독일" {
+                        country += " 🇩🇪"
+                    } else if country == "일본" {
+                        country += " 🇯🇵"
+                    } else if country == "중국" {
+                        country += " 🇨🇳"
+                    } else if country == "캐나다" {
+                        country += " 🇨🇦"
+                    } else if country == "오스트레일리아" {
+                        country += " 🇦🇹"
+                    } else if country == "브라질" {
+                        country += " 🇧🇷"
+                    } else if country == "인도" {
+                        country += " 🇮🇳"
+                    } else if country == "러시아" {
+                        country += " 🇷🇺"
+                    } else if country == "우크라이나" {
+                        country += " 🇺🇦"                        
+                    } else if country == "호주" {
+                        country += " 🇦🇺"
+                    } else if country == "멕시코" {
+                        country += " 🇲🇽"
+                    } else if country == "인도네시아" {
+                        country += " 🇮🇩"
+                    } else if country == "터키" {
+                        country += " 🇹🇷"
+                    } else if country == "사우디아라비아" {
+                        country += " 🇸🇦"
+                    } else if country == "스페인" {
+                        country += " 🇪🇸"
+                    } else if country == "네덜란드" {
+                        country += " 🇳🇱"
+                    } else if country == "스위스" {
+                        country += " 🇨🇭"
+                    } else if country == "아르헨티나" {
+                        country += " 🇦🇷"
+                    } else if country == "스웨덴" {
+                        country += " 🇸🇪"
+                    } else if country == "폴란드" {
+                        country += " 🇵🇱"
+                    } else if country == "벨기에" {
+                        country += " 🇧🇪"
+                    } else if country == "태국" {
+                        country += " 🇹🇭"
+                    } else if country == "이란" {
+                        country += " 🇮🇷"
+                    } else if country == "오스트리아" {
+                        country += " 🇦🇹"
+                    } else if country == "노르웨이" {
+                        country += " 🇳🇴"
+                    } else if country == "아랍에미리트" {
+                        country += " 🇦🇪"
+                    } else if country == "나이지리아" {
+                        country += " 🇳🇬"
+                    } else if country == "남아프리카공화국" {
+                        country += " 🇿🇦"
+                    } else {
+                        country = "기타 🏁"
+                    }
+                    
+                    // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
+                    if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
+                        // 존재하는 경우 해당 배열에 뮤모리 추가
+                        countryMumories.append(mumory)
+                        // 딕셔너리에 업데이트
+                        mumoryDataViewModel.locationMumorys[country] = countryMumories
+                    } else {
+                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                        mumoryDataViewModel.locationMumorys[country] = [mumory]
+                    }
+                } else {
+                    if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
+                        // 존재하는 경우 해당 배열에 뮤모리 추가
+                        countryMumories.append(mumory)
+                        // 딕셔너리에 업데이트
+                        mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
+                    } else {
+                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                        mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
+                
             }
         }
         .fullScreenCover(isPresented: $isDatePickerShown, content: {
             BottomSheetWrapper(isPresent: $isDatePickerShown) {
-                MyMumoryDatePicker(selectedDate: self.$selectedDate)
+                MyMumoryDatePicker(selectedDate: self.$selectedDate, user: self.user)
                     .frame(height: 309)
             }
             .background(TransparentBackground())
@@ -387,25 +368,18 @@ public struct MyMumoryView: View {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {
                     print("뮤모리 삭제 성공")
+                    
+                    let calendar = Calendar.current
+                    let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
+                    let range = ...lastDayOfMonth
+                    let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
+                    mumoryDataViewModel.monthlyMumorys = newDataBeforeSelectedDate
                     appCoordinator.isDeleteMumoryPopUpViewShown = false
+                    mumoryDataViewModel.isUpdating = false
                 }
             })
         })
         .ignoresSafeArea()
-    }
-    
-    func calculateSpacing(forIndex index: Int) -> CGFloat {
-        guard index > 0 else {
-            return 0
-        }
-        let previousDate = mumoryDataViewModel.filteredMumorys[index - 1].date
-        let currentDate = mumoryDataViewModel.filteredMumorys[index].date
-                    
-        print("previousDate: \(previousDate)")
-        print("currentDate: \(currentDate)")
-        print(Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day))
-            
-        return !Calendar.current.isDate(currentDate, equalTo: previousDate, toGranularity: .day) ? 0 : 30
     }
     
     func isSameMonth(_ mumory1: Mumory, with mumory2: Mumory) -> Bool {
@@ -450,13 +424,13 @@ struct MumoryItemView: View {
     }
     
     private var previousDate: Date? {
-        guard let index = mumoryDataViewModel.filteredMumorys.firstIndex(where: { $0.id == mumory.id }) else {
+        guard let index = mumoryDataViewModel.monthlyMumorys.firstIndex(where: { $0.id == mumory.id }) else {
             return nil
         }
         guard index > 0 else {
             return nil
         }
-        return mumoryDataViewModel.filteredMumorys[index - 1].date
+        return mumoryDataViewModel.monthlyMumorys[index - 1].date
     }
     
     private var isSameDateAsPrevious: Bool {
@@ -587,7 +561,6 @@ struct MumoryItemView: View {
                                 }
                         )
 
-                    // MARK: Title & Menu & Heart & Comment
                     HStack(spacing: 0) {
                         SharedAsset.musicIconSocial.swiftUIImage
                             .resizable()
