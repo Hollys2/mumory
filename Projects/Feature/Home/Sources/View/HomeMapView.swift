@@ -15,8 +15,6 @@ import Shared
 
 struct HomeMapView: View {
     
-    @State private var isAppleMusicPopUpShown: Bool = true
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
@@ -52,21 +50,6 @@ struct HomeMapView: View {
                     )
                 
                 Spacer()
-                
-//                Rectangle()
-//                    .foregroundColor(.clear)
-//                    .frame(height: 159.99997)
-//                    .background(
-//                        LinearGradient(
-//                            stops: [
-//                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
-//                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
-//                            ],
-//                            startPoint: UnitPoint(x: 0.5, y: 1),
-//                            endPoint: UnitPoint(x: 0.5, y: 0)
-//                        )
-//                    )
-//                    .offset(y: 89)
             }
             .allowsHitTesting(false)
             
@@ -74,9 +57,8 @@ struct HomeMapView: View {
                 PlayingMusicBarView()
                     .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
                 
-                AppleMusicPopUpView(isShown: self.$isAppleMusicPopUpShown)
+                AppleMusicPopUpView()
                     .padding(.top, 15)
-                    .opacity(self.isAppleMusicPopUpShown ? 1 : 0)
                 
                 Spacer()
             }

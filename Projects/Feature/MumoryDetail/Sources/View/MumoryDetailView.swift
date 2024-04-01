@@ -181,7 +181,7 @@ public struct MumoryDetailView: View {
 
                     Text("\(mumory.musicModel.artist)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .foregroundColor(.white.opacity(0.8))
                         .frame(width: 301, alignment: .leading)
                 }

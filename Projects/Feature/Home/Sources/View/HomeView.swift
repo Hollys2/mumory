@@ -120,10 +120,6 @@ public struct HomeView: View {
             }
         })
         .onAppear {
-            if UserDefaults.standard.object(forKey: "firstRun") == nil {
-                UserDefaults.standard.set(true, forKey: "firstRun")
-                UserDefaults.standard.set(Date(), forKey: "firstLogined")
-            }
             playerViewModel.miniPlayerMoveToBottom = false
             
             Task {
