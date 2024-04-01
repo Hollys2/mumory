@@ -79,12 +79,12 @@ extension Project {
     public static let bundleId: String = "com.hollys.mumory"
     public static let appStoreVersion: String = "1.0"
     public static let bundleVersion: String = "1.0.0"
-    public static let iOSTargetVersion: String = "15.0"
+    public static let iOSTargetVersion: String = "16.0"
     
     
     public static func makeConfiguration() -> [Configuration] {
-        let debug: Configuration = Configuration.debug(name: "Debug", xcconfig: "Configs/Debug.xcconfig")
-        let release: Configuration = Configuration.release(name: "Release", xcconfig: "Configs/Release.xcconfig")
+        let debug: Configuration = Configuration.debug(name: .debug, xcconfig: "./Configs/Debug.xcconfig")
+        let release: Configuration = Configuration.release(name: .release, xcconfig: "./Configs/Release.xcconfig")
         
         return [debug, release]
     }
@@ -97,9 +97,32 @@ extension Project {
                 [
                     "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
                 ],
+            "UIUserInterfaceStyle": "Dark",
             "CFBundleVersion": "\(bundleVersion)",
             "CFBundleShortVersionString": "\(appStoreVersion)",
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
+            "NSLocationWhenInUseUsageDescription": "지도를 주세요.",
+            "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
+            "FirebaseAppDelegateProxyEnabled": false,
+            "CFBundleURLTypes" : [
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "kakao1",
+                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
+                ],
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "kakao2",
+                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260:ouath"]
+                ],
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "fireBase-google",
+                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
+                ]
+            ],
+            "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한이 필요합니다",
+            "NSAppleMusicUsageDescription" : "애플 뮤직 권한 요청"
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in
@@ -113,7 +136,10 @@ extension Project {
         let settings = SettingsDictionary()
         
         return Settings.settings(base: settings,
-                                 configurations: [],
+                                 configurations: [
+                                    .debug(name: .debug),
+                                    .release(name: .release)
+                                 ],
                                  defaultSettings: .recommended)
         
     }

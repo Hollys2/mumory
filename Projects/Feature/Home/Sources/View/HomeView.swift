@@ -6,67 +6,197 @@
 //  Copyright © 2023 hollys. All rights reserved.
 //
 
-
 import SwiftUI
 import MapKit
 import MusicKit
+import Firebase
+
 import Core
+import Shared
+
 
 public struct HomeView: View {
     
-    @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194),
-        span: MKCoordinateSpan(latitudeDelta: 0.5, longitudeDelta: 0.5)
-    )
+    @State private var listener: ListenerRegistration?
+    @State private var isSocialSearchViewShown: Bool = false
+    @State private var isCreateMumoryPopUpViewShown: Bool = true
     
-    public init(){
-        
-    }
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var keyboardResponder: KeyboardResponder
+    @EnvironmentObject var settingViewModel: SettingViewModel
+    @EnvironmentObject var withdrawViewModel: WithdrawViewModel
+    
+    public init(){}
     
     public var body: some View {
-        HStack{
-            Text("This is Home")
-            Button("Load Songs", action: loadSongs)
-            Map(coordinateRegion: $region)
-        }
-    }
-    
-    //    let db = Firestore.firestore()
-    let db = FirebaseManager.shared.db
-    
-    
-    private func saveMusic() {
-        let musicIDs = ["hello", "1487778081", "1712044358", "1590067123", "1651802560", "1534525138",
-                        "1436905366", "1441164589", "1441164738"]
-        
-        db.collection("favorite").document("musicIDs").setData(["IDs": musicIDs]) { error in
-            if let error = error {
-                print("파베 에러: \(error)")
-            } else {
-                print("파베 성공")
+        ZStack(alignment: .bottom) {
+            
+            VStack(spacing: 0) {
+                switch appCoordinator.selectedTab {
+                case .home:
+                    HomeMapView()
+                case .social:
+                    SocialView(isShown: self.$isSocialSearchViewShown)
+                case .library:
+                    LibraryView()
+                case .notification:
+                    NotifyView()
+                }
+                
+                ZStack(alignment: .top) {
+                    MumoryTabView(selectedTab: $appCoordinator.selectedTab)
+                    
+                    CreateMumoryPopUpView()
+                            .offset(y: -41)
+                }
+            }
+            .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
+            
+            MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
+                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+            
+            if self.appCoordinator.isMumoryPopUpShown {
+                ZStack {
+                    
+                    Color.black.opacity(0.6)
+                        .onTapGesture {
+                            self.appCoordinator.isMumoryPopUpShown = false
+                        }
+                    
+                    VStack(spacing: 16) {
+                        
+                        MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
+                            .frame(height: 418)
+                            .padding(.horizontal, (UIScreen.main.bounds.width - (getUIScreenBounds().width == 375 ? 296 : 310)) / 2 - 10)
+                        
+                        Button(action: {
+                            self.appCoordinator.isMumoryPopUpShown = false
+                        }, label: {
+                            SharedAsset.closeButtonMumoryPopup.swiftUIImage
+                                .resizable()
+                                .frame(width: 26, height: 26)
+                        })
+                    }
+                    .offset(y: 10)
+                }
+            }
+            
+            if self.appCoordinator.isAddFriendViewShown {
+                SocialFriendTestView()
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+            }
+            
+            MyPageBottomAnimationView()
+            
+            if self.isSocialSearchViewShown {
+                SocialSearchView(isShown: self.$isSocialSearchViewShown)
+            }
+            
+            if mumoryDataViewModel.isUpdating {
+                ZStack {
+                    Color.black
+                        .opacity(0.1)
+                        .ignoresSafeArea()
+                    
+                    LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
+                }
+            }
+        } // ZStack
+        .ignoresSafeArea()
+        .navigationBarBackButtonHidden()
+        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
+        .onDisappear(perform: {
+            //현재 탭이 라이브러리면 다른 뷰로 넘어가도 플레이어 안 없어지게 
+            if appCoordinator.selectedTab == .library {
+                playerViewModel.setPlayerVisibility(isShown: true, moveToBottom: true)
+            }else {
+                playerViewModel.setPlayerVisibility(isShown: false)
+            }
+        })
+        .onAppear {
+            if UserDefaults.standard.object(forKey: "firstRun") == nil {
+                UserDefaults.standard.set(true, forKey: "firstRun")
+                UserDefaults.standard.set(Date(), forKey: "firstLogined")
+            }
+            playerViewModel.miniPlayerMoveToBottom = false
+            
+            Task {
+                let authorizationStatus = await MusicAuthorization.request()
+                if authorizationStatus == .authorized {
+                    print("음악 권한 받음")
+                    
+                    if !appCoordinator.isFirst {
+                        print("한번")
+                        self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { mumorys in
+                            DispatchQueue.main.async {
+                                self.mumoryDataViewModel.myMumorys = mumorys
+                                self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                                self.mumoryDataViewModel.isUpdating = false
+                            }
+                        }
+                        
+                        appCoordinator.isFirst = true
+                    }
+                } else {
+                    print("음악 권한 거절")
+                    DispatchQueue.main.async {
+                        self.showAlertToRedirectToSettings()
+                    }
+                }
             }
         }
     }
+
+    func showAlertToRedirectToSettings() {
+        let alertController = UIAlertController(title: "음악 권한 허용", message: "뮤모리를 이용하려면 음악 권한이 필요합니다. 설정으로 이동하여 권한을 허용해주세요.", preferredStyle: .alert)
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, completionHandler: nil)
+            }
+        }
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(cancelAction)
+        
+        UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+        //        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+        //            if let window = windowScene.windows.first {
+        //                window.rootViewController?.present(alertController, animated: true, completion: nil)
+        //            }
+        //        }
+    }
     
-    private func loadSongs() {
-        db.collection("favorite").document("musicIDs").getDocument { (document, error) in
-            if let error = error {
-                print("Error getting document: \(error)")
-            } else if let document = document, document.exists {
-                if let musicIDs = document.data()?["IDs"] as? [String] {
-                    print("Music IDs: \(musicIDs)")
-                } else {
-                    print("No Music IDs")
-                }
-            } else {
-                print("Document does not exist")
+    
+    @ViewBuilder
+    private func MyPageBottomAnimationView() -> some View {
+        VStack {
+            if appCoordinator.bottomAnimationViewStatus == .myPage {
+                MyPageView()
+                    .environmentObject(withdrawViewModel)
+                    .environmentObject(settingViewModel)
+                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+                
+            }
+        }
+        
+    }
+    
+    @ViewBuilder
+    private func PlayBottomAnimationView() -> some View {
+        VStack {
+            if appCoordinator.bottomAnimationViewStatus == .play {
+                NowPlayingView()
+                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
             }
         }
     }
 }
-
-//struct HomeVIew_Previews: PreviewProvider {
-//    static var previews: some View {
-//        HomeVIew()
-//    }
-//}
