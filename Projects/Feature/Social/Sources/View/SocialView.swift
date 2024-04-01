@@ -637,9 +637,9 @@ public struct SocialView: View {
                 }
             }
             
-//            if mumoryDataViewModel.isUpdating, mumoryDataViewModel.everyMumorys.isEmpty {
-//                SocialLoadingView()
-//            }
+            if mumoryDataViewModel.isUpdating, !mumoryDataViewModel.isFirstSocialLoad {
+                SocialLoadingView()
+            }
         
             HStack(alignment: .top, spacing: 0) {
 

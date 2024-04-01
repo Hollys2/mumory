@@ -24,7 +24,7 @@ struct MumoryDetailSameLocationMusicView: View {
                     Rectangle()
                         .fill(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.502))
                         .frame(height: 0.5)
-                        .offset(y: 34.75)
+                    , alignment: .bottom
                 )
             
             HStack(spacing: 0) {
@@ -41,15 +41,6 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 .frame(width: 40, height: 40)
                 .cornerRadius(6)
-                
-//                Rectangle()
-//                    .foregroundColor(.clear)
-//                    .frame(width: 40, height: 40)
-//                    .background(
-//                        Color.gray
-//                            .frame(width: 40, height: 40)
-//                    )
-//                    .cornerRadius(6)
                 
                 Spacer().frame(width: 13)
                 
