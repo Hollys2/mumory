@@ -122,11 +122,11 @@ struct ContentView: View {
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundColor(.white)
                             
-                            Spacer()
+                            Spacer(minLength: 0)
                         }
                         .overlay(
                             MonthlyStatGenrePopUpView()
-                                .offset(x: 6, y: 3)
+                                .offset(x: getUIScreenBounds().width > 375 ? -6 : 6, y: 3)
                                 .opacity(self.favoriteGenre == "-" ? 1 : 0)
                             , alignment: .trailing
                         )
@@ -134,7 +134,6 @@ struct ContentView: View {
                             Task {
                                 // 뮤모리 외 MonthlyStat 컬렉션 추후 사용하기
                                 let mumorySongIds: [String] = self.mumoryDataViewModel.monthlyMumorys.map { $0.musicModel.songID.rawValue }
-                                
                                 self.favoriteGenre = await getModeGenre(songIds: mumorySongIds)
                             }
                         }
@@ -142,6 +141,7 @@ struct ContentView: View {
                 }
                 .padding(.top, 28)
                 .padding(.horizontal, 20)
+                .zIndex(3)
                 
                 SharedAsset.infoIconMonthlyStat.swiftUIImage
                     .resizable()
@@ -150,6 +150,7 @@ struct ContentView: View {
                     .onTapGesture {
                         self.isPopUpViewShown = true
                     }
+                    .zIndex(1)
             }
             
             ZStack(alignment: .topLeading) {
@@ -313,10 +314,12 @@ struct ContentView: View {
                 .padding(.top, 30)
             
             HStack(spacing: 10) {
-                let sortedLocationsArray = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count })
-                
+                let sortedLocationsArray = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
                 
                 ForEach(1..<4) { index in
+                    let key = index < sortedLocationsArray.count ? sortedLocationsArray[index].key : "-"
+                    let valueCount = index < sortedLocationsArray.count ? "\(sortedLocationsArray[index].value.count)개" : "-"
+                    
                     Rectangle()
                         .foregroundColor(.clear)
                         .frame(width: getUIScreenBounds().width * 0.28, height: getUIScreenBounds().width * 0.28)
@@ -339,14 +342,14 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                Text("-")
+                                Text(key)
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                     .multilineTextAlignment(.center)
                                     .foregroundColor(.white)
                                 
                                 Spacer()
                                 
-                                Text("-")
+                                Text(valueCount)
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                     .multilineTextAlignment(.center)
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
@@ -395,8 +398,11 @@ struct ContentView: View {
             Spacer()
         }
         .frame(width: getUIScreenBounds().width - 40)
+        .padding(.horizontal, 20)
         .padding(.top, 65)
         .onAppear {
+            mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys
+            
             var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
             let calendar = Calendar.current
             let year = calendar.component(.year, from: Date())
@@ -406,7 +412,7 @@ struct ContentView: View {
             }
             let month = calendar.component(.month, from: self.date)
             self.days = daysInMonth[month - 1]
-//            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+            //            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
             
             for mumory in self.mumoryDataViewModel.monthlyMumorys {
                 let day = Calendar.current.component(.day, from: mumory.date)
@@ -437,177 +443,250 @@ struct ContentView: View {
                 
                 mumoriesCommentCount += mumory.commentCount
             }
+            
+            mumoryDataViewModel.locationMumorys = [:]
+            for mumory in mumoryDataViewModel.monthlyMumorys {
+                var country = mumory.locationModel.country
+                let administrativeArea = mumory.locationModel.administrativeArea
+                
+                if country != "대한민국" {
+                    if country == "영국" {
+                        country += " 🇬🇧"
+                    } else if country == "미 합중국" {
+                        country = "미국 🇺🇸"
+                    } else if country == "이탈리아" {
+                        country += " 🇮🇹"
+                    } else if country == "프랑스" {
+                        country += " 🇫🇷"
+                    } else if country == "독일" {
+                        country += " 🇩🇪"
+                    } else if country == "일본" {
+                        country += " 🇯🇵"
+                    } else if country == "중국" {
+                        country += " 🇨🇳"
+                    } else if country == "캐나다" {
+                        country += " 🇨🇦"
+                    } else if country == "오스트레일리아" {
+                        country += " 🇦🇹"
+                    } else if country == "브라질" {
+                        country += " 🇧🇷"
+                    } else if country == "인도" {
+                        country += " 🇮🇳"
+                    } else if country == "러시아" {
+                        country += " 🇷🇺"
+                    } else if country == "우크라이나" {
+                        country += " 🇺🇦"
+                    } else if country == "호주" {
+                        country += " 🇦🇺"
+                    } else if country == "멕시코" {
+                        country += " 🇲🇽"
+                    } else if country == "인도네시아" {
+                        country += " 🇮🇩"
+                    } else if country == "터키" {
+                        country += " 🇹🇷"
+                    } else if country == "사우디아라비아" {
+                        country += " 🇸🇦"
+                    } else if country == "스페인" {
+                        country += " 🇪🇸"
+                    } else if country == "네덜란드" {
+                        country += " 🇳🇱"
+                    } else if country == "스위스" {
+                        country += " 🇨🇭"
+                    } else if country == "아르헨티나" {
+                        country += " 🇦🇷"
+                    } else if country == "스웨덴" {
+                        country += " 🇸🇪"
+                    } else if country == "폴란드" {
+                        country += " 🇵🇱"
+                    } else if country == "벨기에" {
+                        country += " 🇧🇪"
+                    } else if country == "태국" {
+                        country += " 🇹🇭"
+                    } else if country == "이란" {
+                        country += " 🇮🇷"
+                    } else if country == "오스트리아" {
+                        country += " 🇦🇹"
+                    } else if country == "노르웨이" {
+                        country += " 🇳🇴"
+                    } else if country == "아랍에미리트" {
+                        country += " 🇦🇪"
+                    } else if country == "나이지리아" {
+                        country += " 🇳🇬"
+                    } else if country == "남아프리카공화국" {
+                        country += " 🇿🇦"
+                    } else {
+                        country = "기타 🏁"
+                    }
+                    
+                    // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
+                    if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
+                        // 존재하는 경우 해당 배열에 뮤모리 추가
+                        countryMumories.append(mumory)
+                        // 딕셔너리에 업데이트
+                        mumoryDataViewModel.locationMumorys[country] = countryMumories
+                    } else {
+                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                        mumoryDataViewModel.locationMumorys[country] = [mumory]
+                    }
+                } else {
+                    if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
+                        // 존재하는 경우 해당 배열에 뮤모리 추가
+                        countryMumories.append(mumory)
+                        // 딕셔너리에 업데이트
+                        mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
+                    } else {
+                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                        mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
+                    }
+                }
+                
+            }
         }
-//        .onChange(of: self.date, perform: { _ in
-//            self.mumoryDaily = [:]
-////            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-////            let calendar = Calendar.current
-////            let year = calendar.component(.year, from: Date())
-////            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
-////            if isLeapYear {
-////                daysInMonth[1] = 29
-////            }
-////            let month = calendar.component(.month, from: self.date)
-////            self.days = daysInMonth[month - 1]
-////            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
-//            self.mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.monthlyMumorys
-//
-//            let dispatchGroup = DispatchGroup()
-//
-//            var results: [(Mumory, country: String?, administrativeArea: String?)] = []
-//
-//            for mumory in mumoryDataViewModel.monthlyMumorys {
-//                dispatchGroup.enter() // 비동기 작업 시작
-//
-//                let geocoder = CLGeocoder()
-//                geocoder.reverseGeocodeLocation(CLLocation(latitude: mumory.locationModel.coordinate.latitude, longitude: mumory.locationModel.coordinate.longitude)) { placemarks, error in
-//                    defer { dispatchGroup.leave() } // 비동기 작업 종료
-//
-//                    guard let placemark = placemarks?.first, error == nil else {
-//                        print("Error: ", error?.localizedDescription ?? "Unknown error")
-//                        return
-//                    }
-//
-//                    let country = placemark.country
-//                    let administrativeArea = placemark.administrativeArea
-//
-//                    results.append((mumory, country, administrativeArea))
-//                }
-//            }
-//
-//            dispatchGroup.notify(queue: .main) {
-//                mumoryDataViewModel.locationMumorys = [:]
-//                for result in results {
-//                    let (mumory, country, administrativeArea) = result
-//                    print("country: \(String(describing: country))")
-//                    if var country = country, let administrativeArea = administrativeArea {
-//                        if country != "대한민국" {
-//                            if country == "영국" {
-//                                country += " 🇬🇧"
-//                            } else if country == "미 합중국" {
-//                                country = "미국 🇺🇸"
-//                            } else if country == "이탈리아" {
-//                                country += " 🇮🇹"
-//                            } else if country == "프랑스" {
-//                                country += " 🇫🇷"
-//                            } else if country == "독일" {
-//                                country += " 🇩🇪"
-//                            } else if country == "일본" {
-//                                country += " 🇯🇵"
-//                            } else if country == "중국" {
-//                                country += " 🇨🇳"
-//                            } else if country == "캐나다" {
-//                                country += " 🇨🇦"
-//                            } else if country == "오스트레일리아" {
-//                                country += " 🇦🇹"
-//                            } else if country == "브라질" {
-//                                country += " 🇧🇷"
-//                            } else if country == "인도" {
-//                                country += " 🇮🇳"
-//                            } else if country == "러시아" {
-//                                country += " 🇷🇺"
-//                            } else if country == "호주" {
-//                                country += " 🇦🇺"
-//                            } else if country == "멕시코" {
-//                                country += " 🇲🇽"
-//                            } else if country == "인도네시아" {
-//                                country += " 🇮🇩"
-//                            } else if country == "터키" {
-//                                country += " 🇹🇷"
-//                            } else if country == "사우디아라비아" {
-//                                country += " 🇸🇦"
-//                            } else if country == "스페인" {
-//                                country += " 🇪🇸"
-//                            } else if country == "네덜란드" {
-//                                country += " 🇳🇱"
-//                            } else if country == "스위스" {
-//                                country += " 🇨🇭"
-//                            } else if country == "아르헨티나" {
-//                                country += " 🇦🇷"
-//                            } else if country == "스웨덴" {
-//                                country += " 🇸🇪"
-//                            } else if country == "폴란드" {
-//                                country += " 🇵🇱"
-//                            } else if country == "벨기에" {
-//                                country += " 🇧🇪"
-//                            } else if country == "태국" {
-//                                country += " 🇹🇭"
-//                            } else if country == "이란" {
-//                                country += " 🇮🇷"
-//                            } else if country == "오스트리아" {
-//                                country += " 🇦🇹"
-//                            } else if country == "노르웨이" {
-//                                country += " 🇳🇴"
-//                            } else if country == "아랍에미리트" {
-//                                country += " 🇦🇪"
-//                            } else if country == "나이지리아" {
-//                                country += " 🇳🇬"
-//                            } else if country == "남아프리카공화국" {
-//                                country += " 🇿🇦"
-//                            } else {
-//                                country = "기타 🏁"
-//                            }
-//
-//                            // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-//                            if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
-//                                // 존재하는 경우 해당 배열에 뮤모리 추가
-//                                countryMumories.append(mumory)
-//                                // 딕셔너리에 업데이트
-//                                mumoryDataViewModel.locationMumorys[country] = countryMumories
-//                            } else {
-//                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-//                                mumoryDataViewModel.locationMumorys[country] = [result.0]
-//                            }
-//                        } else {
-//                            if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
-//                                // 존재하는 경우 해당 배열에 뮤모리 추가
-//                                countryMumories.append(mumory)
-//                                // 딕셔너리에 업데이트
-//                                mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
-//                            } else {
-//                                // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-//                                mumoryDataViewModel.locationMumorys[administrativeArea] = [result.0]
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            for mumory in self.mumoryDataViewModel.monthlyMumorys {
-//                let day = Calendar.current.component(.day, from: mumory.date)
-//
-//                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
-//                if var mumories = self.mumoryDaily[day] {
-//                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
-//                    mumories.append(mumory)
-//                    self.mumoryDaily[day] = mumories
-//                } else {
-//                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
-//                    self.mumoryDaily[day] = [mumory]
-//                }
-//            }
-//
-//            for day in 1...self.days {
-//                if self.mumoryDaily[day] == nil {
-//                    self.mumoryDaily[day] = []
-//                }
-//            }
-//
-//
-//
-//            mumoriesLikeCount = 0
-//            mumoriesCommentCount = 0
-//
-//            for mumory in self.mumoryDataViewModel.monthlyMumorys {
-//                for uId in mumory.likes {
-//                    if uId != currentUserData.user.uId {
-//                        mumoriesLikeCount += 1
-//                    }
-//                }
-//
-//                mumoriesCommentCount += mumory.commentCount
-//            }
-//        })
+        .onChange(of: self.date) { _ in
+            print("DATE: \(date)")
+            var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+            let calendar = Calendar.current
+            let year = calendar.component(.year, from: Date())
+            let isLeapYear = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
+            if isLeapYear {
+                daysInMonth[1] = 29
+            }
+            let month = calendar.component(.month, from: self.date)
+            self.days = daysInMonth[month - 1]
+            //            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+            
+            
+            mumoryDaily = [:]
+            mumoriesLikeCount = 0
+            mumoriesCommentCount = 0
+            for mumory in self.mumoryDataViewModel.monthlyMumorys {
+                let day = Calendar.current.component(.day, from: mumory.date)
+                
+                // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
+                if var mumories = self.mumoryDaily[day] {
+                    // 이미 해당 "일"에 해당하는 Mumory 배열이 있는 경우에는 해당 배열에 Mumory를 추가합니다.
+                    mumories.append(mumory)
+                    self.mumoryDaily[day] = mumories
+                } else {
+                    // 해당 "일"에 해당하는 Mumory 배열이 없는 경우에는 새로운 배열을 생성하여 Mumory를 추가합니다.
+                    self.mumoryDaily[day] = [mumory]
+                }
+            }
+            
+            for day in 1...self.days {
+                if self.mumoryDaily[day] == nil {
+                    self.mumoryDaily[day] = []
+                }
+            }
+            
+            for mumory in self.mumoryDataViewModel.monthlyMumorys {
+                for uId in mumory.likes {
+                    if uId != currentUserData.user.uId {
+                        mumoriesLikeCount += 1
+                    }
+                }
+                
+                mumoriesCommentCount += mumory.commentCount
+            }
+            
+            mumoryDataViewModel.locationMumorys = [:]
+            for mumory in mumoryDataViewModel.monthlyMumorys {
+                var country = mumory.locationModel.country
+                let administrativeArea = mumory.locationModel.administrativeArea
+                
+                if country != "대한민국" {
+                    if country == "영국" {
+                        country += " 🇬🇧"
+                    } else if country == "미 합중국" {
+                        country = "미국 🇺🇸"
+                    } else if country == "이탈리아" {
+                        country += " 🇮🇹"
+                    } else if country == "프랑스" {
+                        country += " 🇫🇷"
+                    } else if country == "독일" {
+                        country += " 🇩🇪"
+                    } else if country == "일본" {
+                        country += " 🇯🇵"
+                    } else if country == "중국" {
+                        country += " 🇨🇳"
+                    } else if country == "캐나다" {
+                        country += " 🇨🇦"
+                    } else if country == "오스트레일리아" {
+                        country += " 🇦🇹"
+                    } else if country == "브라질" {
+                        country += " 🇧🇷"
+                    } else if country == "인도" {
+                        country += " 🇮🇳"
+                    } else if country == "러시아" {
+                        country += " 🇷🇺"
+                    } else if country == "우크라이나" {
+                        country += " 🇺🇦"
+                    } else if country == "호주" {
+                        country += " 🇦🇺"
+                    } else if country == "멕시코" {
+                        country += " 🇲🇽"
+                    } else if country == "인도네시아" {
+                        country += " 🇮🇩"
+                    } else if country == "터키" {
+                        country += " 🇹🇷"
+                    } else if country == "사우디아라비아" {
+                        country += " 🇸🇦"
+                    } else if country == "스페인" {
+                        country += " 🇪🇸"
+                    } else if country == "네덜란드" {
+                        country += " 🇳🇱"
+                    } else if country == "스위스" {
+                        country += " 🇨🇭"
+                    } else if country == "아르헨티나" {
+                        country += " 🇦🇷"
+                    } else if country == "스웨덴" {
+                        country += " 🇸🇪"
+                    } else if country == "폴란드" {
+                        country += " 🇵🇱"
+                    } else if country == "벨기에" {
+                        country += " 🇧🇪"
+                    } else if country == "태국" {
+                        country += " 🇹🇭"
+                    } else if country == "이란" {
+                        country += " 🇮🇷"
+                    } else if country == "오스트리아" {
+                        country += " 🇦🇹"
+                    } else if country == "노르웨이" {
+                        country += " 🇳🇴"
+                    } else if country == "아랍에미리트" {
+                        country += " 🇦🇪"
+                    } else if country == "나이지리아" {
+                        country += " 🇳🇬"
+                    } else if country == "남아프리카공화국" {
+                        country += " 🇿🇦"
+                    } else {
+                        country = "기타 🏁"
+                    }
+                    
+                    // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
+                    if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
+                        // 존재하는 경우 해당 배열에 뮤모리 추가
+                        countryMumories.append(mumory)
+                        // 딕셔너리에 업데이트
+                        mumoryDataViewModel.locationMumorys[country] = countryMumories
+                    } else {
+                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                        mumoryDataViewModel.locationMumorys[country] = [mumory]
+                    }
+                } else {
+                    if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
+                        // 존재하는 경우 해당 배열에 뮤모리 추가
+                        countryMumories.append(mumory)
+                        // 딕셔너리에 업데이트
+                        mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
+                    } else {
+                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
+                        mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
+                    }
+                }
+                
+            }
+        }
     }
 }
 

@@ -40,6 +40,7 @@ struct MumoryDetailScrollContentView: View {
     @State var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()
     @State var isMapViewShown: Bool = false
+    @State var isPopUpShown: Bool = true
     @State var playButtonOpacity: CGFloat = 1
 
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -55,7 +56,6 @@ struct MumoryDetailScrollContentView: View {
                 
                 Color.clear
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                
                 
                 Rectangle()
                     .foregroundColor(.clear)
@@ -112,6 +112,7 @@ struct MumoryDetailScrollContentView: View {
                                 Color(red: 0.184, green: 0.184, blue: 0.184)
                             }
                         }
+                        .scaledToFill()
                         .frame(width: 38, height: 38)
                         .mask {Circle()}
                         .onTapGesture {
@@ -228,6 +229,22 @@ struct MumoryDetailScrollContentView: View {
                                 }
                             }
                     })
+                    .overlay(
+                        ZStack {
+                            SharedAsset.starPopup.swiftUIImage
+                                .resizable()
+                                .frame(width: 235, height: 42)
+                                .offset(x: -15, y: 16)
+                                .opacity(UserDefaults.standard.value(forKey: "starPopUp") == nil ? 1 : 0)
+                                .onTapGesture {
+                                    self.isPopUpShown = false
+                                    UserDefaults.standard.set(Date(), forKey: "starPopUp")
+                                }
+                        }
+                            .opacity(self.isPopUpShown ? 1: 0)
+                        
+                        , alignment: .bottomTrailing
+                    )
                 
                 Spacer().frame(height: 70)
                 

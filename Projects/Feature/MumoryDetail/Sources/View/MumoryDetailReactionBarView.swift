@@ -17,6 +17,7 @@ struct MumoryDetailReactionBarView: View {
     
     @State var isOn: Bool
     @State private var isButtonDisabled = false
+    @State private var isStarButtonTapped = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
@@ -104,9 +105,10 @@ struct MumoryDetailReactionBarView: View {
                 Spacer()
                 
                 Button(action: {
-                    
+//                    self.isStarButtonTapped = true
+                    self.appCoordinator.isStarButtonTapped = true
                 }, label: {
-                    Image(uiImage: SharedAsset.starOffMumoryDetail.image)
+                    Image(uiImage: self.isStarButtonTapped ? SharedAsset.starOnMumoryDetail.image : SharedAsset.starOffMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
                 })
@@ -115,6 +117,7 @@ struct MumoryDetailReactionBarView: View {
             .padding(.top, 11)
         }
         .offset(y: self.isOn ? UIScreen.main.bounds.height - 85 : 0)
+        
     }
 }
 
