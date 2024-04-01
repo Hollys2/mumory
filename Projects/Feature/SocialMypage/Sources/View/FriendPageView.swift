@@ -111,7 +111,7 @@ struct KnownFriendPageView: View {
                         .fill(Color.clear)
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
-                    
+       
                     FriendMapViewRepresentable(friendMumorys: self.mumoryDataViewModel.friendMumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
@@ -127,11 +127,8 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendMumoryView(friend: self.friend, mumorys: $mumorys)
-                
-                Divider05()
-                
-                FriendMumoryView(friend: self.friend, mumorys: self.mumorys, isLoading: $isLoading)
+                FriendMumoryView(mumorys: $mumorys)
+                    .environmentObject(friendDataViewModel)
                 
                 Divider05()
                 
@@ -148,6 +145,9 @@ struct KnownFriendPageView: View {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
         }
         .onAppear {
+            friendDataViewModel.isPlaylistLoading = true
+            friendDataViewModel.isMumoryLoading = true
+            
             self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { result in
                 
                 switch result {
@@ -160,61 +160,19 @@ struct KnownFriendPageView: View {
                     DispatchQueue.main.async {
                         mumoryDataViewModel.friendMumorys = mumorys
                         mumoryDataViewModel.isUpdating = false
+                        friendDataViewModel.isMumoryLoading = false
                     }
                 case .failure(let err):
                     print("ERROR: \(err)")
                 }
-                if self.playlists.isEmpty {
-                    Task {
-                        isPlaylistLoading = true
-                        await getPlaylist()
-                        fetchSongToPlaylist(playlistArray: $playlists)
-                        isPlaylistLoading = false
-                    }
-                }
+            }
+            
+            Task {
+                friendDataViewModel.friend = await MumoriUser(uId: friend.uId)
+                friendDataViewModel.playlistArray = await friendDataViewModel.savePlaylist(uId: friend.uId)
+                friendDataViewModel.isPlaylistLoading = false
             }
         }
-    }
-    
-    private func getPlaylist() async {
-        self.playlists.removeAll()
-        let db = FBManager.shared.db
-        guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
-            print("error")
-            return
-        }
-        for document in snapshot.documents {
-            let data = document.data()
-            guard let isPublic = data["isPublic"] as? Bool else {
-                return
-            }
-            if !isPublic {continue}
-            guard let title = data["title"] as? String else {
-                return
-            }
-            guard let songIdentifiers = data["songIds"] as? [String] else {
-                return
-            }
-            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
-                return
-            }
-            let id = document.documentID
-            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, createdDate: date))
-        }
-    }
-    private func fetchSongInfo(songIdentifiers: [String]) async -> [Song] {
-        
-        var songs: [Song] = []
-        for id in songIdentifiers {
-            let musicItemID = MusicItemID(rawValue: id)
-            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-            let response = try? await request.response()
-            guard let song = response?.items.first else {
-                continue
-            }
-            songs.append(song)
-        }
-        return songs
     }
 }
 
@@ -590,17 +548,10 @@ struct FriendInfoView: View {
 }
 
 struct FriendPlaylistView: View {
-    
+
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
-    
-    let friend: MumoriUser
-    init(friend: MumoriUser, playlists: Binding<[MusicPlaylist]>, isLoading: Binding<Bool>) {
-        self.friend = friend
-        self._playlists = playlists
-        self._isLoading = isLoading
-    }
-    
+    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
+
     let db = FBManager.shared.db
     
     var body: some View {
@@ -952,14 +903,11 @@ struct PlaylistItemTest: View {
 struct FriendMumoryView: View {
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    let mumorys: [Mumory]
-    @Binding private var isLoading: Bool
-    let friend: MumoriUser
+
+    @Binding private var mumorys: [Mumory]
     
-    init(friend: MumoriUser, mumorys: [Mumory], isLoading: Binding<Bool>) {
-        self.friend = friend
-        self.mumorys = mumorys
-        self._isLoading = isLoading
+    init(mumorys: Binding<[Mumory]>) {
+        self._mumorys = mumorys
     }
     var body: some View {
         VStack(spacing: 0, content: {
@@ -983,7 +931,7 @@ struct FriendMumoryView: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .onTapGesture {
-                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(friend), mumoryAnnotation: Mumory()))
+                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(friendDataViewModel.friend), mumoryAnnotation: Mumory()))
             }
             
             if friendDataViewModel.isMumoryLoading {
