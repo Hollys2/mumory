@@ -79,7 +79,7 @@ struct MumoryDetailScrollContentView: View {
                         GeometryReader { geometry in
                             Color.clear
                                 .onChange(of: geometry.frame(in: .global).minY) { newValue in
-                                    let threshold = 62 + appCoordinator.safeAreaInsetsTop
+                                    let threshold = 150 + appCoordinator.safeAreaInsetsTop
                                     let distance = newValue - threshold
                                     let maxDistance: CGFloat = 90
                                     let opacity = min(max(distance / maxDistance, 0), 1)
@@ -307,29 +307,6 @@ struct MumoryDetailScrollContentView: View {
                         ForEach(self.mumoryDataViewModel.surroundingMumorys.prefix(3), id: \.self) { mumory in
                             MumoryDetailSameLocationMusicView(mumory: mumory)
                         }
-                        
-                        Spacer().frame(height: 25)
-                        
-                        Button(action: {
-                            
-                        }, label: {
-                            ZStack {
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: getUIScreenBounds().width - 40, height: 49)
-                                    .cornerRadius(50)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 50)
-                                        //                                        .inset(by: 0.25)
-                                            .stroke(Color(red: 0.475, green: 0.475, blue: 0.475), lineWidth: 0.5)
-                                    )
-                                
-                                Text("더보기")
-                                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.white)
-                            }
-                        })
                     }
                     Spacer().frame(height: 100)
                 }

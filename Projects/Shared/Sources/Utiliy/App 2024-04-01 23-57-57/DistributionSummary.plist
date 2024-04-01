@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>App.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>buildNumber</key>
+			<string>1.0.0</string>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>565F71211EDB1E2E23002F12A706EEAC2A73B176</string>
+				<key>dateExpires</key>
+				<string>2024/06/27</string>
+				<key>type</key>
+				<string>Cloud Managed Apple Distribution</string>
+			</dict>
+			<key>embeddedBinaries</key>
+			<array>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>1</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>565F71211EDB1E2E23002F12A706EEAC2A73B176</string>
+						<key>dateExpires</key>
+						<string>2024/06/27</string>
+						<key>type</key>
+						<string>Cloud Managed Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>Alamofire.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>D8W49RM7XB</string>
+						<key>name</key>
+						<string>Hyein Kim</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>1.0</string>
+				</dict>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>1</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>565F71211EDB1E2E23002F12A706EEAC2A73B176</string>
+						<key>dateExpires</key>
+						<string>2024/06/27</string>
+						<key>type</key>
+						<string>Cloud Managed Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>Core.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>D8W49RM7XB</string>
+						<key>name</key>
+						<string>Hyein Kim</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>1.0</string>
+				</dict>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>1</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>565F71211EDB1E2E23002F12A706EEAC2A73B176</string>
+						<key>dateExpires</key>
+						<string>2024/06/27</string>
+						<key>type</key>
+						<string>Cloud Managed Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>Feature.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>D8W49RM7XB</string>
+						<key>name</key>
+						<string>Hyein Kim</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>1.0</string>
+				</dict>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>buildNumber</key>
+					<string>1</string>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>565F71211EDB1E2E23002F12A706EEAC2A73B176</string>
+						<key>dateExpires</key>
+						<string>2024/06/27</string>
+						<key>type</key>
+						<string>Cloud Managed Apple Distribution</string>
+					</dict>
+					<key>name</key>
+					<string>Shared.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>D8W49RM7XB</string>
+						<key>name</key>
+						<string>Hyein Kim</string>
+					</dict>
+					<key>versionNumber</key>
+					<string>1.0</string>
+				</dict>
+			</array>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>D8W49RM7XB.com.hollys.mumory</string>
+				<key>com.apple.developer.team-identifier</key>
+				<string>D8W49RM7XB</string>
+				<key>get-task-allow</key>
+				<false/>
+			</dict>
+			<key>name</key>
+			<string>App.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>48014de5-bfa5-4bdb-b480-ddfc155bff58</string>
+				<key>dateExpires</key>
+				<string>2024/06/27</string>
+				<key>name</key>
+				<string>iOS Team Ad Hoc Provisioning Profile: com.hollys.mumory</string>
+			</dict>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>D8W49RM7XB</string>
+				<key>name</key>
+				<string>Hyein Kim</string>
+			</dict>
+			<key>versionNumber</key>
+			<string>1.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>

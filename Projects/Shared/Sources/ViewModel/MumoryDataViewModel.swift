@@ -39,6 +39,7 @@ final public class MumoryDataViewModel: ObservableObject {
     
     @Published public var isLoading: Bool = false
     @Published public var isUpdating: Bool = false
+    @Published public var isFirstSocialLoad: Bool = false
     
     @Published public var isRewardPopUpShown: Bool = false
     @Published public var reward: Reward = .none
@@ -281,6 +282,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     self.everyMumorys = self.tempSocialMumory
                     self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
+                    self.isFirstSocialLoad = true
                 }
                 
                 print("fetchSocialMumory successfully!")

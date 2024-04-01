@@ -254,6 +254,7 @@ public struct MyMumoryView: View {
                 mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.friendMumorys
             }
             
+            mumoryDataViewModel.monthlyMumorys.sort { $0.date > $1.date }
             mumoryDataViewModel.locationMumorys = [:]
             
             for mumory in mumoryDataViewModel.monthlyMumorys {

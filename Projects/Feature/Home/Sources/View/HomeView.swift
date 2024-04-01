@@ -114,10 +114,6 @@ public struct HomeView: View {
         .navigationBarBackButtonHidden()
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
-            if UserDefaults.standard.object(forKey: "firstRun") == nil {
-                UserDefaults.standard.set(true, forKey: "firstRun")
-                UserDefaults.standard.set(Date(), forKey: "firstLogined")
-            }
             playerViewModel.miniPlayerMoveToBottom = false
             
             Task {
