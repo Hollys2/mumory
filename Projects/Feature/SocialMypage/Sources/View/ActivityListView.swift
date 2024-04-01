@@ -49,6 +49,7 @@ struct Activity: Hashable{
 struct ActivityListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    
     @State var selection: ActivityType = .all
     @State var date: Date = Date()
     @State var isPresentDatePicker: Bool = false
