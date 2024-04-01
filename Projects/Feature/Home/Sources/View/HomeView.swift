@@ -11,29 +11,12 @@ import MapKit
 import MusicKit
 import Firebase
 
-import Firebase
-
 import Core
-import Shared
-
 import Shared
 
 
 public struct HomeView: View {
     
-    @State private var listener: ListenerRegistration?
-    @State private var isSocialSearchViewShown: Bool = false
-    @State private var isCreateMumoryPopUpViewShown: Bool = true
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var keyboardResponder: KeyboardResponder
-    @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var withdrawViewModel: WithdrawViewModel
-    
-    public init(){}
     @State private var listener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
     @State private var isCreateMumoryPopUpViewShown: Bool = true
@@ -199,32 +182,6 @@ public struct HomeView: View {
         //            }
         //        }
     }
-    
-    
-    @ViewBuilder
-    private func MyPageBottomAnimationView() -> some View {
-        VStack {
-            if appCoordinator.bottomAnimationViewStatus == .myPage {
-                MyPageView()
-                    .environmentObject(withdrawViewModel)
-                    .environmentObject(settingViewModel)
-                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-                
-            }
-        }
-        
-    }
-    
-    @ViewBuilder
-    private func PlayBottomAnimationView() -> some View {
-        VStack {
-            if appCoordinator.bottomAnimationViewStatus == .play {
-                NowPlayingView()
-                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-            }
-        }
-    }
-}
     
     
     @ViewBuilder
