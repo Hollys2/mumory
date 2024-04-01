@@ -462,6 +462,9 @@ struct ActivityBottomSheet: View {
     let functions = FBManager.shared.functions
     @Binding var activityList: [String: [Activity]]
     @Binding var isLoading: Bool
+    
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     init(activity: Activity, activityList: Binding<[String: [Activity]]>, isLoading: Binding<Bool>) {
         self.activity = activity
         self._activityList = activityList
@@ -484,18 +487,23 @@ struct ActivityBottomSheet: View {
                             activityList[key]?.remove(at: index)
                         }
                     }
-                  
+                    
                 }
             
         }else if activity.type == "comment" {
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
                 .onTapGesture {
-                    Task {
-                        self.isLoading = true
-                        await deleteComment(commentId: self.activity.commentId, mumoryId: self.activity.mumoryId)
-                        self.isLoading = false
+                    self.isLoading = true
+                    //                        await deleteComment(commentId: self.activity.commentId, mumoryId: self.activity.mumoryId)
+                    self.mumoryDataViewModel.deleteComment(comment: Comment(id: self.activity.commentId, uId: "", nickname: "", parentId: "", mumoryId: self.activity.mumoryId, date: Date(), content: "", isPublic: false)) { comments in
+                        Task {
+                            let mumory = await mumoryDataViewModel.fetchMumory(documentID: self.activity.mumoryId)
+                            mumory.commentCount -= 1
+                            mumoryDataViewModel.updateMumory(mumory) {
+                                self.isLoading = false
+                            }
+                        }
                     }
-                  
                 }
         } else if activity.type == "reply" {
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
