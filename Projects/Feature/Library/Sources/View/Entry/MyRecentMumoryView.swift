@@ -41,9 +41,18 @@ public struct MyRecentMumoryView: View {
             .padding(.vertical, 10)
             
             if mumoryDataViewModel.myMumorys.isEmpty{
-                NoMumoryView()
-                    .frame(maxHeight: .infinity, alignment: .center)
-                    .padding(.bottom, 7)
+                InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
+                    appCoordinator.rootPath.removeLast()
+                    Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+                        withAnimation(Animation.easeInOut(duration: 0.1)) {
+                            appCoordinator.isCreateMumorySheetShown = true
+                            appCoordinator.offsetY = CGFloat.zero
+                        }
+                    }
+                }                    
+                .frame(maxHeight: .infinity, alignment: .center)
+                
             }else {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: spacing, content: {

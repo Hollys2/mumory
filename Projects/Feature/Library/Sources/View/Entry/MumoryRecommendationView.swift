@@ -130,7 +130,7 @@ public struct MumoryRecommendationView: View {
             if mostPostedSongs.isEmpty || similarTasteSongs.isEmpty {
                 Task {
                     mostPostedSongs = await getMostPostedSongs()
-                    similarTasteSongs = await getSimiliarTasteSongs()
+                    similarTasteSongs = await getSimilarTasteSongs()
                 }
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "MumoryRecommendationView")
@@ -180,7 +180,7 @@ public struct MumoryRecommendationView: View {
         }
     }
     
-    private func getSimiliarTasteSongs() async -> [Song]{
+    private func getSimilarTasteSongs() async -> [Song]{
         let db = FBManager.shared.db
         let songIds: [String] = await withTaskGroup(of: [String].self) { taskGroup -> [String] in
             var songIds: [String] = []

@@ -41,6 +41,7 @@ public struct MumoriUser: Hashable {
             guard let snapshot = try? await query.getDocuments() else {print("nouser");return}
             guard let userDoc = snapshot.documents.first else {
                 nickname = "탈퇴계정"
+                self.defaultProfileImage = SharedAsset.profileWithdrawed.swiftUIImage
                 return
             }
             

@@ -25,6 +25,7 @@ public struct SplashView: View {
     @StateObject var customizationManageViewModel: CustomizationManageViewModel = CustomizationManageViewModel()
     @StateObject var withdrawViewModel: WithdrawViewModel = WithdrawViewModel()
     @StateObject var settingViewModel: SettingViewModel = SettingViewModel()
+    @StateObject var friendDataViewModel: FriendDataViewModel = FriendDataViewModel()
 
     @State var time = 0.0
     @State var isSignInCompleted: Bool = false
@@ -117,18 +118,28 @@ public struct SplashView: View {
                     case .friend(friend: let friend):
                         FriendPageView(friend: friend)
                             .navigationBarBackButtonHidden()
-                    case .friendPlaylist(friend: let friend, playlist: let playlist):
-                        UneditablePlaylistView(friend: friend, playlist: playlist)
-                    case .friendPlaylistManage(friend: let friend, playlist: let playlist):
-                        UneditablePlaylistManageView(friend: friend, playlistArray: playlist)
+                            .environmentObject(friendDataViewModel)
+
+                    case .friendPlaylist(playlistIndex: let playlistIndex):
+                        UneditablePlaylistView(playlist: $friendDataViewModel.playlistArray[playlistIndex])
+                            .environmentObject(friendDataViewModel)
+
+                    case .friendPlaylistManage:
+                        UneditablePlaylistManageView()        
+                            .environmentObject(friendDataViewModel)
+                        
                     case .searchFriend:
                         SocialFriendTestView()
+                        
                     case .mostPostedSongList(songs: let songs):
                         MostPostedSongListView(songs: songs)
+                        
                     case .similarTasteList(songs: let songs):
                         SimilarTasteListView(songs: songs)
+                        
                     case .myRecentMumorySongList:
                         MyRecentMumoryListView()
+                        
                     case .report:
                         ReportView()
                             .environmentObject(settingViewModel)
@@ -242,6 +253,7 @@ public struct SplashView: View {
                     case .friendPage(friend: let friend):
                         FriendPageView(friend: friend)
                             .navigationBarBackButtonHidden()
+                            .environmentObject(friendDataViewModel)
                         
                     case .reward:
                         RewardView()
@@ -311,7 +323,7 @@ public struct SplashView: View {
             currentUserData.user = await MumoriUser(uId: user.uid)
             print("checkCurrentUserAndGetUserData: \(currentUserData.user)")
             currentUserData.favoriteGenres = favoriteGenres
-            
+            currentUserData.playlistArray = await currentUserData.savePlaylist()
             withAnimation {
                 isInitialSettingDone = true
             }

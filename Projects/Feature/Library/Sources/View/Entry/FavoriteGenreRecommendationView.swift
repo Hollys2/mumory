@@ -134,19 +134,11 @@ private struct RecommendationScrollView: View {
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            playerViewModel.playNewSong(song: song)
-//                                            playerViewModel.isShownMiniPlayer = true
-//                                        })
-//                                )
-                            
                         }
                         
                     }
                 }
-                .padding(.leading, 20)
+                .padding(.horizontal, 20)
             }
             .padding(.top, 12)
             .scrollIndicators(.hidden)

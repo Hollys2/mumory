@@ -14,14 +14,10 @@ struct SelectableArtistView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerViewModel: PlayerViewModel
-    
+    @State private var isBottomSheetPresent: Bool = false
     @State private var offset: CGPoint = .zero
-    @State private var contentSize: CGSize = .zero
     @State private var songs: [Song] = []
-    @State private var haveToLoadNextPage: Bool = false
-    @State private var requestIndex: Int = 0
     @State private var isLoading: Bool = false
-
     let artist: Artist
     init(artist: Artist) {
         self.artist = artist
@@ -47,7 +43,7 @@ struct SelectableArtistView: View {
                 ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
             }
             
-            ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize) {
+            SimpleScrollView(contentOffset: $offset) {
                 LazyVStack(spacing: 0, content: {
                     //그라데이션
                     SharedAsset.bottomGradient.swiftUIImage
@@ -66,7 +62,7 @@ struct SelectableArtistView: View {
                         
                         //곡 개수와 전체 재생 버튼
                         HStack(alignment: .bottom, spacing: 0, content: {
-                            Text(songs.count > 0 ? "\(songs.count)곡" : "")
+                            Text(isLoading ? "" : "\( songs.count)곡")
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                                 .foregroundStyle(ColorSet.subGray)
                             Spacer()
@@ -128,75 +124,12 @@ struct SelectableArtistView: View {
         .onAppear(perform: {
             Task {
                 self.isLoading = true
-                self.songs = await requestArtistSongs()
+                await requestArtistSongs(artist: self.artist, originalSongs: $songs)
                 self.isLoading = false
             }
         })
     }
-    
-    private func requestArtistSongs() async -> [Song] {
-        return await withTaskGroup(of: [Song].self) { taskGroup -> [Song] in
-            let albums = await withTaskGroup(of: Album?.self) { taskGroup -> [Album] in
-                guard let detailedArtist = await fetchDetailArtist(artistID: artist.id.rawValue) else {return []}
-                guard let albums = detailedArtist.albums else {return []}
-                var returnValue: [Album] = []
-                
-                if albums.count > 1 {
-                    for album in albums {
-                        print("aa")
-                        taskGroup.addTask {
-                            print("bb")
-                            return await fetchDetailAlbum(albumID: album.id.rawValue)
-                        }
-                    }
-                    
-                    for await value in taskGroup {
-                        print("cc")
-                        guard let album = value else {print("no album");return []}
-                        print("album title: \(album.title)")
-                        returnValue.append(album)
-                    }
-                }else {
-                    guard let album = albums.first else {return []}
-                    return [album]
-                }
-                return returnValue
-            }
-            print("5555")
-            
-            var totalSongs: [Song] = []
-            
-            if albums.count > 1 {
-                albums.forEach { album in
-                    taskGroup.addTask {
-                        guard let tracks = album.tracks else {return []}
-                        var songs: [Song] = []
-                        for track in tracks {
-                            guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
-                            songs.append(song)
-                        }
-                        return songs
-                    }
-                }
-                
-                for await songs in taskGroup {
-                    totalSongs.append(contentsOf: songs)
-                }
-                
-            }else {
-                guard let album = albums.first else {print("no album");return []}
-                guard let tracks = album.tracks else {print("no track");return []}
-                for track in tracks {
-                    guard let song = await fetchSong(songID: track.id.rawValue) else {print("no song");continue}
-                    totalSongs.append(song)
-                }
-            }
-            
- 
-            
-            return totalSongs
-        }
-    }
+
 }
 
 struct SelectableMusicListItem: View {

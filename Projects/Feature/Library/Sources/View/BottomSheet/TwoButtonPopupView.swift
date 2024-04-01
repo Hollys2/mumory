@@ -99,6 +99,54 @@ struct TwoButtonPopupView: View {
     }
 }
 
-//#Preview {
-//    TwoButtonPopupView()
-//}
+struct OneButtonOnlyConfirmPopupView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @Environment(\.dismiss) private var dismiss
+    
+    private var lineGray = Color(red: 0.65, green: 0.65, blue: 0.65)
+    
+    var title: String
+  
+    
+    init(title: String) {
+        self.title = title
+    }
+
+        
+    var body: some View {
+        ZStack(alignment: .center){
+            Color.black.opacity(0.7).ignoresSafeArea()
+                .onTapGesture {
+                    dismiss()
+                }
+            
+            VStack(alignment: .center, spacing: 0, content: {
+                Text(title)
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 40)
+                
+                Divider05()
+                
+                Button(action: {
+                    dismiss()
+                }, label: {
+                    Text("확인")
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.mainPurpleColor)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                })
+                .padding(.vertical, 19)
+
+            })
+            .background(ColorSet.darkGray)
+            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+            .padding(.horizontal, 40)
+        }
+        .onDisappear {
+            UIView.setAnimationsEnabled(true)
+        }
+
+    }
+}

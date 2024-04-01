@@ -66,9 +66,7 @@ struct PageTabView<Content: View, Label: View>: View {
 }
 
 public struct SocialSearchView: View {
-    
     @Binding private var isShown: Bool
-    
     @State private var searchText: String = ""
     @State private var currentTabSelection: Int = 0
     @State private var isRecentSearch: Bool = false

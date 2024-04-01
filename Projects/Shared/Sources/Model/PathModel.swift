@@ -21,8 +21,8 @@ public enum MumoryPage: Hashable {
     case requestFriend
     case blockFriend
     case friend(friend: MumoriUser)
-    case friendPlaylist(friend: MumoriUser, playlist: Binding<MusicPlaylist>)
-    case friendPlaylistManage(friend: MumoriUser, playlist: Binding<[MusicPlaylist]>)
+    case friendPlaylist(playlistIndex: Int)
+    case friendPlaylistManage
     case searchFriend
     case mostPostedSongList(songs: Binding<[Song]>)
     case similarTasteList(songs: Binding<[Song]>)
@@ -39,14 +39,13 @@ public enum MumoryPage: Hashable {
              (.lastOfCustomization, .lastOfCustomization),
              (.login, .login),
              (.requestFriend, .requestFriend),
-             (.blockFriend, .blockFriend):
+             (.blockFriend, .blockFriend),
+            (.friendPlaylistManage, .friendPlaylistManage):
             return true
         case let (.friend(friend: friend1), .friend(friend: friend2)):
             return friend1 == friend2
-        case let (.friendPlaylist(friend: friend1, playlist: playlist1), .friendPlaylist(friend: friend2, playlist: playlist2)):
-            return (friend1 == friend2) && (playlist1.wrappedValue == playlist2.wrappedValue)
-        case let (.friendPlaylistManage(friend: friend1, playlist: playlist1), .friendPlaylistManage(friend: friend2, playlist: playlist2)):
-            return friend1 == friend2 && playlist1.wrappedValue == playlist2.wrappedValue
+        case let (.friendPlaylist(playlistIndex: index1), .friendPlaylist(playlistIndex: index2)):
+            return index1 == index2
         default:
             return false
         }
@@ -75,14 +74,11 @@ public enum MumoryPage: Hashable {
         case .friend(friend: let friend):
             hasher.combine(9)
             hasher.combine(friend)
-        case .friendPlaylist(friend: let friend, playlist: let playlist):
+        case .friendPlaylist(playlistIndex: let playlistIndex):
             hasher.combine(10)
-            hasher.combine(friend)
-            hasher.combine(playlist.wrappedValue)
-        case .friendPlaylistManage(friend: let friend, playlist: let playlist):
+            hasher.combine(playlistIndex)
+        case .friendPlaylistManage:
             hasher.combine(11)
-            hasher.combine(friend)
-            hasher.combine(playlist.wrappedValue)
         case .searchFriend:
             hasher.combine(12)
         case .mostPostedSongList(songs: let songs):
