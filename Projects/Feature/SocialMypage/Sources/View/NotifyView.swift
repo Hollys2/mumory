@@ -94,7 +94,7 @@ struct NotifyView: View {
                 .padding(.top, currentUserData.topInset)
             }
             .onAppear{
-                playerViewModel.setPlayerVisibility(isShown: true)
+                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                 Task{
                     await getNotification()
                 }

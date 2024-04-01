@@ -301,6 +301,14 @@ struct PlayingView: View {
                                 .foregroundStyle(Color.white)
                                 .offset(x: startAnimation ? changeOffset : 0)
                                 .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true).delay(2.0), value: startAnimation)
+                                .onAppear {
+                                    guard let song = playerViewModel.currentSong else {return}
+                                    DispatchQueue.main.async {
+                                        titleWidth = getTextWidth(term: song.title)
+                                        changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
+                                        startAnimation = true
+                                    }
+                                }
                         }
                         
                         
@@ -317,6 +325,7 @@ struct PlayingView: View {
                             DispatchQueue.main.async {
                                 endInit = false
                                 startAnimation = false
+                                changeOffset = 0
                                 Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
                                     endInit = true
                                 }

@@ -137,6 +137,11 @@ struct ActivityListView: View {
                         })
                         .padding(.top, 55)
                     }
+                    .refreshable {
+                        Task {
+                            await getActivity(type: self.selection, date: self.date, pagingCorsor: self.$pagingCursor, isLoading: $isLoadig)
+                        }
+                    }
                     .scrollIndicators(.hidden)
                     .overlay {
                         
@@ -374,6 +379,7 @@ struct ActivityItem: View {
     @State var song: Song?
     @Binding var activityList: [String: [Activity]]
     @State var isLoading: Bool = false
+    @State var isPresentDeleteMumoryPopup: Bool = false
     let activity: Activity
     init(activity: Activity, activityList: Binding<[String: [Activity]]>) {
         self.activity = activity
@@ -445,15 +451,21 @@ struct ActivityItem: View {
         })
         .onTapGesture {
             if self.activity.type == "like" || self.activity.type == "comment" || self.activity.type == "reply" {
-                Task{
+                Task{                    
                     let mumory = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    if mumory.id == "DELETE" {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentDeleteMumoryPopup = true
+                    }else {
+                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    }
                 }
             }
         }
-        .onChange(of: isLoading) { newValue in
-            print(newValue)
-        }
+        .fullScreenCover(isPresented: $isPresentDeleteMumoryPopup, content: {
+            OneButtonOnlyConfirmPopupView(title: "삭제된 게시물입니다")
+                .background(TransparentBackground())
+        })
     }
 }
 

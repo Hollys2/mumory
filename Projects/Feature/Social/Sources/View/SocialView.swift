@@ -25,6 +25,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     init(contentOffsetY: Binding<CGFloat>, onRefresh: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
         self._contentOffsetY = contentOffsetY
@@ -365,6 +366,7 @@ struct SocialItemView: View {
 //                        self.appCoordinator.choosedSongID = self.mumoryAnnotation.musicModel.songID
                         self.appCoordinator.choosedMumoryAnnotation = self.mumory
                         self.appCoordinator.isSocialMenuSheetViewShown = true
+                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                     }, label: {
                         SharedAsset.menuButtonSocial.swiftUIImage
                             .resizable()
@@ -724,7 +726,13 @@ public struct SocialView: View {
             }
             
             FirebaseManager.shared.observeFriendRequests()
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+            if !appCoordinator.isSocialCommentSheetViewShown && 
+                !appCoordinator.isAddFriendViewShown &&
+                !appCoordinator.isMyMumorySearchViewShown &&
+                !(appCoordinator.bottomAnimationViewStatus == .myPage) &&
+                !appCoordinator.isSocialMenuSheetViewShown{
+                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+            }
             print("SocialView onAppear")
         }
         .onDisappear {

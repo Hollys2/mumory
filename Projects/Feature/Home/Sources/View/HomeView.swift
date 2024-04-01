@@ -112,12 +112,7 @@ public struct HomeView: View {
         .navigationBarBackButtonHidden()
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onDisappear(perform: {
-            //현재 탭이 라이브러리면 다른 뷰로 넘어가도 플레이어 안 없어지게 
-            if appCoordinator.selectedTab == .library {
-                playerViewModel.setPlayerVisibility(isShown: true, moveToBottom: true)
-            }else {
-                playerViewModel.setPlayerVisibility(isShown: false)
-            }
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
         })
         .onAppear {
             if UserDefaults.standard.object(forKey: "firstRun") == nil {
