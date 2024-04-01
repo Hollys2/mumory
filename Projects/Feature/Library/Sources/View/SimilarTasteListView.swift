@@ -45,7 +45,7 @@ struct SimilarTasteListView: View {
                         .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
-                        Text("비슷한 취향의 사용자가\n즐겨찾기한 음악")
+                        Text("비슷한 취향 사용자의 선호 음악")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                             .frame(width: getUIScreenBounds().width, alignment: .center)
                             .multilineTextAlignment(.center)

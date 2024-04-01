@@ -104,13 +104,8 @@ struct SaveToPlaylistView: View {
         }
         .onAppear(perform: {
             getUserPlaylist()
-            playerViewModel.setPlayerVisibility(isShown: false)
         })
-        .onDisappear {
-            if appCoordinator.selectedTab == .library {
-                playerViewModel.setPlayerVisibility(isShown: true)
-            }
-        }
+
     }
     
     private func saveSongToPlaylist(to: MusicPlaylist)  {

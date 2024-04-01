@@ -157,10 +157,11 @@ public class CurrentUserData: ObservableObject {
                         let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
                         let id = document.reference.documentID
                         var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
-                        
                         let startIndex = 0
                         var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4
                         let requestSongIds = Array(songIDs[startIndex..<endIndex])
+                        print("original: \(songIDs)")
+                        print("request: \(requestSongIds)")
                         playlist.songs = await self.fetchSongs(songIDs: requestSongIds)
                         return playlist
                     }
@@ -371,7 +372,7 @@ public class CurrentUserData: ObservableObject {
             var songs = songIds.map { songId in
                 return returnValue.first(where: {$0.id.rawValue == songId})!
             }
-            return returnValue
+            return songs
         }
 
     }

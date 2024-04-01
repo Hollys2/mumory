@@ -32,7 +32,6 @@ struct ModifyPlaylistPopupView: View {
     var body: some View {
         ZStack{
             Color.black.opacity(backgroundOpacity).ignoresSafeArea()
-                .transition(.opacity)
             
             VStack(spacing: 0){
                 HStack{
@@ -51,6 +50,7 @@ struct ModifyPlaylistPopupView: View {
                 Text("플레이리스트 이름 수정")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                     .foregroundStyle(.white)
+                    .padding(.top, 5)
                 
                 HStack(spacing: 0) {
                     Text("\(playlistTitle.count) ")
@@ -70,7 +70,7 @@ struct ModifyPlaylistPopupView: View {
                 TextField("playlist_textfield", text: $playlistTitle, prompt: getPrompt())
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(.white)
-                    .padding(.vertical, 17)
+                    .frame(height: 50)
                     .padding(.horizontal, 25)
                     .background(LibraryColorSet.deepGray)
                     .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
@@ -118,7 +118,7 @@ struct ModifyPlaylistPopupView: View {
                             .frame(width: 16, height: 16)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 17)
+                    .frame(height: 50)
                     .padding(.horizontal, 25)
                     .background(LibraryColorSet.deepGray)
                     .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
@@ -131,11 +131,11 @@ struct ModifyPlaylistPopupView: View {
                 Button(action: {
                     modifyPlaylist()
                 }, label: {
-                    MumoryLoadingButton(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
+                    MumoryLoadingButtonMedium(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
                         .padding(.horizontal, 30)
-                        .padding(.top, 40)
                 })
                 .frame(height: 50)
+                .padding(.top, 40)
                 .disabled(playlistTitle.isEmpty)
 
             }

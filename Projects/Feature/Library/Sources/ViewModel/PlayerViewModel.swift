@@ -66,7 +66,6 @@ public class PlayerViewModel: ObservableObject {
         self.queue = [song]
         self.originQueue = [song]
         self.queueTitle = ""
-        self.setPlayerVisibilityByUser(isShown: true)
         Task {
             do {
                 try await player.play()
@@ -87,7 +86,6 @@ public class PlayerViewModel: ObservableObject {
         self.queue = [song]
         self.originQueue = [song]
         self.queueTitle = ""
-        self.setPlayerVisibilityByUser(isShown: true)
         self.isPresentNowPlayingView = true
         Task {
             do {
@@ -112,7 +110,6 @@ public class PlayerViewModel: ObservableObject {
         self.queue = songs
         self.originQueue = songs
         self.queueTitle = title
-        self.setPlayerVisibilityByUser(isShown: true)
         Task {
             do {
                 try await player.play()

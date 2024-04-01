@@ -70,7 +70,7 @@ struct MostPostedSongListView: View {
                     PlayAllButton()
                         .padding(.trailing, 20)
                         .onTapGesture {
-                            playerViewModel.playAll(title: "뮤모리 사용자가 많이 기록한 음악", songs: songs)
+                            playerViewModel.playAll(title: "뮤모리로 많이 기록된 음악", songs: songs)
                             AnalyticsManager.shared.setSelectContentLog(title: "MostPostedSongListView")
                         }
                 }
@@ -84,7 +84,7 @@ struct MostPostedSongListView: View {
                         ForEach(songs.indices, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
                                 .simultaneousGesture(TapGesture().onEnded({ _ in
-                                    playerViewModel.playAll(title: "뮤모리 사용자가 많이 기록한 음악", songs: songs, startingItem: songs[index])
+                                    playerViewModel.playAll(title: "뮤모리로 많이 기록된 음악", songs: songs, startingItem: songs[index])
                                 }))
                         
                         }

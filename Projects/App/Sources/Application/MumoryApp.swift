@@ -54,11 +54,6 @@ struct MumoryApp: App {
                         .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)
                         .environmentObject(currentUserData)
-                    
-                    MiniPlayerView()
-                        .environmentObject(snackBarViewModel)
-                        .environmentObject(playerViewModel)
-                    
                 }
                 .ignoresSafeArea()
                 .environmentObject(snackBarViewModel)

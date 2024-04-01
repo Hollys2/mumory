@@ -371,6 +371,7 @@ struct ActivityItem: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentBottomSheet: Bool = false
+    @State var isPresentDeletedMumoryPopup: Bool = false
     @State var song: Song?
     @Binding var activityList: [String: [Activity]]
     @State var isLoading: Bool = false
@@ -447,13 +448,18 @@ struct ActivityItem: View {
             if self.activity.type == "like" || self.activity.type == "comment" || self.activity.type == "reply" {
                 Task{
                     let mumory = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
+                    if mumory.id == "DELETE" {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentDeletedMumoryPopup = true
+                        return}
                     appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
             }
         }
-        .onChange(of: isLoading) { newValue in
-            print(newValue)
-        }
+        .fullScreenCover(isPresented: $isPresentDeletedMumoryPopup, content: {
+            OneButtonOnlyConfirmPopupView(title: "삭제된 게시물입니다")
+                .background(TransparentBackground())
+        })
     }
 }
 
@@ -462,22 +468,46 @@ struct ActivityBottomSheet: View {
     let functions = FBManager.shared.functions
     @Binding var activityList: [String: [Activity]]
     @Binding var isLoading: Bool
-    
+    @State var isPresentConfimPopup: Bool = false
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @Environment(\.dismiss) var dismiss
     
     init(activity: Activity, activityList: Binding<[String: [Activity]]>, isLoading: Binding<Bool>) {
         self.activity = activity
         self._activityList = activityList
         self._isLoading = isLoading
     }
-       
     var body: some View {
-        if activity.type == "like" {
-            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "좋아요 취소", type: .warning)
-                .onTapGesture {
+        HStack {
+            if activity.type == "like" {
+                BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "좋아요 취소", type: .warning)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentConfimPopup = true
+                    }
+            }else if activity.type == "comment" {
+                BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentConfimPopup = true
+                    }
+            } else if activity.type == "reply" {
+                BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentConfimPopup = true
+                    }
+            }
+        }
+        .overlay(content: {
+            LoadingAnimationView(isLoading: $isLoading)
+        })
+        .fullScreenCover(isPresented: $isPresentConfimPopup, content: {
+            TwoButtonPopupView(title: "해당 활동 내역을 삭제하시겠습니까?", positiveButtonTitle: "확인") {
+                if activity.type == "like" {
                     isLoading = true
+                    dismiss()
                     functions.httpsCallable("like").call(["mumoryId": activity.mumoryId]) { result, error in
-                        isLoading = false
                         guard error == nil else {return}
                         for element in activityList {
                             let key = element.key
@@ -486,41 +516,37 @@ struct ActivityBottomSheet: View {
                                 && $0.songId == self.activity.songId}) else {continue}
                             activityList[key]?.remove(at: index)
                         }
+                        self.isLoading = false
                     }
-                    
-                }
-            
-        }else if activity.type == "comment" {
-            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
-                .onTapGesture {
+                } else if activity.type == "reply" || activity.type == "comment" {
                     self.isLoading = true
-                    //                        await deleteComment(commentId: self.activity.commentId, mumoryId: self.activity.mumoryId)
+                    dismiss()
                     self.mumoryDataViewModel.deleteComment(comment: Comment(id: self.activity.commentId, uId: "", nickname: "", parentId: "", mumoryId: self.activity.mumoryId, date: Date(), content: "", isPublic: false)) { comments in
                         Task {
                             let mumory = await mumoryDataViewModel.fetchMumory(documentID: self.activity.mumoryId)
                             mumory.commentCount -= 1
                             mumoryDataViewModel.updateMumory(mumory) {
+                                for element in activityList {
+                                    let key = element.key
+                                    guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
+                                        && $0.mumoryId == self.activity.mumoryId
+                                        && $0.songId == self.activity.songId}) else {continue}
+                                    activityList[key]?.remove(at: index)
+                                }
                                 self.isLoading = false
+               
                             }
                         }
                     }
                 }
-        } else if activity.type == "reply" {
-            BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
-                .onTapGesture {
-                    self.isLoading = true
-                    let db = FBManager.shared.db
-                    db.collection("Mumory").document(self.activity.mumoryId).collection("Comment").document(self.activity.commentId).delete()
-                    for element in activityList {
-                        let key = element.key
-                        guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
-                            && $0.commentId == self.activity.commentId}) else {continue}
-                        activityList[key]?.remove(at: index)
-                    }
-                    self.isLoading = false
-                }
-        }
+            }
+            
+            .background(TransparentBackground())
+          
+        })
+        .disabled(isLoading)
     }
+    
     
     
     private func deleteComment(commentId: String, mumoryId: String) async {

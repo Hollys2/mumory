@@ -111,22 +111,19 @@ public struct MiniPlayerView: View {
                 .onTapGesture {
                     playerViewModel.setPlayerVisibilityByUser(isShown: false)
                 }
-            
-            
-            
         })
         .frame(maxWidth: .infinity)
         .frame(height: 70)
         .background(ColorSet.background)
         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
-        .overlay( /// apply a rounded border
+        .overlay( 
             RoundedRectangle(cornerRadius: 35, style: .circular)
                 .stroke(ColorSet.skeleton02, lineWidth: 0.5)
         )
         .padding(.bottom, 10)
         .padding(.horizontal, 8)
         .padding(.bottom, playerViewModel.miniPlayerMoveToBottom ? 15 : 89)
-        .offset(y: playerViewModel.isShownMiniPlayer ? 0 : 200)
+        //        .offset(y: playerViewModel.isShownMiniPlayer ? 0 : 200)
         .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
         .frame(maxHeight: .infinity, alignment: .bottom)
         .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {

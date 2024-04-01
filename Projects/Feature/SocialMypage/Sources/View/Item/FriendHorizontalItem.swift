@@ -10,11 +10,7 @@ import SwiftUI
 import Shared
 
 struct FriendHorizontalItem: View {
-    var defaultProfiles: [Image] = [SharedAsset.profileRed.swiftUIImage, SharedAsset.profilePurple.swiftUIImage, SharedAsset.profileOrange.swiftUIImage, SharedAsset.profileYellow.swiftUIImage]
-    
-    let nickname: String = "어쩔닉네임"
     let user: MumoriUser
-    
     init(user: MumoriUser) {
         self.user = user
     }
@@ -28,7 +24,7 @@ struct FriendHorizontalItem: View {
                     .frame(width: 55, height: 55)
                     .clipShape(Circle())
             } placeholder: {
-                defaultProfiles[Int.random(in: 0 ... 3)]
+                user.defaultProfileImage
                     .resizable()
                     .frame(width: 55, height: 55)
                     .scaledToFill()
@@ -36,7 +32,7 @@ struct FriendHorizontalItem: View {
             
             Text(user.nickname)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                .foregroundStyle(Color.white)
+                .foregroundStyle(user.nickname == "탈퇴계정" ? ColorSet.subGray : Color.white)
                 .frame(width: 60)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -45,6 +41,3 @@ struct FriendHorizontalItem: View {
     }
 }
 
-//#Preview {
-//    FriendHorizontalItem()
-//}

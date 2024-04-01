@@ -28,9 +28,9 @@ struct ExtraRecommendationView: View {
         self._songs = songs
         switch type {
         case .mostPosted:
-            self.title = "뮤모리 사용자가 많이 기록한 음악"
+            self.title = "뮤모리로 많이 기록된 음악"
         case .similiarTaste:
-            self.title = "비슷한 취향의 사용자가 즐겨찾기한 음악"
+            self.title = "비슷한 취향 사용자의 선호 음악"
         }
     }
     

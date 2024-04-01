@@ -631,7 +631,6 @@ struct FriendPageCommonBottomSheetView: View {
                     dismiss()
                     blockFriend(uId: currentUserData.uId, friendUId: friend.uId)
                 }
-            Divider05()
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                 .onTapGesture {
                     dismiss()
@@ -663,7 +662,6 @@ struct FriendDeleteBlockBottomSheetView: View {
                     isPresentBlockConfirmPopup = true
                 }
             
-            Divider05()
             
             BottomSheetSubTitleItem(image: SharedAsset.cutOffFriend.swiftUIImage, title: "\(friend.nickname)과 친구 끊기", subTitle: "\(friend.nickname)님과 친구 관계를 끊습니다.")
                 .onTapGesture {

@@ -85,7 +85,7 @@ public func fetchSongs(songIDs: [String]) async -> [Song]{
         var songs = songIds.map { songId in
             return returnValue.first(where: {$0.id.rawValue == songId})!
         }
-        return returnValue
+        return songs
     }
 
 }

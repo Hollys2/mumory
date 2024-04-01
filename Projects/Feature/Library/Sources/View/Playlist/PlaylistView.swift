@@ -127,7 +127,6 @@ struct PlaylistView: View {
                                     .onTapGesture {
                                         self.selectedSongsForDelete.removeAll()
                                         setEditMode(isEditing: true)
-                                        playerViewModel.setPlayerVisibility(isShown: false)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewEditButton")
                                     }
                                 
@@ -213,7 +212,6 @@ struct PlaylistView: View {
                             guard startIndex < playlist.songIDs.endIndex else {return}
                             var endIndex = startIndex + 20
                             endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
-                            print(endIndex)
                             let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
                             guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                             currentUserData.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
@@ -238,7 +236,6 @@ struct PlaylistView: View {
                 if isEditing {
                     Button(action: {
                         setEditMode(isEditing: false)
-                        playerViewModel.setPlayerVisibility(isShown: true)
                     }, label: {
                         Text("완료")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -286,6 +283,7 @@ struct PlaylistView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
+            UIView.setAnimationsEnabled(true)
             Task {
                 isLoading = true
                 let startIndex = 0
@@ -304,7 +302,10 @@ struct PlaylistView: View {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
                 PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
                     isBottomSheetPresent = false
-                    isPresentModifyPlaylistView = true
+                    DispatchQueue.main.async {
+                        UIView.setAnimationsEnabled(true)
+                        isPresentModifyPlaylistView = true
+                    }
                 })
             }
             .background(TransparentBackground())

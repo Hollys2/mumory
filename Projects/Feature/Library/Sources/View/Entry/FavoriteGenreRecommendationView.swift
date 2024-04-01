@@ -67,12 +67,15 @@ struct FavoriteGenreRecommendationView: View {
                                         }
                                         .offset(y: -37)
                                         .transition(.scale(scale: 0.0, anchor: .top).combined(with: .opacity))
+                                        .onAppear {
+                                            UserDefaults.standard.set(Date(), forKey: "EditGenre")
+                                        }
                                 }
                                 
                             }
                             .onAppear(perform: {
                                 withAnimation(.spring()) {
-                                    isEditGenreInfoPresent = true
+                                    isEditGenreInfoPresent = UserDefaults.standard.value(forKey: "EditGenre") == nil
                                 }
                                 genreInfoTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { timer in
                                     withAnimation (.spring()){

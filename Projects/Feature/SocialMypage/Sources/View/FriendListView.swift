@@ -95,6 +95,7 @@ struct FriendListView: View {
                                 ForEach(results, id: \.uId) { friend in
                                     FriendListItem(friend: friend)
                                         .onTapGesture {
+                                            if friend.nickname == "탈퇴계정" {return}
                                             appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
                                         }
                                 }

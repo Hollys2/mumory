@@ -86,7 +86,6 @@ public struct CreateMumoryBottomSheetView: View {
                             self.contentText.removeAll()
                             photoPickerViewModel.removeAllSelectedImages()
                             self.imageURLs.removeAll()
-                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 self.appCoordinator.isCreateMumorySheetShown = false
                             }
@@ -114,7 +113,6 @@ public struct CreateMumoryBottomSheetView: View {
                                         self.contentText.removeAll()
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
-                                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                                         withAnimation(.easeInOut(duration: 0.2)) {
                                             self.appCoordinator.isCreateMumorySheetShown = false
                                         }
@@ -371,7 +369,6 @@ public struct CreateMumoryBottomSheetView: View {
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")
                                     }
                                 }
-                                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
@@ -401,7 +398,6 @@ public struct CreateMumoryBottomSheetView: View {
                         self.imageURLs.removeAll()
                         
                         self.isDeletePopUpShown = false
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                         withAnimation(.easeInOut(duration: 0.2)) {
                             self.appCoordinator.isCreateMumorySheetShown = false
                         }
