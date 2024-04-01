@@ -13,6 +13,7 @@ import MusicKit
 import _MapKit_SwiftUI
 
 struct FriendPageView: View {
+    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isStranger: Bool = true
@@ -32,6 +33,7 @@ struct FriendPageView: View {
             //친구 여부에 따라 친구 페이지 혹은 모르는 사람 페이지 띄우기
             if currentUserData.getFriendStatus(friend: friend) == .friend{
                 KnownFriendPageView(friend: friend)
+                    .environmentObject(friendDataViewModel)
             }else {
                 UnkownFriendPageView(friend: friend)
                 
@@ -78,10 +80,10 @@ struct FriendPageView: View {
 }
 
 struct KnownFriendPageView: View {
-    
     let friend: MumoriUser
     let lineGray = Color(white: 0.37)
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
     @State private var firstMumory: Mumory = Mumory()
@@ -99,6 +101,7 @@ struct KnownFriendPageView: View {
                 
                 //친구 프로필 뷰
                 FriendInfoView(friend: friend)
+                    .environmentObject(friendDataViewModel)
                 
                 Divider05()
                 
@@ -132,7 +135,8 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendPlaylistView(friend: friend, playlists: $playlists, isLoading: $isPlaylistLoading)
+                FriendPlaylistView()
+                    .environmentObject(friendDataViewModel)
                 
                 Rectangle()
                     .fill(Color.clear)
@@ -598,19 +602,17 @@ struct FriendPlaylistView: View {
     }
     
     let db = FBManager.shared.db
-    @Binding var playlists: [MusicPlaylist]
-    @Binding var isLoading: Bool
     
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0, content: {
                 //ooo의 플레이리스트
                 HStack(spacing: 0, content: {
-                    Text("\(friend.nickname)의 플레이리스트")
+                    Text("\(friendDataViewModel.friend.nickname)의 플레이리스트")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                         .foregroundStyle(Color.white)
                     Spacer()
-                    Text("\(playlists.count)")
+                    Text("\(friendDataViewModel.playlistArray.count)")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(ColorSet.charSubGray)
                         .padding(.trailing, 3)
@@ -623,24 +625,24 @@ struct FriendPlaylistView: View {
                 .frame(height: 67)
                 .padding(.horizontal, 20)
                 .onTapGesture {
-                    appCoordinator.rootPath.append(MumoryPage.friendPlaylistManage(friend: self.friend, playlist: $playlists))
+                    appCoordinator.rootPath.append(MumoryPage.friendPlaylistManage)
                 }
                 
                 //플리 가로 스크롤뷰
                 ScrollView(.horizontal) {
                     HStack(alignment: .top, spacing: 10, content: {
-                        ForEach( 0 ..< playlists.count, id: \.self) { index in
-                            PlaylistItemTest(playlist: $playlists[index], itemSize: getUIScreenBounds().width * 0.215)
+                        ForEach(friendDataViewModel.playlistArray.indices, id: \.self) { index in
+                            PlaylistItemTest(playlist: $friendDataViewModel.playlistArray[index], itemSize: getUIScreenBounds().width * 0.215)
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(friend: friend, playlist: $playlists[index]))
+                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlistIndex: index))
                                 }
                         }
                         
-                        if isLoading {
+                        if friendDataViewModel.isPlaylistLoading {
                             ForEach(0...10, id: \.self) { index in
                                 PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
                             }
-                        }else if playlists.isEmpty {
+                        }else if friendDataViewModel.playlistArray.isEmpty {
                             Text("플레이리스트가 없습니다")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .frame(maxWidth: .infinity, alignment: .center)
@@ -948,6 +950,7 @@ struct PlaylistItemTest: View {
 }
 
 struct FriendMumoryView: View {
+    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     let mumorys: [Mumory]
     @Binding private var isLoading: Bool
@@ -961,7 +964,7 @@ struct FriendMumoryView: View {
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
-                Text("\(friend.nickname) 뮤모리")
+                Text("\(friendDataViewModel.friend.nickname) 뮤모리")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundStyle(Color.white)
                 
@@ -983,7 +986,7 @@ struct FriendMumoryView: View {
                 self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(friend), mumoryAnnotation: Mumory()))
             }
             
-            if isLoading {
+            if friendDataViewModel.isMumoryLoading {
                 ScrollView(.horizontal) {
                     HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
                         MumorySkeletonView()
