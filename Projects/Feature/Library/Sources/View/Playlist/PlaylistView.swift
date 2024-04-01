@@ -25,8 +25,9 @@ struct PlaylistView: View {
     @State var isPresentModifyPlaylistView: Bool = false
     @State var selectedTab: Tab = .library
     @State private var isLoading: Bool = false
-    
+    @State var searchIndex: Int = 0
     @Binding var playlist: MusicPlaylist
+    let itemHeight: CGFloat = 70
     init(playlist: Binding<MusicPlaylist>){
         self._playlist = playlist
     }
@@ -166,22 +167,6 @@ struct PlaylistView: View {
                                         playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: song)
                                     }
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            if isEditing{
-//                                                if selectedSongsForDelete.contains(song) {
-//                                                    selectedSongsForDelete.removeAll(where: {$0.id == song.id})
-//                                                }else {
-//                                                    selectedSongsForDelete.append(song)
-//                                                }
-//                                            }else {
-//                                                playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: song)
-//                                                playerViewModel.isShownMiniPlayer = true
-//                                            }
-//                                        })
-//                                )
-                            
                         }
                         
                         if isLoading {
@@ -219,7 +204,23 @@ struct PlaylistView: View {
                 }
             }
             .scrollIndicators(.hidden)
-            
+            .onChange(of: offset, perform: { value in
+                if offset.y > CGFloat(searchIndex) * itemHeight * 17 {
+                    searchIndex += 1
+                    DispatchQueue.main.async {
+                        Task {
+                            let startIndex = searchIndex * 20
+                            guard startIndex < playlist.songIDs.endIndex else {return}
+                            var endIndex = startIndex + 20
+                            endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
+                            print(endIndex)
+                            let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+                            guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                            currentUserData.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
+                        }
+                    }
+                }
+            })
             
             //상단바 - z축 최상위
             HStack(spacing: 0, content: {
@@ -287,9 +288,13 @@ struct PlaylistView: View {
         .onAppear(perform: {
             Task {
                 isLoading = true
+                let startIndex = 0
+                var endIndex = playlist.songIDs.endIndex < 20 ? playlist.songIDs.endIndex : 20
+                let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+
                 let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
                 guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                currentUserData.playlistArray[index].songs = songs
+                currentUserData.playlistArray[index].songs = await fetchSongs(songIDs: requestSongIds)
                 isLoading = false
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
@@ -318,15 +323,7 @@ struct PlaylistView: View {
             .background(TransparentBackground())
         })
     }
-    
-    private func fetchSong(songId: String) async -> Song? {
-        let musicItemID = MusicItemID(rawValue: songId)
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        request.properties = [.genres, .artists]
-        guard let response = try? await request.response() else {return nil}
-        guard let song = response.items.first else {return nil}
-        return song
-    }
+
     
     private func setEditMode(isEditing: Bool) {
         withAnimation {

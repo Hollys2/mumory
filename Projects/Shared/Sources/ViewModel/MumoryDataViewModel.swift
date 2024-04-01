@@ -191,7 +191,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 return newMumory
             } else {
                 print("Document does not exist")
-            }   
+            }
         } catch {
             print("Error fetching document: \(error.localizedDescription)")
         }

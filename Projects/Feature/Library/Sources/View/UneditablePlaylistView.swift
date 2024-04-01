@@ -11,19 +11,19 @@ import Shared
 import MusicKit
 
 struct UneditablePlaylistView: View {
+    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @State var isLoading: Bool = false
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
     @State var isCompletedGetSongs: Bool = false
+    @State var searchIndex: Int = 0
     @Binding var playlist: MusicPlaylist
-    let friend: MumoriUser
-    init(friend: MumoriUser, playlist: Binding<MusicPlaylist>){
-        self.friend = friend
+    init(playlist: Binding<MusicPlaylist>){
         self._playlist = playlist
     }
+    let itemHeight: CGFloat = 70
     
     var body: some View {
         ZStack(alignment: .top){
@@ -76,21 +76,24 @@ struct UneditablePlaylistView: View {
                         .padding(.horizontal, 20)
                         
                         //플레이리스트 곡 목록
-                        ForEach(playlist.songs, id: \.self) { song in
-                            MusicListItem(song: song, type: .normal)
+                        ForEach(playlist.songs.indices, id: \.self) { index in
+                            MusicListItem(song: playlist.songs[index], type: .normal)
+                                .id("\(playlist.songs[index].artistName) \(playlist.songs[index].id.rawValue) \(index)")
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: playlist.songs[index])
                                 }
                             
                             Divider05()
                         }
                         
-                        
+                        if friendDataViewModel.isPlaylistLoading {
+                            SongListSkeletonView(isLineShown: false)
+                        }
                         //플레이어에 가려지는 높이만큼 채워주기
                         //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
                         Rectangle()
                             .foregroundStyle(.clear)
-                            .frame(height: isLoading ? 1000 : playlist.songs.count < 10 ? 400 : 90)
+                            .frame(height: friendDataViewModel.isPlaylistLoading ? 1000 : playlist.songs.count < 10 ? 400 : 90)
                     })
                     .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
                     .frame(width: getUIScreenBounds().width, alignment: .center)
@@ -105,12 +108,28 @@ struct UneditablePlaylistView: View {
             }
             .refreshAction {
                 Task {
-                    isLoading = true
-                    playlist.songs = await requestPlaylistSong(uId: friend.uId, playlistID: playlist.id)
-                    isLoading = false
+                    friendDataViewModel.isPlaylistLoading = true
+                    playlist.songs = await requestPlaylistSong(uId: friendDataViewModel.friend.uId, playlistID: playlist.id)
+                    friendDataViewModel.isPlaylistLoading = false
                 }
             }
             .scrollIndicators(.hidden)
+            .onChange(of: offset, perform: { value in
+                if offset.y > CGFloat(searchIndex) * itemHeight * 20 {
+                    searchIndex += 1
+                    DispatchQueue.main.async {
+                        Task {
+                            let startIndex = searchIndex * 20
+                            guard startIndex < playlist.songIDs.endIndex else {return}
+                            var endIndex = startIndex + 20
+                            endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
+                            print(endIndex)
+                            let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+                            self.playlist.songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
+                        }
+                    }
+                }
+            })
             
             
             //상단바 - z축 최상위
@@ -151,10 +170,15 @@ struct UneditablePlaylistView: View {
             .background(TransparentBackground())
         })
         .onAppear {
-            Task {
-                isLoading = true
-                playlist.songs = await requestPlaylistSong(uId: friend.uId, playlistID: playlist.id)
-                isLoading = false
+            if playlist.songs.count < playlist.songIDs.count {
+                Task {
+                    friendDataViewModel.isPlaylistLoading = true
+                    let startIndex = 0
+                    var endIndex = playlist.songIDs.endIndex < 20 ? playlist.songIDs.endIndex : 20
+                    let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+                    self.playlist.songs = await fetchSongs(songIDs: requestSongIds)
+                    friendDataViewModel.isPlaylistLoading = false
+                }
             }
         }
         

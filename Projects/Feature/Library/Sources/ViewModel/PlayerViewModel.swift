@@ -214,7 +214,9 @@ public class PlayerViewModel: ObservableObject {
                 self.isPlaying = self.player.state.playbackStatus == .playing
             }
             if Int(self.player.playbackTime) == 0 {
-                self.currentSong = self.playingSong()
+                DispatchQueue.main.async {
+                    self.currentSong = self.playingSong()
+                }
             }
         })
     }

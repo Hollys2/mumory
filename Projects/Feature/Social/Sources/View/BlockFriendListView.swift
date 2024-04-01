@@ -40,7 +40,7 @@ struct BlockFriendListView: View {
                 
                 Divider05()
                 if currentUserData.blockFriends.isEmpty {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 16) {
                         Text("차단한 친구가 없어요")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                             .foregroundStyle(Color.white)

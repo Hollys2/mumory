@@ -65,29 +65,15 @@ struct MyRecentMumoryListView: View {
                     .padding(.top, 15)
                 
                 if songs.isEmpty && !isLoading {
-                    VStack(spacing: 25) {
-                        Text("나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!")
-                            .foregroundStyle(ColorSet.subGray)
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .multilineTextAlignment(.center)
-                        
-                        Text("뮤모리 기록하러 가기")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                            .frame(height: 30)
-                            .padding(.horizontal, 10)
-                            .background(ColorSet.darkGray)
-                            .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
-                            .onTapGesture {
-                                appCoordinator.rootPath.removeLast()
-                                Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-                                    withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                        appCoordinator.isCreateMumorySheetShown = true
-                                        appCoordinator.offsetY = CGFloat.zero
-                                    }
-                                }
+                    InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
+                        appCoordinator.rootPath.removeLast()
+                        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+                            withAnimation(Animation.easeInOut(duration: 0.1)) {
+                                appCoordinator.isCreateMumorySheetShown = true
+                                appCoordinator.offsetY = CGFloat.zero
                             }
+                        }
                     }
                     .padding(.top, getUIScreenBounds().height * 0.25)
                 }
@@ -104,13 +90,6 @@ struct MyRecentMumoryListView: View {
                                     .onTapGesture {
                                         playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs, startingItem: song)
                                     }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
-//                                        })
-//                                )
-                                
                             }
                         }
                         

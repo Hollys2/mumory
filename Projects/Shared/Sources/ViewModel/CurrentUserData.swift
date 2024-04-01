@@ -49,7 +49,7 @@ public class CurrentUserData: ObservableObject {
     var friendCollectionListener: ListenerRegistration?
     var friendDocumentListener: ListenerRegistration?
     var notificationListener: ListenerRegistration?
-
+    
     
     func FriendRequestListener() {
         DispatchQueue.main.async {
@@ -107,32 +107,19 @@ public class CurrentUserData: ObservableObject {
     }
     
     func FriendUpdateListener() {
+        let db = FBManager.shared.db
         DispatchQueue.main.async {
-            let db = FBManager.shared.db
             self.friendDocumentListener = db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
                 guard let friendIds = snapshot.get("friends") as? [String] else {return}
-                self.friends.removeAll()
-                self.blockFriends.removeAll()
-                friendIds.forEach { uid in
-                    Task {
-                        let user = await MumoriUser(uId: uid)
-                        DispatchQueue.main.async {
-                            self.friends.append(user)
-                        }
-                    }
-                }
                 guard let blockFriendIds = snapshot.get("blockFriends") as? [String] else {return}
-                blockFriendIds.forEach { uid in
-                    Task {
-                        let user = await MumoriUser(uId: uid)
-                        DispatchQueue.main.async {
-                            self.blockFriends.append(user)
-                        }
-                    }
+                Task {
+                    self.friends = await self.fetchFriend(friendIds: friendIds)
+                    self.blockFriends = await self.fetchFriend(friendIds: blockFriendIds)
                 }
             }
         }
+        
     }
     
     func NotificationListener() {
@@ -171,23 +158,54 @@ public class CurrentUserData: ObservableObject {
                         let id = document.reference.documentID
                         var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
                         
-                        var count = 0
-                        for id in playlist.songIDs {
-                            if count >= 4 {
-                                break
-                            }
-                            count += 1
-                            let musicItemID = MusicItemID(rawValue: id)
-                            var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                            request.properties = [.genres, .artists]
-                            do {
-                                let response = try await request.response()
-                                guard let song = response.items.first else { continue }
-                                playlist.songs.append(song)
-                            } catch {
-                                print("Error fetching song: \(error)")
-                            }
-                        }
+                        let startIndex = 0
+                        var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4
+                        let requestSongIds = Array(songIDs[startIndex..<endIndex])
+                        playlist.songs = await self.fetchSongs(songIDs: requestSongIds)
+                        return playlist
+                    }
+                    
+                }
+            } catch {
+                print(error)
+            }
+            
+            for await value in taskGroup {
+                playlists.append(value)
+            }
+            
+            return playlists.sorted(by: {$0.createdDate < $1.createdDate})
+        })
+        
+    }
+    
+    private func savePlaylist() async {
+        let Firebase = FBManager.shared
+        let db = Firebase.db
+        self.playlistArray = await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
+            var playlists: [MusicPlaylist] = []
+            
+            let query = db.collection("User").document(uId).collection("Playlist")
+                .order(by: "date", descending: false)
+            
+            do {
+                let snapshot = try await query.getDocuments()
+                
+                snapshot.documents.forEach { document in
+                    
+                    taskGroup.addTask {
+                        let data = document.data()
+                        let title = data["title"] as? String ?? ""
+                        let isPublic = data["isPublic"] as? Bool ?? false
+                        let songIDs = data["songIds"] as? [String] ?? []
+                        let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+                        let id = document.reference.documentID
+                        var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
+                        
+                        let startIndex = 0
+                        var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4
+                        let requestSongIds = Array(songIDs[startIndex..<endIndex])
+                        playlist.songs = await self.fetchSongs(songIDs: requestSongIds)
                         return playlist
                     }
                     
@@ -312,5 +330,49 @@ public class CurrentUserData: ObservableObject {
         friendCollectionListener?.remove()
         friendDocumentListener?.remove()
         notificationListener?.remove()
+    }
+    
+    private func fetchFriend(friendIds: [String]) async -> [MumoriUser] {
+        return await withTaskGroup(of: MumoriUser.self) { taskGroup -> [MumoriUser] in
+            var friendList: [MumoriUser] = []
+            for friendId in friendIds {
+                taskGroup.addTask {
+                    return await MumoriUser(uId: friendId)
+                }
+            }
+            for await value in taskGroup {
+                friendList.append(value)
+            }
+            return friendList
+        }
+    }
+    
+    public func fetchSongs(songIDs: [String]) async -> [Song]{
+        var returnValue: [Song] = []
+        var songIds: [String] = songIDs
+        return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
+            for id in songIDs {
+                taskGroup.addTask {
+                    let musicItemID = MusicItemID(rawValue: id)
+                    let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                    guard let response = try? await request.response() else {return nil}
+                    return response.items.first
+                }
+            }
+            
+            for await value in taskGroup {
+                guard let song = value else {continue}
+                returnValue.append(song)
+            }
+            
+            songIds.removeAll { songId in
+                return !returnValue.contains(where: {$0.id.rawValue == songId})
+            }
+            var songs = songIds.map { songId in
+                return returnValue.first(where: {$0.id.rawValue == songId})!
+            }
+            return returnValue
+        }
+
     }
 }

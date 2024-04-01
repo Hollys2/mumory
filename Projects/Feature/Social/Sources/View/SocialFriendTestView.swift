@@ -143,6 +143,7 @@ struct SocialFriendTestView: View {
                             .multilineTextAlignment(.center)
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             .padding(.top, getUIScreenBounds().height * 0.2)
+                            .lineSpacing(5)
                         
                     } else if status == .noResult {
                         Text("검색 결과가 없습니다")
@@ -171,7 +172,7 @@ struct SocialFriendTestView: View {
                 }else {
                     //친구 요청 페이지 - selection: 1
                     if currentUserData.recievedRequests.isEmpty {
-                        VStack(spacing: 20) {
+                        VStack(spacing: 16) {
                             Text("받은 친구 요청 내력이 없어요")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                                 .foregroundStyle(Color.white)

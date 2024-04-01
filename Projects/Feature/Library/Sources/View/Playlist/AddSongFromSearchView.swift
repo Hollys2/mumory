@@ -50,6 +50,7 @@ struct AddSongFromSearchView: View {
                     LazyVStack(spacing: 0, content: {
                         ForEach(songs, id: \.self) { song in
                             AddMusicItem(song: song, originPlaylist: $originPlaylist)
+                                .id("\(song.artistName) \(song.id)")
                         }
                     })
                     .frame(width: getUIScreenBounds().width)

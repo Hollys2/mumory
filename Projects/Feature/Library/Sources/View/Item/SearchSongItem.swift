@@ -25,7 +25,8 @@ struct SearchSongItem: View {
                     .frame(width: 57, height: 57)
                     .foregroundStyle(.gray)
             }
-            VStack(spacing: 7, content: {
+            
+            VStack(alignment: .leading, spacing: 7, content: {
                 Text(song.title)
                     .font(.system(size: 20, weight: .medium))
                     .foregroundStyle(.white)
@@ -40,29 +41,22 @@ struct SearchSongItem: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
             })
+            .frame(maxWidth: .infinity)
             .padding(.leading, 16)
-            
-            Spacer()
-            
+                        
             SharedAsset.menu.swiftUIImage
                 .resizable()
                 .scaledToFit()
                 .frame(width: 30, height: 30)
-                .padding(.trailing, 16)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet = true
                 }
          
         })
-        .padding(.vertical, 19)
-        .padding(.leading, 20)
+        .padding(.horizontal, 20)
+        .frame(height: 95)
         .background(ColorSet.background)
-//        .onLongPressGesture {
-//            self.generateHapticFeedback(style: .medium)
-//            UIView.setAnimationsEnabled(false)
-//            isPresentBottomSheet = true
-//        }
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
                 SongBottomSheetView(song: song)

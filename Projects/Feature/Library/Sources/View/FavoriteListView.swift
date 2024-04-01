@@ -66,25 +66,11 @@ struct FavoriteListView: View {
                     .padding(.top, 15)
                 
                 if !isLoading && currentUserData.playlistArray[0].songIDs.isEmpty {
-                    VStack(spacing: 25) {
-                        Text("즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .multilineTextAlignment(.center)
-                        
-                        Text("추천 음악 보러가기")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                            .foregroundStyle(ColorSet.mainPurpleColor)
-                            .frame(height: 30)
-                            .padding(.horizontal, 10)
-                            .background(ColorSet.darkGray)
-                            .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
-                            .onTapGesture {
-                                let myRandomGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
-                                appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: myRandomGenre))
-                            }
+                    InitialSettingView(title: "즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요", buttonTitle: "추천 음악 보러가기") {
+                        let myRandomGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
+                        appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: myRandomGenre))
                     }
                     .padding(.top, getUIScreenBounds().height * 0.25)
-            
                 }
                 
                 ScrollView {
