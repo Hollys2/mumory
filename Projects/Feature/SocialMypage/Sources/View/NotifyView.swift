@@ -315,6 +315,7 @@ struct NotifyCommentItem: View {
             Task{
                 let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
                 print(mumory.imageURLs)
+                
                 appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
             }
             if !notification.isRead {

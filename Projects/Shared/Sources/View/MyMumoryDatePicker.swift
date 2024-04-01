@@ -14,23 +14,25 @@ public struct MyMumoryDatePicker: View {
     
     @Binding var selectedDate: Date
     
+    let user: MumoriUser
+    
     @State private var pickerDate: Date = Date()
     @State private var selectedYear: Int = 0
     @State private var selectedMonth: Int = 0
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @Environment(\.dismiss) private var dismiss
-
     
-    public init(selectedDate: Binding<Date>) {
+    public init(selectedDate: Binding<Date>, user: MumoriUser) {
         self._selectedDate = selectedDate
+        self.user = user
     }
     
     public var body: some View {
         VStack(spacing: 0) {
-                  
             Picker("Year and Month", selection: self.$pickerDate) {
                 ForEach(getMumoryDate().keys.sorted().reversed(), id: \.self) { year in
                     ForEach(getMumoryDate()[year]!, id: \.self) { month in
@@ -54,11 +56,11 @@ public struct MyMumoryDatePicker: View {
                 let calendar = Calendar.current
                 let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
                 let range = ...lastDayOfMonth
-                let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
+                let newDataBeforeSelectedDate = self.user.uId == currentUserData.user.uId ? mumoryDataViewModel.myMumorys.filter { range.contains($0.date) } : mumoryDataViewModel.friendMumorys.filter { range.contains($0.date) }
                 
-                mumoryDataViewModel.filteredMumorys = []
+                mumoryDataViewModel.monthlyMumorys = []
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    mumoryDataViewModel.filteredMumorys = newDataBeforeSelectedDate
+                    mumoryDataViewModel.monthlyMumorys = newDataBeforeSelectedDate
                 }
 
                 dismiss()
@@ -189,7 +191,7 @@ public struct MonthlyStatDatePicker: View {
                     return dataYear == selectedYear && dataMonth == selectedMonth
                 }
                 
-                mumoryDataViewModel.filteredMumorys = filteredMumorys
+                mumoryDataViewModel.monthlyMumorys = filteredMumorys
 
                 dismiss()
             }) {

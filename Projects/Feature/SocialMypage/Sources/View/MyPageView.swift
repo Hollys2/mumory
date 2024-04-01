@@ -278,7 +278,7 @@ struct MyMumori: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .onTapGesture {
-                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
+                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(currentUserData.user), mumoryAnnotation: Mumory()))
             }
             
             if mumoryDataViewModel.myMumorys.isEmpty {

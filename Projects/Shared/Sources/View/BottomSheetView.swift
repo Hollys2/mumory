@@ -13,6 +13,7 @@ import MusicKit
 public enum MumoryBottomSheetType {
     case createMumory
     case mumoryDetailView
+    case friendMumoryDetailView
     case mumorySocialView
     case mumoryCommentView
     case mumoryCommentMyView(isMe: Bool)
@@ -82,13 +83,20 @@ public struct MumoryBottomSheet {
                     self.appCoordinator.isDeleteMumoryPopUpViewShown = true
                     //                    self.mumoryDataViewModel.deleteMumory(mumoryAnnotation)
                 },
-                BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
-                    
-                },
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
                     self.appCoordinator.rootPath.append(MumoryPage.report)
                 }
             ]
+        case .friendMumoryDetailView:
+            return [
+                BottemSheetMenuOption(iconImage: SharedAsset.starMumoryDetailMenu.swiftUIImage, title: "즐겨찾기 목록에 추가", action: {
+                    self.appCoordinator.rootPath.append(MumoryPage.report)
+                }),
+                BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
+                    self.appCoordinator.rootPath.append(MumoryPage.report)
+                })
+            ]
+            
         case .mumorySocialView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
@@ -100,8 +108,6 @@ public struct MumoryBottomSheet {
                         self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
                     }
                 }),
-                BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
-                },
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
                     withAnimation(.easeOut(duration: 0.1)) {
                         self.appCoordinator.isSocialMenuSheetViewShown = false
@@ -151,9 +157,6 @@ public struct MumoryBottomSheet {
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
                     self.appCoordinator.isDeleteMumoryPopUpViewShown = true
-                },
-                BottemSheetMenuOption(iconImage: SharedAsset.shareMumoryDetailMenu.swiftUIImage, title: "공유하기") {
-                    
                 }]
         }
     }
@@ -412,6 +415,7 @@ public struct RewardBottomSheetView: View {
     
     @Binding var isShown: Bool
     
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     
     public var body: some View {
@@ -428,20 +432,20 @@ public struct RewardBottomSheetView: View {
                 
                 Spacer().frame(height: 35)
                 
-                self.currentUserData.reward.image
+                self.mumoryDataViewModel.reward.image
                     .resizable()
                     .frame(width: getUIScreenBounds().width * 0.287, height: getUIScreenBounds().width * 0.287)
                 
                 Spacer().frame(height: 21)
                 
-                Text(self.currentUserData.reward.title)
+                Text(self.mumoryDataViewModel.reward.title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white)
                 
                 Spacer().frame(height: 16)
                 
-                     Text(self.currentUserData.reward.subTitle)
+                     Text(self.mumoryDataViewModel.reward.subTitle)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
@@ -471,9 +475,6 @@ public struct RewardBottomSheetView: View {
             }
         }
         .frame(height: 349)
-        .onAppear {
-            self.currentUserData.reward = .comment(4)
-        }
     }
 }
 

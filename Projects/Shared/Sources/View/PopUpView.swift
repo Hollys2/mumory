@@ -211,7 +211,7 @@ public struct PopUpView: View {
             .frame(height: self.type.height)
             .cornerRadius(15)
 
-            LoadingAnimationView(isLoading: .constant(self.mumoryDataViewModel.isUpdating || self.mumoryDataViewModel.isCreating))
+            LoadingAnimationView(isLoading: .constant(self.mumoryDataViewModel.isUpdating || self.mumoryDataViewModel.isLoading))
         }
     }
 }

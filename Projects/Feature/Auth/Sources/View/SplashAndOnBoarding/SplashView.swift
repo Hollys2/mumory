@@ -81,10 +81,10 @@ public struct SplashView: View {
                         MumoryDetailView(mumory: view.mumoryAnnotation)
                     case .editMumoryView:
                         MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
-                    case .myMumoryView:
-                        MyMumoryView()
-                    case .regionMyMumoryView:
-                        RegionMyMumoryView(region: view.region ?? "", mumorys: view.mumorys ?? [])
+                    case .myMumoryView(let user):
+                        MyMumoryView(user: user)
+                    case .regionMyMumoryView(let user):
+                        RegionMyMumoryView(user: user, region: view.region ?? "", mumorys: view.mumorys ?? [])
                     }
                 }
                 .navigationDestination(for: MumoryPage.self) { page in

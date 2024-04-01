@@ -44,7 +44,7 @@ struct MumoryDetailReactionBarView: View {
                 Button(action: {
                     self.generateHapticFeedback(style: .medium)
                     isButtonDisabled = true
-
+                    
                     Task {
                         await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId)
                         
@@ -106,7 +106,7 @@ struct MumoryDetailReactionBarView: View {
                 Button(action: {
                     
                 }, label: {
-                    Image(uiImage: SharedAsset.shareButtonMumoryDetail.image)
+                    Image(uiImage: SharedAsset.starOffMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
                 })
