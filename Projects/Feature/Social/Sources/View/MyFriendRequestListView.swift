@@ -42,7 +42,7 @@ struct MyFriendRequestListView: View {
                 Divider05()
                 
                 if currentUserData.friendRequests.isEmpty {
-                    VStack(spacing: 20) {
+                    VStack(spacing: 16) {
                         Text("보낸 요청 내역이 없어요")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                             .foregroundStyle(Color.white)

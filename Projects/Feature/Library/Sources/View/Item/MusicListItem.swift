@@ -102,11 +102,6 @@ struct MusicListItem: View {
         .padding(.horizontal, 20)
         .frame(height: 70)
         .background(ColorSet.background)
-//        .onLongPressGesture {
-//            self.generateHapticFeedback(style: .medium)
-//            UIView.setAnimationsEnabled(false)
-//            isPresentBottomSheet = true
-//        }
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
                 //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거

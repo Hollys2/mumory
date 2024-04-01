@@ -11,16 +11,11 @@ import Shared
 import MusicKit
 
 struct UneditablePlaylistManageView: View {
+    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @State var itemSize: CGFloat = .zero
     @State var isPresentBottomSheet: Bool = false
-    @Binding var playlistArray: [MusicPlaylist]
-    let friend: MumoriUser
 
-    init(friend: MumoriUser, playlistArray: Binding<[MusicPlaylist]>) {
-        self.friend = friend
-        self._playlistArray = playlistArray
-    }
     var body: some View {
         ZStack(alignment: .top){
             LibraryColorSet.background.ignoresSafeArea()
@@ -37,7 +32,7 @@ struct UneditablePlaylistManageView: View {
                     
                     Spacer()
                     
-                    Text("\(friend.nickname) 플레이리스트")
+                    Text("\(friendDataViewModel.friend.nickname) 플레이리스트")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundStyle(.white)
                     
@@ -61,13 +56,13 @@ struct UneditablePlaylistManageView: View {
                 //플레이리스트 스크롤뷰
                 ScrollView(.vertical) {
                     LazyVGrid(columns: [
-                                GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12),
-                              GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12)
-                                ] , spacing: 30, content: {
-                        ForEach(0 ..< playlistArray.count, id: \.self) { index in
-                            UneditablePlaylistBigItem(playlist: $playlistArray[index])
+                        GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12),
+                        GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12)
+                    ] , spacing: 30, content: {
+                        ForEach(friendDataViewModel.playlistArray.indices, id: \.self) { index in
+                            UneditablePlaylistBigItem(playlist: $friendDataViewModel.playlistArray[index])
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(friend: friend, playlist: $playlistArray[index]))
+                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlistIndex: index))
                                 }
                             
                         }

@@ -18,6 +18,10 @@ struct NowPlayingView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentQueue: Bool = false
     @State var playTogetherSongs: [Song] = []
+    
+    @State var albumCoverSize: CGFloat = .zero
+    @State var horizontalSpacing: CGFloat = .zero
+    @State var isSE: Bool = false
     init() {
         UISlider.appearance().setThumbImage(UIImage(asset: SharedAsset.playSphere)?.resized(to: CGSize(width: 10.45, height: 10)), for: .normal)
     }
@@ -49,21 +53,20 @@ struct NowPlayingView: View {
                             
                         }
                         PlayControlView(isPresentQueue: $isPresentQueue)
-
                     }
                     .id("main")
-                    .frame(height: getUIScreenBounds().height - appCoordinator.safeAreaInsetsBottom - 45)
+                    .frame(height: getUIScreenBounds().height - appCoordinator.safeAreaInsetsBottom - (isSE ? 35 : 45))
                     
                     PlayTogetherView(songs: $playTogetherSongs)
                         .opacity(isPresentQueue ? 0 : 1)
                         .padding(.bottom, 100)
-                        .onChange(of: playerViewModel.currentSong, perform: { value in
-                            guard let song = value else {return}
-                            print("\(song.title), \(song.artistName)")
-                            Task {
-                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
-                            }
-                        })
+//                        .onChange(of: playerViewModel.currentSong, perform: { value in
+//                            guard let song = value else {return}
+//                            print("\(song.title), \(song.artistName)")
+//                            Task {
+//                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
+//                            }
+//                        })
                 }
                 .scrollIndicators(.hidden)
                 .scrollDisabled(isPresentQueue)
@@ -88,13 +91,16 @@ struct NowPlayingView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            print("on appear")
             guard let song = playerViewModel.currentSong else {return}
+            isSE = getUIScreenBounds().height < 700
+            albumCoverSize = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.77 : getUIScreenBounds().width * 0.87
+            horizontalSpacing = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.1 : getUIScreenBounds().width * 0.065
             Task {
                 print("\(song.title), \(song.artistName)")
                 self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
             }
         }
+
     }
 }
 
@@ -104,6 +110,11 @@ struct PlayControlView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var isPresentQueue: Bool
     let durationTextColor = Color(white: 0.83)
+    
+    @State var albumCoverSize: CGFloat = .zero
+    @State var horizontalSpacing: CGFloat = .zero
+    @State var isSE: Bool = false
+    
     var body: some View {
         //재생 제어 버튼들
         HStack(spacing: 0, content: {
@@ -118,17 +129,15 @@ struct PlayControlView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 28, height: 28)
-                        .frame(maxWidth: .infinity)
-                        .padding(.trailing, 5)
                 }else {
                     SharedAsset.playlist.swiftUIImage
                         .resizable()
                         .scaledToFit()
                         .frame(width: 28, height: 28)
-                        .frame(maxWidth: .infinity)
-                        .padding(.trailing, 5)
                 }
             }
+            
+            Spacer()
             
             //뒤로가기 버튼
             Button(action: {
@@ -139,8 +148,9 @@ struct PlayControlView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 32, height: 32)
-                    .frame(maxWidth: .infinity)
             })
+            Spacer()
+
             
             //재생, 멈춤 버튼
             if playerViewModel.isPlaying {
@@ -151,7 +161,6 @@ struct PlayControlView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 70, height: 70)
-                        .frame(maxWidth: .infinity)
                 })
             }else {
                 Button(action: {
@@ -161,9 +170,10 @@ struct PlayControlView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 70, height: 70)
-                        .frame(maxWidth: .infinity)
                 })
             }
+            Spacer()
+
             
             //앞으로 가기 버튼
             Button(action: {
@@ -173,11 +183,10 @@ struct PlayControlView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 32, height: 32)
-                    .frame(maxWidth: .infinity)
             })
             
-            
-            
+            Spacer()
+
             //북마크 버튼
             Button(action: {
                 guard let nowSong = playerViewModel.currentSong else {return}
@@ -196,20 +205,22 @@ struct PlayControlView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 32, height: 32)
-                        .frame(maxWidth: .infinity)
                 }else {
                     SharedAsset.bookmarkLight.swiftUIImage
                         .resizable()
                         .scaledToFit()
                         .frame(width: 32, height: 32)
-                        .frame(maxWidth: .infinity)
                 }
                 
             })
         })
-        .frame(width: getUIScreenBounds().width)
-        .padding(.bottom, 15)
-        .padding(.horizontal, getUIScreenBounds().width * 0.13 / 2)
+        .padding(.horizontal, horizontalSpacing)
+        .padding(.bottom, isSE ? 12 : 15)
+        .onAppear {
+            isSE = getUIScreenBounds().height < 700
+            albumCoverSize = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.77 : getUIScreenBounds().width * 0.87
+            horizontalSpacing = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.1 : getUIScreenBounds().width * 0.065
+        }
         
     }
 }
@@ -224,10 +235,19 @@ struct PlayingView: View {
     @State var changeOffset: CGFloat = .zero
     @State var isPresentAddBottomSheet: Bool = false
     @State var isPresentSongBottmSheet: Bool = false
-
+    
+    @State var albumCoverSize: CGFloat = .zero
+    @State var horizontalSpacing: CGFloat = .zero
+    @State var isSE: Bool = false
+    
+    @State var id: UUID = UUID()
+    @State var titleMaxWidth: CGFloat = .zero
+    @State var endInit: Bool = true
+    
     let delay: Double = 1.0
     let artistTextColor = Color(white: 0.89)
     let durationTextColor = Color(white: 0.83)
+    
     
     var body: some View {
         VStack(spacing: 0) {
@@ -243,7 +263,6 @@ struct PlayingView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                 })
-                
                 Spacer()
                 SharedAsset.menuWhite.swiftUIImage
                     .resizable()
@@ -254,13 +273,11 @@ struct PlayingView: View {
                         UIView.setAnimationsEnabled(false)
                         isPresentSongBottmSheet = true
                     }
-                
             })
-            .frame(height: 63)
+            .frame(height: 65)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
-            .padding(.horizontal, getUIScreenBounds().width * 0.13 / 2)
+            .padding(.horizontal, isSE ? 20 : horizontalSpacing)
             
-            //선명한 앨범 커버(정방형) 폰 기준 가로의 87%
             AsyncImage(url: playerViewModel.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
                     .resizable()
@@ -270,19 +287,41 @@ struct PlayingView: View {
                     .resizable()
                     .scaledToFit()
             }
-            .frame(width: getUIScreenBounds().width * 0.87, height: getUIScreenBounds().width * 0.87)
+            .frame(width: albumCoverSize, height: albumCoverSize)
             .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-            .padding(.bottom, 20)
+            .padding(.bottom, isSE ? 16 : 20)
             
             //아티스트 이름 및 노래 이름, 추가버튼
             HStack(alignment: .top, spacing: 0, content: {
                 VStack(spacing: 6, content: {
-                    MarqueeText(song: $playerViewModel.currentSong)
-
+                    if endInit {
+                        ScrollView(.horizontal) {
+                            Text(playerViewModel.currentSong?.title ?? "재생 중인 음악이 없습니다.")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
+                                .foregroundStyle(Color.white)
+                                .offset(x: startAnimation ? changeOffset : 0)
+                                .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true).delay(2.0), value: startAnimation)
+                        }
+                        
+                        
+                    } else {
+                        Text(" ")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
+                    }
+         
                     Text(playerViewModel.currentSong?.artistName ?? "아티스트이름")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 18))
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: isSE ? 16 : 18))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .onChange(of: playerViewModel.currentSong, perform: { value in
+                            DispatchQueue.main.async {
+                                endInit = false
+                                startAnimation = false
+                                Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+                                    endInit = true
+                                }
+                            }
+                        })
                    
                 })
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -307,7 +346,7 @@ struct PlayingView: View {
                 }
                 
             })
-            .padding(.horizontal, getUIScreenBounds().width * 0.13 / 2)
+            .padding(.horizontal, horizontalSpacing)
 
 
             Spacer()
@@ -324,7 +363,7 @@ struct PlayingView: View {
                 }())
                 .resizable()
                 .scaledToFit()
-                .frame(width: 28, height: 28)
+                .frame(width: isSE ? 26 : 28, height: isSE ? 26 : 28)
                 .onTapGesture {
                     playerViewModel.setShuffleMode()
                 }
@@ -344,23 +383,25 @@ struct PlayingView: View {
                 }())
                 .resizable()
                 .scaledToFit()
-                .frame(width: 28, height: 28)
+                .frame(width: isSE ? 26 : 28, height: isSE ? 26 : 28)
                 .onTapGesture {
                     playerViewModel.setRepeatMode()
                 }
                 
             }
-            .padding(.bottom, 16)
-            .padding(.horizontal, getUIScreenBounds().width * 0.13 / 2)
+            .padding(.bottom, 5)
+            .padding(.horizontal, horizontalSpacing)
 
             
             //슬라이드 바 및 재생시간
             VStack(spacing: 0, content: {
                 Slider(value: $playerViewModel.playingTime, in: 0...(playerViewModel.playingSong()?.duration ?? 0.0), onEditingChanged: { isEditing in
-                    if isEditing {
-                        playerViewModel.startEditingSlider()
-                    }else {
-                        playerViewModel.updatePlaybackTime(to: playerViewModel.playingTime )
+                    DispatchQueue.main.async {
+                        if isEditing {
+                            playerViewModel.startEditingSlider()
+                        }else {
+                            playerViewModel.updatePlaybackTime(to: playerViewModel.playingTime )
+                        }
                     }
                 })
                 .tint(Color.white)
@@ -382,12 +423,8 @@ struct PlayingView: View {
                 })
                 .offset(y: -5)
             })
-
-            .padding(.horizontal, getUIScreenBounds().width * 0.13 / 2)
-            .padding(.bottom, 12)
-            
-            
-            
+            .padding(.horizontal, horizontalSpacing)
+            .padding(.bottom, isSE ? 0 : 12)
         }
         .frame(width: getUIScreenBounds().width)
         .fullScreenCover(isPresented: $isPresentAddBottomSheet) {
@@ -402,6 +439,24 @@ struct PlayingView: View {
             }
             .background(TransparentBackground())
         }
+        .onAppear {
+            isSE = getUIScreenBounds().height < 700
+            albumCoverSize = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.77 : getUIScreenBounds().width * 0.87
+            horizontalSpacing = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.1 : getUIScreenBounds().width * 0.065
+            
+            let addIconWidth: CGFloat = 35
+            let spacing: CGFloat = 20
+            let horizontalTotalSpacing: CGFloat = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.2 : getUIScreenBounds().width * 0.13
+            titleMaxWidth = getUIScreenBounds().width - addIconWidth - spacing - horizontalTotalSpacing
+            
+            guard let song = playerViewModel.currentSong else {return}
+            DispatchQueue.main.async {
+                titleWidth = getTextWidth(term: song.title)
+                changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
+                startAnimation = true
+            }
+
+        }
         
     }
 }
@@ -411,6 +466,9 @@ struct PlayingViewBottomSheet: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @Environment(\.dismiss) var dismiss
+    
+    @State var albumCoverSize: CGFloat = .zero
+    @State var horizontalSpacing: CGFloat = .zero
     
     var body: some View {
         VStack(spacing: 0) {
@@ -441,6 +499,9 @@ struct QueueView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     let playlistTitleBackgroundColor = Color(white: 0.12)
+    @State var isSE: Bool = false
+    @State var albumCoverSize: CGFloat = .zero
+    @State var horizontalSpacing: CGFloat = .zero
     
     var body: some View {
         VStack(spacing: 0) {
@@ -456,7 +517,7 @@ struct QueueView: View {
                     .frame(height: 63)
                     .padding(.top, appCoordinator.safeAreaInsetsTop)
             }
-            .padding(.trailing, getUIScreenBounds().width * 0.13 / 2)
+            .padding(.trailing, isSE ? 20 : horizontalSpacing)
             
             
             HStack(content: {
@@ -522,6 +583,11 @@ struct QueueView: View {
             }
         }
         .frame(width: getUIScreenBounds().width)
+        .onAppear {
+            isSE = getUIScreenBounds().height < 700
+            albumCoverSize = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.77 : getUIScreenBounds().width * 0.87
+            horizontalSpacing = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.1 : getUIScreenBounds().width * 0.065
+        }
     }
 }
 public func requestPlayTogetherSongs(title: String, artist: String) async -> [Song]{
@@ -610,6 +676,7 @@ struct PlayTogetherItem: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentBottomSheet: Bool = false
+    @State var viewWidth: CGFloat = .zero
     var song: Song
     init(song: Song){
         self.song = song
@@ -701,56 +768,3 @@ struct PlayTogetherItem: View {
     }
 }
 
-struct MarqueeText: View {
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @State var animationDuration: Double = 5.0
-    @State var titleWidth: CGFloat = 0
-    @State private var startAnimation : Bool = false
-    @State var changeOffset: CGFloat = .zero
-    @Binding var song: Song?
-    @State var id: UUID = UUID()
-    init(song: Binding<Song?>) {
-        self._song = song
-    }
-    var body: some View {
-        ScrollView(.horizontal) {
-            Text(song?.title ?? "재생 중인 음악이 없습니다.")
-                .id(self.id)
-                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                .foregroundStyle(Color.white)
-                .onAppear {
-                    guard let song = playerViewModel.currentSong else {return}
-                    titleWidth = getTextWidth(term: song.title)
-                    changeOffset = 0
-                    //현재 startAnimation: false, changeOffset: -400. 현재 위치 -400
-                    //false -> true / -400 -> 0 / 왼 -> 오 / 끝나는 위치: 0
-                    //시작 위치: -400, 끝나는 위치: 0 => 3회반복 (false -> true)
-                    //false -> true -> false -> true / -400 -> 0 -> -400 -> 0
-                    //0 -> -400 -> 0 -> -400 -> 0 / 0이 아니라 -400에 가잇음;;; - 아 결국 끝나는 곳이 false니까..!
-                    //음ㅣㄹ알단킵
-                    withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(5, autoreverses: true)) {
-                        changeOffset = titleWidth < 280 ? 0 : -titleWidth
-                        startAnimation = true
-                    }
-                }
-                .onChange(of: playerViewModel.currentSong, perform: { value in
-                    guard let song = value else {return}
-                    startAnimation = false
-                    changeOffset = 0
-                    self.id = UUID()
-                    titleWidth = getTextWidth(term: song.title)
-                    changeOffset = titleWidth < 280 ? 0 : -titleWidth
-                    withAnimation(.linear(duration: 4.0).delay(2.0).repeatCount(3, autoreverses: true)) {
-                        startAnimation = true
-                    }
-
-                    
-                })
-                .offset(x: startAnimation ? 0 : changeOffset )
-        }
-        .scrollIndicators(.hidden)
-        .scrollDisabled(true)
-    }
-    
-}

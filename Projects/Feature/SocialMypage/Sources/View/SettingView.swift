@@ -93,16 +93,13 @@ struct SettingView: View {
                             for key in UserDefaults.standard.dictionaryRepresentation().keys {
                                 UserDefaults.standard.removeObject(forKey: key.description)
                             }
-                            currentUserData.removeAllData()
-                            print("로그아웃 완료")
+                            Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
                             appCoordinator.bottomAnimationViewStatus = .remove
                             appCoordinator.initPage = .login
                             appCoordinator.rootPath = NavigationPath()
+                            currentUserData.removeAllData()
                         }catch {
                             print("signout error: \(error)")
-                        }
-                        Firebase.messaging.deleteToken { error in
-                            print(error?.localizedDescription)
                         }
                     }
                 

@@ -16,15 +16,28 @@ struct SearchMusicEntryView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
     @State var popularSearchTerm: [String] = []
+    
     @Binding var term: String
+    @Binding private var songs: MusicItemCollection<Song>
+    @Binding private var artists: MusicItemCollection<Artist>
+    @Binding private var isLoading: Bool
     var shazamViewType: ShazamViewType = .normal
-    init(term: Binding<String>){
+    
+    init(term: Binding<String>, songs: Binding<MusicItemCollection<Song>>, artists: Binding<MusicItemCollection<Artist>>, isLoading: Binding<Bool>) {
         self._term = term
+        self._songs = songs
+        self._artists = artists
+        self._isLoading = isLoading
     }
-    init(term: Binding<String>, shazamViewType: ShazamViewType) {
+    
+    init(term: Binding<String>, songs: Binding<MusicItemCollection<Song>>, artists: Binding<MusicItemCollection<Artist>>, isLoading: Binding<Bool>, shazamViewType: ShazamViewType) {
         self._term = term
+        self._songs = songs
+        self._artists = artists
+        self._isLoading = isLoading
         self.shazamViewType = shazamViewType
     }
+
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -73,7 +86,16 @@ struct SearchMusicEntryView: View {
                                             .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
                                             .onTapGesture {
                                                 self.term = term
-                                                
+                                                self.songs = []
+                                                self.artists = []
+                                                Task {
+                                                    self.artists = await requestArtist(term: term)
+                                                    isLoading = false
+                                                }
+                                                Task {
+                                                    self.songs = await requestSong(term: term, index: 0)
+                                                    isLoading = false
+                                                }
                                                 let userDefault = UserDefaults.standard
                                                 var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                                 recentSearchList.removeAll(where: {$0 == term})
@@ -126,8 +148,25 @@ struct SearchMusicEntryView: View {
                                     userDefault.set(result, forKey: "recentSearchList")
                                 })
                                 .onTapGesture {
-                                    term = title
+                                    self.isLoading = true
+                                    self.term = title
+                                    self.songs = []
+                                    self.artists = []
+                                    Task {
+                                        self.artists = await requestArtist(term: term)
+                                        isLoading = false
+                                    }
+                                    Task {
+                                        self.songs = await requestSong(term: term, index: 0)
+                                        isLoading = false
+                                    }
+                                    let userDefault = UserDefaults.standard
+                                    var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                    recentSearchList.removeAll(where: {$0 == term})
+                                    recentSearchList.insert(term, at: 0)
+                                    userDefault.set(recentSearchList, forKey: "recentSearchList")
                                 }
+                            
                             }
                             if recentSearchObject.recentSearchList.isEmpty {
                                 Text("최근 검색내역이 없습니다")

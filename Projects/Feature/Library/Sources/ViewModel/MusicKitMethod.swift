@@ -63,18 +63,31 @@ public func fetchDetailAlbum(albumID: String) async -> Album? {
 
 public func fetchSongs(songIDs: [String]) async -> [Song]{
     var returnValue: [Song] = []
-    for id in songIDs {
-        let musicItemID = MusicItemID(rawValue: id)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        guard let response = try? await request.response() else {
-            continue
+    var songIds: [String] = songIDs
+    return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
+        for id in songIDs {
+            taskGroup.addTask {
+                let musicItemID = MusicItemID(rawValue: id)
+                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+                guard let response = try? await request.response() else {return nil}
+                return response.items.first
+            }
         }
-        guard let song = response.items.first else {
-            continue
+        
+        for await value in taskGroup {
+            guard let song = value else {continue}
+            returnValue.append(song)
         }
-        returnValue.append(song)
+        
+        songIds.removeAll { songId in
+            return !returnValue.contains(where: {$0.id.rawValue == songId})
+        }
+        var songs = songIds.map { songId in
+            return returnValue.first(where: {$0.id.rawValue == songId})!
+        }
+        return returnValue
     }
-    return returnValue
+
 }
 
 // MonthlyStat 컬렉션 데이터 가져오기

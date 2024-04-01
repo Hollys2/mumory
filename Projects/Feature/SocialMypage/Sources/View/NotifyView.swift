@@ -160,6 +160,7 @@ struct NotifyLikeItem: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
+    @State var isPresentDeleteMumoryPopup: Bool = false
     init(notification: Binding<Notification>) {
         self._notification = notification
 
@@ -224,7 +225,12 @@ struct NotifyLikeItem: View {
         .onTapGesture {
             Task{
                 let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                if mumory.id == "DELETE" {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeleteMumoryPopup = true
+                }else {
+                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                }
             }
             if !notification.isRead {
                 DispatchQueue.global().async {
@@ -234,7 +240,10 @@ struct NotifyLikeItem: View {
                 self.notification.isRead = true
             }
         }
-
+        .fullScreenCover(isPresented: $isPresentDeleteMumoryPopup, content: {
+            OneButtonOnlyConfirmPopupView(title: "삭제된 게시물입니다")
+                .background(TransparentBackground())
+        })
     }
     
 
@@ -246,6 +255,7 @@ struct NotifyCommentItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
+    @State var isPresentDeleteMumoryPopup: Bool = false
     init(notification: Binding<Notification>) {
         self._notification = notification
     }
@@ -314,8 +324,12 @@ struct NotifyCommentItem: View {
         .onTapGesture {
             Task{
                 let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                print(mumory.imageURLs)
-                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                if mumory.id == "DELETE" {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeleteMumoryPopup = true
+                }else {
+                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                }
             }
             if !notification.isRead {
                 DispatchQueue.global().async {
@@ -325,6 +339,10 @@ struct NotifyCommentItem: View {
             }
             //해당 알림과 관련된 페이지로 넘어가기
         }
+        .fullScreenCover(isPresented: $isPresentDeleteMumoryPopup, content: {
+            OneButtonOnlyConfirmPopupView(title: "삭제된 게시물입니다")
+                .background(TransparentBackground())
+        })
     }
 }
 

@@ -117,6 +117,7 @@ struct EmailLoginView: View {
               let snapshot = try? await db.collection("User").document(result.user.uid).getDocument(),
               let data = snapshot.data() else {
             self.isLoginError = true
+            isLoading = false
             return
         }
         

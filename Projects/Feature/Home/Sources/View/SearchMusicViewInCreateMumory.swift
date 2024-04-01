@@ -17,32 +17,50 @@ import MusicKit
 //가장 처음 샤잠, 최근 검색, 검색텍스트필드 등이 있음
 //검색 단어 존재 유무에 따라서 초반 뷰와 결과 뷰를 나눠서 보여주는 역할
 struct SearchMusicViewInCreateMumory: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @State var term: String = ""
-    @State var musicList: MusicItemCollection<Song> = []
-    @State var artistList: MusicItemCollection<Artist> = []
-    @GestureState var dragAmount = CGSize.zero
+    @State var songs: MusicItemCollection<Song> = []
+    @State var artists: MusicItemCollection<Artist> = []
+    @State var offset: CGPoint = .zero
+    @State var isLoading: Bool = false
+    @State var searchIndex: Int = 0
+    let itemHeight: CGFloat = 95.0
     
     var body: some View {
-        ZStack{
-            Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 1).ignoresSafeArea()
+        ZStack(alignment: .top){
+            ColorSet.background.ignoresSafeArea()
+            
             VStack(spacing: 0) {
                 HStack(spacing: 0, content: {
+                    //검색 텍스트 필드 뷰
                     HStack(spacing: 0, content: {
                         SharedAsset.graySearch.swiftUIImage
                             .frame(width: 23, height: 23)
                             .padding(.leading, 15)
                         
-                        TextField("노래 및 아티스트 검색", text: $term, prompt: searchPlaceHolder())
+                        TextField("", text: $term, prompt: searchPlaceHolder())
                             .textFieldStyle(.plain)
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
                             .foregroundColor(.white)
-                        
+                            .submitLabel(.search)
+                            .onSubmit {
+                                isLoading = true
+                                artists = []
+                                songs = []
+                                Task {
+                                    self.artists = await requestArtist(term: term)
+                                    isLoading = false
+                                }
+                                Task {
+                                    self.songs = await requestSong(term: term, index: 0)
+                                    isLoading = false
+                                }
+                            }
+                    
                         
                         SharedAsset.xWhiteCircle.swiftUIImage
                             .frame(width: 23, height: 23)
@@ -71,16 +89,22 @@ struct SearchMusicViewInCreateMumory: View {
                 .padding(.trailing, 20)
                 .padding(.bottom, 15)
                 .background(.clear)
-                
-                if term.count > 0 {
-                    SearchMusicResultViewInCreateMumory(term: $term)
+
+                if term.count > 0{
+                    SearchMusicResultViewInCreateMumory(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, offset: $offset)
+                        .onChange(of: offset, perform: { value in
+                            print(offset)
+                            if offset.y > CGFloat(searchIndex) * itemHeight * 20 + (itemHeight * 10) {
+                                searchIndex += 1
+                                Task {
+                                    self.songs += await requestSong(term: self.term, index: searchIndex)
+                                }
+                            }
+                        })
+                    
                 }else{
-                    SearchMusicEntryView(term: $term, shazamViewType: .createMumory)
+                    SearchMusicEntryView(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, shazamViewType: .createMumory)
                 }
-                
-                
-                
-                Spacer()
             }
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             
@@ -114,33 +138,40 @@ struct SearchMusicResultViewInCreateMumory: View {
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    
-    @Binding var term: String
-    @State private var musicList: MusicItemCollection<Song> = []
-    @State private var artistList: MusicItemCollection<Artist> = []
-    
-    @State private var timer: Timer?
-    @State private var localTime = 0.0
-    
-    @State private var offset: CGPoint = .zero
-    @State private var contentSize: CGSize = .zero
-    @State private var requestIndex = 0
-    @State private var haveToLoadNextPage: Bool = false
-    @State private var isLoading: Bool = false
-    
+    @Binding private var term: String
+    @Binding private var songs: MusicItemCollection<Song>
+    @Binding private var artists: MusicItemCollection<Artist>
+    @Binding private var isLoading: Bool
+    @Binding private var offset: CGPoint
+        
+    init(term: Binding<String>, songs: Binding<MusicItemCollection<Song>>, artists: Binding<MusicItemCollection<Artist>>,
+         isLoading: Binding<Bool>, offset: Binding<CGPoint>) {
+        self._term = term
+        self._songs = songs
+        self._artists = artists
+        self._isLoading = isLoading
+        self._offset = offset
+    }
     
     var body: some View {
         ZStack(alignment: .top){
-            ScrollWrapperWithContentSize(contentOffset: $offset, contentSize: $contentSize){
+            SimpleScrollView(contentOffset: $offset) {
                 VStack(spacing: 0, content: {
-                    if musicList.count == 0 && artistList.count == 0 {
+                    
+                    if isLoading {
+                        LoadingAnimationView(isLoading: $isLoading)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, getUIScreenBounds().height * 0.25)
+                        
+                    } else if term.isEmpty {
+                        EmptyView()
+                    } else if songs.isEmpty || artists.isEmpty {
                         Text("검색 결과가 없습니다")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .foregroundStyle(ColorSet.subGray)
-                            .padding(.top, 130)
-                    }else {
+                            .padding(.top, getUIScreenBounds().height * 0.2)
+                    } else {
                         LazyVStack(spacing: 0, content: {
-                            //아티스트 검색 결과 타이틀 및 리스트
                             Text("아티스트")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                 .foregroundStyle(.white)
@@ -149,8 +180,9 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(artistList, id: \.id){ artist in
+                            ForEach(artists, id: \.id){ artist in
                                 SearchArtistItem(artist: artist)
+                                    .id(artist.id)
                                     .onTapGesture {
                                         appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))
                                         //최근 검색어 저장
@@ -162,13 +194,11 @@ struct SearchMusicResultViewInCreateMumory: View {
                                     }
                             }
                             
-                            //구분선
                             Rectangle()
                                 .fill(Color.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 8)
                             
-                            //음악 검색 결과 타이틀 및 리스트
                             Text("곡")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -177,105 +207,37 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(musicList, id: \.id){ music in
-                                SearchSelectableSongItem(song: music)
+                            ForEach(songs, id: \.id){ song in
+                                SearchSelectableSongItem(song: song)
+                                    .id("\(song.artistName)\(song.id)")
                                     .onTapGesture {
-                                        playerViewModel.setPreviewPlayer(tappedSong: music)
+                                        playerViewModel.setPreviewPlayer(tappedSong: song)
                                         //최근 검색어 저장
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
-                                        recentSearchList.removeAll(where: {$0 == music.title})
-                                        recentSearchList.insert(music.title, at: 0)
+                                        recentSearchList.removeAll(where: {$0 == song.title})
+                                        recentSearchList.insert(song.title, at: 0)
                                         userDefault.set(recentSearchList, forKey: "recentSearchList")
                                     }
-                                
                             }
                             
                             Rectangle()
                                 .frame(height: 87)
                                 .foregroundStyle(.clear)
                         })
-                        
+
                     }
                 })
                 .frame(width: getUIScreenBounds().width)
-                .onChange(of: term, perform: { value in
-                    localTime = 0.0
-                    requestIndex = 0
-                    isLoading = true
-                })
-                .onChange(of: localTime, perform: { value in
-                    if localTime == 0.8 {
-                        requestArtist(term: term)
-                        requestSong(term: term, index: 0)
-                    }
-                })
-                .onChange(of: offset, perform: { value in
-                    if offset.y/contentSize.height > 0.7 {
-                        if !haveToLoadNextPage {
-                            haveToLoadNextPage = true
-                            requestIndex += 1
-                            requestSong(term: term, index: requestIndex)
-                        }
-                    }else {
-                        haveToLoadNextPage = false
-                    }
-                })
-                
-                
             }
-            .scrollIndicators(.hidden)
             .ignoresSafeArea()
-            .onAppear(perform: {
-                self.timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { timer in
-                    localTime += 0.2
-                }
-            })
-            .onDisappear(perform: {
-                timer?.invalidate()
-            })
+            .scrollIndicators(.hidden)
             
+            LoadingAnimationView(isLoading: $isLoading)
+                .padding(.top, getUIScreenBounds().height * 0.25)
+
         }
     }
-    public func requestArtist(term: String){
-        var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
-        request.limit = 20
-        request.includeTopResults = true
-        
-        Task {
-            do {
-                let response = try await request.response()
-                DispatchQueue.main.async {
-                    self.artistList = response.artists
-                    isLoading = false
-                }
-            }catch(let error) {
-                print("error: \(error.localizedDescription)")
-            }
-            
-        }
-        
-    }
-    
-    public func requestSong(term: String, index: Int) {
-        print("request song")
-        var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
-        request.limit = 20
-        request.includeTopResults = true
-        request.offset = index * 20
-        Task {
-            do {
-                let response = try await request.response()
-                DispatchQueue.main.async {
-                    self.musicList += response.songs
-                }
-            }catch(let error) {
-                print("error: \(error.localizedDescription)")
-            }
-            
-        }
-    }
-    
 }
 
 //선택 가능한 노래 아이템(우측에 하얀 플러스 아이콘)

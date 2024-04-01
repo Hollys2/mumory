@@ -17,13 +17,16 @@ struct SearchMusicView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     @State var term: String
-    @State var musicList: MusicItemCollection<Song> = []
-    @State var artistList: MusicItemCollection<Artist> = []
-
+    @State var songs: MusicItemCollection<Song> = []
+    @State var artists: MusicItemCollection<Artist> = []
+    @State var offset: CGPoint = .zero
+    @State var isLoading: Bool = false
+    @State var searchIndex: Int = 0
+    let itemHeight: CGFloat = 95.0
+    
     var body: some View {
-        ZStack{
+        ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
-            
             VStack(spacing: 0) {
                 HStack(spacing: 0, content: {
                     //검색 텍스트 필드 뷰
@@ -37,6 +40,20 @@ struct SearchMusicView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                             .padding(.leading, 7)
                             .foregroundColor(.white)
+                            .submitLabel(.search)
+                            .onSubmit {
+                                isLoading = true
+                                artists = []
+                                songs = []
+                                Task {
+                                    self.artists = await requestArtist(term: term)
+                                    isLoading = false
+                                }
+                                Task {
+                                    self.songs = await requestSong(term: term, index: 0)
+                                    isLoading = false
+                                }
+                            }
                     
                         
                         SharedAsset.xWhiteCircle.swiftUIImage
@@ -51,32 +68,38 @@ struct SearchMusicView: View {
                     .background(Color(red: 0.24, green: 0.24, blue: 0.24))
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .circular))
                     
-                  
-                        Text("취소")
-                            .padding(.leading, 8)
-                            .foregroundColor(.white)
-                            .font(.system(size: 16, weight: .medium))
-                            .onTapGesture {
-                                appCoordinator.rootPath.removeLast()
-                            }
-                  
+                    
+                    Text("취소")
+                        .padding(.leading, 8)
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .medium))
+                        .onTapGesture {
+                            appCoordinator.rootPath.removeLast()
+                        }
+                    
                 })
                 .padding(.top, 12)
                 .padding(.leading, 20)
                 .padding(.trailing, 20)
                 .padding(.bottom, 15)
                 .background(.clear)
-                
+    
                 if term.count > 0{
-                    SearchMusicResultView(term: $term)
+                    SearchMusicResultView(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, offset: $offset)
+                        .onChange(of: offset, perform: { value in
+                            print(offset)
+                            if offset.y > CGFloat(searchIndex) * itemHeight * 20 + (itemHeight * 10) {
+                                searchIndex += 1
+                                Task {
+                                    self.songs += await requestSong(term: self.term, index: searchIndex)
+                                }
+                            }
+                        })
                     
                 }else{
-                    SearchMusicEntryView(term: $term)
+                    SearchMusicEntryView(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading)
                 }
                 
-                
-    
-                Spacer()
             }
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             
@@ -96,4 +119,31 @@ struct SearchMusicView: View {
             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
             .foregroundColor(ColorSet.subGray)
     }
+}
+public func requestArtist(term: String) async -> MusicItemCollection<Artist> {
+    var request = MusicCatalogSearchRequest(term: term, types: [Artist.self])
+    request.limit = 5
+    request.includeTopResults = true
+    do {
+        let response = try await request.response()
+        return response.artists
+    }catch(let error) {
+        print("error: \(error.localizedDescription)")
+    }
+    return []
+}
+
+public func requestSong(term: String, index: Int) async -> MusicItemCollection<Song> {
+    print("request song")
+    var request = MusicCatalogSearchRequest(term: term, types: [Song.self])
+    request.limit = 20
+    request.includeTopResults = true
+    request.offset = index * 20
+    do {
+        let response = try await request.response()
+        return response.songs
+    }catch(let error) {
+        print("error: \(error.localizedDescription)")
+    }
+    return []
 }

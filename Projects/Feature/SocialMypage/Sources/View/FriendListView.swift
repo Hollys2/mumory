@@ -77,22 +77,8 @@ struct FriendListView: View {
                             .padding(.bottom, 15)
                         
                         if currentUserData.friends.isEmpty {
-                            VStack(spacing: 25) {
-                                Text("서로의 일상과 음악 취향을\n공유하고 싶은 친구들을 초대해보세요")
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                    .foregroundStyle(ColorSet.subGray)
-                                    .multilineTextAlignment(.center)
-                                
-                                Text("친구 초대하러 가기")
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
-                                    .foregroundStyle(ColorSet.mainPurpleColor)
-                                    .frame(height: 30)
-                                    .padding(.horizontal, 10)
-                                    .background(ColorSet.darkGray)
-                                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
-                                    .onTapGesture {
-                                        appCoordinator.rootPath.append(MumoryPage.searchFriend)
-                                    }
+                            InitialSettingView(title: "서로의 일상과 음악 취향을\n공유하고 싶은 친구들을 초대해보세요", buttonTitle: "친구 초대하러 가기") {
+                                appCoordinator.rootPath.append(MumoryPage.searchFriend)
                             }
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.top, getUIScreenBounds().height * 0.15)
