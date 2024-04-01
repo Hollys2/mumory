@@ -33,7 +33,7 @@ struct CommentView: View {
     var body: some View {
         
         HStack(alignment: .top,  spacing: 13) {
-            if currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) {
+            if currentUserData.blockFriends.contains(where: {$0.uId == comment.uId}) ||  self.commentUser.nickname == "탈퇴계정" {
                 commentUser.defaultProfileImage
                     .resizable()
                     .frame(width: 28, height: 28)
@@ -451,9 +451,10 @@ public struct MumoryCommentSheetView: View {
         let dragGesture = DragGesture()
             .updating($dragState) { value, state, transaction in
                 var newTranslation = value.translation
-                print("updating")
                 if self.offsetY + newTranslation.height < 0 {
-                    newTranslation.height = -self.offsetY
+                    DispatchQueue.main.async {
+                        newTranslation.height = -self.offsetY
+                    }
                 }
                 
                 state = .dragging(translation: newTranslation)

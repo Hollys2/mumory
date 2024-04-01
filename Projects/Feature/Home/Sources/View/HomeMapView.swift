@@ -53,26 +53,26 @@ struct HomeMapView: View {
                 
                 Spacer()
                 
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 159.99997)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 1),
-                            endPoint: UnitPoint(x: 0.5, y: 0)
-                        )
-                    )
-                    .offset(y: 89)
+//                Rectangle()
+//                    .foregroundColor(.clear)
+//                    .frame(height: 159.99997)
+//                    .background(
+//                        LinearGradient(
+//                            stops: [
+//                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99), location: 0.36),
+//                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 0.83),
+//                            ],
+//                            startPoint: UnitPoint(x: 0.5, y: 1),
+//                            endPoint: UnitPoint(x: 0.5, y: 0)
+//                        )
+//                    )
+//                    .offset(y: 89)
             }
             .allowsHitTesting(false)
             
             VStack(spacing: 0) {
                 PlayingMusicBarView()
-                    .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 12 : 16))
+                    .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
                 
                 AppleMusicPopUpView(isShown: self.$isAppleMusicPopUpShown)
                     .padding(.top, 15)

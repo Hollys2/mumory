@@ -103,7 +103,7 @@ public struct PlayingMusicBarView: View {
             Rectangle()
               .foregroundColor(.clear)
               .frame(width: 0.5, height: 35)
-              .background(Color(white: 0.52))
+              .background(ColorSet.skeleton02)
               .padding(.trailing, 17)
               .padding(.leading, 20)
             

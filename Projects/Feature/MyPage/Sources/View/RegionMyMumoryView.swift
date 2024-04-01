@@ -14,6 +14,7 @@ import Shared
 
 public struct RegionMyMumoryView: View {
     
+    let user: MumoriUser
     let region: String
     let mumorys: [Mumory]
     
@@ -152,7 +153,7 @@ public struct RegionMyMumoryView: View {
         }
         .navigationBarBackButtonHidden(true)
         .sheet(isPresented: self.$isDatePickerShown, content: {
-            MyMumoryDatePicker(selectedDate: self.$selectedDate)
+            MyMumoryDatePicker(selectedDate: self.$selectedDate, user: self.user)
                 .presentationDetents([.height(309)])
         })
         .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .myMumory, mumoryAnnotation: .constant(Mumory())))
@@ -171,8 +172,8 @@ public struct RegionMyMumoryView: View {
         guard index > 0 else {
             return 0
         }
-        let previousDate = mumoryDataViewModel.filteredMumorys[index - 1].date
-        let currentDate = mumoryDataViewModel.filteredMumorys[index].date
+        let previousDate = mumoryDataViewModel.monthlyMumorys[index - 1].date
+        let currentDate = mumoryDataViewModel.monthlyMumorys[index].date
         
         print("previousDate: \(previousDate)")
         print("currentDate: \(currentDate)")

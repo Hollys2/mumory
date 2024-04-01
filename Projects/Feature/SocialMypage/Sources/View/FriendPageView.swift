@@ -13,19 +13,18 @@ import MusicKit
 import _MapKit_SwiftUI
 
 struct FriendPageView: View {
-    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isStranger: Bool = true
     @State var isPresentFriendBottomSheet: Bool = false
     @State var isPresentBlockConfirmPopup: Bool = false
-    
+
     @State var friend: MumoriUser
     
     init(friend: MumoriUser) {
         self._friend = .init(initialValue: friend)
     }
-    
+
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background
@@ -33,10 +32,9 @@ struct FriendPageView: View {
             //친구 여부에 따라 친구 페이지 혹은 모르는 사람 페이지 띄우기
             if currentUserData.getFriendStatus(friend: friend) == .friend{
                 KnownFriendPageView(friend: friend)
-                    .environmentObject(friendDataViewModel)
             }else {
                 UnkownFriendPageView(friend: friend)
-                
+
             }
             
             //상단바
@@ -80,16 +78,15 @@ struct FriendPageView: View {
 }
 
 struct KnownFriendPageView: View {
+    
     let friend: MumoriUser
     let lineGray = Color(white: 0.37)
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
+    
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
-    @State private var firstMumorys: [Mumory] = []
-    @State private var isLoading: Bool = true
-    @State private var playlists: [MusicPlaylist] = []
-    @State private var isPlaylistLoading: Bool = true
+    
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+
     init(friend: MumoriUser) {
         self.friend = friend
     }
@@ -101,7 +98,6 @@ struct KnownFriendPageView: View {
                 
                 //친구 프로필 뷰
                 FriendInfoView(friend: friend)
-                    .environmentObject(friendDataViewModel)
                 
                 Divider05()
                 
@@ -111,8 +107,31 @@ struct KnownFriendPageView: View {
                         .fill(Color.clear)
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
-                    
-                    FriendMapViewRepresentable(friendMumorys: self.firstMumorys)
+
+//                    Map(coordinateRegion: .constant(MapConstant.defaultRegion), annotationItems: self.mumorys) { mumory in
+//
+//                        MapAnnotation(coordinate: mumory.locationModel.coordinate) {
+//                            ZStack(alignment: .topLeading) {
+//                                SharedAsset.musicPin.swiftUIImage
+//                                    .resizable()
+//                                    .frame(width: 74, height: 81)
+//
+//                                AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
+//                                    switch phase {
+//                                    case .success(let image):
+//                                        image
+//                                            .resizable()
+//                                    default:
+//                                        Color.clear
+//                                    }
+//                                }
+//                                .frame(width: 60.65238, height: 60.65238)
+//                                .cornerRadius(12)
+//                                .offset(x: 6.74, y: 6.74)
+//                            }
+//                        }
+//                    }
+                    FriendMapViewRepresentable(friendMumorys: self.mumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
                     
@@ -127,46 +146,24 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendMumoryView(mumorys: $mumorys)
-                    .environmentObject(friendDataViewModel)
+                FriendMumoryView(friend: self.friend, mumorys: $mumorys)
                 
                 Divider05()
                 
-                FriendPlaylistView()
-                    .environmentObject(friendDataViewModel)
+                FriendPlaylistView(friend: friend)
                 
                 Rectangle()
                     .fill(Color.clear)
                     .frame(height: 110)
             })
         }
-        .scrollIndicators(.hidden)
         .fullScreenCover(isPresented: $isMapViewShown) {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
+                .preferredColorScheme(.light)
         }
         .onAppear {
-            friendDataViewModel.isPlaylistLoading = true
-            friendDataViewModel.isMumoryLoading = true
-            
             self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { mumorys in
-                print("KnownFriendPageView fetchFriendsMumorys 성공")
-                if !mumorys.isEmpty, let firstMumory = mumorys.first {
-                    self.firstMumorys = [firstMumory]
-                }
                 self.mumorys = mumorys
-                
-                DispatchQueue.main.async {
-                    mumoryDataViewModel.isUpdating = false
-                    friendDataViewModel.isMumoryLoading = false
-
-                }
-            }
-            
-            Task {
-                friendDataViewModel.isPlaylistLoading = true
-                friendDataViewModel.friend = await MumoriUser(uId: friend.uId)
-                friendDataViewModel.playlistArray = await friendDataViewModel.savePlaylist(uId: friend.uId)
-                friendDataViewModel.isPlaylistLoading = false
             }
         }
     }
@@ -178,7 +175,7 @@ struct UnkownFriendPageView: View {
     @State var isPresentPopup: Bool = false
     @State var isRequested: Bool = false
     @State var myRequestList: [String] = []//이미 요청한 친구 uid배열
-    @State var status: FriendRequestStatus = .normal
+    
     let friend: MumoriUser
     let secretId: String
     let secretNickname: String
@@ -194,7 +191,7 @@ struct UnkownFriendPageView: View {
                 UnknownFriendInfoView
                 Divider10()
                 UnknownFriendContentView
-                    .padding(.top, getUIScreenBounds().height * 0.1)
+                    .padding(.top, 90)
             })
         }
         .onAppear{
@@ -204,128 +201,118 @@ struct UnkownFriendPageView: View {
     
     //상단 친구 인포메이션 - 배경사진, 프로필사진, 닉네임, 아이디 등
     var UnknownFriendInfoView: some View {
-        ZStack(alignment: .top) {
-            VStack(spacing: 0, content: {
-                Rectangle()
-                    .frame(maxWidth: .infinity)
-                    .frame(width: getUIScreenBounds().width)
-                    .frame(height: 165)
-                    .foregroundStyle(ColorSet.darkGray)
-                    .overlay {
-                        LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
-                    }
-                
-                VStack(alignment: .leading, spacing: 4, content: {
-                    Text(secretNickname)
+        VStack(spacing: 0, content: {
+ 
+            
+            Rectangle()
+                .frame(maxWidth: .infinity)
+                .frame(width: getUIScreenBounds().width)
+                .frame(height: 165)
+                .foregroundStyle(ColorSet.darkGray)
+                .overlay {
+                    LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.76))
+                }
+            
+            VStack(alignment: .leading, spacing: 4, content: {
+                Text(secretNickname)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 20)
-                    
-                    Text("@\(secretId)")
+
+                Text("@\(secretId)")
                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.charSubGray)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    //자기소개 안보이게
-                    Text("")
+                 
+                //자기소개 안보이게
+                Text("")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(ColorSet.subGray)
                         .frame(height: 52, alignment: .bottom)
                         .padding(.bottom, 18)
-                })
-                .overlay {
-                    friend.defaultProfileImage
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 90, height: 90)
-                        .clipShape(Circle())
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .offset(y: -40)
-                }
-                .padding(.horizontal, 20)
+            })
+            .overlay {
+                friend.defaultProfileImage
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 90, height: 90)
+                    .clipShape(Circle())
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .offset(y: -40)
+            }
+            .padding(.horizontal, 20)
+            
+            HStack(spacing: 4, content: {
                 
-                HStack(spacing: 4, content: {
+                switch currentUserData.getFriendStatus(friend: friend) {
+                case .notFriend:
+                    SharedAsset.addFriend.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
                     
-                    switch currentUserData.getFriendStatus(friend: friend) {
-                    case .notFriend:
-                        SharedAsset.addFriend.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Text("친구 추가")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(ColorSet.background)
-                        
-                    case .alreadySendRequest:
-                        SharedAsset.cancelFriendRequest.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Text("요청취소")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(ColorSet.background)
-                        
-                    case .alreadyRecieveRequest:
-                        SharedAsset.acceptFriend.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Text("친구요청 수락")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(ColorSet.background)
-                        
-                    case .block:
-                        SharedAsset.blockFriend.swiftUIImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Text("차단 해제")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                            .foregroundStyle(ColorSet.background)
-                        
-                    default: EmptyView()
-                    }
+                    Text("친구 추가")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
                     
-                })
-                .frame(maxWidth: .infinity)
-                .frame(height: 45)
-                .background(currentUserData.getFriendStatus(friend: friend) == .block ?
-                            ColorSet.subGray : currentUserData.getFriendStatus(friend: friend) == .alreadySendRequest ?
-                            ColorSet.charSubGray : ColorSet.mainPurpleColor)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-                .padding(.horizontal, 20)
-                .padding(.bottom, 22)
-                .onTapGesture {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentPopup = true
+                case .alreadySendRequest:
+                    SharedAsset.cancelFriendRequest.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
                     
+                    Text("요청취소")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
+                    
+                case .alreadyRecieveRequest:
+                    SharedAsset.acceptFriend.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                    
+                    Text("친구요청 수락")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
+                    
+                case .block:
+                    SharedAsset.blockFriend.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                    
+                    Text("차단 해제")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.background)
+                    
+                default: EmptyView()
                 }
                 
             })
-
-        }
-        .disabled(status == .friendProcessLoading)
+            .frame(maxWidth: .infinity)
+            .frame(height: 45)
+            .background(currentUserData.getFriendStatus(friend: friend) == .block ? 
+                        ColorSet.subGray : currentUserData.getFriendStatus(friend: friend) == .alreadySendRequest ?
+                        ColorSet.charSubGray : ColorSet.mainPurpleColor)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+            .padding(.horizontal, 20)
+            .padding(.bottom, 22)
+            .onTapGesture {
+                UIView.setAnimationsEnabled(false)
+                isPresentPopup = true
+           
+            }
+            
+        })
         .fullScreenCover(isPresented: $isPresentPopup, content: {
             PopupView
                 .background(TransparentBackground())
         })
-        .overlay {
-            if status == .friendProcessLoading{
-                LoadingAnimationView(isLoading: .constant(true))
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, getUIScreenBounds().height * 0.5)
-            }
-        }
 
-        
     }
     
-    
+   
     
     //친구가 아닌 사용자 컨텐츠 부분 안내
     var UnknownFriendContentView: some View{
@@ -344,7 +331,7 @@ struct UnkownFriendPageView: View {
             Text("친구인 사용자의 프로필만 볼 수 있습니다.")
                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                 .foregroundStyle(ColorSet.subGray)
-            
+
         })
     }
     
@@ -355,49 +342,38 @@ struct UnkownFriendPageView: View {
             switch currentUserData.getFriendStatus(friend: friend) {
             case .notFriend:
                 TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
-                    status = .friendProcessLoading
                     let functions = FBManager.shared.functions
                     Task {
                         guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
                             print("network error")
-                            status = .normal
                             return
                         }
-                        status = .normal
                     }
                 }
             case .alreadySendRequest:
                 TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
-                    status = .friendProcessLoading
                     Task {
                         guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
-                            status = .normal
                             return
                         }
-                        status = .normal
                     }
                 }
             case .alreadyRecieveRequest:
                 TwoButtonPopupView(title: "친구 요청을 수락하시겠습니까??", positiveButtonTitle: "요청수락") {
-                    status = .friendProcessLoading
                     let functions = FBManager.shared.functions
                     Task {
                         guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
                             print("network error")
-                            status = .normal
                             return
                         }
-                        status = .normal
                     }
                 }
             case .block:
                 TwoButtonPopupView(title: "차단을 해제 하시겠습니까?", positiveButtonTitle: "차단해제") {
-                    status = .friendProcessLoading
                     Task{
                         let db = FBManager.shared.db
                         let query = db.collection("User").document(currentUserData.uId)
                         query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
-                        status = .normal
                     }
                 }
             default: EmptyView()
@@ -457,45 +433,45 @@ struct FriendInfoView: View {
             
             VStack(alignment: .leading, spacing: 4, content: {
                 Text(friend.nickname)
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
-                    .foregroundStyle(Color.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 20)
-                
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
+                        .foregroundStyle(Color.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 20)
+
                 Text("@\(friend.id)")
-                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
-                    .foregroundStyle(ColorSet.charSubGray)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
+                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.charSubGray)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
                 Text(friend.bio)
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundStyle(ColorSet.subGray)
-                    .frame(height: 52, alignment: .bottom)
-                    .padding(.bottom, 18)
-                
-                
-                
-            })
-            .overlay {
-                AsyncImage(url: friend.profileImageURL) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 90, height: 90)
-                        .clipShape(Circle())
-                } placeholder: {
-                    friend.defaultProfileImage
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: 90, height: 90)
-                        .clipShape(Circle())
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundStyle(ColorSet.subGray)
+                        .frame(height: 52, alignment: .bottom)
+                        .padding(.bottom, 18)
+         
+
+
+                })
+                .overlay {
+                    AsyncImage(url: friend.profileImageURL) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
+                            .clipShape(Circle())
+                    } placeholder: {
+                        friend.defaultProfileImage
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 90, height: 90)
+                            .clipShape(Circle())
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .offset(y: -40)
+
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                .offset(y: -40)
-                
-            }
-            .padding(.horizontal, 20)
-            
+                .padding(.horizontal, 20)
+
             HStack(spacing: 4, content: {
                 SharedAsset.friendPurple.swiftUIImage
                     .resizable()
@@ -511,8 +487,8 @@ struct FriendInfoView: View {
                     .scaledToFit()
                     .frame(width: 19, height: 19)
                     .padding(.leading, 2)
-                
-                
+
+                  
             })
             .frame(maxWidth: .infinity)
             .frame(height: 45)
@@ -545,19 +521,24 @@ struct FriendInfoView: View {
 
 struct FriendPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
+    let friend: MumoriUser
+    init(friend: MumoriUser) {
+        self.friend = friend
+    }
+    
     let db = FBManager.shared.db
+    @State var playlists: [MusicPlaylist] = []
     
     var body: some View {
         ZStack(alignment: .top) {
             VStack(spacing: 0, content: {
                 //ooo의 플레이리스트
                 HStack(spacing: 0, content: {
-                    Text("\(friendDataViewModel.friend.nickname)의 플레이리스트")
+                    Text("\(friend.nickname)의 플레이리스트")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                         .foregroundStyle(Color.white)
                     Spacer()
-                    Text("\(friendDataViewModel.playlistArray.count)")
+                    Text("\(playlists.count)")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundStyle(ColorSet.charSubGray)
                         .padding(.trailing, 3)
@@ -570,45 +551,77 @@ struct FriendPlaylistView: View {
                 .frame(height: 67)
                 .padding(.horizontal, 20)
                 .onTapGesture {
-                    appCoordinator.rootPath.append(MumoryPage.friendPlaylistManage)
+                    appCoordinator.rootPath.append(MumoryPage.friendPlaylistManage(friend: self.friend, playlist: $playlists))
                 }
                 
                 //플리 가로 스크롤뷰
                 ScrollView(.horizontal) {
                     HStack(alignment: .top, spacing: 10, content: {
-                        ForEach(friendDataViewModel.playlistArray.indices, id: \.self) { index in
-                            PlaylistItemTest(playlist: $friendDataViewModel.playlistArray[index], itemSize: getUIScreenBounds().width * 0.215)
+                        ForEach( 0 ..< playlists.count, id: \.self) { index in
+                            PlaylistItemTest(playlist: $playlists[index], itemSize: 85)
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlistIndex: index))
+                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlist: $playlists[index]))
                                 }
                         }
-                        
-                        if friendDataViewModel.isPlaylistLoading {
-                            ForEach(0...10, id: \.self) { index in
-                                PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
-                            }
-                        }else if friendDataViewModel.playlistArray.isEmpty {
-                            Text("플레이리스트가 없습니다")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .foregroundColor(ColorSet.subGray)
-                        }
-                        
                     })
                     .padding(.horizontal, 20)
                 }
                 .scrollIndicators(.hidden)
             })
         }
-
+        .onAppear {
+            if self.playlists.isEmpty {
+                Task {
+                    await getPlaylist()
+                    fetchSongToPlaylist(playlistArray: $playlists)
+                }
+            }
+        }
     }
-
+    private func getPlaylist() async {
+        self.playlists.removeAll()
+        guard let snapshot = try? await db.collection("User").document(friend.uId).collection("Playlist").getDocuments() else {
+            print("error")
+            return
+        }
+        for document in snapshot.documents {
+            let data = document.data()
+            guard let isPublic = data["isPublic"] as? Bool else {
+                return
+            }
+            if !isPublic {continue}
+            guard let title = data["title"] as? String else {
+                return
+            }
+            guard let songIdentifiers = data["songIds"] as? [String] else {
+                return
+            }
+            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                return
+            }
+            let id = document.documentID
+            self.playlists.append(MusicPlaylist(id: id, title: title, songIDs: songIdentifiers, isPublic: isPublic, createdDate: date))
+        }
+    }
+    private func fetchSongInfo(songIdentifiers: [String]) async -> [Song] {
+ 
+        var songs: [Song] = []
+        for id in songIdentifiers {
+            let musicItemID = MusicItemID(rawValue: id)
+            let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+            let response = try? await request.response()
+            guard let song = response?.items.first else {
+                continue
+            }
+            songs.append(song)
+        }
+        return songs
+    }
 }
 
 
 
 struct FriendPageCommonBottomSheetView: View {
-    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @Environment(\.dismiss) var dismiss
     let friend: MumoriUser
@@ -627,14 +640,10 @@ struct FriendPageCommonBottomSheetView: View {
                 }
             Divider05()
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
-                .onTapGesture {
-                    dismiss()
-                    appCoordinator.rootPath.append(MumoryPage.report)
-                }
         })
     }
     
-    
+
 }
 
 struct FriendDeleteBlockBottomSheetView: View {
@@ -671,7 +680,7 @@ struct FriendDeleteBlockBottomSheetView: View {
 
 
 public func blockFriend(uId: String, friendUId: String) {
-    
+
     Task {
         let db = FBManager.shared.db
         let deleteDocQuery = db.collection("User").document(uId).collection("Friend")
@@ -736,140 +745,139 @@ struct PlaylistItemTest: View {
     
     var body: some View {
         VStack(spacing: 0){
-            VStack(spacing: 0, content: {
-                HStack(spacing: 0, content: {
-                    //1번째 이미지
-                    if playlist.songs.count < 1 {
-                        Rectangle()
-                            .fill(emptyGray)
-                            .frame(width: itemSize, height: itemSize)
-                    }else{
-                        AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        } placeholder: {
+                VStack(spacing: 0, content: {
+                    HStack(spacing: 0, content: {
+                        //1번째 이미지
+                        if playlist.songs.count < 1 {
                             Rectangle()
-                                .foregroundStyle(emptyGray)
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
                         }
-                        .frame(width: itemSize, height: itemSize)
                         
-                    }
+                        //세로줄(구분선)
+                        Rectangle()
+                            .frame(width: 1)
+                            .frame(maxHeight: .infinity)
+                            .foregroundStyle(ColorSet.background)
+                        
+                        //2번째 이미지
+                        if playlist.songs.count < 2{
+                            Rectangle()
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
+                        }
+                        
+                        
+                    })
                     
-                    //세로줄(구분선)
+                    //가로줄(구분선)
                     Rectangle()
-                        .frame(width: 1)
-                        .frame(maxHeight: .infinity)
+                        .frame(height: 1)
+                        .frame(maxWidth: .infinity)
                         .foregroundStyle(ColorSet.background)
                     
-                    //2번째 이미지
-                    if playlist.songs.count < 2{
-                        Rectangle()
-                            .fill(emptyGray)
-                            .frame(width: itemSize, height: itemSize)
-                    }else{
-                        AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        } placeholder: {
+                    HStack(spacing: 0,content: {
+                        //3번째 이미지
+                        if playlist.songs.count < 3 {
                             Rectangle()
-                                .foregroundStyle(emptyGray)
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
                         }
-                        .frame(width: itemSize, height: itemSize)
                         
-                    }
-                    
-                    
+                        //세로줄 구분선
+                        Rectangle()
+                            .frame(width: 1)
+                            .frame(maxHeight: .infinity)
+                            .foregroundStyle(ColorSet.background)
+                        
+                        //4번째 이미지
+                        if playlist.songs.count <  4 {
+                            Rectangle()
+                                .fill(emptyGray)
+                                .frame(width: itemSize, height: itemSize)
+                        }else{
+                            AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                            } placeholder: {
+                                Rectangle()
+                                    .foregroundStyle(emptyGray)
+                            }
+                            .frame(width: itemSize, height: itemSize)
+                            
+                        }
+                        
+                    })
                 })
-                
-                //가로줄(구분선)
-                Rectangle()
-                    .frame(height: 1)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(ColorSet.background)
-                
-                HStack(spacing: 0,content: {
-                    //3번째 이미지
-                    if playlist.songs.count < 3 {
-                        Rectangle()
-                            .fill(emptyGray)
-                            .frame(width: itemSize, height: itemSize)
-                    }else{
-                        AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        } placeholder: {
-                            Rectangle()
-                                .foregroundStyle(emptyGray)
-                        }
-                        .frame(width: itemSize, height: itemSize)
-                        
-                    }
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
+                .overlay {
+                    SharedAsset.bookmarkWhite.swiftUIImage
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                        .opacity(playlist.id == "favorite" ? 1 : 0)
                     
-                    //세로줄 구분선
-                    Rectangle()
-                        .frame(width: 1)
-                        .frame(maxHeight: .infinity)
-                        .foregroundStyle(ColorSet.background)
-                    
-                    //4번째 이미지
-                    if playlist.songs.count <  4 {
-                        Rectangle()
-                            .fill(emptyGray)
-                            .frame(width: itemSize, height: itemSize)
-                    }else{
-                        AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        } placeholder: {
-                            Rectangle()
-                                .foregroundStyle(emptyGray)
-                        }
-                        .frame(width: itemSize, height: itemSize)
-                        
-                    }
-                    
-                })
-            })
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
-            .overlay {
-                SharedAsset.bookmarkWhite.swiftUIImage
-                    .resizable()
-                    .frame(width: 24, height: 24)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                    .opacity(playlist.id == "favorite" ? 1 : 0)
+                    SharedAsset.lockPurple.swiftUIImage
+                        .resizable()
+                        .frame(width: 23, height: 23)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .opacity(playlist.id == "favorite" ? 0 : playlist.isPublic ? 0 : 1)
+                }
                 
-                SharedAsset.lockPurple.swiftUIImage
-                    .resizable()
-                    .frame(width: 23, height: 23)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .opacity(playlist.id == "favorite" ? 0 : playlist.isPublic ? 0 : 1)
+                
+                Text(playlist.title)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .padding(.top, 10)
+                    .foregroundStyle(.white)
+                
+                Text("\(playlist.songIDs.count)곡")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundStyle(LibraryColorSet.lightGrayTitle)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 5)
+                
             }
-            
-            
-            Text(playlist.title)
-                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .padding(.top, 10)
-                .foregroundStyle(.white)
-                .frame(width: itemSize * 2)
-            
-            Text("\(playlist.songIDs.count)곡")
-                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                .foregroundStyle(LibraryColorSet.lightGrayTitle)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 5)
-            
-        }
     }
     
     private func fetchSongInfo(songIDs: [String]) async -> [Song]{
@@ -895,17 +903,20 @@ struct PlaylistItemTest: View {
 }
 
 struct FriendMumoryView: View {
-    @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @Binding private var mumorys: [Mumory]
-    
-    init(mumorys: Binding<[Mumory]>) {
+    let friend: MumoriUser
+
+    init(friend: MumoriUser, mumorys: Binding<[Mumory]>) {
+        self.friend = friend
         self._mumorys = mumorys
     }
     var body: some View {
         VStack(spacing: 0, content: {
+            
             HStack(spacing: 0, content: {
-                Text("\(friendDataViewModel.friend.nickname) 뮤모리")
+                
+                Text("\(friend.nickname) 뮤모리")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundStyle(Color.white)
                 
@@ -927,43 +938,26 @@ struct FriendMumoryView: View {
                 self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView, mumoryAnnotation: Mumory()))
             }
             
-            if friendDataViewModel.isMumoryLoading {
-                ScrollView(.horizontal) {
-                    HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
+            ScrollView(.horizontal) {
+                HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
+                    if mumorys.isEmpty {
                         MumorySkeletonView()
-                    })
-                    .padding(.horizontal, 20)
-                }
-                .frame(height: getUIScreenBounds().width * 0.43)
-                .padding(.bottom, 40)
-            } else {
-                if mumorys.isEmpty {
-                    Text("뮤모리 기록이 없습니다")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                        .foregroundStyle(ColorSet.subGray)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .frame(height: getUIScreenBounds().width * 0.43)
-                        .padding(.bottom, 40)
-                } else {
-                    ScrollView(.horizontal) {
-                        HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
-                            ForEach(mumorys.prefix(10), id: \.id) { mumory in
-                                MyMumoryItem(mumory: mumory)
-                                    .onTapGesture {
-                                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
-                                    }
-                            }
-                        })
-                        .padding(.horizontal, 20)
-                        
                     }
-                    .frame(height: getUIScreenBounds().width * 0.43)
-                    .scrollIndicators(.hidden)
-                    .padding(.bottom, 40)
-                }
+                    ForEach(mumorys.prefix(10), id: \.id) { mumory in
+                        MyMumoryItem(mumory: mumory)
+                            .onTapGesture {
+                                appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                            }
+                    }
+                })
+                .padding(.horizontal, 20)
+                
             }
+            .frame(height: getUIScreenBounds().width * 0.43)
+            .scrollIndicators(.hidden)
+            .padding(.bottom, 40)
         })
-        
+
     }
 }
 
