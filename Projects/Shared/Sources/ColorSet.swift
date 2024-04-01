@@ -17,15 +17,18 @@ public class ColorSet{
     public static let darkGray = Color(red: 0.16, green: 0.16, blue: 0.16)
     public static let lightGray = Color(red: 0.82, green: 0.82, blue: 0.82)
     public static let moreDeepGray = Color(red: 0.12, green: 0.12, blue: 0.12)
-    public static let skeleton02 = Color(red: 0.25, green: 0.25, blue: 0.25)
     public static let charSubGray = Color(red: 0.76, green: 0.76, blue: 0.76)
     public static let errorRed = Color(red: 1.00, green: 0.34, blue: 0.34)
     public static let accentRed = Color(red: 1.00, green: 0.25, blue: 0.25)
     public static let validGreen = Color(red: 0.33, green: 0.87, blue: 0.61)
-    public static let skeleton = Color(red: 0.18, green: 0.18, blue: 0.18)
     public static let lineGray = Color(white: 0.65)
     public static let D9Gray = Color(white: 0.85)
     public static let D0Gray = Color(white: 0.82)
     public static let A6Gray = Color(white: 0.65)
     public static let Gray34 = Color(white: 0.2)
+    
+    public static let skeleton = Color(red: 0.18, green: 0.18, blue: 0.18)
+    public static let skeleton02 = Color(red: 0.25, green: 0.25, blue: 0.25)
+    public static let skeleton03 = Color(red: 0.349, green: 0.349, blue: 0.349)
+
 }

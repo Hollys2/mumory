@@ -241,7 +241,7 @@ struct MumoryDetailScrollContentView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 24)
                         
-                        if self.mumoryDataViewModel.friendMumorys.count > 0 {
+                        if self.mumoryDataViewModel.sameSongFriendMumorys.count > 0 {
                             VStack(spacing: 0) {
                                 
                                 MumoryDetailFriendMumoryScrollUIViewRepresentable(mumory: self.mumory)
@@ -251,7 +251,7 @@ struct MumoryDetailScrollContentView: View {
                                 
                                 HStack(spacing: 10) {
                                     
-                                    ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.friendMumorys.prefix(min(3, self.mumoryDataViewModel.friendMumorys.count))).count))
+                                    ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.sameSongFriendMumorys.prefix(min(3, self.mumoryDataViewModel.sameSongFriendMumorys.count))).count))
                                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                                         .background(Color(red: 0.165, green: 0.165, blue: 0.165))
                                         .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
@@ -260,7 +260,7 @@ struct MumoryDetailScrollContentView: View {
                                     Text("\(self.appCoordinator.page)")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                         .foregroundColor(SharedAsset.mainColor.swiftUIColor)
-                                    + Text(" / \(Array(self.mumoryDataViewModel.friendMumorys.prefix(min(3, self.mumoryDataViewModel.friendMumorys.count))).count)")
+                                    + Text(" / \(Array(self.mumoryDataViewModel.sameSongFriendMumorys.prefix(min(3, self.mumoryDataViewModel.sameSongFriendMumorys.count))).count)")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                         .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                                 }
@@ -304,7 +304,7 @@ struct MumoryDetailScrollContentView: View {
                         .frame(height: 334 - 25)
                         .offset(y: -25)
                     } else {
-                        ForEach(self.mumoryDataViewModel.surroundingMumorys, id: \.self) { mumory in
+                        ForEach(self.mumoryDataViewModel.surroundingMumorys.prefix(3), id: \.self) { mumory in
                             MumoryDetailSameLocationMusicView(mumory: mumory)
                         }
                         

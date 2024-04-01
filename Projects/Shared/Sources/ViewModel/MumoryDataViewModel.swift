@@ -27,22 +27,25 @@ final public class MumoryDataViewModel: ObservableObject {
     
     @Published public var myMumorys: [Mumory] = []
     @Published public var friendMumorys: [Mumory] = []
+    @Published public var sameSongFriendMumorys: [Mumory] = []
     @Published public var everyMumorys: [Mumory] = []
-    @Published public var filteredMumorys: [Mumory] = []
+    @Published public var monthlyMumorys: [Mumory] = []
     @Published public var surroundingMumorys: [Mumory] = []
+    @Published public var locationMumorys: [String: [Mumory]] = [:]
     
     @Published public var mumoryComments: [Comment] = []
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
     @Published public var searchedMumoryAnnotations: [Mumory] = []
     
     @Published public var isLoading: Bool = false
-    @Published public var isCreating: Bool = false
     @Published public var isUpdating: Bool = false
     
     @Published public var isRewardPopUpShown: Bool = false
+    @Published public var reward: Reward = .none
+    
     
     private var tempMumory: [Mumory] = []
-    
+    private var tempSocialMumory: [Mumory] = []
     private var lastDocument: DocumentSnapshot?
 
     
@@ -79,14 +82,11 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("Error: ", error?.localizedDescription ?? "Unknown error")
                 return }
             
-//            print("placemark.country: \(String(describing: placemark.country))")
-//            print("placemark.administrativeArea: \(String(describing: placemark.administrativeArea))")
-            
             let locationTitle = placemark.name ?? ""
             let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
             let coordinate = location.coordinate
             
-            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: coordinate)
+            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: locationSubtitle, coordinate: coordinate, country: placemark.country ?? "", administrativeArea: placemark.administrativeArea ?? "")
             
             completion(locationModel)
         }
@@ -95,8 +95,9 @@ final public class MumoryDataViewModel: ObservableObject {
     public func fetchMyMumoryListener(uId: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
-            .order(by: "date", descending: true)
+        
         let query = collectionReference.whereField("uId", isEqualTo: uId)
+            .order(by: "date", descending: true)
         
         let listener = query.addSnapshotListener { snapshot, error in
             Task {
@@ -114,23 +115,32 @@ final public class MumoryDataViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                                 self.myMumorys.append(newMumory)
-                                self.myMumorys.sort { $0.date > $1.date }
+//                                self.myMumorys.sort { $0.date > $1.date }
                                 print("Document added: \(documentChange.document.documentID)")
-                                
-                                if self.myMumorys.count == 3 {
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
+                            }
+                            
+                            if self.myMumorys.count == 1 {
+                                self.reward = .record(0)
+                                withAnimation(.spring(response: 0.2)) {
+                                    self.isRewardPopUpShown = true
+                                }
+                            } else if self.myMumorys.count == 5 {
+                                self.reward = .record(1)
+                                withAnimation(.spring(response: 0.2)) {
+                                    self.isRewardPopUpShown = true
+                                }
+                            } else if self.myMumorys.count == 10 {
+                                self.reward = .record(2)
+                                withAnimation(.spring(response: 0.2)) {
+                                    self.isRewardPopUpShown = true
                                 }
                             }
                         }
-                        
-                        if !self.filteredMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
-                            DispatchQueue.main.async {
-                                self.filteredMumorys.append(newMumory)
-                                self.filteredMumorys.sort { $0.date > $1.date }
-                            }
-                        }
+//                        if !self.monthlyMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
+//                            DispatchQueue.main.async {
+//                                self.monthlyMumorys.append(newMumory)
+//                            }
+//                        }
                         
                     case .modified:
                         let documentData = documentChange.document.data()
@@ -189,39 +199,48 @@ final public class MumoryDataViewModel: ObservableObject {
         DispatchQueue.main.async {
             self.isUpdating = false
         }
+        
         return Mumory()
     }
     
-    public func fetchFriendsMumorys(uId: String, completion: @escaping ([Mumory]) -> Void) {
+    public func fetchFriendsMumorys(uId: String, completion: @escaping (Result<[Mumory], Error>) -> Void) {
         DispatchQueue.main.async {
             self.isUpdating = true
         }
         
         let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("Mumory").whereField("uId", isEqualTo: uId)
+        let collectionReference = db.collection("Mumory")
+            .whereField("uId", isEqualTo: uId)
+            .order(by: "date", descending: true)
         
         Task {
             do {
                 let snapshot = try await collectionReference.getDocuments()
                 
                 DispatchQueue.main.async {
-                    self.friendMumorys = []
+                    self.sameSongFriendMumorys = []
                 }
                 
                 var result: [Mumory] = []
                 
                 for document in snapshot.documents {
                     let documentData = document.data()
-                    guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
+                    guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {
+                        DispatchQueue.main.async {
+                            self.isUpdating = false
+                        }
+                        return
+                    }
                     
                     result.append(newMumory)
-                    result.sort { $0.date > $1.date }
                 }
-                
-                print("fetchMumorys successfully: \(result)!")
-                completion(result)
+                completion(.success(result))
             } catch {
                 print("Error fetchMumorys: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.isUpdating = false
+                }
+                completion(.failure(error))
             }
         }
     }
@@ -235,7 +254,7 @@ final public class MumoryDataViewModel: ObservableObject {
         
         var mumoryCollectionRef = db.collection("Mumory")
             .order(by: "date", descending: true)
-            .limit(to: 10)
+            .limit(to: 7)
         
         if let lastDoc = self.lastDocument {
             mumoryCollectionRef = mumoryCollectionRef.start(afterDocument: lastDoc)
@@ -246,22 +265,20 @@ final public class MumoryDataViewModel: ObservableObject {
         Task {
             do {
                 let snapshot = try await copiedMumoryCollectionRef.getDocuments()
-//                self.tempMumory = []
                 for document in snapshot.documents {
                     let documentData = document.data()
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
                     DispatchQueue.main.async {
-                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
-                            self.tempMumory.append(newMumory)
-                            self.tempMumory.sort { $0.date > $1.date }
+                        if !self.tempSocialMumory.contains(where: { $0.id == document.documentID }) {
+                            self.tempSocialMumory.append(newMumory)
                         }
                     }
                 }
                 
                 DispatchQueue.main.async {
-//                    self.everyMumorys.append(contentsOf: self.tempMumory)
-                    self.everyMumorys = self.tempMumory
+                    self.tempSocialMumory.sort { $0.date > $1.date }
+                    self.everyMumorys = self.tempSocialMumory
                     self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
                 }
@@ -269,13 +286,9 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("fetchSocialMumory successfully!")
                 
                 
-                if snapshot.documents.count < 10 {
+                if snapshot.documents.count < 7 {
                     print("No more documents to fetch")
                 }
-//                else {
-//                    // 다음 페이지의 데이터 가져오기
-//                    self.fetchEveryMumory()
-//                }
             } catch {
                 print("Error fetchSocialMumory: \(error.localizedDescription)")
             }
@@ -287,9 +300,9 @@ final public class MumoryDataViewModel: ObservableObject {
            
         Task {
             
-            var mumoryCollectionRef = db.collection("Mumory")
+            let mumoryCollectionRef = db.collection("Mumory")
                 .order(by: "date", descending: true)
-                .limit(to: 10)
+                .limit(to: 7)
 
             do {
                 let snapshot = try await mumoryCollectionRef.getDocuments()
@@ -301,14 +314,12 @@ final public class MumoryDataViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
                             self.tempMumory.append(newMumory)
-                            self.tempMumory.sort { $0.date > $1.date }
                         }
                     }
                 }
                 
                 DispatchQueue.main.async {
                     self.everyMumorys = self.tempMumory
-//                    self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
                     completionHandler(.success(()))
                 }
@@ -355,6 +366,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let collectionReference = db.collection("Mumory")
             .whereField("uId", isEqualTo: friend.uId)
             .whereField("songId", isEqualTo: songId)
+            .order(by: "date", descending: true)
             
         do {
             let querySnapshot = try await collectionReference.getDocuments()
@@ -367,12 +379,12 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.tempMumory.append(newMumory)
-                    self.tempMumory.sort { $0.date > $1.date }
+//                    self.tempMumory.sort { $0.date > $1.date }
                 }
             }
             
             DispatchQueue.main.async {
-                self.friendMumorys = self.tempMumory                    
+                self.sameSongFriendMumorys = self.tempMumory                    
             }
         } catch {
             print("Error sameSongFriendMumory: \(error)")
@@ -385,24 +397,29 @@ final public class MumoryDataViewModel: ObservableObject {
             .whereField("uId", isEqualTo: friend.uId)
             .whereField("longitude", isGreaterThan: mumory.locationModel.coordinate.longitude - 0.01)
             .whereField("longitude", isLessThan: mumory.locationModel.coordinate.longitude + 0.01)
-            .whereField("latitude", isGreaterThan: mumory.locationModel.coordinate.latitude - 0.01)
-            .whereField("latitude", isLessThan: mumory.locationModel.coordinate.latitude + 0.01)
-            
+        
         do {
             let querySnapshot = try await collectionReference.getDocuments()
-            
+
+            print("querySnapshot.documents: \(querySnapshot.documents)")
             self.tempMumory = []
             
-            for document in querySnapshot.documents {
+            let filteredQuerySnapshot = querySnapshot.documents.filter {
+                let documentData = $0.data()
+                let latitude = documentData["latitude"] as? Double ?? 0.0
+                return latitude > mumory.locationModel.coordinate.latitude - 0.01 &&
+                       latitude < mumory.locationModel.coordinate.latitude + 0.01
+            }
+            
+            for document in filteredQuerySnapshot {
                 let documentData = document.data()
-                guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
+                guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else { return }
                 
                 DispatchQueue.main.async {
                     self.tempMumory.append(newMumory)
-                    self.tempMumory.sort { $0.date > $1.date }
                 }
             }
-            
+
             DispatchQueue.main.async {
                 self.surroundingMumorys = self.tempMumory
             }
@@ -422,6 +439,8 @@ final public class MumoryDataViewModel: ObservableObject {
             "locationTitle": mumory.locationModel.locationTitle,
             "latitude": mumory.locationModel.coordinate.latitude,
             "longitude": mumory.locationModel.coordinate.longitude,
+            "coutry": mumory.locationModel.country,
+            "administrativeArea": mumory.locationModel.administrativeArea,
             "tags": mumory.tags ?? [],
             "content": mumory.content ?? "",
             "imageURLs": mumory.imageURLs ?? [],
@@ -452,6 +471,8 @@ final public class MumoryDataViewModel: ObservableObject {
             "songId": String(describing: mumory.musicModel.songID),
             "latitude": mumory.locationModel.coordinate.latitude,
             "longitude": mumory.locationModel.coordinate.longitude,
+            "coutry": mumory.locationModel.country,
+            "administrativeArea": mumory.locationModel.administrativeArea,
             "tags": mumory.tags ?? [],
             "content": mumory.content ?? "",
             "imageURLs": mumory.imageURLs ?? [],
@@ -554,6 +575,7 @@ final public class MumoryDataViewModel: ObservableObject {
     public func fetchCommentReply(mumoryDocumentID: String) {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").document(mumoryDocumentID).collection("Comment")
+            .order(by: "date", descending: true)
         
         collectionReference.getDocuments { (querySnapshot, error)  in
             if let error = error {
@@ -568,7 +590,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     if !self.mumoryComments.contains(where: { $0.id == commentID }) {
                         DispatchQueue.main.async {
                             self.mumoryComments.append(newComment)
-                            self.mumoryComments.sort { $0.date > $1.date }
+//                            self.mumoryComments.sort { $0.date > $1.date }
                         }
                     }
                 }
@@ -820,73 +842,5 @@ final public class MumoryDataViewModel: ObservableObject {
                 completion(url)
             }
         }
-    }
-}
-
-extension MumoryDataViewModel {
-    
-    public func createReply2(mumoryAnnotation: Mumory, loginUserID: String, parentCommentIndex: Int, reply: Comment) {
-        
-//        let db = FirebaseManager.shared.db
-//
-//        let commentsRef = db.collection("User").document(mumoryAnnotation.userDocumentID).collection("mumory").document(mumoryAnnotation.id)
-//
-//        db.runTransaction({ (transaction, errorPointer) -> Any? in
-//
-//            let postDocument: DocumentSnapshot
-//
-//            do {
-//                try postDocument = transaction.getDocument(commentsRef)
-//            } catch let fetchError as NSError {
-//                errorPointer?.pointee = fetchError
-//                return nil
-//            }
-//
-//            guard var commentsData = postDocument.data()?["comments"] as? [[String: Any]] else {
-//                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-//                    NSLocalizedDescriptionKey: "Unable to retrieve likes from snapshot \(postDocument)"
-//                ])
-//                errorPointer?.pointee = error
-//                return nil
-//            }
-//
-//            guard parentCommentIndex >= 0 && parentCommentIndex < commentsData.count else {
-//                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [
-//                    NSLocalizedDescriptionKey: "Invalid parentCommentIndex"
-//                ])
-//                errorPointer?.pointee = error
-//                return nil
-//            }
-//
-//            let replyData = reply.toDictionary()
-//            print("replyData: \(replyData)")
-//
-//            if var replies = commentsData[parentCommentIndex]["replies"] as? [[String: Any]] {
-//                replies.append(replyData)
-//                commentsData[parentCommentIndex]["replies"] = replies
-//            } else {
-//                let replies = [replyData]
-//                commentsData[parentCommentIndex]["replies"] = replies
-//            }
-//
-//            mumoryAnnotation.comments[parentCommentIndex].replies.append(reply)
-//
-//            if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-//                DispatchQueue.main.async {
-//                    self.everyMumoryAnnotations[index] = mumoryAnnotation
-//                }
-//            }
-//
-//            transaction.updateData(["comments": commentsData], forDocument: commentsRef)
-//
-//            return nil
-//        }) { (object, error) in
-//            if let error = error {
-//                print("Transaction failed: \(error)")
-//            } else {
-//                self.fetchEveryMumory()
-//                print("Transaction successfully committed!")
-//            }
-//        }
     }
 }

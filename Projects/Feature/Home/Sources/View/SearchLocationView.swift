@@ -23,20 +23,17 @@ struct AddressRow: View {
     
     var body: some View {
         Button(action: {
-            localSearchViewModel.getRegion(localSearchCompletion: result) { region in
-                if let region = region {
+            localSearchViewModel.getRegion(localSearchCompletion: result) { coordintate in
+                mumoryDataViewModel.getChoosedeMumoryModelLocation(location: CLLocation(latitude: coordintate.latitude, longitude: coordintate.longitude)) { locationModel in
                     DispatchQueue.main.async {
-                        let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
-                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
+                        mumoryDataViewModel.choosedLocationModel = locationModel
                         
-                        self.localSearchViewModel.addRecentSearch(RecentLocationSearch(locationTitle: result.title, locationSubTitle: result.subtitle, latitude: region.center.latitude, longitude: region.center.longitude))
+                        self.localSearchViewModel.addRecentSearch(RecentLocationSearch(locationTitle: result.title, locationSubTitle: result.subtitle, latitude: locationModel.coordinate.latitude, longitude: locationModel.coordinate.longitude, country: locationModel.country, administrativeArea: locationModel.administrativeArea))
+                        
+                        appCoordinator.rootPath.removeLast()
                     }
-                } else {
-                    print("ERROR: 해당하는 주소가 없습니다.")
                 }
             }
-            
-            appCoordinator.rootPath.removeLast()
         }) {
             HStack(spacing: 0) {
                 SharedAsset.addressSearchLocation.swiftUIImage
@@ -244,7 +241,8 @@ struct SearchLocationView: View {
                                         self.localSearchViewModel.removeRecentSearch(value)
                                     }
                                     .onTapGesture {
-                                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, coordinate: CLLocationCoordinate2D(latitude: value.latitude, longitude: value.longitude))
+                                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, coordinate: CLLocationCoordinate2D(latitude: value.latitude, longitude: value.longitude), country: value.country, administrativeArea: value.administrativeArea)
+                                        
                                         appCoordinator.rootPath.removeLast()
                                     }
                                 }

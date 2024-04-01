@@ -45,16 +45,23 @@ public struct LocationModel: Identifiable {
     public var locationSubtitle: String
     public var coordinate: CLLocationCoordinate2D
     
-    public var country: String?
-    public var administrativeArea: String?
+    public var country: String
+    public var administrativeArea: String
     
-    public init(locationTitle: String, locationSubtitle: String, coordinate: CLLocationCoordinate2D, country: String? = nil, administrativeArea: String? = nil) {
+    public init(locationTitle: String, locationSubtitle: String, coordinate: CLLocationCoordinate2D, country: String, administrativeArea: String) {
         self.locationTitle = locationTitle
         self.locationSubtitle = locationSubtitle
         self.coordinate = coordinate
-        
         self.country = country
         self.administrativeArea = administrativeArea
+    }
+    
+    public init() {
+        self.locationTitle = ""
+        self.locationSubtitle = ""
+        self.coordinate = CLLocationCoordinate2D()
+        self.country = ""
+        self.administrativeArea = ""
     }
 }
 
@@ -89,7 +96,7 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     }
     
     public override convenience init() {
-        self.init(id: "DELETE", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN PLACE", locationSubtitle: "", coordinate: CLLocationCoordinate2D()), isPublic: false, likes: [], commentCount: 0)
+        self.init(id: "DELETE", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN PLACE", locationSubtitle: "", coordinate: CLLocationCoordinate2D(), country: "", administrativeArea: ""), isPublic: false, likes: [], commentCount: 0)
     }
     
     func copy(from other: Mumory) {
@@ -113,6 +120,8 @@ extension Mumory {
               let locationTitle = documentData["locationTitle"] as? String,
               let latitude = documentData["latitude"] as? CLLocationDegrees,
               let longitude = documentData["longitude"] as? CLLocationDegrees,
+              let coutry = documentData["coutry"] as? String,
+              let administrativeArea = documentData["administrativeArea"] as? String,
               let date = documentData["date"] as? FirebaseManager.Timestamp,
               let tags = documentData["tags"] as? [String],
               let content = documentData["content"] as? String,
@@ -135,7 +144,7 @@ extension Mumory {
             let musicModel = MusicModel(songID: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
             
             let location = CLLocation(latitude: latitude, longitude: longitude)
-            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "", coordinate: location.coordinate)
+            let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "", coordinate: location.coordinate, country: coutry, administrativeArea: administrativeArea)
             
             return Mumory(id: mumoryDocumentID, uId: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count)
             
@@ -158,45 +167,5 @@ public struct UserModel {
         self.nickname = nickname
         self.id = id
         self.profileURL = profileURL
-    }
-}
-
-public class Mumory2: NSObject, MKAnnotation, Codable {
-    
-    public var coordinate: CLLocationCoordinate2D
-    
-    let name: String
-    let state: String?
-    let country: String?
-    let isCapital: Bool?
-    let population: Int64?
-    
-    enum CodingKeys: String, CodingKey {
-        case name
-        case state
-        case country
-        case isCapital = "capital"
-        case population
-    }
-    
-    public init(coordinate: CLLocationCoordinate2D, name: String, state: String?, country: String?, isCapital: Bool?, population: Int64?) {
-        self.coordinate = coordinate
-        self.name = name
-        self.state = state
-        self.country = country
-        self.isCapital = isCapital
-        self.population = population
-    }
-    
-    public required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.state = try container.decodeIfPresent(String.self, forKey: .state)
-        self.country = try container.decodeIfPresent(String.self, forKey: .country)
-        self.isCapital = try container.decodeIfPresent(Bool.self, forKey: .isCapital)
-        self.population = try container.decodeIfPresent(Int64.self, forKey: .population)
-        
-        self.coordinate = CLLocationCoordinate2D(latitude: 0.0, longitude: 0.0)
-        //            super.init()
     }
 }
