@@ -698,7 +698,6 @@ public struct SocialView: View {
             .padding(.horizontal, 20)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-            .background(.clear)
             .offset(y: -self.offsetY)
         }
         .onAppear {

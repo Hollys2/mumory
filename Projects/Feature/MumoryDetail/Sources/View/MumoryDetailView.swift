@@ -260,10 +260,11 @@ public struct MumoryDetailView: View {
             Task {
                 for friend in self.currentUserData.friends {
                     await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
-                    print("친구뮤모리: \(mumoryDataViewModel.friendMumorys)")
+                    await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
+                    print("친구뮤모리: \(mumoryDataViewModel.sameSongFriendMumorys)")
+                    print("주변뮤모리: \(mumoryDataViewModel.surroundingMumorys)")
                 }
             }
-            
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
