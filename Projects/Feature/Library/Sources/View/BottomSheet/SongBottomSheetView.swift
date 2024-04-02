@@ -336,7 +336,7 @@ struct OptionalSongBottomSheetView: View {
                     BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                         .onTapGesture {
                             dismiss()
-                            
+                            appCoordinator.rootPath = NavigationPath()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 guard let unwrappedSong = self.song else {return}
                                 let musicModel = MusicModel(songID: unwrappedSong.id, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))

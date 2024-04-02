@@ -9,9 +9,14 @@
 
 import SwiftUI
 import Shared
+import MusicKit
 
 struct MumoryDetailSameLocationMusicView: View {
-    
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @State var isPresentBottomSheet: Bool = false
+    @State var song: Song?
     let mumory: Mumory
     
     var body: some View {
@@ -62,18 +67,53 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 Spacer()
                 
-                SharedAsset.bookmarkOffMumoryDatail.swiftUIImage
-                    .resizable()
-                    .frame(width: 20, height: 20)
+                if playerViewModel.favoriteSongIds.contains(mumory.musicModel.songID.rawValue) {
+                    SharedAsset.bookmarkOnMumoryDatail.swiftUIImage
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .onTapGesture {
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.musicModel.songID.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                        }
+                } else {
+                    SharedAsset.bookmarkOffMumoryDatail.swiftUIImage
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .onTapGesture {
+                            self.generateHapticFeedback(style: .medium)
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.musicModel.songID.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                        }
+                }
+          
                 
                 Spacer().frame(width: 29)
                 
-                Button(action: {}, label: {
+                Button(action: {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentBottomSheet = true
+                }, label: {
                     SharedAsset.musicMenuMumoryDatail.swiftUIImage
                         .resizable()
                         .frame(width: 20, height: 20)
                 })
             } // HStack
         } // ZStack
+        .background(ColorSet.background)
+        .onAppear(perform: {
+            Task {
+                song = await fetchSong(songID: mumory.musicModel.songID.rawValue)
+            }
+        })
+        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                OptionalSongBottomSheetView(song: $song, types: [.withoutBookmark])
+            }
+            .background(TransparentBackground())
+        })
+        .onTapGesture {
+            guard let playSong = self.song else {return}
+            playerViewModel.playNewSongShowingPlayingView(song: playSong)
+        }
     }
 }

@@ -43,6 +43,7 @@ struct ShazamView: View {
                         .frame(width: 30, height: 30)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .onTapGesture {
+                            playerViewModel.setLibraryPlayerVisibility(isShown: true)
                             appCoordinator.rootPath.removeLast()
                         }
                 }
@@ -184,6 +185,7 @@ struct ShazamView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                 .foregroundStyle(Color.white)
                                 .onTapGesture {
+                                    playerViewModel.setLibraryPlayerVisibility(isShown: true)
                                     isEditing = false
                                 }
                             
@@ -193,6 +195,7 @@ struct ShazamView: View {
                                 .foregroundStyle(ColorSet.subGray)
                                 .onTapGesture {
                                     selectedShazamHistory.removeAll()
+                                    playerViewModel.setLibraryPlayerVisibility(isShown: false)
                                     isEditing = true
                                 }
                         }

@@ -47,7 +47,7 @@ public struct MiniPlayerView: View {
                         
                         Text(playingSong.artistName)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                            .foregroundStyle(Color(red: 0.89, green: 0.89, blue: 0.89))
+                            .foregroundStyle(ColorSet.charSubGray)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .lineLimit(1)
                             .truncationMode(.tail)
@@ -55,7 +55,7 @@ public struct MiniPlayerView: View {
                     })
                     .padding(.leading, 11)
                 }else {
-                    Text("재생중인 음악이 없습니다.")
+                    Text("재생 중인 음악이 없습니다.")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundStyle(Color.white)
                         .padding(.leading, 8)
@@ -179,7 +179,7 @@ public struct MiniPlayerViewInLibrary: View {
                     })
                     .padding(.leading, 11)
                 }else {
-                    Text("재생중인 음악이 없습니다.")
+                    Text("재생 중인 음악이 없습니다.")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundStyle(Color.white)
                         .padding(.leading, 8)

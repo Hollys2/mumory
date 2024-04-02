@@ -49,9 +49,11 @@ public struct BottomSheetWrapper: View {
                     .offset(y: yOffset)
                     .gesture(drag)
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+                    .padding(.bottom, 29)
                 }
                 
             })
+            .ignoresSafeArea()
             .onAppear(perform: {
                 UIView.setAnimationsEnabled(true)
                 withAnimation(.easeOut(duration: 0.2)){

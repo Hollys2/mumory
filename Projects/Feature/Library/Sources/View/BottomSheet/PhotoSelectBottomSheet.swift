@@ -121,9 +121,11 @@ public struct PhotoSelectBottomSheet: View {
                     .padding(.horizontal, 7)
                     .offset(y: yOffset)
                     .gesture(drag)
+                    .padding(.bottom, 27)
                 }
                 
             })
+            .ignoresSafeArea()
             .onAppear(perform: {
                 UIView.setAnimationsEnabled(true)
                 withAnimation(.easeOut(duration: 0.2)){

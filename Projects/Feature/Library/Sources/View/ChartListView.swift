@@ -30,7 +30,6 @@ struct ChartListView: View {
                 HStack(spacing: 0, content: {
                     SharedAsset.back.swiftUIImage
                         .frame(width: 30, height: 30)
-                        .padding(.leading, 20)
                         .onTapGesture {
                             appCoordinator.rootPath.removeLast()
                         }
@@ -46,13 +45,11 @@ struct ChartListView: View {
                         
                     })
                     Spacer()
-                    SharedAsset.search.swiftUIImage
+                    Rectangle()
+                        .fill(Color.clear)
                         .frame(width: 30, height: 30)
-                        .padding(.trailing, 20)
-                        .onTapGesture {
-                            appCoordinator.rootPath.append(LibraryPage.search(term: ""))
-                        }
                 })
+                .padding(.horizontal, 20)
                 .frame(height: 65)
                 .padding(.top, appCoordinator.safeAreaInsetsTop)
                 

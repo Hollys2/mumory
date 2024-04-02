@@ -196,7 +196,6 @@ struct UnkownFriendPageView: View {
         ZStack(alignment: .top){
             VStack(spacing: 0, content: {
                 UnknownFriendInfoView
-                Divider10()
                 UnknownFriendContentView
                     .padding(.top, getUIScreenBounds().height * 0.1)
             })
@@ -310,6 +309,8 @@ struct UnkownFriendPageView: View {
                     
                 }
                 
+                Divider10()
+
             })
 
         }

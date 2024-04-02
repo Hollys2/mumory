@@ -167,6 +167,7 @@ struct ProfileSettingView: View {
                             HStack(spacing: 0) {
                                 Text("친구 찾기용 아이디 입니다.")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                    .foregroundStyle(Color.black)
                                 
                                 SharedAsset.xBlack.swiftUIImage
                                     .frame(width: 13, height: 13)
