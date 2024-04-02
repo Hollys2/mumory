@@ -39,7 +39,7 @@ struct MostPostedSongListView: View {
                         }
                     Spacer()
                     VStack(spacing: 5, content: {
-                        Text("뮤모리 사용자가 많이 기록한 음악")
+                        Text("뮤모리로 많이 기록된 음악")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                             .foregroundStyle(.white)
                         
@@ -105,6 +105,7 @@ struct MostPostedSongListView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }

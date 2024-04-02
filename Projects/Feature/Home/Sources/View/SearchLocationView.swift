@@ -164,10 +164,7 @@ struct SearchLocationView: View {
                                             .frame(width: 29, height: 29)
                                         
                                         Text("현재 위치")
-                                            .font(
-                                                Font.custom("Apple SD Gothic Neo", size: 14)
-                                                    .weight(.medium)
-                                            )
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                             .foregroundColor(.white)
                                         
                                         Spacer()
@@ -197,10 +194,7 @@ struct SearchLocationView: View {
                                             .frame(width: 24, height: 22)
                                         
                                         Text("지도에서 직접 선택")
-                                            .font(
-                                                Font.custom("Apple SD Gothic Neo", size: 14)
-                                                    .weight(.medium)
-                                            )
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                             .foregroundColor(.white)
                                         
                                         Spacer()

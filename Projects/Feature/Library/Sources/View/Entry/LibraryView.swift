@@ -136,6 +136,8 @@ struct LibraryView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false, moveToBottom: false)
+            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true)
             Task {
                 currentUserData.playlistArray = await currentUserData.savePlaylist()
             }

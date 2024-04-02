@@ -113,6 +113,7 @@ struct ChartListView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }

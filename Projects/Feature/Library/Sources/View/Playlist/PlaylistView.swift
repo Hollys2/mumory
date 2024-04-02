@@ -125,6 +125,7 @@ struct PlaylistView: View {
                                 
                                 EditButton()
                                     .onTapGesture {
+                                        playerViewModel.setLibraryPlayerVisibility(isShown: false)
                                         self.selectedSongsForDelete.removeAll()
                                         setEditMode(isEditing: true)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewEditButton")
@@ -236,6 +237,7 @@ struct PlaylistView: View {
                 if isEditing {
                     Button(action: {
                         setEditMode(isEditing: false)
+                        playerViewModel.setLibraryPlayerVisibility(isShown: true)
                     }, label: {
                         Text("완료")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -284,6 +286,7 @@ struct PlaylistView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             UIView.setAnimationsEnabled(true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             Task {
                 isLoading = true
                 let startIndex = 0

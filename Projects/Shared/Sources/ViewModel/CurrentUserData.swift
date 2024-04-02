@@ -334,15 +334,18 @@ public class CurrentUserData: ObservableObject {
     }
     
     private func fetchFriend(friendIds: [String]) async -> [MumoriUser] {
-        return await withTaskGroup(of: MumoriUser.self) { taskGroup -> [MumoriUser] in
+        return await withTaskGroup(of: MumoriUser?.self) { taskGroup -> [MumoriUser] in
             var friendList: [MumoriUser] = []
             for friendId in friendIds {
                 taskGroup.addTask {
-                    return await MumoriUser(uId: friendId)
+                    let user = await MumoriUser(uId: friendId)
+                    if user.nickname == "탈퇴계정" {return nil}
+                    return user
                 }
             }
             for await value in taskGroup {
-                friendList.append(value)
+                guard let user = value else {continue}
+                friendList.append(user)
             }
             return friendList
         }

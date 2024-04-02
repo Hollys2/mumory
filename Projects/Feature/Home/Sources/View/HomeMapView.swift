@@ -65,6 +65,7 @@ struct HomeMapView: View {
         }
         .onAppear {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false, moveToBottom: false)
+            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
         }
         .onDisappear {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)

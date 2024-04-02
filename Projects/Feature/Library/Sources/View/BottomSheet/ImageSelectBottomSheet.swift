@@ -94,10 +94,7 @@ public struct ImageSelectBottomSheet: View {
                                 }
                             }
                             
-                            if imageBundle.image != nil {
-                                Divider03()
-                                    .padding(.horizontal, 2)
-                                
+                            if imageBundle.image != nil {                                
                                 HStack(spacing: 0, content: {
                                     SharedAsset.delete.swiftUIImage
                                         .resizable()
@@ -131,7 +128,7 @@ public struct ImageSelectBottomSheet: View {
                         
                     })
                     .frame(maxWidth: .infinity)
-                    .background(ColorSet.moreDeepGray)
+                    .background(ColorSet.background)
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                     .padding(.horizontal, 7)
                     .offset(y: yOffset)

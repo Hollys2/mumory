@@ -178,22 +178,24 @@ struct ShazamView: View {
                     
                     Spacer()
                     
-                    if isEditing {
-                        Text("완료")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                            .foregroundStyle(Color.white)
-                            .onTapGesture {
-                                isEditing = false
-                            }
-                        
-                    }else {
-                        Text("편집")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                            .foregroundStyle(ColorSet.subGray)
-                            .onTapGesture {
-                                selectedShazamHistory.removeAll()
-                                isEditing = true
-                            }
+                    if !shazamHistory.isEmpty {
+                        if isEditing {
+                            Text("완료")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                .foregroundStyle(Color.white)
+                                .onTapGesture {
+                                    isEditing = false
+                                }
+                            
+                        }else {
+                            Text("편집")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                .foregroundStyle(ColorSet.subGray)
+                                .onTapGesture {
+                                    selectedShazamHistory.removeAll()
+                                    isEditing = true
+                                }
+                        }
                     }
                     
                     

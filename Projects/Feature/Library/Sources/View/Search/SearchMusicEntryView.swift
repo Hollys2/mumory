@@ -50,7 +50,7 @@ struct SearchMusicEntryView: View {
                             .frame(width: 25, height: 25)
                         
                         Text("음악 인식")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             .foregroundColor(.white)
                             .onTapGesture {
                                 appCoordinator.rootPath.append(LibraryPage.shazam(type: self.shazamViewType))
@@ -64,57 +64,7 @@ struct SearchMusicEntryView: View {
                     .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
-                    
-                    //뮤모리 인기 검색어
-                    VStack(spacing: 0){
-                        Text("뮤모리 인기 검색어")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.white)
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                        
-                        
-                        LazyVStack(alignment: .leading, spacing: 12) {
-                            ForEach(getRows(list: self.popularSearchTerm), id: \.self) { list in
-                                HStack(spacing: 8) {
-                                    ForEach(list, id: \.self) { term in
-                                        Text(term)
-                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                            .foregroundColor(.black)
-                                            .padding(.horizontal, 16)
-                                            .frame(height: 33)
-                                            .background(ColorSet.mainPurpleColor)
-                                            .clipShape(RoundedRectangle(cornerRadius: 25, style: .circular))
-                                            .onTapGesture {
-                                                self.term = term
-                                                self.songs = []
-                                                self.artists = []
-                                                Task {
-                                                    self.artists = await requestArtist(term: term)
-                                                    isLoading = false
-                                                }
-                                                Task {
-                                                    self.songs = await requestSong(term: term, index: 0)
-                                                    isLoading = false
-                                                }
-                                                let userDefault = UserDefaults.standard
-                                                var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
-                                                recentSearchList.removeAll(where: {$0 == term})
-                                                recentSearchList.insert(term, at: 0)
-                                                userDefault.set(recentSearchList, forKey: "recentSearchList")
-                                            }
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.top, 20)
 
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 20)
-                    .background(ColorSet.moreDeepGray)
-                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 15, height: 15), style: .circular))
-                    .padding(.horizontal, 20)
                     
                     
                     //최근 검색

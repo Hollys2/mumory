@@ -65,7 +65,7 @@ struct UneditablePlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
+                                        playerViewModel.playAll(title: "\(friendDataViewModel.friend.nickname)님의 \(playlist.title)" , songs: playlist.songs)
                                         AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
                                     }
                             })
@@ -80,7 +80,7 @@ struct UneditablePlaylistView: View {
                             MusicListItem(song: playlist.songs[index], type: .normal)
                                 .id("\(playlist.songs[index].artistName) \(playlist.songs[index].id.rawValue) \(index)")
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: playlist.songs[index])
+                                    playerViewModel.playAll(title: "\(friendDataViewModel.friend.nickname)님의 \(playlist.title)" , songs: playlist.songs, startingItem: playlist.songs[index])
                                 }
                             
                             Divider05()
@@ -170,6 +170,7 @@ struct UneditablePlaylistView: View {
             .background(TransparentBackground())
         })
         .onAppear {
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             if playlist.songs.count < playlist.songIDs.count {
                 Task {
                     friendDataViewModel.isPlaylistLoading = true

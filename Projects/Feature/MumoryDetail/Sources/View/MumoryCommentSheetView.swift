@@ -661,7 +661,7 @@ public struct MumoryCommentSheetView: View {
                             
                             TextField("", text: $commentText,
                                       prompt: Text("댓글을 입력하세요.")
-                                .font(Font.custom("Apple SD Gothic Neo", size: 15))
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                                 .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                             )
                             .padding(.leading, 25)

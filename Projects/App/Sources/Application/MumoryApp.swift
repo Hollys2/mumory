@@ -50,6 +50,11 @@ struct MumoryApp: App {
                             playerViewModel.isShownMiniPlayer = false
                         }
                     
+                    MiniPlayerViewInLibrary()
+                        .environmentObject(snackBarViewModel)
+                        .environmentObject(appCoordinator)
+                        .environmentObject(currentUserData)
+                    
                     SnackBarView()
                         .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)

@@ -54,7 +54,7 @@ public struct HomeView: View {
                 }
             }
             .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
-            
+                        
             MiniPlayerView()
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)

@@ -250,10 +250,7 @@ struct MumoryDetailScrollContentView: View {
                 
                     Group {
                         Text("같은 음악을 들은 친구 뮤모리")
-                            .font(
-                                Font.custom("Apple SD Gothic Neo", size: 18)
-                                    .weight(.semibold)
-                            )
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 24)
@@ -302,10 +299,7 @@ struct MumoryDetailScrollContentView: View {
                 
                 Group {
                     Text("주변에서 뮤모리된 음악")
-                        .font(
-                            Font.custom("Apple SD Gothic Neo", size: 18)
-                                .weight(.semibold)
-                        )
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.bottom, 24)

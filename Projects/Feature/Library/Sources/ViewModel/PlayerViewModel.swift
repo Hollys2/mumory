@@ -28,6 +28,7 @@ public class PlayerViewModel: ObservableObject {
     }
     
     @Published public var isShownMiniPlayer: Bool = false
+    @Published public var isShownMiniPlayerInLibrary: Bool = false
     @Published var miniPlayerMoveToBottom: Bool = false
     @Published var isShownPreview: Bool = false
     @Published var userWantsShown: Bool = true
@@ -110,6 +111,7 @@ public class PlayerViewModel: ObservableObject {
         self.queue = songs
         self.originQueue = songs
         self.queueTitle = title
+        self.setPlayerVisibilityByUser(isShown: true, moveToBottom: true)
         Task {
             do {
                 try await player.play()
@@ -296,13 +298,26 @@ public class PlayerViewModel: ObservableObject {
     }
 
     public func setPlayerVisibilityByUser(isShown: Bool) {
-        self.userWantsShown = isShown
-        self.isShownMiniPlayer = isShown
+        withAnimation(.linear(duration: 0.2)) {
+            self.userWantsShown = isShown
+            self.isShownMiniPlayer = isShown
+            self.isShownMiniPlayerInLibrary = isShown
+        }
+    }
+    
+    public func setPlayerVisibilityByUser(isShown: Bool, moveToBottom: Bool) {
+        withAnimation(.linear(duration: 0.2)) {
+            self.miniPlayerMoveToBottom = moveToBottom
+            self.userWantsShown = isShown
+            self.isShownMiniPlayer = isShown
+            self.isShownMiniPlayerInLibrary = isShown
+        }
     }
     
     public func setPlayerVisibilityByUserWithoutAnimation(isShown: Bool) {
         self.userWantsShown = isShown
         self.isShownMiniPlayer = isShown
+        self.isShownMiniPlayerInLibrary = isShown
     }
     
     public func setPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
@@ -324,5 +339,22 @@ public class PlayerViewModel: ObservableObject {
     public func setPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
         self.miniPlayerMoveToBottom = moveToBottom
         isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+    }
+    
+    public func setLibraryPlayerVisibility(isShown: Bool) {
+        withAnimation(.linear(duration: 0.2)) {
+            isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+        }
+    }
+    
+    public func setLibraryPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
+        withAnimation(.linear(duration: 0.2)) {
+            self.miniPlayerMoveToBottom = moveToBottom
+            isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+        }
+    }
+    
+    public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool){
+        isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
     }
 }

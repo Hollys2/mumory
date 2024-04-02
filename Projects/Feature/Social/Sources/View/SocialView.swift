@@ -664,7 +664,7 @@ public struct SocialView: View {
                         self.appCoordinator.isAddFriendViewShown = true
                     }
                 }) {
-                    (currentUserData.recievedNewFriends ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
+                    (currentUserData.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
@@ -696,6 +696,9 @@ public struct SocialView: View {
             .offset(y: -self.offsetY)
         }
         .onAppear {
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+            playerViewModel.isShownMiniPlayerInLibrary = false
+            
             if !appCoordinator.isFirstTabSelected {
                 mumoryDataViewModel.fetchEveryMumory()
                 appCoordinator.isFirstTabSelected = true

@@ -60,13 +60,12 @@ struct NowPlayingView: View {
                     PlayTogetherView(songs: $playTogetherSongs)
                         .opacity(isPresentQueue ? 0 : 1)
                         .padding(.bottom, 100)
-//                        .onChange(of: playerViewModel.currentSong, perform: { value in
-//                            guard let song = value else {return}
-//                            print("\(song.title), \(song.artistName)")
-//                            Task {
-//                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
-//                            }
-//                        })
+                        .onChange(of: playerViewModel.currentSong, perform: { value in
+                            guard let song = value else {return}
+                            Task {
+                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
+                            }
+                        })
                 }
                 .scrollIndicators(.hidden)
                 .scrollDisabled(isPresentQueue)
@@ -312,7 +311,7 @@ struct PlayingView: View {
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
                     }
          
-                    Text(playerViewModel.currentSong?.artistName ?? "아티스트이름")
+                    Text(playerViewModel.currentSong?.artistName ?? "--")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: isSE ? 16 : 18))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -650,11 +649,20 @@ struct PlayTogetherView: View {
             
             if let currentSong = playerViewModel.currentSong {
                 VStack(spacing: 0) {
-                    ForEach(songs, id: \.id) { song in
-                        PlayTogetherItem(song: song)
-                            .onTapGesture {
-                                playerViewModel.playNewSong(song: song)
-                            }
+                    if songs.isEmpty {
+                        Text("함께 재생된 음악이 없습니다.")
+                            .foregroundStyle(ColorSet.subGray)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, 30)
+                            .frame(height: 280)
+                    } else {
+                        ForEach(songs, id: \.id) { song in
+                            PlayTogetherItem(song: song)
+                                .onTapGesture {
+                                    playerViewModel.playNewSong(song: song)
+                                }
+                        }
                     }
                 }
                 .padding(.bottom, 25)

@@ -104,6 +104,7 @@ struct SaveToPlaylistView: View {
         }
         .onAppear(perform: {
             getUserPlaylist()
+            playerViewModel.setLibraryPlayerVisibility(isShown: false)
         })
 
     }

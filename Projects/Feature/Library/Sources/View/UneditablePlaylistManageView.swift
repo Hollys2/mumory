@@ -13,6 +13,7 @@ import MusicKit
 struct UneditablePlaylistManageView: View {
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var itemSize: CGFloat = .zero
     @State var isPresentBottomSheet: Bool = false
 
@@ -83,6 +84,7 @@ struct UneditablePlaylistManageView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             itemSize = getUIScreenBounds().width * 0.21
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
         }
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
