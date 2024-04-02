@@ -41,6 +41,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.backgroundColor = .gray
+        scrollView.bounces = true
 
         let hostingController = UIHostingController(rootView: self.content()
             .environmentObject(self.mumoryDataViewModel)
@@ -182,8 +183,9 @@ struct SocialScrollCotentView: View {
             }
             .frame(width: UIScreen.main.bounds.width - 20)
             .padding(.top, 25)
+            .padding(.bottom, 90)
         } // VStack
-        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 25)
+        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 115)
         .ignoresSafeArea()
     }
 }
@@ -216,7 +218,8 @@ struct SocialItemView: View {
                         image
                             .resizable()
                     default:
-                        Color(red: 0.184, green: 0.184, blue: 0.184)
+                        self.user.defaultProfileImage
+                            .resizable()
                     }
                 }
                 .scaledToFill()
@@ -694,6 +697,7 @@ public struct SocialView: View {
             .offset(y: -self.offsetY)
         }
         .onAppear {
+            UIScrollView.appearance().bounces = true
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             playerViewModel.isShownMiniPlayerInLibrary = false
             
