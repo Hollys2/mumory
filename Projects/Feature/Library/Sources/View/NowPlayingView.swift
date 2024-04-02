@@ -523,14 +523,14 @@ struct QueueView: View {
             
             
             HStack(content: {
-                Text(playerViewModel.queueTitle.isEmpty ? "재생중" : playerViewModel.queueTitle)
+                Text(playerViewModel.queueTitle.isEmpty ? "재생 중" : playerViewModel.queueTitle)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                     .foregroundStyle(Color.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
-                Text(playerViewModel.queueTitle.isEmpty ? "" : "목록 재생중 \(playerViewModel.nowPlayingIndex())/\(playerViewModel.queue.count)")
+                Text(playerViewModel.queueTitle.isEmpty ? "" : "목록 재생 중 \(playerViewModel.nowPlayingIndex())/\(playerViewModel.queue.count)")
                     .fixedSize()
                     .padding(.leading, 6)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
@@ -670,7 +670,7 @@ struct PlayTogetherView: View {
                 }
                 .padding(.bottom, 25)
             }else {
-                Text("재생중인 음악이 없습니다.")
+                Text("재생 중인 음악이 없습니다.")
                     .foregroundStyle(ColorSet.subGray)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .multilineTextAlignment(.center)

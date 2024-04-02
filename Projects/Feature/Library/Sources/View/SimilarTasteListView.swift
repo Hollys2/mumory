@@ -66,7 +66,7 @@ struct SimilarTasteListView: View {
                             
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "비슷한 취향의 사용자가 즐겨찾기한 음악", songs: songs)
+                                    playerViewModel.playAll(title: "비슷한 취향 사용자의 선호 음악", songs: songs)
                                 }
                         }
                         .padding(.horizontal, 20)
@@ -78,7 +78,7 @@ struct SimilarTasteListView: View {
                         ForEach(songs, id: \.self) { song in
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "비슷한 취향의 사용자가 즐겨찾기한 음악", songs: songs, startingItem: song)
+                                    playerViewModel.playAll(title: "비슷한 취향 사용자의 선호 음악", songs: songs, startingItem: song)
                                 }
 //                                .highPriorityGesture(
 //                                    TapGesture()
@@ -153,7 +153,7 @@ struct SimilarTasteListView: View {
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                RecommendationBottomSheetView(songs: $songs, title: "비슷한 취향의 사용자가 즐겨찾기한 음악")
+                RecommendationBottomSheetView(songs: $songs, title: "비슷한 취향 사용자의 선호 음악")
             }
             .background(TransparentBackground())
         })

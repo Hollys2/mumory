@@ -73,7 +73,7 @@ struct ArtistOfSongView: View {
                             Spacer()
                             PlayAllButton()
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: artist?.name ?? "재생중", songs: songs)
+                                    playerViewModel.playAll(title: artist?.name ?? "재생 중", songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "ArtistViewPlayAllButton")
                                 }
                         })

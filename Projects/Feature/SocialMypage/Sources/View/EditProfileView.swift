@@ -470,6 +470,7 @@ private struct IdInfoView: View {
     var body: some View {
         HStack(spacing: 0) {
             Text("친구 찾기용 아이디 입니다.")
+                .foregroundStyle(Color.black)
                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
             
             SharedAsset.xBlack.swiftUIImage
