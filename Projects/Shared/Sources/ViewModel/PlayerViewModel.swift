@@ -1,49 +1,49 @@
 //
-//  Feature
+//  PlayerViewModel.swift
+//  Shared
 //
-//  Created by 제이콥 on 11/27/23.
-//  Copyright © 2023 hollys. All rights reserved.
+//  Created by 제이콥 on 4/3/24.
+//  Copyright © 2024 hollys. All rights reserved.
 //
 
 import Foundation
 import SwiftUI
 import MusicKit
 import MediaPlayer
-import Shared
 
-struct PlayingInfo {
+public struct PlayingInfo {
     var playingTime: TimeInterval
     var playbackRate: Double
 }
-
+public enum ShuffleState {
+    case off
+    case on
+}
+public enum RepeatState {
+    case off
+    case all
+    case one
+}
 public class PlayerViewModel: ObservableObject {
-    enum ShuffleState {
-        case off
-        case on
-    }
-    enum RepeatState {
-        case off
-        case all
-        case one
-    }
+
     
     @Published public var isShownMiniPlayer: Bool = false
     @Published public var isShownMiniPlayerInLibrary: Bool = false
-    @Published var miniPlayerMoveToBottom: Bool = false
-    @Published var isShownPreview: Bool = false
-    @Published var userWantsShown: Bool = true
-    @Published var playQueue = ApplicationMusicPlayer.shared.queue
-    @Published var queue: [Song] = []
-    @Published var currentSong: Song?
-    @Published var queueTitle: String = ""
+    @Published public var miniPlayerMoveToBottom: Bool = false
+    @Published public var isShownPreview: Bool = false
+    @Published public var userWantsShown: Bool = true
+    @Published public var playQueue = ApplicationMusicPlayer.shared.queue
+    @Published public var queue: [Song] = []
+    @Published public var currentSong: Song?
+    @Published public var queueTitle: String = ""
     
-    @Published var favoriteSongIds: [String] = []
+    @Published public var favoriteSongIds: [String] = []
     @Published public var playlistArray: [MusicPlaylist] = []
-    @Published var playingTime: TimeInterval = 0.0
-    @Published var isPresentNowPlayingView: Bool = false
-    @Published var shuffleState: ShuffleState = .off
-    @Published var repeatState: RepeatState = .off
-    @Published var isPlaying: Bool = false
+    @Published public var playingTime: TimeInterval = 0.0
+    @Published public var isPresentNowPlayingView: Bool = false
+    @Published public var shuffleState: ShuffleState = .off
+    @Published public var repeatState: RepeatState = .off
+    @Published public var isPlaying: Bool = false
     private var player = ApplicationMusicPlayer.shared
     var originQueue: [Song] = []
     
@@ -159,9 +159,13 @@ public class PlayerViewModel: ObservableObject {
     }
     
     public func setQueue(songs: [Song]) {
-        print("set queue")
         self.queue = songs
         self.player.queue = .init(for: songs)
+    }
+    
+    public func setQueue(songs: [Song], startSong: Song) {
+        self.queue = songs
+        self.player.queue = .init(for: songs, startingAt: startSong)
     }
     
     public func playingSong() -> Song? {
@@ -355,6 +359,11 @@ public class PlayerViewModel: ObservableObject {
     }
     
     public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool){
+        isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+    }
+    
+    public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
+        self.miniPlayerMoveToBottom = moveToBottom
         isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
     }
 }

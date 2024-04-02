@@ -594,13 +594,16 @@ struct QueueView: View {
 }
 public func requestPlayTogetherSongs(title: String, artist: String) async -> [Song]{
     var returnValue: [Song] = []
-    var request = MusicCatalogSearchRequest(term: "\(title) \(artist)", types: [Song.self])
+    var request = MusicCatalogSearchRequest(term: "\(artist)", types: [Song.self])
     request.limit = 20
     request.includeTopResults = true
     request.offset = 0
     var count = 0
     guard let response = try? await request.response() else {return []}
-    for song in response.songs {
+    var songs = Array(response.songs)
+    songs.shuffle()
+    
+    for song in songs {
         if song.title == title {
             continue
         }

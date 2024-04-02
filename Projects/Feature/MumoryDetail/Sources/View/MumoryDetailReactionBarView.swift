@@ -23,6 +23,7 @@ struct MumoryDetailReactionBarView: View {
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var playerViewModel: PlayerViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     
     var body: some View {
         
@@ -103,14 +104,25 @@ struct MumoryDetailReactionBarView: View {
                 
                 Spacer()
                 
-                Button(action: {
-//                    self.isStarButtonTapped = true
-                    self.appCoordinator.isStarButtonTapped = true
-                }, label: {
-                    Image(uiImage: self.isStarButtonTapped ? SharedAsset.starOnMumoryDetail.image : SharedAsset.starOffMumoryDetail.image)
+                if playerViewModel.favoriteSongIds.contains(mumory.musicModel.songID.rawValue) {
+                    SharedAsset.starOnMumoryDetail.swiftUIImage
                         .resizable()
                         .frame(width: 42, height: 42)
-                })
+                        .onTapGesture {
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.musicModel.songID.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
+                        }
+                } else {
+                    SharedAsset.starOffMumoryDetail.swiftUIImage
+                        .resizable()
+                        .frame(width: 42, height: 42)
+                        .onTapGesture {
+                            self.generateHapticFeedback(style: .medium)
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.musicModel.songID.rawValue)
+                            snackBarViewModel.setSnackBar(type: .favorite, status: .success)
+                        }
+                }
+     
             }
             .padding(.horizontal, 20)
             .padding(.top, 11)

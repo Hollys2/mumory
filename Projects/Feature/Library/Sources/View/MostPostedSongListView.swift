@@ -14,73 +14,68 @@ struct MostPostedSongListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @State var contentOffset: CGPoint = .zero
-    @State var viewWidth: CGFloat = .zero
-    @State var scrollDirection: ScrollDirection = .up
+    
+    @State var offset: CGPoint = .zero
+    @State var isBottomSheetPresent: Bool = false
     @Binding var songs: [Song]
-    @State var searchIndex = 0
-    let dateTextColor = Color(red: 0.51, green: 0.51, blue: 0.51)
     
     init(songs: Binding<[Song]>) {
         self._songs = songs
     }
-    
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
-            VStack(spacing: 0, content: {
-                //상단 바
-                HStack(spacing: 0, content: {
-                    SharedAsset.back.swiftUIImage
-                        .frame(width: 30, height: 30)
-                        .padding(.leading, 20)
-                        .onTapGesture {
-                            appCoordinator.rootPath.removeLast()
-                        }
-                    Spacer()
-                    VStack(spacing: 5, content: {
+
+            //이미지
+            PlaylistImage(songs: $songs)
+                .frame(width: getUIScreenBounds().width)
+                .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
+                .overlay {
+                    LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
+                }
+
+            
+            SimpleScrollView(contentOffset: $offset) {
+                
+                VStack(spacing: 0, content: {
+                    SharedAsset.bottomGradient.swiftUIImage
+                        .resizable()
+                        .frame(width: getUIScreenBounds().width, height: 45)
+                        .ignoresSafeArea()
+                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                    
+                    VStack(spacing: 0, content: {
                         Text("뮤모리로 많이 기록된 음악")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
+                            .frame(width: getUIScreenBounds().width, alignment: .center)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 20)
                             .foregroundStyle(.white)
                         
                         Text(getUpdateDateText())
-                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 12))
-                            .foregroundStyle(dateTextColor)
+                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
+                            .foregroundStyle(ColorSet.subGray)
+                            .padding(.top, 5)
                         
-                    })
-                    Spacer()
-                    SharedAsset.search.swiftUIImage
-                        .frame(width: 30, height: 30)
-                        .padding(.trailing, 20)
-                        .onTapGesture {
-                            appCoordinator.rootPath.append(LibraryPage.search(term: ""))
+                        HStack(alignment: .bottom){
+                            Text("\(songs.count)곡")
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                                .foregroundStyle(ColorSet.subGray)
+                            
+                            Spacer()
+                            
+                            PlayAllButton()
+                                .padding(.trailing, 20)
+                                .onTapGesture {
+                                    playerViewModel.playAll(title: "뮤모리로 많이 기록된 음악", songs: songs)
+                                    AnalyticsManager.shared.setSelectContentLog(title: "MostPostedSongListView")
+                                }
                         }
-                })
-                .frame(height: 65)
-                .padding(.top, appCoordinator.safeAreaInsetsTop)
-                
-                HStack(alignment: .bottom){
-                    Text("\(songs.count)곡")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                        .foregroundStyle(ColorSet.subGray)
-                        .padding(.leading, 20)
-                    
-                    Spacer()
-                    
-                    PlayAllButton()
-                        .padding(.trailing, 20)
-                        .onTapGesture {
-                            playerViewModel.playAll(title: "뮤모리로 많이 기록된 음악", songs: songs)
-                            AnalyticsManager.shared.setSelectContentLog(title: "MostPostedSongListView")
-                        }
-                }
-                .padding(.top, 20)
-                
-                Divider05()
-                    .padding(.top, 15)
-                
-                ScrollWrapperWithIndex(songs: $songs, index: $searchIndex, contentOffset: $contentOffset, scrollDirection: $scrollDirection) {
-                    LazyVStack(spacing: 0, content: {
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 15)
+                        .padding(.top, 30)
+                        
+                        
                         ForEach(songs.indices, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
                                 .simultaneousGesture(TapGesture().onEnded({ _ in
@@ -88,19 +83,59 @@ struct MostPostedSongListView: View {
                                 }))
                         
                         }
+                        
+                        if songs.isEmpty {
+                            SongListSkeletonView(isLineShown: true)
+                        }
+                        
+                        
+                        //플레이어에 가려지는 높이만큼 채워주기
+                        //노래가 채워지면서 뷰의 크기가 바뀌면 에러발생함. 따라서 맨 처음에는 1000만큼 공간을 채워줘서 안정적으로 데이터를 받아올 수 있도록 함
+                        Rectangle()
+                            .foregroundStyle(.clear)
+                            .frame(height: songs.count > 0 ? 100 : 1000)
+                        
+                        
                     })
-                    .frame(width: getUIScreenBounds().width)
+                    .offset(y: -30) //그라데이션과 겹치도록 위로 30만큼 땡김
+                    .background(ColorSet.background)
                     
-                    Rectangle()
-                        .foregroundStyle(.clear)
-                        .frame(height: 87)
-                }
-                .scrollIndicators(.hidden)
-                .ignoresSafeArea()
+                    
+                })
+                .frame(width: getUIScreenBounds().width)
+                .frame(minHeight: getUIScreenBounds().height)
+                
+            }
+            .scrollIndicators(.hidden)
+            
+            
+            //상단바 - z축 최상위
+            HStack(spacing: 0, content: {
+                SharedAsset.backGradient.swiftUIImage
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .padding(.leading, 20)
+                    .onTapGesture {
+                        appCoordinator.rootPath.removeLast()
+                    }
+                
+                Spacer()
+                
+                
+                SharedAsset.menuGradient.swiftUIImage
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .padding(.trailing, 20)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isBottomSheetPresent = true
+                    }
             })
+            .frame(height: 65)
+            .padding(.top, currentUserData.topInset)
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
-            
+  
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
@@ -108,6 +143,14 @@ struct MostPostedSongListView: View {
             playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
+        .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
+            BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
+                RecommendationBottomSheetView(songs: $songs, title: "뮤모리로 많이 기록된 음악")
+            }
+            .background(TransparentBackground())
+        })
+        
+        
     }
 
 }

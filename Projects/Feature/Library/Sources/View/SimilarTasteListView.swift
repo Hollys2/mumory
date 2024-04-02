@@ -153,7 +153,7 @@ struct SimilarTasteListView: View {
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                RecommendationBottomSheetView(songs: songs, title: "비슷한 취향의 사용자가 즐겨찾기한 음악")
+                RecommendationBottomSheetView(songs: $songs, title: "비슷한 취향의 사용자가 즐겨찾기한 음악")
             }
             .background(TransparentBackground())
         })

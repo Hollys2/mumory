@@ -156,7 +156,7 @@ struct RecommendationListView: View {
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                RecommendationBottomSheetView(songs: songs, title: title)
+                RecommendationBottomSheetView(songs: $songs, title: title)
             }
             .background(TransparentBackground())
         })

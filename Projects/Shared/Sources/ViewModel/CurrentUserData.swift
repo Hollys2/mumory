@@ -160,8 +160,6 @@ public class CurrentUserData: ObservableObject {
                         let startIndex = 0
                         var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4
                         let requestSongIds = Array(songIDs[startIndex..<endIndex])
-                        print("original: \(songIDs)")
-                        print("request: \(requestSongIds)")
                         playlist.songs = await self.fetchSongs(songIDs: requestSongIds)
                         return playlist
                     }
