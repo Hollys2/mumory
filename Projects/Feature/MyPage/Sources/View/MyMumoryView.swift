@@ -386,7 +386,7 @@ public struct MyMumoryView: View {
             }
             .background(TransparentBackground())
         })
-        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .myMumory, mumoryAnnotation: .constant(Mumory())))
+        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.user.uId == currentUserData.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {

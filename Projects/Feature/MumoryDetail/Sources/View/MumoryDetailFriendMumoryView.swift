@@ -147,7 +147,8 @@ struct MumoryDetailFriendMumoryView: View {
                             image
                                 .resizable()
                         default:
-                            Color(red: 0.184, green: 0.184, blue: 0.184)
+                            self.user.defaultProfileImage
+                                .resizable()
                         }
                     }
                     .frame(width: 38, height: 38)
@@ -321,6 +322,7 @@ struct MumoryDetailFriendMumoryView: View {
         }
         .onTapGesture {
             self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+            print("앵: \(mumory.isPublic)")
         }
     }
 }

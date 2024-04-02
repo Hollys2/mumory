@@ -109,7 +109,8 @@ struct MumoryDetailScrollContentView: View {
                                 image
                                     .resizable()
                             default:
-                                Color(red: 0.184, green: 0.184, blue: 0.184)
+                                self.user.defaultProfileImage
+                                    .resizable()
                             }
                         }
                         .scaledToFill()
@@ -137,13 +138,13 @@ struct MumoryDetailScrollContentView: View {
                             
                             HStack(spacing: 0) {
 
-                                Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumoryDataViewModel.selectedMumoryAnnotation.isPublic))
+                                Text(DateManager.formattedDate(date: self.mumory.date, isPublic: self.mumory.isPublic))
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .lineLimit(1)
                                     .fixedSize(horizontal: true, vertical: false)
 
-                                if !self.mumoryDataViewModel.selectedMumoryAnnotation.isPublic {
+                                if !self.mumory.isPublic {
                                     Image(uiImage: SharedAsset.lockMumoryDatail.image)
                                         .resizable()
                                         .frame(width: 18, height: 18)
@@ -340,7 +341,7 @@ struct MumoryDetailScrollContentView: View {
                 print("MumoryDetailScrollContentView onAppear")
                 for friend in self.currentUserData.friends {
                     Task {
-                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
+                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue, mumory: self.mumory)
                     }
                     Task {
                         await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
