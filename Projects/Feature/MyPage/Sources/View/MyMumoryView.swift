@@ -117,17 +117,11 @@ public struct MyMumoryView: View {
                                         ZStack(alignment: .top) {
                                             Color.clear
                                             
-                                            InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
-                                                appCoordinator.setBottomAnimationPage(page: .remove)
-                                                appCoordinator.rootPath.removeLast(appCoordinator.rootPath.count)
-                                                Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                                    withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                                        appCoordinator.isCreateMumorySheetShown = true
-                                                        appCoordinator.offsetY = CGFloat.zero
-                                                    }
-                                                }
-                                            }
-                                            .offset(y: 145)
+                                            Text("뮤모리 기록이 없습니다.")
+                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                .foregroundStyle(ColorSet.subGray)
+                                                .multilineTextAlignment(.center)
+                                                .offset(y: 145)
                                         }
                                     }
 
@@ -239,17 +233,11 @@ public struct MyMumoryView: View {
                                     ZStack(alignment: .top) {
                                         Color.clear
 
-                                        InitialSettingView(title: "음악과 일상 기록을 통해\n나만의 뮤모리를 채워보세요", buttonTitle: "뮤모리 기록하러 가기") {
-                                            appCoordinator.setBottomAnimationPage(page: .remove)
-                                            appCoordinator.rootPath.removeLast(appCoordinator.rootPath.count)
-                                            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                                withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                                    appCoordinator.isCreateMumorySheetShown = true
-                                                    appCoordinator.offsetY = CGFloat.zero
-                                                }
-                                            }
-                                        }
-                                        .offset(y: 145)
+                                        Text("뮤모리 기록이 없습니다.")
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                            .foregroundStyle(ColorSet.subGray)
+                                            .multilineTextAlignment(.center)
+                                            .offset(y: 145)
                                     }
                                 }
 

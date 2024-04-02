@@ -106,6 +106,7 @@ struct MumoryDetailReactionBarView: View {
                 Button(action: {
 //                    self.isStarButtonTapped = true
                     self.appCoordinator.isStarButtonTapped = true
+                    self.appCoordinator.isMumoryDetailMenuSheetShown = true
                 }, label: {
                     Image(uiImage: self.isStarButtonTapped ? SharedAsset.starOnMumoryDetail.image : SharedAsset.starOffMumoryDetail.image)
                         .resizable()

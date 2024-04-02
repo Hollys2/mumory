@@ -289,6 +289,7 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
     typealias UIViewType = MKMapView
     
     let friendMumorys: [Mumory]
+    @State private var isFirst: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -306,7 +307,7 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
         mapView.isRotateEnabled = false
         mapView.showsUserLocation = false
         
-        mapView.setRegion(MKCoordinateRegion(center: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaCoordinate2D : self.friendMumorys.first!.coordinate, span: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaSpan : MapConstant.defaultSpan), animated: true)
+        mapView.setRegion(MKCoordinateRegion(center: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaCoordinate2D : self.friendMumorys[0].coordinate, span: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaSpan : MapConstant.defaultSpan), animated: true)
         context.coordinator.mapView = mapView
                 
         return mapView
@@ -327,6 +328,12 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
         
         uiView.addAnnotations(self.friendMumorys)
         
+        if !self.isFirst {
+            uiView.setRegion(MKCoordinateRegion(center: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaCoordinate2D : self.friendMumorys[0].coordinate, span: self.friendMumorys.isEmpty ? MapConstant.defaultSouthKoreaSpan : MapConstant.defaultSpan), animated: true)
+            DispatchQueue.main.async {
+                self.isFirst = true                
+            }
+        }
 //        uiView.setRegion(MKCoordinateRegion(center: self.friendMumorys.first?.coordinate ?? MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSpan), animated: true)
     }
     

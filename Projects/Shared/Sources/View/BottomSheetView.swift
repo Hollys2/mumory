@@ -383,7 +383,8 @@ public struct BottomSheetView: View {
             .padding(.bottom, 8)
         }
         .frame(width: UIScreen.main.bounds.width - 14, height: 55 * CGFloat(menuOptions.count) + 31)
-        .background(Color(red: 0.122, green: 0.122, blue: 0.122))
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+//        .background(Color(red: 0.122, green: 0.122, blue: 0.122))
 //        .background(ColorSet.moreDeepGray)
         .cornerRadius(15)
     }
