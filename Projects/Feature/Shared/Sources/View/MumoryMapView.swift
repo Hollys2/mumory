@@ -105,31 +105,6 @@ struct FriendMumoryMapView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-
-//            Map(coordinateRegion: .constant(region), annotationItems: mumorys) { m in
-//
-//                MapAnnotation(coordinate: m.locationModel.coordinate) {
-//                    ZStack(alignment: .topLeading) {
-//                        SharedAsset.musicPin.swiftUIImage
-//                            .resizable()
-//                            .frame(width: 74, height: 81)
-//
-//                        AsyncImage(url: m.musicModel.artworkUrl) { phase in
-//                            switch phase {
-//                            case .success(let image):
-//                                image
-//                                    .resizable()
-//                            default:
-//                                Color.clear
-//                            }
-//                        }
-//                        .frame(width: 60.65238, height: 60.65238)
-//                        .cornerRadius(12)
-//                        .offset(x: 6.74, y: 6.74)
-//                    }
-//                }
-//            }
-//            .ignoresSafeArea()
             
             FriendMapViewRepresentable(friendMumorys: self.mumorys)
             

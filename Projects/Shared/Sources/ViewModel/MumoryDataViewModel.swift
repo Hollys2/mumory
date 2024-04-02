@@ -240,10 +240,7 @@ final public class MumoryDataViewModel: ObservableObject {
     }
     
     public func fetchMumory(documentID: String) async -> Mumory {
-        DispatchQueue.main.async {
-            self.isUpdating = true
-        }
-        
+
         let db = FirebaseManager.shared.db
         let docRef = db.collection("Mumory").document(documentID)
         
@@ -254,20 +251,13 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 guard let documentData = documentSnapshot.data(),
                       let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentSnapshot.documentID) else { return Mumory() }
-                
-                DispatchQueue.main.async {
-                    self.isUpdating = false
-                }
+            
                 return newMumory
             } else {
                 print("Document does not exist")
             }
         } catch {
             print("Error fetching document: \(error.localizedDescription)")
-        }
-        
-        DispatchQueue.main.async {
-            self.isUpdating = false
         }
         
         return Mumory()
@@ -441,8 +431,10 @@ final public class MumoryDataViewModel: ObservableObject {
             
         do {
             let querySnapshot = try await collectionReference.getDocuments()
-            
-            self.tempMumory = []
+            DispatchQueue.main.async {
+                self.sameSongFriendMumorys = []
+                self.tempMumory = []
+            }
             
             for document in querySnapshot.documents {
                 let documentData = document.data()
@@ -450,11 +442,11 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.tempMumory.append(newMumory)
-//                    self.tempMumory.sort { $0.date > $1.date }
                 }
             }
             
             DispatchQueue.main.async {
+                print("sameSongFriendMumory: \(self.tempMumory)")
                 self.sameSongFriendMumorys = self.tempMumory                    
             }
         } catch {
@@ -471,9 +463,10 @@ final public class MumoryDataViewModel: ObservableObject {
         
         do {
             let querySnapshot = try await collectionReference.getDocuments()
-
-            print("querySnapshot.documents: \(querySnapshot.documents)")
-            self.tempMumory = []
+            DispatchQueue.main.async {
+                self.surroundingMumorys = []
+                self.tempMumory = []
+            }
             
             let filteredQuerySnapshot = querySnapshot.documents.filter {
                 let documentData = $0.data()

@@ -41,7 +41,6 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
         )
         
         let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        
         scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
         hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
         
@@ -56,37 +55,7 @@ struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIScrollView, context: Context) {
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
-            .environmentObject(appCoordinator)
-            .environmentObject(mumoryDataViewModel)
-            .environmentObject(currentUserData)
-        )
-        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-
         
-        if context.coordinator.contentHeight != contentHeight {
-           
-            uiView.contentSize = CGSize(width: 0, height: contentHeight) // 수평 스크롤 차단을 위해 너비를 0으로 함
-            hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
-            
-            uiView.backgroundColor = .clear
-            hostingController.view.backgroundColor = .clear
-
-            uiView.subviews.forEach { $0.removeFromSuperview() }
-            uiView.addSubview(hostingController.view)
-
-            context.coordinator.contentHeight = contentHeight
-        }
-    
-
-//        hostingController.view.setNeedsLayout()
-//        hostingController.view.layoutIfNeeded()
-
-//        let contentSize = hostingController.view.sizeThatFits(
-//             CGSize(width: UIScreen.main.bounds.width, height: CGFloat.infinity)
-//         )
-//
-//        uiView.contentSize = CGSize(width: 0, height: contentSize.height) // 수평 스크롤 차단을 위해 너비를 0으로 함
     }
     
     func makeCoordinator() -> Coordinator {
@@ -100,7 +69,7 @@ extension MumoryDetailScrollViewRepresentable {
         
         let parent: MumoryDetailScrollViewRepresentable
         var contentHeight: CGFloat = .zero
-        //        var previousOffset: CGFloat = 0.0
+        var hostingController: UIHostingController<MumoryDetailScrollContentView>?
         
         init(parent: MumoryDetailScrollViewRepresentable) {
             self.parent = parent
@@ -166,10 +135,10 @@ public struct MumoryDetailView: View {
                     ColorSet.background.opacity((self.offsetY + appCoordinator.safeAreaInsetsTop) / (getUIScreenBounds().width - 150))
                 }
                 
-                SharedAsset.albumFilterMumoryDetail.swiftUIImage
-                    .resizable()
-                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                    .offset(y: -self.offsetY - appCoordinator.safeAreaInsetsTop)
+                    SharedAsset.albumFilterMumoryDetail.swiftUIImage
+                        .resizable()
+                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                        .offset(y: self.offsetY)
                 
                 VStack(spacing: 10) {
 
@@ -189,7 +158,30 @@ public struct MumoryDetailView: View {
             } // ZStack
             
                 
-            MumoryDetailScrollViewRepresentable(mumory: self.mumory, contentOffsetY: self.$offsetY)
+//            MumoryDetailScrollViewRepresentable(mumory: self.mumory, contentOffsetY: self.$offsetY)
+            
+            ScrollView(showsIndicators: false) {
+                MumoryDetailScrollContentView(mumory: self.mumory)
+                    .background(
+                        GeometryReader { geometry in
+                            Color.clear
+                                .onChange(of: geometry.frame(in: .global).minY) { newValue in
+                                    self.offsetY = newValue
+                                    
+                                    let isNavigationBarColored = -newValue >= UIScreen.main.bounds.width - (self.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
+                                    
+                                    DispatchQueue.main.async {
+                                        if self.appCoordinator.isNavigationBarColored != isNavigationBarColored {
+                                            self.appCoordinator.isNavigationBarColored = isNavigationBarColored
+                                        }
+                                    }
+                                }
+                        }
+                    )
+            }
+            .onAppear {
+                UIScrollView.appearance().bounces = false
+            }
             
             if mumoryDataViewModel.isUpdating {
                 MumoryDetailLoadingView()
@@ -245,25 +237,11 @@ public struct MumoryDetailView: View {
             playerViewModel.setPlayerVisibility(isShown: false)
             
             Task {
+//                mumoryDataViewModel.isUpdating = true
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await MumoriUser(uId: self.mumory.uId)
                 print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
-                
-                for friend in self.currentUserData.friends {
-                    await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
-                    await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
-                    print("친구뮤모리: \(mumoryDataViewModel.sameSongFriendMumorys)")
-                    print("주변뮤모리: \(mumoryDataViewModel.surroundingMumorys)")
-                }
-            }
-            
-            Task {
-                for friend in self.currentUserData.friends {
-                    await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
-                    await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
-                    print("친구뮤모리: \(mumoryDataViewModel.sameSongFriendMumorys)")
-                    print("주변뮤모리: \(mumoryDataViewModel.surroundingMumorys)")
-                }
+//                mumoryDataViewModel.isUpdating = false
             }
         }
         .navigationBarBackButtonHidden()
@@ -271,8 +249,8 @@ public struct MumoryDetailView: View {
         .fullScreenCover(isPresented: self.$isMapSheetShown) {
             MumoryMapView(isShown: self.$isMapSheetShown, mumory: self.mumory, user: self.user)
         }
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
-        .bottomSheet(isShown: $appCoordinator.isStarButtonTapped, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .friendMumoryDetailView , mumoryAnnotation: self.$mumory))
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: appCoordinator.isStarButtonTapped ? .friendMumoryDetailView : (mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView), mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
+//        .bottomSheet(isShown: $appCoordinator.isStarButtonTapped, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .friendMumoryDetailView , mumoryAnnotation: self.$mumory))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

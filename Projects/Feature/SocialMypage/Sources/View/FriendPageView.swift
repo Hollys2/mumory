@@ -112,7 +112,7 @@ struct KnownFriendPageView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
        
-                    FriendMapViewRepresentable(friendMumorys: self.mumoryDataViewModel.friendMumorys)
+                    FriendMapViewRepresentable(friendMumorys: self.mumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
                     

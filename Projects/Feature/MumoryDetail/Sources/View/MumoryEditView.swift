@@ -18,6 +18,7 @@ import Shared
 public struct MumoryEditView: View {
     
     @State var mumoryAnnotation: Mumory
+    
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
     @State private var isPublishErrorPopUpShown: Bool = false
@@ -39,7 +40,6 @@ public struct MumoryEditView: View {
     
     @FocusState private var isTagTextFieldFocused: Bool
     @State private var isContentTextFieldFocused = false
-    
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
@@ -179,7 +179,7 @@ public struct MumoryEditView: View {
                                              matching: .images) {
                                     
                                     VStack(spacing: 0) {
-                                        (photoPickerViewModel.imageSelectionCount + (mumoryAnnotation.imageURLs ?? []).count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                        (photoPickerViewModel.imageSelectionCount + self.imageURLs.count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
                                             .resizable()
                                             .frame(width: 24, height: 24)
                                             .offset(y: 1)
@@ -187,7 +187,7 @@ public struct MumoryEditView: View {
                                         Spacer(minLength: 0)
                                         
                                         HStack(spacing: 0) {
-                                            Text("\(photoPickerViewModel.imageSelectionCount + (mumoryAnnotation.imageURLs ?? []).count)")
+                                            Text("\(photoPickerViewModel.imageSelectionCount + self.imageURLs.count)")
                                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                                 .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
                                             Text(" / 3")
@@ -228,6 +228,7 @@ public struct MumoryEditView: View {
                                         .cornerRadius(10)
                                         
                                         Button(action: {
+                                            print("self.imageURLs: \(self.imageURLs)")
                                             if let indexToRemove = self.imageURLs.firstIndex(of: url) {
                                                 self.imageURLs.remove(at: indexToRemove)
                                             }
