@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Group 1223.png",
+      "filename" : "MusicAlbum_Img.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Group 1223@2x.png",
+      "filename" : "MusicAlbum_Img@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Group 1223@3x.png",
+      "filename" : "MusicAlbum_Img@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

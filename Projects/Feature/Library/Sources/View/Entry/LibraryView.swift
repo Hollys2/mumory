@@ -136,7 +136,12 @@ struct LibraryView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+            if playerViewModel.isShownMiniPlayerInLibrary {
+                playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
+            } else {
+                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+            }
             Task {
                 currentUserData.playlistArray = await currentUserData.savePlaylist()
             }

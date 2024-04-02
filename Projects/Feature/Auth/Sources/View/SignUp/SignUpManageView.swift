@@ -192,7 +192,8 @@ struct SignUpManageView: View {
             "signInMethod": "Email",
             "isSubscribedToService": manager.isCheckedServiceNewsNotification,
             "isSubscribedToSocial": true,
-            "fcmToken": messaging.fcmToken ?? ""
+            "fcmToken": messaging.fcmToken ?? "",
+            "signUpDate": Date()
         ]
         
         if manager.isCheckedServiceNewsNotification {

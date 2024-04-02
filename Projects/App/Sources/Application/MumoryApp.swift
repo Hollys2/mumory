@@ -50,15 +50,15 @@ struct MumoryApp: App {
                             playerViewModel.isShownMiniPlayer = false
                         }
                     
-                    SnackBarView()
+                    MiniPlayerViewInLibrary()
                         .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)
                         .environmentObject(currentUserData)
                     
-                    MiniPlayerView()
+                    SnackBarView()
                         .environmentObject(snackBarViewModel)
-                        .environmentObject(playerViewModel)
-                    
+                        .environmentObject(appCoordinator)
+                        .environmentObject(currentUserData)
                 }
                 .ignoresSafeArea()
                 .environmentObject(snackBarViewModel)

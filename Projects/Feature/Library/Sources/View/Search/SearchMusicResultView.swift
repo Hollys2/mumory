@@ -31,7 +31,7 @@ struct SearchMusicResultView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .top){
+        ZStack(alignment: .top) {
             SimpleScrollView(contentOffset: $offset) {
                 VStack(spacing: 0, content: {
                     
@@ -111,6 +111,7 @@ struct SearchMusicResultView: View {
                 .padding(.top, getUIScreenBounds().height * 0.25)
 
         }
+
     }
 }
 

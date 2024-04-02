@@ -99,12 +99,10 @@ struct AddSongView: View {
             
         }
         .ignoresSafeArea()
-        .onAppear {
-            playerViewModel.setPlayerVisibility(isShown: false)
-        }
-        .onDisappear {
-            playerViewModel.setPlayerVisibility(isShown: true)
-        }
+        .onAppear(perform: {
+            playerViewModel.setLibraryPlayerVisibility(isShown: false)
+        })
+
 
     }
 }

@@ -52,7 +52,6 @@ struct SocialFriendTestView: View {
                 HStack(spacing: 0) {
                     Button(action: {
                         if appCoordinator.isAddFriendViewShown {
-                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 self.appCoordinator.isAddFriendViewShown = false
                             }
@@ -173,7 +172,7 @@ struct SocialFriendTestView: View {
                     //친구 요청 페이지 - selection: 1
                     if currentUserData.recievedRequests.isEmpty {
                         VStack(spacing: 16) {
-                            Text("받은 친구 요청 내력이 없어요")
+                            Text("받은 친구 요청 내역이 없어요")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                                 .foregroundStyle(Color.white)
                             
@@ -595,7 +594,6 @@ struct SocialFriendBottomSheet: View {
                     appCoordinator.rootPath.append(MumoryPage.requestFriend)
                 }
             
-            Divider05()
             
             BottomSheetItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "차단친구 관리")
                 .onTapGesture {

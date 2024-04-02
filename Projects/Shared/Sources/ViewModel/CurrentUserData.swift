@@ -157,7 +157,6 @@ public class CurrentUserData: ObservableObject {
                         let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
                         let id = document.reference.documentID
                         var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
-                        
                         let startIndex = 0
                         var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4
                         let requestSongIds = Array(songIDs[startIndex..<endIndex])
@@ -333,15 +332,18 @@ public class CurrentUserData: ObservableObject {
     }
     
     private func fetchFriend(friendIds: [String]) async -> [MumoriUser] {
-        return await withTaskGroup(of: MumoriUser.self) { taskGroup -> [MumoriUser] in
+        return await withTaskGroup(of: MumoriUser?.self) { taskGroup -> [MumoriUser] in
             var friendList: [MumoriUser] = []
             for friendId in friendIds {
                 taskGroup.addTask {
-                    return await MumoriUser(uId: friendId)
+                    let user = await MumoriUser(uId: friendId)
+                    if user.nickname == "탈퇴계정" {return nil}
+                    return user
                 }
             }
             for await value in taskGroup {
-                friendList.append(value)
+                guard let user = value else {continue}
+                friendList.append(user)
             }
             return friendList
         }
@@ -371,7 +373,7 @@ public class CurrentUserData: ObservableObject {
             var songs = songIds.map { songId in
                 return returnValue.first(where: {$0.id.rawValue == songId})!
             }
-            return returnValue
+            return songs
         }
 
     }

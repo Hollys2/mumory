@@ -233,9 +233,8 @@ public struct MumoryDetailView: View {
             }
         } // ZStack
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-        .onAppear {
-            playerViewModel.setPlayerVisibility(isShown: false)
-            
+        .onAppear {        
+            playerViewModel.setLibraryPlayerVisibility(isShown: false)
             Task {
 //                mumoryDataViewModel.isUpdating = true
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)

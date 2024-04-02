@@ -42,15 +42,12 @@ public struct MyRecentMumoryView: View {
             
             if mumoryDataViewModel.myMumorys.isEmpty{
                 InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
-                    appCoordinator.rootPath.removeLast()
-                    Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-                        withAnimation(Animation.easeInOut(duration: 0.1)) {
-                            appCoordinator.isCreateMumorySheetShown = true
-                            appCoordinator.offsetY = CGFloat.zero
-                        }
+                    appCoordinator.selectedTab = .home
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                        appCoordinator.isCreateMumorySheetShown = true
+                        appCoordinator.offsetY = CGFloat.zero
                     }
-                }                    
+                }
                 .frame(maxHeight: .infinity, alignment: .center)
                 
             }else {
@@ -125,14 +122,13 @@ struct NoMumoryView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
                 .padding(.top, 25)
                 .onTapGesture {
-                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-                        withAnimation(Animation.easeInOut(duration: 0.1)) {
-                            appCoordinator.isCreateMumorySheetShown = true
-                            appCoordinator.offsetY = CGFloat.zero
-                        }
-        
+                    withAnimation(Animation.easeInOut(duration: 0.1)) {
+                        appCoordinator.isCreateMumorySheetShown = true
+                        appCoordinator.offsetY = CGFloat.zero
+                    }
+                    
                 }
-
+            
         })
     }
 }

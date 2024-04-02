@@ -21,70 +21,68 @@ struct QueueItem: View {
         self.scrollProxy = scrollProxy
     }
     var body: some View {
-        HStack(spacing: 0, content: {
-            AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
-                image
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                    .clipShape(RoundedRectangle(cornerRadius: 5,style: .circular))
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 5, style: .circular)
-                    .foregroundStyle(.gray)
-                    .frame(width: 40, height: 40)
-            }
-            .padding(.leading, 15)
-            .padding(.trailing, 15)
-            
-            VStack(content: {
-                Text(song.title)
-                    .frame(maxWidth: .infinity,alignment: .leading)
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(playerViewModel.playingSong() == self.song ? ColorSet.mainPurpleColor : .white)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                
-                Text(song.artistName)
-                    .frame(maxWidth: .infinity,alignment: .leading)
-                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
-                    .foregroundStyle(LibraryColorSet.lightGrayTitle)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-            })
-            
-            Spacer()
-            SharedAsset.menu.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 22, height: 22)
-                .padding(.trailing, 13)
-                .onTapGesture {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentBottomSheet = true
+        VStack(spacing: 0, content: {
+            HStack(spacing: 0, content: {
+                AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
+                    image
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                        .clipShape(RoundedRectangle(cornerRadius: 5,style: .circular))
+                } placeholder: {
+                    RoundedRectangle(cornerRadius: 5, style: .circular)
+                        .foregroundStyle(.gray)
+                        .frame(width: 40, height: 40)
                 }
-         
+                .padding(.leading, 15)
+                .padding(.trailing, 15)
+                
+                VStack(content: {
+                    Text(song.title)
+                        .frame(maxWidth: .infinity,alignment: .leading)
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                        .foregroundStyle(playerViewModel.playingSong() == self.song ? ColorSet.mainPurpleColor : .white)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    
+                    Text(song.artistName)
+                        .frame(maxWidth: .infinity,alignment: .leading)
+                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                        .foregroundStyle(LibraryColorSet.lightGrayTitle)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                })
+                
+                Spacer()
+                SharedAsset.menu.swiftUIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 22, height: 22)
+                    .padding(.trailing, 13)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentBottomSheet = true
+                    }
+             
+             
 
-            
+                
+            })
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 70)
+            .background(playerViewModel.playingSong() == self.song ? Color.black : ColorSet.background)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .circular))
+            .padding(.horizontal, 15)
+            .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
+                BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+                    SongBottomSheetViewWithoutPlaying(song: song)
+                }
+                .background(TransparentBackground())
+            })
+
+
         })
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 70)
-        .background(playerViewModel.playingSong() == self.song ? Color.black : ColorSet.background)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .circular))
-        .padding(.horizontal, 15)
-//        .onLongPressGesture {
-//            self.generateHapticFeedback(style: .medium)
-//            UIView.setAnimationsEnabled(false)
-//            isPresentBottomSheet = true
-//        }
-        .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
-            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                SongBottomSheetView(song: song)
-            }
-            .background(TransparentBackground())
-        })
+
     }
 
 }
 
-//#Preview {
-//    QueueItem()
-//}

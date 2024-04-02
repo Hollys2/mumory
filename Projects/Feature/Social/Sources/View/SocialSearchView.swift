@@ -161,7 +161,6 @@ public struct SocialSearchView: View {
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.white)
                     .onTapGesture {
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                         self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
                         self.isShown = false
                     }

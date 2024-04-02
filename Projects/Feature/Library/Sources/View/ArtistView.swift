@@ -88,7 +88,7 @@ struct ArtistView: View {
                         ForEach(songs, id: \.id){ song in
                             MusicListItem(song: song, type: .artist)
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.playAll(title: artist.name, songs: self.songs, startingItem: song)
                                 }
                         }
                         
@@ -144,6 +144,7 @@ struct ArtistView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             Task {
                 self.isLoading = true
                 await requestArtistSongs(artist: self.artist, originalSongs: $songs)

@@ -296,7 +296,8 @@ public struct LoginView: View {
                 "uid": uid,
                 "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
                 "signInMethod": method,
-                "fcmToken": fcmToken
+                "fcmToken": fcmToken,
+                "signUpDate": Date()
             ]
             
             try? await snapshot.reference.setData(userData)

@@ -11,10 +11,10 @@ import Shared
 import MusicKit
 
 struct RecommendationBottomSheetView: View {
-    var songs: [Song]
+    @Binding var songs: [Song]
     var title: String
-    init(songs: [Song], title: String) {
-        self.songs = songs
+    init(songs: Binding<[Song]>, title: String) {
+        self._songs = songs
         self.title = title
     }
     
@@ -25,7 +25,7 @@ struct RecommendationBottomSheetView: View {
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(alignment: .center,spacing: 10,content: {
-                MiniPlaylistImage(songs: songs)
+                MiniPlaylistImage(songs: $songs)
                 
                 Text(title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
@@ -58,8 +58,10 @@ struct RecommendationBottomSheetView: View {
 }
 
 private struct MiniPlaylistImage: View {
-    var songs: [Song]
-    
+    @Binding var songs: [Song]
+    init(songs: Binding<[Song]>) {
+        self._songs = songs
+    }
     let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     let imageSize = 30.0
     let border = 0.5
@@ -97,7 +99,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[1].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -126,7 +128,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[2].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -151,7 +153,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[3].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image

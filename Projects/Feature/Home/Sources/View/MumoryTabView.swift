@@ -51,7 +51,6 @@ public struct MumoryTabView: View {
                     .frame(width: 51, height: 51)
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             appCoordinator.isCreateMumorySheetShown = true
                             appCoordinator.offsetY = CGFloat.zero

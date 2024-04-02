@@ -16,6 +16,7 @@ struct FavoriteListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isLoading: Bool = true
     @State var isPresentBottomSheet: Bool = false
+    @State var showFavoriteInfo: Bool = false
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -33,7 +34,9 @@ struct FavoriteListView: View {
                     Text("즐겨찾기 목록")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                         .foregroundStyle(.white)
+              
                     Spacer()
+                    
                     SharedAsset.menuWhite.swiftUIImage
                         .resizable()
                         .scaledToFit()
@@ -61,6 +64,32 @@ struct FavoriteListView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 19)
+                .overlay {
+                    if showFavoriteInfo {
+                        SharedAsset.speechBubbleMedium.swiftUIImage
+                            .transition(.opacity)
+                            .overlay {
+                                HStack(spacing: 3, content: {
+                                    Text("회원님에게만 보이는 페이지 입니다.")
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                        .foregroundStyle(Color.black)
+                                    
+                                    SharedAsset.xBlackBold.swiftUIImage
+                                        .scaledToFit()
+                                        .frame(width: 13, height: 13)
+                                        .onTapGesture {
+                                            showFavoriteInfo = false
+                                            UserDefaults.standard.setValue(Date(), forKey: "favoriteInfo")
+                                        }
+                                })
+                                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                                .offset(y: 3.5)
+                                .transition(.opacity)
+                            }
+                            .offset(y:-20)
+                    }
+                }
+
                 
                 Divider05()
                     .padding(.top, 15)
@@ -80,18 +109,9 @@ struct FavoriteListView: View {
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
-//                                        })
-//                                )
-                            
                         }
                         if isLoading {
-                            ForEach(0...7, id: \.self) { count in
-                                FavoriteSongSkeletonView().id(UUID())
-                            }
+                            FavoriteSongSkeletonView()
                         }
                         
                         Rectangle()
@@ -112,10 +132,17 @@ struct FavoriteListView: View {
         }
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             Task {
                 currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
                 self.isLoading = false
             }
+            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { timer in
+                withAnimation {
+                    showFavoriteInfo = UserDefaults.standard.value(forKey: "favoriteInfo") == nil
+                }
+            }
+
         }
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
@@ -237,6 +264,15 @@ struct SongListBigItem: View {
 struct FavoriteSongSkeletonView: View {
     @State var startAnimation: Bool = false
     var body: some View {
+        ForEach(0...10, id: \.self) { index in
+            item
+        }
+        .onAppear {
+            startAnimation.toggle()
+        }
+    }
+    
+    var item: some View {
         HStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 5, style: .circular)
                 .fill(startAnimation ? ColorSet.skeleton : ColorSet.skeleton02)
@@ -258,8 +294,5 @@ struct FavoriteSongSkeletonView: View {
         .padding(.horizontal, 20)
         .frame(height: 95)
         .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: startAnimation)
-        .onAppear {
-            startAnimation.toggle()
-        }
     }
 }

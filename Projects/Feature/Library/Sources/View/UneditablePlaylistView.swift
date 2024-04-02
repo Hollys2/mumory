@@ -65,7 +65,7 @@ struct UneditablePlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerViewModel.playAll(title: playlist.title , songs: playlist.songs)
+                                        playerViewModel.playAll(title: "\(friendDataViewModel.friend.nickname)님의 \(playlist.title)" , songs: playlist.songs)
                                         AnalyticsManager.shared.setSelectContentLog(title: "FriendPlaylistViewPlayAllButton")
                                     }
                             })
@@ -80,7 +80,18 @@ struct UneditablePlaylistView: View {
                             MusicListItem(song: playlist.songs[index], type: .normal)
                                 .id("\(playlist.songs[index].artistName) \(playlist.songs[index].id.rawValue) \(index)")
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: playlist.songs[index])
+                                    playerViewModel.playAll(title: "\(friendDataViewModel.friend.nickname)님의 \(playlist.title)" , songs: playlist.songs, startingItem: playlist.songs[index])
+                                    
+                                    searchIndex = playlist.songIDs.count / 20 + 1 //스크롤 이동 시 새로 로드되는 걸 막기 위해서
+                                    let startIndex = playlist.songs.count
+                                    let endIndex = playlist.songIDs.endIndex
+                                    let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+                                    Task {
+                                        let songs = await fetchSongs(songIDs: requestSongIds)
+                                        guard let index = friendDataViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                                        friendDataViewModel.playlistArray[index].songs.append(contentsOf: songs)
+                                        playerViewModel.setQueue(songs: playlist.songs, startSong: playlist.songs[index])
+                                    }
                                 }
                             
                             Divider05()
@@ -170,6 +181,7 @@ struct UneditablePlaylistView: View {
             .background(TransparentBackground())
         })
         .onAppear {
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             if playlist.songs.count < playlist.songIDs.count {
                 Task {
                     friendDataViewModel.isPlaylistLoading = true

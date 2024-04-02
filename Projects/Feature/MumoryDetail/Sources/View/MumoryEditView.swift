@@ -409,8 +409,6 @@ public struct MumoryEditView: View {
         }
         .toolbar(.hidden)
         .ignoresSafeArea()
-        .onAppear {
-            playerViewModel.setPlayerVisibility(isShown: false)
-        }
+
     }
 }

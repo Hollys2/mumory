@@ -83,10 +83,7 @@ public struct PhotoSelectBottomSheet: View {
                                 .background(ColorSet.background)
                             }
                             
-                            if selectedItem != nil {
-                                Divider03()
-                                    .padding(.horizontal, 2)
-                                
+                            if selectedItem != nil {                                
                                 HStack(spacing: 0, content: {
                                     SharedAsset.delete.swiftUIImage
                                         .resizable()
@@ -119,7 +116,7 @@ public struct PhotoSelectBottomSheet: View {
                         
                     })
                     .frame(maxWidth: .infinity)
-                    .background(ColorSet.moreDeepGray)
+                    .background(ColorSet.background)
                     .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                     .padding(.horizontal, 7)
                     .offset(y: yOffset)

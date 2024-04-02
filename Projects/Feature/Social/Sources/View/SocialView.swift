@@ -529,7 +529,6 @@ struct SocialItemView: View {
                     
                     Button(action: {
                         self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             self.appCoordinator.isSocialCommentSheetViewShown = true
                             appCoordinator.offsetY = CGFloat.zero
@@ -651,7 +650,6 @@ public struct SocialView: View {
                 Spacer()
 
                 Button(action: {
-                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                     self.isSocialSearchViewShown = true
                 }) {
                     SharedAsset.searchButtonSocial.swiftUIImage
@@ -662,14 +660,11 @@ public struct SocialView: View {
                 Spacer().frame(width: 12)
 
                 Button(action: {
-                    Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-                    }
                     withAnimation(.easeInOut(duration: 0.2)) {
                         self.appCoordinator.isAddFriendViewShown = true
                     }
                 }) {
-                    (currentUserData.recievedNewFriends ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
+                    (currentUserData.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
@@ -677,7 +672,6 @@ public struct SocialView: View {
                 Spacer().frame(width: 12)
 
                 Button(action: {
-                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                     appCoordinator.setBottomAnimationPage(page: .myPage)
                 }) {
                     AsyncImage(url: currentUserData.user.profileImageURL) { phase in
@@ -702,13 +696,15 @@ public struct SocialView: View {
             .offset(y: -self.offsetY)
         }
         .onAppear {
+            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+            playerViewModel.isShownMiniPlayerInLibrary = false
+            
             if !appCoordinator.isFirstTabSelected {
                 mumoryDataViewModel.fetchEveryMumory()
                 appCoordinator.isFirstTabSelected = true
             }
             
             FirebaseManager.shared.observeFriendRequests()
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             print("SocialView onAppear")
         }
         .onDisappear {

@@ -471,7 +471,6 @@ public struct MumoryCommentSheetView: View {
                 Color.black.opacity(0.6)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                         withAnimation(.easeInOut(duration: 0.1)) {
                             self.isSheetShown = false
                         }
@@ -509,7 +508,6 @@ public struct MumoryCommentSheetView: View {
                             Spacer()
                             
                             Button(action: {
-                                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     self.isSheetShown = false
                                 }
@@ -663,7 +661,7 @@ public struct MumoryCommentSheetView: View {
                             
                             TextField("", text: $commentText,
                                       prompt: Text("댓글을 입력하세요.")
-                                .font(Font.custom("Apple SD Gothic Neo", size: 15))
+                                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
                                 .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
                             )
                             .padding(.leading, 25)
@@ -829,7 +827,6 @@ public struct MumoryCommentSheetView: View {
         }
         
         if cardDismiss {
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
             withAnimation(.spring(response: 0.1)) {
                 self.offsetY = .zero
                 self.isSheetShown = false

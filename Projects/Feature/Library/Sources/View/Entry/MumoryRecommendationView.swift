@@ -63,13 +63,6 @@ public struct MumoryRecommendationView: View {
                                 .onTapGesture {
                                     playerViewModel.playNewSong(song: song)
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            playerViewModel.playNewSong(song: song)
-//                                            playerViewModel.isShownMiniPlayer = true
-//                                        })
-//                                )
                         }
                         
                         if musicChart.isEmpty {

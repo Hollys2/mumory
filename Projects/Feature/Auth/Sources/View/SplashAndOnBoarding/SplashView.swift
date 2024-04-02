@@ -296,13 +296,7 @@ public struct SplashView: View {
         let auth = Firebase.auth
         let messaging = Firebase.messaging
         
-//        if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
-//            page = .onBoarding
-//            withAnimation {
-//                isInitialSettingDone = true
-//            }
-//            return
-//        }
+ 
         
         Task {
             //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
@@ -312,7 +306,11 @@ public struct SplashView: View {
                   let id = data["id"] as? String,
                   let isCheckedServiceNewsNotification = data["isSubscribedToService"] as? Bool,
                   let favoriteGenres = data["favoriteGenres"] as? [Int] else {
-                appCoordinator.initPage = .login
+                if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
+                    appCoordinator.initPage = .onBoarding
+                }else {
+                    appCoordinator.initPage = .login
+                }
                 withAnimation {
                     isInitialSettingDone = true
                 }
@@ -321,9 +319,9 @@ public struct SplashView: View {
             
             currentUserData.uId = user.uid
             currentUserData.user = await MumoriUser(uId: user.uid)
-            print("checkCurrentUserAndGetUserData: \(currentUserData.user)")
             currentUserData.favoriteGenres = favoriteGenres
             currentUserData.playlistArray = await currentUserData.savePlaylist()
+            UserDefaults.standard.setValue(Date(), forKey: "loginHistory")
             withAnimation {
                 isInitialSettingDone = true
             }

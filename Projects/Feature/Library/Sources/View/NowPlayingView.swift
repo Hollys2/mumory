@@ -60,13 +60,12 @@ struct NowPlayingView: View {
                     PlayTogetherView(songs: $playTogetherSongs)
                         .opacity(isPresentQueue ? 0 : 1)
                         .padding(.bottom, 100)
-//                        .onChange(of: playerViewModel.currentSong, perform: { value in
-//                            guard let song = value else {return}
-//                            print("\(song.title), \(song.artistName)")
-//                            Task {
-//                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
-//                            }
-//                        })
+                        .onChange(of: playerViewModel.currentSong, perform: { value in
+                            guard let song = value else {return}
+                            Task {
+                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
+                            }
+                        })
                 }
                 .scrollIndicators(.hidden)
                 .scrollDisabled(isPresentQueue)
@@ -301,6 +300,9 @@ struct PlayingView: View {
                                 .foregroundStyle(Color.white)
                                 .offset(x: startAnimation ? changeOffset : 0)
                                 .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true).delay(2.0), value: startAnimation)
+                                .onAppear(perform: {
+                                    startAnimation = true
+                                })
                         }
                         
                         
@@ -309,13 +311,14 @@ struct PlayingView: View {
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
                     }
          
-                    Text(playerViewModel.currentSong?.artistName ?? "아티스트이름")
+                    Text(playerViewModel.currentSong?.artistName ?? "--")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: isSE ? 16 : 18))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .onChange(of: playerViewModel.currentSong, perform: { value in
                             DispatchQueue.main.async {
                                 endInit = false
+                                changeOffset = 0
                                 startAnimation = false
                                 Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
                                     endInit = true
@@ -435,7 +438,7 @@ struct PlayingView: View {
         }
         .fullScreenCover(isPresented: $isPresentSongBottmSheet) {
             BottomSheetWrapper(isPresent: $isPresentSongBottmSheet) {
-                OptionalSongBottomSheetView(song: $playerViewModel.currentSong, types: [.inPlayingView])
+                OptionalSongBottomSheetViewWithoutPlaying(song: $playerViewModel.currentSong, types: [.inPlayingView])
             }
             .background(TransparentBackground())
         }
@@ -449,12 +452,11 @@ struct PlayingView: View {
             let horizontalTotalSpacing: CGFloat = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.2 : getUIScreenBounds().width * 0.13
             titleMaxWidth = getUIScreenBounds().width - addIconWidth - spacing - horizontalTotalSpacing
             
-            guard let song = playerViewModel.currentSong else {return}
-            DispatchQueue.main.async {
-                titleWidth = getTextWidth(term: song.title)
-                changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
-                startAnimation = true
-            }
+//            guard let song = playerViewModel.currentSong else {return}
+//            DispatchQueue.main.async {
+//                titleWidth = getTextWidth(term: song.title)
+//                changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
+//            }
 
         }
         
@@ -592,13 +594,16 @@ struct QueueView: View {
 }
 public func requestPlayTogetherSongs(title: String, artist: String) async -> [Song]{
     var returnValue: [Song] = []
-    var request = MusicCatalogSearchRequest(term: "\(title) \(artist)", types: [Song.self])
+    var request = MusicCatalogSearchRequest(term: "\(artist)", types: [Song.self])
     request.limit = 20
     request.includeTopResults = true
     request.offset = 0
     var count = 0
     guard let response = try? await request.response() else {return []}
-    for song in response.songs {
+    var songs = Array(response.songs)
+    songs.shuffle()
+    
+    for song in songs {
         if song.title == title {
             continue
         }
@@ -647,11 +652,20 @@ struct PlayTogetherView: View {
             
             if let currentSong = playerViewModel.currentSong {
                 VStack(spacing: 0) {
-                    ForEach(songs, id: \.id) { song in
-                        PlayTogetherItem(song: song)
-                            .onTapGesture {
-                                playerViewModel.playNewSong(song: song)
-                            }
+                    if songs.isEmpty {
+                        Text("함께 재생된 음악이 없습니다.")
+                            .foregroundStyle(ColorSet.subGray)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, 30)
+                            .frame(height: 280)
+                    } else {
+                        ForEach(songs, id: \.id) { song in
+                            PlayTogetherItem(song: song)
+                                .onTapGesture {
+                                    playerViewModel.playNewSong(song: song)
+                                }
+                        }
                     }
                 }
                 .padding(.bottom, 25)

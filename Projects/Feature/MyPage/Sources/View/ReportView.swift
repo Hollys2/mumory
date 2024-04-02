@@ -190,12 +190,6 @@ struct ReportView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             settingViewModel.uid = currentUserData.uId
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-        })
-        .onDisappear(perform: {
-            if appCoordinator.selectedTab == .library {
-                playerViewModel.setPlayerVisibility(isShown: true)
-            }
         })
         .onTapGesture {
             hideKeyboard()

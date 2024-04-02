@@ -151,11 +151,12 @@ struct RecommendationListView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                RecommendationBottomSheetView(songs: songs, title: title)
+                RecommendationBottomSheetView(songs: $songs, title: title)
             }
             .background(TransparentBackground())
         })

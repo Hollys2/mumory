@@ -68,8 +68,12 @@ struct ChartListView: View {
                         .padding(.trailing, 20)
                         .onTapGesture {
                             playerViewModel.playAll(title: "최신 인기곡", songs: songs)
-                            if searchIndex < 5 {
-                                requestTop100(startIndex: searchIndex + 1)
+                            Task {
+                                if searchIndex < 5 {
+                                    let songs = await requestTop100(startIndex: searchIndex + 1)
+                                    self.songs.append(contentsOf: songs)
+                                    playerViewModel.setQueue(songs: self.songs)
+                                }
                             }
                             AnalyticsManager.shared.setSelectContentLog(title: "ChartListViewPlayAllButton")
                         }
@@ -85,8 +89,13 @@ struct ChartListView: View {
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
                                 .simultaneousGesture(TapGesture().onEnded({ _ in
                                     playerViewModel.playAll(title: "최신 인기곡", songs: songs, startingItem: songs[index])
-                                    if searchIndex < 5 {
-                                        requestTop100(startIndex: searchIndex + 1)
+                                    Task {
+                                        if searchIndex < 5 {
+                                            let startSong = songs[index]
+                                            let songs = await requestTop100(startIndex: searchIndex + 1)
+                                            self.songs.append(contentsOf: songs)
+                                            playerViewModel.setQueue(songs: self.songs, startSong: startSong)
+                                        }
                                     }
                                 }))
                         
@@ -113,6 +122,7 @@ struct ChartListView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }
@@ -138,25 +148,30 @@ struct ChartListView: View {
 
     }
     
-    private func requestTop100(startIndex: Int) {
+    private func requestTop100(startIndex: Int) async -> [Song]{
         self.searchIndex = 5 //재생 후 스크롤 시 증가하는 것을 막기위함
         
-        for index in startIndex ..< 5 {
-            Task {
-                var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-                request.limit = 20
-                request.offset = index * 20
-                let response = try await request.response().songCharts
-                
-                print("검색 성공")
-                guard let chart = response.first?.items else {
-                    print("chart error")
-                    return
+        return await withTaskGroup(of: [Song].self) { taskGroup -> [Song] in
+            var songs: [Song] = []
+            for index in startIndex ..< 5 {
+                taskGroup.addTask {
+                    var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
+                    request.limit = 20
+                    request.offset = index * 20
+                    guard let response = try? await request.response().songCharts else {return []}
+                    
+                    guard let chart = response.first?.items else {
+                        return []
+                    }
+                    return Array(chart)
                 }
-                songs += chart
-                print("song count: \(songs.count), index: \(index)")
-                playerViewModel.setQueue(songs: songs)
             }
+            
+            for await value in taskGroup {
+                songs.append(contentsOf: value)
+            }
+            
+            return songs
         }
     }
 }

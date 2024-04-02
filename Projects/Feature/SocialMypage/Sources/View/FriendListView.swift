@@ -36,7 +36,7 @@ struct FriendListView: View {
                         .foregroundStyle(Color.white)
                     Spacer()
                     
-                    (currentUserData.recievedNewFriends ? SharedAsset.addFriendOnSocial.swiftUIImage : SharedAsset.addFriendOffSocial.swiftUIImage)
+                    (currentUserData.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
@@ -95,6 +95,7 @@ struct FriendListView: View {
                                 ForEach(results, id: \.uId) { friend in
                                     FriendListItem(friend: friend)
                                         .onTapGesture {
+                                            if friend.nickname == "탈퇴계정" {return}
                                             appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
                                         }
                                 }

@@ -213,6 +213,7 @@ struct SimpleFriendView: View {
                         ForEach(currentUserData.friends, id: \.self) { friend in
                             FriendHorizontalItem(user: friend)
                                 .onTapGesture {
+                                    if friend.nickname == "탈퇴계정" {return}
                                     appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
                                 }
                         }

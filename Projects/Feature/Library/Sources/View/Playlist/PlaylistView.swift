@@ -125,9 +125,9 @@ struct PlaylistView: View {
                                 
                                 EditButton()
                                     .onTapGesture {
+                                        playerViewModel.setLibraryPlayerVisibility(isShown: false)
                                         self.selectedSongsForDelete.removeAll()
                                         setEditMode(isEditing: true)
-                                        playerViewModel.setPlayerVisibility(isShown: false)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewEditButton")
                                     }
                                 
@@ -165,6 +165,16 @@ struct PlaylistView: View {
                                         }
                                     }else {
                                         playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: song)
+                                        searchIndex = playlist.songIDs.count / 20 + 1 //스크롤 이동 시 새로 로드되는 걸 막기 위해서
+                                        let startIndex = playlist.songs.count
+                                        let endIndex = playlist.songIDs.endIndex
+                                        let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+                                        Task {
+                                            let songs = await fetchSongs(songIDs: requestSongIds)
+                                            guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                                            currentUserData.playlistArray[index].songs.append(contentsOf: songs)
+                                            playerViewModel.setQueue(songs: playlist.songs, startSong: song)
+                                        }
                                     }
                                 }
                         }
@@ -213,7 +223,6 @@ struct PlaylistView: View {
                             guard startIndex < playlist.songIDs.endIndex else {return}
                             var endIndex = startIndex + 20
                             endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
-                            print(endIndex)
                             let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
                             guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                             currentUserData.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
@@ -238,7 +247,7 @@ struct PlaylistView: View {
                 if isEditing {
                     Button(action: {
                         setEditMode(isEditing: false)
-                        playerViewModel.setPlayerVisibility(isShown: true)
+                        playerViewModel.setLibraryPlayerVisibility(isShown: true)
                     }, label: {
                         Text("완료")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -286,6 +295,8 @@ struct PlaylistView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
+            UIView.setAnimationsEnabled(true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             Task {
                 isLoading = true
                 let startIndex = 0
@@ -304,7 +315,10 @@ struct PlaylistView: View {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
                 PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
                     isBottomSheetPresent = false
-                    isPresentModifyPlaylistView = true
+                    DispatchQueue.main.async {
+                        UIView.setAnimationsEnabled(true)
+                        isPresentModifyPlaylistView = true
+                    }
                 })
             }
             .background(TransparentBackground())

@@ -15,6 +15,7 @@ struct MyRecentMumoryListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @State var isPresentBottomSheet: Bool = false
     @State var isLoading: Bool = true
     @State var songs: [Song] = []
     @State var songIds: [String] = []
@@ -40,6 +41,10 @@ struct MyRecentMumoryListView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
+                        .onTapGesture {
+                            UIView.setAnimationsEnabled(false)
+                            isPresentBottomSheet = true
+                        }
                 })
                 .frame(height: 65)
                 .padding(.horizontal, 20)
@@ -66,9 +71,9 @@ struct MyRecentMumoryListView: View {
                 
                 if songs.isEmpty && !isLoading {
                     InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
+                        appCoordinator.selectedTab = .home
                         appCoordinator.rootPath.removeLast()
                         Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                             withAnimation(Animation.easeInOut(duration: 0.1)) {
                                 appCoordinator.isCreateMumorySheetShown = true
                                 appCoordinator.offsetY = CGFloat.zero
@@ -123,6 +128,7 @@ struct MyRecentMumoryListView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
+            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             Task {
                 self.isLoading = true
                 
@@ -138,6 +144,16 @@ struct MyRecentMumoryListView: View {
                 
                 self.isLoading = false
             }
+        }
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
+                    .onTapGesture {
+                        isPresentBottomSheet = false
+                        appCoordinator.rootPath.append(MumoryPage.report)
+                    }
+            }
+            .background(TransparentBackground())
         }
     }
 }

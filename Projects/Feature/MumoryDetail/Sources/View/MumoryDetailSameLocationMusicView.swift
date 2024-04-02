@@ -62,11 +62,9 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 Spacer()
                 
-                Button(action: {}, label: {
-                    SharedAsset.bookmarkOffMumoryDatail.swiftUIImage
-                        .resizable()
-                        .frame(width: 20, height: 20)
-                })
+                SharedAsset.bookmarkOffMumoryDatail.swiftUIImage
+                    .resizable()
+                    .frame(width: 20, height: 20)
                 
                 Spacer().frame(width: 29)
                 
