@@ -88,15 +88,6 @@ struct RecommendationListView: View {
                                 .onTapGesture {
                                     playerViewModel.playAll(title: title, songs: songs, startingItem: song)
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            playerViewModel.playAll(title: title, songs: songs, startingItem: song)
-//                                            playerViewModel.isShownMiniPlayer = true
-//                                        })
-//                                )
-                    
-                            Divider05()
                         }
                         
                         

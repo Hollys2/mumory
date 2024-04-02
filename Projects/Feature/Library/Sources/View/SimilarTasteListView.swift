@@ -80,16 +80,6 @@ struct SimilarTasteListView: View {
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "비슷한 취향 사용자의 선호 음악", songs: songs, startingItem: song)
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            playerViewModel.playAll(title: title, songs: songs, startingItem: song)
-//                                            playerViewModel.isShownMiniPlayer = true
-//                                        })
-//                                )
-                            
-                            Divider05()
-                            
                         }
                         
                         if songs.isEmpty {

@@ -51,6 +51,7 @@ public struct BottomSheetDarkGrayWrapper: View {
                     .gesture(drag)
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
                     .padding(.bottom, 2)
+                    .padding(.bottom, 29)
                 }
                 
             })
