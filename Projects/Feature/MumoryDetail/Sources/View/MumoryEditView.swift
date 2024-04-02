@@ -189,7 +189,7 @@ public struct MumoryEditView: View {
                                         HStack(spacing: 0) {
                                             Text("\(photoPickerViewModel.imageSelectionCount + self.imageURLs.count)")
                                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                .foregroundColor(photoPickerViewModel.imageSelectionCount + self.imageURLs.count >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
                                             Text(" / 3")
                                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                                 .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))

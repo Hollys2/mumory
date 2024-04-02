@@ -20,6 +20,7 @@ public enum MumoryBottomSheetType {
     case mumoryCommentFriendView
     case addFriend
     case myMumory
+    case friendMumory
 }
 
 public enum SearchFriendType {
@@ -158,6 +159,11 @@ public struct MumoryBottomSheet {
                 BottemSheetMenuOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
                     self.appCoordinator.isDeleteMumoryPopUpViewShown = true
                 }]
+        case .friendMumory:
+            return [
+                BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
+                    self.appCoordinator.rootPath.append(MumoryPage.report)
+                })]
         }
     }
 }

@@ -163,7 +163,7 @@ struct MumoryCard: View {
                 
                 HStack(spacing: 5)  {
                     Text(DateManager.formattedDate(date: self.mumory.date, dateFormat: "yyyy.M.d"))
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundColor(.white)
                     
                     Spacer(minLength: 59)
@@ -173,7 +173,7 @@ struct MumoryCard: View {
                         .frame(width: 17, height: 17)
                     
                     Text("\(mumory.locationModel.locationTitle)")
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                         .foregroundColor(.white)
                         .lineLimit(1)
                 } // HStack
@@ -188,13 +188,13 @@ struct MumoryCard: View {
                 HStack {
                     VStack(spacing: 12) {
                         Text("\(mumory.musicModel.title)")
-                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                             .foregroundColor(.white)
                             .frame(width: 199, height: 13, alignment: .topLeading)
                             .lineLimit(1)
                         
                         Text("\(mumory.musicModel.artist)")
-                            .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 18))
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .foregroundColor(.white)
                             .frame(width: 199, height: 13, alignment: .topLeading)
                             .lineLimit(1)

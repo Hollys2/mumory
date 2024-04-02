@@ -334,7 +334,6 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
                 self.isFirst = true                
             }
         }
-//        uiView.setRegion(MKCoordinateRegion(center: self.friendMumorys.first?.coordinate ?? MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSpan), animated: true)
     }
     
     func makeCoordinator() -> Coordinator {

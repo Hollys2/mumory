@@ -222,6 +222,12 @@ final public class MumoryDataViewModel: ObservableObject {
                                 self.myMumorys[index] = updatedMumory
                             }
                         }
+                        if let index = self.everyMumorys.firstIndex(where: { $0.id == modifiedDocumentID }),
+                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.everyMumorys[index].id) {
+                            DispatchQueue.main.async {
+                                self.everyMumorys[index] = updatedMumory
+                            }
+                        }
                         print("Document modified: \(modifiedDocumentID)")
                         
                     case .removed:
@@ -360,7 +366,9 @@ final public class MumoryDataViewModel: ObservableObject {
         let db = FirebaseManager.shared.db
            
         Task {
-            
+//            DispatchQueue.main.async {
+//                self.everyMumorys = []
+//            }
             let mumoryCollectionRef = db.collection("Mumory")
                 .order(by: "date", descending: true)
                 .limit(to: 7)
@@ -422,7 +430,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func sameSongFriendMumory(friend: MumoriUser, songId: String) async {
+    public func sameSongFriendMumory(friend: MumoriUser, songId: String, mumory: Mumory) async {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
             .whereField("uId", isEqualTo: friend.uId)
@@ -433,21 +441,19 @@ final public class MumoryDataViewModel: ObservableObject {
             let querySnapshot = try await collectionReference.getDocuments()
             DispatchQueue.main.async {
                 self.sameSongFriendMumorys = []
-                self.tempMumory = []
             }
             
             for document in querySnapshot.documents {
                 let documentData = document.data()
                 guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                 
-                DispatchQueue.main.async {
-                    self.tempMumory.append(newMumory)
+                if mumory.id != document.documentID {
+                    DispatchQueue.main.async {
+                        if !self.sameSongFriendMumorys.contains(where: { $0.id == document.documentID }), newMumory.isPublic {
+                            self.sameSongFriendMumorys.append(newMumory)
+                        }
+                    }
                 }
-            }
-            
-            DispatchQueue.main.async {
-                print("sameSongFriendMumory: \(self.tempMumory)")
-                self.sameSongFriendMumorys = self.tempMumory                    
             }
         } catch {
             print("Error sameSongFriendMumory: \(error)")
@@ -480,7 +486,9 @@ final public class MumoryDataViewModel: ObservableObject {
                 guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else { return }
                 
                 DispatchQueue.main.async {
-                    self.tempMumory.append(newMumory)
+                    if !self.tempMumory.contains(where: { $0.id == document.documentID && $0.musicModel.songID.rawValue != mumory.musicModel.songID.rawValue}) {
+                        self.tempMumory.append(newMumory)
+                    }
                 }
             }
 

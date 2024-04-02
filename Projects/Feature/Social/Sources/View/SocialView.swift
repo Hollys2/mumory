@@ -119,7 +119,6 @@ extension SocialScrollViewRepresentable {
         }
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
-//            parent.mumoryDataViewModel.everyMumorys = []
             parent.mumoryDataViewModel.fetchEveryMumory2 { result in
                 switch result {
                 case .success():
@@ -137,7 +136,6 @@ extension SocialScrollViewRepresentable {
             let contentHeight = scrollView.contentSize.height
             let scrollViewHeight = scrollView.bounds.height
             let limitHeight = self.parent.appCoordinator.safeAreaInsetsTop + 68
-            
             
             topBarOffsetY += (offsetY - preOffsetY)
 

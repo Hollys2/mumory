@@ -179,9 +179,6 @@ public struct MumoryDetailView: View {
                         }
                     )
             }
-            .onAppear {
-                UIScrollView.appearance().bounces = false
-            }
             
             if mumoryDataViewModel.isUpdating {
                 MumoryDetailLoadingView()
@@ -246,10 +243,9 @@ public struct MumoryDetailView: View {
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .fullScreenCover(isPresented: self.$isMapSheetShown) {
-            MumoryMapView(isShown: self.$isMapSheetShown, mumory: self.mumory, user: self.user)
+            FriendMumoryMapView(isShown: self.$isMapSheetShown, mumorys: [self.mumory], user: self.user)
         }
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: appCoordinator.isStarButtonTapped ? .friendMumoryDetailView : (mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView), mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
-//        .bottomSheet(isShown: $appCoordinator.isStarButtonTapped, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .friendMumoryDetailView , mumoryAnnotation: self.$mumory))
+        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .friendMumoryDetailView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

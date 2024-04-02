@@ -340,7 +340,7 @@ struct MumoryDetailScrollContentView: View {
                 print("MumoryDetailScrollContentView onAppear")
                 for friend in self.currentUserData.friends {
                     Task {
-                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue)
+                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue, mumory: self.mumory)
                     }
                     Task {
                         await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
