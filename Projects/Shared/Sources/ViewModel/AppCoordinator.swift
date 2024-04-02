@@ -24,6 +24,8 @@ public class AppCoordinator: ObservableObject {
     @Published public var scrollToTop: Bool = false
     @Published public var createdMumoryRegion: MKCoordinateRegion?
     @Published public var listener: ListenerRegistration?
+
+    @Published public var isStarButtonTapped: Bool = false
     
     @Published public var offsetY: CGFloat = .zero
     @Published public var isCreateMumorySheetShown: Bool = false

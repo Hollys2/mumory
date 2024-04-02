@@ -90,7 +90,7 @@ public struct MumoryBottomSheet {
         case .friendMumoryDetailView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.starMumoryDetailMenu.swiftUIImage, title: "즐겨찾기 목록에 추가", action: {
-                    self.appCoordinator.rootPath.append(MumoryPage.report)
+
                 }),
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고", action: {
                     self.appCoordinator.rootPath.append(MumoryPage.report)
@@ -112,7 +112,7 @@ public struct MumoryBottomSheet {
                     withAnimation(.easeOut(duration: 0.1)) {
                         self.appCoordinator.isSocialMenuSheetViewShown = false
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.appCoordinator.rootPath.append(MumoryPage.report)
                     }
                 }

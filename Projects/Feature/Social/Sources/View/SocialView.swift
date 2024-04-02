@@ -221,6 +221,7 @@ struct SocialItemView: View {
                         Color(red: 0.184, green: 0.184, blue: 0.184)
                     }
                 }
+                .scaledToFill()
                 .frame(width: 38, height: 38)
                 .mask {Circle()}
                 .onTapGesture {

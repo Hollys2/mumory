@@ -72,6 +72,7 @@ struct CommentView: View {
                         Color(red: 0.184, green: 0.184, blue: 0.184)
                     }
                 }
+                .scaledToFill()
                 .frame(width: 28, height: 28)
                 .mask { Circle() }
                 .onTapGesture {
@@ -285,6 +286,7 @@ struct Reply: View {
                         Color(red: 0.184, green: 0.184, blue: 0.184)
                     }
                 }
+                .scaledToFill()
                 .frame(width: 28, height: 28)
                 .mask { Circle() }
                 .onTapGesture {
@@ -430,6 +432,7 @@ public struct MumoryCommentSheetView: View {
     @State private var isPublic: Bool = false
     
     @State private var commentYOffset: CGFloat = .zero
+    @State private var isPopUpShown: Bool = true
     
     @GestureState private var dragState = DragState.inactive
     
@@ -723,10 +726,20 @@ public struct MumoryCommentSheetView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 72)
                         .overlay(
-                            Rectangle()
-                                .fill(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
-                                .frame(height: 0.5)
-                            , alignment: .top
+                            ZStack {
+                                SharedAsset.commentInitialPopup.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 246, height: 42)
+                                    .offset(x: 10, y: -49)
+                                    .opacity(UserDefaults.standard.value(forKey: "commentPopUp") == nil ? 1 : 0)
+                                    .onTapGesture {
+                                        self.isPopUpShown = false
+                                        UserDefaults.standard.set(Date(), forKey: "commentPopUp")
+                                    }
+                            }
+                                .opacity(self.isPopUpShown ? 1: 0)
+                            
+                            , alignment: .topLeading
                         )
                     }
                     .frame(maxWidth: .infinity)

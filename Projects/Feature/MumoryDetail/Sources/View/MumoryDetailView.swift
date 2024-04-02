@@ -175,7 +175,7 @@ public struct MumoryDetailView: View {
 
                     Text("\(mumory.musicModel.title)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
-                        .lineLimit(2)
+                        .lineLimit(3)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
 
@@ -270,6 +270,7 @@ public struct MumoryDetailView: View {
             MumoryMapView(isShown: self.$isMapSheetShown, mumory: self.mumory, user: self.user)
         }
         .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
+        .bottomSheet(isShown: $appCoordinator.isStarButtonTapped, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .friendMumoryDetailView , mumoryAnnotation: self.$mumory))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

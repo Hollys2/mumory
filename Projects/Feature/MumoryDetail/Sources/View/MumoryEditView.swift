@@ -179,7 +179,7 @@ public struct MumoryEditView: View {
                                              matching: .images) {
                                     
                                     VStack(spacing: 0) {
-                                        (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                        (photoPickerViewModel.imageSelectionCount + (mumoryAnnotation.imageURLs ?? []).count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
                                             .resizable()
                                             .frame(width: 24, height: 24)
                                             .offset(y: 1)
@@ -187,7 +187,7 @@ public struct MumoryEditView: View {
                                         Spacer(minLength: 0)
                                         
                                         HStack(spacing: 0) {
-                                            Text("\(photoPickerViewModel.imageSelectionCount)")
+                                            Text("\(photoPickerViewModel.imageSelectionCount + (mumoryAnnotation.imageURLs ?? []).count)")
                                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                                 .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
                                             Text(" / 3")

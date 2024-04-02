@@ -41,7 +41,7 @@ public struct AppleMusicPopUpView: View {
     
     @State var musicSubscription: MusicSubscription?
     @State var isShowingAppleMusicOffer = false
-    @State var isShown = false
+    @State var isShown = UserDefaults.standard.bool(forKey: "appleMusicPopUpShown")
     
     var offerOptions: MusicSubscriptionOffer.Options {
         var offerOptions = MusicSubscriptionOffer.Options()
@@ -77,6 +77,7 @@ public struct AppleMusicPopUpView: View {
                 .frame(width: 17, height: 17)
                 .padding(.trailing, 11)
                 .onTapGesture {
+                    UserDefaults.standard.setValue(false, forKey: "appleMusicPopUpShown")
                     self.isShown = false
                 }
         }

@@ -287,7 +287,7 @@ public struct CreateMumoryBottomSheetView: View {
                 .transition(.move(edge: .bottom))
                 .zIndex(1)
                 .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
-                    DatePicker("", selection: self.$calendarDate, displayedComponents: [.date])
+                    DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
                         .datePickerStyle(.graphical)
                         .labelsHidden()
                         .accentColor(SharedAsset.mainColor.swiftUIColor)

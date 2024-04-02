@@ -114,6 +114,15 @@ public struct HomeView: View {
         .navigationBarBackButtonHidden()
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
+            let userDefualt = UserDefaults.standard
+            if !userDefualt.bool(forKey: "firstLogined") {
+                userDefualt.setValue(true, forKey: "firstLogined")
+                userDefualt.setValue(true, forKey: "appleMusicPopUpShown")
+                userDefualt.setValue(true, forKey: "starPopUp")
+                userDefualt.setValue(true, forKey: "commentPopUp")
+            }
+            
+            
             playerViewModel.miniPlayerMoveToBottom = false
             
             Task {

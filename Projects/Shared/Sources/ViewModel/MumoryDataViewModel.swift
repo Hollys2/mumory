@@ -116,32 +116,101 @@ final public class MumoryDataViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                                 self.myMumorys.append(newMumory)
-//                                self.myMumorys.sort { $0.date > $1.date }
                                 print("Document added: \(documentChange.document.documentID)")
                             }
                             
-                            if self.myMumorys.count == 1 {
-                                self.reward = .record(0)
+                            if UserDefaults.standard.value(forKey: "attendance0") == nil {
+                                self.reward = .attendance(0)
                                 withAnimation(.spring(response: 0.2)) {
                                     self.isRewardPopUpShown = true
+                                }
+                                UserDefaults.standard.set(Date(), forKey: "attendance0")
+                            }
+                            
+                            if self.myMumorys.count == 1 {
+                                if UserDefaults.standard.value(forKey: "record0") == nil {
+                                    self.reward = .record(0)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "record0")
                                 }
                             } else if self.myMumorys.count == 5 {
-                                self.reward = .record(1)
-                                withAnimation(.spring(response: 0.2)) {
-                                    self.isRewardPopUpShown = true
+                                if UserDefaults.standard.value(forKey: "record1") == nil {
+                                    self.reward = .record(1)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "record1")
                                 }
                             } else if self.myMumorys.count == 10 {
-                                self.reward = .record(2)
-                                withAnimation(.spring(response: 0.2)) {
-                                    self.isRewardPopUpShown = true
+                                if UserDefaults.standard.value(forKey: "record2") == nil {
+                                    self.reward = .record(2)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "record2")
+                                }
+                            } else if self.myMumorys.count == 20 {
+                                if UserDefaults.standard.value(forKey: "record3") == nil {
+                                    self.reward = .record(3)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "record3")
+                                }
+                            } else if self.myMumorys.count == 50 {
+                                if UserDefaults.standard.value(forKey: "record4") == nil {
+                                    self.reward = .record(4)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "record4")
+                                }
+                            }
+                            
+                            if self.locationMumorys.count == 2 {
+                                if UserDefaults.standard.value(forKey: "location0") == nil {
+                                    self.reward = .location(0)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "location0")
+                                }
+                            } else if self.locationMumorys.count == 3 {
+                                if UserDefaults.standard.value(forKey: "location1") == nil {
+                                    self.reward = .location(1)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "location1")
+                                }
+                            } else if self.locationMumorys.count == 5 {
+                                if UserDefaults.standard.value(forKey: "location2") == nil {
+                                    self.reward = .location(2)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "location2")
+                                }
+                            } else if self.locationMumorys.count == 10 {
+                                if UserDefaults.standard.value(forKey: "location3") == nil {
+                                    self.reward = .location(3)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "location3")
+                                }
+                            } else if self.locationMumorys.count == 15 {
+                                if UserDefaults.standard.value(forKey: "location4") == nil {
+                                    self.reward = .location(4)
+                                    withAnimation(.spring(response: 0.2)) {
+                                        self.isRewardPopUpShown = true
+                                    }
+                                    UserDefaults.standard.set(Date(), forKey: "location4")
                                 }
                             }
                         }
-//                        if !self.monthlyMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
-//                            DispatchQueue.main.async {
-//                                self.monthlyMumorys.append(newMumory)
-//                            }
-//                        }
                         
                     case .modified:
                         let documentData = documentChange.document.data()
