@@ -737,6 +737,7 @@ struct MumoryItemView: View {
                                         .foregroundColor(.white.opacity(0.7))
                                         .lineLimit(1)
                                         .frame(alignment: .leading)
+                                        .fixedSize(horizontal: true, vertical: false)
                                         .padding(.leading, 7)
                                 }
                                 
