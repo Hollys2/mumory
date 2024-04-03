@@ -132,7 +132,7 @@ public struct MyRequestFriendItem: View {
             .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
             .onTapGesture {
                 UIView.setAnimationsEnabled(false)
-                isPresentDeletePopup = true
+                isPresentDeletePopup.toggle()
             }
         })
         .padding(.horizontal, 20)

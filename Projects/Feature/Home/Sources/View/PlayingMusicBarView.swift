@@ -69,8 +69,7 @@ public struct PlayingMusicBarView: View {
                 
             })
             .onTapGesture {
-                playerViewModel.isPresentNowPlayingView = true
-//                appCoordinator.setBottomAnimationPage(page: .play)
+                playerViewModel.isPresentNowPlayingView.toggle()
             }
             
             //재생버튼. 재생 여부에 따라 다르게 보여야함

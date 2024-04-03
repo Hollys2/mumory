@@ -49,6 +49,7 @@ public struct BottomSheetWrapper: View {
                     .offset(y: yOffset)
                     .gesture(drag)
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+                    .padding(.bottom, 7)
                     .padding(.bottom, 29)
                 }
                 

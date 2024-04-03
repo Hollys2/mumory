@@ -111,8 +111,8 @@ struct SelectableArtistView: View {
                 
                 Spacer()
                 
-                SharedAsset.menuGradient.swiftUIImage
-                    .resizable()
+                Rectangle()
+                    .fill(Color.clear)
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
                 

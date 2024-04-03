@@ -63,8 +63,8 @@ struct AddSongView: View {
                         }
                     
                     Text("검색")
-                        .font(selection == 1 ?  SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                        .foregroundStyle(selection == 1 ? noneSelectedColor : .white)
+                        .font(selection == 1 ?  SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                        .foregroundStyle(selection == 1 ? .white : noneSelectedColor)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .onTapGesture {
                             withAnimation (.linear(duration: 0.2)) {

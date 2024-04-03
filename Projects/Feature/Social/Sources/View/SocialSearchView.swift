@@ -268,7 +268,6 @@ public struct SocialSearchView: View {
                                     AsyncImage(url: friend.profileImageURL) { image in
                                         image
                                             .resizable()
-                                         
                                     } placeholder: {
                                         friend.defaultProfileImage
                                             .resizable()

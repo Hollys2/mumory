@@ -13,6 +13,8 @@ import MusicKit
 struct PlaylistBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var currentUserData: CurrentUserData
+    @State var isPresentDeletePlaylistBottomSheet: Bool = false
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
     var playlist: MusicPlaylist
@@ -54,6 +56,10 @@ struct PlaylistBottomSheetView: View {
                     appCoordinator.rootPath.append(LibraryPage.addSong(originPlaylist: playlist))
                 }
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트 삭제", type: .warning)
+                .onTapGesture {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeletePlaylistBottomSheet.toggle()
+                }
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                 .onTapGesture {
                     dismiss()
@@ -62,6 +68,17 @@ struct PlaylistBottomSheetView: View {
         })
         .padding(.bottom, 15)
         .background(ColorSet.background)
+        .fullScreenCover(isPresented: $isPresentDeletePlaylistBottomSheet, content: {
+            TwoButtonPopupView(title: "해당 플레이리스트를 삭제하시겠습니까?", positiveButtonTitle: "플레이리스트 삭제") {
+                let db = FBManager.shared.db
+                let playlistId = playlist.id
+                let path = db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
+                path.delete()
+                appCoordinator.rootPath.removeLast()
+                currentUserData.playlistArray.removeAll(where: {$0.id == playlistId})
+            }
+            .background(TransparentBackground())
+        })
     }
 }
 

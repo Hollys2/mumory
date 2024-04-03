@@ -372,7 +372,6 @@ public struct CreateMumoryBottomSheetView: View {
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
-                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true)
                                 }
                             }
                         }

@@ -74,9 +74,7 @@ struct MyPlaylistView: View {
                       
                         AddSongItem()
                             .onTapGesture {
-                                print("aaaaa")
-                                isPresentCreatePlaylistPopup = true
-                                print("bbbbbb")
+                                isPresentCreatePlaylistPopup.toggle()
                             }
                      
 

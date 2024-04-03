@@ -57,9 +57,9 @@ struct SignUpConsentItem: View {
                     .underline()
                     .onTapGesture {
                         if title.contains("이용약관") {
-                            isPresentTosView = true
+                            isPresentTosView.toggle()
                         }else if title.contains("개인정보"){
-                            isPresentPersnalInfoTosView = true
+                            isPresentPersnalInfoTosView.toggle()
                         }
                     }
                 

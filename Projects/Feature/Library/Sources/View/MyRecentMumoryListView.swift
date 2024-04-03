@@ -124,6 +124,9 @@ struct MyRecentMumoryListView: View {
                 
     
             })
+            
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
+
         }
         .navigationBarBackButtonHidden()
         .onAppear {

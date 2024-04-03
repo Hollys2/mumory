@@ -269,7 +269,7 @@ struct PlayingView: View {
                     .onTapGesture {
                         guard let song = playerViewModel.currentSong else {return}
                         UIView.setAnimationsEnabled(false)
-                        isPresentSongBottmSheet = true
+                        isPresentSongBottmSheet.toggle()
                     }
             })
             .frame(height: 65)
@@ -300,11 +300,15 @@ struct PlayingView: View {
                                 .offset(x: startAnimation ? changeOffset : 0)
                                 .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true).delay(2.0), value: startAnimation)
                                 .onAppear(perform: {
-                                    startAnimation = true
+                                    DispatchQueue.main.async {
+                                        guard let song = playerViewModel.currentSong else {return}
+                                        titleWidth = getTextWidth(term: song.title)
+                                        changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
+                                        startAnimation = true
+                                    }
                                 })
                         }
-                        
-                        
+                        .scrollDisabled(true)
                     } else {
                         Text(" ")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
@@ -317,7 +321,6 @@ struct PlayingView: View {
                         .onChange(of: playerViewModel.currentSong, perform: { value in
                             DispatchQueue.main.async {
                                 endInit = false
-                                changeOffset = 0
                                 startAnimation = false
                                 Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
                                     endInit = true
@@ -338,7 +341,7 @@ struct PlayingView: View {
                         .onTapGesture {
                             print("taptaptap")
                             UIView.setAnimationsEnabled(false)
-                            isPresentAddBottomSheet = true
+                            isPresentAddBottomSheet.toggle()
                         }
                 }else {
                     SharedAsset.addGrayCircle.swiftUIImage
@@ -451,12 +454,12 @@ struct PlayingView: View {
             let horizontalTotalSpacing: CGFloat = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.2 : getUIScreenBounds().width * 0.13
             titleMaxWidth = getUIScreenBounds().width - addIconWidth - spacing - horizontalTotalSpacing
             
-//            guard let song = playerViewModel.currentSong else {return}
-//            DispatchQueue.main.async {
-//                titleWidth = getTextWidth(term: song.title)
-//                changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
-//            }
-
+            guard let song = playerViewModel.currentSong else {return}
+            DispatchQueue.main.async {
+                titleWidth = getTextWidth(term: song.title)
+                changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
+                startAnimation = true
+            }
         }
         
     }
@@ -756,7 +759,7 @@ struct PlayTogetherItem: View {
                 .onTapGesture {
                     guard let song = playerViewModel.currentSong else {return}
                     UIView.setAnimationsEnabled(false)
-                    isPresentBottomSheet = true
+                    isPresentBottomSheet.toggle()
                 }
        
             
