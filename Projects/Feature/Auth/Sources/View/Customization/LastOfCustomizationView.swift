@@ -119,7 +119,7 @@ struct LastOfCustomizationView: View {
                         })
                         .padding(.leading, 58)
                         .padding(.trailing, 58)
-                        .padding(.top, getUIScreenBounds().height > 815 ? 40 : 20)
+                        .padding(.top, 37)
                         .offset(y: secondYOffset)
                         .opacity(secondOpacity)
                         
@@ -131,13 +131,14 @@ struct LastOfCustomizationView: View {
                             .tracking(0.3)
                             .lineSpacing(5)
                             .offset(y: thirdYOffset)
-                            .opacity(getUIScreenBounds().height > 815 ? thirdOpacity : 0)
-                        
+                            .opacity(thirdOpacity)
+
                         
                         Spacer()
                         
                         
                     }
+                    .padding(.bottom, 100)
                 }
                 .scrollIndicators(.hidden)
 

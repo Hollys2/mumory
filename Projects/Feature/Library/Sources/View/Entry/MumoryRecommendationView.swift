@@ -58,10 +58,10 @@ public struct MumoryRecommendationView: View {
                 ChartPagingScrollView(musicChart: $musicChart, scrollViewHeight: $scrollViewHeight) {
                     LazyHGrid(rows: rows, spacing: 0,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
-                            let song = musicChart[index]
-                            MusicChartItem(rank: index+1, song: song) //순위 곡 itemv
+                            MusicChartItem(rank: index+1, song: musicChart[index]) //순위 곡 itemv
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.playAll(title: "최신 인기곡", songs: Array(musicChart), startingItem: musicChart[index])
+                                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                                 }
                         }
                         

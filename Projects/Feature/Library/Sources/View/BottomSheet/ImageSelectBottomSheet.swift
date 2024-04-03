@@ -121,8 +121,8 @@ public struct ImageSelectBottomSheet: View {
                         })
                         .background(ColorSet.background)
                         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 9)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 7)
                         
                         
                         

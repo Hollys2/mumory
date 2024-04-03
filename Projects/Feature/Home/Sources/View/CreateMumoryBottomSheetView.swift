@@ -372,6 +372,7 @@ public struct CreateMumoryBottomSheetView: View {
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
+                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true)
                                 }
                             }
                         }
@@ -458,6 +459,7 @@ public struct CreateMumoryBottomSheetView: View {
         self.offsetY = CGFloat(offset)
         
         if cardDismiss {
+            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true)
             withAnimation(.spring(response: 0.1)) {
                 mumoryDataViewModel.choosedMusicModel = nil
                 mumoryDataViewModel.choosedLocationModel = nil

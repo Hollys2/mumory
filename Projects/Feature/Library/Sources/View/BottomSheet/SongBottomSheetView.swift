@@ -136,6 +136,7 @@ struct SongBottomSheetView: View {
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
+                                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
@@ -535,6 +536,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(MumoryPage.report)
                         }
                 }
@@ -664,6 +666,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(MumoryPage.report)
                         }
                 }else {
@@ -733,6 +736,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(MumoryPage.report)
                         }
                 }
@@ -765,3 +769,4 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
     }
 
 }
+

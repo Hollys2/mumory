@@ -173,7 +173,6 @@ struct PlayControlView: View {
             }
             Spacer()
 
-            
             //앞으로 가기 버튼
             Button(action: {
                 playerViewModel.skipToNext()
@@ -775,10 +774,11 @@ struct PlayTogetherItem: View {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
                 //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거
                 //현재 MusicListItem은 북마크 버튼이 있는 아이템이라 즐겨찾기 추가 버튼이 음악 아이템 내부에 원래 있음
-                SongBottomSheetView(song: song, types: [.withoutBookmark])
+                SongBottomSheetViewWithoutPlaying(song: song, types: [.withoutBookmark])
             }
             .background(TransparentBackground())
         }
     }
 }
+
 

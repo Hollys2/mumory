@@ -149,26 +149,28 @@ struct UserInfoView: View {
             }
             .padding(.horizontal, 20)
             
-            HStack(spacing: 8, content: {
-                SharedAsset.editProfile.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 15, height: 15)
-                
-                Text("프로필 편집")
-                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundStyle(ColorSet.D9Gray)
+            Button(action: {
+                isPresentEditView = true
+            }, label: {
+                HStack(spacing: 8, content: {
+                    SharedAsset.editProfile.swiftUIImage
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 15, height: 15)
+                    
+                    Text("프로필 편집")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundStyle(ColorSet.D9Gray)
+                    
+                })
+                .frame(maxWidth: .infinity)
+                .frame(height: 45)
+                .background(ColorSet.darkGray)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
                 
             })
-            .frame(maxWidth: .infinity)
-            .frame(height: 45)
-            .background(ColorSet.darkGray)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
             .padding(.horizontal, 20)
             .padding(.bottom, 22)
-            .onTapGesture {
-                isPresentEditView = true
-            }
             .fullScreenCover(isPresented: $isPresentEditView, content: {
                 EditProfileView()
             })

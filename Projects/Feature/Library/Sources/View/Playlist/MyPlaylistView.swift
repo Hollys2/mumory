@@ -33,7 +33,7 @@ struct MyPlaylistView: View {
                     
                     Spacer()
                     
-                    Text("\(currentUserData.playlistArray.count)") //플레이리스트 추가 아이템 제외
+                    Text("\(currentUserData.playlistArray.count < 1 ? 0 : currentUserData.playlistArray.count - 1)") //플레이리스트 추가 아이템 제외
                         .foregroundStyle(LibraryColorSet.lightGrayTitle)
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .padding(.trailing, 4)

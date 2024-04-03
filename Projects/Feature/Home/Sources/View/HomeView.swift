@@ -122,7 +122,7 @@ public struct HomeView: View {
                 userDefualt.setValue(true, forKey: "commentPopUp")
             }
             
-            
+            appCoordinator.initPage = .home
             playerViewModel.miniPlayerMoveToBottom = false
             
             Task {
@@ -156,6 +156,7 @@ public struct HomeView: View {
                         self.showAlertToRedirectToSettings()
                     }
                 }
+                currentUserData.playlistArray = await currentUserData.savePlaylist()
             }
         }
     }

@@ -114,6 +114,8 @@ struct MumoryDetailSameLocationMusicView: View {
         .onTapGesture {
             guard let playSong = self.song else {return}
             playerViewModel.playNewSongShowingPlayingView(song: playSong)
+            playerViewModel.userWantsShown = true
+            playerViewModel.isShownMiniPlayer = true
         }
     }
 }
