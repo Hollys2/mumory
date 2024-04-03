@@ -353,7 +353,6 @@ public struct CreateMumoryBottomSheetView: View {
                                         
                                         mumoryDataViewModel.isLoading = false
 
-                                        
                                         mumoryDataViewModel.choosedMusicModel = nil
                                         mumoryDataViewModel.choosedLocationModel = nil
                                         self.tags.removeAll()
