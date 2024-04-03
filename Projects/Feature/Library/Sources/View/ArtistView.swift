@@ -126,7 +126,7 @@ struct ArtistView: View {
                     .padding(.trailing, 20)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isBottomSheetPresent = true
+                        isBottomSheetPresent.toggle()
                     }
                 
             })

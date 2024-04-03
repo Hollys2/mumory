@@ -71,10 +71,10 @@ struct ProfileSettingView: View {
                         .padding(.top, 25)
                         .onTapGesture {
                             UIView.setAnimationsEnabled(false)
-                            isPresentBottomSheet = true
+                            isPresentBottomSheet.toggle()
                         }
                         .onChange(of: selectedItem, perform: { value in
-                            isPresentBottomSheet = false
+                            isPresentBottomSheet.toggle()
                             Task{
                                 guard let loaded = try? await selectedItem?.loadTransferable(type: Data.self),
                                       let uiImage = UIImage(data: loaded) else {

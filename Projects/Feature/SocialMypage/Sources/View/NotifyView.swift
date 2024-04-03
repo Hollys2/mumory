@@ -228,7 +228,7 @@ struct NotifyLikeItem: View {
                 let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
                 if mumory.id == "DELETE" {
                     UIView.setAnimationsEnabled(false)
-                    isPresentDeleteMumoryPopup = true
+                    isPresentDeleteMumoryPopup.toggle()
                 }else {
                     appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
@@ -327,7 +327,7 @@ struct NotifyCommentItem: View {
                 let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
                 if mumory.id == "DELETE" {
                     UIView.setAnimationsEnabled(false)
-                    isPresentDeleteMumoryPopup = true
+                    isPresentDeleteMumoryPopup.toggle()
                 }else {
                     appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
@@ -591,7 +591,7 @@ struct NotifyMenuBotton: View {
     var body: some View {
         Button(action: {
             UIView.setAnimationsEnabled(false)
-            isPresentBottomSheet = true
+            isPresentBottomSheet.toggle()
         }, label: {
             SharedAsset.menu.swiftUIImage
                 .resizable()
@@ -603,10 +603,10 @@ struct NotifyMenuBotton: View {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
                 BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "알림 삭제", type: .warning)
                     .onTapGesture {
-                        isPresentBottomSheet = false
+                        isPresentBottomSheet.toggle()
                         Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
                             UIView.setAnimationsEnabled(false)
-                            isPresentPopup = true
+                            isPresentPopup.toggle()
                         }
                     }
             }

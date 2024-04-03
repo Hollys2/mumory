@@ -77,7 +77,7 @@ struct UneditablePlaylistView: View {
                         
                         //플레이리스트 곡 목록
                         ForEach(playlist.songs.indices, id: \.self) { index in
-                            MusicListItem(song: playlist.songs[index], type: .normal)
+                            MusicListItemInUneditablePage(song: playlist.songs[index], type: .normal)
                                 .id("\(playlist.songs[index].artistName) \(playlist.songs[index].id.rawValue) \(index)")
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "\(friendDataViewModel.friend.nickname)님의 \(playlist.title)" , songs: playlist.songs, startingItem: playlist.songs[index])
@@ -87,10 +87,11 @@ struct UneditablePlaylistView: View {
                                     let endIndex = playlist.songIDs.endIndex
                                     let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
                                     Task {
+                                        let tappedSong = playlist.songs[index]
                                         let songs = await fetchSongs(songIDs: requestSongIds)
                                         guard let index = friendDataViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                                         friendDataViewModel.playlistArray[index].songs.append(contentsOf: songs)
-                                        playerViewModel.setQueue(songs: playlist.songs, startSong: playlist.songs[index])
+                                        playerViewModel.setQueue(songs: playlist.songs, startSong: tappedSong)
                                     }
                                 }
                             
@@ -161,7 +162,7 @@ struct UneditablePlaylistView: View {
                     .padding(.trailing, 20)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isBottomSheetPresent = true
+                        isBottomSheetPresent.toggle()
                     }
             })
             .frame(height: 65)
@@ -174,7 +175,7 @@ struct UneditablePlaylistView: View {
             BottomSheetDarkGrayWrapper(isPresent: $isBottomSheetPresent)  {
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                     .onTapGesture {
-                        isBottomSheetPresent = false
+                        isBottomSheetPresent.toggle()
                         appCoordinator.rootPath.append(MumoryPage.report)
                     }
             }

@@ -137,6 +137,12 @@ struct ActivityListView: View {
                         })
                         .padding(.top, 55)
                     }
+                    .refreshable {
+                        pagingCursor = nil
+                        Task {
+                            await getActivity(type: self.selection, date: self.date, pagingCorsor: self.$pagingCursor, isLoading: $isLoadig)
+                        }
+                    }
                     .scrollIndicators(.hidden)
                     .overlay {
                         
@@ -159,7 +165,7 @@ struct ActivityListView: View {
                             .background(.ultraThinMaterial)
                             .onTapGesture {
                                 UIView.setAnimationsEnabled(false)
-                                isPresentDatePicker = true
+                                isPresentDatePicker.toggle()
                             }
                             .onChange(of: date, perform: { value in
                                 pagingCursor = nil
@@ -426,7 +432,7 @@ struct ActivityItem: View {
                 .padding(.leading, 10)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentBottomSheet = true
+                    isPresentBottomSheet.toggle()
                 }
         })
         .padding(.horizontal, 15)
@@ -450,7 +456,7 @@ struct ActivityItem: View {
                     let mumory = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
                     if mumory.id == "DELETE" {
                         UIView.setAnimationsEnabled(false)
-                        isPresentDeletedMumoryPopup = true
+                        isPresentDeletedMumoryPopup.toggle()
                         return}
                     appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
@@ -483,19 +489,19 @@ struct ActivityBottomSheet: View {
                 BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "좋아요 취소", type: .warning)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isPresentConfimPopup = true
+                        isPresentConfimPopup.toggle()
                     }
             }else if activity.type == "comment" {
                 BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isPresentConfimPopup = true
+                        isPresentConfimPopup.toggle()
                     }
             } else if activity.type == "reply" {
                 BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", type: .warning)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isPresentConfimPopup = true
+                        isPresentConfimPopup.toggle()
                     }
             }
         }

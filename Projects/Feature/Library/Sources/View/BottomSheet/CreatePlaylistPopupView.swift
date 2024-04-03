@@ -171,6 +171,9 @@ struct CreatePlaylistPopupView: View {
                 print("success")
                 isLoading = false
                 dismiss()
+                Task {
+                    currentUserData.playlistArray = await currentUserData.savePlaylist()
+                }
             }
         }
     }
