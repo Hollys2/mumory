@@ -108,7 +108,8 @@ public struct MyMumoryDatePicker: View {
         var yearMonthDictionary = [Int: [Int]]()
         // Mumory 배열을 순회하면서 연도와 월을 추출하여 배열에 추가
         
-        let mumoryArray: [Mumory] = mumoryDataViewModel.myMumorys
+//        let mumoryArray: [Mumory] = mumoryDataViewModel.myMumorys
+        let mumoryArray: [Mumory] = self.user.uId == currentUserData.user.uId ? mumoryDataViewModel.myMumorys : mumoryDataViewModel.friendMumorys
         
         // 딕셔너리를 생성하여 연도를 키로 하고 해당 연도에 속하는 월의 배열을 값으로 함
 //        var yearMonthDictionary = [Int: [Int]]()
