@@ -123,7 +123,7 @@ final public class MumoryDataViewModel: ObservableObject {
                         DispatchQueue.main.async {
                             if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                                 self.myMumorys.append(newMumory)
-                                print("Document added: \(documentChange.document.documentID)")
+                                print("Document added: \(self.myMumorys.count)")
                             }
                             
                             if self.myMumorys.count == 1 {
@@ -209,11 +209,11 @@ final public class MumoryDataViewModel: ObservableObject {
         let collectionReference = db.collection("User").document(uId).collection("Reward")
 
         let listener = collectionReference.addSnapshotListener { snapshot, error in
-            if UserDefaults.standard.value(forKey: "attendance@@") == nil {
+            if UserDefaults.standard.value(forKey: "attendance%") == nil {
                 print("fetchRewardListener 첫 실행")
                 let data = ["type": "attendance0"]
                 collectionReference.addDocument(data: data)
-                UserDefaults.standard.set(Date(), forKey: "attendance@@")
+                UserDefaults.standard.set(Date(), forKey: "attendance%")
             }
             
             Task {
@@ -459,22 +459,56 @@ final public class MumoryDataViewModel: ObservableObject {
             }
         }
     }
-
     
-//    public static func fetchCommentCount(mumoryId: String, completion: @escaping (Int?) -> Void) {
-//        let db = FirebaseManager.shared.db
-//        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
-//
-//        collectionReference.getDocuments { (querySnapshot, error) in
-//            if let error = error {
-//                print("Error fetching documents: \(error)")
-//                completion(nil)
-//            } else {
-//                let count = querySnapshot?.documents.count ?? 0
-//                completion(count)
-//            }
-//        }
-//    }
+    public static func fetchReward(user: MumoriUser) async -> [String] {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+        
+        var rewards: [String] = [] // 배열을 초기화
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            
+            for document in querySnapshot.documents {
+                let documentData = document.data()
+                guard let reward: String = documentData["type"] as? String else {
+                    continue
+                }
+                rewards.append(reward)
+            }
+        } catch {
+            print("Error fetching documents: \(error)")
+        }
+        
+        return rewards
+    }
+    
+    public static func fetchRewardCount(user: MumoriUser, reward: String) async -> Int {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+            .whereField("type", isEqualTo: reward)
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            return querySnapshot.documents.count
+        } catch {
+            print("Error fetching documents: \(error)")
+            return -1
+        }
+    }
+    
+    public static func fetchRewardCount(user: MumoriUser) async -> Int {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            return querySnapshot.documents.count
+        } catch {
+            print("Error fetching documents: \(error)")
+            return -1
+        }
+    }
     
     public static func fetchCommentCount(mumoryId: String) async -> Int {
         let db = FirebaseManager.shared.db
