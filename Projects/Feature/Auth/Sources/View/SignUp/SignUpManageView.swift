@@ -147,6 +147,10 @@ struct SignUpManageView: View {
                 self.hideKeyboard()
             }
             .disabled(manager.isLoading)
+            .fullScreenCover(isPresented: $isSignUpErrorShowing, content: {
+                OneButtonOnlyConfirmPopupView(title: "알 수 없는 오류가 발생했습니다.")
+                    .background(TransparentBackground())
+            })
 
     }
     
@@ -166,6 +170,7 @@ struct SignUpManageView: View {
             if let error = error {
                 print("create user error: \(error)")
                 manager.isLoading = false
+                UIView.setAnimationsEnabled(false)
                 isSignUpErrorShowing = true
             }else {
                 print("create user success")

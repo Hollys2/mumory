@@ -63,7 +63,7 @@ public struct MiniPlayerView: View {
                 
             }
             .onTapGesture {
-                playerViewModel.isPresentNowPlayingView = true
+                playerViewModel.isPresentNowPlayingView.toggle()
             }
             
             
@@ -187,7 +187,7 @@ public struct MiniPlayerViewInLibrary: View {
                 
             }
             .onTapGesture {
-                playerViewModel.isPresentNowPlayingView = true
+                playerViewModel.isPresentNowPlayingView.toggle()
             }
             
             

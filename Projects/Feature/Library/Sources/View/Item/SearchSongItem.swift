@@ -50,7 +50,7 @@ struct SearchSongItem: View {
                 .frame(width: 30, height: 30)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentBottomSheet = true
+                    isPresentBottomSheet.toggle()
                 }
          
         })

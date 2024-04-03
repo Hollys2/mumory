@@ -209,7 +209,7 @@ struct SearchMusicResultViewInCreateMumory: View {
                             
                             ForEach(songs, id: \.id){ song in
                                 SearchSelectableSongItem(song: song)
-                                    .id("\(song.artistName)\(song.id)")
+                                    .id("\(song.artistName)\(song.id) \(UUID())")
                                     .onTapGesture {
                                         playerViewModel.setPreviewPlayer(tappedSong: song)
                                         //최근 검색어 저장

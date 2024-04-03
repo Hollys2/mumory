@@ -148,7 +148,7 @@ struct FavoriteListView: View {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
                 BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                     .onTapGesture {
-                        isPresentBottomSheet = false
+                        isPresentBottomSheet.toggle()
                         appCoordinator.rootPath.append(MumoryPage.report)
                     }
             }
@@ -241,7 +241,7 @@ struct SongListBigItem: View {
                 .frame(width: 30, height: 30)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentBottomSheet = true
+                    isPresentBottomSheet.toggle()
                 }
         })
         .padding(.horizontal, 20)

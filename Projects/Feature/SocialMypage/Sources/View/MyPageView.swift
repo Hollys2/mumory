@@ -150,7 +150,7 @@ struct UserInfoView: View {
             .padding(.horizontal, 20)
             
             Button(action: {
-                isPresentEditView = true
+                isPresentEditView.toggle()
             }, label: {
                 HStack(spacing: 8, content: {
                     SharedAsset.editProfile.swiftUIImage

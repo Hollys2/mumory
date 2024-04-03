@@ -121,7 +121,7 @@ struct ArtistOfSongView: View {
                     .frame(width: 30, height: 30)
                     .padding(.trailing, 20)
                     .onTapGesture {
-                        isBottomSheetPresent = true
+                        isBottomSheetPresent.toggle()
                     }
                     .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
                         BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {

@@ -57,7 +57,7 @@ struct FriendPageView: View {
                     .frame(width: 30, height: 30)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isPresentFriendBottomSheet = true
+                        isPresentFriendBottomSheet.toggle()
                     }
             }
             .padding(.horizontal, 20)
@@ -305,7 +305,7 @@ struct UnkownFriendPageView: View {
                 .padding(.bottom, 22)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentPopup = true
+                    isPresentPopup.toggle()
                     
                 }
                 
@@ -527,7 +527,7 @@ struct FriendInfoView: View {
             .padding(.bottom, 22)
             .onTapGesture {
                 UIView.setAnimationsEnabled(false)
-                isPresentBottomSheet = true
+                isPresentBottomSheet.toggle()
             }
             //바텀 애니메이션 뷰
             .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
@@ -723,7 +723,7 @@ struct DeleteFriendBottomSheetView: View {
             .onTapGesture {
                 dismiss()
                 UIView.setAnimationsEnabled(false)
-                isPresentPopup = true
+                isPresentPopup.toggle()
             }
     }
 }

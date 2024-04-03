@@ -125,7 +125,7 @@ struct SettingView: View {
                     })
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isShowingWithdrawPopup = true
+                        isShowingWithdrawPopup.toggle()
                     }
                     .fullScreenCover(isPresented: $isShowingWithdrawPopup) {
                         TwoButtonPopupView(title: "계정을 탈퇴하시겠습니까?", subTitle: "탈퇴하신 계정은 복구가 불가능합니다.", positiveButtonTitle: "탈퇴하기") {

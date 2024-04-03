@@ -128,7 +128,7 @@ struct MostPostedSongListView: View {
                     .padding(.trailing, 20)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isBottomSheetPresent = true
+                        isBottomSheetPresent.toggle()
                     }
             })
             .frame(height: 65)

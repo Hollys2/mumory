@@ -152,7 +152,7 @@ struct PlaylistItem_Big: View {
                     .transition(.opacity)
                     .onTapGesture {
                         UIView.setAnimationsEnabled(false)
-                        isDeletePupupPresent = true
+                        isDeletePupupPresent.toggle()
                     }
                 
                 //즐겨찾기 항목 삭제 불가 나타냄
@@ -253,7 +253,7 @@ public struct AddSongItemBig: View {
             itemSize = (getUIScreenBounds().width * 0.22) * 2
         })
         .onTapGesture {
-            isPresent = true
+            isPresent.toggle()
         }
         .fullScreenCover(isPresented: $isPresent, content: {
             CreatePlaylistPopupView()

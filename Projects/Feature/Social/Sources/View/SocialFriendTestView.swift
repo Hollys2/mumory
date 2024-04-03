@@ -77,12 +77,19 @@ struct SocialFriendTestView: View {
                     
                     Button(action: {
                         UIView.setAnimationsEnabled(false)
-                        isPresentFriendBottomSheet = true
+                        isPresentFriendBottomSheet.toggle()
                     }, label: {
                         SharedAsset.menuButtonSearchFriend.swiftUIImage
                             .resizable()
                             .frame(width: 30, height: 30)
                     })
+                    .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
+                        BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
+                            SocialFriendBottomSheet()
+                        }
+                        .background(TransparentBackground())
+                    })
+                    
                 }
                 .padding(.horizontal, 20)
                 .frame(height: 63)       
@@ -212,12 +219,6 @@ struct SocialFriendTestView: View {
 
         }
         .navigationBarBackButtonHidden()
-        .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
-            BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
-                SocialFriendBottomSheet()
-            }
-            .background(TransparentBackground())
-        })
         .disabled(status == .friendProcessLoading)
 
     }
@@ -516,7 +517,7 @@ struct RecievedRequestItem: View {
                 .padding(.trailing, 6)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentAcceptPopup = true
+                    isPresentAcceptPopup.toggle()
                 }
             
             
@@ -530,7 +531,7 @@ struct RecievedRequestItem: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentDeletePopup = true
+                    isPresentDeletePopup.toggle()
                 }
         })
         .padding(.horizontal, 20)

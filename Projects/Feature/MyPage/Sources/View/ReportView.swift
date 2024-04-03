@@ -123,6 +123,12 @@ struct ReportView: View {
                             Text("노골적인 폭력 묘사")
                         })
                         
+                        Button(action: {
+                            menuTitle = "오류"
+                        }, label: {
+                            Text("오류")
+                        })
+                        
                     } label: {
                         HStack(spacing: 0, content: {
                             Text(menuTitle)
@@ -190,7 +196,9 @@ struct ReportView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             settingViewModel.uid = currentUserData.uId
-            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+            }
         })
         .onTapGesture {
             hideKeyboard()

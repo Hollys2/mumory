@@ -105,7 +105,7 @@ private struct UserProfile: View {
             }
             .onTapGesture {
                 UIView.setAnimationsEnabled(false)
-                isPresentBackgroundBottomSheet = true
+                isPresentBackgroundBottomSheet.toggle()
             }
             .fullScreenCover(isPresented: $isPresentBackgroundBottomSheet) {
                 ImageSelectBottomSheet(isPresent: $isPresentBackgroundBottomSheet, imageBundle: $editProfileViewModel.backgroundImageBundle, photoType: .background)
@@ -144,7 +144,7 @@ private struct UserProfile: View {
                 .padding(.trailing, 20)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
-                    isPresentProfileBottomSheet = true
+                    isPresentProfileBottomSheet.toggle()
                 }
                 .fullScreenCover(isPresented: $isPresentProfileBottomSheet) {
                     ImageSelectBottomSheet(isPresent: $isPresentProfileBottomSheet, imageBundle: $editProfileViewModel.profileImageBundle)
