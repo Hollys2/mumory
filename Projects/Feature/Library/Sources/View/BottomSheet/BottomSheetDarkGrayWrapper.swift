@@ -42,6 +42,9 @@ public struct BottomSheetDarkGrayWrapper: View {
                             .padding(.bottom, 11)
                         
                         AnyView(content())
+                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
+                            .padding(.horizontal, 7)
+                            .padding(.bottom, 7)
                     })
                     .frame(maxWidth: .infinity)
                     .background(ColorSet.background)
@@ -50,7 +53,6 @@ public struct BottomSheetDarkGrayWrapper: View {
                     .offset(y: yOffset)
                     .gesture(drag)
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-                    .padding(.bottom, 2)
                     .padding(.bottom, 29)
                 }
                 

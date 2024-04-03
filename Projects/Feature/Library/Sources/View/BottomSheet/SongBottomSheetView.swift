@@ -536,6 +536,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(MumoryPage.report)
                         }
                 }
@@ -665,6 +666,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(MumoryPage.report)
                         }
                 }else {
@@ -734,6 +736,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(MumoryPage.report)
                         }
                 }
@@ -766,3 +769,4 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
     }
 
 }
+

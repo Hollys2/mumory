@@ -111,7 +111,7 @@ public class PlayerViewModel: ObservableObject {
         self.queue = songs
         self.originQueue = songs
         self.queueTitle = title
-        self.setPlayerVisibilityByUser(isShown: true, moveToBottom: true)
+        self.setPlayerVisibilityByUser(isShown: true)
         Task {
             do {
                 try await player.play()
@@ -228,12 +228,39 @@ public class PlayerViewModel: ObservableObject {
         let query = db.collection("User").document(uid).collection("Playlist").document("favorite")
         query.updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songId])])
         self.favoriteSongIds.append(songId)
-        let monthlyStatData: [String: Any] = [
-            "date": Date(),
-            "songId": songId,
-            "type": "favorite"
-        ]
-        db.collection("User").document(uid).collection("MonthlyStat").addDocument(data: monthlyStatData)
+
+        let validCheckQuery = db.collection("User").document(uid).collection("MonthlyStat")
+            .whereField("type", isEqualTo: "favorite")
+            .whereField("songId", isEqualTo: songId)
+            .order(by: "date", descending: true)
+        
+        validCheckQuery.getDocuments { querySnapshot, error in
+            guard error == nil else {print("a");return}
+            guard let snapshots = querySnapshot else {print("b");return}
+            if let recentData = snapshots.documents.first {
+                let data = recentData.data()
+                guard let recentDate = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {print("d");return}
+                
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy년 MM월 dd일"
+                
+                let todayString = formatter.string(from: Date())
+                let dateOfRecentDataString = formatter.string(from: recentDate)
+                print("today string: \(todayString)")
+                print("recent string: \(dateOfRecentDataString)")
+                if todayString == dateOfRecentDataString {
+                    recentData.reference.delete()
+                }
+            }
+            
+            let monthlyStatData: [String: Any] = [
+                "date": Date(),
+                "songId": songId,
+                "type": "favorite"
+            ]
+            self.db.collection("User").document(uid).collection("MonthlyStat").addDocument(data: monthlyStatData)
+        }
+   
     }
     
     public func removeFromFavorite(uid: String, songId: String) {

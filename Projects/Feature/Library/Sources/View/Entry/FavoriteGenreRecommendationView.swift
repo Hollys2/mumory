@@ -135,7 +135,8 @@ private struct RecommendationScrollView: View {
                         ForEach(songs, id: \.self){ song in
                             RecommendationMusicItem(song: song)
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡 리스트", songs: songs, startingItem: song)
+                                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                                 }
                         }
                         
