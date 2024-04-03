@@ -79,6 +79,8 @@ struct ContentView: View {
     @State var mumoriesCountByMonth: [Int] = Array(repeating: 0, count: 12)
     @State var mumoriesLikeCount: Int = 0
     @State var mumoriesCommentCount: Int = 0
+    @State var playListCount: Int = 0
+    @State var favoriteCount: Int = 0
     
     @State var days: Int = -1
     @State var mumoryDaily: [Int: [Mumory]] = [:]
@@ -384,7 +386,7 @@ struct ContentView: View {
                                 
                                 Spacer()
                                 
-                                Text(i == 0 ? "\(currentUserData.playlistArray.count)개" : "\(currentUserData.playlistArray.first(where: {$0.id == "favorite"})?.songIDs.count ?? 0)개")
+                                Text(i == 0 ? "\(self.playListCount)개" : "\(self.favoriteCount)개")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             }
@@ -401,8 +403,6 @@ struct ContentView: View {
         .padding(.horizontal, 20)
         .padding(.top, 65)
         .onAppear {
-            mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys
-            
             var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
             let calendar = Calendar.current
             let year = calendar.component(.year, from: Date())
@@ -412,7 +412,7 @@ struct ContentView: View {
             }
             let month = calendar.component(.month, from: self.date)
             self.days = daysInMonth[month - 1]
-            //            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+            mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
             
             for mumory in self.mumoryDataViewModel.monthlyMumorys {
                 let day = Calendar.current.component(.day, from: mumory.date)
@@ -540,6 +540,12 @@ struct ContentView: View {
                     }
                 }
                 
+            }
+            
+            self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
+            Task {
+                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
+                self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
         }
         .onChange(of: self.date) { _ in
@@ -685,6 +691,13 @@ struct ContentView: View {
                     }
                 }
                 
+            }
+            
+            self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
+            
+            Task {
+                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
+                self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
         }
     }

@@ -32,6 +32,8 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var monthlyMumorys: [Mumory] = []
     @Published public var surroundingMumorys: [Mumory] = []
     @Published public var locationMumorys: [String: [Mumory]] = [:]
+
+    @Published public var favoriteDate: [Date] = []
     
     @Published public var mumoryComments: [Comment] = []
     @Published public var mumoryCarouselAnnotations: [Mumory] = []
@@ -486,8 +488,10 @@ final public class MumoryDataViewModel: ObservableObject {
                 guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else { return }
                 
                 DispatchQueue.main.async {
-                    if !self.tempMumory.contains(where: { $0.id == document.documentID && $0.musicModel.songID.rawValue != mumory.musicModel.songID.rawValue}) {
-                        self.tempMumory.append(newMumory)
+                    if !self.tempMumory.contains(where: { $0.id == document.documentID}) {
+                        if !self.tempMumory.contains(where: { $0.musicModel.songID.rawValue == newMumory.musicModel.songID.rawValue}) {
+                            self.tempMumory.append(newMumory)
+                        }
                     }
                 }
             }
@@ -499,6 +503,33 @@ final public class MumoryDataViewModel: ObservableObject {
             print("Error sameSongFriendMumory: \(error)")
         }
     }
+    
+    public func fetchFavoriteDate(user: MumoriUser) async {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("MonthlyStat")
+            .whereField("type", isEqualTo: "favorite")
+        
+        do {
+            DispatchQueue.main.async {
+                self.favoriteDate = []
+            }
+            
+            let querySnapshot = try await collectionReference.getDocuments()
+            for document in querySnapshot.documents {
+                let documentData = document.data()
+                guard let date: FirebaseManager.Timestamp = documentData["date"] as? FirebaseManager.Timestamp else { return }
+                
+//                if !self.favoriteDate.contains(where: { $0.id == document.documentID }) {
+                    DispatchQueue.main.async {
+                        self.favoriteDate.append(date.dateValue())
+                    }
+//                }
+            }
+        } catch {
+            print("Error sameSongFriendMumory: \(error)")
+        }
+    }
+
     
     public func createMumory(_ mumory : Mumory, completionHandler: @escaping (Result<Void, Error>) -> Void)  {
         let db = FirebaseManager.shared.db
