@@ -119,6 +119,12 @@ struct SelectableArtistView: View {
             })
             .frame(height: 65)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
+            
+            PreviewMiniPlayer()
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+                .offset(y: playerViewModel.isShownPreview ? 0 : 120)
+                .animation(.spring(), value: playerViewModel.isShownPreview)
         }
         .ignoresSafeArea()
         .onAppear(perform: {

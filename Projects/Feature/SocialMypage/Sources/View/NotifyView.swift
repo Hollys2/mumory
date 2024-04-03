@@ -589,36 +589,37 @@ struct NotifyMenuBotton: View {
         self.notification = notification
     }
     var body: some View {
-        SharedAsset.menu.swiftUIImage
-            .resizable()
-            .scaledToFit()
-            .frame(width: 22, height: 22)
-            .padding(.leading, 10)
-            .onTapGesture {
-                UIView.setAnimationsEnabled(false)
-                isPresentBottomSheet = true
-            }
-            .fullScreenCover(isPresented: $isPresentBottomSheet) {
-                BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
-                    BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "알림 삭제", type: .warning)
-                        .onTapGesture {
-                            isPresentBottomSheet = false
-                            Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
-                                UIView.setAnimationsEnabled(false)
-                                isPresentPopup = true
-                            }
+        Button(action: {
+            UIView.setAnimationsEnabled(false)
+            isPresentBottomSheet = true
+        }, label: {
+            SharedAsset.menu.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 22, alignment: .trailing)
+        })
+        .padding(.leading, 10)
+        .fullScreenCover(isPresented: $isPresentBottomSheet) {
+            BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
+                BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "알림 삭제", type: .warning)
+                    .onTapGesture {
+                        isPresentBottomSheet = false
+                        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+                            UIView.setAnimationsEnabled(false)
+                            isPresentPopup = true
                         }
-                }
-                .background(TransparentBackground())
+                    }
             }
-            .fullScreenCover(isPresented: $isPresentPopup) {
-                TwoButtonPopupView(title: "해당 알림을 삭제하시겠습니까?", positiveButtonTitle: "확인") {
-                    let query = db.collection("User").document(currentUserData.uId).collection("Notification").document(notification.id)
-                    query.delete()
-                    notificationViewModel.notifications.removeAll(where: {$0.id == self.notification.id})
-                }
-                .background(TransparentBackground())
+            .background(TransparentBackground())
+        }
+        .fullScreenCover(isPresented: $isPresentPopup) {
+            TwoButtonPopupView(title: "해당 알림을 삭제하시겠습니까?", positiveButtonTitle: "확인") {
+                let query = db.collection("User").document(currentUserData.uId).collection("Notification").document(notification.id)
+                query.delete()
+                notificationViewModel.notifications.removeAll(where: {$0.id == self.notification.id})
             }
+            .background(TransparentBackground())
+        }
     }
 }
 

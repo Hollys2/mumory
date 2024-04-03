@@ -320,7 +320,6 @@ public struct SplashView: View {
             currentUserData.uId = user.uid
             currentUserData.user = await MumoriUser(uId: user.uid)
             currentUserData.favoriteGenres = favoriteGenres
-            currentUserData.playlistArray = await currentUserData.savePlaylist()
             UserDefaults.standard.setValue(Date(), forKey: "loginHistory")
             withAnimation {
                 isInitialSettingDone = true

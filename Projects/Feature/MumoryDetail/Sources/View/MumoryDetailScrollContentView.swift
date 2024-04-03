@@ -93,6 +93,8 @@ struct MumoryDetailScrollContentView: View {
                         Task {
                             guard let song = await fetchSong(songId: self.mumory.musicModel.songID.rawValue) else {return}
                             playerViewModel.playNewSongShowingPlayingView(song: song)
+                            playerViewModel.userWantsShown = true
+                            playerViewModel.isShownMiniPlayer = true
                         }
                     }
 

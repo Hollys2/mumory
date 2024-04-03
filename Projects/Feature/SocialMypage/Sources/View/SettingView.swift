@@ -80,6 +80,18 @@ struct SettingView: View {
                     }
                 
                 SettingItem(title: "앱 리뷰 남기기")
+                    .onTapGesture {
+                        if let appstoreUrl = URL(string: "https://apps.apple.com/app/idD8W49RM7XB") {
+                            var urlComp = URLComponents(url: appstoreUrl, resolvingAgainstBaseURL: false)
+                            urlComp?.queryItems = [
+                                URLQueryItem(name: "action", value: "write-review")
+                            ]
+                            guard let reviewUrl = urlComp?.url else {
+                                return
+                            }
+                            UIApplication.shared.open(reviewUrl, options: [:], completionHandler: nil)
+                        }
+                    }
                 
                 
                 Spacer()
@@ -95,9 +107,9 @@ struct SettingView: View {
                             }
                             Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
                             appCoordinator.bottomAnimationViewStatus = .remove
-                            appCoordinator.initPage = .login
-                            appCoordinator.rootPath = NavigationPath()
+                            appCoordinator.initPage = .onBoarding
                             currentUserData.removeAllData()
+                            appCoordinator.rootPath = NavigationPath()
                         }catch {
                             print("signout error: \(error)")
                         }
