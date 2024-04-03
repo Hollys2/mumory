@@ -40,7 +40,7 @@ struct StartCostomizationView: View {
 
                 LottieView(animation: .named("survey", bundle: .module))
                     .looping()
-                    .scaledToFill()
+                    .frame(width: getUIScreenBounds().width)
                 
                 Spacer()
                 
