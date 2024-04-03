@@ -80,8 +80,9 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
     public var isPublic: Bool
     public var likes: [String]
     public var commentCount: Int
+    public var myCommentCount: Int
 
-    public init(id: String, uId: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int) {
+    public init(id: String, uId: String, date: Date, musicModel: MusicModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int, myCommentCount: Int) {
         self.id = id
         self.uId = uId
         self.date = date
@@ -93,10 +94,11 @@ public class Mumory: NSObject, MKAnnotation, Identifiable {
         self.isPublic = isPublic
         self.likes = likes
         self.commentCount = commentCount
+        self.myCommentCount = myCommentCount
     }
     
     public override convenience init() {
-        self.init(id: "DELETE", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN PLACE", locationSubtitle: "", coordinate: CLLocationCoordinate2D(), country: "", administrativeArea: ""), isPublic: false, likes: [], commentCount: 0)
+        self.init(id: "DELETE", uId: "UNKNOWN", date: Date(), musicModel: MusicModel(), locationModel: LocationModel(locationTitle: "UNKNOWN PLACE", locationSubtitle: "", coordinate: CLLocationCoordinate2D(), country: "", administrativeArea: ""), isPublic: false, likes: [], commentCount: 0,  myCommentCount: 0)
     }
     
     func copy(from other: Mumory) {
@@ -128,7 +130,8 @@ extension Mumory {
               let imageURLs = documentData["imageURLs"] as? [String],
               let isPublic = documentData["isPublic"] as? Bool,
               let likes = documentData["likes"] as? [String],
-              let count = documentData["commentCount"] as? Int else {
+              let commentCount = documentData["commentCount"] as? Int,
+              let myCommentCount = documentData["myCommentCount"] as? Int else {
             print("something is nil in Mumory")
             return nil
         }
@@ -146,7 +149,7 @@ extension Mumory {
             let location = CLLocation(latitude: latitude, longitude: longitude)
             let locationModel = LocationModel(locationTitle: locationTitle, locationSubtitle: "", coordinate: location.coordinate, country: coutry, administrativeArea: administrativeArea)
             
-            return Mumory(id: mumoryDocumentID, uId: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: count)
+            return Mumory(id: mumoryDocumentID, uId: userDocumentID, date: date.dateValue(), musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: commentCount, myCommentCount: myCommentCount)
             
         } catch {
             print("Error fetching music or location:", error.localizedDescription)

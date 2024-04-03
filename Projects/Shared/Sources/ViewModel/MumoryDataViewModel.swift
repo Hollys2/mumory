@@ -46,11 +46,11 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var isRewardPopUpShown: Bool = false
     @Published public var reward: Reward = .none
     
-    
     private var tempMumory: [Mumory] = []
     private var tempSocialMumory: [Mumory] = []
     private var lastDocument: DocumentSnapshot?
-
+    private var initialSnapshot: Bool = true
+    private var initialMumorySnapshot: Bool = true
     
     public init() {}
     
@@ -115,102 +115,59 @@ final public class MumoryDataViewModel: ObservableObject {
                         let documentData = documentChange.document.data()
                         guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
                         
+                        if self.initialMumorySnapshot {
+                            self.initialMumorySnapshot = false
+                            return
+                        }
+                        
                         DispatchQueue.main.async {
                             if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
                                 self.myMumorys.append(newMumory)
-                                print("Document added: \(documentChange.document.documentID)")
-                            }
-                            
-                            if UserDefaults.standard.value(forKey: "attendance0") == nil {
-                                self.reward = .attendance(0)
-                                withAnimation(.spring(response: 0.2)) {
-                                    self.isRewardPopUpShown = true
-                                }
-                                UserDefaults.standard.set(Date(), forKey: "attendance0")
+                                print("Document added: \(self.myMumorys.count)")
                             }
                             
                             if self.myMumorys.count == 1 {
-                                if UserDefaults.standard.value(forKey: "record0") == nil {
-                                    self.reward = .record(0)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "record0")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "record0"]
+                                collectionReference.addDocument(data: data)
                             } else if self.myMumorys.count == 5 {
-                                if UserDefaults.standard.value(forKey: "record1") == nil {
-                                    self.reward = .record(1)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "record1")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "record1"]
+                                collectionReference.addDocument(data: data)
                             } else if self.myMumorys.count == 10 {
-                                if UserDefaults.standard.value(forKey: "record2") == nil {
-                                    self.reward = .record(2)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "record2")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "record2"]
+                                collectionReference.addDocument(data: data)
                             } else if self.myMumorys.count == 20 {
-                                if UserDefaults.standard.value(forKey: "record3") == nil {
-                                    self.reward = .record(3)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "record3")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "record3"]
+                                collectionReference.addDocument(data: data)
                             } else if self.myMumorys.count == 50 {
-                                if UserDefaults.standard.value(forKey: "record4") == nil {
-                                    self.reward = .record(4)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "record4")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "record4"]
+                                collectionReference.addDocument(data: data)
                             }
                             
                             if self.locationMumorys.count == 2 {
-                                if UserDefaults.standard.value(forKey: "location0") == nil {
-                                    self.reward = .location(0)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "location0")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "location0"]
+                                collectionReference.addDocument(data: data)
                             } else if self.locationMumorys.count == 3 {
-                                if UserDefaults.standard.value(forKey: "location1") == nil {
-                                    self.reward = .location(1)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "location1")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "location1"]
+                                collectionReference.addDocument(data: data)
                             } else if self.locationMumorys.count == 5 {
-                                if UserDefaults.standard.value(forKey: "location2") == nil {
-                                    self.reward = .location(2)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "location2")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "location2"]
+                                collectionReference.addDocument(data: data)
                             } else if self.locationMumorys.count == 10 {
-                                if UserDefaults.standard.value(forKey: "location3") == nil {
-                                    self.reward = .location(3)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "location3")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "location3"]
+                                collectionReference.addDocument(data: data)
                             } else if self.locationMumorys.count == 15 {
-                                if UserDefaults.standard.value(forKey: "location4") == nil {
-                                    self.reward = .location(4)
-                                    withAnimation(.spring(response: 0.2)) {
-                                        self.isRewardPopUpShown = true
-                                    }
-                                    UserDefaults.standard.set(Date(), forKey: "location4")
-                                }
+                                let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                let data = ["type": "location4"]
+                                collectionReference.addDocument(data: data)
                             }
                         }
                         
@@ -241,6 +198,101 @@ final public class MumoryDataViewModel: ObservableObject {
                             self.myMumorys.removeAll { $0.id == removedDocumentID }
                         }
                     }
+                }
+            }
+        }
+        return listener
+    }
+    
+    public func fetchRewardListener(uId: String) -> ListenerRegistration {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(uId).collection("Reward")
+
+        let listener = collectionReference.addSnapshotListener { snapshot, error in
+            if UserDefaults.standard.value(forKey: "attendance%") == nil {
+                print("fetchRewardListener 첫 실행")
+                let data = ["type": "attendance0"]
+                collectionReference.addDocument(data: data)
+                UserDefaults.standard.set(Date(), forKey: "attendance%")
+            }
+            
+            Task {
+                guard let snapshot = snapshot, error == nil else {
+                    print("Error fetchRewardListener: \(error!)")
+                    return
+                }
+                
+                if !self.initialSnapshot {
+                    for documentChange in snapshot.documentChanges {
+                        guard documentChange.type == .added else { continue }
+                        let documentData = documentChange.document.data()
+                        guard let type = documentData["type"] as? String else { continue }
+                        
+                        DispatchQueue.main.async {
+                            switch type {
+                            case "attendance0":
+                                self.reward = .attendance(0)
+                            case "attendance1":
+                                self.reward = .attendance(1)
+                            case "attendance2":
+                                self.reward = .attendance(2)
+                            case "attendance3":
+                                self.reward = .attendance(3)
+                            case "attendance4":
+                                self.reward = .attendance(4)
+                            case "attendanc0":
+                                self.reward = .attendance(0)
+                            case "record1":
+                                self.reward = .record(1)
+                            case "record2":
+                                self.reward = .record(2)
+                            case "record3":
+                                self.reward = .record(3)
+                            case "record4":
+                                self.reward = .record(4)
+                            case "location0":
+                                self.reward = .location(0)
+                            case "location1":
+                                self.reward = .location(1)
+                            case "location2":
+                                self.reward = .location(2)
+                            case "location3":
+                                self.reward = .location(3)
+                            case "location4":
+                                self.reward = .location(4)
+                            case "like0":
+                                self.reward = .like(0)
+                            case "like1":
+                                self.reward = .like(1)
+                            case "like2":
+                                self.reward = .like(2)
+                            case "like3":
+                                self.reward = .like(3)
+                            case "like4":
+                                self.reward = .like(4)
+                            case "comment0":
+                                self.reward = .comment(0)
+                            case "comment1":
+                                self.reward = .comment(1)
+                            case "comment2":
+                                self.reward = .comment(2)
+                            case "comment3":
+                                self.reward = .comment(3)
+                            case "comment4":
+                                self.reward = .comment(4)
+                            default:
+                                self.reward = .none
+                                break
+                            }
+                            
+                            withAnimation(.spring(response: 0.2)) {
+                                self.isRewardPopUpShown = true
+                            }
+                            print("fetchRewardListener added: \(self.reward)")
+                        }
+                    }
+                } else {
+                    self.initialSnapshot = false
                 }
             }
         }
@@ -335,7 +387,12 @@ final public class MumoryDataViewModel: ObservableObject {
                 let snapshot = try await copiedMumoryCollectionRef.getDocuments()
                 for document in snapshot.documents {
                     let documentData = document.data()
-                    guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
+                    guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {
+                        DispatchQueue.main.async {
+                            self.isUpdating = false
+                        }
+                        return
+                    }
                     
                     DispatchQueue.main.async {
                         if !self.tempSocialMumory.contains(where: { $0.id == document.documentID }) {
@@ -402,26 +459,73 @@ final public class MumoryDataViewModel: ObservableObject {
             }
         }
     }
-
     
-//    public static func fetchCommentCount(mumoryId: String, completion: @escaping (Int?) -> Void) {
-//        let db = FirebaseManager.shared.db
-//        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment")
-//
-//        collectionReference.getDocuments { (querySnapshot, error) in
-//            if let error = error {
-//                print("Error fetching documents: \(error)")
-//                completion(nil)
-//            } else {
-//                let count = querySnapshot?.documents.count ?? 0
-//                completion(count)
-//            }
-//        }
-//    }
+    public static func fetchReward(user: MumoriUser) async -> [String] {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+        
+        var rewards: [String] = [] // 배열을 초기화
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            
+            for document in querySnapshot.documents {
+                let documentData = document.data()
+                guard let reward: String = documentData["type"] as? String else {
+                    continue
+                }
+                rewards.append(reward)
+            }
+        } catch {
+            print("Error fetching documents: \(error)")
+        }
+        
+        return rewards
+    }
+    
+    public static func fetchRewardCount(user: MumoriUser, reward: String) async -> Int {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+            .whereField("type", isEqualTo: reward)
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            return querySnapshot.documents.count
+        } catch {
+            print("Error fetching documents: \(error)")
+            return -1
+        }
+    }
+    
+    public static func fetchRewardCount(user: MumoriUser) async -> Int {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            return querySnapshot.documents.count
+        } catch {
+            print("Error fetching documents: \(error)")
+            return -1
+        }
+    }
     
     public static func fetchCommentCount(mumoryId: String) async -> Int {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment").whereField("parentId", isEqualTo: "")
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            return querySnapshot.documents.count
+        } catch {
+            print("Error fetching documents: \(error)")
+            return -1
+        }
+    }
+    
+    public static func fetchMyCommentCount(mumoryId: String, uId: String) async -> Int {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory").document(mumoryId).collection("Comment").whereField("uId", isEqualTo: uId)
         
         do {
             let querySnapshot = try await collectionReference.getDocuments()
@@ -549,7 +653,8 @@ final public class MumoryDataViewModel: ObservableObject {
             "imageURLs": mumory.imageURLs ?? [],
             "isPublic": mumory.isPublic,
             "likes": mumory.likes,
-            "commentCount": mumory.commentCount
+            "commentCount": mumory.commentCount,
+            "myCommentCount": mumory.myCommentCount
         ]
         
         collectionReference.addDocument(data: newData) { error in
@@ -581,7 +686,8 @@ final public class MumoryDataViewModel: ObservableObject {
             "imageURLs": mumory.imageURLs ?? [],
             "isPublic": mumory.isPublic,
             "likes": mumory.likes,
-            "commentCount": mumory.commentCount
+            "commentCount": mumory.commentCount,
+            "myCommentCount": mumory.myCommentCount
         ]
         
         documentReference.updateData(updatedData) { error in
@@ -639,7 +745,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func likeMumory(mumoryAnnotation: Mumory, uId: String) async {
+    public func likeMumory(mumoryAnnotation: Mumory, uId: String, completion: @escaping ([String]) -> Void) async {
         let db = FirebaseManager.shared.db
         let docRef = db.collection("Mumory").document(mumoryAnnotation.id)
         
@@ -649,7 +755,6 @@ final public class MumoryDataViewModel: ObservableObject {
                 guard let documentData = document.data(),
                       var oldLikes = documentData["likes"] as? [String] else {return}
                 
-                print("oldLikes1: \(oldLikes)")
                 if oldLikes.contains(uId) {
                     if let index = oldLikes.firstIndex(of: uId) {
                         oldLikes.remove(at: index)
@@ -658,15 +763,10 @@ final public class MumoryDataViewModel: ObservableObject {
                     oldLikes.append(uId)
                 }
                 
-                print("oldLikes2: \(oldLikes)")
+                print("oldLikes: \(oldLikes)")
+                completion(oldLikes)
                 
-                self.selectedMumoryAnnotation.likes = oldLikes
-                
-//                if let index = self.everyMumoryAnnotations.firstIndex(where: { $0.id == mumoryAnnotation.id }) {
-//                    DispatchQueue.main.async {
-//                        self.everyMumoryAnnotations[index] = mumoryAnnotation
-//                    }
-//                }
+//                self.selectedMumoryAnnotation.likes = oldLikes
             } else {
                 print("Document does not exist")
             }
@@ -767,10 +867,10 @@ final public class MumoryDataViewModel: ObservableObject {
     //                        }
     //                    }
     
-    public func createComment(mumoryDocumentID: String, comment: Comment, competion: @escaping ([Comment]) -> Void) {
+    public func createComment(mumory: Mumory, comment: Comment, competion: @escaping ([Comment]) -> Void) {
         let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("Mumory").document(mumoryDocumentID).collection("Comment")
-        let mumoryDocReference = db.collection("Mumory").document(mumoryDocumentID)
+        let collectionReference = db.collection("Mumory").document(mumory.id).collection("Comment")
+        let mumoryDocReference = db.collection("Mumory").document(mumory.id)
         
         let newData: [String: Any] = comment.toDictionary()
         
@@ -780,8 +880,16 @@ final public class MumoryDataViewModel: ObservableObject {
                 competion([])
             } else {
                 Task {
-                    let commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumoryDocumentID)
-                    try await mumoryDocReference.updateData(["commentCount": commentCount])
+                    let commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+                    var myCommentCount = 0
+                    if mumory.uId == comment.uId {
+                        myCommentCount = await MumoryDataViewModel.fetchMyCommentCount(mumoryId: mumory.id, uId: comment.uId)
+                        print("나다: \(myCommentCount)")
+                        try await mumoryDocReference.updateData(["commentCount": commentCount, "myCommentCount": myCommentCount])
+                    } else {
+                        try await mumoryDocReference.updateData(["commentCount": commentCount, "myCommentCount": commentCount])
+                    }
+                    
                     let comments = await MumoryDataViewModel.fetchComment(mumoryId: comment.mumoryId) ?? []
                     var result: [Comment] = []
                     for i in comments {
