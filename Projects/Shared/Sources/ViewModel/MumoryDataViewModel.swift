@@ -116,6 +116,11 @@ final public class MumoryDataViewModel: ObservableObject {
                         guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
                         
                         if self.initialMumorySnapshot {
+                            if !self.myMumorys.contains(where: { $0.id == documentChange.document.documentID }) {
+                                self.myMumorys.append(newMumory)
+                                print("Document added: \(self.myMumorys.count)")
+                            }
+                            
                             self.initialMumorySnapshot = false
                             return
                         }
