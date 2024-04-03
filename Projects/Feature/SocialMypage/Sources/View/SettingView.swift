@@ -105,9 +105,9 @@ struct SettingView: View {
                             for key in UserDefaults.standard.dictionaryRepresentation().keys {
                                 UserDefaults.standard.removeObject(forKey: key.description)
                             }
+                            appCoordinator.initPage = .onBoarding
                             Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
                             appCoordinator.bottomAnimationViewStatus = .remove
-                            appCoordinator.initPage = .onBoarding
                             currentUserData.removeAllData()
                             appCoordinator.rootPath = NavigationPath()
                         }catch {

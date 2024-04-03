@@ -71,13 +71,9 @@ struct MyRecentMumoryListView: View {
                 
                 if songs.isEmpty && !isLoading {
                     InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
-                        appCoordinator.selectedTab = .home
-                        appCoordinator.rootPath.removeLast()
-                        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                            withAnimation(Animation.easeInOut(duration: 0.1)) {
-                                appCoordinator.isCreateMumorySheetShown = true
-                                appCoordinator.offsetY = CGFloat.zero
-                            }
+                        withAnimation(Animation.easeInOut(duration: 0.1)) {
+                            appCoordinator.isCreateMumorySheetShown = true
+                            appCoordinator.offsetY = CGFloat.zero
                         }
                     }
                     .padding(.top, getUIScreenBounds().height * 0.25)

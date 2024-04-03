@@ -41,6 +41,7 @@ public struct BottomSheetWrapper: View {
                             .padding(.top, 11)
                             .padding(.bottom, 4)
                         AnyView(content())
+                            .padding(.bottom, 7)
                     })
                     .frame(maxWidth: .infinity)
                     .background(ColorSet.background)
@@ -49,7 +50,6 @@ public struct BottomSheetWrapper: View {
                     .offset(y: yOffset)
                     .gesture(drag)
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-                    .padding(.bottom, 7)
                     .padding(.bottom, 29)
                 }
                 

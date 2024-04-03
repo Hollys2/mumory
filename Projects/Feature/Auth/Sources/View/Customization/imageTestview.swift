@@ -7,26 +7,25 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct imageTestview: View {
     var body: some View {
-        VStack{
-            AsyncImage(url: URL(string: "https://cdn.huffingtonpost.kr/news/photo/201903/80794_153503.jpeg")) { image in
-                image
-                    .resizable()
+        ZStack{
+            Color.black
+            VStack{
+                LottieView(animation: .named("survey", bundle: .module))
+                    .looping()
                     .scaledToFill()
-                    .frame(width: 105, height: 105)
-                    .clipShape(Circle())
-            } placeholder: {
-                EmptyView()
             }
-            
+            .ignoresSafeArea()
 
-                
         }
+        .ignoresSafeArea()
+
     }
 }
-
+//
 //#Preview {
 //    imageTestview()
 //}

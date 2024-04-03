@@ -85,12 +85,15 @@ struct SignUpManageView: View {
                                 isTapBackButton = false
                             })
                     case 1:
-                        InputPWView()
-                            .environmentObject(manager)
-                            .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), removal: .move(edge: isTapBackButton ? .trailing : .leading)))
-                            .onAppear(perform: {
-                                isTapBackButton = false
-                            })
+                        ScrollView {
+                            InputPWView()
+                                .environmentObject(manager)
+                                .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), removal: .move(edge: isTapBackButton ? .trailing : .leading)))
+                                .onAppear(perform: {
+                                    isTapBackButton = false
+                                })
+                        }
+               
                     case 2:
                         TermsOfServiceView()
                             .environmentObject(manager)
@@ -126,7 +129,6 @@ struct SignUpManageView: View {
                     .disabled(manager.isLoading || !manager.isButtonEnabled())
                 }
                 
-                SignUpErrorPopup(isShowing: $isSignUpErrorShowing)
             }
             .background(LibraryColorSet.background)
             .navigationBarBackButtonHidden()
