@@ -238,10 +238,10 @@ struct MumoryDetailScrollContentView: View {
                                 .resizable()
                                 .frame(width: 235, height: 42)
                                 .offset(x: -15, y: 16)
-                                .opacity(UserDefaults.standard.value(forKey: "starPopUp") == nil ? 1 : 0)
+                                .opacity(UserDefaults.standard.value(forKey: "starPopUp2") == nil ? 1 : 0)
                                 .onTapGesture {
                                     self.isPopUpShown = false
-                                    UserDefaults.standard.set(Date(), forKey: "starPopUp")
+                                    UserDefaults.standard.set(Date(), forKey: "starPopUp2")
                                 }
                         }
                             .opacity(self.isPopUpShown ? 1: 0)

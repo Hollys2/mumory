@@ -698,7 +698,7 @@ public struct MumoryCommentSheetView: View {
                                             isButtonDisabled = true
                                             
                                             Task {
-                                                mumoryDataViewModel.createComment(mumoryDocumentID: mumory.id, comment: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: "", mumoryId: mumory.id, date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
+                                                mumoryDataViewModel.createComment(mumory: mumory, comment: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: "", mumoryId: mumory.id, date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
                                                     commentText = ""
                                                     self.comments = comments
                                                     isButtonDisabled = false
@@ -733,10 +733,10 @@ public struct MumoryCommentSheetView: View {
                                     .resizable()
                                     .frame(width: 246, height: 42)
                                     .offset(x: 10, y: -49)
-                                    .opacity(UserDefaults.standard.value(forKey: "commentPopUp") == nil ? 1 : 0)
+                                    .opacity(UserDefaults.standard.value(forKey: "commentPopUp2") == nil ? 1 : 0)
                                     .onTapGesture {
                                         self.isPopUpShown = false
-                                        UserDefaults.standard.set(Date(), forKey: "commentPopUp")
+                                        UserDefaults.standard.set(Date(), forKey: "commentPopUp2")
                                     }
                             }
                                 .opacity(self.isPopUpShown ? 1: 0)
