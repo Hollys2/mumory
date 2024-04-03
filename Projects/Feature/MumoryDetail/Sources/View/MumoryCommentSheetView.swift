@@ -69,7 +69,8 @@ struct CommentView: View {
                         image
                             .resizable()
                     default:
-                        Color(red: 0.184, green: 0.184, blue: 0.184)
+                        currentUserData.user.defaultProfileImage
+                            .resizable()
                     }
                 }
                 .scaledToFill()
@@ -283,7 +284,8 @@ struct Reply: View {
                         image
                             .resizable()
                     default:
-                        Color(red: 0.184, green: 0.184, blue: 0.184)
+                        currentUserData.user.defaultProfileImage
+                            .resizable()
                     }
                 }
                 .scaledToFill()
