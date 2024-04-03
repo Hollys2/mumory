@@ -18,6 +18,7 @@ import Shared
 public struct HomeView: View {
     
     @State private var listener: ListenerRegistration?
+    @State private var rewardListener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
     @State private var isCreateMumoryPopUpViewShown: Bool = true
     
@@ -138,6 +139,7 @@ public struct HomeView: View {
                                 DispatchQueue.main.async {
                                     self.mumoryDataViewModel.myMumorys = mumorys
                                     self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                                    self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(uId: self.currentUserData.uId)
                                 }
                             case .failure(let error):
                                 print("ERROR: \(error)")

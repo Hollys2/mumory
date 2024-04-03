@@ -46,18 +46,20 @@ struct MumoryDetailReactionBarView: View {
                 Button(action: {
                     self.generateHapticFeedback(style: .medium)
                     isButtonDisabled = true
-                    
+                    let originLikes = self.mumory.likes
+
                     Task {
-                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId)
-                        
-                        lazy var functions = Functions.functions()
-                        functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
-                            if let error = error {
-                                print("Error Functions \(error.localizedDescription)")
-                            } else {
-                                self.mumory.likes = self.mumoryDataViewModel.selectedMumoryAnnotation.likes
-                                print("라이크 성공: \(mumory.likes.count)")
-                                isButtonDisabled = false
+                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId) { likes in
+                            lazy var functions = Functions.functions()
+                            functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
+                                if let error = error {
+                                    self.mumory.likes = originLikes
+                                    print("Error Functions \(error.localizedDescription)")
+                                } else {
+                                    self.mumory.likes = likes
+                                    print("라이크 성공: \(mumory.likes.count)")
+                                    isButtonDisabled = false
+                                }
                             }
                         }
                     }

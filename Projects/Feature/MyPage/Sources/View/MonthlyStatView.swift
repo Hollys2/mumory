@@ -284,7 +284,7 @@ struct ContentView: View {
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                 
-                                Text("\(mumoriesCommentCount)개")
+                                Text("\(self.mumoriesCommentCount)개")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             }
@@ -441,7 +441,8 @@ struct ContentView: View {
                     }
                 }
                 
-                mumoriesCommentCount += mumory.commentCount
+                self.mumoriesCommentCount += mumory.commentCount
+                mumoriesCommentCount -= mumory.myCommentCount
             }
             
             mumoryDataViewModel.locationMumorys = [:]
@@ -593,6 +594,7 @@ struct ContentView: View {
                 }
                 
                 mumoriesCommentCount += mumory.commentCount
+                mumoriesCommentCount -= mumory.myCommentCount
             }
             
             mumoryDataViewModel.locationMumorys = [:]
@@ -690,7 +692,6 @@ struct ContentView: View {
                         mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
-                
             }
             
             self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
