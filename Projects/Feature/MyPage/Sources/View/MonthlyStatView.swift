@@ -543,7 +543,7 @@ struct ContentView: View {
                 
             }
             
-            self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
+            self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count - 1
             Task {
                 await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
                 self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count

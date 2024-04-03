@@ -436,6 +436,60 @@ extension FriendMapViewRepresentable.Coordinator: MKMapViewDelegate {
                     imageView.image = lockImage
                     annotationView.addSubview(imageView)
                 }
+                
+                let text = "\(mumoryAnnotation.locationModel.locationTitle)"
+                // UILabel 생성
+                let label = UILabel()
+                label.text = text
+                label.textColor = .white
+                label.textAlignment = .center
+                label.font = SharedFontFamily.Pretendard.medium.font(size: 16)
+                
+                // 최대 너비 설정
+                label.preferredMaxLayoutWidth = 309
+                
+                // 두 줄로 제한
+                label.numberOfLines = 2
+                label.lineBreakMode = .byTruncatingTail
+
+                
+                // UILabel을 포함하는 UIView 생성
+                let containerView = UIView()
+                containerView.addSubview(label)
+                
+                // AutoLayout 설정
+                label.translatesAutoresizingMaskIntoConstraints = false
+                containerView.translatesAutoresizingMaskIntoConstraints = false
+                
+                NSLayoutConstraint.activate([
+                    label.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+                    label.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+                    
+                    // 텍스트 좌우로 19포인트 씩 여백
+                    label.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 15),
+                    label.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -15),
+                    
+                    // 텍스트 상하로 12포인트 씩 여백
+                    label.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 9),
+                    label.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -9)
+                ])
+                
+                // containerView에 둥근 모서리 적용
+                containerView.layer.cornerRadius = 19.53
+                
+                // containerView의 배경색을 오렌지로 설정
+                containerView.backgroundColor = UIColor(red: 0.188, green: 0.188, blue: 0.188, alpha: 0.898)
+
+                // ViewController의 뷰에 containerView 추가
+                annotationView.addSubview(containerView)
+                
+                // AutoLayout 설정
+                containerView.translatesAutoresizingMaskIntoConstraints = false
+                
+                NSLayoutConstraint.activate([
+                    containerView.bottomAnchor.constraint(equalTo: annotationView.topAnchor, constant: -2),
+                    containerView.centerXAnchor.constraint(equalTo: annotationView.centerXAnchor)
+                ])
             } else {
                 print("ERROR: NO URL")
             }
