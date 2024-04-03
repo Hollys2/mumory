@@ -254,7 +254,7 @@ struct PlayingView: View {
             //상단바
             HStack(alignment: .bottom, content: {
                 Button(action: {
-                    dismiss()
+                    playerViewModel.isPresentNowPlayingView = false
                 }, label: {
                     SharedAsset.downArrow.swiftUIImage
                         .resizable()
@@ -302,7 +302,8 @@ struct PlayingView: View {
                                 .onAppear(perform: {
                                     DispatchQueue.main.async {
                                         guard let song = playerViewModel.currentSong else {return}
-                                        titleWidth = getTextWidth(term: song.title)
+                                        let fontSize: CGFloat = getUIScreenBounds().height < 700 ? 18.0 : 20.0
+                                        titleWidth = getTextWidth(term: song.title, fontSize: fontSize)
                                         changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
                                         startAnimation = true
                                     }
@@ -456,7 +457,8 @@ struct PlayingView: View {
             
             guard let song = playerViewModel.currentSong else {return}
             DispatchQueue.main.async {
-                titleWidth = getTextWidth(term: song.title)
+                let fontSize: CGFloat = getUIScreenBounds().height < 700 ? 18.0 : 20.0
+                titleWidth = getTextWidth(term: song.title, fontSize: fontSize)
                 changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
                 startAnimation = true
             }
@@ -629,8 +631,8 @@ private func getMinuteSecondString(time: TimeInterval?) -> String {
     return Duration(tvm).formatted(.time(pattern: .minuteSecond))
 }
 
-private func getTextWidth(term: String) -> CGFloat {
-    let fontAttribute = [NSAttributedString.Key.font: SharedFontFamily.Pretendard.semiBold.font(size: 23)]
+private func getTextWidth(term: String, fontSize: CGFloat) -> CGFloat {
+    let fontAttribute = [NSAttributedString.Key.font: SharedFontFamily.Pretendard.semiBold.font(size: fontSize)]
     let width = (term as NSString).size(withAttributes: fontAttribute).width
     return width
 }

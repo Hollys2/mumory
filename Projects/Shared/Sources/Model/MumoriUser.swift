@@ -25,7 +25,7 @@ public struct MumoriUser: Hashable {
     public var profileImageURL: URL?
     public var backgroundImageURL: URL?
     public var bio: String = ""
-    public var defaultProfileImage: Image = randomProfiles[0]
+    public var defaultProfileImage: Image = SharedAsset.circle.swiftUIImage
     
     public init() {}
     

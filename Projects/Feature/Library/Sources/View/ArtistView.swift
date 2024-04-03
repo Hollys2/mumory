@@ -141,6 +141,8 @@ struct ArtistView: View {
             })
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
+                .ignoresSafeArea()
+
         }
         .ignoresSafeArea()
         .onAppear(perform: {

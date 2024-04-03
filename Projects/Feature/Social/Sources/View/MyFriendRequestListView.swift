@@ -143,7 +143,6 @@ public struct MyRequestFriendItem: View {
                 status = .friendProcessLoading
                 Task {
                     guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
-                        status = .normal
                         return
                     }
                     status = .normal

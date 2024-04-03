@@ -291,6 +291,8 @@ struct PlaylistView: View {
             .opacity(isEditing ? 1 : 0)
 
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
+                .ignoresSafeArea()
+
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()

@@ -36,14 +36,16 @@ public class CurrentUserData: ObservableObject {
     @Published public var recievedRequests: [MumoriUser] = []
     @Published public var recievedNewFriends: Bool = false
     @Published public var existUnreadNotification: Bool = false
+    @Published public var signUpDate: Date = Date()
     
     @Published public var reward: Reward = .none
+    @Published public var favoriteGenres: [Int] = []
+    @Published public var playlistArray: [MusicPlaylist] = []
+
     
     //삭제 예정...
-    @Published public var favoriteGenres: [Int] = []
     @Published public var topInset: CGFloat = 0
     @Published public var bottomInset: CGFloat = 0
-    @Published public var playlistArray: [MusicPlaylist] = []
     @Published public var startAnimation: Bool = false
     public init(){}
     

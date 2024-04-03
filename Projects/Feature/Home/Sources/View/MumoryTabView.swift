@@ -33,6 +33,7 @@ public struct MumoryTabView: View {
                     .frame(width: 25, height: 41)
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
+                        playerViewModel.isPresentNowPlayingView = false
                         selectedTab = .home
                     }
                 

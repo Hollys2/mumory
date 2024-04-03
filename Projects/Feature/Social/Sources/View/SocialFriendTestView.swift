@@ -444,7 +444,6 @@ struct FriendAddItem: View {
                 let functions = Firebase.functions
                 Task {
                     guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
-                        status = .valid
                         print("network error")
                         return
                     }
