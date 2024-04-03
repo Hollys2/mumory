@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "circle.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
@@ -9,7 +10,6 @@
       "scale" : "2x"
     },
     {
-      "filename" : "MiniInfo_Comment@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -15,8 +15,11 @@ struct imageTestview: View {
             Color.black
             VStack{
                 LottieView(animation: .named("survey", bundle: .module))
+                    .resizable()
                     .looping()
-                    .scaledToFill()
+                    .background(Color.yellow)
+                    .ignoresSafeArea()
+
             }
             .ignoresSafeArea()
 
@@ -25,7 +28,7 @@ struct imageTestview: View {
 
     }
 }
-//
+
 //#Preview {
 //    imageTestview()
 //}

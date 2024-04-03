@@ -15,7 +15,6 @@ struct FavoriteGenreRecommendationView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isEditGenreViewPresent: Bool = false
     @State var isEditGenreInfoPresent: Bool = false
-    @State var genreInfoTimer: Timer?
     
     var body: some View {
         ZStack{
@@ -59,33 +58,39 @@ struct FavoriteGenreRecommendationView: View {
                                 
                                 if isEditGenreInfoPresent {
                                     SharedAsset.speechBubblePurple.swiftUIImage
+                                        .frame(width: 178)
                                         .overlay {
-                                            Text("관심 장르를 수정해보세요!")
-                                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 11))
-                                                .foregroundStyle(Color.black)
-                                                .padding(.bottom, 6)
+                                            HStack(spacing: 3, content: {
+                                                Text("관심 장르를 수정해보세요!")
+                                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 13))
+                                                    .foregroundStyle(Color.black)
+                                                
+                                                SharedAsset.xBlackBold.swiftUIImage
+                                                    .scaledToFit()
+                                                    .frame(width: 13, height: 13)
+                                                    .onTapGesture {
+                                                        UserDefaults.standard.set(Date(), forKey: "EditFavoriteGenre")
+                                                        withAnimation(.spring()){
+                                                            isEditGenreInfoPresent = false
+                                                        }
+                                                    }
+                                            })
+                                            .padding(.bottom, 6)
+                                            
                                         }
-                                        .offset(y: -37)
+                                        .offset(y: -40)
+                                        .offset(x: -65)
                                         .transition(.scale(scale: 0.0, anchor: .top).combined(with: .opacity))
-                                        .onAppear {
-                                            UserDefaults.standard.set(Date(), forKey: "EditGenre")
-                                        }
                                 }
                                 
                             }
                             .onAppear(perform: {
                                 withAnimation(.spring()) {
-                                    isEditGenreInfoPresent = UserDefaults.standard.value(forKey: "EditGenre") == nil
-                                }
-                                genreInfoTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { timer in
-                                    withAnimation (.spring()){
-                                        isEditGenreInfoPresent = false
-                                    }
+                                    isEditGenreInfoPresent = UserDefaults.standard.value(forKey: "EditFavoriteGenre") == nil
                                 }
                             })
                             .onDisappear(perform: {
                                 isEditGenreInfoPresent = false
-                                genreInfoTimer?.invalidate()
                             })
                         
                     }
