@@ -22,6 +22,7 @@ public class CurrentUserData: ObservableObject {
                     self.FriendRequestListener()
                     self.NotificationListener()
                     self.FriendUpdateListener()
+                
                 }
             }
         }
@@ -111,8 +112,8 @@ public class CurrentUserData: ObservableObject {
         DispatchQueue.main.async {
             self.friendDocumentListener = db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
-                guard let friendIds = snapshot.get("friends") as? [String] else {return}
-                guard let blockFriendIds = snapshot.get("blockFriends") as? [String] else {return}
+                let friendIds = snapshot.get("friends") as? [String] ?? []
+                let blockFriendIds = snapshot.get("blockFriends") as? [String] ?? []
                 Task {
                     self.friends = await self.fetchFriend(friendIds: friendIds)
                     self.blockFriends = await self.fetchFriend(friendIds: blockFriendIds)
@@ -337,6 +338,7 @@ public class CurrentUserData: ObservableObject {
             for friendId in friendIds {
                 taskGroup.addTask {
                     let user = await MumoriUser(uId: friendId)
+                    print("friend!!!!! nickname: \(user.nickname)")
                     if user.nickname == "탈퇴계정" {return nil}
                     return user
                 }
