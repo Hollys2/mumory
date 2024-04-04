@@ -112,7 +112,6 @@ public struct MyMumoryView: View {
 
                                 VStack(spacing: 0) {
                                     
-                                    
                                     if mumoryDataViewModel.monthlyMumorys.isEmpty {
                                         ZStack(alignment: .top) {
                                             Color.clear
@@ -312,7 +311,7 @@ public struct MyMumoryView: View {
                     } else if country == "러시아" {
                         country += " 🇷🇺"
                     } else if country == "우크라이나" {
-                        country += " 🇺🇦"                        
+                        country += " 🇺🇦"
                     } else if country == "호주" {
                         country += " 🇦🇺"
                     } else if country == "멕시코" {
@@ -376,7 +375,6 @@ public struct MyMumoryView: View {
                         mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
-                
             }
         }
         .fullScreenCover(isPresented: $isDatePickerShown, content: {
@@ -646,7 +644,7 @@ struct MumoryItemView: View {
                                         
                                         SharedAsset.imageCountSocial.swiftUIImage
                                             .resizable()
-                                            .frame(width: 18, height: 18)
+                                            .frame(width: 14, height: 14)
                                         
                                         Text("\(imageURLs.count)")
                                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
@@ -658,7 +656,7 @@ struct MumoryItemView: View {
                                         Rectangle()
                                             .foregroundColor(.clear)
                                             .frame(width: 48, height: 28)
-                                            .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.6))
+                                            .background(Color(red: 0.16, green: 0.16, blue: 0.16).opacity(0.7))
                                             .cornerRadius(15)
                                     )
                                 }
@@ -950,19 +948,6 @@ private struct BlurScroll: ViewModifier {
     @State private var scrollPosition: CGPoint = .zero
     
     func body(content: Content) -> some View {
-        
-        let gradient = LinearGradient(stops: [
-            .init(color: .white, location: 0.10),
-            .init(color: .clear, location: 0.25)],
-                                      startPoint: .bottom,
-                                      endPoint: .top)
-        
-        let invertedGradient = LinearGradient(stops: [
-            .init(color: .clear, location: 0.10),
-            .init(color: .white, location: 0.25)],
-                                              startPoint: .bottom,
-                                              endPoint: .top)
-        
         GeometryReader { proxy in
             ScrollView {
                 ZStack(alignment: .top) {
@@ -982,8 +967,7 @@ private struct BlurScroll: ViewModifier {
                 .background(
                     GeometryReader { geo in
                         Color.clear
-                            .preference(key: ScrollOffsetPreferenceKey.self,
-                                        value: geo.frame(in: .named(coordinateSpaceName)).origin)
+                            .preference(key: ScrollOffsetPreferenceKey.self, value: geo.frame(in: .named(coordinateSpaceName)).origin)
                     }
                 )
                 .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in

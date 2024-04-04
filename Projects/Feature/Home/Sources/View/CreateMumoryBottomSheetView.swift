@@ -524,9 +524,7 @@ struct ContainerView: View {
     }
     
     var body: some View {
-        
         ZStack {
-            
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
@@ -747,10 +745,9 @@ struct ContainerView: View {
                     }
                 }
             }
-            .frame(maxWidth: .infinity)
             .padding(.horizontal, 17)
         }
-        
+        .frame(width: getUIScreenBounds().width - 40)
     }
 }
 
@@ -764,9 +761,7 @@ struct CalendarContainerView: View {
     }
     
     var body: some View {
-        
         ZStack {
-            
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
@@ -790,6 +785,7 @@ struct CalendarContainerView: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 17)
         }
+        .frame(width: getUIScreenBounds().width - 40)
     }
 }
 
@@ -810,7 +806,6 @@ struct TagContainerView: View {
     var body: some View {
         
         ZStack {
-            
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
@@ -892,7 +887,7 @@ struct TagContainerView: View {
                     .allowsHitTesting(false)
             }
         } // ZStack
-        .frame(height: 60)
+        .frame(width: getUIScreenBounds().width - 40, height: 60)
     }
 }
 

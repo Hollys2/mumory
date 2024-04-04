@@ -67,6 +67,8 @@ public struct LocationModel: Identifiable {
 
 public class Mumory: NSObject, MKAnnotation, Identifiable {
     
+    public let uuid: UUID = UUID()
+    
     public var id: String
 
     public var uId: String

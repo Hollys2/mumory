@@ -115,6 +115,8 @@ public struct HomeView: View {
         .navigationBarBackButtonHidden()
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
+            UIScrollView.appearance().bounces = true
+            
             let userDefualt = UserDefaults.standard
             if !userDefualt.bool(forKey: "firstLogined") {
                 userDefualt.setValue(true, forKey: "firstLogined")
@@ -131,11 +133,11 @@ public struct HomeView: View {
                 if authorizationStatus == .authorized {
                     print("음악 권한 받음")
                     
-                    if !appCoordinator.isFirst {
-                        self.mumoryDataViewModel.fetchFriendsMumorys(uId: currentUserData.user.uId) { result in
+                    if appCoordinator.isFirst {
+                        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                             switch result {
                             case .success(let mumorys):
-                                print("fetchMumorys successfully: \(mumorys)!")
+                                print("fetchMumorys successfully: \(mumorys)")
                                 DispatchQueue.main.async {
                                     self.mumoryDataViewModel.myMumorys = mumorys
                                     self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
@@ -150,7 +152,7 @@ public struct HomeView: View {
                             }
                         }
                         
-                        appCoordinator.isFirst = true
+                        appCoordinator.isFirst = false
                     }
                 } else {
                     print("음악 권한 거절")

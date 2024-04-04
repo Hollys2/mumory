@@ -179,10 +179,7 @@ public struct MumoryDetailView: View {
                     )
             }
             .onAppear {
-                UIScrollView.appearance().bounces = false
-            }
-            .onDisappear {
-                UIScrollView.appearance().bounces = true
+//                UIScrollView.appearance().bounces = false
             }
             
             if mumoryDataViewModel.isUpdating {

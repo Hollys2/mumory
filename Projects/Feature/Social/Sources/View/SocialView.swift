@@ -177,7 +177,7 @@ struct SocialScrollCotentView: View {
             
             LazyVStack(spacing: 0) {
                 
-                ForEach(self.mumoryDataViewModel.everyMumorys, id: \.self) { i in
+                ForEach(self.mumoryDataViewModel.everyMumorys, id: \.uuid) { i in
                     SocialItemView(mumory: i)
                 }
             }
@@ -194,6 +194,7 @@ struct SocialItemView: View {
     
     @State private var isMapViewShown: Bool = false
     @State private var isTruncated: Bool = false
+    @State private var isLocationTitleTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
     @State var user: MumoriUser = MumoriUser()
     
@@ -268,11 +269,25 @@ struct SocialItemView: View {
                             Spacer().frame(width: 5)
                             
                             Text(self.mumory.locationModel.locationTitle)
-                                .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14)))
+                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                 .frame(maxWidth: getUIScreenBounds().width * 0.33589)
                                 .frame(height: 11, alignment: .leading)
                                 .fixedSize(horizontal: true, vertical: false)
+                                .background(
+                                    GeometryReader { proxy in
+                                        Color.clear.onAppear {
+                                            let size = self.mumory.locationModel.locationTitle.size(withAttributes: [.font: SharedFontFamily.Pretendard.medium.font(size: 14)])
+                                            
+                                            if size.width > proxy.size.width {
+                                                self.isLocationTitleTruncated = true
+                                            } else {
+                                                self.isLocationTitleTruncated = false
+                                            }
+                                        }
+                                    }
+                                )
+                                .offset(x: self.isLocationTitleTruncated ? -3 : 0)
                         }
                         .onTapGesture {
                             self.isMapViewShown = true
@@ -326,24 +341,26 @@ struct SocialItemView: View {
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
                     
-                    SharedAsset.musicIconSocial.swiftUIImage
-                        .resizable()
-                        .frame(width: 14, height: 14)
-                    
-                    Spacer().frame(width: 6)
-                    
-                    Text(self.mumory.musicModel.title)
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                        .multilineTextAlignment(.trailing)
-                        .foregroundColor(.white)
+                    Group {
+                        SharedAsset.musicIconSocial.swiftUIImage
+                            .resizable()
+                            .frame(width: 14, height: 14)
+                        
+                        Spacer().frame(width: 6)
+                        
+                        Text(self.mumory.musicModel.title)
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                            .multilineTextAlignment(.trailing)
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        
+                        Spacer().frame(width: 8)
+                        
+                        Text(self.mumory.musicModel.artist)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .foregroundColor(.white)
                         .lineLimit(1)
-                    
-                    Spacer().frame(width: 8)
-                    
-                    Text(self.mumory.musicModel.artist)
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
+                    }
                     
                     Spacer()
                     
@@ -695,7 +712,6 @@ public struct SocialView: View {
             .offset(y: -self.offsetY)
         }
         .onAppear {
-            UIScrollView.appearance().bounces = true
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             playerViewModel.isShownMiniPlayerInLibrary = false
             
