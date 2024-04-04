@@ -26,7 +26,7 @@ public struct MumoriUser: Hashable {
     public var backgroundImageURL: URL?
     public var bio: String = ""
     public var defaultProfileImage: Image = SharedAsset.circle.swiftUIImage
-    
+    public var signUpDate: Date = Date()
     public init() {}
     
     public init(uId: String) async {
@@ -55,6 +55,7 @@ public struct MumoriUser: Hashable {
             self.bio = data["bio"] as? String ?? ""
             let profileIndex: Int = data["profileIndex"] as? Int ?? 0
             self.defaultProfileImage = randomProfiles[profileIndex]
+            self.signUpDate = (data["signUpDate"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
         }
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 import MusicKit
 
-struct NowPlayingView: View {
+public struct NowPlayingView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -22,11 +22,11 @@ struct NowPlayingView: View {
     @State var albumCoverSize: CGFloat = .zero
     @State var horizontalSpacing: CGFloat = .zero
     @State var isSE: Bool = false
-    init() {
+    public init() {
         UISlider.appearance().setThumbImage(UIImage(asset: SharedAsset.playSphere)?.resized(to: CGSize(width: 10.45, height: 10)), for: .normal)
     }
     
-    var body: some View {
+    public var body: some View {
         ZStack(alignment: .top) {
             //재생페이지에서 보여줄 배경 사진(앨범 커버)
             AsyncImage(url: playerViewModel.playingSong()?.artwork?.url(width: 1000, height: 1000)) { image in
@@ -298,12 +298,14 @@ struct PlayingView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
                                 .foregroundStyle(Color.white)
                                 .offset(x: startAnimation ? changeOffset : 0)
-                                .animation(.linear(duration: 4.0).delay(2.0).repeatForever(autoreverses: true).delay(2.0), value: startAnimation)
+                                .animation(.linear(duration: animationDuration).delay(2.0).repeatForever(autoreverses: true).delay(2.0), value: startAnimation)
                                 .onAppear(perform: {
                                     DispatchQueue.main.async {
                                         guard let song = playerViewModel.currentSong else {return}
                                         let fontSize: CGFloat = getUIScreenBounds().height < 700 ? 18.0 : 20.0
                                         titleWidth = getTextWidth(term: song.title, fontSize: fontSize)
+                                        let abs = abs(titleMaxWidth - titleWidth)
+                                        animationDuration = abs * 0.04
                                         changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
                                         startAnimation = true
                                     }
@@ -315,10 +317,11 @@ struct PlayingView: View {
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
                     }
          
-                    Text(playerViewModel.currentSong?.artistName ?? "--")
+                    Text(playerViewModel.currentSong?.artistName ?? "Bound preference ViewPositionKey tried to update multiple times per frame")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: isSE ? 16 : 18))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(isSE ? 1 : 2)
                         .onChange(of: playerViewModel.currentSong, perform: { value in
                             DispatchQueue.main.async {
                                 endInit = false
@@ -454,11 +457,13 @@ struct PlayingView: View {
             let spacing: CGFloat = 20
             let horizontalTotalSpacing: CGFloat = getUIScreenBounds().height < 700 ? getUIScreenBounds().width * 0.2 : getUIScreenBounds().width * 0.13
             titleMaxWidth = getUIScreenBounds().width - addIconWidth - spacing - horizontalTotalSpacing
-            
             guard let song = playerViewModel.currentSong else {return}
             DispatchQueue.main.async {
                 let fontSize: CGFloat = getUIScreenBounds().height < 700 ? 18.0 : 20.0
+                
                 titleWidth = getTextWidth(term: song.title, fontSize: fontSize)
+                let abs = abs(titleMaxWidth - titleWidth)
+                self.animationDuration = abs * 0.04
                 changeOffset = titleWidth < titleMaxWidth ? 0 : (titleMaxWidth - titleWidth)
                 startAnimation = true
             }

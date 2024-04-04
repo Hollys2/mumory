@@ -63,7 +63,7 @@ public struct MiniPlayerView: View {
                 
             }
             .onTapGesture {
-                playerViewModel.isPresentNowPlayingView.toggle()
+                playerViewModel.isPresentNowPlayingView = true
             }
             
             
@@ -125,9 +125,7 @@ public struct MiniPlayerView: View {
         .padding(.bottom, playerViewModel.miniPlayerMoveToBottom ? 15 : 89)
         .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
         .frame(maxHeight: .infinity, alignment: .bottom)
-        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
-            NowPlayingView()
-        }
+
         
     }
     
@@ -187,7 +185,7 @@ public struct MiniPlayerViewInLibrary: View {
                 
             }
             .onTapGesture {
-                playerViewModel.isPresentNowPlayingView.toggle()
+                playerViewModel.isPresentNowPlayingView = true
             }
             
             
@@ -249,9 +247,7 @@ public struct MiniPlayerViewInLibrary: View {
         .padding(.bottom, playerViewModel.miniPlayerMoveToBottom ? 15 : 89)
         .offset(y: playerViewModel.isShownMiniPlayerInLibrary ? 0 : 200)
         .frame(maxHeight: .infinity, alignment: .bottom)
-        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
-            NowPlayingView()
-        }
+
         
     }
     

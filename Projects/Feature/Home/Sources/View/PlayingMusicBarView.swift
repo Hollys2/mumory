@@ -69,7 +69,7 @@ public struct PlayingMusicBarView: View {
                 
             })
             .onTapGesture {
-                playerViewModel.isPresentNowPlayingView.toggle()
+                playerViewModel.isPresentNowPlayingView = true
             }
             
             //재생버튼. 재생 여부에 따라 다르게 보여야함
@@ -133,9 +133,6 @@ public struct PlayingMusicBarView: View {
         .background(Color.black.opacity(0.9))
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
         .padding(.horizontal, 15)
-        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
-            NowPlayingView()
-        }
 
     }
 

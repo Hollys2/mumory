@@ -111,7 +111,6 @@ public enum LibraryPage: Hashable{
     case playlist(playlist: Binding<MusicPlaylist>)
     case shazam(type: ShazamViewType)
     case addSong(originPlaylist: MusicPlaylist)
-    case play
     case saveToPlaylist(songs: [Song])
     case recommendation(genreID: Int)
     case selectableArtist(artist: Artist)
@@ -135,8 +134,6 @@ public enum LibraryPage: Hashable{
             return lhsShazamType == rhsShazamType
         case let (.addSong(originPlaylist: lhsOriginPlaylist), .addSong(originPlaylist: rhsOriginPlaylist)):
             return lhsOriginPlaylist == rhsOriginPlaylist
-        case (.play, .play):
-            return true
         case let (.saveToPlaylist(lhsSongs), .saveToPlaylist(rhsSongs)):
             return lhsSongs == rhsSongs
         case let (.recommendation(lhsGenreID), .recommendation(rhsGenreID)):
@@ -171,8 +168,6 @@ public enum LibraryPage: Hashable{
           case .addSong(let originPlaylist):
               hasher.combine(7)
               hasher.combine(originPlaylist)
-          case .play:
-              hasher.combine(8)
           case .saveToPlaylist(let songs):
               hasher.combine(9)
               hasher.combine(songs)

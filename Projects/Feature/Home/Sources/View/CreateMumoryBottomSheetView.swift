@@ -350,7 +350,6 @@ public struct CreateMumoryBottomSheetView: View {
                                     case .success:
                                         self.generateHapticFeedback(style: .medium)
                                         print("뮤모리 만들기 성공")
-                                        
                                         mumoryDataViewModel.isLoading = false
 
                                         mumoryDataViewModel.choosedMusicModel = nil

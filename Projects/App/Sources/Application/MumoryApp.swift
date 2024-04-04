@@ -54,6 +54,9 @@ struct MumoryApp: App {
                         .environmentObject(snackBarViewModel)
                         .environmentObject(appCoordinator)
                         .environmentObject(currentUserData)
+                        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView, content: {
+                            NowPlayingView()
+                        })
                     
                     SnackBarView()
                         .environmentObject(snackBarViewModel)

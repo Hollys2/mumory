@@ -173,8 +173,6 @@ public struct SplashView: View {
                     case .addSong(originPlaylist: let originPlaylist):
                         AddSongView(originPlaylist: originPlaylist)
                             .navigationBarBackButtonHidden()
-                    case .play:
-                        NowPlayingView()
                             
                     case .saveToPlaylist(songs: let songs):
                         SaveToPlaylistView(songs: songs)

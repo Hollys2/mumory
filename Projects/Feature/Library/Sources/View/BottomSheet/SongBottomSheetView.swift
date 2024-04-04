@@ -84,7 +84,7 @@ struct SongBottomSheetView: View {
                             dismiss()
                             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
                                 playerViewModel.playNewSong(song: song)
-                                playerViewModel.isPresentNowPlayingView.toggle()
+                                playerViewModel.isPresentNowPlayingView = true
                             }
                         }
                 })
@@ -167,10 +167,6 @@ struct SongBottomSheetView: View {
             })
             .padding(.bottom, 15)
             .background(ColorSet.background)
-            .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView, content: {
-                NowPlayingView()
-            })
-    
         }
     
     private func getArtist(song: Song, completion: @escaping (Artist) -> ())  {
@@ -270,7 +266,7 @@ struct OptionalSongBottomSheetView: View {
                     guard let song = self.song else {return}
                     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
                         playerViewModel.playNewSong(song: song)
-                        playerViewModel.isPresentNowPlayingView.toggle()
+                        playerViewModel.isPresentNowPlayingView = true
                     }
                 }
                 
@@ -374,9 +370,6 @@ struct OptionalSongBottomSheetView: View {
             })
             .padding(.bottom, 15)
             .background(ColorSet.background)
-            .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView, content: {
-                NowPlayingView()
-            })
         }
     
     private func getArtist(song: Song, completion: @escaping (Artist) -> ())  {
@@ -526,6 +519,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                     BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                         .onTapGesture {
                             dismiss()
+                            playerViewModel.isPresentNowPlayingView = false
                             appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
@@ -833,7 +827,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                             dismiss()
                             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
                                 playerViewModel.playNewSong(song: song)
-                                playerViewModel.isPresentNowPlayingView.toggle()
+                                playerViewModel.isPresentNowPlayingView = true
                             }
                         }
                 })
@@ -917,10 +911,6 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
             })
             .padding(.bottom, 15)
             .background(ColorSet.background)
-            .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView, content: {
-                NowPlayingView()
-            })
-    
         }
     
     private func getArtist(song: Song, completion: @escaping (Artist) -> ())  {

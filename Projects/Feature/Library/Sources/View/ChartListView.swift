@@ -84,7 +84,7 @@ struct ChartListView: View {
                     LazyVStack(spacing: 0, content: {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
-                                .simultaneousGesture(TapGesture().onEnded({ _ in
+                                .onTapGesture {
                                     playerViewModel.playAll(title: "최신 인기곡", songs: songs, startingItem: songs[index])
                                     Task {
                                         if searchIndex < 5 {
@@ -94,8 +94,7 @@ struct ChartListView: View {
                                             playerViewModel.setQueue(songs: self.songs, startSong: startSong)
                                         }
                                     }
-                                }))
-                        
+                                }
                         }
                     })
                     .frame(width: getUIScreenBounds().width)

@@ -52,19 +52,21 @@ struct PreviewMiniPlayer: View {
                 .rotationEffect(.degrees(-90))
                 .overlay {
                     if playerViewModel.isPlaying {
-                        SharedAsset.pauseButtonTopbar.swiftUIImage
+                        SharedAsset.previewPauseSolid.swiftUIImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 33, height: 33)
+                            .transition(.identity)
                             .onTapGesture {
                                 playerViewModel.pause()
                             }
                         
                     }else {
-                        SharedAsset.playButtonTopbar.swiftUIImage
+                        SharedAsset.previewPlaySolid.swiftUIImage
                             .resizable()
                             .scaledToFit()
                             .frame(width: 33, height: 33)
+                            .transition(.identity)
                             .onTapGesture {
                                 playerViewModel.play()
                             }

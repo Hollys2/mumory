@@ -199,14 +199,4 @@ public struct HomeView: View {
         }
         
     }
-    
-    @ViewBuilder
-    private func PlayBottomAnimationView() -> some View {
-        VStack {
-            if appCoordinator.bottomAnimationViewStatus == .play {
-                NowPlayingView()
-                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-            }
-        }
-    }
 }

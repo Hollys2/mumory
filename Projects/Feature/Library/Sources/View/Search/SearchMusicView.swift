@@ -87,7 +87,6 @@ struct SearchMusicView: View {
                 if term.count > 0{
                     SearchMusicResultView(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, offset: $offset)
                         .onChange(of: offset, perform: { value in
-                            print(offset)
                             if offset.y > CGFloat(searchIndex) * itemHeight * 20 + (itemHeight * 10) {
                                 searchIndex += 1
                                 Task {

@@ -77,6 +77,7 @@ public struct MyPageView: View {
                     .onTapGesture {
                         appCoordinator.rootPath.append(MyPage.setting)
                     }
+                
             }
             .padding(.horizontal, 20)
             .frame(height: 63)
@@ -150,7 +151,7 @@ struct UserInfoView: View {
             .padding(.horizontal, 20)
             
             Button(action: {
-                isPresentEditView.toggle()
+                isPresentEditView = true
             }, label: {
                 HStack(spacing: 8, content: {
                     SharedAsset.editProfile.swiftUIImage

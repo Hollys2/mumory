@@ -62,10 +62,11 @@ public class PlayerViewModel: ObservableObject {
         }
     }
     
-    public func playNewSong(song: Song) {
+    public func playNewSong(song: Song, isPlayerShown: Bool = true) {
         player.queue = [song]
         self.queue = [song]
         self.originQueue = [song]
+        self.setPlayerVisibilityByUser(isShown: isPlayerShown, moveToBottom: true)
         self.queueTitle = ""
         Task {
             do {
@@ -289,7 +290,7 @@ public class PlayerViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self.isShownPreview = true
             }
-            self.playNewSong(song: tappedSong)
+            self.playNewSong(song: tappedSong, isPlayerShown: false)
         }
     }
         

@@ -83,9 +83,10 @@ struct SearchMusicResultView: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(songs, id: \.id){ song in
+                            ForEach(songs.indices, id: \.self){ index in
+                                let song = songs[index]
                                 SearchSongItem(song: song)
-                                    .id("\(song.artistName)\(song.id)")
+                                    .id("\(song.id.rawValue)\(index)")
                                     .onTapGesture {
                                         playerViewModel.playNewSong(song: song)
                                         let userDefault = UserDefaults.standard

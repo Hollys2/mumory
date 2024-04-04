@@ -133,6 +133,7 @@ struct EmailLoginView: View {
         try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
         currentUserData.uId = result.user.uid
         currentUserData.user = await MumoriUser(uId: result.user.uid)
+        currentUserData.playlistArray = await currentUserData.savePlaylist()
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         

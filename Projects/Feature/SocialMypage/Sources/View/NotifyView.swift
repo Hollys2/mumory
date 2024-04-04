@@ -603,10 +603,10 @@ struct NotifyMenuBotton: View {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {
                 BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "알림 삭제", type: .warning)
                     .onTapGesture {
-                        isPresentBottomSheet.toggle()
-                        Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { timer in
+                        isPresentBottomSheet = false
+                        Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                             UIView.setAnimationsEnabled(false)
-                            isPresentPopup.toggle()
+                            isPresentPopup = true
                         }
                     }
             }
@@ -626,4 +626,6 @@ struct NotifyMenuBotton: View {
 
 class NotificationViewModel: ObservableObject {
     @Published var notifications: [Notification] = []
+    @Published var isPresentDeletedMumoryPopup: Bool = false
+    @Published var isPresentDeleteBottomSheet: Bool = false
 }

@@ -12,8 +12,6 @@ import Core
 import Shared
 import MusicKit
 
-@available(iOS 16.0, *)
-
 //가장 처음 샤잠, 최근 검색, 검색텍스트필드 등이 있음
 //검색 단어 존재 유무에 따라서 초반 뷰와 결과 뷰를 나눠서 보여주는 역할
 struct SearchMusicViewInCreateMumory: View {
@@ -92,21 +90,22 @@ struct SearchMusicViewInCreateMumory: View {
 
                 if term.count > 0{
                     SearchMusicResultViewInCreateMumory(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, offset: $offset)
-                        .onChange(of: offset, perform: { value in
-                            print(offset)
-                            if offset.y > CGFloat(searchIndex) * itemHeight * 20 + (itemHeight * 10) {
-                                searchIndex += 1
-                                Task {
-                                    self.songs += await requestSong(term: self.term, index: searchIndex)
-                                }
-                            }
-                        })
-                    
                 }else{
                     SearchMusicEntryView(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, shazamViewType: .createMumory)
                 }
             }
             .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .onChange(of: offset, perform: { value in
+                if offset.y > CGFloat(searchIndex) * itemHeight * 20 + (itemHeight * 10) {
+                    searchIndex += 1
+                    DispatchQueue.main.async {
+                        Task {
+                            self.songs += await requestSong(term: self.term, index: searchIndex)
+                        }
+                    }
+                }
+            })
+            
             
             PreviewMiniPlayer()
                 .frame(maxHeight: .infinity, alignment: .bottom)
@@ -207,9 +206,10 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 .padding(.top, 16)
                                 .padding(.bottom, 9)
                             
-                            ForEach(songs, id: \.id){ song in
+                            ForEach(songs.indices, id: \.self){ index in
+                                let song = songs[index]
                                 SearchSelectableSongItem(song: song)
-                                    .id("\(song.artistName)\(song.id) \(UUID())")
+                                    .id("\(song.id.rawValue)\(index)")
                                     .onTapGesture {
                                         playerViewModel.setPreviewPlayer(tappedSong: song)
                                         //최근 검색어 저장
@@ -225,7 +225,6 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 .frame(height: 87)
                                 .foregroundStyle(.clear)
                         })
-
                     }
                 })
                 .frame(width: getUIScreenBounds().width)

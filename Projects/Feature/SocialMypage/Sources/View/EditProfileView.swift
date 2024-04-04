@@ -140,8 +140,6 @@ private struct UserProfile: View {
                 })
                 .clipShape(Circle())
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                .offset(y: 50)
-                .padding(.trailing, 20)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
                     isPresentProfileBottomSheet.toggle()
@@ -153,6 +151,8 @@ private struct UserProfile: View {
                 .onChange(of: editProfileViewModel.profileImageBundle.image) { value in
                     editProfileViewModel.profileStatus = .valid
                 }
+                .padding(.top, 20)
+                .padding(.trailing, 20)
             }
             
             //상단바
