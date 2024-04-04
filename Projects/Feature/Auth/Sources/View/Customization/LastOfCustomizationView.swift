@@ -271,11 +271,6 @@ struct LastOfCustomizationView: View {
                         withTransaction(transaction) {
                             appCoordinator.rootPath = NavigationPath()
                         }
-                        
-                        let db = FirebaseManager.shared.db
-                        let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
-                        let data = ["type": "attendance0"]
-                        collectionReference.addDocument(data: data)
                     }
             }
         }

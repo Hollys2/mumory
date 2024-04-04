@@ -216,7 +216,7 @@ public struct MumoryEditView: View {
                                                 image
                                                     .resizable()
                                                     .frame(width: 75, height: 75)
-                                                    .aspectRatio(contentMode: .fill)
+                                                    .scaledToFill()
                                                     .clipped()
                                             case .failure:
                                                 Text("Failed to load image")
@@ -250,6 +250,7 @@ public struct MumoryEditView: View {
                                             Image(uiImage: photoPickerViewModel.selectedImages[index])
                                                 .resizable()
                                                 .frame(width: 75, height: 75)
+                                                .scaledToFill()
                                                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                                 .cornerRadius(10)
                                             

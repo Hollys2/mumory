@@ -249,6 +249,7 @@ public struct CreateMumoryBottomSheetView: View {
                                                     Image(uiImage: image)
                                                         .resizable()
                                                         .frame(width: 75, height: 75)
+                                                        .scaledToFit()
                                                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                                         .cornerRadius(10)
                                                     
@@ -363,16 +364,19 @@ public struct CreateMumoryBottomSheetView: View {
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
 
-                                        appCoordinator.selectedTab = .home
-                                        self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                                    
                                         
                                     case .failure(let error):
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")
                                     }
                                 }
+                                
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
+                                    
+                                    appCoordinator.selectedTab = .home
+                                    self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                 }
                             }
                         }

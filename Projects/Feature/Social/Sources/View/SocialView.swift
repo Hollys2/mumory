@@ -648,6 +648,7 @@ public struct SocialView: View {
     @ObservedObject var firebaseManager = FirebaseManager.shared
     
     public init(isShown: Binding<Bool>) {
+        UIScrollView.appearance().bounces = true
         self._isSocialSearchViewShown = isShown
     }
     

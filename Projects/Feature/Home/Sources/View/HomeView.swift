@@ -132,6 +132,13 @@ public struct HomeView: View {
                     
                     if appCoordinator.isFirst {
                         self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+                        print("myRewards: \(mumoryDataViewModel.myRewards)")
+                        if !self.mumoryDataViewModel.myRewards.contains { $0 == "attendance0" } {
+                            let db = FirebaseManager.shared.db
+                            let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
+                            let data = ["type": "attendance0"]
+                            collectionReference.addDocument(data: data)
+                        }
                         self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
                         self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                             switch result {

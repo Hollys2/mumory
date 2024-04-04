@@ -183,7 +183,6 @@ public struct MumoryDetailView: View {
                         }
                     )
             }
-            
             if mumoryDataViewModel.isUpdating {
                 MumoryDetailLoadingView()
             }
