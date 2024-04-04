@@ -592,6 +592,7 @@ public struct LocationInputBottomSheetView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 45)
                     .padding(.horizontal, 25)
+                    .padding(.trailing, 20)
                     .background(
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .fill(Color(red: 0.24, green: 0.24, blue: 0.24))

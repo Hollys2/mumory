@@ -148,7 +148,7 @@ struct KnownFriendPageView: View {
             friendDataViewModel.isPlaylistLoading = true
             friendDataViewModel.isMumoryLoading = true
             
-            self.mumoryDataViewModel.fetchFriendsMumorys(uId: self.friend.uId) { result in
+            self.mumoryDataViewModel.fetchMumorys(uId: self.friend.uId) { result in
                 
                 switch result {
                 case .success(let mumorys):
