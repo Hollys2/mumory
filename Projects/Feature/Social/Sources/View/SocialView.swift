@@ -325,25 +325,37 @@ struct SocialItemView: View {
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
-                    
-                    SharedAsset.musicIconSocial.swiftUIImage
-                        .resizable()
-                        .frame(width: 14, height: 14)
-                    
-                    Spacer().frame(width: 6)
-                    
-                    Text(self.mumory.musicModel.title)
-                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                        .multilineTextAlignment(.trailing)
-                        .foregroundColor(.white)
-                        .lineLimit(1)
-                    
-                    Spacer().frame(width: 8)
-                    
-                    Text(self.mumory.musicModel.artist)
-                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                        .foregroundColor(.white)
-                        .lineLimit(1)
+                    Group {
+                        SharedAsset.musicIconSocial.swiftUIImage
+                            .resizable()
+                            .frame(width: 14, height: 14)
+                        
+                        Spacer().frame(width: 6)
+                        
+                        Text(self.mumory.musicModel.title)
+                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                            .multilineTextAlignment(.trailing)
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                        
+                        Spacer().frame(width: 8)
+                        
+                        Text(self.mumory.musicModel.artist)
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .foregroundColor(.white)
+                            .lineLimit(1)
+                    }
+                    .onTapGesture {
+                        Task {
+                            guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
+                            playerViewModel.playNewSong(song: song, isPlayerShown: false)
+                            withAnimation {
+                                playerViewModel.userWantsShown = true
+                                playerViewModel.isShownMiniPlayer = true
+                                playerViewModel.miniPlayerMoveToBottom = false
+                            }
+                        }
+                    }
                     
                     Spacer()
                     

@@ -317,7 +317,7 @@ struct PlayingView: View {
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
                     }
          
-                    Text(playerViewModel.currentSong?.artistName ?? "Bound preference ViewPositionKey tried to update multiple times per frame")
+                    Text(playerViewModel.currentSong?.artistName ?? "--")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: isSE ? 16 : 18))
                         .foregroundStyle(artistTextColor)
                         .frame(maxWidth: .infinity, alignment: .leading)

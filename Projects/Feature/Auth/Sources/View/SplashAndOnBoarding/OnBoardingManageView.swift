@@ -21,14 +21,10 @@ struct OnBoardingManageView: View {
                     //스크린사이즈에 따라 다른 뷰를 보여줌
                     if geometry.size.height > 700 {
                         OnBoardingManageView_big()
-                            .onAppear(perform: {
-                                print("big, \(geometry.size.height)")
-                            })
+
                     }else {
                         OnBoardingManageView_small()
-                            .onAppear(perform: {
-                                print("small, \(geometry.size.height)")
-                            })
+
                     }
                     
                 }

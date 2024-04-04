@@ -64,7 +64,7 @@ struct MyRecentMumoryListView: View {
                         }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 19)
+                .padding(.top, 10)
                 
                 Divider05()
                     .padding(.top, 15)
@@ -117,13 +117,10 @@ struct MyRecentMumoryListView: View {
                     }
                 }
                 .scrollIndicators(.hidden)
-                
-    
             })
             
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
                 .ignoresSafeArea()
-
         }
         .navigationBarBackButtonHidden()
         .onAppear {

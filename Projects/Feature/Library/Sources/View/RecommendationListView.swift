@@ -40,6 +40,7 @@ struct RecommendationListView: View {
                 .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
+                    ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
                 }
 
             
