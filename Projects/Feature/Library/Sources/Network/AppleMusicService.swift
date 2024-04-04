@@ -35,7 +35,14 @@ public class AppleMusicService {
     }
     
     func getRecommendationMusicIDList(genre: Int, limit: Int, offset: Int, completion: @escaping(NetworkResult) -> Void){
-        let url = baseURL + chartURL
+        var url = baseURL
+        
+        //팝 장르만 미국 기준으로 받기
+        if genre == 14 {
+            url = url + "/catalog/us/charts"
+        } else {
+            url = url + chartURL
+        }
         let Firebase = FBManager.shared
         let db = Firebase.db
         

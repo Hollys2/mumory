@@ -146,11 +146,13 @@ struct ArtistView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
-            Task {
-                self.isLoading = true
-                await requestArtistSongs(artist: self.artist, originalSongs: $songs)
-                self.isLoading = false
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+            if songs.isEmpty {
+                Task {
+                    self.isLoading = true
+                    await requestArtistSongs(artist: self.artist, originalSongs: $songs)
+                    self.isLoading = false
+                }
             }
         })
     }

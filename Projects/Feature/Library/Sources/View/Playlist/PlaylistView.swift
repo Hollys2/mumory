@@ -298,7 +298,7 @@ struct PlaylistView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             UIView.setAnimationsEnabled(true)
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 isLoading = true
                 let startIndex = 0

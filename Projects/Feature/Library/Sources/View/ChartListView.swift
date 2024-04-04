@@ -89,9 +89,10 @@ struct ChartListView: View {
                                     Task {
                                         if searchIndex < 5 {
                                             let startSong = songs[index]
-                                            let songs = await requestTop100(startIndex: searchIndex + 1)
+                                            var songs = await requestTop100(startIndex: searchIndex + 1)
                                             self.songs.append(contentsOf: songs)
                                             playerViewModel.setQueue(songs: self.songs, startSong: startSong)
+               
                                         }
                                     }
                                 }
@@ -120,7 +121,7 @@ struct ChartListView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }

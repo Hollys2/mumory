@@ -110,7 +110,7 @@ struct SearchMusicView: View {
         .navigationBarBackButtonHidden()
         .background(.black)
         .onAppear(perform: {
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
         })
     }
 

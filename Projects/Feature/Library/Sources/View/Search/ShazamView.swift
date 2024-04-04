@@ -43,7 +43,6 @@ struct ShazamView: View {
                         .frame(width: 30, height: 30)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .onTapGesture {
-                            playerViewModel.setLibraryPlayerVisibility(isShown: true)
                             appCoordinator.rootPath.removeLast()
                         }
                 }

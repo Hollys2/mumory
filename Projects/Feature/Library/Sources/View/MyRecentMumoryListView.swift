@@ -125,7 +125,7 @@ struct MyRecentMumoryListView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 self.isLoading = true
                 

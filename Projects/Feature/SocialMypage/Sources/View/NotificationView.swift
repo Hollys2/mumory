@@ -117,16 +117,18 @@ struct NotificationView: View {
         .onAppear {
             if settingViewModel.uid.isEmpty {
                 settingViewModel.uid = currentUserData.uId
+                Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                    isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
+                }
+            }else {
+                isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
             }
+   
         }
         .disabled(settingViewModel.isLoading)
     }
     
 }
-
-//#Preview {
-//    NotificationView()
-//}
 
 struct NotificationItem: View {
     @State var title: String

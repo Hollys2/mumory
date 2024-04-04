@@ -123,7 +123,7 @@ public struct MiniPlayerView: View {
         .padding(.bottom, 10)
         .padding(.horizontal, 8)
         .padding(.bottom, playerViewModel.miniPlayerMoveToBottom ? 15 : 89)
-        .opacity(playerViewModel.isShownMiniPlayer ? 1 : 0)
+        .offset(y: playerViewModel.isShownMiniPlayer ? 0 : 200)
         .frame(maxHeight: .infinity, alignment: .bottom)
 
         
