@@ -122,11 +122,14 @@ private struct UserProfile: View {
                             .resizable()
                             .scaledToFill()
                             .frame(width: 90, height: 90)
+                            .clipped()
                     }else {
                         currentUserData.user.defaultProfileImage
                             .resizable()
                             .scaledToFill()
                             .frame(width: 90, height: 90)
+                            .clipped()
+
                         
                     }
                 }
@@ -139,6 +142,8 @@ private struct UserProfile: View {
                         .frame(width: 24, height: 24)
                 })
                 .clipShape(Circle())
+                .offset(y: 40)
+                .padding(.trailing, 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                 .onTapGesture {
                     UIView.setAnimationsEnabled(false)
@@ -151,8 +156,7 @@ private struct UserProfile: View {
                 .onChange(of: editProfileViewModel.profileImageBundle.image) { value in
                     editProfileViewModel.profileStatus = .valid
                 }
-                .padding(.top, 20)
-                .padding(.trailing, 20)
+        
             }
             
             //상단바

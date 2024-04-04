@@ -289,7 +289,12 @@ public struct LoginView: View {
             currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
             try? await query.updateData(["fcmToken": fcmToken])
             appCoordinator.selectedTab = .home
-            appCoordinator.rootPath.append(MumoryPage.home)
+            appCoordinator.initPage = .home
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                appCoordinator.rootPath = NavigationPath()
+            }
         }else {
             //신규 회원
             var userData: [String: Any] = [

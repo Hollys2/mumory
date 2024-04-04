@@ -100,22 +100,21 @@ struct SettingView: View {
                 LogoutButton()
                     .onTapGesture {
                         let Firebase = FBManager.shared
-                        do {
-                            try Firebase.auth.signOut()
-                            for key in UserDefaults.standard.dictionaryRepresentation().keys {
-                                UserDefaults.standard.removeObject(forKey: key.description)
-                            }
-                            appCoordinator.initPage = .onBoarding
-                            Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
-                            appCoordinator.bottomAnimationViewStatus = .remove
-                            currentUserData.removeAllData()
-                            appCoordinator.rootPath = NavigationPath()
-                        }catch {
-                            print("signout error: \(error)")
+                        let auth = Firebase.auth
+                        guard let signOut = try? auth.signOut() else {return}
+                        Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
+                        currentUserData.removeAllData()
+                        appCoordinator.bottomAnimationViewStatus = .remove
+                        appCoordinator.initPage = .onBoarding
+                        appCoordinator.rootPath = NavigationPath()
+                        
+                        for key in UserDefaults.standard.dictionaryRepresentation().keys {
+                            UserDefaults.standard.removeObject(forKey: key.description)
                         }
+                     
                     }
                 
-            
+                
                 WithdrawButton()
                     .onChange(of: withdrawManager.isAppleUserAuthenticated, perform: { value in
                         if value{

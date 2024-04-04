@@ -63,7 +63,7 @@ struct FavoriteListView: View {
                         }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 19)
+                .padding(.top, 10)
                 .overlay {
                     if showFavoriteInfo {
                         SharedAsset.speechBubbleMedium.swiftUIImage
@@ -129,6 +129,8 @@ struct FavoriteListView: View {
                 .scrollIndicators(.hidden)
         
             })
+            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
+                .ignoresSafeArea()
         }
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)

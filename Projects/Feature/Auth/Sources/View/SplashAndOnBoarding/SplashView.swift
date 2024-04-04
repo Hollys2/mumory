@@ -47,11 +47,17 @@ public struct SplashView: View {
                             LoginView()
                         case .onBoarding:
                             OnBoardingManageView()
+                                .onAppear(perform: {
+                                    print("splash on boarding")
+                                })
                         case .home:
                             HomeView()
                                 .environmentObject(settingViewModel)
                                 .environmentObject(withdrawViewModel)
                                 .navigationBarBackButtonHidden()
+                                .onAppear(perform: {
+                                    print("splash home")
+                                })
                         }
                     }
                 }
@@ -278,7 +284,7 @@ public struct SplashView: View {
                 .opacity(isEndSplash && isInitialSettingDone ? 0 : 1)
                 .transition(.opacity)
                 .onAppear(perform: {
-                    Timer.scheduledTimer(withTimeInterval: 0, repeats: false) { timer in
+                    Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
                         withAnimation {
                             isEndSplash = true
                         }
@@ -289,6 +295,7 @@ public struct SplashView: View {
     }
     
     private func checkCurrentUserAndGetUserData() {
+        print("splash checkcheck")
         let Firebase = FBManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
@@ -297,6 +304,8 @@ public struct SplashView: View {
  
         
         Task {
+            print("splash checkcheck1")
+
             //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
             guard let user = auth.currentUser,
                   let snapshot = try? await db.collection("User").document(user.uid).getDocument(),
@@ -304,6 +313,8 @@ public struct SplashView: View {
                   let id = data["id"] as? String,
                   let isCheckedServiceNewsNotification = data["isSubscribedToService"] as? Bool,
                   let favoriteGenres = data["favoriteGenres"] as? [Int] else {
+                print("splash checkcheck2")
+
                 if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
                     appCoordinator.initPage = .onBoarding
                 }else {
@@ -314,7 +325,8 @@ public struct SplashView: View {
                 }
                 return
             }
-            
+            print("splash checkcheck3")
+
             currentUserData.uId = user.uid
             currentUserData.user = await MumoriUser(uId: user.uid)
             currentUserData.favoriteGenres = favoriteGenres
@@ -322,6 +334,8 @@ public struct SplashView: View {
             withAnimation {
                 isInitialSettingDone = true
             }
+            print("splash checkcheck4")
+
             appCoordinator.initPage = .home
             try await db.collection("User").document(user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {

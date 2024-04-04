@@ -19,7 +19,7 @@ struct LastOfCustomizationView: View {
     @State var thirdYOffset: CGFloat = 0
     @State var thirdOpacity: CGFloat = 0
     //    var selectedGenreList = ["K-POP", "J-POP", "라이브음악", "인디", "HIP/HOP"]
-    
+
     var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
@@ -264,7 +264,12 @@ struct LastOfCustomizationView: View {
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .onTapGesture {
-                        appCoordinator.rootPath.append(MumoryPage.home)
+                        appCoordinator.initPage = .home                        
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            appCoordinator.rootPath = NavigationPath()
+                        }
                     }
             }
         }

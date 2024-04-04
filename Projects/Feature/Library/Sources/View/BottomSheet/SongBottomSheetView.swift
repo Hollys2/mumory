@@ -132,7 +132,6 @@ struct SongBottomSheetView: View {
                     BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                         .onTapGesture {
                             dismiss()
-                            
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel

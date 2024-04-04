@@ -340,7 +340,7 @@ struct SocialItemView: View {
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
-                    
+
                     Group {
                         SharedAsset.musicIconSocial.swiftUIImage
                             .resizable()
@@ -359,7 +359,18 @@ struct SocialItemView: View {
                         Text(self.mumory.musicModel.artist)
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             .foregroundColor(.white)
-                        .lineLimit(1)
+                            .lineLimit(1)
+                    }
+                    .onTapGesture {
+                        Task {
+                            guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
+                            playerViewModel.playNewSong(song: song, isPlayerShown: false)
+                            withAnimation {
+                                playerViewModel.userWantsShown = true
+                                playerViewModel.isShownMiniPlayer = true
+                                playerViewModel.miniPlayerMoveToBottom = false
+                            }
+                        }
                     }
                     
                     Spacer()

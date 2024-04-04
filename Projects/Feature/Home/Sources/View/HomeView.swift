@@ -125,7 +125,6 @@ public struct HomeView: View {
                 userDefualt.setValue(true, forKey: "commentPopUp")
             }
             
-            appCoordinator.initPage = .home
             playerViewModel.miniPlayerMoveToBottom = false
             
             Task {

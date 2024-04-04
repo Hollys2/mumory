@@ -122,9 +122,6 @@ public struct PlayingMusicBarView: View {
             .onTapGesture {
                 appCoordinator.setBottomAnimationPage(page: .myPage)
             }
-            .onAppear {
-                print("currentUserData.user: \(currentUserData.user)")
-            }
      
                         
         })

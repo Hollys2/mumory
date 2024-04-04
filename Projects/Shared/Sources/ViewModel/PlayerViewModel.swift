@@ -66,7 +66,12 @@ public class PlayerViewModel: ObservableObject {
         player.queue = [song]
         self.queue = [song]
         self.originQueue = [song]
-        self.setPlayerVisibilityByUser(isShown: isPlayerShown, moveToBottom: true)
+        if isPlayerShown {
+            self.setPlayerVisibilityByUser(isShown: isPlayerShown)
+        }
+        self.shuffleState = .off
+        self.setRepeatMode(mode: .off)
+        self.setShuffleMode(mode: .off)
         self.queueTitle = ""
         Task {
             do {
@@ -89,6 +94,8 @@ public class PlayerViewModel: ObservableObject {
         self.originQueue = [song]
         self.queueTitle = ""
         self.isPresentNowPlayingView = true
+        self.setRepeatMode(mode: .off)
+        self.setShuffleMode(mode: .off)
         Task {
             do {
                 try await player.play()
@@ -113,6 +120,8 @@ public class PlayerViewModel: ObservableObject {
         self.originQueue = songs
         self.queueTitle = title
         self.setPlayerVisibilityByUser(isShown: true)
+        self.setRepeatMode(mode: .off)
+        self.setShuffleMode(mode: .off)
         Task {
             do {
                 try await player.play()
@@ -315,6 +324,17 @@ public class PlayerViewModel: ObservableObject {
         }
     }
     
+    func setShuffleMode(mode: ShuffleState) {
+        switch mode {
+        case .off:
+            self.player.state.shuffleMode = .off
+            self.shuffleState = .off
+        case .on:
+            self.player.state.shuffleMode = .songs
+            self.shuffleState = .on
+        }
+    }
+    
     public func setRepeatMode(){
         let state = self.player.state.repeatMode
         if state == MusicPlayer.RepeatMode.none {
@@ -326,6 +346,20 @@ public class PlayerViewModel: ObservableObject {
         } else {
             self.repeatState = .off
             self.player.state.repeatMode = MusicPlayer.RepeatMode.none
+        }
+    }
+    
+    func setRepeatMode(mode: RepeatState) {
+        switch mode {
+        case .off:
+            self.player.state.repeatMode = MusicPlayer.RepeatMode.none
+            self.repeatState = .off
+        case .all:
+            self.player.state.repeatMode = .all
+            self.repeatState = .all
+        case .one:
+            self.player.state.repeatMode = .one
+            self.repeatState = .one
         }
     }
 

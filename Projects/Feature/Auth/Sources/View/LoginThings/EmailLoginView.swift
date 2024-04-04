@@ -138,7 +138,12 @@ struct EmailLoginView: View {
         userDefualt.setValue(Date(), forKey: "loginHistory")
         
         isLoading = false
-        appCoordinator.rootPath.append(MumoryPage.home)
+        appCoordinator.initPage = .home
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            appCoordinator.rootPath = NavigationPath()
+        }
     }
 }
 

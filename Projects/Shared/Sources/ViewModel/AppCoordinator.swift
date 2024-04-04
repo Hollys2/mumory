@@ -17,7 +17,11 @@ import Firebase
 public class AppCoordinator: ObservableObject {
     
     @Published public var rootPath: NavigationPath = NavigationPath()
-    @Published public var initPage: InitPage = .login
+    @Published public var initPage: InitPage = .login {
+        didSet {
+            print("init view did set: \(initPage)")
+        }
+    }
     @Published public var selectedTab: Tab = .home
     
     

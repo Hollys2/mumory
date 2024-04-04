@@ -75,7 +75,7 @@ struct ChartListView: View {
                             AnalyticsManager.shared.setSelectContentLog(title: "ChartListViewPlayAllButton")
                         }
                 }
-                .padding(.top, 20)
+                .padding(.top, 10)
                 
                 Divider05()
                     .padding(.top, 15)

@@ -16,7 +16,7 @@ public class CurrentUserData: ObservableObject {
     //사용자 정보 및 디바이스 크기 정보
     @Published public var uId: String = "" {
         didSet {
-            guard !uId.isEmpty else {return}
+            if uId.isEmpty {return}
             DispatchQueue.main.async {
                 Task {
                     self.FriendRequestListener()
@@ -139,6 +139,7 @@ public class CurrentUserData: ObservableObject {
     }
     
     public func savePlaylist() async -> [MusicPlaylist]{
+        if self.uId.isEmpty {return []}
         let Firebase = FBManager.shared
         let db = Firebase.db
         return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
@@ -182,6 +183,7 @@ public class CurrentUserData: ObservableObject {
     }
     
     private func savePlaylist() async {
+        if self.uId.isEmpty {return}
         let Firebase = FBManager.shared
         let db = Firebase.db
         self.playlistArray = await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
@@ -226,6 +228,8 @@ public class CurrentUserData: ObservableObject {
     }
     
     public func requestMorePlaylistSong(playlistID: String) async -> [Song]{
+        if self.uId.isEmpty {return []}
+
         let db = FBManager.shared.db
         return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
             var returnValue:[Song] = []
@@ -260,6 +264,8 @@ public class CurrentUserData: ObservableObject {
     }
     
     public func refreshPlaylist(playlistId: String) async {
+        if self.uId.isEmpty {return}
+
         let db = FBManager.shared.db
         let songs = await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
             var returnValue:[Song] = []
