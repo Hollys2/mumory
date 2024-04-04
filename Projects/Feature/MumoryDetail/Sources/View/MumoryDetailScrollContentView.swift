@@ -282,6 +282,7 @@ struct MumoryDetailScrollContentView: View {
                                         .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                                 }
                                 .padding(.bottom, 65)
+                                .opacity(self.mumoryDataViewModel.sameSongFriendMumorys.count == 1 ? 0 : 1)
                             }
                         } else {
                             

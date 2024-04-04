@@ -95,7 +95,7 @@ struct MumoryCard: View {
             VStack {
                 Rectangle()
                     .foregroundColor(.clear)
-                    .frame(width:  getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
+                    .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
                     .background(
                         AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
                             switch phase {
@@ -157,7 +157,7 @@ struct MumoryCard: View {
                 }
             }
             
-            VStack {
+            VStack(spacing: 0) {
                 
                 Spacer()
                 
@@ -184,9 +184,10 @@ struct MumoryCard: View {
                     .foregroundColor(.clear)
                     .frame(width: 284, height: 0.5)
                     .background(.white.opacity(0.5))
+                    .padding(.top, 11)
                 
                 HStack {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 8) {
                         Text("\(mumory.musicModel.title)")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                             .foregroundColor(.white)
@@ -212,10 +213,11 @@ struct MumoryCard: View {
                     })
                 } // HStack
                 .padding(.horizontal, 16)
-                .padding(.bottom, 22)
+                .padding(.top, 16)
+                .padding(.bottom, 18)
             } // VStack
         } // ZStack
-        .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: 418)
+        .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 407 : 418)
         .background(Color(red: 0.64, green: 0.51, blue: 0.99))
         .cornerRadius(15)
     }

@@ -19,7 +19,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     var content: () -> Content
     var onRefresh: () -> Void
-
+    
     @Binding var contentOffsetY: CGFloat
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -34,15 +34,15 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
-
+        
         scrollView.delegate = context.coordinator
-
+        
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.backgroundColor = .gray
         scrollView.bounces = true
-
+        
         let hostingController = UIHostingController(rootView: self.content()
             .environmentObject(self.mumoryDataViewModel)
             .environmentObject(self.currentUserData))
@@ -73,15 +73,15 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
             .environmentObject(self.currentUserData))
         
         let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-
+        
         if context.coordinator.contentHeight != contentHeight {
-
+            
             uiView.contentSize = CGSize(width: 0, height: contentHeight) // 수평 스크롤 차단을 위해 너비를 0으로 함
             hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: contentHeight)
-
+            
             uiView.backgroundColor = .clear
             hostingController.view.backgroundColor = .clear
-
+            
             uiView.subviews.forEach { $0.removeFromSuperview() }
             
             let refreshControl = UIRefreshControl()
@@ -91,7 +91,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
             uiView.contentInset.top = self.appCoordinator.safeAreaInsetsTop + 68
             
             uiView.addSubview(hostingController.view)
-
+            
             context.coordinator.contentHeight = contentHeight
         }
     }
@@ -120,7 +120,8 @@ extension SocialScrollViewRepresentable {
         }
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
-//            parent.mumoryDataViewModel.everyMumorys = []
+            print("handleRefreshControl")
+            
             parent.mumoryDataViewModel.fetchEveryMumory2 { result in
                 switch result {
                 case .success():
@@ -140,17 +141,17 @@ extension SocialScrollViewRepresentable {
             let limitHeight = self.parent.appCoordinator.safeAreaInsetsTop + 68
             
             topBarOffsetY += (offsetY - preOffsetY)
-
+            
             if topBarOffsetY < .zero || offsetY <= .zero {
                 topBarOffsetY = .zero
             } else if topBarOffsetY > limitHeight || offsetY >= contentHeight - scrollViewHeight {
                 topBarOffsetY = limitHeight
             }
-
+            
             DispatchQueue.main.async {
                 self.parent.contentOffsetY = self.topBarOffsetY
             }
-
+            
             preOffsetY = offsetY
             
             if offsetY >= contentHeight - scrollViewHeight {
@@ -162,7 +163,6 @@ extension SocialScrollViewRepresentable {
                 isRefreshing = false
             }
         }
-
     }
 }
 
@@ -175,9 +175,7 @@ struct SocialScrollCotentView: View {
     var body: some View {
         
         VStack(spacing: 0) {
-            
             LazyVStack(spacing: 0) {
-                
                 ForEach(self.mumoryDataViewModel.everyMumorys, id: \.uuid) { i in
                     SocialItemView(mumory: i)
                 }
@@ -211,7 +209,7 @@ struct SocialItemView: View {
     var body: some View {
         
         VStack(spacing: 0) {
-
+            
             HStack(spacing: 8) {
                 
                 AsyncImage(url: self.user.profileImageURL) { phase in
@@ -325,7 +323,7 @@ struct SocialItemView: View {
                             .clipped()
                     )
                     .cornerRadius(15)
-
+                
                 
                 SharedAsset.artworkFilterSocial.swiftUIImage
                     .resizable()
@@ -341,7 +339,41 @@ struct SocialItemView: View {
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
-
+                    
+                    //                    Button {
+                    //                        Task {
+                    //                            guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
+                    //                            playerViewModel.playNewSong(song: song, isPlayerShown: false)
+                    //                            withAnimation {
+                    //                                playerViewModel.userWantsShown = true
+                    //                                playerViewModel.isShownMiniPlayer = true
+                    //                                playerViewModel.miniPlayerMoveToBottom = false
+                    //                            }
+                    //                        }
+                    //                    } label: {
+                    //                        HStack(spacing: 0) {
+                    //                            SharedAsset.musicIconSocial.swiftUIImage
+                    //                                .resizable()
+                    //                                .frame(width: 14, height: 14)
+                    //
+                    //                            Spacer().frame(width: 6)
+                    //
+                    //                            Text(self.mumory.musicModel.title)
+                    //                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
+                    //                                .multilineTextAlignment(.trailing)
+                    //                                .foregroundColor(.white)
+                    //                                .lineLimit(1)
+                    //
+                    //                            Spacer().frame(width: 8)
+                    //
+                    //                            Text(self.mumory.musicModel.artist)
+                    //                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                    //                                .foregroundColor(.white)
+                    //                                .lineLimit(1)
+                    //                        }
+                    //                        .padding(.vertical, 10)
+                    //                    }
+                    
                     HStack(spacing: 0) {
                         SharedAsset.musicIconSocial.swiftUIImage
                             .resizable()
@@ -363,6 +395,7 @@ struct SocialItemView: View {
                             .lineLimit(1)
                     }
                     .padding(.vertical, 10)
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         Task {
                             guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
@@ -429,7 +462,7 @@ struct SocialItemView: View {
                                 ForEach(tags, id: \.self) { tag in
                                     
                                     HStack(alignment: .center, spacing: 5) {
-                                    
+                                        
                                         SharedAsset.tagMumoryDatail.swiftUIImage
                                             .resizable()
                                             .frame(width: 14, height: 14)
@@ -456,13 +489,13 @@ struct SocialItemView: View {
                             .frame(width: (UIScreen.main.bounds.width - 20) * 0.66, height: 44)
                             .blur(radius: 3)
                     )
-
+                    
                     
                     // MARK: Content
                     if let content = self.mumory.content, !content.isEmpty {
                         
                         HStack(spacing: 0) {
-                        
+                            
                             Text(content.replacingOccurrences(of: "\n", with: " "))
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
@@ -484,7 +517,7 @@ struct SocialItemView: View {
                                 )
                             
                             Spacer(minLength: 0)
-
+                            
                             if self.isTruncated {
                                 Text("더보기")
                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 11))
@@ -510,7 +543,7 @@ struct SocialItemView: View {
                         self.generateHapticFeedback(style: .medium)
                         isButtonDisabled = true
                         let originLikes = self.mumory.likes
-
+                        
                         Task {
                             await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId) { likes in
                                 lazy var functions = Functions.functions()
@@ -602,7 +635,7 @@ struct SocialItemView: View {
 public struct SocialView: View {
     
     @Binding private var isSocialSearchViewShown: Bool
-
+    
     @State private var isLoadingViewShown = true
     @State private var offsetY: CGFloat = 0
     @State private var isAddFriendNotification: Bool = false
@@ -625,60 +658,53 @@ public struct SocialView: View {
             Color(red: 0.09, green: 0.09, blue: 0.09)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                 print("onRefresh")
                 self.mumoryDataViewModel.fetchEveryMumory()
             }) {
+//                VStack(spacing: 0) {
+//
+//                    SharedAsset.socialInitIcon.swiftUIImage
+//                        .resizable()
+//                        .frame(width: 96.74, height: 57)
+//                        .padding(.bottom, 39)
+//
+//                    Text("아직 뮤모리가 기록되지 않았어요")
+//                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+//                        .foregroundColor(.white)
+//                        .frame(maxWidth: .infinity, alignment: .center)
+//                        .padding(.bottom, 21)
+//
+//                    Text("친구들을 초대해서 나만의 좋은 음악과")
+//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+//                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+//                        .fixedSize(horizontal: true, vertical: true)
+//                        .padding(.bottom, 3)
+//
+//                    Text("특별한 순간을 공유해보세요!")
+//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+//                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+//                        .fixedSize(horizontal: true, vertical: true)
+//                }
+//                .offset(y: -65 - appCoordinator.safeAreaInsetsTop)
+//                .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
                 
-                ZStack {
-                    
-                    Color.clear
-                        .frame(height: getUIScreenBounds().height - 89)
-                    
-                    VStack(spacing: 0) {
-                        
-                        SharedAsset.socialInitIcon.swiftUIImage
-                            .resizable()
-                            .frame(width: 96.74, height: 57)
-                            .padding(.bottom, 39)
-                        
-                        Text("아직 뮤모리가 기록되지 않았어요")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.bottom, 21)
-                        
-                        Text("친구들을 초대해서 나만의 좋은 음악과")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-                            .fixedSize(horizontal: true, vertical: true)
-                            .padding(.bottom, 3)
-                        
-                        Text("특별한 순간을 공유해보세요!")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-                            .fixedSize(horizontal: true, vertical: true)
-                    }
-                    .offset(y: -65 - appCoordinator.safeAreaInsetsTop)
-                    .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
-                    
-                    SocialScrollCotentView()
-                }
+                SocialScrollCotentView()
+                
             }
             
             if mumoryDataViewModel.isUpdating, !mumoryDataViewModel.isFirstSocialLoad {
                 SocialLoadingView()
             }
-        
+            
             HStack(alignment: .top, spacing: 0) {
-
+                
                 Text("소셜")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                     .foregroundColor(.white)
-
+                
                 Spacer()
-
+                
                 Button(action: {
                     self.isSocialSearchViewShown = true
                 }) {
@@ -686,9 +712,9 @@ public struct SocialView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-
+                
                 Spacer().frame(width: 12)
-
+                
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         self.appCoordinator.isAddFriendViewShown = true
@@ -698,9 +724,9 @@ public struct SocialView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-
+                
                 Spacer().frame(width: 12)
-
+                
                 Button(action: {
                     appCoordinator.setBottomAnimationPage(page: .myPage)
                 }) {

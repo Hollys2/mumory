@@ -203,27 +203,14 @@ public struct CreateMumoryBottomSheetView: View {
                                     TagContainerView(tags: self.$tags)
                                     
                                     ContentContainerView(contentText: self.$contentText)
-                                        .background {
+                                        .background(
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                        
-                                                        self.contentContainerYOffset = newOffset
+                                                    .onChange(of: geometry.frame(in: .global).maxY) { newValue in
+                                                        self.contentContainerYOffset = newValue
                                                     }
                                             }
-                                        }
-//                                        .background(
-//                                            GeometryReader { geometry in
-//                                                Color.clear
-//                                                    .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global).maxY)
-//                                                    .onPreferenceChange(ViewPositionKey.self) { newValue in
-//                                                        if newValue ?? .zero >= getUIScreenBounds().height - (keyboardResponder.keyboardHeight + 55 + appCoordinator.safeAreaInsetsBottom) {
-//                                                            self.contentContainerYOffset = (newValue ?? .zero) - (getUIScreenBounds().height - (keyboardResponder.keyboardHeight + 55 + appCoordinator.safeAreaInsetsBottom))
-//                                                            print("contentContainerYOffset: \(contentContainerYOffset)")
-//                                                        }
-//                                                    }
-//                                            }
-//                                        )
+                                        )
                                     
                                     HStack(spacing: 11) {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -286,10 +273,15 @@ public struct CreateMumoryBottomSheetView: View {
                             } // VStack
                             .padding(.top, 20)
                             .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
-//                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
-                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -contentContainerYOffset : 0)
+                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
                         } // ScrollView
                     .scrollIndicators(.hidden)
+                    .simultaneousGesture(DragGesture().onChanged { _ in
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    })
+                    .onAppear {
+                        UIScrollView.appearance().bounces = false
+                    }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
@@ -454,7 +446,7 @@ public struct CreateMumoryBottomSheetView: View {
                     , alignment: .top
                 )
                 .zIndex(2)
-                .offset(y:  keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+                .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
             }
         }
     }

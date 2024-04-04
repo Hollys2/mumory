@@ -112,7 +112,7 @@ public struct MumoryDetailView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(mumory: Mumory) {
-//        UIScrollView.appearance().bounces = false
+        UIScrollView.appearance().bounces = false
         self._mumory = State(initialValue: mumory)
     }
 

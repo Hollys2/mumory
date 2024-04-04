@@ -34,6 +34,7 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var locationMumorys: [String: [Mumory]] = [:]
     
     @Published public var myActivity: [(String, String)] = []
+    @Published public var myRewards: [String] = []
     
     @Published public var favoriteDate: [Date] = []
     
@@ -333,13 +334,15 @@ final public class MumoryDataViewModel: ObservableObject {
                     return
                 }
                 
-                if !self.initialSnapshot {
-                    for documentChange in snapshot.documentChanges {
-                        guard documentChange.type == .added else { continue }
-                        let documentData = documentChange.document.data()
-                        guard let type = documentData["type"] as? String else { continue }
-                        
-                        DispatchQueue.main.async {
+                for documentChange in snapshot.documentChanges {
+                    guard documentChange.type == .added else { continue }
+                    let documentData = documentChange.document.data()
+                    guard let type = documentData["type"] as? String else { continue }
+                    let newReward: String = type
+                    
+                    DispatchQueue.main.async {
+                        if !self.myRewards.contains(where: { $0 == type }) {
+                            self.myRewards.append(newReward)
                             switch type {
                             case "attendance0":
                                 self.reward = .attendance(0)
@@ -400,16 +403,16 @@ final public class MumoryDataViewModel: ObservableObject {
                                 self.isRewardPopUpShown = true
                             }
                             print("fetchRewardListener added: \(self.reward)")
+                            
                         }
                     }
-                } else {
-                    self.initialSnapshot = false
                 }
             }
         }
         return listener
     }
     
+            
     public func fetchActivityListener(uId: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(uId).collection("Activity")
@@ -502,8 +505,6 @@ final public class MumoryDataViewModel: ObservableObject {
             do {
                 let snapshot = try await collectionReference.getDocuments()
                 
-//                var result: [(String, String)] = []
-                
                 for document in snapshot.documents {
                     let documentData = document.data()
                     guard let type = documentData["type"] as? String else {
@@ -521,6 +522,41 @@ final public class MumoryDataViewModel: ObservableObject {
                 print("fetchActivitys successfully: \(myActivity)")
             } catch {
                 print("Error fetchActivitys: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.isUpdating = false
+                }
+            }
+        }
+    }
+    
+    public func fetchRewards(uId: String) {
+        DispatchQueue.main.async {
+            self.isUpdating = true
+        }
+        
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(uId).collection("Reward")
+        
+        Task {
+            do {
+                let snapshot = try await collectionReference.getDocuments()
+                
+                for document in snapshot.documents {
+                    let documentData = document.data()
+                    guard let type = documentData["type"] as? String else {
+                        DispatchQueue.main.async {
+                            self.isUpdating = false
+                        }
+                        continue }
+                    
+                    DispatchQueue.main.async {
+                        self.myRewards.append(type)
+                    }
+                }
+                
+                print("fetchRewards successfully: \(myRewards)")
+            } catch {
+                print("Error fetchRewards: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     self.isUpdating = false
                 }
@@ -750,9 +786,6 @@ final public class MumoryDataViewModel: ObservableObject {
         let db = FirebaseManager.shared.db
            
         Task {
-//            DispatchQueue.main.async {
-//                self.everyMumorys = []
-//            }
             let mumoryCollectionRef = db.collection("Mumory")
                 .order(by: "date", descending: true)
                 .limit(to: 7)
@@ -765,15 +798,16 @@ final public class MumoryDataViewModel: ObservableObject {
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
                     DispatchQueue.main.async {
-                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
-                            self.tempMumory.append(newMumory)
-                            self.tempMumory.sort { $0.date > $1.date }
-                        }
+//                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
+//                        self.everyMumorys.append(newMumory)
+//                            self.tempMumory.sort { $0.date > $1.date }
+                        self.tempMumory.append(newMumory)
                     }
+//                    }
                 }
                 
                 DispatchQueue.main.async {
-//                    self.everyMumorys = self.tempMumory
+                    self.everyMumorys = self.tempMumory
                     self.isUpdating = false
                     completionHandler(.success(()))
                 }

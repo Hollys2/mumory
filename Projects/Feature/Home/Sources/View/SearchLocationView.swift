@@ -85,7 +85,7 @@ struct SearchLocationView: View {
             HStack {
                 
                 ZStack(alignment: .leading) {
-                    TextField("", text: $localSearchViewModel.queryFragment,
+                    TextField("Location", text: $localSearchViewModel.queryFragment,
                               prompt: Text("위치 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
                     .frame(maxWidth: .infinity)
@@ -104,17 +104,16 @@ struct SearchLocationView: View {
                         .padding(.leading, 15)
                     
                     if !self.localSearchViewModel.queryFragment.isEmpty {
-                        Button(action: {
-                            self.localSearchViewModel.queryFragment = ""
-                        }) {
-                            HStack {
-                                Spacer()
-                                SharedAsset.removeButtonSearch.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 23, height: 23)
-                            }
-                            .padding(.trailing, 17)
+                        HStack {
+                            Spacer()
+                            SharedAsset.removeButtonSearch.swiftUIImage
+                                .resizable()
+                                .frame(width: 23, height: 23)
+                                .onTapGesture {
+                                    self.localSearchViewModel.queryFragment = ""
+                                }
                         }
+                        .padding(.trailing, 17)
                     }
                 }
                 

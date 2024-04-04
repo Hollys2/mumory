@@ -132,7 +132,7 @@ public struct HomeView: View {
                     print("음악 권한 받음")
                     
                     if appCoordinator.isFirst {
-                        
+                        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
                         self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
                         self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                             switch result {
@@ -149,9 +149,45 @@ public struct HomeView: View {
                             }
                             
                             DispatchQueue.main.async {
-                                self.mumoryDataViewModel.isUpdating = false                                
+                                self.mumoryDataViewModel.isUpdating = false
                             }
                         }
+                        
+                        let pastDate: Date = currentUserData.user.signUpDate
+                        let currentDate = Date()
+                        
+                        let calendar = Calendar.current
+                        let components = calendar.dateComponents([.day], from: pastDate, to: currentDate)
+                        if let dayDifference = components.day {
+                            if dayDifference >= 3 {
+                                let db = FirebaseManager.shared.db
+                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
+                                let data = ["type": "attendance1"]
+                                collectionReference.addDocument(data: data)
+                            }
+                            
+                            if dayDifference >= 7 {
+                                let db = FirebaseManager.shared.db
+                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
+                                let data = ["type": "attendance2"]
+                                collectionReference.addDocument(data: data)
+                            }
+                            
+                            if dayDifference >= 14 {
+                                let db = FirebaseManager.shared.db
+                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
+                                let data = ["type": "attendance3"]
+                                collectionReference.addDocument(data: data)
+                            }
+                            
+                            if dayDifference >= 30 {
+                                let db = FirebaseManager.shared.db
+                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
+                                let data = ["type": "attendance4"]
+                                collectionReference.addDocument(data: data)
+                            }
+                        }
+
                         
                         appCoordinator.isFirst = false
                     }
