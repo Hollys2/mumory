@@ -445,6 +445,7 @@ struct FriendAddItem: View {
                 Task {
                     guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
                         print("network error")
+                        status = .normal
                         return
                     }
                     status = .alreadyRequest
@@ -573,6 +574,7 @@ struct RecievedRequestItem: View {
         Task {
             guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
                 print("network error")
+                status = .normal
                 return
             }
             currentUserData.recievedRequests.removeAll(where: {$0.uId == friend.uId})

@@ -57,6 +57,11 @@ struct SearchMusicViewInCreateMumory: View {
                                     self.songs = await requestSong(term: term, index: 0)
                                     isLoading = false
                                 }
+                                let userDefault = UserDefaults.standard
+                                var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
+                                recentSearchList.removeAll(where: {$0 == term})
+                                recentSearchList.insert(term, at: 0)
+                                userDefault.set(recentSearchList, forKey: "recentSearchList")
                             }
                     
                         

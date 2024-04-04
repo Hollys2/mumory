@@ -581,30 +581,34 @@ struct FriendPlaylistView: View {
                 }
                 
                 //플리 가로 스크롤뷰
-                ScrollView(.horizontal) {
-                    HStack(alignment: .top, spacing: 10, content: {
-                        ForEach(friendDataViewModel.playlistArray.indices, id: \.self) { index in
-                            PlaylistItemTest(playlist: $friendDataViewModel.playlistArray[index], itemSize: getUIScreenBounds().width * 0.215)
-                                .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlistIndex: index))
-                                }
-                        }
-                        
-                        if friendDataViewModel.isPlaylistLoading {
-                            ForEach(0...10, id: \.self) { index in
-                                PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
+                if friendDataViewModel.isPlaylistLoading {
+                    ForEach(0...10, id: \.self) { index in
+                        PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
+                    }
+                }else if friendDataViewModel.playlistArray.isEmpty {
+                    Text("플레이리스트가 없습니다")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundColor(ColorSet.subGray)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: getUIScreenBounds().width * 0.43 + 25, alignment: .center) //이후 수정하기
+                } else {
+                    ScrollView(.horizontal) {
+                        HStack(alignment: .top, spacing: 10, content: {
+                            ForEach(friendDataViewModel.playlistArray.indices, id: \.self) { index in
+                                PlaylistItemTest(playlist: $friendDataViewModel.playlistArray[index], itemSize: getUIScreenBounds().width * 0.215)
+                                    .onTapGesture {
+                                        appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlistIndex: index))
+                                    }
                             }
-                        }else if friendDataViewModel.playlistArray.isEmpty {
-                            Text("플레이리스트가 없습니다")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                .frame(maxWidth: .infinity, alignment: .center)
-                                .foregroundColor(ColorSet.subGray)
-                        }
-                        
-                    })
-                    .padding(.horizontal, 20)
+                            
+                            
+                            
+                        })
+                        .padding(.horizontal, 20)
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                .scrollIndicators(.hidden)
             })
         }
 
@@ -911,7 +915,7 @@ struct FriendMumoryView: View {
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
-                Text("\(friendDataViewModel.friend.nickname) 뮤모리")
+                Text("\(friendDataViewModel.friend.nickname)의 뮤모리")
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                     .foregroundStyle(Color.white)
                 

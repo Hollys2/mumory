@@ -55,7 +55,6 @@ public struct HomeView: View {
                             .offset(y: -41)
                 }
             }
-            .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
                         
             MiniPlayerView()
             
