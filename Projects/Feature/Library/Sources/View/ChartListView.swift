@@ -92,7 +92,6 @@ struct ChartListView: View {
                                             var songs = await requestTop100(startIndex: searchIndex + 1)
                                             self.songs.append(contentsOf: songs)
                                             playerViewModel.setQueue(songs: self.songs, startSong: startSong)
-               
                                         }
                                     }
                                 }

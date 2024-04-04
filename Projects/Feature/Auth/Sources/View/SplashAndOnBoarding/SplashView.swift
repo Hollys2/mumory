@@ -313,19 +313,12 @@ public struct SplashView: View {
                   let id = data["id"] as? String,
                   let isCheckedServiceNewsNotification = data["isSubscribedToService"] as? Bool,
                   let favoriteGenres = data["favoriteGenres"] as? [Int] else {
-                print("splash checkcheck2")
-
-                if (UserDefaults.standard.value(forKey: "loginHistory") == nil) {
-                    appCoordinator.initPage = .onBoarding
-                }else {
-                    appCoordinator.initPage = .login
-                }
+                appCoordinator.initPage = .onBoarding
                 withAnimation {
                     isInitialSettingDone = true
                 }
                 return
             }
-            print("splash checkcheck3")
 
             currentUserData.uId = user.uid
             currentUserData.user = await MumoriUser(uId: user.uid)
@@ -334,7 +327,6 @@ public struct SplashView: View {
             withAnimation {
                 isInitialSettingDone = true
             }
-            print("splash checkcheck4")
 
             appCoordinator.initPage = .home
             try await db.collection("User").document(user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])

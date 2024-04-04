@@ -79,7 +79,7 @@ struct FavoriteGenreRecommendationView: View {
                                             
                                         }
                                         .offset(y: -40)
-                                        .offset(x: -65)
+                                        .offset(x: -63)
                                         .transition(.scale(scale: 0.0, anchor: .top).combined(with: .opacity))
                                 }
                                 

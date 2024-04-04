@@ -100,33 +100,34 @@ struct FavoriteListView: View {
                         appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: myRandomGenre))
                     }
                     .padding(.top, getUIScreenBounds().height * 0.25)
-                }
-                
-                ScrollView {
-                    LazyVStack(spacing: 0, content: {
-                        ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
-                            SongListBigItem(song: song)
-                                .onTapGesture {
-                                    playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
-                                }
-                        }
-                        if isLoading {
-                            FavoriteSongSkeletonView()
-                        }
-                        
-                        Rectangle()
-                            .fill(Color.clear)
-                            .frame(height: 90)
-                    })
-                }
-                .refreshable {
-                    Task {
-                        self.isLoading = true
-                        currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
-                        self.isLoading = false
+                } else {
+                    
+                    ScrollView {
+                        LazyVStack(spacing: 0, content: {
+                            ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
+                                SongListBigItem(song: song)
+                                    .onTapGesture {
+                                        playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
+                                    }
+                            }
+                            if isLoading {
+                                FavoriteSongSkeletonView()
+                            }
+                            
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 90)
+                        })
                     }
+                    .refreshable {
+                        Task {
+                            self.isLoading = true
+                            currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
+                            self.isLoading = false
+                        }
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                .scrollIndicators(.hidden)
         
             })
             CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
