@@ -93,7 +93,6 @@ final class PhotoPickerViewModel: ObservableObject {
     
     @MainActor
     func convertDataToImage(imageURLsCount: Int) {
-        
         if !imageSelections.isEmpty {
             for eachItem in imageSelections {
                 Task {

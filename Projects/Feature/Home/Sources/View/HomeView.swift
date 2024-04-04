@@ -19,6 +19,7 @@ public struct HomeView: View {
     
     @State private var listener: ListenerRegistration?
     @State private var rewardListener: ListenerRegistration?
+    @State private var activityListener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
     @State private var isCreateMumoryPopUpViewShown: Bool = true
     
@@ -115,8 +116,6 @@ public struct HomeView: View {
         .navigationBarBackButtonHidden()
         .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
-            UIScrollView.appearance().bounces = true
-            
             let userDefualt = UserDefaults.standard
             if !userDefualt.bool(forKey: "firstLogined") {
                 userDefualt.setValue(true, forKey: "firstLogined")
@@ -133,6 +132,8 @@ public struct HomeView: View {
                     print("음악 권한 받음")
                     
                     if appCoordinator.isFirst {
+                        
+                        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
                         self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                             switch result {
                             case .success(let mumorys):
@@ -141,6 +142,7 @@ public struct HomeView: View {
                                     self.mumoryDataViewModel.myMumorys = mumorys
                                     self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
                                     self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(uId: self.currentUserData.uId)
+                                    self.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
                                 }
                             case .failure(let error):
                                 print("ERROR: \(error)")

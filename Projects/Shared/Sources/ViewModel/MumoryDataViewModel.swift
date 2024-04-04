@@ -32,7 +32,9 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var monthlyMumorys: [Mumory] = []
     @Published public var surroundingMumorys: [Mumory] = []
     @Published public var locationMumorys: [String: [Mumory]] = [:]
-
+    
+    @Published public var myActivity: [(String, String)] = []
+    
     @Published public var favoriteDate: [Date] = []
     
     @Published public var mumoryComments: [Comment] = []
@@ -323,7 +325,7 @@ final public class MumoryDataViewModel: ObservableObject {
     public func fetchRewardListener(uId: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(uId).collection("Reward")
-
+        
         let listener = collectionReference.addSnapshotListener { snapshot, error in
             Task {
                 guard let snapshot = snapshot, error == nil else {
@@ -406,6 +408,124 @@ final public class MumoryDataViewModel: ObservableObject {
             }
         }
         return listener
+    }
+    
+    public func fetchActivityListener(uId: String) -> ListenerRegistration {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(uId).collection("Activity")
+        
+        let listener = collectionReference.addSnapshotListener { snapshot, error in
+            Task {
+                guard let snapshot = snapshot, error == nil else {
+                    print("Error fetchRewardListener: \(error!)")
+                    return
+                }
+                
+                for documentChange in snapshot.documentChanges {
+                    guard documentChange.type == .added else { continue }
+                    let documentData = documentChange.document.data()
+                    guard let friendUid = documentData["friendUId"] as? String,
+                          let type = documentData["type"] as? String else { continue }
+                    
+                    DispatchQueue.main.async {
+                        if !self.myActivity.contains(where: { $0.0 == documentChange.document.documentID }) {
+                            if uId != friendUid {
+                                let newActivity: (String, String) = (documentChange.document.documentID, type)
+                                self.myActivity.append(newActivity)
+                                
+                                if newActivity.1 == "like" {
+                                    if self.myActivity.filter({$0.1 == "like"}).count == 1 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "like0"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "like"}).count == 5 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "like1"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "like"}).count == 15 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "like2"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "like"}).count == 30 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "like3"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "like"}).count == 50 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "like4"]
+                                        collectionReference.addDocument(data: data)
+                                    }
+                                } else if newActivity.1 == "comment" {
+                                    if self.myActivity.filter({$0.1 == "comment"}).count == 1 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "comment0"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "comment"}).count == 5 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "comment1"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "comment"}).count == 10 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "comment2"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "comment"}).count == 20 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "comment3"]
+                                        collectionReference.addDocument(data: data)
+                                    } else if self.myActivity.filter({$0.1 == "comment"}).count == 40 {
+                                        let collectionReference = db.collection("User").document(uId).collection("Reward")
+                                        let data = ["type": "comment4"]
+                                        collectionReference.addDocument(data: data)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        print("fetchActivityListener added")
+                    }
+                }
+                
+            }
+        }
+        return listener
+    }
+    
+    public func fetchActivitys(uId: String) {
+        DispatchQueue.main.async {
+            self.isUpdating = true
+        }
+        
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(uId).collection("Activity")
+        
+        Task {
+            do {
+                let snapshot = try await collectionReference.getDocuments()
+                
+//                var result: [(String, String)] = []
+                
+                for document in snapshot.documents {
+                    let documentData = document.data()
+                    guard let type = documentData["type"] as? String else {
+                        DispatchQueue.main.async {
+                            self.isUpdating = false
+                        }
+                        continue }
+                    
+                    let newResult = (document.documentID, type)
+                    DispatchQueue.main.async {
+                        self.myActivity.append(newResult)
+                    }
+                }
+                
+                print("fetchActivitys successfully: \(myActivity)")
+            } catch {
+                print("Error fetchActivitys: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.isUpdating = false
+                }
+            }
+        }
     }
     
     public func fetchMumory(documentID: String) async -> Mumory {
@@ -601,6 +721,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         if !self.tempSocialMumory.contains(where: { $0.id == document.documentID }) {
                             self.tempSocialMumory.append(newMumory)
+                            self.tempSocialMumory.sort { $0.date > $1.date }
                         }
                     }
                 }
@@ -646,12 +767,13 @@ final public class MumoryDataViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
                             self.tempMumory.append(newMumory)
+                            self.tempMumory.sort { $0.date > $1.date }
                         }
                     }
                 }
                 
                 DispatchQueue.main.async {
-                    self.everyMumorys = self.tempMumory
+//                    self.everyMumorys = self.tempMumory
                     self.isUpdating = false
                     completionHandler(.success(()))
                 }
@@ -881,6 +1003,7 @@ final public class MumoryDataViewModel: ObservableObject {
             "uId": mumory.uId,
             "date": FirebaseManager.Timestamp(date: mumory.date),
             "songId": String(describing: mumory.musicModel.songID),
+            "locationTitle": mumory.locationModel.locationTitle,
             "latitude": mumory.locationModel.coordinate.latitude,
             "longitude": mumory.locationModel.coordinate.longitude,
             "coutry": mumory.locationModel.country,
@@ -903,7 +1026,6 @@ final public class MumoryDataViewModel: ObservableObject {
                 }
             } else {
                 print("updateMumory successfully! : \(documentReference.documentID)")
-                self.selectedMumoryAnnotation = mumory
                 completion()
             }
         }

@@ -165,7 +165,7 @@ public struct CreateMumoryBottomSheetView: View {
                                     NavigationLink(value: "location") {
                                         ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                                     }
-                                    
+
                                     CalendarContainerView(date: self.$calendarDate)
                                         .onTapGesture {
                                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -203,15 +203,27 @@ public struct CreateMumoryBottomSheetView: View {
                                     TagContainerView(tags: self.$tags)
                                     
                                     ContentContainerView(contentText: self.$contentText)
-                                        .background(
+                                        .background {
                                             GeometryReader { geometry in
                                                 Color.clear
-                                                    .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global).maxY)
-                                                    .onPreferenceChange(ViewPositionKey.self) { newValue in
-                                                        self.contentContainerYOffset = newValue ?? 0
+                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                        
+                                                        self.contentContainerYOffset = newOffset
                                                     }
                                             }
-                                        )
+                                        }
+//                                        .background(
+//                                            GeometryReader { geometry in
+//                                                Color.clear
+//                                                    .preference(key: ViewPositionKey.self, value: geometry.frame(in: .global).maxY)
+//                                                    .onPreferenceChange(ViewPositionKey.self) { newValue in
+//                                                        if newValue ?? .zero >= getUIScreenBounds().height - (keyboardResponder.keyboardHeight + 55 + appCoordinator.safeAreaInsetsBottom) {
+//                                                            self.contentContainerYOffset = (newValue ?? .zero) - (getUIScreenBounds().height - (keyboardResponder.keyboardHeight + 55 + appCoordinator.safeAreaInsetsBottom))
+//                                                            print("contentContainerYOffset: \(contentContainerYOffset)")
+//                                                        }
+//                                                    }
+//                                            }
+//                                        )
                                     
                                     HStack(spacing: 11) {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -273,11 +285,11 @@ public struct CreateMumoryBottomSheetView: View {
                                 .padding(.horizontal, 20)
                             } // VStack
                             .padding(.top, 20)
-                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
-//                            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                            .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
+//                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -contentContainerYOffset : 0)
                         } // ScrollView
                     .scrollIndicators(.hidden)
-
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
                 .cornerRadius(23, corners: [.topLeft, .topRight])
@@ -359,9 +371,8 @@ public struct CreateMumoryBottomSheetView: View {
                                         photoPickerViewModel.removeAllSelectedImages()
                                         self.imageURLs.removeAll()
 
-                                        self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
-                                        
                                         appCoordinator.selectedTab = .home
+                                        self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                         
                                     case .failure(let error):
                                         print("뮤모리 만들기 실패: \(error.localizedDescription)")
@@ -545,9 +556,7 @@ struct ContainerView: View {
                 Spacer().frame(width: 10)
                 
                 if self.title == "음악 추가하기" {
-                    
                     if let mumoryAnnotation = self.mumoryAnnotation {
-                        
                         if let choosed = self.mumoryDataViewModel.choosedMusicModel {
                             
                             Rectangle()
@@ -636,7 +645,6 @@ struct ContainerView: View {
                         }
                     } else {
                         if let choosed = self.mumoryDataViewModel.choosedMusicModel {
-                            
                             Rectangle()
                                 .foregroundColor(.clear)
                                 .frame(width: 36, height: 36)
@@ -699,17 +707,31 @@ struct ContainerView: View {
                     }
                 } else {
                     if let mumoryAnnotation = self.mumoryAnnotation {
-                        Text("\(mumoryAnnotation.locationModel.locationTitle)")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                            .foregroundColor(.white)
-                            .lineLimit(1)
-                            .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
-                        
-                        Spacer().frame(width: 15)
-                        
-                        SharedAsset.editIconCreateMumory.swiftUIImage
-                            .resizable()
-                            .frame(width: 31, height: 31)
+                        if let choosed = self.mumoryDataViewModel.choosedLocationModel {
+                            Text("\(choosed.locationTitle)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
+                            
+                            Spacer().frame(width: 15)
+                            
+                            SharedAsset.editIconCreateMumory.swiftUIImage
+                                .resizable()
+                                .frame(width: 31, height: 31)
+                        } else {
+                            Text("\(mumoryAnnotation.locationModel.locationTitle)")
+                                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                                .foregroundColor(.white)
+                                .lineLimit(1)
+                                .frame(width: getUIScreenBounds().width * 0.587, alignment: .leading)
+                            
+                            Spacer().frame(width: 15)
+                            
+                            SharedAsset.editIconCreateMumory.swiftUIImage
+                                .resizable()
+                                .frame(width: 31, height: 31)
+                        }
                     } else {
                         if let choosed = self.mumoryDataViewModel.choosedLocationModel {
                             Text("\(choosed.locationTitle)")
@@ -723,7 +745,6 @@ struct ContainerView: View {
                             SharedAsset.editIconCreateMumory.swiftUIImage
                                 .resizable()
                                 .frame(width: 31, height: 31)
-                            
                         } else {
                             Group {
                                 
@@ -906,7 +927,6 @@ struct ContentContainerView: View {
             Rectangle()
                 .foregroundColor(.clear)
                 .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-//                .frame(minHeight: getUIScreenBounds().height == 667 ? 86 : 111)
                 .cornerRadius(15)
             
             HStack(alignment: .top, spacing: 0) {
@@ -923,8 +943,7 @@ struct ContentContainerView: View {
                     .kerning(0.24)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
-//                    .frame(height: 111)
-                    .padding([.top, .leading], -5)
+                    .offset(x: -5, y: -5)
                     .overlay(
                         Text("자유롭게 내용을 입력하세요.")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
@@ -934,14 +953,14 @@ struct ContentContainerView: View {
                             .allowsHitTesting(false)
                         , alignment: .topLeading
                     )
-                
+                    
                 Spacer()
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 18)
-            .padding(.horizontal, 17)
+            .padding(.leading, 17)
         }
-        .frame(height: 111)
+        .frame(width: getUIScreenBounds().width - 40, height: 111)
     }
 }
 

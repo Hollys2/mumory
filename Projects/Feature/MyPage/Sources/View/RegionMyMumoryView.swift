@@ -16,7 +16,7 @@ public struct RegionMyMumoryView: View {
     
     let user: MumoriUser
     let region: String
-    let mumorys: [Mumory]
+    @State var mumorys: [Mumory]
     
     @State private var selectedDate: Date = Date()
     @State private var currentTabSelection: Int = 0
@@ -78,13 +78,34 @@ public struct RegionMyMumoryView: View {
                         
                         ZStack(alignment: .top) {
                             
-                            ScrollView(showsIndicators: false) {
+//                            ScrollView(showsIndicators: false) {
                                 
                                 VStack(spacing: 0) {
                                     
                                     ForEach(Array(self.mumorys.enumerated()), id: \.element) { index, mumory in
                                         
-                                        if index > 0 && !isSameMonth(mumory, with: self.mumorys[index - 1]) {
+                                        if index == 0 {
+                                            ZStack(alignment: .topLeading) {
+                                                Rectangle()
+                                                    .foregroundColor(.clear)
+                                                    .frame(height: 31)
+                                                    .overlay(
+                                                        Rectangle()
+                                                            .foregroundColor(.clear)
+                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                        alignment: .top
+                                                    )
+                                                
+                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                    .foregroundColor(.white)
+                                                    .padding(.leading, 12)
+                                                    .offset(y: 21)
+                                            }
+                                        }
+                                        
+                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.monthlyMumorys[index - 1]) {
                                             ZStack(alignment: .topLeading) {
                                                 Rectangle()
                                                     .foregroundColor(.clear)
@@ -110,37 +131,38 @@ public struct RegionMyMumoryView: View {
                                     }
                                 } // VStack
                                 .padding(.top, 45)
-                            } // ScrollView
-                            
-                            ZStack(alignment: .leading) {
-                                
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: getUIScreenBounds().width, height: 55)
-                                    .background(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.4).blur(radius: 5))
-                                    .overlay(
-                                        Rectangle()
-                                            .foregroundColor(.clear)
-                                            .frame(width: getUIScreenBounds().width, height: 0.3)
-                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.3))
-                                        , alignment: .bottom
-                                    )
-                                
-                                HStack(spacing: 6) {
-                                    Text("\(Calendar.current.component(.month, from: self.selectedDate))월")
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                                        .foregroundColor(.white)
-                                    
-                                    SharedAsset.dateButtonMypage.swiftUIImage
-                                        .resizable()
-                                        .frame(width: 15, height: 15)
+                                .blurScroll(10)
+                                //                                } // ScrollView
+
+                                ZStack(alignment: .leading) {
+
+                                    Rectangle()
+                                        .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.9))
+                                        .frame(width: getUIScreenBounds().width, height: 55)
+                                        .overlay(
+                                            Rectangle()
+                                                .foregroundColor(.clear)
+                                                .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4))
+                                            , alignment: .bottom
+                                        )
+
+                                    HStack(spacing: 6) {
+                                        Text("\(Calendar.current.component(.month, from: self.selectedDate))월")
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                                            .foregroundColor(.white)
+
+                                        SharedAsset.dateButtonMypage.swiftUIImage
+                                            .resizable()
+                                            .frame(width: 15, height: 15)
+                                    }
+                                    .padding(.leading, 12)
+                                    .onTapGesture {
+                                        UIView.setAnimationsEnabled(false)
+                                        self.isDatePickerShown = true
+                                    }
                                 }
-                                .padding(.leading, 12)
-                                .onTapGesture {
-                                    self.isDatePickerShown = true
-                                }
-                            }
-                            
+//                            } // ScrollView
                         }
                     } // VStack
                 }
@@ -162,6 +184,12 @@ public struct RegionMyMumoryView: View {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {
                     print("뮤모리 삭제 성공")
+                    
+//                    mumoryDataViewModel.locationMumorys.forEach { key, value in
+//                        mumoryDataViewModel.locationMumorys[key]?.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id}
+//                    }
+                    self.mumorys.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id }
+                    
                     appCoordinator.isDeleteMumoryPopUpViewShown = false
                 }
             })

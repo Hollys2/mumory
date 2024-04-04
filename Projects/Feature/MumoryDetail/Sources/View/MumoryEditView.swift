@@ -17,7 +17,7 @@ import Shared
 
 public struct MumoryEditView: View {
     
-    @State var mumoryAnnotation: Mumory
+    @State var mumory: Mumory
     
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
@@ -49,13 +49,13 @@ public struct MumoryEditView: View {
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
 
-    public init(mumoryAnnotation: Mumory) {
-        self._mumoryAnnotation = State(initialValue: mumoryAnnotation)
-        self._calendarDate = State(initialValue: mumoryAnnotation.date)
-        self._imageURLs = State(initialValue: mumoryAnnotation.imageURLs ?? [])
-        self._isPublic = State(initialValue: mumoryAnnotation.isPublic)
-        self._tags = State(initialValue: mumoryAnnotation.tags ?? [])
-        self._contentText = State(initialValue: mumoryAnnotation.content ?? "NO CONTENT")
+    public init(mumory: Mumory) {
+        self._mumory = State(initialValue: mumory)
+        self._calendarDate = State(initialValue: mumory.date)
+        self._imageURLs = State(initialValue: mumory.imageURLs ?? [])
+        self._isPublic = State(initialValue: mumory.isPublic)
+        self._tags = State(initialValue: mumory.tags ?? [])
+        self._contentText = State(initialValue: mumory.content ?? "NO CONTENT")
     }
     
     public var body: some View {
@@ -82,6 +82,7 @@ public struct MumoryEditView: View {
                         Spacer()
                         
                         Button(action: {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             self.isPublishPopUpShown = true
                         }) {
                             Rectangle()
@@ -113,11 +114,11 @@ public struct MumoryEditView: View {
                         VStack(spacing: 16) {
                             
                             NavigationLink(value: "music") {
-                                ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumoryAnnotation)
+                                ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
                             }
                             
                             NavigationLink(value: "location") {
-                                ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumoryAnnotation)
+                                ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
                             }
                             
                             CalendarContainerView(date: self.$calendarDate)
@@ -175,7 +176,7 @@ public struct MumoryEditView: View {
                             HStack(spacing: 11) {
                                 
                                 PhotosPicker(selection: $photoPickerViewModel.imageSelections,
-                                             maxSelectionCount: 1,
+                                             maxSelectionCount: 3 - self.imageURLs.count ,
                                              matching: .images) {
                                     
                                     VStack(spacing: 0) {
@@ -329,12 +330,11 @@ public struct MumoryEditView: View {
                     }
                     
                     group.notify(queue: .main) {
-                        let newMumory = Mumory(id: mumoryAnnotation.id, uId: currentUserData.user.uId, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? mumoryAnnotation.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? mumoryAnnotation.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: mumoryAnnotation.likes, commentCount: mumoryAnnotation.commentCount, myCommentCount: mumoryAnnotation.myCommentCount)
+                        let newMumory = Mumory(id: self.mumory.id, uId: currentUserData.user.uId, date: self.calendarDate, musicModel: mumoryDataViewModel.choosedMusicModel ?? self.mumory.musicModel, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.locationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
                         
                         mumoryDataViewModel.updateMumory(newMumory) {
                             
                             mumoryDataViewModel.isUpdating = false
-                            mumoryDataViewModel.selectedMumoryAnnotation = newMumory
                             
                             mumoryDataViewModel.choosedMusicModel = nil
                             mumoryDataViewModel.choosedLocationModel = nil

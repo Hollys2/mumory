@@ -108,76 +108,72 @@ public struct MyMumoryView: View {
                         ZStack(alignment: .top) {
 
                             //                                ScrollView(showsIndicators: false) {
-                            ScrollViewReader { proxy in
-
-                                VStack(spacing: 0) {
+                            VStack(spacing: 0) {
+                                if mumoryDataViewModel.monthlyMumorys.isEmpty {
+                                    ZStack(alignment: .top) {
+                                        Color.clear
+                                        
+                                        Text("뮤모리 기록이 없습니다.")
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                            .foregroundStyle(ColorSet.subGray)
+                                            .multilineTextAlignment(.center)
+                                            .offset(y: 145)
+                                    }
+                                }
+                                
+                                ForEach(Array(mumoryDataViewModel.monthlyMumorys.enumerated()), id: \.element) { index, mumory in
                                     
-                                    if mumoryDataViewModel.monthlyMumorys.isEmpty {
-                                        ZStack(alignment: .top) {
-                                            Color.clear
+                                    if index == 0 {
+                                        ZStack(alignment: .topLeading) {
+                                            Rectangle()
+                                                .foregroundColor(.clear)
+                                                .frame(height: 31)
+                                                .overlay(
+                                                    Rectangle()
+                                                        .foregroundColor(.clear)
+                                                        .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                        .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                    alignment: .top
+                                                )
                                             
-                                            Text("뮤모리 기록이 없습니다.")
+                                            Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
                                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                .foregroundStyle(ColorSet.subGray)
-                                                .multilineTextAlignment(.center)
-                                                .offset(y: 145)
+                                                .foregroundColor(.white)
+                                                .padding(.leading, 12)
+                                                .offset(y: 21)
                                         }
                                     }
-
-                                    ForEach(Array(mumoryDataViewModel.monthlyMumorys.enumerated()), id: \.element) { index, mumory in
-
-                                        if index == 0 {
-                                            ZStack(alignment: .topLeading) {
-                                                Rectangle()
-                                                    .foregroundColor(.clear)
-                                                    .frame(height: 31)
-                                                    .overlay(
-                                                        Rectangle()
-                                                            .foregroundColor(.clear)
-                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                        alignment: .top
-                                                    )
-
-                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                    .foregroundColor(.white)
-                                                    .padding(.leading, 12)
-                                                    .offset(y: 21)
-                                            }
+                                    
+                                    if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.monthlyMumorys[index - 1]) {
+                                        ZStack(alignment: .topLeading) {
+                                            Rectangle()
+                                                .foregroundColor(.clear)
+                                                .frame(height: 31)
+                                                .overlay(
+                                                    Rectangle()
+                                                        .foregroundColor(.clear)
+                                                        .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                        .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+                                                    alignment: .top
+                                                )
+                                            
+                                            Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                                .foregroundColor(.white)
+                                                .padding(.leading, 12)
+                                                .offset(y: 21)
                                         }
-
-                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.monthlyMumorys[index - 1]) {
-                                            ZStack(alignment: .topLeading) {
-                                                Rectangle()
-                                                    .foregroundColor(.clear)
-                                                    .frame(height: 31)
-                                                    .overlay(
-                                                        Rectangle()
-                                                            .foregroundColor(.clear)
-                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                        alignment: .top
-                                                    )
-
-                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                    .foregroundColor(.white)
-                                                    .padding(.leading, 12)
-                                                    .offset(y: 21)
-                                            }
-                                            .padding(.top, 30)
-                                        }
-
-                                        MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
-                                            .id(Int(index))
+                                        .padding(.top, 30)
                                     }
-
-                                    Spacer(minLength: 0)
-                                } // VStack
-                                .padding(.top, 55)
-                                .blurScroll(10)
-                            }
+                                    
+                                    MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
+                                        .id(Int(index))
+                                }
+                                
+                                Spacer(minLength: 0)
+                            } // VStack
+                            .padding(.top, 55)
+                            .blurScroll(10)
                             //                                } // ScrollView
 
                             ZStack(alignment: .leading) {
@@ -746,13 +742,11 @@ struct MumoryItemView: View {
                     .padding(.leading, 20)
                     .offset(y: UIScreen.main.bounds.width - 82 - self.vStackOffsetY - 17)
                 } // ZStack
-                
-                Spacer()
+                .padding(.bottom, 40)
             } // VStack
             
             Spacer().frame(width: 20)
         }
-        .frame(height: 371)
         .padding(.top, !isSameDateAsPrevious ? 30 : 0)
     }
 }

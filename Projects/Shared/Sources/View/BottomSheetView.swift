@@ -71,7 +71,7 @@ public struct MumoryBottomSheet {
                     mumoryAnnotation.isPublic.toggle()
                     mumoryDataViewModel.updateMumory(mumoryAnnotation) {
                         mumoryDataViewModel.isUpdating = false
-                        mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
+                        mumoryDataViewModel.selectedMumoryAnnotation.isPublic = mumoryAnnotation.isPublic
                     }
                     
                 },

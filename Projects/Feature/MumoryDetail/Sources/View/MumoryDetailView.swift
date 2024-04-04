@@ -12,92 +12,92 @@ import MapKit
 
 import Shared
 
-struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
-    
-    //    typealias UIViewType = UIScrollView
-    
-    let mumory: Mumory
-    
-    @Binding var contentOffsetY: Double
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
-    
-    func makeUIView(context: Context) -> UIScrollView {
-        let scrollView = UIScrollView()
-        
-        scrollView.delegate = context.coordinator
-        
-        scrollView.isScrollEnabled = true
-        scrollView.bounces = false
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        
-        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
-            .environmentObject(appCoordinator)
-            .environmentObject(mumoryDataViewModel)
-            .environmentObject(currentUserData)
-        )
-        
-        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
-        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
-        
-        scrollView.backgroundColor = .clear
-        hostingController.view.backgroundColor = .clear
-        
-        scrollView.subviews.forEach { $0.removeFromSuperview() }
-        scrollView.addSubview(hostingController.view)
-        
-        return scrollView
-    }
-    
-    
-    func updateUIView(_ uiView: UIScrollView, context: Context) {
-        
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
-    }
-}
-
-extension MumoryDetailScrollViewRepresentable {
-    
-    class Coordinator: NSObject {
-        
-        let parent: MumoryDetailScrollViewRepresentable
-        var contentHeight: CGFloat = .zero
-        var hostingController: UIHostingController<MumoryDetailScrollContentView>?
-        
-        init(parent: MumoryDetailScrollViewRepresentable) {
-            self.parent = parent
-            super.init()
-        }
-    }
-}
-
-extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
-    
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        
-        DispatchQueue.main.async {
-            self.parent.contentOffsetY = offsetY
-        }
-        
-        let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
-        
-        DispatchQueue.main.async {
-            if self.parent.appCoordinator.isNavigationBarColored != isNavigationBarColored {
-                self.parent.appCoordinator.isNavigationBarColored = isNavigationBarColored
-            }
-        }
-        //        previousOffset = offsetY
-    }
-}
+//struct MumoryDetailScrollViewRepresentable: UIViewRepresentable {
+//    
+//    //    typealias UIViewType = UIScrollView
+//    
+//    let mumory: Mumory
+//    
+//    @Binding var contentOffsetY: Double
+//    
+//    @EnvironmentObject var appCoordinator: AppCoordinator
+//    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+//    @EnvironmentObject var currentUserData: CurrentUserData
+//    
+//    func makeUIView(context: Context) -> UIScrollView {
+//        let scrollView = UIScrollView()
+//        
+//        scrollView.delegate = context.coordinator
+//        
+//        scrollView.isScrollEnabled = true
+//        scrollView.bounces = false
+//        scrollView.showsVerticalScrollIndicator = false
+//        scrollView.showsHorizontalScrollIndicator = false
+//        
+//        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
+//            .environmentObject(appCoordinator)
+//            .environmentObject(mumoryDataViewModel)
+//            .environmentObject(currentUserData)
+//        )
+//        
+//        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+//        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
+//        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
+//        
+//        scrollView.backgroundColor = .clear
+//        hostingController.view.backgroundColor = .clear
+//        
+//        scrollView.subviews.forEach { $0.removeFromSuperview() }
+//        scrollView.addSubview(hostingController.view)
+//        
+//        return scrollView
+//    }
+//    
+//    
+//    func updateUIView(_ uiView: UIScrollView, context: Context) {
+//        
+//    }
+//    
+//    func makeCoordinator() -> Coordinator {
+//        Coordinator(parent: self)
+//    }
+//}
+//
+//extension MumoryDetailScrollViewRepresentable {
+//    
+//    class Coordinator: NSObject {
+//        
+//        let parent: MumoryDetailScrollViewRepresentable
+//        var contentHeight: CGFloat = .zero
+//        var hostingController: UIHostingController<MumoryDetailScrollContentView>?
+//        
+//        init(parent: MumoryDetailScrollViewRepresentable) {
+//            self.parent = parent
+//            super.init()
+//        }
+//    }
+//}
+//
+//extension MumoryDetailScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
+//    
+//    
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        let offsetY = scrollView.contentOffset.y
+//        
+//        DispatchQueue.main.async {
+//            self.parent.contentOffsetY = offsetY
+//        }
+//        
+//        let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
+//        
+//        DispatchQueue.main.async {
+//            if self.parent.appCoordinator.isNavigationBarColored != isNavigationBarColored {
+//                self.parent.appCoordinator.isNavigationBarColored = isNavigationBarColored
+//            }
+//        }
+//        //        previousOffset = offsetY
+//    }
+//}
 
 public struct MumoryDetailView: View {
 
@@ -110,6 +110,11 @@ public struct MumoryDetailView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    
+    public init(mumory: Mumory) {
+//        UIScrollView.appearance().bounces = false
+        self._mumory = State(initialValue: mumory)
+    }
 
     public var body: some View {
         
@@ -160,7 +165,7 @@ public struct MumoryDetailView: View {
 //            MumoryDetailScrollViewRepresentable(mumory: self.mumory, contentOffsetY: self.$offsetY)
             
             ScrollView(showsIndicators: false) {
-                MumoryDetailScrollContentView(mumory: self.mumory)
+                MumoryDetailScrollContentView(mumory: self.$mumory)
                     .background(
                         GeometryReader { geometry in
                             Color.clear
@@ -177,9 +182,6 @@ public struct MumoryDetailView: View {
                                 }
                         }
                     )
-            }
-            .onAppear {
-//                UIScrollView.appearance().bounces = false
             }
             
             if mumoryDataViewModel.isUpdating {
@@ -232,7 +234,7 @@ public struct MumoryDetailView: View {
             }
         } // ZStack
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-        .onAppear {        
+        .onAppear {
             playerViewModel.setLibraryPlayerVisibility(isShown: false)
             Task {
 //                mumoryDataViewModel.isUpdating = true

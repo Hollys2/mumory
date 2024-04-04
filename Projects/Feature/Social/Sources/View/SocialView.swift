@@ -120,6 +120,7 @@ extension SocialScrollViewRepresentable {
         }
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
+//            parent.mumoryDataViewModel.everyMumorys = []
             parent.mumoryDataViewModel.fetchEveryMumory2 { result in
                 switch result {
                 case .success():
@@ -341,7 +342,7 @@ struct SocialItemView: View {
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
 
-                    Group {
+                    HStack(spacing: 0) {
                         SharedAsset.musicIconSocial.swiftUIImage
                             .resizable()
                             .frame(width: 14, height: 14)
@@ -361,6 +362,7 @@ struct SocialItemView: View {
                             .foregroundColor(.white)
                             .lineLimit(1)
                     }
+                    .padding(.vertical, 10)
                     .onTapGesture {
                         Task {
                             guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
@@ -376,7 +378,6 @@ struct SocialItemView: View {
                     Spacer()
                     
                     Button(action: {
-//                        self.appCoordinator.choosedSongID = self.mumoryAnnotation.musicModel.songID
                         self.appCoordinator.choosedMumoryAnnotation = self.mumory
                         self.appCoordinator.isSocialMenuSheetViewShown = true
                     }, label: {
@@ -624,10 +625,16 @@ public struct SocialView: View {
             Color(red: 0.09, green: 0.09, blue: 0.09)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            if self.mumoryDataViewModel.everyMumorys.isEmpty  {
-                ZStack(alignment: .center) {
+            
+            SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
+                print("onRefresh")
+                self.mumoryDataViewModel.fetchEveryMumory()
+            }) {
+                
+                ZStack {
                     
                     Color.clear
+                        .frame(height: getUIScreenBounds().height - 89)
                     
                     VStack(spacing: 0) {
                         
@@ -653,14 +660,10 @@ public struct SocialView: View {
                             .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                             .fixedSize(horizontal: true, vertical: true)
                     }
-                }
-            } else {
-                SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
-                    print("onRefresh")
-                    self.mumoryDataViewModel.fetchEveryMumory()
-                }) {
+                    .offset(y: -65 - appCoordinator.safeAreaInsetsTop)
+                    .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
+                    
                     SocialScrollCotentView()
-                        .environmentObject(self.appCoordinator)
                 }
             }
             

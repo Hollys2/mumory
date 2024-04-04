@@ -37,7 +37,7 @@ struct TagView: View {
 
 struct MumoryDetailScrollContentView: View {
     
-    @State var mumory: Mumory
+    @Binding var mumory: Mumory
     @State var user: MumoriUser = MumoriUser()
     @State var isMapViewShown: Bool = false
     @State var isPopUpShown: Bool = true

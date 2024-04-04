@@ -84,6 +84,9 @@ struct ContentView: View {
     
     @State var days: Int = -1
     @State var mumoryDaily: [Int: [Mumory]] = [:]
+    @State var sortedLocationsArray: [String: [Mumory]] = [:]
+    @State private var sortedByValueCount: [(key: String, value: [Mumory])] = []
+
     
     @State var bottomPadding: CGFloat = 0
     @State var isPopUpViewShown: Bool = false
@@ -316,50 +319,89 @@ struct ContentView: View {
                 .padding(.top, 30)
             
             HStack(spacing: 10) {
-                let sortedLocationsArray = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
-                
-                ForEach(1..<4) { index in
-                    let key = index < sortedLocationsArray.count ? sortedLocationsArray[index].key : "-"
-                    let valueCount = index < sortedLocationsArray.count ? "\(sortedLocationsArray[index].value.count)개" : "-"
-                    
-                    Rectangle()
-                        .foregroundColor(.clear)
-                        .frame(width: getUIScreenBounds().width * 0.28, height: getUIScreenBounds().width * 0.28)
-                        .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                        .cornerRadius(15)
-                        .overlay(
-                            VStack(spacing: 0) {
-                                HStack(alignment: .center, spacing: 10) {
-                                    Text("TOP \(index)")
-                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                ForEach(0..<3) { index in
+                    if index < sortedByValueCount.count {
+                        let key = sortedByValueCount[index].key
+                        let valueCount = "\(sortedByValueCount[index].value.count)개"
+                        
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .frame(width: getUIScreenBounds().width * 0.28, height: getUIScreenBounds().width * 0.28)
+                            .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                            .cornerRadius(15)
+                            .overlay(
+                                VStack(spacing: 0) {
+                                    HStack(alignment: .center, spacing: 10) {
+                                        Text("TOP \(index + 1)")
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                            .multilineTextAlignment(.center)
+                                            .foregroundColor(.white)
+                                            .frame(height: 8)
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, getUIScreenBounds().width * 0.015)
+                                    .background(Color(red: 0.32, green: 0.32, blue: 0.32))
+                                    .cornerRadius(30)
+                                    .padding(.top, getUIScreenBounds().width * 0.28 * 0.1)
+                                    
+                                    Spacer()
+                                    
+                                    Text(key)
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                                         .multilineTextAlignment(.center)
                                         .foregroundColor(.white)
-                                        .frame(height: 8)
+                                    
+                                    Spacer()
+                                    
+                                    Text(valueCount)
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                        .frame(height: 15)
+                                        .padding(.bottom, getUIScreenBounds().width * 0.28 * 0.12)
                                 }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, getUIScreenBounds().width * 0.015)
-                                .background(Color(red: 0.32, green: 0.32, blue: 0.32))
-                                .cornerRadius(30)
-                                .padding(.top, getUIScreenBounds().width * 0.28 * 0.1)
-                                
-                                Spacer()
-                                
-                                Text(key)
-                                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(.white)
-                                
-                                Spacer()
-                                
-                                Text(valueCount)
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                    .multilineTextAlignment(.center)
-                                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                                    .frame(height: 15)
-                                    .padding(.bottom, getUIScreenBounds().width * 0.28 * 0.12)
-                            }
-                                .frame(height: getUIScreenBounds().width * 0.28)
-                        )
+                                    .frame(height: getUIScreenBounds().width * 0.28)
+                            )
+                    } else {
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .frame(width: getUIScreenBounds().width * 0.28, height: getUIScreenBounds().width * 0.28)
+                            .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+                            .cornerRadius(15)
+                            .overlay(
+                                VStack(spacing: 0) {
+                                    HStack(alignment: .center, spacing: 10) {
+                                        Text("TOP \(index + 1)")
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
+                                            .multilineTextAlignment(.center)
+                                            .foregroundColor(.white)
+                                            .frame(height: 8)
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, getUIScreenBounds().width * 0.015)
+                                    .background(Color(red: 0.32, green: 0.32, blue: 0.32))
+                                    .cornerRadius(30)
+                                    .padding(.top, getUIScreenBounds().width * 0.28 * 0.1)
+                                    
+                                    Spacer()
+                                    
+                                    Text("-")
+                                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(.white)
+                                    
+                                    Spacer()
+                                    
+                                    Text("-")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                                        .multilineTextAlignment(.center)
+                                        .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
+                                        .frame(height: 15)
+                                        .padding(.bottom, getUIScreenBounds().width * 0.28 * 0.12)
+                                }
+                                    .frame(height: getUIScreenBounds().width * 0.28)
+                            )
+                    }
                 }
             }
             .padding(.top, 15)
@@ -548,6 +590,13 @@ struct ContentView: View {
                 await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
                 self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
+            
+            let sortedPrefix = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
+            // 결과를 순회하며 딕셔너리로 변환
+            for element in sortedPrefix {
+                self.sortedLocationsArray[element.key] = element.value
+            }
+            self.sortedByValueCount = sortedLocationsArray.sorted(by: { $0.value.count > $1.value.count })
         }
         .onChange(of: self.date) { _ in
             print("DATE: \(date)")
@@ -700,6 +749,19 @@ struct ContentView: View {
                 await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
                 self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
+            
+            
+            let sortedPrefix = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
+            // 결과를 순회하며 딕셔너리로 변환
+            self.sortedLocationsArray = [:]
+            for element in sortedPrefix {
+                self.sortedLocationsArray[element.key] = element.value
+            }
+            
+            self.sortedByValueCount = []
+            self.sortedByValueCount = sortedLocationsArray.sorted(by: { $0.value.count > $1.value.count })
+            print("mumoryDataViewModel.locationMumorys: \(mumoryDataViewModel.locationMumorys)")
+            print("sortedByValueCount: \(sortedByValueCount)")
         }
     }
 }

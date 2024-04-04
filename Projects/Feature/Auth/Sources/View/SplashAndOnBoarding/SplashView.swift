@@ -87,7 +87,7 @@ public struct SplashView: View {
                     case .mumoryDetailView:
                         MumoryDetailView(mumory: view.mumoryAnnotation)
                     case .editMumoryView:
-                        MumoryEditView(mumoryAnnotation: view.mumoryAnnotation)
+                        MumoryEditView(mumory: view.mumoryAnnotation)
                     case .myMumoryView(let user):
                         MyMumoryView(user: user)
                     case .regionMyMumoryView(let user):

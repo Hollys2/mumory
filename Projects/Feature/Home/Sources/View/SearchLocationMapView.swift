@@ -119,7 +119,7 @@ public struct SearchLocationMapView: View {
                     
                     Button(action: {
                         mumoryDataViewModel.choosedLocationModel = locationModel
-                        appCoordinator.rootPath.removeLast(appCoordinator.rootPath.count)
+                        appCoordinator.rootPath.removeLast(2)
                     }) {
                         Rectangle()
                             .foregroundColor(.clear)
