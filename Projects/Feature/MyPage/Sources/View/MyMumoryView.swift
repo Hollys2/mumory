@@ -152,7 +152,7 @@ public struct MyMumoryView: View {
                                                 .overlay(
                                                     Rectangle()
                                                         .foregroundColor(.clear)
-                                                        .frame(width: getUIScreenBounds().width, height: 0.3)
+                                                        .frame(width: getUIScreenBounds().width, height: 0.5)
                                                         .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
                                                     alignment: .top
                                                 )
@@ -488,6 +488,7 @@ struct MumoryItemView: View {
                     .frame(maxHeight: .infinity)
             }
             .frame(width: 35)
+            .frame(maxHeight: .infinity)
             
             Spacer().frame(width: 15)
             
@@ -681,6 +682,7 @@ struct MumoryItemView: View {
                             } // HStack
                             
                         } // ScrollView
+                        .frame(width: UIScreen.main.bounds.width - 82 - 40)
                         .mask(
                             Rectangle()
                                 .frame(height: 44)
@@ -747,6 +749,7 @@ struct MumoryItemView: View {
             
             Spacer().frame(width: 20)
         }
+        .frame(height: getUIScreenBounds().height * 0.439573)
         .padding(.top, !isSameDateAsPrevious ? 30 : 0)
     }
 }
