@@ -186,9 +186,9 @@ public struct MumoryRecommendationView: View {
                 
                 for document in documents {
                     taskGroup.addTask {
-                        guard let favoriteDoc = try? await db.collection("User").document(document.documentID).collection("Playlist").document("favorite").getDocument() else {print("c");return []}
+                        guard let favoriteDoc = try? await db.collection("User").document(document.documentID).collection("Playlist").document("favorite").getDocument() else {return []}
                         guard let data = favoriteDoc.data() else {print("d");return []}
-                        guard var songIds = data["songIds"] as? [String] else {print("e");return []}
+                        guard var songIds = data["songIds"] as? [String] else {return []}
                         return songIds
                     }
                 }

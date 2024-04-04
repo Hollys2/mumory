@@ -140,7 +140,7 @@ struct SimilarTasteListView: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {

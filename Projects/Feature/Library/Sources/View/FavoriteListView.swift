@@ -134,7 +134,7 @@ struct FavoriteListView: View {
         }
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
                 self.isLoading = false

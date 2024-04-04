@@ -117,7 +117,7 @@ struct SearchMusicViewInCreateMumory: View {
         .navigationBarBackButtonHidden()
         .background(.black)
         .onAppear {
-            AnalyticsManager.shared.setScreenLog(screenTitle: "SearchMusicView")
+            
         }
         
     }

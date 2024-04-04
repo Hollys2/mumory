@@ -142,44 +142,10 @@ struct SearchMusicEntryView: View {
 
         }
         .onAppear(perform: {
-            requestPupularMusic()
-
             let userDefault = UserDefaults.standard
             guard let result = userDefault.value(forKey: "recentSearchList") as? [String] else {print("no recent list");return}
             recentSearchObject.recentSearchList = result
         })
-    }
-    
-    private func requestPupularMusic() {
-        if !popularSearchTerm.isEmpty {
-            return
-        }
-        
-        Task {
-            var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
-            request.limit = 6
-            let response = try await request.response().songCharts
-            guard let chart = response.first?.items else {
-                return
-            }
-            chart.forEach { song in
-                switch Int.random(in: 0...1) {
-                case 0:
-                    if !popularSearchTerm.contains(song.title){
-                        self.popularSearchTerm.append(song.title)
-                    }
-                case 1:
-                    if !popularSearchTerm.contains(song.artistName){
-                        self.popularSearchTerm.append(song.artistName)
-                    }
-                default:
-                    if !popularSearchTerm.contains(song.title){
-                        self.popularSearchTerm.append(song.title)
-                    }
-                }
-            }
-      
-        }
     }
     
     private func getTextWidth(term: String) -> CGFloat {

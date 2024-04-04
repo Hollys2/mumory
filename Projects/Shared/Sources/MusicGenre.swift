@@ -92,15 +92,10 @@ public struct MusicGenreHelper{
         MusicGenre(name: "뉴에이지", id: 13),
         MusicGenre(name: "R&B/소울", id: 15),
         MusicGenre(name: "댄스", id: 17),
-        
-     
-        
+
         MusicGenre(name: "일본 애니메이션", id: 29),
         MusicGenre(name: "홀리데이", id: 8),
         MusicGenre(name: "포크", id: 1289),
-
-        
-
         
         MusicGenre(name: "아프리카 음악", id: 1203),
         MusicGenre(name: "악기", id: 53),
