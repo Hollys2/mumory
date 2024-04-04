@@ -50,15 +50,17 @@ struct MumoryDetailReactionBarView: View {
 
                     Task {
                         await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId) { likes in
+                            self.mumory.likes = likes
+                            isButtonDisabled = false
+                            
                             lazy var functions = Functions.functions()
                             functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
                                 if let error = error {
-                                    self.mumory.likes = originLikes
+//                                    self.mumory.likes = originLikes
                                     print("Error Functions \(error.localizedDescription)")
                                 } else {
-                                    self.mumory.likes = likes
+//                                    self.mumory.likes = likes
                                     print("라이크 성공: \(mumory.likes.count)")
-                                    isButtonDisabled = false
                                 }
                             }
                         }
