@@ -48,7 +48,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
             .environmentObject(self.currentUserData))
         let height = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
         
-        scrollView.contentSize = CGSize(width: 0, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
+        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: height) // 수평 스크롤 차단을 위해 너비를 0으로 함
         scrollView.setContentOffset(CGPoint(x: 0, y: -68 - appCoordinator.safeAreaInsetsTop), animated: true)
         
         hostingController.view.frame = CGRect(x: 10, y: 0, width: UIScreen.main.bounds.width - 20, height: height)
@@ -121,20 +121,17 @@ extension SocialScrollViewRepresentable {
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
             print("handleRefreshControl")
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.prepare()
+            generator.impactOccurred()
+            sender.endRefreshing()
             
             parent.mumoryDataViewModel.fetchEveryMumory2(friends: self.parent.currentUserData.friends) { result in
                 switch result {
                 case .success():
                     print("새로고침 성공")
-                    let generator = UIImpactFeedbackGenerator(style: .medium)
-                    generator.prepare()
-                    generator.impactOccurred()
-                    sender.endRefreshing()
                 case .failure(_):
                     print("새로고침 실패")
-                    let generator = UIImpactFeedbackGenerator(style: .medium)
-                    generator.prepare()
-                    generator.impactOccurred()
                     break
                 }
             }
@@ -166,10 +163,6 @@ extension SocialScrollViewRepresentable {
                     parent.onRefresh()
                 }
             } else {
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.prepare()
-                generator.impactOccurred()
-
                 isRefreshing = false
             }
         }
@@ -700,12 +693,12 @@ public struct SocialView: View {
                             .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                             .fixedSize(horizontal: true, vertical: true)
                     }
-                    .offset(y: 65 + appCoordinator.safeAreaInsetsTop + 20)
+                    .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height - 89)
+                    .offset(y: -65 - appCoordinator.safeAreaInsetsTop)
                     .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty && self.mumoryDataViewModel.myMumorys.isEmpty ? 1 : 0)
                     
                     SocialScrollCotentView()
                 }
-                
             }
             
             if mumoryDataViewModel.isUpdating, !mumoryDataViewModel.isFirstSocialLoad {
