@@ -107,155 +107,128 @@ public struct MumoryEditView: View {
                 .padding(.top, appCoordinator.safeAreaInsetsTop)
                 .padding(.horizontal, 20)
                 
-                ScrollView(showsIndicators: false) {
-                    
-                    VStack(spacing: 0) {
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
                         
-                        VStack(spacing: 16) {
+                        VStack(spacing: 0) {
                             
-                            NavigationLink(value: "music") {
-                                ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
-                            }
-                            
-                            NavigationLink(value: "location") {
-                                ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
-                            }
-                            
-                            CalendarContainerView(date: self.$calendarDate)
-                                .onTapGesture {
-                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                    
-                                    withAnimation(.easeInOut(duration: 0.1)) {
-                                        self.isDatePickerShown.toggle()
-                                    }
-                                }
-                                .background {
-                                    GeometryReader { geometry in
-                                        
-                                        Color.clear
-                                            .onAppear {
-                                                self.calendarYOffset = geometry.frame(in: .global).maxY
-                                            }
-                                            .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                // Update calendarYOffset when the offset changes
-                                                self.calendarYOffset = newOffset
-                                            }
-                                    }
-                                }
-                        }
-                        .padding(.horizontal, 20)
-                        
-                        Rectangle()
-                            .foregroundColor(.clear)
-                            .frame(height: 6)
-                            .background(.black)
-                            .padding(.vertical, 18)
-                        
-                        VStack(spacing: 16) {
-                            
-                            TagContainerView(tags: self.$tags)
-                                .background(
-                                    GeometryReader { geometry in
-                                        Color.clear
-                                            .onChange(of: geometry.frame(in: .global).maxY) { newValue in
-                                                self.tagContainerYOffset = newValue
-                                            }
-                                    }
-                                )
-                            
-                            ContentContainerView(contentText: self.$contentText)
-                                .background(
-                                    GeometryReader { geometry in
-                                        Color.clear
-                                            .onChange(of: geometry.frame(in: .global).maxY) { newValue in
-                                                self.contentContainerYOffset = newValue
-                                            }
-                                    }
-                                )
-                            
-                            HStack(spacing: 11) {
+                            VStack(spacing: 16) {
                                 
-                                PhotosPicker(selection: $photoPickerViewModel.imageSelections,
-                                             maxSelectionCount: 3 - self.imageURLs.count ,
-                                             matching: .images) {
-                                    
-                                    VStack(spacing: 0) {
-                                        (photoPickerViewModel.imageSelectionCount + self.imageURLs.count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
-                                            .resizable()
-                                            .frame(width: 24, height: 24)
-                                            .offset(y: 1)
+                                NavigationLink(value: "music") {
+                                    ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
+                                }
+                                
+                                NavigationLink(value: "location") {
+                                    ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
+                                }
+                                
+                                CalendarContainerView(date: self.$calendarDate)
+                                    .onTapGesture {
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                         
-                                        Spacer(minLength: 0)
-                                        
-                                        HStack(spacing: 0) {
-                                            Text("\(photoPickerViewModel.imageSelectionCount + self.imageURLs.count)")
-                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                .foregroundColor(photoPickerViewModel.imageSelectionCount + self.imageURLs.count >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                            Text(" / 3")
-                                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                        withAnimation(.easeInOut(duration: 0.1)) {
+                                            self.isDatePickerShown.toggle()
                                         }
-                                        .multilineTextAlignment(.center)
-                                        .offset(y: 2)
                                     }
-                                    .padding(.vertical, 15)
-                                    .frame(width: 75, height: 75)
-                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                    .cornerRadius(10)
-                                }
-                                
-                                
-                                ForEach(self.imageURLs, id: \.self) { url in
-                                    
-                                    ZStack {
-                                        AsyncImage(url: URL(string: url)) { phase in
-                                            switch phase {
-                                            case .empty:
-                                                ProgressView()
-                                            case .success(let image):
-                                                image
-                                                    .resizable()
-                                                    .frame(width: 75, height: 75)
-                                                    .scaledToFill()
-                                                    .clipped()
-                                            case .failure:
-                                                Text("Failed to load image")
-                                            @unknown default:
-                                                Text("Unknown state")
-                                            }
+                                    .background {
+                                        GeometryReader { geometry in
+                                            
+                                            Color.clear
+                                                .onAppear {
+                                                    self.calendarYOffset = geometry.frame(in: .global).maxY
+                                                }
+                                                .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                    self.calendarYOffset = newOffset
+                                                }
                                         }
+                                    }
+                            }
+                            .padding(.horizontal, 20)
+                            
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .frame(height: 6)
+                                .background(.black)
+                                .padding(.vertical, 18)
+                            
+                            VStack(spacing: 16) {
+                                
+                                TagContainerView(tags: self.$tags)
+                                    .id(0)
+                                    .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
+                                        withAnimation {
+                                            proxy.scrollTo(0, anchor: .top)
+                                        }
+                                    }))
+                                
+                                ContentContainerView(contentText: self.$contentText)
+                                    .id(1)
+                                    .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
+                                        withAnimation {
+                                            proxy.scrollTo(0, anchor: .top)
+                                        }
+                                    }))
+                                
+                                HStack(spacing: 11) {
+                                    
+                                    PhotosPicker(selection: $photoPickerViewModel.imageSelections,
+                                                 maxSelectionCount: 3 - self.imageURLs.count ,
+                                                 matching: .images) {
+                                        
+                                        VStack(spacing: 0) {
+                                            (photoPickerViewModel.imageSelectionCount + self.imageURLs.count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                                .resizable()
+                                                .frame(width: 24, height: 24)
+                                                .offset(y: 1)
+                                            
+                                            Spacer(minLength: 0)
+                                            
+                                            HStack(spacing: 0) {
+                                                Text("\(photoPickerViewModel.imageSelectionCount + self.imageURLs.count)")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                    .foregroundColor(photoPickerViewModel.imageSelectionCount + self.imageURLs.count >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                Text(" / 3")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                            }
+                                            .multilineTextAlignment(.center)
+                                            .offset(y: 2)
+                                        }
+                                        .padding(.vertical, 15)
                                         .frame(width: 75, height: 75)
                                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                         .cornerRadius(10)
-                                        
-                                        Button(action: {
-                                            print("self.imageURLs: \(self.imageURLs)")
-                                            if let indexToRemove = self.imageURLs.firstIndex(of: url) {
-                                                self.imageURLs.remove(at: indexToRemove)
-                                            }
-                                        }) {
-                                            SharedAsset.closeButtonCreateMumory.swiftUIImage
-                                                .resizable()
-                                                .frame(width: 27, height: 27)
-                                        }
-                                        .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
                                     }
-                                }
-                                
-                                if !photoPickerViewModel.selectedImages.isEmpty {
                                     
-                                    ForEach(photoPickerViewModel.selectedImages.indices, id: \.self) { index in
+                                    
+                                    ForEach(self.imageURLs, id: \.self) { url in
                                         
                                         ZStack {
-                                            Image(uiImage: photoPickerViewModel.selectedImages[index])
-                                                .resizable()
-                                                .frame(width: 75, height: 75)
-                                                .scaledToFill()
-                                                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                                .cornerRadius(10)
+                                            AsyncImage(url: URL(string: url)) { phase in
+                                                switch phase {
+                                                case .empty:
+                                                    ProgressView()
+                                                case .success(let image):
+                                                    image
+                                                        .resizable()
+                                                        .frame(width: 75, height: 75)
+                                                        .scaledToFill()
+                                                        .clipped()
+                                                case .failure:
+                                                    Text("Failed to load image")
+                                                @unknown default:
+                                                    Text("Unknown state")
+                                                }
+                                            }
+                                            .frame(width: 75, height: 75)
+                                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                            .cornerRadius(10)
                                             
                                             Button(action: {
-                                                photoPickerViewModel.removeImage(photoPickerViewModel.selectedImages[index])
+                                                print("self.imageURLs: \(self.imageURLs)")
+                                                if let indexToRemove = self.imageURLs.firstIndex(of: url) {
+                                                    self.imageURLs.remove(at: indexToRemove)
+                                                }
                                             }) {
                                                 SharedAsset.closeButtonCreateMumory.swiftUIImage
                                                     .resizable()
@@ -264,26 +237,50 @@ public struct MumoryEditView: View {
                                             .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
                                         }
                                     }
+                                    
+                                    if !photoPickerViewModel.selectedImages.isEmpty {
+                                        
+                                        ForEach(photoPickerViewModel.selectedImages.indices, id: \.self) { index in
+                                            
+                                            ZStack {
+                                                Image(uiImage: photoPickerViewModel.selectedImages[index])
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 75, height: 75)
+                                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                                    .cornerRadius(10)
+                                                
+                                                Button(action: {
+                                                    photoPickerViewModel.removeImage(photoPickerViewModel.selectedImages[index])
+                                                }) {
+                                                    SharedAsset.closeButtonCreateMumory.swiftUIImage
+                                                        .resizable()
+                                                        .frame(width: 27, height: 27)
+                                                }
+                                                .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
+                                            }
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .onChange(of: photoPickerViewModel.imageSelections) { newValue in
+                                    print("onChange(of: photoPickerViewModel.imageSelections)")
+                                    photoPickerViewModel.convertDataToImage(imageURLsCount: imageURLs.count)
                                 }
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .onChange(of: photoPickerViewModel.imageSelections) { newValue in
-                                print("onChange(of: photoPickerViewModel.imageSelections)")
-                                photoPickerViewModel.convertDataToImage(imageURLsCount: imageURLs.count)
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 50)
-                        
-                    } // VStack
-                    .padding(.top, 20)
-                    .padding(.bottom, 50)
-                    .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
-                } // ScrollView
-                .scrollIndicators(.hidden)
-                .simultaneousGesture(DragGesture().onChanged { _ in
-                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                })
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 50)
+                            
+                        } // VStack
+                        .padding(.top, 20)
+                        .padding(.bottom, 50 + appCoordinator.safeAreaInsetsBottom)
+                        .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
+                    } // ScrollView
+                    .scrollIndicators(.hidden)
+                    .simultaneousGesture(DragGesture().onChanged { _ in
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    })
+                }
             } // VStack
             .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - appCoordinator.safeAreaInsetsTop) {
                 DatePicker("", selection: self.$calendarDate, displayedComponents: [.date])

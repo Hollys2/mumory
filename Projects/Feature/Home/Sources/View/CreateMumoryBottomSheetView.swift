@@ -152,7 +152,8 @@ public struct CreateMumoryBottomSheetView: View {
                     .padding(.bottom, 11)
                     .padding(.horizontal, 20)
                         
-                    ScrollView(showsIndicators: false) {
+                    ScrollViewReader { proxy in
+                        ScrollView(showsIndicators: false) {
                             
                             VStack(spacing: 0) {
                                 
@@ -165,28 +166,23 @@ public struct CreateMumoryBottomSheetView: View {
                                     NavigationLink(value: "location") {
                                         ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                                     }
-
+                                    
                                     CalendarContainerView(date: self.$calendarDate)
-                                        .onTapGesture {
-                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                            
-                                            withAnimation(.easeInOut(duration: 0.1)) {
-                                                self.isDatePickerShown.toggle()
-                                            }
-//                                            self.isImagePickerShown = true
-                                        }
-                                        .confirmationDialog("Select Source", isPresented: self.$isImagePickerShown) {
-                                            Button("Camera", role: .destructive) {
-                                            }
-                                            Button("Photo Library", role: .none) {
-                                            }
-                                        }
                                         .background {
                                             GeometryReader { geometry in
                                                 Color.clear
+                                                    .onAppear {
+                                                        self.calendarYOffset = geometry.frame(in: .global).maxY
+                                                    }
                                                     .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
                                                         self.calendarYOffset = newOffset
                                                     }
+                                            }
+                                        }
+                                        .onTapGesture {
+                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                            withAnimation(.easeInOut(duration: 0.1)) {
+                                                self.isDatePickerShown.toggle()
                                             }
                                         }
                                 }
@@ -201,16 +197,20 @@ public struct CreateMumoryBottomSheetView: View {
                                 VStack(spacing: 16) {
                                     
                                     TagContainerView(tags: self.$tags)
+                                        .id(0)
+                                        .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
+                                            withAnimation {
+                                            proxy.scrollTo(0, anchor: .top)
+                                            }
+                                        }))
                                     
                                     ContentContainerView(contentText: self.$contentText)
-                                        .background(
-                                            GeometryReader { geometry in
-                                                Color.clear
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newValue in
-                                                        self.contentContainerYOffset = newValue
-                                                    }
+                                        .id(1)
+                                        .onTapGesture {
+                                            withAnimation {
+                                                proxy.scrollTo(0, anchor: .top)
                                             }
-                                        )
+                                        }
                                     
                                     HStack(spacing: 11) {
                                         PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -248,8 +248,8 @@ public struct CreateMumoryBottomSheetView: View {
                                                 ZStack {
                                                     Image(uiImage: image)
                                                         .resizable()
+                                                        .scaledToFill()
                                                         .frame(width: 75, height: 75)
-                                                        .scaledToFit()
                                                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                                                         .cornerRadius(10)
                                                     
@@ -274,14 +274,12 @@ public struct CreateMumoryBottomSheetView: View {
                             } // VStack
                             .padding(.top, 20)
                             .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
-                            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -(contentContainerYOffset + 16 - getUIScreenBounds().height + keyboardResponder.keyboardHeight) - 55 : 0)
+                            .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
                         } // ScrollView
-                    .scrollIndicators(.hidden)
-                    .simultaneousGesture(DragGesture().onChanged { _ in
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    })
-                    .onAppear {
-                        UIScrollView.appearance().bounces = false
+                        .scrollIndicators(.hidden)
+                        .onAppear {
+                            UIScrollView.appearance().bounces = false
+                        }
                     }
                 } // VStack
                 .background(SharedAsset.backgroundColor.swiftUIColor)
@@ -298,7 +296,6 @@ public struct CreateMumoryBottomSheetView: View {
                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                         .background(SharedAsset.backgroundColor.swiftUIColor)
                         .environment(\.locale, Locale.init(identifier: "ko_KR"))
-                        .zIndex(3)
                 }
                 .popup(show: self.$isPublishPopUpShown, content: {
                     PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
@@ -451,6 +448,7 @@ public struct CreateMumoryBottomSheetView: View {
                 )
                 .zIndex(2)
                 .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+                .opacity(self.isDatePickerShown ? 0 : 1)
             }
         }
     }
@@ -848,9 +846,6 @@ struct TagContainerView: View {
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                     .focused(self.$isFocused)
-                    .onChange(of: isFocused, perform: { newValue in
-                        print("isFocued: \(newValue)")
-                    })
                     .onChange(of: tags[index], perform: { newValue in
                         if newValue.count > 5 {
                             tags[index] = String(newValue.prefix(5))
