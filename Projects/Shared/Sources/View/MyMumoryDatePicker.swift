@@ -218,7 +218,7 @@ public struct MonthlyStatDatePicker: View {
     
     func getYears() -> [Int] {
         let currentYear = Calendar.current.component(.year, from: Date())
-        let siginUpYear = Calendar.current.component(.year, from: currentUserData.signUpDate)
+        let siginUpYear = Calendar.current.component(.year, from: currentUserData.user.signUpDate)
         return Array(siginUpYear...currentYear)
     }
 
@@ -226,8 +226,8 @@ public struct MonthlyStatDatePicker: View {
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
         
-        let siginUpYear = Calendar.current.component(.year, from: currentUserData.signUpDate)
-        let siginUpMonth = Calendar.current.component(.month, from: currentUserData.signUpDate)
+        let siginUpYear = Calendar.current.component(.year, from: currentUserData.user.signUpDate)
+        let siginUpMonth = Calendar.current.component(.month, from: currentUserData.user.signUpDate)
         
         var months: [Int] = []
         if year == currentYear { // 현재 연도라면 현재 월까지만 추가
