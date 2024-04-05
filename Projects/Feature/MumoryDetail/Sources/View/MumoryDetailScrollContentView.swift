@@ -310,11 +310,11 @@ struct MumoryDetailScrollContentView: View {
                     
                     if self.mumoryDataViewModel.surroundingMumorys.isEmpty {
                         VStack(spacing: 0) {
-                            Text("현재 데이터를 모으는 중으로 추후에 업데이트 될 예정입니다!")
+                            Text("주변에서 뮤모리된 음악이 없습니다.")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                                 .multilineTextAlignment(.center)
-                                .frame(width: 210)
+                                .frame(maxWidth: .infinity)
                         }
                         .frame(height: 334 - 25)
                         .offset(y: -25)

@@ -1020,7 +1020,9 @@ final public class MumoryDataViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     if !self.tempMumory.contains(where: { $0.id == document.documentID}) {
                         if !self.tempMumory.contains(where: { $0.musicModel.songID.rawValue == newMumory.musicModel.songID.rawValue}) {
-                            self.tempMumory.append(newMumory)
+                            if mumory.musicModel.songID.rawValue != newMumory.musicModel.songID.rawValue {
+                                self.tempMumory.append(newMumory)
+                            }
                         }
                     }
                 }
