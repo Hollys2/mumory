@@ -74,6 +74,9 @@ struct LibraryView: View {
                         if isTapMyMusic{
                             MyMusicView()
                                 .padding(.top, 26)
+                                .frame(width: getUIScreenBounds().width)
+
+                                
                         }else {
                             MumoryRecommendationView()
                                 .padding(.top, 26)
@@ -84,14 +87,16 @@ struct LibraryView: View {
                             .foregroundStyle(.clear)
                             .frame(height: 87)
                     }
+                    .frame(width: getUIScreenBounds().width)
                 }
-                .frame(width: screenWidth)
+                .frame(width: getUIScreenBounds().width)
                 .onAppear {
                     print("screent width: \(getUIScreenBounds().width), height: \(getUIScreenBounds().height)")
                 }
         
                 
             })
+            .frame(width: getUIScreenBounds().width)
             .scrollIndicators(.hidden)
             .padding(.top, appCoordinator.safeAreaInsetsTop)
 
@@ -135,6 +140,7 @@ struct LibraryView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: appCoordinator.safeAreaInsetsTop)
         }
+        .frame(width: getUIScreenBounds().width)
         .ignoresSafeArea()
         .onAppear(perform: {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
