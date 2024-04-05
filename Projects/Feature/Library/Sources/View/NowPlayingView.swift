@@ -665,7 +665,7 @@ struct PlayTogetherView: View {
                         ForEach(songs, id: \.id) { song in
                             PlayTogetherItem(song: song)
                                 .onTapGesture {
-                                    playerViewModel.playNewSong(song: song)
+                                    playerViewModel.playNewSong(song: song, isPlayerShown: false)
                                 }
                         }
                     }

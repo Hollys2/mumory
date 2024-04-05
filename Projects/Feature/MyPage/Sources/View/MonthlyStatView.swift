@@ -781,7 +781,7 @@ struct MonthlyStatPopUpView: View {
             
             HStack(alignment: .bottom, spacing: 6) {
                 
-                Text("뮤모리 기록, 재생 / 즐겨찾기 / 플레이리스트\n바탕으로 수집된 데이터 기반으로 나오는 결과입니다")
+                Text("뮤모리 기록 / 즐겨찾기 / 플레이리스트\n바탕으로 수집된 데이터 기반으로 나오는 결과입니다")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 11))
                     .foregroundColor(.black)
                     .frame(alignment: .topLeading)

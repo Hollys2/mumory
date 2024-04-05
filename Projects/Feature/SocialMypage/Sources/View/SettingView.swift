@@ -195,6 +195,7 @@ struct SettingView: View {
                     }else {
                         print("delete docs successful")
                         appCoordinator.bottomAnimationViewStatus = .remove
+                        appCoordinator.initPage = .onBoarding
                         appCoordinator.rootPath = NavigationPath()
                     }
                 }
@@ -241,9 +242,9 @@ struct SettingView: View {
                             for key in UserDefaults.standard.dictionaryRepresentation().keys {
                                 UserDefaults.standard.removeObject(forKey: key.description)
                             }
-                            currentUserData.removeAllData()
                             appCoordinator.bottomAnimationViewStatus = .remove
-                            appCoordinator.initPage = .home
+                            currentUserData.removeAllData()
+                            appCoordinator.initPage = .onBoarding
                             appCoordinator.rootPath = NavigationPath()
                         }
                     }

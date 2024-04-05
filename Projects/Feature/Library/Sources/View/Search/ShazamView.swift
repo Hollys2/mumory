@@ -184,7 +184,7 @@ struct ShazamView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                 .foregroundStyle(Color.white)
                                 .onTapGesture {
-                                    playerViewModel.setLibraryPlayerVisibility(isShown: true)
+                                    playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown)
                                     isEditing = false
                                 }
                             

@@ -140,6 +140,7 @@ struct EmailLoginView: View {
         
         isLoading = false
         appCoordinator.initPage = .home
+        appCoordinator.isCreateMumorySheetShown = false
         var transaction = Transaction()
         transaction.disablesAnimations = true
         withTransaction(transaction) {
