@@ -353,6 +353,7 @@ public struct CreateMumoryBottomSheetView: View {
                                         self.generateHapticFeedback(style: .medium)
                                         print("뮤모리 만들기 성공")
                                         mumoryDataViewModel.isLoading = false
+                                        playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
 
                                         mumoryDataViewModel.choosedMusicModel = nil
                                         mumoryDataViewModel.choosedLocationModel = nil
@@ -371,8 +372,8 @@ public struct CreateMumoryBottomSheetView: View {
                                 withAnimation(Animation.easeInOut(duration: 0.2)) {
                                     isPublishPopUpShown = false
                                     appCoordinator.isCreateMumorySheetShown = false
-                                    
                                     appCoordinator.selectedTab = .home
+                                    appCoordinator.rootPath = NavigationPath()
                                     self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
                                 }
                             }
@@ -461,7 +462,6 @@ public struct CreateMumoryBottomSheetView: View {
         self.offsetY = CGFloat(offset)
         
         if cardDismiss {
-            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true)
             withAnimation(.spring(response: 0.1)) {
                 mumoryDataViewModel.choosedMusicModel = nil
                 mumoryDataViewModel.choosedLocationModel = nil

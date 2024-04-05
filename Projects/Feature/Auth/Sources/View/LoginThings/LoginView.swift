@@ -292,6 +292,7 @@ public struct LoginView: View {
             appCoordinator.initPage = .home
             var transaction = Transaction()
             transaction.disablesAnimations = true
+            appCoordinator.isCreateMumorySheetShown = false
             withTransaction(transaction) {
                 appCoordinator.rootPath = NavigationPath()
             }

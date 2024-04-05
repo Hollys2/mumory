@@ -65,7 +65,6 @@ struct MostPostedSongListView: View {
                             Spacer()
                             
                             PlayAllButton()
-                                .padding(.trailing, 20)
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "뮤모리로 많이 기록된 음악", songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "MostPostedSongListView")
