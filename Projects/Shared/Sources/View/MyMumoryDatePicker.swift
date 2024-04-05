@@ -150,6 +150,7 @@ public struct MonthlyStatDatePicker: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserData: CurrentUserData
     
     @Environment(\.dismiss) private var dismiss
 
@@ -217,16 +218,20 @@ public struct MonthlyStatDatePicker: View {
     
     func getYears() -> [Int] {
         let currentYear = Calendar.current.component(.year, from: Date())
-        return Array((2024)...currentYear)
+        let siginUpYear = Calendar.current.component(.year, from: currentUserData.signUpDate)
+        return Array(siginUpYear...currentYear)
     }
 
     func getMonths(forYear year: Int) -> [Int] {
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
         
+        let siginUpYear = Calendar.current.component(.year, from: currentUserData.signUpDate)
+        let siginUpMonth = Calendar.current.component(.month, from: currentUserData.signUpDate)
+        
         var months: [Int] = []
         if year == currentYear { // 현재 연도라면 현재 월까지만 추가
-            months = Array(1...currentMonth)
+            months = Array(siginUpMonth...currentMonth)
         } else {
             months = Array(1...12)
         }

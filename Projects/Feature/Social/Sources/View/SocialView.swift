@@ -126,9 +126,15 @@ extension SocialScrollViewRepresentable {
                 switch result {
                 case .success():
                     print("새로고침 성공")
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.prepare()
+                    generator.impactOccurred()
                     sender.endRefreshing()
                 case .failure(_):
                     print("새로고침 실패")
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.prepare()
+                    generator.impactOccurred()
                     break
                 }
             }
@@ -160,6 +166,10 @@ extension SocialScrollViewRepresentable {
                     parent.onRefresh()
                 }
             } else {
+                let generator = UIImpactFeedbackGenerator(style: .medium)
+                generator.prepare()
+                generator.impactOccurred()
+
                 isRefreshing = false
             }
         }
@@ -489,7 +499,6 @@ struct SocialItemView: View {
                             .blur(radius: 3)
                     )
                     
-                    
                     // MARK: Content
                     if let content = self.mumory.content, !content.isEmpty {
                         
@@ -664,6 +673,7 @@ public struct SocialView: View {
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                 print("onRefresh")
                 self.mumoryDataViewModel.fetchEveryMumory(friends: currentUserData.friends, me: currentUserData.user)
+                self.generateHapticFeedback(style: .medium)
             }) {
                 ZStack {
                     VStack(spacing: 0) {
@@ -691,7 +701,7 @@ public struct SocialView: View {
                             .fixedSize(horizontal: true, vertical: true)
                     }
                     .offset(y: 65 + appCoordinator.safeAreaInsetsTop + 20)
-                    .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
+                    .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty && self.mumoryDataViewModel.myMumorys.isEmpty ? 1 : 0)
                     
                     SocialScrollCotentView()
                 }

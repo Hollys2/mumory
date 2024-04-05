@@ -107,7 +107,7 @@ public struct MyMumoryView: View {
 
                         ZStack(alignment: .top) {
 
-                            //                                ScrollView(showsIndicators: false) {
+                                                            ScrollView(showsIndicators: false) {
                             VStack(spacing: 0) {
                                 if mumoryDataViewModel.monthlyMumorys.isEmpty {
                                     ZStack(alignment: .top) {
@@ -167,19 +167,18 @@ public struct MyMumoryView: View {
                                     }
                                     
                                     MumoryItemView(mumory: mumory, isRecent: index == 0 ? true : false)
-                                        .id(Int(index))
                                 }
                                 
                                 Spacer(minLength: 0)
                             } // VStack
                             .padding(.top, 55)
-                            .blurScroll(10)
-                            //                                } // ScrollView
+//                            .blurScroll(10)
+                                                            } // ScrollView
 
                             ZStack(alignment: .leading) {
 
                                 Rectangle()
-                                    .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.9))
+                                    .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.95))
                                     .frame(width: getUIScreenBounds().width, height: 55)
                                     .overlay(
                                         Rectangle()
@@ -488,7 +487,7 @@ struct MumoryItemView: View {
                     .frame(maxHeight: .infinity)
             }
             .frame(width: 35)
-            .frame(maxHeight: .infinity)
+            .frame(height: 371)
             
             Spacer().frame(width: 15)
             
@@ -749,7 +748,6 @@ struct MumoryItemView: View {
             
             Spacer().frame(width: 20)
         }
-        .frame(height: getUIScreenBounds().height * 0.439573)
         .padding(.top, !isSameDateAsPrevious ? 30 : 0)
     }
 }

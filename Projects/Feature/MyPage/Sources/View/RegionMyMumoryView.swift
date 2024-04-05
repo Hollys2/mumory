@@ -78,7 +78,7 @@ public struct RegionMyMumoryView: View {
                         
                         ZStack(alignment: .top) {
                             
-//                            ScrollView(showsIndicators: false) {
+                            ScrollView(showsIndicators: false) {
                                 
                                 VStack(spacing: 0) {
                                     
@@ -129,15 +129,16 @@ public struct RegionMyMumoryView: View {
                                         
                                         MumoryItemView2(mumory: mumory, mumorys: self.mumorys, isRecent: index == 0 ? true : false)
                                     }
+                                    Spacer(minLength: 0)
                                 } // VStack
-                                .padding(.top, 45)
-                                .blurScroll(10)
-                                //                                } // ScrollView
+                                .padding(.top, 55)
+//                                .blurScroll(10)
+                                                                } // ScrollView
 
                                 ZStack(alignment: .leading) {
 
                                     Rectangle()
-                                        .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.9))
+                                        .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.95))
                                         .frame(width: getUIScreenBounds().width, height: 55)
                                         .overlay(
                                             Rectangle()
@@ -175,9 +176,12 @@ public struct RegionMyMumoryView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-        .sheet(isPresented: self.$isDatePickerShown, content: {
-            MyMumoryDatePicker(selectedDate: self.$selectedDate, user: self.user)
-                .presentationDetents([.height(309)])
+        .fullScreenCover(isPresented: $isDatePickerShown, content: {
+            BottomSheetWrapper(isPresent: $isDatePickerShown) {
+                MyMumoryDatePicker(selectedDate: self.$selectedDate, user: self.user)
+                    .frame(height: 309)
+            }
+            .background(TransparentBackground())
         })
         .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.user.uId == currentUserData.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
@@ -286,6 +290,7 @@ struct MumoryItemView2: View {
                     .frame(maxHeight: .infinity)
             }
             .frame(width: 35)
+            .frame(height: 371)
             
             Spacer().frame(width: 15)
             
@@ -546,7 +551,6 @@ struct MumoryItemView2: View {
             
             Spacer().frame(width: 20)
         }
-        .frame(height: 371)
         .padding(.top, !isSameDateAsPrevious ? 30 : 0)
     }
 }
