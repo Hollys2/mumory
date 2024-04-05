@@ -23,6 +23,7 @@ struct SettingView: View {
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     @State var isShowingWithdrawPopup = false
     @State var isLoading: Bool = false
@@ -99,6 +100,12 @@ struct SettingView: View {
                 
                 LogoutButton()
                     .onTapGesture {
+                        mumoryDataViewModel.myMumorys.removeAll()
+                        mumoryDataViewModel.myActivity.removeAll()
+                        mumoryDataViewModel.everyMumorys.removeAll()
+                        mumoryDataViewModel.myRewards.removeAll()
+                        mumoryDataViewModel.choosedMusicModel = nil
+                        mumoryDataViewModel.choosedLocationModel = nil
                         let Firebase = FBManager.shared
                         let auth = Firebase.auth
                         guard let signOut = try? auth.signOut() else {return}
@@ -106,6 +113,7 @@ struct SettingView: View {
                         currentUserData.removeAllData()
                         appCoordinator.bottomAnimationViewStatus = .remove
                         appCoordinator.initPage = .onBoarding
+                        appCoordinator.selectedTab = .home
                         appCoordinator.rootPath = NavigationPath()
                         
                         for key in UserDefaults.standard.dictionaryRepresentation().keys {

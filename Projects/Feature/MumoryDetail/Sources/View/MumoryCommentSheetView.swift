@@ -706,6 +706,8 @@ public struct MumoryCommentSheetView: View {
                                                 mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
                                             }
                                         }
+                                        
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     }, label: {
                                         commentText.isEmpty ?
                                         SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage

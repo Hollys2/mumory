@@ -122,7 +122,7 @@ extension SocialScrollViewRepresentable {
         @objc func handleRefreshControl(sender: UIRefreshControl) {
             print("handleRefreshControl")
             
-            parent.mumoryDataViewModel.fetchEveryMumory2 { result in
+            parent.mumoryDataViewModel.fetchEveryMumory2(friends: self.parent.currentUserData.friends) { result in
                 switch result {
                 case .success():
                     print("새로고침 성공")
@@ -664,36 +664,38 @@ public struct SocialView: View {
             
             SocialScrollViewRepresentable(contentOffsetY: self.$offsetY, onRefresh: {
                 print("onRefresh")
-                self.mumoryDataViewModel.fetchEveryMumory()
+                self.mumoryDataViewModel.fetchEveryMumory(friends: currentUserData.friends, me: currentUserData.user)
             }) {
-//                VStack(spacing: 0) {
-//
-//                    SharedAsset.socialInitIcon.swiftUIImage
-//                        .resizable()
-//                        .frame(width: 96.74, height: 57)
-//                        .padding(.bottom, 39)
-//
-//                    Text("아직 뮤모리가 기록되지 않았어요")
-//                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-//                        .foregroundColor(.white)
-//                        .frame(maxWidth: .infinity, alignment: .center)
-//                        .padding(.bottom, 21)
-//
-//                    Text("친구들을 초대해서 나만의 좋은 음악과")
-//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-//                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-//                        .fixedSize(horizontal: true, vertical: true)
-//                        .padding(.bottom, 3)
-//
-//                    Text("특별한 순간을 공유해보세요!")
-//                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-//                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-//                        .fixedSize(horizontal: true, vertical: true)
-//                }
-//                .offset(y: -65 - appCoordinator.safeAreaInsetsTop)
-//                .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
-                
-                SocialScrollCotentView()
+                ZStack {
+                    VStack(spacing: 0) {
+                        
+                        SharedAsset.socialInitIcon.swiftUIImage
+                            .resizable()
+                            .frame(width: 96.74, height: 57)
+                            .padding(.bottom, 39)
+                        
+                        Text("아직 뮤모리가 기록되지 않았어요")
+                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.bottom, 21)
+                        
+                        Text("친구들을 초대해서 나만의 좋은 음악과")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                            .fixedSize(horizontal: true, vertical: true)
+                            .padding(.bottom, 3)
+                        
+                        Text("특별한 순간을 공유해보세요!")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                            .fixedSize(horizontal: true, vertical: true)
+                    }
+                    .offset(y: 65 + appCoordinator.safeAreaInsetsTop)
+                    .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
+                    
+                    SocialScrollCotentView()
+                }
                 
             }
             
@@ -760,7 +762,7 @@ public struct SocialView: View {
             playerViewModel.isShownMiniPlayerInLibrary = false
             
             if !appCoordinator.isFirstTabSelected {
-                mumoryDataViewModel.fetchEveryMumory()
+                mumoryDataViewModel.fetchEveryMumory(friends: currentUserData.friends, me: currentUserData.user)
                 appCoordinator.isFirstTabSelected = true
             }
             

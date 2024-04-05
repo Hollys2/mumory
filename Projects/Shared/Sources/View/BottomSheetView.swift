@@ -524,7 +524,7 @@ struct RewardBottomSheetViewModifier: ViewModifier {
                 Color.black.opacity(0.5)
                     .onTapGesture {
                         withAnimation(.spring(response: 0.2)) {
-                            self.isShown = false
+//                            self.isShown = false
                         }
                     }
                 

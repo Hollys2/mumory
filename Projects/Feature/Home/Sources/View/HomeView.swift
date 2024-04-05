@@ -132,13 +132,6 @@ public struct HomeView: View {
                     
                     if appCoordinator.isFirst {
                         self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-                        print("myRewards: \(mumoryDataViewModel.myRewards)")
-                        if !self.mumoryDataViewModel.myRewards.contains { $0 == "attendance0" } {
-                            let db = FirebaseManager.shared.db
-                            let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
-                            let data = ["type": "attendance0"]
-                            collectionReference.addDocument(data: data)
-                        }
                         self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
                         self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                             switch result {
@@ -147,7 +140,7 @@ public struct HomeView: View {
                                 DispatchQueue.main.async {
                                     self.mumoryDataViewModel.myMumorys = mumorys
                                     self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                                    self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(uId: self.currentUserData.uId)
+                                    self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
                                     self.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
                                 }
                             case .failure(let error):
@@ -156,41 +149,6 @@ public struct HomeView: View {
                             
                             DispatchQueue.main.async {
                                 self.mumoryDataViewModel.isUpdating = false
-                            }
-                        }
-                        
-                        let pastDate: Date = currentUserData.user.signUpDate
-                        let currentDate = Date()
-                        
-                        let calendar = Calendar.current
-                        let components = calendar.dateComponents([.day], from: pastDate, to: currentDate)
-                        if let dayDifference = components.day {
-                            if dayDifference >= 3 {
-                                let db = FirebaseManager.shared.db
-                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
-                                let data = ["type": "attendance1"]
-                                collectionReference.addDocument(data: data)
-                            }
-                            
-                            if dayDifference >= 7 {
-                                let db = FirebaseManager.shared.db
-                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
-                                let data = ["type": "attendance2"]
-                                collectionReference.addDocument(data: data)
-                            }
-                            
-                            if dayDifference >= 14 {
-                                let db = FirebaseManager.shared.db
-                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
-                                let data = ["type": "attendance3"]
-                                collectionReference.addDocument(data: data)
-                            }
-                            
-                            if dayDifference >= 30 {
-                                let db = FirebaseManager.shared.db
-                                let collectionReference = db.collection("User").document(currentUserData.user.uId).collection("Reward")
-                                let data = ["type": "attendance4"]
-                                collectionReference.addDocument(data: data)
                             }
                         }
 

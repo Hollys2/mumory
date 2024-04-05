@@ -63,7 +63,6 @@ struct MumoryApp: App {
                         .environmentObject(appCoordinator)
                         .environmentObject(currentUserData)
                         .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
-                    
                 }
                 .ignoresSafeArea()
                 .environmentObject(snackBarViewModel)

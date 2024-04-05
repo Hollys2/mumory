@@ -323,15 +323,32 @@ final public class MumoryDataViewModel: ObservableObject {
         return listener
     }
     
-    public func fetchRewardListener(uId: String) -> ListenerRegistration {
+    public func fetchRewardListener(user: MumoriUser) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("User").document(uId).collection("Reward")
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
         
         let listener = collectionReference.addSnapshotListener { snapshot, error in
             Task {
                 guard let snapshot = snapshot, error == nil else {
                     print("Error fetchRewardListener: \(error!)")
                     return
+                }
+
+                
+                DispatchQueue.main.async {
+                    if !self.myRewards.contains(where: { $0 == "attendance0" }) {
+                        self.myRewards.append("attendance0")
+                        
+                        let db = FirebaseManager.shared.db
+                        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+                        let data = ["type": "attendance0"]
+                        collectionReference.addDocument(data: data)
+                        
+                        self.reward = .attendance(0)
+                        withAnimation(.spring(response: 0.2)) {
+                            self.isRewardPopUpShown = true
+                        }
+                    }
                 }
                 
                 for documentChange in snapshot.documentChanges {
@@ -341,6 +358,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     let newReward: String = type
                     
                     DispatchQueue.main.async {
+                        
                         if !self.myRewards.contains(where: { $0 == type }) {
                             self.myRewards.append(newReward)
                             switch type {
@@ -397,6 +415,41 @@ final public class MumoryDataViewModel: ObservableObject {
                             default:
                                 self.reward = .none
                                 break
+                            }
+                            
+                            let pastDate: Date = user.signUpDate
+                            let currentDate = Date()
+                            
+                            let calendar = Calendar.current
+                            let components = calendar.dateComponents([.day], from: pastDate, to: currentDate)
+                            if let dayDifference = components.day {
+                                if dayDifference >= 3 {
+                                    let db = FirebaseManager.shared.db
+                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+                                    let data = ["type": "attendance1"]
+                                    collectionReference.addDocument(data: data)
+                                }
+                                
+                                if dayDifference >= 7 {
+                                    let db = FirebaseManager.shared.db
+                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+                                    let data = ["type": "attendance2"]
+                                    collectionReference.addDocument(data: data)
+                                }
+                                
+                                if dayDifference >= 14 {
+                                    let db = FirebaseManager.shared.db
+                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+                                    let data = ["type": "attendance3"]
+                                    collectionReference.addDocument(data: data)
+                                }
+                                
+                                if dayDifference >= 30 {
+                                    let db = FirebaseManager.shared.db
+                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+                                    let data = ["type": "attendance4"]
+                                    collectionReference.addDocument(data: data)
+                                }
                             }
                             
                             withAnimation(.spring(response: 0.2)) {
@@ -725,14 +778,17 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchEveryMumory() {
+    public func fetchEveryMumory(friends: [MumoriUser], me: MumoriUser) {
         DispatchQueue.main.async {
             self.isUpdating = true
         }
         
         let db = FirebaseManager.shared.db
-        
+        var friendsUids: [String] = friends.map {$0.uId}
+    
         var mumoryCollectionRef = db.collection("Mumory")
+            .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
+            .whereField("isPublic", isEqualTo: true)
             .order(by: "date", descending: true)
             .limit(to: 7)
         
@@ -763,6 +819,8 @@ final public class MumoryDataViewModel: ObservableObject {
                 }
                 
                 DispatchQueue.main.async {
+                    
+                    self.tempSocialMumory.append(contentsOf: self.myMumorys)
                     self.tempSocialMumory.sort { $0.date > $1.date }
                     self.everyMumorys = self.tempSocialMumory
                     self.lastDocument = snapshot.documents.last
@@ -782,8 +840,15 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchEveryMumory2(completionHandler: @escaping (Result<Void, Error>) -> Void) {
+    public func fetchEveryMumory2(friends: [MumoriUser], completionHandler: @escaping (Result<Void, Error>) -> Void) {
         let db = FirebaseManager.shared.db
+        var friendsUids: [String] = friends.map {$0.uId}
+    
+        var mumoryCollectionRef = db.collection("Mumory")
+            .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
+            .whereField("isPublic", isEqualTo: true)
+            .order(by: "date", descending: true)
+            .limit(to: 7)
            
         Task {
             let mumoryCollectionRef = db.collection("Mumory")
@@ -798,16 +863,32 @@ final public class MumoryDataViewModel: ObservableObject {
                     guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {return}
                     
                     DispatchQueue.main.async {
-//                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
-//                        self.everyMumorys.append(newMumory)
-//                            self.tempMumory.sort { $0.date > $1.date }
-                        self.tempMumory.append(newMumory)
+                        if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
+                            //                        self.everyMumorys.append(newMumory)
+                            //                            self.tempMumory.sort { $0.date > $1.date }
+                            self.tempMumory.append(newMumory)
+                        }
                     }
-//                    }
                 }
                 
                 DispatchQueue.main.async {
-                    self.everyMumorys = self.tempMumory
+                    self.tempMumory.append(contentsOf: self.myMumorys)
+                    var uniqueIDs = Set<String>()
+
+                    // 중복을 제거한 Mumory 배열을 담을 임시 배열을 생성합니다.
+                    var uniqueMumories = [Mumory]()
+
+                    // 원본 Mumory 배열을 순회하면서 중복된 ID를 제거한 배열을 생성합니다.
+                    for mumory in self.tempMumory {
+                        // Set에 현재 Mumory의 ID를 추가합니다.
+                        if uniqueIDs.insert(mumory.id).inserted {
+                            // 만약 Set에 삽입한 결과가 true라면, 즉 중복되지 않은 ID라면 uniqueMumories에 추가합니다.
+                            uniqueMumories.append(mumory)
+                        }
+                    }
+                    
+                    uniqueMumories.sort { $0.date > $1.date }
+                    self.everyMumorys = uniqueMumories
                     self.isUpdating = false
                     completionHandler(.success(()))
                 }
