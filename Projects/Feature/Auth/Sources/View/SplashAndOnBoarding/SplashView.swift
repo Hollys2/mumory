@@ -61,6 +61,9 @@ public struct SplashView: View {
                         }
                     }
                 }
+                .onAppear(perform: {
+                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+                })
                 .navigationDestination(for: String.self, destination: { i in
                     if i == "music" {
                         SearchMusicViewInCreateMumory()
