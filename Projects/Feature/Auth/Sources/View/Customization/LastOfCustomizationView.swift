@@ -78,6 +78,7 @@ struct LastOfCustomizationView: View {
                                     .multilineTextAlignment(.center)
                                     .padding(.top, 13)
                                     .lineSpacing(5)
+                                    .lineLimit(5)
                                 
                                 Rectangle()
                                     .frame(height: 1)
@@ -268,6 +269,7 @@ struct LastOfCustomizationView: View {
                         appCoordinator.initPage = .home                        
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
+                        appCoordinator.isCreateMumorySheetShown = false
                         withTransaction(transaction) {
                             appCoordinator.rootPath = NavigationPath()
                         }
