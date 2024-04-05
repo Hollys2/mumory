@@ -49,6 +49,10 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var isRewardPopUpShown: Bool = false
     @Published public var reward: Reward = .none
     
+    @Published public var listener: ListenerRegistration?
+    @Published public var rewardListener: ListenerRegistration?
+    @Published public var activityListener: ListenerRegistration?
+    
     private var tempMumory: [Mumory] = []
     private var tempSocialMumory: [Mumory] = []
     private var lastDocument: DocumentSnapshot?
@@ -868,6 +872,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.tempMumory.sort { $0.date > $1.date }
+                    print("self.tempMumory: \(self.tempMumory)")
                     self.everyMumorys = self.tempMumory
                     self.isUpdating = false
                     completionHandler(.success(()))
@@ -1015,7 +1020,9 @@ final public class MumoryDataViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     if !self.tempMumory.contains(where: { $0.id == document.documentID}) {
                         if !self.tempMumory.contains(where: { $0.musicModel.songID.rawValue == newMumory.musicModel.songID.rawValue}) {
-                            self.tempMumory.append(newMumory)
+                            if mumory.musicModel.songID.rawValue != newMumory.musicModel.songID.rawValue {
+                                self.tempMumory.append(newMumory)
+                            }
                         }
                     }
                 }
@@ -1142,6 +1149,10 @@ final public class MumoryDataViewModel: ObservableObject {
             } else {
                 if let index = self.myMumorys.firstIndex(where: { $0.id == mumory.id }) {
                     self.myMumorys.remove(at: index)
+                }
+                
+                if let index = self.everyMumorys.firstIndex(where: { $0.id == mumory.id }) {
+                    self.everyMumorys.remove(at: index)
                 }
 
                 let commentsRef = db.collection("Mumory").document(mumory.id).collection("Comment")

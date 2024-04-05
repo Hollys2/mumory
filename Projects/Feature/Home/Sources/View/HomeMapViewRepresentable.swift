@@ -473,19 +473,12 @@ extension FriendMapViewRepresentable.Coordinator: MKMapViewDelegate {
                     label.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 9),
                     label.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -9)
                 ])
-                
-                // containerView에 둥근 모서리 적용
-                containerView.layer.cornerRadius = 19.53
-                
-                // containerView의 배경색을 오렌지로 설정
-                containerView.backgroundColor = UIColor(red: 0.188, green: 0.188, blue: 0.188, alpha: 0.898)
 
-                // ViewController의 뷰에 containerView 추가
+                containerView.layer.cornerRadius = 19.53
+                containerView.backgroundColor = UIColor(red: 0.188, green: 0.188, blue: 0.188, alpha: 0.898)
                 annotationView.addSubview(containerView)
-                
-                // AutoLayout 설정
+
                 containerView.translatesAutoresizingMaskIntoConstraints = false
-                
                 NSLayoutConstraint.activate([
                     containerView.bottomAnchor.constraint(equalTo: annotationView.topAnchor, constant: -2),
                     containerView.centerXAnchor.constraint(equalTo: annotationView.centerXAnchor)

@@ -514,7 +514,7 @@ struct RewardBottomSheetViewModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         
-        ZStack(alignment: .bottom) {
+        ZStack {
             
             Color.clear
             
@@ -530,7 +530,7 @@ struct RewardBottomSheetViewModifier: ViewModifier {
                 
                 RewardBottomSheetView(isShown: self.$isShown)
                     .offset(y: self.translation.height)
-                    .gesture(dragGesture)
+//                    .gesture(dragGesture)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
                     .padding(.bottom, 27)

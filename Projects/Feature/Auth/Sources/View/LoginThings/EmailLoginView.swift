@@ -14,6 +14,7 @@ import Lottie
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
     @EnvironmentObject var appCoordinator: AppCoordinator
     @State var email: String = ""
@@ -138,9 +139,32 @@ struct EmailLoginView: View {
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         
+        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
+        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+            switch result {
+            case .success(let mumorys):
+                print("fetchMumorys successfully: \(mumorys)")
+                DispatchQueue.main.async {
+                    self.mumoryDataViewModel.myMumorys = mumorys
+                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+                }
+            case .failure(let error):
+                print("ERROR: \(error)")
+            }
+            
+            DispatchQueue.main.async {
+                self.mumoryDataViewModel.isUpdating = false
+            }
+        }
+        
         isLoading = false
         appCoordinator.initPage = .home
         appCoordinator.isCreateMumorySheetShown = false
+        appCoordinator.selectedTab = .home
+        
         var transaction = Transaction()
         transaction.disablesAnimations = true
         withTransaction(transaction) {

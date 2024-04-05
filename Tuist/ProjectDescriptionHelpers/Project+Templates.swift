@@ -107,13 +107,8 @@ extension Project {
             "CFBundleURLTypes" : [
                 [
                     "CFBundleTypeRole" : "Editor",
-                    "CFBundleURLName" : "kakao1",
+                    "CFBundleURLName" : "kakao",
                     "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
-                ],
-                [
-                    "CFBundleTypeRole" : "Editor",
-                    "CFBundleURLName" : "kakao2",
-                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260:ouath"]
                 ],
                 [
                     "CFBundleTypeRole" : "Editor",

@@ -20,6 +20,7 @@ public struct LoginView: View {
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
 
 
 //    @State var isLoginCompleted: Bool = false
@@ -290,6 +291,28 @@ public struct LoginView: View {
             try? await query.updateData(["fcmToken": fcmToken])
             appCoordinator.selectedTab = .home
             appCoordinator.initPage = .home
+            
+            self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+            self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
+            self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+                switch result {
+                case .success(let mumorys):
+                    print("fetchMumorys successfully: \(mumorys)")
+                    DispatchQueue.main.async {
+                        self.mumoryDataViewModel.myMumorys = mumorys
+                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+                        self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+                    }
+                case .failure(let error):
+                    print("ERROR: \(error)")
+                }
+                
+                DispatchQueue.main.async {
+                    self.mumoryDataViewModel.isUpdating = false
+                }
+            }
+            
             var transaction = Transaction()
             transaction.disablesAnimations = true
             appCoordinator.isCreateMumorySheetShown = false
