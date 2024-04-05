@@ -137,20 +137,51 @@ struct LibraryView: View {
         }
         .ignoresSafeArea()
         .onAppear(perform: {
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-            if !appCoordinator.isCreateMumorySheetShown {
-                if playerViewModel.isShownMiniPlayerInLibrary {
-                    playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
-                } else {
-                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
-                }
-            }
-
             Task {
-                currentUserData.playlistArray = await currentUserData.savePlaylist()
+                let authorizationStatus = await MusicAuthorization.request()
+                if authorizationStatus != .authorized {
+                    print("음악 권한 거절")
+                    DispatchQueue.main.async {
+                        self.showAlertToRedirectToSettings()
+                    }
+                } else {
+                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+                    if !appCoordinator.isCreateMumorySheetShown {
+                        if playerViewModel.isShownMiniPlayerInLibrary {
+                            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
+                        } else {
+                            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+                        }
+                    }
+                    
+                    
+                    currentUserData.playlistArray = await currentUserData.savePlaylist()
+                }
             }
         })
         
+    }
+    
+    func showAlertToRedirectToSettings() {
+        let alertController = UIAlertController(title: "음악 권한 허용", message: "뮤모리를 이용하려면 음악 권한이 필요합니다. 설정으로 이동하여 권한을 허용해주세요.", preferredStyle: .alert)
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { (_) in
+            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+                return
+            }
+            if UIApplication.shared.canOpenURL(settingsUrl) {
+                UIApplication.shared.open(settingsUrl, completionHandler: nil)
+            }
+        }
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        alertController.addAction(settingsAction)
+        alertController.addAction(cancelAction)
+        
+        UIApplication.shared.windows.first?.rootViewController?.present(alertController, animated: true, completion: nil)
+        //        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+        //            if let window = windowScene.windows.first {
+        //                window.rootViewController?.present(alertController, animated: true, completion: nil)
+        //            }
+        //        }
     }
 }
 

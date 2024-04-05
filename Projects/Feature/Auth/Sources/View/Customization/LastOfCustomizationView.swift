@@ -13,6 +13,7 @@ struct LastOfCustomizationView: View {
     @EnvironmentObject var manager: CustomizationManageViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State var firstYOffset: CGFloat = 0
     @State var firstOpacity: CGFloat = 0
     @State var secondYOffset: CGFloat = 0
@@ -266,6 +267,27 @@ struct LastOfCustomizationView: View {
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .onTapGesture {
+                        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+                        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
+                        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+                            switch result {
+                            case .success(let mumorys):
+                                print("fetchMumorys successfully: \(mumorys)")
+                                DispatchQueue.main.async {
+                                    self.mumoryDataViewModel.myMumorys = mumorys
+                                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+                                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+                                }
+                            case .failure(let error):
+                                print("ERROR: \(error)")
+                            }
+                            
+                            DispatchQueue.main.async {
+                                self.mumoryDataViewModel.isUpdating = false
+                            }
+                        }
+                        
                         appCoordinator.initPage = .home                        
                         var transaction = Transaction()
                         transaction.disablesAnimations = true
