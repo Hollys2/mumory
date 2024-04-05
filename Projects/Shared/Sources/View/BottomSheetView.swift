@@ -530,7 +530,7 @@ struct RewardBottomSheetViewModifier: ViewModifier {
                 
                 RewardBottomSheetView(isShown: self.$isShown)
                     .offset(y: self.translation.height)
-                    .gesture(dragGesture)
+//                    .gesture(dragGesture)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
                     .padding(.bottom, 27)
