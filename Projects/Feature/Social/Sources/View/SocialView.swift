@@ -173,10 +173,9 @@ struct SocialScrollCotentView: View {
     @EnvironmentObject private var currentUserData: CurrentUserData
     
     var body: some View {
-        
         VStack(spacing: 0) {
             LazyVStack(spacing: 0) {
-                ForEach(self.mumoryDataViewModel.everyMumorys, id: \.uuid) { i in
+                ForEach(Array(Set(self.mumoryDataViewModel.everyMumorys + self.mumoryDataViewModel.myMumorys)).sorted(by: { $0.date > $1.date }), id: \.uuid) { i in
                     SocialItemView(mumory: i)
                 }
             }
@@ -184,7 +183,7 @@ struct SocialScrollCotentView: View {
             .padding(.top, 25)
             .padding(.bottom, 90)
         } // VStack
-        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count) + 115)
+        .frame(height: (getUIScreenBounds().width + 71) * CGFloat(self.mumoryDataViewModel.everyMumorys.count + self.mumoryDataViewModel.myMumorys.count) + 115)
         .ignoresSafeArea()
     }
 }
@@ -691,7 +690,7 @@ public struct SocialView: View {
                             .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                             .fixedSize(horizontal: true, vertical: true)
                     }
-                    .offset(y: 65 + appCoordinator.safeAreaInsetsTop)
+                    .offset(y: 65 + appCoordinator.safeAreaInsetsTop + 20)
                     .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty ? 1 : 0)
                     
                     SocialScrollCotentView()

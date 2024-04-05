@@ -819,8 +819,6 @@ final public class MumoryDataViewModel: ObservableObject {
                 }
                 
                 DispatchQueue.main.async {
-                    
-                    self.tempSocialMumory.append(contentsOf: self.myMumorys)
                     self.tempSocialMumory.sort { $0.date > $1.date }
                     self.everyMumorys = self.tempSocialMumory
                     self.lastDocument = snapshot.documents.last
@@ -842,18 +840,17 @@ final public class MumoryDataViewModel: ObservableObject {
     
     public func fetchEveryMumory2(friends: [MumoriUser], completionHandler: @escaping (Result<Void, Error>) -> Void) {
         let db = FirebaseManager.shared.db
-        var friendsUids: [String] = friends.map {$0.uId}
-    
-        var mumoryCollectionRef = db.collection("Mumory")
-            .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
-            .whereField("isPublic", isEqualTo: true)
-            .order(by: "date", descending: true)
-            .limit(to: 7)
+        let friendsUids: [String] = friends.map {$0.uId}
            
         Task {
-            let mumoryCollectionRef = db.collection("Mumory")
+            var mumoryCollectionRef = db.collection("Mumory")
+                .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
+                .whereField("isPublic", isEqualTo: true)
                 .order(by: "date", descending: true)
                 .limit(to: 7)
+//            let mumoryCollectionRef = db.collection("Mumory")
+//                .order(by: "date", descending: true)
+//                .limit(to: 7)
 
             do {
                 let snapshot = try await mumoryCollectionRef.getDocuments()
@@ -864,31 +861,14 @@ final public class MumoryDataViewModel: ObservableObject {
                     
                     DispatchQueue.main.async {
                         if !self.tempMumory.contains(where: { $0.id == document.documentID }) {
-                            //                        self.everyMumorys.append(newMumory)
-                            //                            self.tempMumory.sort { $0.date > $1.date }
                             self.tempMumory.append(newMumory)
                         }
                     }
                 }
                 
                 DispatchQueue.main.async {
-                    self.tempMumory.append(contentsOf: self.myMumorys)
-                    var uniqueIDs = Set<String>()
-
-                    // 중복을 제거한 Mumory 배열을 담을 임시 배열을 생성합니다.
-                    var uniqueMumories = [Mumory]()
-
-                    // 원본 Mumory 배열을 순회하면서 중복된 ID를 제거한 배열을 생성합니다.
-                    for mumory in self.tempMumory {
-                        // Set에 현재 Mumory의 ID를 추가합니다.
-                        if uniqueIDs.insert(mumory.id).inserted {
-                            // 만약 Set에 삽입한 결과가 true라면, 즉 중복되지 않은 ID라면 uniqueMumories에 추가합니다.
-                            uniqueMumories.append(mumory)
-                        }
-                    }
-                    
-                    uniqueMumories.sort { $0.date > $1.date }
-                    self.everyMumorys = uniqueMumories
+                    self.tempMumory.sort { $0.date > $1.date }
+                    self.everyMumorys = self.tempMumory
                     self.isUpdating = false
                     completionHandler(.success(()))
                 }
