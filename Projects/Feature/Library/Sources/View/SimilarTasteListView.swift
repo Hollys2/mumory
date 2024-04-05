@@ -104,6 +104,9 @@ struct SimilarTasteListView: View {
                 .frame(minHeight: getUIScreenBounds().height)
                 
             }
+            .refreshAction {
+                generateHapticFeedback(style: .light)
+            }
             .scrollIndicators(.hidden)
             
             

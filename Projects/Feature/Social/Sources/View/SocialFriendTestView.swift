@@ -445,7 +445,7 @@ struct FriendAddItem: View {
                 Task {
                     guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
                         print("network error")
-                        status = .normal
+                        status = .valid
                         return
                     }
                     status = .alreadyRequest

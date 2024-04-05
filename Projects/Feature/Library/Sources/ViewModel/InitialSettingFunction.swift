@@ -19,3 +19,6 @@ func setSimilarTaste() async {
     
     try? await FBManager.shared.db.collection("User").document("adminFavoriteGenres").collection("Playlist").document("favorite").setData(["songIds": songIds])
 }
+
+
+

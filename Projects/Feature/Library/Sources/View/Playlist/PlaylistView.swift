@@ -205,6 +205,7 @@ struct PlaylistView: View {
 
             }
             .refreshAction {
+                generateHapticFeedback(style: .light)
                 Task {
                     self.isLoading = true
                     let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)

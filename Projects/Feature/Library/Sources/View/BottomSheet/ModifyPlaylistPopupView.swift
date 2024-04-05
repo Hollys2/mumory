@@ -87,6 +87,7 @@ struct ModifyPlaylistPopupView: View {
                         isPublic = true
                     }, label: {
                         Text("전체공개")
+                            .id("publicMenu")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .foregroundStyle(.white)
                     })
@@ -95,6 +96,7 @@ struct ModifyPlaylistPopupView: View {
                         isPublic = false
                     }, label: {
                         Text("나만보기")
+                            .id("privateMenu")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .foregroundStyle(.white)
                     })
@@ -104,11 +106,13 @@ struct ModifyPlaylistPopupView: View {
                         if isPublic{
                             SharedAsset.unlock.swiftUIImage
                             Text("전체공개")
+                                .id("publicLabel")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundStyle(LibraryColorSet.charSubGray)
                         }else{
                             SharedAsset.lock.swiftUIImage
                             Text("나만보기")
+                                .id("privateLabel")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                                 .foregroundStyle(LibraryColorSet.charSubGray)
                         }

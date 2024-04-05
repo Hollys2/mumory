@@ -35,9 +35,7 @@ public class CurrentUserData: ObservableObject {
     @Published public var friendRequests: [MumoriUser] = []
     @Published public var recievedRequests: [MumoriUser] = []
     @Published public var recievedNewFriends: Bool = false
-    @Published public var existUnreadNotification: Bool = false
-    @Published public var signUpDate: Date = Date()
-    
+    @Published public var existUnreadNotification: Bool = false    
     @Published public var reward: Reward = .none
     @Published public var favoriteGenres: [Int] = []
     @Published public var playlistArray: [MusicPlaylist] = []

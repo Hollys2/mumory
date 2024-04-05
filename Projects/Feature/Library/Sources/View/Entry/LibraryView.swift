@@ -27,6 +27,7 @@ struct LibraryView: View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
             StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, refreshAction: {
+                generateHapticFeedback(style: .light)
                 Task {
                     currentUserData.playlistArray = await currentUserData.savePlaylist()
                 }

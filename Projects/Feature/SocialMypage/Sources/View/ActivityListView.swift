@@ -307,35 +307,15 @@ struct SelectionButtonView: View {
 }
 
 struct DatePickerView: View {
+    @EnvironmentObject var currentUserData: CurrentUserData
     @Environment(\.dismiss) var dismiss
     @Binding var date: Date
-    var dateArray: [Date] = []
+    @State var dateArray: [Date] = []
     @State var selectDate: Date = Date()
     
     init(date: Binding<Date>){
         self._date = date
-        let calendar = Calendar.current
-        
-        let components: Set<Calendar.Component> = [.year, .month]
-        let originDate = calendar.dateComponents(components, from: self.date)
-        let thisMonthDate = calendar.dateComponents(components, from: Date())
-        
-        
-        let startDateComponents = DateComponents(year: 2024, month: 1)
-        let endDateComponents = DateComponents(year: thisMonthDate.year, month: thisMonthDate.month)
-        
-        guard let startDate = calendar.date(from: startDateComponents),
-              let endDate = calendar.date(from: endDateComponents) else {
-            return
-        }
-        
-        var currentDate = startDate
-        
-        while currentDate <= endDate {
-            dateArray.append(currentDate)
-            currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate)!
-        }
-        selectDate = endDate
+  
     }
     
     var body: some View {
@@ -360,6 +340,29 @@ struct DatePickerView: View {
       
         }
         .onAppear {
+            let calendar = Calendar.current
+            
+            let components: Set<Calendar.Component> = [.year, .month]
+            let originDate = calendar.dateComponents(components, from: self.date)
+            let thisMonthDate = calendar.dateComponents(components, from: Date())
+            let signUpDate = calendar.dateComponents(components, from: currentUserData.user.signUpDate)
+            
+            let startDateComponents = DateComponents(year: signUpDate.year, month: signUpDate.month)
+            let endDateComponents = DateComponents(year: thisMonthDate.year, month: thisMonthDate.month)
+            let originComponents = DateComponents(year: originDate.year, month: originDate.month)
+            
+            guard let startDate = calendar.date(from: startDateComponents),
+                  let endDate = calendar.date(from: endDateComponents) else {
+                return
+            }
+            
+            var currentDate = startDate
+            
+            while currentDate <= endDate {
+                dateArray.append(currentDate)
+                currentDate = calendar.date(byAdding: .month, value: 1, to: currentDate)!
+            }
+            
             selectDate = date
         }
  

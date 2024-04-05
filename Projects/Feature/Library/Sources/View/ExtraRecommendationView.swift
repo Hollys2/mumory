@@ -84,17 +84,17 @@ struct ExtraRecommendationView: View {
                     if songs.isEmpty {
                         if type == .mostPosted {
                             MusicChartSkeletonLongView()
-                                .frame(width: getUIScreenBounds().width * 0.9)
+                                .frame(maxWidth: .infinity)
 
                         }else if type == .similiarTaste {
                             SongListSkeletonView()
-                                .frame(width: getUIScreenBounds().width * 0.9)
+                                .frame(maxWidth: .infinity)
 
                         }
                     }else {
                         ForEach(songs.indices, id: \.self) { index in
                             ExtraRecommendationItem(song: songs[index], rank: index, type: self.type)
-                                .frame(width: getUIScreenBounds().width * 0.9)
+                                .frame(maxWidth: .infinity)
                                 .onTapGesture {
                                     playerViewModel.playAll(title: title, songs: songs, startingItem: songs[index])
                                 }

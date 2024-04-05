@@ -582,8 +582,13 @@ struct FriendPlaylistView: View {
                 
                 //플리 가로 스크롤뷰
                 if friendDataViewModel.isPlaylistLoading {
-                    ForEach(0...10, id: \.self) { index in
-                        PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
+                    ScrollView(.horizontal) {
+                        HStack(alignment: .top, spacing: 10, content: {
+                            ForEach(0...10, id: \.self) { index in
+                                PlaylistSkeletonView(itemSize: getUIScreenBounds().width * 0.215)
+                            }
+                        })
+                        .padding(.horizontal, 20)
                     }
                 }else if friendDataViewModel.playlistArray.isEmpty {
                     Text("플레이리스트가 없습니다")

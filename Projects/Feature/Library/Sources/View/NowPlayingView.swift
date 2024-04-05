@@ -22,6 +22,9 @@ public struct NowPlayingView: View {
     @State var albumCoverSize: CGFloat = .zero
     @State var horizontalSpacing: CGFloat = .zero
     @State var isSE: Bool = false
+    @State var offset: CGPoint = .zero
+    
+    @State var newOffset: CGPoint = .zero
     public init() {
         UISlider.appearance().setThumbImage(UIImage(asset: SharedAsset.playSphere)?.resized(to: CGSize(width: 10.45, height: 10)), for: .normal)
     }
@@ -43,49 +46,47 @@ public struct NowPlayingView: View {
                 ColorSet.background.opacity(isPresentQueue ? 1 : 0)
             }
             
-            ScrollViewReader { proxy in
-                ScrollView(.vertical) {
+            ScrollViewReader(content: { proxy in
+                ScrollView {
                     VStack(spacing: 0) {
                         if isPresentQueue {
                             QueueView()
                         }else {
                             PlayingView()
-                            
                         }
                         PlayControlView(isPresentQueue: $isPresentQueue)
                     }
                     .id("main")
                     .frame(height: getUIScreenBounds().height - appCoordinator.safeAreaInsetsBottom - (isSE ? 35 : 45))
                     
-                    PlayTogetherView(songs: $playTogetherSongs)
-                        .opacity(isPresentQueue ? 0 : 1)
-                        .padding(.bottom, 100)
-                        .onChange(of: playerViewModel.currentSong, perform: { value in
-                            guard let song = value else {return}
-                            Task {
-                                self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
-                            }
-                        })
-                }
-                .scrollIndicators(.hidden)
-                .scrollDisabled(isPresentQueue)
-                .onChange(of: isPresentQueue) { newValue in
-                    if isPresentQueue{
-                        proxy.scrollTo("main", anchor: .top)
+                    if !isPresentQueue {
+                        PlayTogetherView(songs: $playTogetherSongs)
+                            .opacity(isPresentQueue ? 0 : 1)
+                            .padding(.bottom, 100)
+                            .onChange(of: playerViewModel.currentSong, perform: { value in
+                                guard let song = value else {return}
+                                Task {
+                                    self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
+                                }
+                            })
                     }
                 }
-            }
+                .scrollIndicators(.hidden)
+                .onChange(of: isPresentQueue) { newValue in
+                    proxy.scrollTo("main", anchor: .top)
+                }
+            })
             .preferredColorScheme(.dark)
             .background(.ultraThinMaterial.opacity(isPresentQueue ? 0 : 1))
-    
+            
             SnackBarView(additionalAction: {
                 Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { timer in
                     dismiss()
                 }
             })
             .frame(width: getUIScreenBounds().width)
-
-
+            
+            
             
         }
         .ignoresSafeArea()
@@ -99,7 +100,7 @@ public struct NowPlayingView: View {
                 self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
             }
         }
-
+        
     }
 }
 
@@ -149,7 +150,7 @@ struct PlayControlView: View {
                     .frame(width: 32, height: 32)
             })
             Spacer()
-
+            
             
             //재생, 멈춤 버튼
             if playerViewModel.isPlaying {
@@ -172,7 +173,7 @@ struct PlayControlView: View {
                 })
             }
             Spacer()
-
+            
             //앞으로 가기 버튼
             Button(action: {
                 playerViewModel.skipToNext()
@@ -184,7 +185,7 @@ struct PlayControlView: View {
             })
             
             Spacer()
-
+            
             //북마크 버튼
             Button(action: {
                 guard let nowSong = playerViewModel.currentSong else {return}
@@ -273,8 +274,8 @@ struct PlayingView: View {
                     }
             })
             .frame(height: 65)
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
             .padding(.horizontal, isSE ? 20 : horizontalSpacing)
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             
             AsyncImage(url: playerViewModel.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
@@ -316,7 +317,7 @@ struct PlayingView: View {
                         Text(" ")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: getUIScreenBounds().height < 700 ? 18 : 20))
                     }
-         
+                    
                     Text(playerViewModel.currentSong?.artistName ?? "--")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: isSE ? 16 : 18))
                         .foregroundStyle(artistTextColor)
@@ -331,7 +332,7 @@ struct PlayingView: View {
                                 }
                             }
                         })
-                   
+                    
                 })
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.trailing, 20)
@@ -356,8 +357,8 @@ struct PlayingView: View {
                 
             })
             .padding(.horizontal, horizontalSpacing)
-
-
+            
+            
             Spacer()
             
             HStack{
@@ -376,7 +377,7 @@ struct PlayingView: View {
                 .onTapGesture {
                     playerViewModel.setShuffleMode()
                 }
-  
+                
                 Spacer()
                 
                 //곡 반복 버튼
@@ -400,7 +401,7 @@ struct PlayingView: View {
             }
             .padding(.bottom, 5)
             .padding(.horizontal, horizontalSpacing)
-
+            
             
             //슬라이드 바 및 재생시간
             VStack(spacing: 0, content: {
@@ -414,7 +415,7 @@ struct PlayingView: View {
                     }
                 })
                 .tint(Color.white)
-            
+                
                 
                 
                 HStack(content: {
@@ -489,7 +490,7 @@ struct PlayingViewBottomSheet: View {
                     appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
                     dismiss()
                     playerViewModel.isPresentNowPlayingView = false
-
+                    
                 }
             BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 만들기", type: .accent)
                 .onTapGesture {
@@ -518,7 +519,7 @@ struct QueueView: View {
         VStack(spacing: 0) {
             //플레이리스트 보여줄때
             Button {
-                dismiss()
+                playerViewModel.isPresentNowPlayingView = false
             } label: {
                 SharedAsset.xWhite.swiftUIImage
                     .resizable()
@@ -526,9 +527,9 @@ struct QueueView: View {
                     .frame(width: 30, height: 30)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .frame(height: 63)
-                    .padding(.top, appCoordinator.safeAreaInsetsTop)
             }
             .padding(.trailing, isSE ? 20 : horizontalSpacing)
+            .padding(.top, appCoordinator.safeAreaInsetsTop)
             
             
             HStack(content: {
@@ -564,34 +565,26 @@ struct QueueView: View {
                                     }
                                     playerViewModel.changeCurrentEntry(song: song)
                                 }
-//                                .highPriorityGesture(
-//                                    TapGesture()
-//                                        .onEnded({ _ in
-//                                            withAnimation {
-//                                                proxy.scrollTo(song.id, anchor: .top)
-//                                            }
-//                                            playerViewModel.changeCurrentEntry(song: song)
-//                                        })
-//                                )
-                            
                         }
                     }
                     
                 }
+                .id("innerScrollView")
                 .scrollIndicators(.hidden)
-//                .overlay(content: {
-//                    VStack(content: {
-//                        Spacer()
-//                        LinearGradient(colors: [ColorSet.background, Color.clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.2))
-//                            .frame(maxWidth: .infinity)
-//                            .frame(height: 30)
-//                    })
-//
-//                })
+                .overlay(content: {
+                    VStack(content: {
+                        Spacer()
+                        LinearGradient(colors: [ColorSet.background, Color.clear], startPoint: .bottom, endPoint: .init(x: 0.5, y: 0.2))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 30)
+                    })
+                    
+                })
                 .onAppear {
                     proxy.scrollTo(playerViewModel.playingSong()?.id, anchor: .top)
                 }
             }
+            .id("innerScrollViewReader")
         }
         .frame(width: getUIScreenBounds().width)
         .onAppear {
@@ -622,7 +615,7 @@ public func requestPlayTogetherSongs(title: String, artist: String) async -> [So
         returnValue.append(song)
         count += 1
     }
-
+    
     return returnValue
 }
 
@@ -768,18 +761,18 @@ struct PlayTogetherItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentBottomSheet.toggle()
                 }
-       
+            
             
         })
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 15)
         .frame(height: 70)
         .background(ColorSet.background)
-//        .onLongPressGesture {
-//            self.generateHapticFeedback(style: .medium)
-//            UIView.setAnimationsEnabled(false)
-//            isPresentBottomSheet = true
-//        }
+        //        .onLongPressGesture {
+        //            self.generateHapticFeedback(style: .medium)
+        //            UIView.setAnimationsEnabled(false)
+        //            isPresentBottomSheet = true
+        //        }
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
                 //아티스트 페이지의 바텀시트면 아티스트 노래 보기 아이템 제거. 그 외의 경우에는 즐겨찾기 추가만 제거

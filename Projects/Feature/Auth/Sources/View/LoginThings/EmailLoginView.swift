@@ -134,6 +134,7 @@ struct EmailLoginView: View {
         currentUserData.uId = result.user.uid
         currentUserData.user = await MumoriUser(uId: result.user.uid)
         currentUserData.playlistArray = await currentUserData.savePlaylist()
+        currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
         

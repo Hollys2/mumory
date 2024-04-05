@@ -100,6 +100,7 @@ struct SettingView: View {
                 
                 LogoutButton()
                     .onTapGesture {
+                        isLoading = true
                         mumoryDataViewModel.myMumorys.removeAll()
                         mumoryDataViewModel.myActivity.removeAll()
                         mumoryDataViewModel.everyMumorys.removeAll()
@@ -112,14 +113,15 @@ struct SettingView: View {
                         Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
                         currentUserData.removeAllData()
                         appCoordinator.bottomAnimationViewStatus = .remove
+                        appCoordinator.isCreateMumorySheetShown = false
                         appCoordinator.initPage = .onBoarding
                         appCoordinator.selectedTab = .home
-                        appCoordinator.rootPath = NavigationPath()
-                        
                         for key in UserDefaults.standard.dictionaryRepresentation().keys {
                             UserDefaults.standard.removeObject(forKey: key.description)
                         }
-                     
+                        appCoordinator.rootPath = NavigationPath()
+                        
+                        isLoading = false
                     }
                 
                 
@@ -148,6 +150,7 @@ struct SettingView: View {
             })
             
             LoadingAnimationView(isLoading: $isLoading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             
         }
         .disabled(isLoading)

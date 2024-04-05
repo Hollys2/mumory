@@ -71,6 +71,7 @@ struct MyRecentMumoryListView: View {
                 
                 if songs.isEmpty && !isLoading {
                     InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
+                        playerViewModel.setLibraryPlayerVisibility(isShown: false, moveToBottom: true)
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             appCoordinator.isCreateMumorySheetShown = true
                             appCoordinator.offsetY = CGFloat.zero
