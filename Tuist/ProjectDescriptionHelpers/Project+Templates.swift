@@ -101,7 +101,7 @@ extension Project {
             "CFBundleVersion": "\(bundleVersion)",
             "CFBundleShortVersionString": "\(appStoreVersion)",
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
-            "NSLocationWhenInUseUsageDescription": "지도를 주세요.",
+            "NSLocationWhenInUseUsageDescription": "뮤모리 작성 시 현 위치(GPS) 기능 사용 및 검색을 위해 위치 권한을 허용해주세요",
             "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
             "FirebaseAppDelegateProxyEnabled": false,
             "CFBundleURLTypes" : [
@@ -121,8 +121,8 @@ extension Project {
                     "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
                 ]
             ],
-            "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한이 필요합니다",
-            "NSAppleMusicUsageDescription" : "애플 뮤직 권한 요청"
+            "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한을 허용해주세요",
+            "NSAppleMusicUsageDescription" : "음악 검색 및 음악 감상, 뮤모리 작성을 위해 권한을 허용해주세요."
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in

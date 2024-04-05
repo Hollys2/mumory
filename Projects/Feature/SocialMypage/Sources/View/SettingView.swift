@@ -82,7 +82,7 @@ struct SettingView: View {
                 
                 SettingItem(title: "앱 리뷰 남기기")
                     .onTapGesture {
-                        if let appstoreUrl = URL(string: "https://apps.apple.com/app/idD8W49RM7XB") {
+                        if let appstoreUrl = URL(string: "https://apps.apple.com/app/id6480319042") {
                             var urlComp = URLComponents(url: appstoreUrl, resolvingAgainstBaseURL: false)
                             urlComp?.queryItems = [
                                 URLQueryItem(name: "action", value: "write-review")
