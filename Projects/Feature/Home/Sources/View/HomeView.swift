@@ -130,31 +130,31 @@ public struct HomeView: View {
                 if authorizationStatus == .authorized {
                     print("음악 권한 받음")
                     
-                    if appCoordinator.isFirst {
-                        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-                        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-                        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
-                            switch result {
-                            case .success(let mumorys):
-                                print("fetchMumorys successfully: \(mumorys)")
-                                DispatchQueue.main.async {
-                                    self.mumoryDataViewModel.myMumorys = mumorys
-                                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                                    self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-                                    self.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
-                                }
-                            case .failure(let error):
-                                print("ERROR: \(error)")
-                            }
-                            
-                            DispatchQueue.main.async {
-                                self.mumoryDataViewModel.isUpdating = false
-                            }
-                        }
-
-                        
-                        appCoordinator.isFirst = false
-                    }
+//                    if appCoordinator.isFirst {
+//                        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+//                        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
+//                        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+//                            switch result {
+//                            case .success(let mumorys):
+//                                print("fetchMumorys successfully: \(mumorys)")
+//                                DispatchQueue.main.async {
+//                                    self.mumoryDataViewModel.myMumorys = mumorys
+//                                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+//                                    self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+//                                    self.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+//                                }
+//                            case .failure(let error):
+//                                print("ERROR: \(error)")
+//                            }
+//                            
+//                            DispatchQueue.main.async {
+//                                self.mumoryDataViewModel.isUpdating = false
+//                            }
+//                        }
+//
+//                        
+//                        appCoordinator.isFirst = false
+//                    }
                 } else {
                     print("음악 권한 거절")
                     DispatchQueue.main.async {

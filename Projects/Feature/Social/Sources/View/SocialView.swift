@@ -668,7 +668,9 @@ public struct SocialView: View {
                 self.mumoryDataViewModel.fetchEveryMumory(friends: currentUserData.friends, me: currentUserData.user)
                 self.generateHapticFeedback(style: .medium)
             }) {
-                ZStack {
+                ZStack(alignment: .top) {
+                    SocialScrollCotentView()
+                    
                     VStack(spacing: 0) {
                         
                         SharedAsset.socialInitIcon.swiftUIImage
@@ -696,8 +698,6 @@ public struct SocialView: View {
                     .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height - 89)
                     .offset(y: -65 - appCoordinator.safeAreaInsetsTop)
                     .opacity(self.mumoryDataViewModel.everyMumorys.isEmpty && self.mumoryDataViewModel.myMumorys.isEmpty ? 1 : 0)
-                    
-                    SocialScrollCotentView()
                 }
             }
             

@@ -514,7 +514,7 @@ struct RewardBottomSheetViewModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         
-        ZStack(alignment: .bottom) {
+        ZStack {
             
             Color.clear
             
