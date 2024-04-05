@@ -142,7 +142,7 @@ struct KnownFriendPageView: View {
         }
         .scrollIndicators(.hidden)
         .fullScreenCover(isPresented: $isMapViewShown) {
-            FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend)
+            FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend, isFriendPage: true)
         }
         .onAppear {
             friendDataViewModel.isPlaylistLoading = true
@@ -152,13 +152,14 @@ struct KnownFriendPageView: View {
                 
                 switch result {
                 case .success(let mumorys):
-                    if !mumorys.isEmpty, let firstMumory = mumorys.first {
+                    let friendMumorys = mumorys.filter { $0.isPublic == true }
+                    if !friendMumorys.isEmpty, let firstMumory = friendMumorys.first {
                         self.firstMumory = firstMumory
                     }
-                    self.mumorys = mumorys
+                    self.mumorys = friendMumorys
                     
                     DispatchQueue.main.async {
-                        mumoryDataViewModel.friendMumorys = mumorys
+                        mumoryDataViewModel.friendMumorys = friendMumorys
                         mumoryDataViewModel.isUpdating = false
                         friendDataViewModel.isMumoryLoading = false
                     }

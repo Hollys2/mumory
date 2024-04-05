@@ -90,17 +90,22 @@ struct MumoryMapView: View {
 struct FriendMumoryMapView: View {
     
     @Binding private var isShown: Bool
+    @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
+
     let mumorys: [Mumory]
     let user: MumoriUser
-    @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
+    var isFriendPage: Bool?
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
-    init(isShown: Binding<Bool>, mumorys: [Mumory], user: MumoriUser) {
+    init(isShown: Binding<Bool>, mumorys: [Mumory], user: MumoriUser, isFriendPage: Bool? = nil) {
         self._isShown = isShown
+        self._region = State(initialValue: MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan))
+
         self.mumorys = mumorys
         self.user = user
-        self._region = State(initialValue: MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan))
+        
+        self.isFriendPage = isFriendPage
     }
     
     var body: some View {
