@@ -88,7 +88,8 @@ struct ArtistView: View {
                         ForEach(songs, id: \.id){ song in
                             MusicListItem(song: song, type: .artist)
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: artist.name, songs: self.songs, startingItem: song)
+                                    let tappedSong = song
+                                    playerViewModel.playAll(title: artist.name, songs: self.songs, startingItem: tappedSong)
                                 }
                         }
                         

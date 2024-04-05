@@ -60,7 +60,8 @@ public struct MumoryRecommendationView: View {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
                             MusicChartItem(rank: index+1, song: musicChart[index]) //순위 곡 itemv
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "최신 인기곡", songs: Array(musicChart), startingItem: musicChart[index])
+                                    let tappedSong = musicChart[index]
+                                    playerViewModel.playAll(title: "최신 인기곡", songs: Array(musicChart), startingItem: tappedSong)
                                     playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                                 }
                         }

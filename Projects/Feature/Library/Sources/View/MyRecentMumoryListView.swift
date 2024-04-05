@@ -90,7 +90,8 @@ struct MyRecentMumoryListView: View {
                             ForEach(songs, id: \.id) { song in
                                 SongListBigItem(song: song, type: .recentMumory)
                                     .onTapGesture {
-                                        playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs, startingItem: song)
+                                        let tappedSong = song
+                                        playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs, startingItem: tappedSong)
                                     }
                             }
                         }

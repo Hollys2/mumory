@@ -96,7 +96,8 @@ struct ExtraRecommendationView: View {
                             ExtraRecommendationItem(song: songs[index], rank: index, type: self.type)
                                 .frame(maxWidth: .infinity)
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: title, songs: songs, startingItem: songs[index])
+                                    let tappedSong = songs[index]
+                                    playerViewModel.playAll(title: title, songs: songs, startingItem: tappedSong)
                                 }
                         }
                     }

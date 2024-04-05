@@ -85,7 +85,8 @@ struct ChartListView: View {
                         ForEach(0..<songs.count, id: \.self) { index in
                             MusicChartDetailItem(rank: index + 1, song: songs[index])
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: "최신 인기곡", songs: songs, startingItem: songs[index])
+                                    let tappedSong = songs[index]
+                                    playerViewModel.playAll(title: "최신 인기곡", songs: songs, startingItem: tappedSong)
                                     Task {
                                         if searchIndex < 5 {
                                             let startSong = songs[index]

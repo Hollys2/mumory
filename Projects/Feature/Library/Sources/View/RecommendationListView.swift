@@ -87,7 +87,8 @@ struct RecommendationListView: View {
                         ForEach(songs, id: \.self) { song in
                             MusicListItem(song: song, type: .normal)
                                 .onTapGesture {
-                                    playerViewModel.playAll(title: title, songs: songs, startingItem: song)
+                                    let tappedSong = song
+                                    playerViewModel.playAll(title: title, songs: songs, startingItem: tappedSong)
                                 }
                         }
                         

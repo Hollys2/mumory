@@ -107,7 +107,8 @@ struct FavoriteListView: View {
                             ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
                                 SongListBigItem(song: song)
                                     .onTapGesture {
-                                        playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: song)
+                                        let tappedSong = song
+                                        playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: tappedSong)
                                     }
                             }
                             if isLoading {

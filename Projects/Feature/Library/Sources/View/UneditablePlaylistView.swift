@@ -80,6 +80,7 @@ struct UneditablePlaylistView: View {
                             MusicListItemInUneditablePage(song: playlist.songs[index], type: .normal)
                                 .id("\(playlist.songs[index].artistName) \(playlist.songs[index].id.rawValue) \(index)")
                                 .onTapGesture {
+                                    let tappedSong = playlist.songs[index]
                                     playerViewModel.playAll(title: "\(friendDataViewModel.friend.nickname)님의 \(playlist.title)" , songs: playlist.songs, startingItem: playlist.songs[index])
                                     
                                     searchIndex = playlist.songIDs.count / 20 + 1 //스크롤 이동 시 새로 로드되는 걸 막기 위해서
@@ -87,7 +88,6 @@ struct UneditablePlaylistView: View {
                                     let endIndex = playlist.songIDs.endIndex
                                     let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
                                     Task {
-                                        let tappedSong = playlist.songs[index]
                                         let songs = await fetchSongs(songIDs: requestSongIds)
                                         guard let index = friendDataViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                                         friendDataViewModel.playlistArray[index].songs.append(contentsOf: songs)
