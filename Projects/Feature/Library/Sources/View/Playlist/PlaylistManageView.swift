@@ -103,9 +103,9 @@ struct PlaylistManageView: View {
                             PlaylistItem_Big(playlist: $currentUserData.playlistArray[index], isEditing: $isEditing)
                                 .onTapGesture {
                                     if currentUserData.playlistArray[index].id == "favorite"{
-                                        appCoordinator.rootPath.append(LibraryPage.favorite)
+                                        appCoordinator.rootPath.append(MumoryPage.favorite)
                                     }else {
-                                        appCoordinator.rootPath.append(LibraryPage.playlistWithIndex(index: index))
+                                        appCoordinator.rootPath.append(MumoryPage.playlistWithIndex(index: index))
                                     }
                                 }
                         }

@@ -58,7 +58,7 @@ struct ArtistBottomSheetView: View {
             BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                 .onTapGesture {
                     dismiss()
-                    appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: songs))
+                    appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: songs))
                 }
             BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (아티스트 URL 링크 복사)")
                 .onTapGesture {

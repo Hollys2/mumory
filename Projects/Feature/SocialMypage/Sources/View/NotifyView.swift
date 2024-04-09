@@ -38,7 +38,7 @@ struct NotifyView: View {
                             .scaledToFit()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                appCoordinator.rootPath.append(MyPage.notification(iconHidden: true))
+                                appCoordinator.rootPath.append(MumoryPage.notification(iconHidden: true))
                             }
                     }
                     .frame(height: 63)

@@ -87,7 +87,7 @@ struct AccountManageView: View {
                     
                     SettingItem(title: "비밀번호 재설정")
                         .onTapGesture {
-                            appCoordinator.rootPath.append(MyPage.setPW)
+                            appCoordinator.rootPath.append(MumoryPage.setPW)
                         }
                 }
 

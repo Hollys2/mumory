@@ -92,6 +92,7 @@ extension Project {
     public static func makeInfoPlist(merging other: [String: InfoPlist.Value] = [:]) -> InfoPlist {
         var extendedPlist: [String: InfoPlist.Value] = [
             //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
+            "ITSAppUsesNonExemptEncryption": false,
             "UILaunchScreen": [],
             "UISupportedInterfaceOrientations":
                 [

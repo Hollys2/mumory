@@ -118,7 +118,7 @@ struct LibraryView: View {
                     .padding(.trailing, 20)
                     .padding(.top, 5)
                     .onTapGesture {
-                        appCoordinator.rootPath.append(LibraryPage.search(term: ""))
+                        appCoordinator.rootPath.append(MumoryPage.search(term: ""))
                     }
             }
             .frame(height: topBarHeight, alignment: .center)

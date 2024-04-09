@@ -105,7 +105,7 @@ struct NotificationView: View {
                 .padding(20)
                 .background(ColorSet.background)
                 .onTapGesture {
-                    appCoordinator.rootPath.append(MyPage.selectNotificationTime)
+                    appCoordinator.rootPath.append(MumoryPage.selectNotificationTime)
                 }
      
                 Spacer()

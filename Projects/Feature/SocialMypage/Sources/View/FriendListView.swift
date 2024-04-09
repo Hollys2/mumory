@@ -96,7 +96,7 @@ struct FriendListView: View {
                                     FriendListItem(friend: friend)
                                         .onTapGesture {
                                             if friend.nickname == "탈퇴계정" {return}
-                                            appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
+                                            appCoordinator.rootPath.append(MumoryPage.friendPage(friend: friend))
                                         }
                                 }
                             }

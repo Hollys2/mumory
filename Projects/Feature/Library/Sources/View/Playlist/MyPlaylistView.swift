@@ -46,7 +46,7 @@ struct MyPlaylistView: View {
                 .padding(.top, 10)
                 .padding(.bottom, 10)
                 .onTapGesture {
-                    appCoordinator.rootPath.append(LibraryPage.playlistManage)
+                    appCoordinator.rootPath.append(MumoryPage.playlistManage)
                     AnalyticsManager.shared.setSelectContentLog(title: "MoveToPlaylistManage")
                 }
                 
@@ -56,9 +56,9 @@ struct MyPlaylistView: View {
                             PlaylistItem(playlist: $currentUserData.playlistArray[index], itemSize: 81)
                                 .onTapGesture {
                                     if currentUserData.playlistArray[index].id == "favorite" {
-                                        appCoordinator.rootPath.append(LibraryPage.favorite)
+                                        appCoordinator.rootPath.append(MumoryPage.favorite)
                                     }else {
-                                        appCoordinator.rootPath.append(LibraryPage.playlistWithIndex(index: index))
+                                        appCoordinator.rootPath.append(MumoryPage.playlistWithIndex(index: index))
                                     }
                                     AnalyticsManager.shared.setSelectContentLog(title: "MyPlaylistViewItem")
                                 }

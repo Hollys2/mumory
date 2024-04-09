@@ -105,7 +105,7 @@ struct SongBottomSheetView: View {
                                 dismiss()
                                 playerViewModel.isPresentNowPlayingView = false
                                 getArtist(song: song) { artist in
-                                    appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                    appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                                 }
                             }
                     }
@@ -148,7 +148,7 @@ struct SongBottomSheetView: View {
                     BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                         .onTapGesture {
                             dismiss()
-                            appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
+                            appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: [song]))
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
                         .onTapGesture {
@@ -280,7 +280,7 @@ struct OptionalSongBottomSheetView: View {
                             playerViewModel.isPresentNowPlayingView = false
                             guard let unwrappedSong = self.song else {return}
                             getArtist(song: unwrappedSong) { artist in
-                                appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                             }
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
@@ -303,7 +303,7 @@ struct OptionalSongBottomSheetView: View {
                                 playerViewModel.isPresentNowPlayingView = false
                                 guard let unwrappedSong = self.song else {return}
                                 getArtist(song: unwrappedSong) { artist in
-                                    appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                    appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                                 }
                             }
                     }
@@ -350,7 +350,7 @@ struct OptionalSongBottomSheetView: View {
                         .onTapGesture {
                             guard let unwrappedSong = self.song else {return}
                             dismiss()
-                            appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [unwrappedSong]))
+                            appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: [unwrappedSong]))
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
                         .onTapGesture {
@@ -474,7 +474,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                                 dismiss()
                                 playerViewModel.isPresentNowPlayingView = false
                                 getArtist(song: song) { artist in
-                                    appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                    appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                                 }
                             }
                     }
@@ -519,7 +519,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                         .onTapGesture {
                             dismiss()
                             playerViewModel.isPresentNowPlayingView = false
-                            appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
+                            appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: [song]))
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
                         .onTapGesture {
@@ -639,7 +639,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                             playerViewModel.isPresentNowPlayingView = false
                             guard let unwrappedSong = self.song else {return}
                             getArtist(song: unwrappedSong) { artist in
-                                appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                             }
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
@@ -663,7 +663,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                                 playerViewModel.isPresentNowPlayingView = false
                                 guard let unwrappedSong = self.song else {return}
                                 getArtist(song: unwrappedSong) { artist in
-                                    appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                    appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                                 }
                             }
                     }
@@ -710,7 +710,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                         .onTapGesture {
                             guard let unwrappedSong = self.song else {return}
                             dismiss()
-                            appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [unwrappedSong]))
+                            appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: [unwrappedSong]))
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
                         .onTapGesture {
@@ -847,7 +847,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                                 dismiss()
                                 playerViewModel.isPresentNowPlayingView = false
                                 getArtist(song: song) { artist in
-                                    appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                    appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                                 }
                             }
                     }
@@ -892,7 +892,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                     BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                         .onTapGesture {
                             dismiss()
-                            appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
+                            appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: [song]))
                         }
                     BottomSheetItem(image: SharedAsset.share.swiftUIImage, title: "공유하기 (음악 URL 링크 복사)")
                         .onTapGesture {
