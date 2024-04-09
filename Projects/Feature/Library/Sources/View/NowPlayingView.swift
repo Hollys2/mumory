@@ -487,7 +487,7 @@ struct PlayingViewBottomSheet: View {
             BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                 .onTapGesture {
                     guard let song = playerViewModel.currentSong else {return}
-                    appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: [song]))
+                    appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: [song]))
                     dismiss()
                     playerViewModel.isPresentNowPlayingView = false
                     

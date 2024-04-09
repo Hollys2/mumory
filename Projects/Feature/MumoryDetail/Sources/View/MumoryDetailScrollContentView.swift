@@ -121,7 +121,7 @@ struct MumoryDetailScrollContentView: View {
                         .onTapGesture {
                             Task {
                                 if self.user.uId == currentUserData.user.uId {
-                                    appCoordinator.rootPath.append(MyPage.myPage)
+                                    appCoordinator.rootPath.append(MumoryPage.myPage)
                                 } else {
                                     let friend = await MumoriUser(uId: self.user.uId)
                                     appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))

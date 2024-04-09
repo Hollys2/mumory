@@ -67,17 +67,17 @@ struct SettingView: View {
                 
                 SettingItem(title: "계정 정보 / 보안")
                     .onTapGesture {
-                        appCoordinator.rootPath.append(MyPage.account)
+                        appCoordinator.rootPath.append(MumoryPage.account)
                     }
                 
                 SettingItem(title: "알림")
                     .onTapGesture {
-                        appCoordinator.rootPath.append(MyPage.notification(iconHidden: false))
+                        appCoordinator.rootPath.append(MumoryPage.notification(iconHidden: false))
                     }
                 
                 SettingItem(title: "1:1 문의")
                     .onTapGesture {
-                        appCoordinator.rootPath.append(MyPage.question)
+                        appCoordinator.rootPath.append(MumoryPage.question)
                     }
                 
                 SettingItem(title: "앱 리뷰 남기기")
@@ -216,7 +216,7 @@ struct SettingView: View {
                 deleteUser(isSuccessful: isSuccessful)
             }
         }else if method == "Email" {
-            appCoordinator.rootPath.append(MyPage.emailVerification)
+            appCoordinator.rootPath.append(MumoryPage.emailVerification)
         }
     }
     

@@ -300,7 +300,7 @@ public struct SocialSearchView: View {
                                 .onTapGesture {
                                     Task {
                                         if friend.uId == currentUserData.user.uId {
-                                            appCoordinator.rootPath.append(MyPage.myPage)
+                                            appCoordinator.rootPath.append(MumoryPage.myPage)
                                         } else {
                                             let friend = await MumoriUser(uId: friend.uId)
                                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))

@@ -102,28 +102,34 @@ public struct SplashView: View {
                     case .customization:
                         TermsOfServiceForSocialView() //커스텀 안 했을 시 커스텀 화면으로 이동
                             .environmentObject(customizationManageViewModel)
+                        
                     case .home:
                         HomeView()
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
+                        
                     case .signUp:
                         SignUpManageView()
+                        
                     case .startCustomization:
                         StartCostomizationView()
                             .environmentObject(customizationManageViewModel)
+                        
                     case .emailLogin:
                         EmailLoginView()
+                        
                     case .lastOfCustomization:
                         LastOfCustomizationView()
                             .environmentObject(customizationManageViewModel)
-                    case .login:
-                        LoginView()
+
                     case .requestFriend:
                         MyFriendRequestListView()
                             .navigationBarBackButtonHidden()
+                        
                     case .blockFriend:
                         BlockFriendListView()
                             .navigationBarBackButtonHidden()
+                        
                     case .friend(friend: let friend):
                         FriendPageView(friend: friend)
                             .navigationBarBackButtonHidden()
@@ -154,10 +160,6 @@ public struct SplashView: View {
                             .environmentObject(settingViewModel)
                     case .mumoryReport(mumoryId: let mumoryId):
                         ReportView(mumoryId: mumoryId)
-                    }
-                }
-                .navigationDestination(for: LibraryPage.self) { page in
-                    switch(page){
                     case .search(term: let term):
                         SearchMusicView(term: term)
                         
@@ -201,10 +203,7 @@ public struct SplashView: View {
                         
                     case .playlistWithIndex(index: let index):
                         PlaylistView(playlist: $currentUserData.playlistArray[index])
-                    }
-                }
-                .navigationDestination(for: MyPage.self) { page in
-                    switch(page){
+                        
                     case .myPage:
                         MyPageView()
                             .navigationBarBackButtonHidden()
@@ -274,7 +273,6 @@ public struct SplashView: View {
                         ActivityListView()
                             .navigationBarBackButtonHidden()
                     }
-
                 }
             }
             

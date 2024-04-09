@@ -229,7 +229,7 @@ struct SocialItemView: View {
                 .mask {Circle()}
                 .onTapGesture {
                     if self.user.uId == self.currentUserData.user.uId {
-                        appCoordinator.rootPath.append(MyPage.myPage)
+                        appCoordinator.rootPath.append(MumoryPage.myPage)
                     } else {
                         Task {
                             let friend = await MumoriUser(uId: self.user.uId)

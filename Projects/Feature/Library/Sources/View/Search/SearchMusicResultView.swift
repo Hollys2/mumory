@@ -61,7 +61,7 @@ struct SearchMusicResultView: View {
                                 SearchArtistItem(artist: artist)
                                     .id(artist.id)
                                     .onTapGesture {
-                                        appCoordinator.rootPath.append(LibraryPage.artist(artist: artist))
+                                        appCoordinator.rootPath.append(MumoryPage.artist(artist: artist))
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
                                         recentSearchList.removeAll(where: {$0 == artist.name})

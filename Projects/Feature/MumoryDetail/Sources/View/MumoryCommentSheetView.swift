@@ -78,7 +78,7 @@ struct CommentView: View {
                 .mask { Circle() }
                 .onTapGesture {
                     if commentUser.uId == currentUserData.user.uId {
-                        appCoordinator.rootPath.append(MyPage.myPage)
+                        appCoordinator.rootPath.append(MumoryPage.myPage)
                     } else {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }
@@ -293,7 +293,7 @@ struct Reply: View {
                 .mask { Circle() }
                 .onTapGesture {
                     if commentUser.uId == currentUserData.user.uId {
-                        appCoordinator.rootPath.append(MyPage.myPage)
+                        appCoordinator.rootPath.append(MumoryPage.myPage)
                     } else {
                         appCoordinator.rootPath.append(MumoryPage.friend(friend: self.commentUser))
                     }

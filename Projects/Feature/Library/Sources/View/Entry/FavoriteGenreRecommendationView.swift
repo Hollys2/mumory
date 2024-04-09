@@ -126,7 +126,7 @@ private struct RecommendationScrollView: View {
         VStack(spacing: 0) {
             GenreTitle(genreName: MusicGenreHelper().genreName(id: genreID))
                 .onTapGesture {
-                    appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: genreID))
+                    appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: genreID))
                 }
             
             ScrollView(.horizontal) {

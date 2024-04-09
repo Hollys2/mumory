@@ -27,6 +27,7 @@ struct MyMusicView: View {
                 
             })
         }
+        .frame(width: getUIScreenBounds().width)
         .onAppear {
             AnalyticsManager.shared.setScreenLog(screenTitle: "MyMusicView")
         }

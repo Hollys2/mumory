@@ -97,7 +97,7 @@ struct FavoriteListView: View {
                 if !isLoading && currentUserData.playlistArray[0].songIDs.isEmpty {
                     InitialSettingView(title: "즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요", buttonTitle: "추천 음악 보러가기") {
                         let myRandomGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
-                        appCoordinator.rootPath.append(LibraryPage.recommendation(genreID: myRandomGenre))
+                        appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: myRandomGenre))
                     }
                     .padding(.top, getUIScreenBounds().height * 0.25)
                 } else {

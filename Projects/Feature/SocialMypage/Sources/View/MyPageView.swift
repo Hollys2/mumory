@@ -75,7 +75,7 @@ public struct MyPageView: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
-                        appCoordinator.rootPath.append(MyPage.setting)
+                        appCoordinator.rootPath.append(MumoryPage.setting)
                     }
                 
             }
@@ -203,7 +203,7 @@ struct SimpleFriendView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                appCoordinator.rootPath.append(MyPage.friendList)
+                appCoordinator.rootPath.append(MumoryPage.friendList)
             }
             
             if currentUserData.friends.isEmpty {
@@ -217,7 +217,7 @@ struct SimpleFriendView: View {
                             FriendHorizontalItem(user: friend)
                                 .onTapGesture {
                                     if friend.nickname == "탈퇴계정" {return}
-                                    appCoordinator.rootPath.append(MyPage.friendPage(friend: friend))
+                                    appCoordinator.rootPath.append(MumoryPage.friendPage(friend: friend))
                                 }
                         }
                     })
@@ -334,7 +334,7 @@ struct SubFunctionView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                appCoordinator.rootPath.append(MyPage.reward)
+                appCoordinator.rootPath.append(MumoryPage.reward)
             }
             
             Divider05()
@@ -355,7 +355,7 @@ struct SubFunctionView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                appCoordinator.rootPath.append(MyPage.monthlyStat)
+                appCoordinator.rootPath.append(MumoryPage.monthlyStat)
             }
             
             Divider05()
@@ -381,7 +381,7 @@ struct SubFunctionView: View {
             .frame(height: 67)
             .background(ColorSet.background)
             .onTapGesture {
-                appCoordinator.rootPath.append(MyPage.activityList)
+                appCoordinator.rootPath.append(MumoryPage.activityList)
             }
             
             Divider05()

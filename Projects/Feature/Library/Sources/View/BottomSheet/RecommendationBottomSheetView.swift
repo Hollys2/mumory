@@ -43,7 +43,7 @@ struct RecommendationBottomSheetView: View {
             BottomSheetItem(image: SharedAsset.addPlaylist.swiftUIImage, title: "플레이리스트에 추가")
                 .onTapGesture {
                     dismiss()
-                    appCoordinator.rootPath.append(LibraryPage.saveToPlaylist(songs: songs))
+                    appCoordinator.rootPath.append(MumoryPage.saveToPlaylist(songs: songs))
                 }
       
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")

@@ -53,7 +53,7 @@ struct PlaylistBottomSheetView: View {
             BottomSheetItem(image: SharedAsset.addMusic.swiftUIImage, title: "음악 추가")
                 .onTapGesture {
                     dismiss()
-                    appCoordinator.rootPath.append(LibraryPage.addSong(originPlaylist: playlist))
+                    appCoordinator.rootPath.append(MumoryPage.addSong(originPlaylist: playlist))
                 }
             BottomSheetItem(image: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "플레이리스트 삭제", type: .warning)
                 .onTapGesture {

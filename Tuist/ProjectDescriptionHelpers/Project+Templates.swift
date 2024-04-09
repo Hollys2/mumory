@@ -44,7 +44,7 @@ extension Project {
     private static func makeAppTargets(name: String, platform: Platform, dependencies: [TargetDependency]) -> [Target] {
         let platform: Platform = platform
         let infoPlist: [String: InfoPlist.Value] = [
-            "CFBundleShortVersionString": "1.0",
+            "CFBundleShortVersionString": "1.1",
             "CFBundleVersion": "1",
             "UIMainStoryboardFile": "",
             "UILaunchStoryboardName": "LaunchScreen"
@@ -77,8 +77,8 @@ extension Project {
 
 extension Project {
     public static let bundleId: String = "com.hollys.mumory"
-    public static let appStoreVersion: String = "1.0"
-    public static let bundleVersion: String = "1.0.0"
+    public static let appStoreVersion: String = "1.1"
+    public static let bundleVersion: String = "1.1"
     public static let iOSTargetVersion: String = "16.0"
     
     
@@ -92,6 +92,7 @@ extension Project {
     public static func makeInfoPlist(merging other: [String: InfoPlist.Value] = [:]) -> InfoPlist {
         var extendedPlist: [String: InfoPlist.Value] = [
             //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
+            "ITSAppUsesNonExemptEncryption": false,
             "UILaunchScreen": [],
             "UISupportedInterfaceOrientations":
                 [

@@ -288,7 +288,7 @@ public struct SnackBarView: View {
                 .padding(.leading, 18)
                 .foregroundStyle(ColorSet.skeleton02)
                 .onTapGesture {
-                    appCoordinator.rootPath.append(LibraryPage.favorite)
+                    appCoordinator.rootPath.append(MumoryPage.favorite)
                     additionalAction()
                 }
         }

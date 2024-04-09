@@ -53,7 +53,7 @@ struct SearchMusicEntryView: View {
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             .foregroundColor(.white)
                             .onTapGesture {
-                                appCoordinator.rootPath.append(LibraryPage.shazam(type: self.shazamViewType))
+                                appCoordinator.rootPath.append(MumoryPage.shazam(type: self.shazamViewType))
                             }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

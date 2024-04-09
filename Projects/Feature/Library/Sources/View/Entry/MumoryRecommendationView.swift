@@ -51,7 +51,7 @@ public struct MumoryRecommendationView: View {
                 //최신 인기곡 타이틀
                 SubTitle()
                     .onTapGesture {
-                        appCoordinator.rootPath.append(LibraryPage.chart)
+                        appCoordinator.rootPath.append(MumoryPage.chart)
                     }
                 
                 //차트 - 가로 페이징

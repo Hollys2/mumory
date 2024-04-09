@@ -188,7 +188,7 @@ struct SearchMusicResultViewInCreateMumory: View {
                                 SearchArtistItem(artist: artist)
                                     .id(artist.id)
                                     .onTapGesture {
-                                        appCoordinator.rootPath.append(LibraryPage.selectableArtist(artist: artist))
+                                        appCoordinator.rootPath.append(MumoryPage.selectableArtist(artist: artist))
                                         //최근 검색어 저장
                                         let userDefault = UserDefaults.standard
                                         var recentSearchList = userDefault.value(forKey: "recentSearchList") as? [String] ?? []
