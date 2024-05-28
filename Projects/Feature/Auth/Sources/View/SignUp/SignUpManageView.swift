@@ -18,7 +18,6 @@ struct SignUpManageView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     @StateObject var manager: SignUpManageViewModel = SignUpManageViewModel()
-//    @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State private var isSignUpCompleted = false
     @State private var isSignUpErrorShowing: Bool = false
