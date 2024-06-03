@@ -70,7 +70,7 @@ struct PlaylistBottomSheetView: View {
         .background(ColorSet.background)
         .fullScreenCover(isPresented: $isPresentDeletePlaylistBottomSheet, content: {
             TwoButtonPopupView(title: "해당 플레이리스트를 삭제하시겠습니까?", positiveButtonTitle: "플레이리스트 삭제") {
-                let db = FBManager.shared.db
+                let db = FirebaseManager.shared.db
                 let playlistId = playlist.id
                 let path = db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
                 path.delete()

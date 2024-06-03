@@ -28,7 +28,7 @@ final public class MumoryDataViewModel: ObservableObject {
     @Published public var myMumorys: [Mumory] = []
     @Published public var friendMumorys: [Mumory] = []
     @Published public var sameSongFriendMumorys: [Mumory] = []
-    @Published public var everyMumorys: [Mumory] = []
+    @Published public var socialMumorys: [Mumory] = []
     @Published public var monthlyMumorys: [Mumory] = []
     @Published public var surroundingMumorys: [Mumory] = []
     @Published public var locationMumorys: [String: [Mumory]] = [:]
@@ -304,10 +304,10 @@ final public class MumoryDataViewModel: ObservableObject {
                                 self.myMumorys[index] = updatedMumory
                             }
                         }
-                        if let index = self.everyMumorys.firstIndex(where: { $0.id == modifiedDocumentID }),
-                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.everyMumorys[index].id) {
+                        if let index = self.socialMumorys.firstIndex(where: { $0.id == modifiedDocumentID }),
+                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.socialMumorys[index].id) {
                             DispatchQueue.main.async {
-                                self.everyMumorys[index] = updatedMumory
+                                self.socialMumorys[index] = updatedMumory
                             }
                         }
                         print("Document modified: \(modifiedDocumentID)")
@@ -468,7 +468,6 @@ final public class MumoryDataViewModel: ObservableObject {
         }
         return listener
     }
-    
             
     public func fetchActivityListener(uId: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
@@ -782,13 +781,14 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchEveryMumory(friends: [MumoriUser], me: MumoriUser) {
+    public func fetchSocialMumory(friends: [MumoriUser], me: MumoriUser, isRefreshing: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         DispatchQueue.main.async {
             self.isUpdating = true
         }
         
         let db = FirebaseManager.shared.db
         var friendsUids: [String] = friends.map {$0.uId}
+        friendsUids.append(me.uId)
     
         var mumoryCollectionRef = db.collection("Mumory")
             .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
@@ -796,10 +796,12 @@ final public class MumoryDataViewModel: ObservableObject {
             .order(by: "date", descending: true)
             .limit(to: 7)
         
-        if let lastDoc = self.lastDocument {
+        if !isRefreshing, let lastDoc = self.lastDocument {
             mumoryCollectionRef = mumoryCollectionRef.start(afterDocument: lastDoc)
+        } else {
+            self.lastDocument = nil
         }
-        
+                
         let copiedMumoryCollectionRef = mumoryCollectionRef
            
         Task {
@@ -824,7 +826,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     self.tempSocialMumory.sort { $0.date > $1.date }
-                    self.everyMumorys = self.tempSocialMumory
+                    self.socialMumorys = self.tempSocialMumory
                     self.lastDocument = snapshot.documents.last
                     self.isUpdating = false
                     self.isFirstSocialLoad = true
@@ -832,10 +834,11 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 print("fetchSocialMumory successfully!")
                 
-                
                 if snapshot.documents.count < 7 {
                     print("No more documents to fetch")
                 }
+                
+                completion(.success(()))
             } catch {
                 print("Error fetchSocialMumory: \(error.localizedDescription)")
             }
@@ -873,7 +876,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     self.tempMumory.sort { $0.date > $1.date }
                     print("self.tempMumory: \(self.tempMumory)")
-                    self.everyMumorys = self.tempMumory
+                    self.socialMumorys = self.tempMumory
                     self.isUpdating = false
                     completionHandler(.success(()))
                 }
@@ -1151,8 +1154,8 @@ final public class MumoryDataViewModel: ObservableObject {
                     self.myMumorys.remove(at: index)
                 }
                 
-                if let index = self.everyMumorys.firstIndex(where: { $0.id == mumory.id }) {
-                    self.everyMumorys.remove(at: index)
+                if let index = self.socialMumorys.firstIndex(where: { $0.id == mumory.id }) {
+                    self.socialMumorys.remove(at: index)
                 }
 
                 let commentsRef = db.collection("Mumory").document(mumory.id).collection("Comment")

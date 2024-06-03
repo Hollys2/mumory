@@ -25,7 +25,7 @@ public struct CustomizationView: View {
     
     @State var isTapBackButton: Bool = false
     
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
     
     public init(){}
     

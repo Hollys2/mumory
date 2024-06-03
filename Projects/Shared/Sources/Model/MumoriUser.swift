@@ -30,7 +30,7 @@ public struct MumoriUser: Hashable {
     public init() {}
     
     public init(uId: String) async {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         
         if uId.isEmpty {
             print("uid empty")
@@ -55,7 +55,7 @@ public struct MumoriUser: Hashable {
             self.bio = data["bio"] as? String ?? ""
             let profileIndex: Int = data["profileIndex"] as? Int ?? 0
             self.defaultProfileImage = randomProfiles[profileIndex]
-            self.signUpDate = (data["signUpDate"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+            self.signUpDate = (data["signUpDate"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
         }
     }
 }

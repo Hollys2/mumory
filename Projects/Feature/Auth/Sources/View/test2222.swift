@@ -16,7 +16,7 @@ public struct test2222: View {
         VStack{
             Button {
                 Task {
-                    let Firebase = FBManager.shared
+                    let Firebase = FirebaseManager.shared
                     let db = Firebase.db
                     let auth = Firebase.auth
                     

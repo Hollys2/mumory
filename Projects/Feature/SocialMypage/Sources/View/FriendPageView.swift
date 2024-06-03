@@ -362,7 +362,7 @@ struct UnkownFriendPageView: View {
             case .notFriend:
                 TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
                     status = .friendProcessLoading
-                    let functions = FBManager.shared.functions
+                    let functions = FirebaseManager.shared.functions
                     Task {
                         guard let result = try? await functions.httpsCallable("friendRequest").call(["uId": self.friend.uId]) else {
                             print("network error")
@@ -386,7 +386,7 @@ struct UnkownFriendPageView: View {
             case .alreadyRecieveRequest:
                 TwoButtonPopupView(title: "친구 요청을 수락하시겠습니까??", positiveButtonTitle: "요청수락") {
                     status = .friendProcessLoading
-                    let functions = FBManager.shared.functions
+                    let functions = FirebaseManager.shared.functions
                     Task {
                         guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
                             print("network error")
@@ -400,9 +400,9 @@ struct UnkownFriendPageView: View {
                 TwoButtonPopupView(title: "차단을 해제 하시겠습니까?", positiveButtonTitle: "차단해제") {
                     status = .friendProcessLoading
                     Task{
-                        let db = FBManager.shared.db
+                        let db = FirebaseManager.shared.db
                         let query = db.collection("User").document(currentUserData.uId)
-                        query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
+                        query.updateData(["blockFriends": FirebaseManager.Fieldvalue.arrayRemove([self.friend.uId])])
                         status = .normal
                     }
                 }
@@ -413,7 +413,7 @@ struct UnkownFriendPageView: View {
     
     //내가 보낸 친구 요청 리스트 받아오기
     private func getMyRequestList(){
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let query = db.collection("User").document(currentUserData.uId).collection("Friend")
             .whereField("type", isEqualTo: "request")
         query.getDocuments { snapshot, error in
@@ -554,7 +554,7 @@ struct FriendPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
 
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -688,7 +688,7 @@ struct FriendDeleteBlockBottomSheetView: View {
 public func blockFriend(uId: String, friendUId: String) {
     
     Task {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let deleteDocQuery = db.collection("User").document(uId).collection("Friend")
             .whereField("uId", isEqualTo: friendUId)
         
@@ -700,23 +700,23 @@ public func blockFriend(uId: String, friendUId: String) {
         }
         
         let query = db.collection("User").document(uId)
-        try await query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
-        try await query.updateData(["blockFriends": FBManager.Fieldvalue.arrayUnion([friendUId])])
+        try await query.updateData(["friends": FirebaseManager.Fieldvalue.arrayRemove([friendUId])])
+        try await query.updateData(["blockFriends": FirebaseManager.Fieldvalue.arrayUnion([friendUId])])
         
         //탈퇴한회원이라면...?ㅜㅜ
         let friendQuery = db.collection("User").document(friendUId)
-        try await friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+        try await friendQuery.updateData(["friends": FirebaseManager.Fieldvalue.arrayRemove([uId])])
     }
 }
 
 public func deleteFriend(uId: String, friendUId: String){
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     let query = db.collection("User").document(uId)
-    query.updateData(["friends": FBManager.Fieldvalue.arrayRemove([friendUId])])
+    query.updateData(["friends": FirebaseManager.Fieldvalue.arrayRemove([friendUId])])
     
     let friendQuery = db.collection("User").document(friendUId)
-    friendQuery.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uId])])
+    friendQuery.updateData(["friends": FirebaseManager.Fieldvalue.arrayRemove([uId])])
 }
 
 struct DeleteFriendBottomSheetView: View {

@@ -16,7 +16,6 @@ import FirebaseAuth
 
 
 public struct SplashView: View {
-  
     
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -26,41 +25,41 @@ public struct SplashView: View {
     @StateObject var withdrawViewModel: WithdrawViewModel = WithdrawViewModel()
     @StateObject var settingViewModel: SettingViewModel = SettingViewModel()
     @StateObject var friendDataViewModel: FriendDataViewModel = FriendDataViewModel()
-
+    
     @State var time = 0.0
     @State var isSignInCompleted: Bool = false
     @State var isPresent: Bool = false
     @State var isInitialSettingDone = false
     @State var goToLoginView: Bool = false
     @State var isEndSplash: Bool = false
-        
-    public init() {
-    }
+    
+    @State private var popUp: PopUp = .none
+    
+    public init() {}
     
     public var body: some View {
-        ZStack(alignment: .top) {
+        ZStack {
             NavigationStack(path: $appCoordinator.rootPath) {
-                ZStack(alignment: .top) {
-                    VStack(spacing: 0) {
-                        switch(appCoordinator.initPage){
-                        case .login:
-                            LoginView()
-                        case .onBoarding:
-                            OnBoardingManageView()
-                                .onAppear(perform: {
-                                    print("splash on boarding")
-                                })
-                        case .home:
-                            HomeView()
-                                .environmentObject(settingViewModel)
-                                .environmentObject(withdrawViewModel)
-                                .navigationBarBackButtonHidden()
-                                .onAppear(perform: {
-                                    print("splash home")
-                                })
-                        }
+                VStack(spacing: 0) {
+                    switch(appCoordinator.initPage){
+                    case .login:
+                        LoginView()
+                    case .onBoarding:
+                        OnBoardingManageView()
+                            .onAppear(perform: {
+                                print("splash on boarding")
+                            })
+                    case .home:
+                        HomeView()
+                            .environmentObject(settingViewModel)
+                            .environmentObject(withdrawViewModel)
+                            .navigationBarBackButtonHidden()
+                            .onAppear(perform: {
+                                print("splash home")
+                            })
                     }
                 }
+                .ignoresSafeArea()
                 .onAppear(perform: {
                     playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                 })
@@ -121,7 +120,7 @@ public struct SplashView: View {
                     case .lastOfCustomization:
                         LastOfCustomizationView()
                             .environmentObject(customizationManageViewModel)
-
+                        
                     case .requestFriend:
                         MyFriendRequestListView()
                             .navigationBarBackButtonHidden()
@@ -134,13 +133,13 @@ public struct SplashView: View {
                         FriendPageView(friend: friend)
                             .navigationBarBackButtonHidden()
                             .environmentObject(friendDataViewModel)
-
+                        
                     case .friendPlaylist(playlistIndex: let playlistIndex):
                         UneditablePlaylistView(playlist: $friendDataViewModel.playlistArray[playlistIndex])
                             .environmentObject(friendDataViewModel)
-
+                        
                     case .friendPlaylistManage:
-                        UneditablePlaylistManageView()        
+                        UneditablePlaylistManageView()
                             .environmentObject(friendDataViewModel)
                         
                     case .searchFriend:
@@ -166,7 +165,7 @@ public struct SplashView: View {
                     case .artist(artist: let artist):
                         ArtistView(artist: artist)
                             .navigationBarBackButtonHidden()
-
+                        
                     case .playlistManage:
                         PlaylistManageView()
                             .navigationBarBackButtonHidden()
@@ -180,11 +179,11 @@ public struct SplashView: View {
                     case .shazam(type: let type):
                         ShazamView(type: type)
                             .navigationBarBackButtonHidden()
-
+                        
                     case .addSong(originPlaylist: let originPlaylist):
                         AddSongView(originPlaylist: originPlaylist)
                             .navigationBarBackButtonHidden()
-                            
+                        
                     case .saveToPlaylist(songs: let songs):
                         SaveToPlaylistView(songs: songs)
                             .navigationBarBackButtonHidden()
@@ -215,33 +214,33 @@ public struct SplashView: View {
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
-              
+                        
                     case .account:
                         AccountManageView()
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
-                     
+                        
                     case .notification(iconHidden: let hidden):
                         NotificationView(homeIconHidden: hidden)
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
-                         
+                        
                     case .setPW:
                         SetPWView()
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
-
+                        
                     case .question:
                         QuestionView()
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
-
+                        
                     case .emailVerification:
                         EmailLoginForWithdrawView()
                             .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
-
+                        
                     case .selectNotificationTime:
                         SelectNotificationTimeView()
                             .navigationBarBackButtonHidden()
@@ -264,7 +263,7 @@ public struct SplashView: View {
                     case .reward:
                         RewardView()
                             .navigationBarBackButtonHidden()
-                    
+                        
                     case .monthlyStat:
                         MonthlyStatView()
                             .navigationBarBackButtonHidden()
@@ -277,36 +276,73 @@ public struct SplashView: View {
             }
             
             //스플래시 뷰
-            ColorSet.mainPurpleColor.ignoresSafeArea()
-                .overlay {
-                    LottieView(animation: .named("splash", bundle: .module))
-                        .looping()
-                }
-                .opacity(isEndSplash && isInitialSettingDone ? 0 : 1)
-                .transition(.opacity)
-                .onAppear(perform: {
-                    Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { timer in
-                        withAnimation {
-                            isEndSplash = true
-                        }
+            if !(isEndSplash && isInitialSettingDone) {
+                ColorSet.mainPurpleColor
+                    .overlay {
+                        LottieView(animation: .named("splash", bundle: .module))
+                            .looping()
                     }
-                    checkCurrentUserAndGetUserData()
-                })
+                //                                .opacity(isEndSplash && isInitialSettingDone ? 0 : 1)
+                    .transition(.opacity)
+                    .onAppear(perform: {
+                        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { timer in
+                            withAnimation {
+                                isEndSplash = true
+                            }
+                        }
+                        checkCurrentUserAndGetUserData()
+                    })
+            }
+            
+//            switch self.appCoordinator.sheet {
+//            case .createMumory:
+//                Color.black.opacity(0.6)
+//                
+//                CreateMumoryBottomSheetView()
+//                
+//            case .comment:
+//                Color.black.opacity(0.6)
+//                    .onTapGesture {
+//                        withAnimation(.spring(response: 0.1)) {
+//                            self.appCoordinator.sheet = .none
+//                        }
+//                    }
+//                
+//                MumoryCommentSheetView()
+//                
+//            default:
+//                EmptyView()
+//            }
+            
+            switch self.appCoordinator.bottomSheet {
+            case .commentMenu:
+                BottomSheetUIViewRepresentable(mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+                    .zIndex(.infinity)
+            case .socialMenu:
+                BottomSheetUIViewRepresentable(mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
+            case .mumoryDetail:
+                BottomSheetUIViewRepresentable(mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryDetailView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
+            case .none:
+                EmptyView()
+            }
+            
+            if self.mumoryDataViewModel.isUpdating {
+                LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
+            }
         }
+        
     }
     
     private func checkCurrentUserAndGetUserData() {
         print("splash checkcheck")
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         let messaging = Firebase.messaging
         
- 
-        
         Task {
             print("splash checkcheck1")
-
+            
             //최근에 로그인했는지, 유저 데이터는 모두 존재하는지 확인. 하나라도 만족하지 않을시 로그인 페이지로 이동
             guard let user = auth.currentUser,
                   let snapshot = try? await db.collection("User").document(user.uid).getDocument(),
@@ -320,7 +356,7 @@ public struct SplashView: View {
                 }
                 return
             }
-
+            
             currentUserData.uId = user.uid
             currentUserData.user = await MumoriUser(uId: user.uid)
             currentUserData.favoriteGenres = favoriteGenres
@@ -350,7 +386,7 @@ public struct SplashView: View {
             withAnimation {
                 isInitialSettingDone = true
             }
-
+            
             appCoordinator.initPage = .home
             try await db.collection("User").document(user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
             guard let favoriteData = try? await db.collection("User").document(user.uid).collection("Playlist").document("favorite").getDocument().data() else {

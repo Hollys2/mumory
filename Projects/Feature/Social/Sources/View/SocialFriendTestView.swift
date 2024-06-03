@@ -43,7 +43,7 @@ struct SocialFriendTestView: View {
     //지금 검색을 한 상태인건지
     //초반에 나오는 문구....
     
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
@@ -220,7 +220,8 @@ struct SocialFriendTestView: View {
         }
         .navigationBarBackButtonHidden()
         .disabled(status == .friendProcessLoading)
-
+        .transition(.move(edge: .bottom))
+        .zIndex(.infinity)
     }
     
     private func searchFriend(id: String){
@@ -384,7 +385,7 @@ struct FriendAddItem: View {
         self.friend = friend
         self._status = status
     }
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
     @State var isPresentRequestPopup: Bool = false
     
     var body: some View {
@@ -471,7 +472,7 @@ struct RecievedRequestItem: View {
     }
     @State var isPresentDeletePopup: Bool = false
     @State var isPresentAcceptPopup: Bool = false
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -570,7 +571,7 @@ struct RecievedRequestItem: View {
     
     private func acceptRequest(){
         status = .friendProcessLoading
-        let functions = FBManager.shared.functions
+        let functions = FirebaseManager.shared.functions
         Task {
             guard let result = try? await functions.httpsCallable("friendAccept").call(["uId": self.friend.uId]) else {
                 print("network error")

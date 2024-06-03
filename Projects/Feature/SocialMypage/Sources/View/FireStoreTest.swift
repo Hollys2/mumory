@@ -19,7 +19,7 @@ public struct FireStoreTest: View {
     }
     
     private func test(){
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         

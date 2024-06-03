@@ -73,7 +73,7 @@ private struct UserProfile: View {
     @Environment(\.dismiss) var dismiss
     @State var isPresentBackgroundBottomSheet: Bool = false
     @State var isPresentProfileBottomSheet: Bool = false
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
     
     var body: some View {
         ZStack(alignment: .top){
@@ -219,7 +219,7 @@ private struct IdStackView: View {
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State private var isTappedInfo: Bool = false
     @State private var timer: Timer?
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     
     var body: some View {
@@ -338,7 +338,7 @@ private struct NicknameStackView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State var timer: Timer?
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     
     var body: some View {
@@ -565,8 +565,8 @@ class EditProfileViewModel: ObservableObject {
         }
     }
     
-    let db = FBManager.shared.db
-    let storage = FBManager.shared.storage
+    let db = FirebaseManager.shared.db
+    let storage = FirebaseManager.shared.storage
     
     func isValid() -> Bool {
         if idStatus == .normal && nicknameStatus == .normal && bioStatus == .normal && backgroundStatus == .normal && profileStatus == .normal {
@@ -610,7 +610,7 @@ class EditProfileViewModel: ObservableObject {
     
     private func uploadProfile(uid: String) async -> String {
         if let profileData = profileImageBundle.data {
-            let metaData = FBManager.shared.storageMetadata()
+            let metaData = FirebaseManager.shared.storageMetadata()
             metaData.contentType = "image/jpeg"
             let path: String = "ProfileImage/\(uid).jpg"
             let reference = storage.reference(withPath: path)
@@ -625,7 +625,7 @@ class EditProfileViewModel: ObservableObject {
             guard let result = try? await storage.reference(withPath: "ProfileImage/\(uid).jpg").delete() else {
                 return ""
             }
-            guard let updateResult = try? await db.collection("User").document(uid).updateData(["profileImageURL": FBManager.Fieldvalue.delete()]) else {
+            guard let updateResult = try? await db.collection("User").document(uid).updateData(["profileImageURL": FirebaseManager.Fieldvalue.delete()]) else {
                 return ""
             }
             return ""
@@ -634,7 +634,7 @@ class EditProfileViewModel: ObservableObject {
     
     private func uploadBackground(uid: String) async -> String {
         if let backgroundData = backgroundImageBundle.data {
-            let metaData = FBManager.shared.storageMetadata()
+            let metaData = FirebaseManager.shared.storageMetadata()
             metaData.contentType = "image/jpeg"
             let path: String = "BackgroundImage/\(uid).jpg"
             let reference = storage.reference(withPath: path)
@@ -650,7 +650,7 @@ class EditProfileViewModel: ObservableObject {
             guard let result = try? await storage.reference(withPath: "BackgroundImage/\(uid).jpg").delete() else {
                 return ""
             }
-            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["backgroundImageURL": FBManager.shared.deleteFieldValue()]) else {
+            guard let deleteResult = try? await db.collection("User").document(uid).updateData(["backgroundImageURL": FirebaseManager.shared.deleteFieldValue()]) else {
                 return ""
             }
             return ""

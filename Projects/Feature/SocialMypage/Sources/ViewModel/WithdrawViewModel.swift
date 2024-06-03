@@ -33,7 +33,7 @@ class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDe
     
     func EmailLogin(email: String, password: String, completion: @escaping (_ isSuccessful: Bool) -> Void){
         //Core에 정의해둔 FirebaseAuth
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
         

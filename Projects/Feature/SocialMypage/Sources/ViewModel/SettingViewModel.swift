@@ -72,8 +72,8 @@ class SettingViewModel: ObservableObject{
             }
         }
     }
-    let db = FBManager.shared.db
-    let messaging = FBManager.shared.messaging
+    let db = FirebaseManager.shared.db
+    let messaging = FirebaseManager.shared.messaging
     
     public init() {}
 

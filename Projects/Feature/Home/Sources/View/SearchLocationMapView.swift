@@ -57,7 +57,6 @@ public struct SearchLocationMapView: View {
                     
                     Button(action: {
                         withAnimation {
-                            appCoordinator.isSearchLocationMapViewShown = false
                             appCoordinator.rootPath.removeLast()
                         }
                     }) {

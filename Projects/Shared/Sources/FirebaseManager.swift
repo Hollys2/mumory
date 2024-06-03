@@ -8,10 +8,13 @@
 
 
 import SwiftUI
+import Firebase
 import FirebaseFirestore
 import FirebaseAuth
 import FirebaseStorage
 import FirebaseDatabase
+import FirebaseMessaging
+import FirebaseFunctions
 
 public class FirebaseManager: ObservableObject {
     
@@ -20,6 +23,13 @@ public class FirebaseManager: ObservableObject {
     public let db: Firestore
     public let auth: Auth
     public let storage: Storage
+    public let app: FirebaseApp?
+    public let messaging: Messaging
+    public let functions: Functions
+    
+    public typealias Timestamp = FirebaseFirestore.Timestamp
+    public typealias Document = DocumentSnapshot
+    public typealias Fieldvalue = FieldValue
     
     @Published public var friends: [FriendSearch] = []
     @Published public var friendRequests: [FriendSearch] = []
@@ -29,9 +39,22 @@ public class FirebaseManager: ObservableObject {
         self.db = Firestore.firestore()
         self.auth = Auth.auth()
         self.storage = Storage.storage()
+        self.app = FirebaseApp.app()
+        self.messaging = Messaging.messaging()
+        self.functions = Functions.functions()
     }
     
-    public typealias Timestamp = FirebaseFirestore.Timestamp
+    public func getGoogleCredential(idToken: String, accessToken: String) -> AuthCredential {
+        return GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+    }
+    
+    public func storageMetadata() -> StorageMetadata {
+        return StorageMetadata()
+    }
+    
+    public func deleteFieldValue() -> FieldValue {
+        return FieldValue.delete()
+    }
     
     public func timestampToString(timestamp: Timestamp) -> String {
         

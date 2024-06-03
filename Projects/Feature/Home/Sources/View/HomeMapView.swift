@@ -15,6 +15,8 @@ import Shared
 
 struct HomeMapView: View {
     
+    @Binding var isAnnotationTapped: Bool
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
@@ -24,14 +26,9 @@ struct HomeMapView: View {
     @EnvironmentObject var withdrawViewModel: WithdrawViewModel
     
     var body: some View {
-        
         ZStack {
             
-            HomeMapViewRepresentable(annotationSelected: $appCoordinator.isMumoryPopUpShown)
-                .onAppear {
-                    print("HomeMapViewRepresentable onAppear: \(self.currentUserData.user.uId)")
-                }
-
+            HomeMapViewRepresentable(isAnnotationTapped: self.$isAnnotationTapped)
             
             VStack(spacing: 0) {
                 
@@ -54,6 +51,7 @@ struct HomeMapView: View {
             .allowsHitTesting(false)
             
             VStack(spacing: 0) {
+                
                 PlayingMusicBarView()
                     .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
                 

@@ -4,6 +4,7 @@ import KakaoSDKAuth
 import Core
 import Shared
 import MapKit
+import Combine
 
 @main
 struct MumoryApp: App {
@@ -22,24 +23,76 @@ struct MumoryApp: App {
     var body: some Scene {
         WindowGroup {
             GeometryReader { geometry in
+                
+//                ZStack {
+//
+//                    if {
+//                        NavigationStack(path1) {
+//                            ZStack {
+//                                if {
+//                                    온보딩뷰
+//                                }
+//
+//                                로그인뷰
+//                                    .navigationDestination()
+//                            }
+//                        }
+//                    } else {
+//                        NavigationStack(path2) {
+//                            ZStack {
+//                                홈뷰
+//
+//                                소셜, 라이브러리 -> A B, 알람
+//                                    .navigationDestination()
+//
+//                            }
+//
+//                        }
+//                    }
+//
+//
+//                    if  {
+//                        스플래쉬
+//                            .onAppear {
+//                                0-1.
+//
+//                                1-1. 로그인 여부 (파이어베이스 캐시) X -> 온보딩뷰
+//                                1-2. 로그인 여부 (파이어베이스 캐시) O -> 홈뷰
+//
+//                                2.
+//                            }
+//                    }
+//
+//                    CreateMumoryBottomSheetView()
+//
+//                    if appState.isPopUpShown {
+////                        팝업(언제: Bool, 어떻게: {appState.sajkdhaskjdh}})
+//
+//                        func testFunc() -> Void {
+//
+//                        }
+//
+//                        팝업(type: enum, action: {})) // 테스트 요망
+//                    }
+//
+//                    if appState.isBottomShown {
+//
+//                    }
+//
+//                    스낵바
+//
+//                    리워드
+//
+//                    뮤직플레이어
+//                }
+                
                 ZStack {
                     SplashView()
-                        .preferredColorScheme(.dark)
-//                    MumoryEditView(mumoryAnnotation: Mumory())
                         .onOpenURL(perform: { url in
                             if (AuthApi.isKakaoTalkLoginUrl(url)) {
                                 AuthController.handleOpenUrl(url: url)
                             }
                         })
-                        .environmentObject(snackBarViewModel)
-                        .environmentObject(appCoordinator)
-                        .environmentObject(locationManager)
-                        .environmentObject(localSearchViewModel)
-                        .environmentObject(mumoryDataViewModel)
-                        .environmentObject(firebaseManager)
-                        .environmentObject(keyboardResponder)
-                        .environmentObject(currentUserData)
-                        .environmentObject(playerViewModel)
                         .onAppear {
                             appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
                             appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
@@ -51,21 +104,15 @@ struct MumoryApp: App {
                         }
                     
                     MiniPlayerViewInLibrary()
-                        .environmentObject(snackBarViewModel)
-                        .environmentObject(appCoordinator)
-                        .environmentObject(currentUserData)
                         .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView, content: {
                             NowPlayingView()
                         })
                     
                     SnackBarView()
-                        .environmentObject(snackBarViewModel)
-                        .environmentObject(appCoordinator)
-                        .environmentObject(currentUserData)
                         .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
                 }
                 .ignoresSafeArea()
-                .environmentObject(snackBarViewModel)
+                .preferredColorScheme(.dark)
                 .environmentObject(appCoordinator)
                 .environmentObject(locationManager)
                 .environmentObject(localSearchViewModel)
@@ -74,6 +121,7 @@ struct MumoryApp: App {
                 .environmentObject(keyboardResponder)
                 .environmentObject(currentUserData)
                 .environmentObject(playerViewModel)
+                .environmentObject(snackBarViewModel)
 
             }
         }

@@ -292,8 +292,8 @@ struct PlaylistView: View {
             .padding(.bottom, currentUserData.bottomInset-10)
             .opacity(isEditing ? 1 : 0)
 
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
-                .ignoresSafeArea()
+//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
+//                .ignoresSafeArea()
 
         }
         .ignoresSafeArea()
@@ -349,14 +349,14 @@ struct PlaylistView: View {
         }
     }
     private func deleteSongsFromPlaylist() {
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
         let songIdsForDelete = selectedSongsForDelete.map{$0.id.rawValue}
 
         
         db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
-            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(songIdsForDelete)])
+            .updateData(["songIds": FirebaseManager.Fieldvalue.arrayRemove(songIdsForDelete)])
         
         playlist.songs.removeAll(where: {selectedSongsForDelete.contains($0)})
         setEditMode(isEditing: false)

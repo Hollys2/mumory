@@ -87,7 +87,7 @@ public struct InputEmailView: View {
     
     private func checkValidEmail(){
         manager.isLoading = true
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         
         let emailCheckQuery = db.collection("User").whereField("email", isEqualTo: email)
         emailCheckQuery.getDocuments { snapshot, error in

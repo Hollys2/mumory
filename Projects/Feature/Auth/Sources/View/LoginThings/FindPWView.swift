@@ -103,7 +103,7 @@ struct FindPWView: View {
     
     private func checkValidEmail(email: String) {
         isLoading = true
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         

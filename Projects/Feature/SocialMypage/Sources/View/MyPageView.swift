@@ -22,7 +22,7 @@ public struct MyPageView: View {
     @State var isPresentEditProfile: Bool = false
     let lineGray = Color(white: 0.37)
     public var body: some View {
-        
+
         ZStack(alignment: .top){
             ColorSet.background
             ScrollView{
@@ -88,6 +88,10 @@ public struct MyPageView: View {
             settingViewModel.uid = currentUserData.uId
             AnalyticsManager.shared.setScreenLog(screenTitle: "MyPageView")
         }
+//        .environmentObject(withdrawViewModel)
+//        .environmentObject(settingViewModel)
+        .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
+        .zIndex(.infinity)
     }
 }
 
@@ -244,7 +248,7 @@ struct MyMumori: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
 
     var body: some View {
         VStack(spacing: 0, content: {

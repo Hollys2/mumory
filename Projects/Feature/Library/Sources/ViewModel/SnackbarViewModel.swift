@@ -74,9 +74,9 @@ public class SnackBarViewModel: ObservableObject {
     }
     
     public func removeRecentSaveData(uId: String) {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         db.collection("User").document(uId).collection("Playlist").document(self.recentSaveData.playlistId)
-            .updateData(["songIds": FBManager.Fieldvalue.arrayRemove(self.recentSaveData.songIds)])
+            .updateData(["songIds": FirebaseManager.Fieldvalue.arrayRemove(self.recentSaveData.songIds)])
         setSnackBar(type: .playlist, status: .delete)
     }
     public func setPresentValue(isPresent: Bool) {
