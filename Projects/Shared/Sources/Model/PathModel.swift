@@ -223,3 +223,14 @@ public enum InitPage {
     case onBoarding
     case home
 }
+
+
+public enum AuthPage {
+    case login
+    case singUpCenter
+    case TOSForSocial
+    case introOfCustomization
+    case customizationManage
+    case customizationCenter
+    case profileCard
+}

@@ -14,8 +14,17 @@ import Lottie
 import GoogleSignIn
 import Firebase
 
+struct LoginData {
+    var uid: String = ""
+    var email: String = ""
+    var fcmToken: String = ""
+    var method: String = ""
+}
+
 public struct LoginView: View {
     public init() {}
+    
+    // MARK: - Properties
     
     let Firebase = FBManager.shared
     @Environment(\.presentationMode) var presentationMode
@@ -24,7 +33,11 @@ public struct LoginView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @State var isLoading: Bool = false
+    
+    // 여러 개의 메서드에서 중복되어 사용되는 로그인 관련 변수만 정의해둔 구조체
     @State var loginData: LoginData = .init()
+    
+    // MARK: - View
     
     public var body: some View {
         ZStack{
@@ -37,7 +50,7 @@ public struct LoginView: View {
                     .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
                 LoginButton(type: .kakao, action: kakaoLogin)
                 LoginButton(type: .google, action: googleLogin)
-                LoginButton(type: .apple, action: tapAppleButton)
+                LoginButton(type: .apple, action: appleLogin)
                     .onChange(of: signInWithAppleManager.isUserAuthenticated) { isUserAuthenticated in
                         if isUserAuthenticated{
                             if let currentUser = Firebase.auth.currentUser {
@@ -53,9 +66,9 @@ public struct LoginView: View {
             LoadingAnimationView(isLoading: $isLoading)
         }
         .navigationBarBackButtonHidden()
+        //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
         .onDisappear(perform: {
             isLoading = false
-            //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
             signInWithAppleManager.isUserAuthenticated = false
         })
     }
@@ -76,6 +89,7 @@ public struct LoginView: View {
         .gesture(handleSignUpGesture)
     }
     
+    // 회원 가입 버튼 제스처 정의
     private var handleSignUpGesture: some Gesture {
         TapGesture()
             .onEnded { gesture in
@@ -83,6 +97,8 @@ public struct LoginView: View {
             }
     }
         
+    // MARK: - Methods
+    
     private func googleLogin(){
         isLoading = true
         guard let id = FirebaseApp.app()?.options.clientID else { return }
@@ -101,7 +117,6 @@ public struct LoginView: View {
             guard let idToken = result?.user.idToken?.tokenString else {return}
             guard let accessToken = result?.user.accessToken.tokenString else {return}
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
-            
             Task {
                 await firebaseSignInWithCredential(credential: credential, method: "Google")
                 await finishSignInProcess()
@@ -123,152 +138,11 @@ public struct LoginView: View {
         appCoordinator.rootPath.append(MumoryPage.emailLogin)
     }
     
-    private func tapAppleButton(){
-        print("tap apple button")
-        signInWithAppleManager.performSignIn()
+    private func appleLogin(){
         isLoading = true
+        signInWithAppleManager.performSignIn()
     }
     
-    //카카오 로그인 관련 코드 - 비즈 전환 후 재테스트 해야함
-//    private func signInWithKakao(){
-//        print("create user with kakao")
-//        //기존에 존재하는 유저인지 판단 후 회원가입 혹은 로그인 진행
-//        
-//        //유저 정보 접근
-//        UserApi.shared.me { user, error in
-//            if let error = error {
-//                //유저 정보 접근 에러
-//                print("error in getting user info \(error)")
-//            }else if let user = user{
-//                //유저 정보 접근 성공
-//                //동의,비동의 항목에 따라 가지고 올 수 있는 데이터가 다름
-//                guard let email = user.kakaoAccount?.email else {return}
-//                guard let uid = user.id else {return} //카카오 uid
-//                
-//                //저장된 유저데이터에서 기존유저 판단 쿼리
-//                let checkOldUserQuery = Firebase.db.collection("User")
-//                    .whereField("email", isEqualTo: email)
-//                    .whereField("signInMethod", isEqualTo: "Kakao")
-//                
-//                //쿼리 기반 데이터 가져오기
-//                checkOldUserQuery.getDocuments { snapShot, error in
-//                    if let error = error {
-//                        print("fire base query error: \(error)")
-//                    }else if let snapShot = snapShot {
-//                        //카카오 이메일과 동일한 회원 데이터가 있는지 확인
-//                        if snapShot.isEmpty {
-//                            //이메일이 동일한 카카오 로그인 회원이 없으니 회원가입
-//                            print("no user")
-//                            //비밀번호 하드코딩한 거 수정하기
-//                            Firebase.auth.createUser(withEmail: "kakao/\(email)", password: "kakao/\(uid)"){result, error in
-//                                if let error = error{
-//                                    print("firebase sign up error: \(error)")
-//                                }else{
-//                                    guard let user = result?.user else {return}
-//                                    print("firebase sign up successful")
-//                                    Task {
-//                                        await checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
-//                                    }
-//                                }
-//                                
-//                            }
-//                        }else {
-//                            //카카오 이메일이 동일한 회원 데이터가 존재하면 로그인
-//                            Firebase.auth.signIn(withEmail: "kakao/\(email)", password: "kakao/\(uid)") { result, error in
-//                                if let error = error {
-//                                    print("login error \(error)")
-//                                }else if let user = result?.user{
-//                                    print("success login")
-//                                    Task {
-//                                        await checkInitialSetting(uid: user.uid, email: email, method: "Kakao")
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//                
-//            }
-//            
-//        }
-//    }
-        
-//    private func checkInitialSetting(uid: String, email: String?, method: String) async {
-//        //로그인 기록 및 uid 셋팅
-//        let userDefualt = UserDefaults.standard
-//        userDefualt.setValue(Date(), forKey: "loginHistory")
-//        
-//        //기존 유저인지, 신규 유저인지, 커스텀 했는지 확인
-//        let query = Firebase.db.collection("User").document(uid)
-//        let fcmToken = Firebase.messaging.fcmToken ?? ""
-//        guard let snapshot = try? await query.getDocument() else {
-//            self.isLoading = false
-//            return
-//        }
-//        
-//        if snapshot.exists {
-//            guard let data = snapshot.data(),
-//                  let uid = data["uid"] as? String else {
-//                //로그인 오류 처리
-//                self.isLoading = false
-//                return
-//            }
-//            
-//            guard let id = data["id"] as? String,
-//                  let nickname = data["nickname"] as? String else {
-//                //커스텀 마무리 안 한 기존 회원
-//                appCoordinator.rootPath.append(MumoryPage.customization)
-//                return
-//            }
-//            
-//            currentUserData.uId = uid
-//            currentUserData.user = await MumoriUser(uId: uid)
-//            currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
-//            try? await query.updateData(["fcmToken": fcmToken])
-//            appCoordinator.selectedTab = .home
-//            appCoordinator.initPage = .home
-//            
-//            self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-//            self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-//            self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
-//                switch result {
-//                case .success(let mumorys):
-//                    print("fetchMumorys successfully: \(mumorys)")
-//                    DispatchQueue.main.async {
-//                        self.mumoryDataViewModel.myMumorys = mumorys
-//                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-//                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-//                        self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
-//                    }
-//                case .failure(let error):
-//                    print("ERROR: \(error)")
-//                }
-//                
-//                DispatchQueue.main.async {
-//                    self.mumoryDataViewModel.isUpdating = false
-//                }
-//            }
-//            
-//            var transaction = Transaction()
-//            transaction.disablesAnimations = true
-//            appCoordinator.isCreateMumorySheetShown = false
-//            withTransaction(transaction) {
-//                appCoordinator.rootPath = NavigationPath()
-//            }
-//        }else {
-//            var userData: [String: Any] = [
-//                "uid": uid,
-//                "email": email ?? "NOEMAIL\(uid)", //이메일 없을 경우 - NOEMAIL유저아이디
-//                "signInMethod": method,
-//                "fcmToken": fcmToken,
-//                "signUpDate": Date()
-//            ]
-//            
-//            try? await snapshot.reference.setData(userData)
-//            self.isLoading = false
-//            appCoordinator.rootPath.append(MumoryPage.customization)
-//        }
-//     }
     
     public func kakaoLogin(){
         isLoading = true
@@ -419,9 +293,4 @@ public struct LoginView: View {
     
 }
 
-struct LoginData {
-    var uid: String = ""
-    var email: String = ""
-    var fcmToken: String = ""
-    var method: String = ""
-}
+

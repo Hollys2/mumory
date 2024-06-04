@@ -11,10 +11,15 @@ import Core
 import Shared
 import Lottie
 
+
 public struct CustomizationView: View {
-    let imageModel: UIImage = UIImage()
+    public init(){}
+
+    // MARK: - Properties
+    
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: CustomizationManageViewModel
+    
+    @EnvironmentObject var customizationViewModel: CustomizationManageViewModel
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     
@@ -22,27 +27,25 @@ public struct CustomizationView: View {
     @State var isUploadUserDataCompleted = false
     @State var isUploadPlaylistCompleted = false
     @State var isCustomizationDone = false
-    
     @State var isTapBackButton: Bool = false
     
     let Firebase = FBManager.shared
     
-    public init(){}
+    // MARK: - View
     
     public var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
             
-            //Step indicator
             VStack(spacing: 0, content: {
                 HStack{
                     Button(action: {
                         isTapBackButton = true
-                        if manager.step == 0 {
+                        if customizationViewModel.step == 0 {
                             dismiss()
                         }else{
                             withAnimation {
-                                manager.step -= 1
+                                customizationViewModel.step -= 1
                             }
                         }
                     }, label: {
@@ -67,10 +70,10 @@ public struct CustomizationView: View {
                 }
                 
                 //Switch View
-                switch(manager.step){
+                switch(customizationViewModel.step){
                 case 0:
                     SelectGenreView()
-                        .environmentObject(manager)
+                        .environmentObject(customizationViewModel)
                         .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), 
                                                 removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                         .onAppear(perform: {
@@ -79,7 +82,7 @@ public struct CustomizationView: View {
                     
                 case 1:
                     SelectTimeView()
-                        .environmentObject(manager)
+                        .environmentObject(customizationViewModel)
                         .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), 
                                                 removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                         .onAppear(perform: {
@@ -88,7 +91,7 @@ public struct CustomizationView: View {
                     
                 case 2:
                     ProfileSettingView()
-                        .environmentObject(manager)
+                        .environmentObject(customizationViewModel)
                         .transition(.asymmetric(insertion: .move(edge: isTapBackButton ? .leading : .trailing), 
                                                 removal: .move(edge: isTapBackButton ? .trailing : .leading)))
                         .onAppear(perform: {
@@ -113,22 +116,22 @@ public struct CustomizationView: View {
             VStack{
                 Spacer()
                 Button(action: {
-                    if manager.step == 2 {
+                    if customizationViewModel.step == 2 {
                         Task{
                             await uploadUserData()
                         }
                     }else{
                         withAnimation {
-                            manager.step += 1
+                            customizationViewModel.step += 1
                         }
                     }
                 }, label: {
-                    MumoryLoadingButton(title: manager.getButtonTitle(), isEnabled: manager.isButtonEnabled(), isLoading: $manager.isLoading)
+                    MumoryLoadingButton(title: customizationViewModel.getButtonTitle(), isEnabled: customizationViewModel.isButtonEnabled(), isLoading: $customizationViewModel.isLoading)
                         .padding(.bottom, 20)
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                 })
-                .disabled(!manager.isButtonEnabled())
+                .disabled(!customizationViewModel.isButtonEnabled())
                 
             }
             
@@ -138,11 +141,11 @@ public struct CustomizationView: View {
         .gesture(DragGesture().onEnded({ gesture in
             if gesture.location.x - gesture.startLocation.x > 80 {
                 isTapBackButton = true
-                if manager.step == 0 {
+                if customizationViewModel.step == 0 {
                     dismiss()
                 }else{
                     withAnimation {
-                        manager.step -= 1
+                        customizationViewModel.step -= 1
                     }
                 }
                 
@@ -151,24 +154,47 @@ public struct CustomizationView: View {
         .onTapGesture {
             self.hideKeyboard()
         }
-        .disabled(manager.isLoading)
+        .disabled(customizationViewModel.isLoading)
         
     }
+    
+    var NavigationBar: some View {
+        HStack{
+            Button(action: {
+                isTapBackButton = true
+                if customizationViewModel.step == 0 {
+                    dismiss()
+                }else{
+                    withAnimation {
+                        customizationViewModel.step -= 1
+                    }
+                }
+            }, label: {
+                SharedAsset.back.swiftUIImage
+            })
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 65)
+    }
+    
+    // MARK: - Methods
+    
     private func setPadding(screen: CGSize) -> CGFloat {
         //width에 곱한 수 만큼 padding을 주어서 줄어들게 만듦
         //ex) 1번째 스탭이라면 3/4만큼 줄어들게 만들기
-        if manager.step == 0{
+        if customizationViewModel.step == 0{
             return screen.width * 3/4
-        }else if manager.step == 1 {
+        }else if customizationViewModel.step == 1 {
             return screen.width * 2/4
-        }else if manager.step == 2 {
+        }else if customizationViewModel.step == 2 {
             return screen.width * 1/4
         }
         return 0
     }
     
     private func uploadUserData() async{
-        manager.isLoading = true
+        customizationViewModel.isLoading = true
         let db = Firebase.db
         let auth = Firebase.auth
         let messaging = Firebase.messaging
@@ -179,12 +205,12 @@ public struct CustomizationView: View {
         }
         
         var userData: [String : Any] = [
-            "id": manager.id,
-            "nickname": manager.nickname,
-            "favoriteGenres": manager.selectedGenres.map({$0.id}),
-            "notificationTime": manager.selectedTime,
+            "id": customizationViewModel.id,
+            "nickname": customizationViewModel.nickname,
+            "favoriteGenres": customizationViewModel.selectedGenres.map({$0.id}),
+            "notificationTime": customizationViewModel.selectedTime,
             "fcmToken": messaging.fcmToken ?? "",
-            "profileIndex": manager.randomProfileIndex
+            "profileIndex": customizationViewModel.randomProfileIndex
         ]
         
         userData.merge(await uploadProfileImage(uid: uid))
@@ -196,9 +222,9 @@ public struct CustomizationView: View {
         
         currentUserData.uId = uid
         currentUserData.user = await MumoriUser(uId: uid)
-        currentUserData.favoriteGenres = manager.selectedGenres.map({$0.id})
+        currentUserData.favoriteGenres = customizationViewModel.selectedGenres.map({$0.id})
         
-        manager.isLoading = false
+        customizationViewModel.isLoading = false
         isCustomizationDone = true
         appCoordinator.rootPath.append(MumoryPage.lastOfCustomization)
     }
@@ -207,7 +233,7 @@ public struct CustomizationView: View {
     private func subscribeTOS(uid: String) async -> [String: Any] {
         let messaging = Firebase.messaging
         
-        guard let isCheckedServiceNewsNotification = manager.isCheckedServiceNewsNotification else {
+        guard let isCheckedServiceNewsNotification = customizationViewModel.isCheckedServiceNewsNotification else {
             return [:]
         }
         if isCheckedServiceNewsNotification {
@@ -235,7 +261,7 @@ public struct CustomizationView: View {
     private func uploadProfileImage(uid: String) async -> [String: Any] {
         let storage = Firebase.storage
         
-        guard let data = manager.profileImageData else {return ["profileImageURL": ""]}
+        guard let data = customizationViewModel.profileImageData else {return ["profileImageURL": ""]}
         let metaData = Firebase.storageMetadata()
         metaData.contentType = "image/jpeg"
         let path: String = "ProfileImage/\(uid).jpg"

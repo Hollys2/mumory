@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>1070391821667-amji34rll9iodc75j6adq918p50nkf6u.apps.googleusercontent.com</string>
+	<string>108840634909-mcjqomjccpsc14ubnhor8uet1shj0bcq.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u</string>
+	<string>com.googleusercontent.apps.108840634909-mcjqomjccpsc14ubnhor8uet1shj0bcq</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAczhI8kIhZnWF0cw4sOm3VGx1A9CSOrac</string>
+	<string>AIzaSyCNoiAD8UOWAC3ccO_RS7jbN2IYosKZEgU</string>
 	<key>GCM_SENDER_ID</key>
-	<string>1070391821667</string>
+	<string>108840634909</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.hollys.mumory</string>
 	<key>PROJECT_ID</key>
-	<string>music-app-62ca9</string>
+	<string>mumorytest</string>
 	<key>STORAGE_BUCKET</key>
-	<string>music-app-62ca9.appspot.com</string>
+	<string>mumorytest.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1070391821667:ios:46154049fec903827c7f56</string>
-	<key>DATABASE_URL</key>
-	<string>https://music-app-62ca9-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+	<string>1:108840634909:ios:d6e8cd5b913255296814f4</string>
 </dict>
 </plist>

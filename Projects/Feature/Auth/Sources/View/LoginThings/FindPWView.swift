@@ -12,6 +12,9 @@ import Core
 import Lottie
 
 struct FindPWView: View {
+    
+    // MARK: - Properties
+    
     @Environment(\.dismiss) private var dismiss
     @State var email: String = ""
     @State var errorText: String = ""
@@ -19,6 +22,9 @@ struct FindPWView: View {
     @State var isValidEmail: Bool = false
     @State var infoText = "•  가입하신 이메일 주소를 입력하시면 비밀번호 재설정 지침을\n    보내드립니다."
     @State var isLoading = false
+    
+    // MARK: - View
+    
     var body: some View {
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
@@ -101,6 +107,8 @@ struct FindPWView: View {
     }
 
     
+    // MARK: - Methods
+    
     private func checkValidEmail(email: String) {
         isLoading = true
         let Firebase = FBManager.shared
@@ -146,6 +154,3 @@ struct FindPWView: View {
     
 }
 
-//#Preview {
-//    FindPWView()
-//}

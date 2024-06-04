@@ -114,7 +114,7 @@ extension Project {
                 [
                     "CFBundleTypeRole" : "Editor",
                     "CFBundleURLName" : "fireBase-google",
-                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
+                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.108840634909-mcjqomjccpsc14ubnhor8uet1shj0bcq"]
                 ]
             ],
             "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한을 허용해주세요",
