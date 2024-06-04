@@ -47,7 +47,7 @@ public class PlayerViewModel: ObservableObject {
     private var player = ApplicationMusicPlayer.shared
     var originQueue: [Song] = []
     
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     var timer: Timer?
     public init() {}
     
@@ -236,7 +236,7 @@ public class PlayerViewModel: ObservableObject {
     
     public func addToFavorite(uid: String, songId: String) {
         let query = db.collection("User").document(uid).collection("Playlist").document("favorite")
-        query.updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songId])])
+        query.updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion([songId])])
         self.favoriteSongIds.append(songId)
 
         let validCheckQuery = db.collection("User").document(uid).collection("MonthlyStat")
@@ -249,7 +249,7 @@ public class PlayerViewModel: ObservableObject {
             guard let snapshots = querySnapshot else {print("b");return}
             if let recentData = snapshots.documents.first {
                 let data = recentData.data()
-                guard let recentDate = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {print("d");return}
+                guard let recentDate = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() else {print("d");return}
                 
                 let formatter = DateFormatter()
                 formatter.dateFormat = "yyyy년 MM월 dd일"
@@ -275,7 +275,7 @@ public class PlayerViewModel: ObservableObject {
     
     public func removeFromFavorite(uid: String, songId: String) {
         let query = db.collection("User").document(uid).collection("Playlist").document("favorite")
-        query.updateData(["songIds": FBManager.Fieldvalue.arrayRemove([songId])])
+        query.updateData(["songIds": FirebaseManager.Fieldvalue.arrayRemove([songId])])
         self.favoriteSongIds.removeAll(where: {$0 == songId})
     }
     

@@ -14,10 +14,10 @@ func setSimilarTaste(songs: [Song] = []) async {
     var songs: [Song] = []
     var songIds = songs.map { $0.id.rawValue }
     songIds = Array(songIds.prefix(20))
-    try? await  FBManager.shared.db.collection("User").document("adminFavoriteGenres")
+    try? await  FirebaseManager.shared.db.collection("User").document("adminFavoriteGenres")
         .setData(["favoriteGenres": MusicGenreHelper().genres.map({$0.id})])
     
-    try? await FBManager.shared.db.collection("User").document("adminFavoriteGenres").collection("Playlist").document("favorite").setData(["songIds": songIds])
+    try? await FirebaseManager.shared.db.collection("User").document("adminFavoriteGenres").collection("Playlist").document("favorite").setData(["songIds": songIds])
 }
 
 
@@ -34,7 +34,7 @@ let banNicknameList = ["mumory","뮤모리", "삭제된아이디", "시발", "�
 ]
 
 func setBanNicknameList() {
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     banNicknameList.indices.forEach { index in
         db.collection("User").document("adminNicknameDocument\(index)").setData(["nickname": banNicknameList[index]])

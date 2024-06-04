@@ -103,7 +103,8 @@ public struct MumoryBottomSheet {
                 BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
                     mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
                     withAnimation(.easeOut(duration: 0.1)) {
-                        self.appCoordinator.isSocialMenuSheetViewShown = false
+//                        self.appCoordinator.isSocialMenuSheetViewShown = false
+                        self.appCoordinator.bottomSheet = .none
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumoryAnnotation))
@@ -111,7 +112,8 @@ public struct MumoryBottomSheet {
                 }),
                 BottemSheetMenuOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
                     withAnimation(.easeOut(duration: 0.1)) {
-                        self.appCoordinator.isSocialMenuSheetViewShown = false
+//                        self.appCoordinator.isSocialMenuSheetViewShown = false
+                        self.appCoordinator.bottomSheet = .none
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.appCoordinator.rootPath.append(MumoryPage.report)
@@ -184,15 +186,11 @@ public struct BottemSheetMenuOption: Identifiable {
 
 public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
     
-    //    typealias UIViewType = UIView
-    
-    @Binding var isShown: Bool
-    let mumoryBottomSheet: MumoryBottomSheet
+    private let mumoryBottomSheet: MumoryBottomSheet
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     
-    public init(isShown: Binding<Bool>, mumoryBottomSheet: MumoryBottomSheet) {
-        self._isShown = isShown
+    public init(mumoryBottomSheet: MumoryBottomSheet) {
         self.mumoryBottomSheet = mumoryBottomSheet
     }
     
@@ -213,7 +211,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
         newView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 54 * CGFloat(self.mumoryBottomSheet.menuOptions.count) + 31)
         newView.backgroundColor = .clear
     
-        let hostingController = UIHostingController(rootView: BottomSheetView(isShown: $isShown, menuOptions: self.mumoryBottomSheet.menuOptions, action: {
+        let hostingController = UIHostingController(rootView: BottomSheetView(menuOptions: self.mumoryBottomSheet.menuOptions, action: {
             dimmingView.alpha = 0
 
             UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut], animations: {
@@ -221,7 +219,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
             }) { (_) in
                 newView.removeFromSuperview()
                 dimmingView.removeFromSuperview()
-                self.isShown = false
+                self.appCoordinator.bottomSheet = .none
             }
         }))
         hostingController.view.frame = newView.bounds
@@ -291,7 +289,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
                     }) { value in
                         newView.removeFromSuperview()
                         dimmingView.removeFromSuperview()
-                        self.parent.isShown = false
+                        self.parent.appCoordinator.bottomSheet = .none
                         
                     }
                 } else {
@@ -313,7 +311,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
             }) { (_) in
                 newView.removeFromSuperview()
                 dimmingView.removeFromSuperview()
-                self.parent.isShown = false
+                self.parent.appCoordinator.bottomSheet = .none
             }
         }
     }
@@ -322,13 +320,11 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
 public struct BottomSheetView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @Binding var isShown: Bool
     
     var menuOptions: [BottemSheetMenuOption]
     var action: (() -> Void)?
     
-    public init(isShown: Binding<Bool>, menuOptions: [BottemSheetMenuOption], action: (() -> Void)? = nil) {
-        self._isShown = isShown
+    public init(menuOptions: [BottemSheetMenuOption], action: (() -> Void)? = nil) {
         self.menuOptions = menuOptions
         self.action = action
     }
@@ -410,7 +406,7 @@ struct BottomSheetViewModifier: ViewModifier {
             content
             
             if isShown {
-                BottomSheetUIViewRepresentable(isShown: $isShown, mumoryBottomSheet: mumoryBottomSheet)
+                BottomSheetUIViewRepresentable(mumoryBottomSheet: mumoryBottomSheet)
             }
         }
         .zIndex(1)

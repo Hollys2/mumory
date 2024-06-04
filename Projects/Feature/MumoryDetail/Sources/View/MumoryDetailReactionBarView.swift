@@ -89,7 +89,8 @@ struct MumoryDetailReactionBarView: View {
                 Button(action: {
                     mumoryDataViewModel.selectedMumoryAnnotation = mumory
                     withAnimation(.easeInOut(duration: 0.1)) {
-                        self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
+//                        self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
+                        self.appCoordinator.sheet = .comment
                     }
                 }, label: {
                     Image(uiImage: SharedAsset.commentButtonMumoryDetail.image)

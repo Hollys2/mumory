@@ -18,7 +18,7 @@ struct NotifyView: View {
     private let notificationQueue = DispatchQueue(label: "notificationQueue")
     //observableobject를 만들면 너무 불필요한 게 되는데....음음음음음음
     //binding으로 2단계 아래로 넘기자니 오히려 더 지저분함
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
 
 
     var body: some View {
@@ -166,7 +166,7 @@ struct NotifyLikeItem: View {
         self._notification = notification
 
     }
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     @State var song: Song?
     
     var body: some View {
@@ -260,7 +260,7 @@ struct NotifyCommentItem: View {
     init(notification: Binding<Notification>) {
         self._notification = notification
     }
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     @State var song: Song?
 
     var body: some View {
@@ -355,7 +355,7 @@ struct NotifyFriendItem: View {
     init(notification: Binding<Notification>) {
         self._notification = notification
     }
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -422,7 +422,7 @@ struct NotifyPostItem: View {
     init(notification: Binding<Notification>) {
         self._notification = notification
     }
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -488,7 +488,7 @@ struct Notification {
     
     init(id: String, data: [String: Any]) {
         self.id = id
-        self.date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+        self.date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
         self.isRead = (data["isRead"] as? Bool) ?? false
         
         switch((data["type"] as? String) ?? "") {
@@ -557,7 +557,7 @@ struct ReadAllButton: View {
             .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
             .onTapGesture {
                 if notifications.filter({!$0.isRead}).count > 0 {
-                    let db = FBManager.shared.db
+                    let db = FirebaseManager.shared.db
                     let query = db.collection("User").document(currentUserData.uId).collection("Notification")
                         .whereField("isRead", isEqualTo: false)
                     query.getDocuments { snapshot, error in
@@ -584,7 +584,7 @@ struct NotifyMenuBotton: View {
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentPopup: Bool = false
     let notification: Notification
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     init(notification: Notification) {
         self.notification = notification
     }

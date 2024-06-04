@@ -136,8 +136,8 @@ struct SimilarTasteListView: View {
             .frame(height: 65)
             .padding(.top, currentUserData.topInset)
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
-                .ignoresSafeArea()
+//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
+//                .ignoresSafeArea()
 
   
         }

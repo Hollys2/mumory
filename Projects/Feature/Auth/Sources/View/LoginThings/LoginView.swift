@@ -36,7 +36,6 @@ public struct LoginView: View {
     
     // 여러 개의 메서드에서 중복되어 사용되는 로그인 관련 변수만 정의해둔 구조체
     @State var loginData: LoginData = .init()
-    
     // MARK: - View
     
     public var body: some View {

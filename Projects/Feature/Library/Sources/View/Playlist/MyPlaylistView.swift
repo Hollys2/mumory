@@ -99,7 +99,7 @@ struct MyPlaylistView: View {
     }
     
     private func getPlayList() async {
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
         currentUserData.playlistArray.removeAll()
@@ -125,7 +125,7 @@ struct MyPlaylistView: View {
                 print("no id list")
                 return
             }
-            guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+            guard let date = (document.data()["date"] as? FirebaseManager.Timestamp)?.dateValue() else {
                 return
             }
             

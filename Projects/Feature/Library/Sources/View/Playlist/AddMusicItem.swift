@@ -69,7 +69,7 @@ struct AddMusicItem: View {
         
     }
     private func addMusicToPlaylist(song: Song) {
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let songID = song.id.rawValue
         
@@ -78,7 +78,7 @@ struct AddMusicItem: View {
             originPlaylist.songIDs.append(songID)
             
             let songData: [String: Any] = [
-                "songIds" : FBManager.Fieldvalue.arrayUnion([songID])
+                "songIds" : FirebaseManager.Fieldvalue.arrayUnion([songID])
             ]
             let monthlyStatData: [String: Any] = [
                 "date": Date(),
@@ -86,7 +86,7 @@ struct AddMusicItem: View {
                 "type": "playlist"
             ]
             db.collection("User").document(currentUserData.uId).collection("Playlist").document(originPlaylist.id)
-                .updateData(["songIds": FBManager.Fieldvalue.arrayUnion([songID])])
+                .updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion([songID])])
             db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
             snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songIds: [songID])

@@ -21,25 +21,28 @@ public struct HomeView: View {
     @State private var rewardListener: ListenerRegistration?
     @State private var activityListener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
-    @State private var isCreateMumoryPopUpViewShown: Bool = true
     
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @State private var isAnnotationTapped: Bool = false
+    
+    @ObservedObject private var tabViewModel: TabViewModel = TabViewModel.shared
+    
+    @EnvironmentObject private var appCoordinator: AppCoordinator
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var keyboardResponder: KeyboardResponder
-    @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var withdrawViewModel: WithdrawViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
+    @EnvironmentObject private var keyboardResponder: KeyboardResponder
+    @EnvironmentObject private var settingViewModel: SettingViewModel
+    @EnvironmentObject private var withdrawViewModel: WithdrawViewModel
     
-    public init(){}
+    public init() {}
     
     public var body: some View {
         ZStack(alignment: .bottom) {
             
             VStack(spacing: 0) {
-                switch appCoordinator.selectedTab {
+                switch self.appCoordinator.selectedTab {
                 case .home:
-                    HomeMapView()
+                    HomeMapView(isAnnotationTapped: self.$isAnnotationTapped)
                 case .social:
                     SocialView(isShown: self.$isSocialSearchViewShown)
                 case .library:
@@ -48,72 +51,51 @@ public struct HomeView: View {
                     NotifyView()
                 }
                 
-                ZStack(alignment: .top) {
-                    MumoryTabView(selectedTab: $appCoordinator.selectedTab)
-                    
-                    CreateMumoryPopUpView()
-                            .offset(y: -41)
-                }
+                MumoryTabView()
+                    .overlay(CreateMumoryPopUpView(), alignment: .top)
             }
                         
             MiniPlayerView()
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
-            
-            MumoryCommentSheetView(isSheetShown: $appCoordinator.isSocialCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
-            
-            if self.appCoordinator.isMumoryPopUpShown {
-                ZStack {
-                    
-                    Color.black.opacity(0.6)
-                        .onTapGesture {
-                            self.appCoordinator.isMumoryPopUpShown = false
+            switch self.appCoordinator.sheet {
+            case .createMumory:
+                Color.black.opacity(0.6)
+                
+                CreateMumoryBottomSheetView()
+                
+            case .comment:
+                Color.black.opacity(0.6)
+                    .onTapGesture {
+                        withAnimation(.spring(response: 0.1)) {
+                            self.appCoordinator.sheet = .none
                         }
-                    
-                    VStack(spacing: 16) {
-                        
-                        MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
-                            .frame(height: 418)
-                            .padding(.horizontal, (UIScreen.main.bounds.width - (getUIScreenBounds().width == 375 ? 296 : 310)) / 2 - 10)
-                        
-                        Button(action: {
-                            self.appCoordinator.isMumoryPopUpShown = false
-                        }, label: {
-                            SharedAsset.closeButtonMumoryPopup.swiftUIImage
-                                .resizable()
-                                .frame(width: 26, height: 26)
-                        })
                     }
-                    .offset(y: 10)
-                }
+                
+                MumoryCommentSheetView()
+                
+            default:
+                EmptyView()
+            }
+            
+            
+           
+            if self.isAnnotationTapped {
+                MumoryCardView(isAnnotationTapped: self.$isAnnotationTapped)
             }
             
             if self.appCoordinator.isAddFriendViewShown {
                 SocialFriendTestView()
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
             }
             
-            MyPageBottomAnimationView()
+            if self.appCoordinator.bottomAnimationViewStatus == .myPage {
+                MyPageView()
+            }
             
             if self.isSocialSearchViewShown {
                 SocialSearchView(isShown: self.$isSocialSearchViewShown)
             }
-            
-            if mumoryDataViewModel.isUpdating {
-                ZStack {
-                    Color.black
-                        .opacity(0.1)
-                        .ignoresSafeArea()
-                    
-                    LoadingAnimationView(isLoading: $mumoryDataViewModel.isUpdating)
-                }
-            }
         } // ZStack
-        .ignoresSafeArea()
         .navigationBarBackButtonHidden()
-        .bottomSheet(isShown: $appCoordinator.isSocialMenuSheetViewShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumorySocialView, mumoryAnnotation: $appCoordinator.choosedMumoryAnnotation))
         .onAppear {
             let userDefualt = UserDefaults.standard
             if !userDefualt.bool(forKey: "firstLogined") {
@@ -130,31 +112,6 @@ public struct HomeView: View {
                 if authorizationStatus == .authorized {
                     print("음악 권한 받음")
                     
-//                    if appCoordinator.isFirst {
-//                        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-//                        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-//                        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
-//                            switch result {
-//                            case .success(let mumorys):
-//                                print("fetchMumorys successfully: \(mumorys)")
-//                                DispatchQueue.main.async {
-//                                    self.mumoryDataViewModel.myMumorys = mumorys
-//                                    self.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-//                                    self.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-//                                    self.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
-//                                }
-//                            case .failure(let error):
-//                                print("ERROR: \(error)")
-//                            }
-//                            
-//                            DispatchQueue.main.async {
-//                                self.mumoryDataViewModel.isUpdating = false
-//                            }
-//                        }
-//
-//                        
-//                        appCoordinator.isFirst = false
-//                    }
                 } else {
                     print("음악 권한 거절")
                     DispatchQueue.main.async {
@@ -163,6 +120,10 @@ public struct HomeView: View {
                 }
                 currentUserData.playlistArray = await currentUserData.savePlaylist()
             }
+            print("HomeView onAppear")
+        }
+        .onDisappear {
+            print("HomeView onDisappear")
         }
     }
 
@@ -186,20 +147,5 @@ public struct HomeView: View {
         //                window.rootViewController?.present(alertController, animated: true, completion: nil)
         //            }
         //        }
-    }
-    
-    
-    @ViewBuilder
-    private func MyPageBottomAnimationView() -> some View {
-        VStack {
-            if appCoordinator.bottomAnimationViewStatus == .myPage {
-                MyPageView()
-                    .environmentObject(withdrawViewModel)
-                    .environmentObject(settingViewModel)
-                    .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
-                
-            }
-        }
-        
     }
 }

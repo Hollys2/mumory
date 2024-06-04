@@ -18,497 +18,455 @@ import Shared
 
 public struct CreateMumoryBottomSheetView: View {
     
-    @Binding var isSheetShown: Bool
-    @Binding var offsetY: CGFloat
+    @State private var offsetY: Double = .zero
     
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
     @State private var isPublishErrorPopUpShown: Bool = false
     @State private var isTagErrorPopUpShown: Bool = false
     @State private var isDeletePopUpShown: Bool = false
-    @State private var isImagePickerShown: Bool = false
-    @State private var sourceType: UIImagePickerController.SourceType?
-    
-    @GestureState private var dragState = DragState.inactive
     
     @State private var calendarDate: Date = Date()
     @State private var tags: [String] = []
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
-    
     @State private var isPublic: Bool = true
     @State private var calendarYOffset: CGFloat = .zero
-    @State private var bottomBarOffset: CGFloat = 0
-    
-    @State private var tagContainerYOffset: CGFloat = .zero
-    @State private var contentContainerYOffset: CGFloat = .zero
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
+    
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserData: CurrentUserData
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
-    public init(isSheetShown: Binding<Bool>, offsetY: Binding<CGFloat>) {
-        self._isSheetShown = isSheetShown
-        self._offsetY = offsetY
+//    @Environment(\.dismiss) private var dismiss
+    
+    public init() {}
+    
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                if value.translation.height > 0 {
+                    self.offsetY = value.translation.height
+                }
+            }
+            .onEnded { value in
+                if value.translation.height > 100 {
+                    mumoryDataViewModel.choosedMusicModel = nil
+                    mumoryDataViewModel.choosedLocationModel = nil
+                    tags.removeAll()
+                    contentText.removeAll()
+                    photoPickerViewModel.removeAllSelectedImages()
+                    imageURLs.removeAll()
+                    withAnimation(.spring(response: 0.1)) {
+                        appCoordinator.sheet = .none
+                    }
+                }
+                
+                withAnimation(.spring(response: 0.1)) {
+                    self.offsetY = .zero
+                }
+                
+            }
     }
     
     public var body: some View {
+//            Color.black.opacity(0.6)
+//                .ignoresSafeArea()
+//                .onTapGesture {
+//                    if mumoryDataViewModel.choosedMusicModel != nil ||
+//                        mumoryDataViewModel.choosedLocationModel != nil {
+//                        self.isDeletePopUpShown = true
+//                    } else {
+//                        mumoryDataViewModel.choosedMusicModel = nil
+//                        mumoryDataViewModel.choosedLocationModel = nil
+//                        self.calendarDate = Date()
+//                        self.tags.removeAll()
+//                        self.contentText.removeAll()
+//                        photoPickerViewModel.removeAllSelectedImages()
+//                        self.imageURLs.removeAll()
+//                        withAnimation(.easeInOut(duration: 0.1)) {
+//                            self.appCoordinator.bottomSheet = .none
+//                        }
+//                    }
+//                }
         
-        let dragGesture = DragGesture()
-            .updating($dragState) { value, state, transaction in
-                var newTranslation = value.translation
-                if self.offsetY + newTranslation.height < 0 {
-                    newTranslation.height = -self.offsetY
-                }
-                
-                state = .dragging(translation: newTranslation)
-            }
-            .onEnded(onDragEnded)
-        
-        return ZStack(alignment: .bottom) {
+        ZStack(alignment: .bottom) {
             
-            if isSheetShown {
+            VStack(spacing: 0) {
                 
-                Color.black.opacity(0.6)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        if mumoryDataViewModel.choosedMusicModel != nil ||
-                           mumoryDataViewModel.choosedLocationModel != nil {
-                            self.isDeletePopUpShown = true
-                        } else {
-                            mumoryDataViewModel.choosedMusicModel = nil
-                            mumoryDataViewModel.choosedLocationModel = nil
-                            self.calendarDate = Date()
-                            self.tags.removeAll()
-                            self.contentText.removeAll()
-                            photoPickerViewModel.removeAllSelectedImages()
-                            self.imageURLs.removeAll()
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                self.appCoordinator.isCreateMumorySheetShown = false
-                            }
-                        }
-                    }
-                
-                VStack(spacing: 0) {
+                // MARK: -Top bar
+                ZStack {
                     
-                    // MARK: -Top bar
-                    ZStack {
-                        
-                        HStack {
-                            Image(uiImage: SharedAsset.closeCreateMumory.image)
-                                .resizable()
-                                .frame(width: 25, height: 25)
-                                .gesture(TapGesture(count: 1).onEnded {
-                                    if mumoryDataViewModel.choosedMusicModel != nil ||
-                                       mumoryDataViewModel.choosedLocationModel != nil {
-                                        self.isDeletePopUpShown = true
-                                    } else {
-                                        mumoryDataViewModel.choosedMusicModel = nil
-                                        mumoryDataViewModel.choosedLocationModel = nil
-                                        self.calendarDate = Date()
-                                        self.tags.removeAll()
-                                        self.contentText.removeAll()
-                                        photoPickerViewModel.removeAllSelectedImages()
-                                        self.imageURLs.removeAll()
-                                        withAnimation(.easeInOut(duration: 0.2)) {
-                                            self.appCoordinator.isCreateMumorySheetShown = false
-                                        }
-                                    }
-                                })
-                            
-                            Spacer()
-                            
-                            Button(action: {
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                
-                                if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
-                                    self.isPublishPopUpShown = true
-                                } else {
-                                    self.isPublishErrorPopUpShown = true
+                    HStack {
+                        Image(uiImage: SharedAsset.closeCreateMumory.image)
+                            .resizable()
+                            .frame(width: 25, height: 25)
+                            .onTapGesture(perform: {
+                                withAnimation(.easeInOut(duration: 0.1)) {
+                                    appCoordinator.sheet = .none
                                 }
-                            }) {
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(width: 46, height: 30)
-                                    .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                    .cornerRadius(31.5)
-                                    .overlay(
-                                        Text("게시")
-                                            .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-                                            .foregroundColor(.black)
-                                    )
-                                    .allowsHitTesting(true)
+                            })
+//                            .gesture(TapGesture(count: 1).onEnded {
+//                                if mumoryDataViewModel.choosedMusicModel != nil ||
+//                                    mumoryDataViewModel.choosedLocationModel != nil {
+//                                    self.isDeletePopUpShown = true
+//                                } else {
+//                                    mumoryDataViewModel.choosedMusicModel = nil
+//                                    mumoryDataViewModel.choosedLocationModel = nil
+//                                    self.calendarDate = Date()
+//                                    self.tags.removeAll()
+//                                    self.contentText.removeAll()
+//                                    photoPickerViewModel.removeAllSelectedImages()
+//                                    self.imageURLs.removeAll()
+//                                    withAnimation(.easeInOut(duration: 5)) {
+//                                        appCoordinator.bottomSheet = .none
+//                                    }
+//                                }
+//                            })
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                            
+                            if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
+                                self.isPublishPopUpShown = true
+                            } else {
+                                self.isPublishErrorPopUpShown = true
                             }
-                        } // HStack
-                        
-                        Text("뮤모리 만들기")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                            .foregroundColor(.white)
-                    } // ZStack
-                    .padding(.top, 26)
-                    .padding(.bottom, 11)
-                    .padding(.horizontal, 20)
-                        
-                    ScrollViewReader { proxy in
-                        ScrollView(showsIndicators: false) {
-                            
-                            VStack(spacing: 0) {
-                                
-                                VStack(spacing: 16) {
-                                    
-                                    NavigationLink(value: "music") {
-                                        ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
-                                    }
-                                    
-                                    NavigationLink(value: "location") {
-                                        ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
-                                    }
-                                    
-                                    CalendarContainerView(date: self.$calendarDate)
-                                        .background {
-                                            GeometryReader { geometry in
-                                                Color.clear
-                                                    .onAppear {
-                                                        self.calendarYOffset = geometry.frame(in: .global).maxY
-                                                    }
-                                                    .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                        self.calendarYOffset = newOffset
-                                                    }
-                                            }
-                                        }
-                                        .onTapGesture {
-                                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                            withAnimation(.easeInOut(duration: 0.1)) {
-                                                self.isDatePickerShown.toggle()
-                                            }
-                                        }
-                                }
-                                .padding(.horizontal, 20)
-                                
-                                Rectangle()
-                                    .foregroundColor(.clear)
-                                    .frame(height: 6)
-                                    .background(.black)
-                                    .padding(.vertical, 18)
-                                
-                                VStack(spacing: 16) {
-                                    
-                                    TagContainerView(tags: self.$tags)
-                                        .id(0)
-                                        .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
-                                            withAnimation {
-                                            proxy.scrollTo(0, anchor: .top)
-                                            }
-                                        }))
-                                    
-                                    ContentContainerView(contentText: self.$contentText)
-                                        .id(1)
-                                        .onTapGesture {
-                                            withAnimation {
-                                                proxy.scrollTo(0, anchor: .top)
-                                            }
-                                        }
-                                    
-                                    HStack(spacing: 11) {
-                                        PhotosPicker(selection: $photoPickerViewModel.imageSelections,
-                                                     maxSelectionCount: 3,
-                                                     matching: .images) {
-                                            VStack(spacing: 0) {
-                                                (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
-                                                    .resizable()
-                                                    .frame(width: 24, height: 24)
-                                                    .offset(y: 1)
-                                                
-                                                Spacer(minLength: 0)
-                                                
-                                                HStack(spacing: 0) {
-                                                    Text("\(photoPickerViewModel.imageSelectionCount)")
-                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                        .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                    Text(" / 3")
-                                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                                                }
-                                                .multilineTextAlignment(.center)
-                                                .offset(y: 2)
-                                            }
-                                            .padding(.vertical, 15)
-                                            .frame(width: 75, height: 75)
-                                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                            .cornerRadius(10)
-                                        }
-                                        
-                                        if !photoPickerViewModel.selectedImages.isEmpty {
-                                            
-                                            ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
-                                                
-                                                ZStack {
-                                                    Image(uiImage: image)
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 75, height: 75)
-                                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                                                        .cornerRadius(10)
-                                                    
-                                                    Button(action: {
-                                                        photoPickerViewModel.removeImage(image)
-                                                    }) {
-                                                        SharedAsset.closeButtonCreateMumory.swiftUIImage
-                                                            .resizable()
-                                                            .frame(width: 27, height: 27)
-                                                    }
-                                                    .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
-                                                }
-                                            }
-                                        }
-                                    }
-                                    .onChange(of: photoPickerViewModel.imageSelections) { _ in
-                                        photoPickerViewModel.convertDataToImage()
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                }
-                                .padding(.horizontal, 20)
-                            } // VStack
-                            .padding(.top, 20)
-                            .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
-                            .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
-                        } // ScrollView
-                        .scrollIndicators(.hidden)
-                        .onAppear {
-                            UIScrollView.appearance().bounces = false
+                        }) {
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .frame(width: 46, height: 30)
+                                .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                .cornerRadius(31.5)
+                                .overlay(
+                                    Text("게시")
+                                        .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
+                                        .foregroundColor(.black)
+                                )
+                                .allowsHitTesting(true)
                         }
-                    }
-                } // VStack
-                .background(SharedAsset.backgroundColor.swiftUIColor)
-                .cornerRadius(23, corners: [.topLeft, .topRight])
-                .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
-                .offset(y: self.offsetY + self.dragState.translation.height)
-                .gesture(dragGesture)
-                .transition(.move(edge: .bottom))
-                .zIndex(1)
-                .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
-                    DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
-                        .datePickerStyle(.graphical)
-                        .labelsHidden()
-                        .accentColor(SharedAsset.mainColor.swiftUIColor)
-                        .background(SharedAsset.backgroundColor.swiftUIColor)
-                        .environment(\.locale, Locale.init(identifier: "ko_KR"))
-                }
-                .popup(show: self.$isPublishPopUpShown, content: {
-                    PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
-                        let calendar = Calendar.current
-                        let newDate = calendar.date(bySettingHour: calendar.component(.hour, from: Date()),
-                                                    minute: calendar.component(.minute, from: Date()),
-                                                    second: calendar.component(.second, from: Date()),
-                                                    of: calendarDate) ?? Date()
-                        self.calendarDate = newDate
+                    } // HStack
+                    
+                    Text("뮤모리 만들기")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                        .foregroundColor(.white)
+                } // ZStack
+                .padding(.top, 26)
+                .padding(.bottom, 11)
+                .padding(.horizontal, 20)
+                
+                ScrollViewReader { proxy in
+                    ScrollView(showsIndicators: false) {
                         
-                        if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
-                           let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                            mumoryDataViewModel.isLoading = true
+                        VStack(spacing: 0) {
+                            
+                            VStack(spacing: 16) {
+                                
+                                NavigationLink(value: "music") {
+                                    ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
+                                }
+                                
+                                NavigationLink(value: "location") {
+                                    ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
+                                }
+                                
+                                CalendarContainerView(date: self.$calendarDate)
+                                    .background {
+                                        GeometryReader { geometry in
+                                            Color.clear
+                                                .onAppear {
+                                                    self.calendarYOffset = geometry.frame(in: .global).maxY
+                                                }
+                                                .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
+                                                    self.calendarYOffset = newOffset
+                                                }
+                                        }
+                                    }
+                                    .onTapGesture {
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                                        withAnimation(.easeInOut(duration: 0.1)) {
+                                            self.isDatePickerShown.toggle()
+                                        }
+                                    }
+                            }
+                            .padding(.horizontal, 20)
+                            
+                            Rectangle()
+                                .foregroundColor(.clear)
+                                .frame(height: 6)
+                                .background(.black)
+                                .padding(.vertical, 18)
+                            
+                            VStack(spacing: 16) {
+                                
+                                TagContainerView(tags: self.$tags)
+                                    .id(0)
+                                    .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
+                                        withAnimation {
+                                            proxy.scrollTo(0, anchor: .top)
+                                        }
+                                    }))
+                                
+                                ContentContainerView(contentText: self.$contentText)
+                                    .id(1)
+                                    .onTapGesture {
+                                        withAnimation {
+                                            proxy.scrollTo(0, anchor: .top)
+                                        }
+                                    }
+                                
+                                HStack(spacing: 11) {
+                                    PhotosPicker(selection: $photoPickerViewModel.imageSelections,
+                                                 maxSelectionCount: 3,
+                                                 matching: .images) {
+                                        VStack(spacing: 0) {
+                                            (photoPickerViewModel.imageSelectionCount == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                                .resizable()
+                                                .frame(width: 24, height: 24)
+                                                .offset(y: 1)
+                                            
+                                            Spacer(minLength: 0)
+                                            
+                                            HStack(spacing: 0) {
+                                                Text("\(photoPickerViewModel.imageSelectionCount)")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                    .foregroundColor(photoPickerViewModel.imageSelectionCount >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                Text(" / 3")
+                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
+                                                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                            }
+                                            .multilineTextAlignment(.center)
+                                            .offset(y: 2)
+                                        }
+                                        .padding(.vertical, 15)
+                                        .frame(width: 75, height: 75)
+                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                        .cornerRadius(10)
+                                    }
+                                    
+                                    if !photoPickerViewModel.selectedImages.isEmpty {
+                                        
+                                        ForEach(photoPickerViewModel.selectedImages, id: \.self) { image in
+                                            
+                                            ZStack {
+                                                Image(uiImage: image)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 75, height: 75)
+                                                    .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                                    .cornerRadius(10)
+                                                
+                                                Button(action: {
+                                                    photoPickerViewModel.removeImage(image)
+                                                }) {
+                                                    SharedAsset.closeButtonCreateMumory.swiftUIImage
+                                                        .resizable()
+                                                        .frame(width: 27, height: 27)
+                                                }
+                                                .offset(x: -51 + 57 + 27, y: -(-51 + 57 + 27))
+                                            }
+                                        }
+                                    }
+                                }
+                                .onChange(of: photoPickerViewModel.imageSelections) { _ in
+                                    photoPickerViewModel.convertDataToImage()
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding(.horizontal, 20)
+                        } // VStack
+                        .padding(.top, 20)
+                        .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
+                        .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
+                    } // ScrollView
+                    .scrollIndicators(.hidden)
+                    .onAppear {
+                        UIScrollView.appearance().bounces = false
+                    }
+                }
+            } // VStack
+            .background(SharedAsset.backgroundColor.swiftUIColor)
+            .cornerRadius(23, corners: [.topLeft, .topRight])
+            .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
+            .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
+                DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .accentColor(SharedAsset.mainColor.swiftUIColor)
+                    .background(SharedAsset.backgroundColor.swiftUIColor)
+                    .environment(\.locale, Locale.init(identifier: "ko_KR"))
+            }
+            .popup(show: self.$isPublishPopUpShown, content: {
+                PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
+                    let calendar = Calendar.current
+                    let newDate = calendar.date(bySettingHour: calendar.component(.hour, from: Date()),
+                                                minute: calendar.component(.minute, from: Date()),
+                                                second: calendar.component(.second, from: Date()),
+                                                of: calendarDate) ?? Date()
+                    self.calendarDate = newDate
 
-                            let dispatchGroup = DispatchGroup()
+                    if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
+                       let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+                        mumoryDataViewModel.isLoading = true
 
-                            for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
+                        let dispatchGroup = DispatchGroup()
 
-                                guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
-                                    print("Could not convert image to Data.")
-                                    continue
+                        for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
+
+                            guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
+                                print("Could not convert image to Data.")
+                                continue
+                            }
+
+                            dispatchGroup.enter()
+
+                            let imageRef = FirebaseManager.shared.storage.reference().child("mumoryImages/\(UUID().uuidString).jpg")
+                            _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
+                                guard metadata != nil else {
+                                    print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
+                                    dispatchGroup.leave()
+                                    return
                                 }
 
-                                dispatchGroup.enter()
-
-                                let imageRef = FirebaseManager.shared.storage.reference().child("mumoryImages/\(UUID().uuidString).jpg")
-                                _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
-                                    guard metadata != nil else {
-                                        print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
+                                imageRef.downloadURL { (url, error) in
+                                    guard let url = url, error == nil else {
+                                        print("Error getting download URL: \(error?.localizedDescription ?? "")")
                                         dispatchGroup.leave()
                                         return
                                     }
 
-                                    imageRef.downloadURL { (url, error) in
-                                        guard let url = url, error == nil else {
-                                            print("Error getting download URL: \(error?.localizedDescription ?? "")")
-                                            dispatchGroup.leave()
-                                            return
-                                        }
-
-                                        print("Download URL for Image \(index + 1)")
-                                        self.imageURLs.append(url.absoluteString)
-                                        dispatchGroup.leave()
-                                    }
-                                }
-                            }
-
-                            dispatchGroup.notify(queue: .main) {
-
-                                let newMumoryAnnotation = Mumory(id: "", uId: currentUserData.user.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0, myCommentCount: 0)
-
-                                mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
-                                    switch result {
-                                    case .success:
-                                        self.generateHapticFeedback(style: .medium)
-                                        print("뮤모리 만들기 성공")
-                                        mumoryDataViewModel.isLoading = false
-                                        playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
-
-                                        mumoryDataViewModel.choosedMusicModel = nil
-                                        mumoryDataViewModel.choosedLocationModel = nil
-                                        self.tags.removeAll()
-                                        self.contentText.removeAll()
-                                        photoPickerViewModel.removeAllSelectedImages()
-                                        self.imageURLs.removeAll()
-
-                                    
-                                        
-                                    case .failure(let error):
-                                        print("뮤모리 만들기 실패: \(error.localizedDescription)")
-                                    }
-                                }
-                                
-                                withAnimation(Animation.easeInOut(duration: 0.2)) {
-                                    isPublishPopUpShown = false
-                                    appCoordinator.isCreateMumorySheetShown = false
-                                    appCoordinator.selectedTab = .home
-                                    appCoordinator.rootPath = NavigationPath()
-                                    self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                                    print("Download URL for Image \(index + 1)")
+                                    self.imageURLs.append(url.absoluteString)
+                                    dispatchGroup.leave()
                                 }
                             }
                         }
-                    })
-                })
-                .popup(show: self.$isPublishErrorPopUpShown, content: {
-                    PopUpView(isShown: self.$isPublishErrorPopUpShown, type: .oneButton, title: "음악, 위치, 날짜를 입력해주세요.", subTitle: "뮤모리를 남기시려면\n해당 조건을 필수로 입력해주세요!", buttonTitle: "확인", buttonAction: {
-                        self.isPublishErrorPopUpShown = false
-                    })
-                })
-                .popup(show: self.$isTagErrorPopUpShown, content: {
-                    PopUpView(isShown: self.$isTagErrorPopUpShown, type: .oneButton, title: "태그는 최대 3개까지 입력할 수 있습니다.", buttonTitle: "확인", buttonAction: {
-                        self.isTagErrorPopUpShown = false
-                    })
-                })
-                .popup(show: self.$isDeletePopUpShown, content: {
-                    PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
-                        mumoryDataViewModel.choosedMusicModel = nil
-                        mumoryDataViewModel.choosedLocationModel = nil
-                        self.calendarDate = Date()
-                        self.tags.removeAll()
-                        self.contentText.removeAll()
-                        photoPickerViewModel.removeAllSelectedImages()
-                        self.imageURLs.removeAll()
-                        
-                        self.isDeletePopUpShown = false
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            self.appCoordinator.isCreateMumorySheetShown = false
+
+                        dispatchGroup.notify(queue: .main) {
+
+                            let newMumoryAnnotation = Mumory(id: "", uId: currentUserData.user.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0, myCommentCount: 0)
+
+                            mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
+                                switch result {
+                                case .success:
+                                    self.generateHapticFeedback(style: .medium)
+                                    print("뮤모리 만들기 성공")
+                                    mumoryDataViewModel.isLoading = false
+                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+
+                                    mumoryDataViewModel.choosedMusicModel = nil
+                                    mumoryDataViewModel.choosedLocationModel = nil
+                                    self.tags.removeAll()
+                                    self.contentText.removeAll()
+                                    photoPickerViewModel.removeAllSelectedImages()
+                                    self.imageURLs.removeAll()
+
+
+
+                                case .failure(let error):
+                                    print("뮤모리 만들기 실패: \(error.localizedDescription)")
+                                }
+                            }
+
+                            withAnimation(Animation.easeInOut(duration: 0.1)) {
+                                isPublishPopUpShown = false
+                                appCoordinator.sheet = .none
+                                appCoordinator.selectedTab = .home
+                                appCoordinator.rootPath = NavigationPath()
+                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                            }
                         }
-                    })
+                    }
+                })
+            })
+            .popup(show: self.$isPublishErrorPopUpShown, content: {
+                PopUpView(isShown: self.$isPublishErrorPopUpShown, type: .oneButton, title: "음악, 위치, 날짜를 입력해주세요.", subTitle: "뮤모리를 남기시려면\n해당 조건을 필수로 입력해주세요!", buttonTitle: "확인", buttonAction: {
+                    self.isPublishErrorPopUpShown = false
+                })
+            })
+            .popup(show: self.$isTagErrorPopUpShown, content: {
+                PopUpView(isShown: self.$isTagErrorPopUpShown, type: .oneButton, title: "태그는 최대 3개까지 입력할 수 있습니다.", buttonTitle: "확인", buttonAction: {
+                    self.isTagErrorPopUpShown = false
+                })
+            })
+            .popup(show: self.$isDeletePopUpShown, content: {
+                PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
+                    mumoryDataViewModel.choosedMusicModel = nil
+                    mumoryDataViewModel.choosedLocationModel = nil
+                    self.calendarDate = Date()
+                    self.tags.removeAll()
+                    self.contentText.removeAll()
+                    photoPickerViewModel.removeAllSelectedImages()
+                    self.imageURLs.removeAll()
                     
+                    self.isDeletePopUpShown = false
+                    withAnimation(.easeInOut(duration: 0.1)) {
+                        appCoordinator.sheet = .none
+                    }
                 })
                 
-                HStack(spacing: 0) {
-                    Group {
-                        Text("전체공개")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
-                            .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
-                        
-                        Spacer().frame(width: 7)
-                        
-                        Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
-                            .frame(width: 17, height: 17)
-                    }
-                    .gesture(TapGesture(count: 1).onEnded {
-                        self.isPublic.toggle()
-                    })
+            })
+            
+            HStack(spacing: 0) {
+                Group {
+                    Text("전체공개")
+                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
+                        .foregroundColor(self.isPublic ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.76, green: 0.76, blue: 0.76))
                     
-                    Spacer()
+                    Spacer().frame(width: 7)
                     
-                    Button(action: {
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    }) {
-                        SharedAsset.keyboardButtonCreateMumory.swiftUIImage
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                    }
-                    .opacity(self.keyboardResponder.isKeyboardHiddenButtonShown ? 1 : 0)
-                    
+                    Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
+                        .frame(width: 17, height: 17)
                 }
-                .frame(height: 55)
-                .padding(.leading, 25)
-                .padding(.trailing, 20)
-                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
-                .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                .overlay(
-                    Rectangle()
-                        .inset(by: 0.15)
-                        .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
-                        .frame(height: 0.7)
-                    , alignment: .top
-                )
-                .zIndex(2)
-                .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
-                .opacity(self.isDatePickerShown ? 0 : 1)
-            }
-        }
-    }
-    
-    private func onDragEnded(drag: DragGesture.Value) {
-        
-        let cardDismiss = drag.translation.height > 100
-        let offset = cardDismiss ? drag.translation.height : 0
-        
-        self.offsetY = CGFloat(offset)
-        
-        if cardDismiss {
-            withAnimation(.spring(response: 0.1)) {
-                mumoryDataViewModel.choosedMusicModel = nil
-                mumoryDataViewModel.choosedLocationModel = nil
-                self.tags.removeAll()
-                self.contentText.removeAll()
-                photoPickerViewModel.removeAllSelectedImages()
-                self.imageURLs.removeAll()
+                .gesture(TapGesture(count: 1).onEnded {
+                    self.isPublic.toggle()
+                })
                 
-                self.offsetY = .zero
-                self.isSheetShown = false
+                Spacer()
+                
+                Button(action: {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }) {
+                    SharedAsset.keyboardButtonCreateMumory.swiftUIImage
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                }
+                .opacity(self.keyboardResponder.isKeyboardHiddenButtonShown ? 1 : 0)
+                
             }
+            .frame(height: 55)
+            .padding(.leading, 25)
+            .padding(.trailing, 20)
+            .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+            .overlay(
+                Rectangle()
+                    .inset(by: 0.15)
+                    .fill(Color(red: 0.65, green: 0.65, blue: 0.65))
+                    .frame(height: 0.7)
+                , alignment: .top
+            )
+            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+            .opacity(self.isDatePickerShown ? 0 : 1)
+        }
+        .offset(y: self.offsetY)
+        .gesture(dragGesture)
+        .transition(.move(edge: .bottom))
+        .zIndex(.infinity)
+        .onAppear {
+            print("onAppear CreeateMumoryBottomSheetView")
+        }
+        .onDisappear {
+            print("onDisappear CreeateMumoryBottomSheetView")
+            self.offsetY = .zero
         }
     }
 }
-
-struct ViewPositionKey: PreferenceKey {
-    static var defaultValue: CGFloat? = nil
-    
-    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
-        value = nextValue()
-    }
-}
-
-
-enum DragState {
-    case inactive
-    case dragging(translation: CGSize)
-    
-    var translation: CGSize {
-        switch self {
-        case .inactive:
-            return .zero
-        case .dragging(let translation):
-            return translation
-        }
-    }
-    
-    var isDragging: Bool {
-        switch self {
-        case .inactive:
-            return false
-        case .dragging:
-            return true
-        }
-    }
-}
-
 
 struct ContainerView: View {
     

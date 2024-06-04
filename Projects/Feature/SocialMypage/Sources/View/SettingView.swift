@@ -103,11 +103,11 @@ struct SettingView: View {
                         isLoading = true
                         mumoryDataViewModel.myMumorys.removeAll()
                         mumoryDataViewModel.myActivity.removeAll()
-                        mumoryDataViewModel.everyMumorys.removeAll()
+                        mumoryDataViewModel.socialMumorys.removeAll()
                         mumoryDataViewModel.myRewards.removeAll()
                         mumoryDataViewModel.choosedMusicModel = nil
                         mumoryDataViewModel.choosedLocationModel = nil
-                        let Firebase = FBManager.shared
+                        let Firebase = FirebaseManager.shared
                         let auth = Firebase.auth
                         guard let signOut = try? auth.signOut() else {return}
                         Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
@@ -174,7 +174,7 @@ struct SettingView: View {
     }
     private func deleteAppleUser(){
         print("in delete apple user")
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         let auth = Firebase.auth
         
@@ -222,7 +222,7 @@ struct SettingView: View {
     
     private func deleteUser(isSuccessful: Bool){
         if isSuccessful {
-            let Firebase = FBManager.shared
+            let Firebase = FirebaseManager.shared
             let db = Firebase.db
             let auth = Firebase.auth
             
@@ -304,7 +304,7 @@ private struct LogoutButton: View {
 }
 
 private func removeMyData(uid: String) async {
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
     let db = Firebase.db
     let storage = Firebase.storage
     
@@ -319,14 +319,14 @@ private func removeMyData(uid: String) async {
     let deleteFriendQuery = db.collection("User").whereField("friend", arrayContains: uid)
     guard let deleteFriendSnapshot = try? await deleteFriendQuery.getDocuments() else {return}
     deleteFriendSnapshot.documents.forEach { document in
-        document.reference.updateData(["friends": FBManager.Fieldvalue.arrayRemove([uid])])
+        document.reference.updateData(["friends": FirebaseManager.Fieldvalue.arrayRemove([uid])])
     }
     
     //나를 블락했던 사람들의 목록에서 나 삭제
     let deleteBlockQuery = db.collection("User").whereField("blockFriend", arrayContains: uid)
     guard let deleteBlockSnapshot = try? await deleteBlockQuery.getDocuments() else {return}
     deleteBlockSnapshot.documents.forEach { document in
-        document.reference.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([uid])])
+        document.reference.updateData(["blockFriends": FirebaseManager.Fieldvalue.arrayRemove([uid])])
     }
     
     guard let result = try? await storage.reference(withPath: "ProfileImage/\(uid).jpg").delete() else {

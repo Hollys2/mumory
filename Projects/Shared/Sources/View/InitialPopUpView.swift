@@ -22,18 +22,20 @@ public struct CreateMumoryPopUpView: View {
     public init() {}
     
     public var body: some View {
-        Image(uiImage: SharedAsset.createMumoryInitialPopup.image)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 146, height: 35)
-            .opacity(self.isFirstTimeLaunch ? 1: 0)
-            .animation(.easeInOut(duration: 1), value: self.isFirstTimeLaunch)
-            .onAppear {
-                print("isFirstTimeLaunch: \(isFirstTimeLaunch)")
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
-                    UserDefaults.standard.set(false, forKey: "isFirstTimeLaunch")
+        if self.isFirstTimeLaunch {
+            Image(uiImage: SharedAsset.createMumoryInitialPopup.image)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 146, height: 35)
+                .animation(.easeInOut(duration: 1), value: self.isFirstTimeLaunch)
+                .offset(y: -41)
+                .onAppear {
+                    print("isFirstTimeLaunch: \(isFirstTimeLaunch)")
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
+                        UserDefaults.standard.set(false, forKey: "isFirstTimeLaunch")
+                    }
                 }
-            }
+        }
     }
 }
 
@@ -109,9 +111,3 @@ public struct MonthlyStatGenrePopUpView: View {
             }
     }
 }
-
-//struct HomeView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MonthlyStatPopUpView()
-//    }
-//}

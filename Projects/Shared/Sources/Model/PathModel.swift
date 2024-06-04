@@ -11,6 +11,7 @@ import MusicKit
 import SwiftUI
 
 public enum MumoryPage: Hashable {
+    
     case customization
     case startCustomization
     case signUp

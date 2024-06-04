@@ -13,7 +13,7 @@ struct MyFriendRequestListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @State var status: FriendRequestStatus = .normal
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
@@ -82,7 +82,7 @@ public struct MyRequestFriendItem: View {
     @State var isPresentDeletePopup: Bool = false
     @Binding var status: FriendRequestStatus
     let friend: MumoriUser
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
 
     init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
         self.friend = friend
@@ -155,7 +155,7 @@ public struct MyRequestFriendItem: View {
 }
 
 public func deleteFriendRequest(uId: String, friendUId: String) async -> Bool?{
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
     let deleteMyQuery = db.collection("User").document(uId).collection("Friend")
         .whereField("uId", isEqualTo: friendUId)

@@ -110,7 +110,7 @@ struct SaveToPlaylistView: View {
     }
     
     private func saveSongToPlaylist(to: MusicPlaylist)  {
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
         let path = db.collection("User").document(currentUserData.uId).collection("Playlist")
@@ -118,7 +118,7 @@ struct SaveToPlaylistView: View {
         if self.songIDs.count > 1 {
             //리스트로 저장할 때
             DispatchQueue.global(qos: .background ).async {
-                path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion(songIDs)]) { error in
+                path.document(to.id).updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion(songIDs)]) { error in
                     guard error == nil else {
                         return
                     }
@@ -144,7 +144,7 @@ struct SaveToPlaylistView: View {
                 snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: to.title)
             }else {
                 DispatchQueue.global().async {
-                    path.document(to.id).updateData(["songIds": FBManager.Fieldvalue.arrayUnion([song])]) { error in
+                    path.document(to.id).updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion([song])]) { error in
                         guard error == nil else {
                             return
                         }
@@ -168,7 +168,7 @@ struct SaveToPlaylistView: View {
     
     private func getUserPlaylist() {
         self.playlistArray = []
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
         let path = db.collection("User").document(currentUserData.uId).collection("Playlist")
@@ -196,7 +196,7 @@ struct SaveToPlaylistView: View {
                         return
                     }
                     
-                    guard let date = (document.data()["date"] as? FBManager.TimeStamp)?.dateValue() else {
+                    guard let date = (document.data()["date"] as? FirebaseManager.Timestamp)?.dateValue() else {
                         return
                     }
                     

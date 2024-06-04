@@ -213,7 +213,7 @@ struct ReportView: View {
     }
     
     private func saveReport() {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         var data = [
             "uId": settingViewModel.uid,
             "email": settingViewModel.email,

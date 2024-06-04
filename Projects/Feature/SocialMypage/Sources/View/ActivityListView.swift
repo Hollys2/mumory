@@ -56,9 +56,9 @@ struct ActivityListView: View {
     @State var activityList: [String: [Activity]] = [:]
     @State var isLoadig: Bool = false
     
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     
-    @State var pagingCursor: FBManager.Document?
+    @State var pagingCursor: FirebaseManager.Document?
     
     var body: some View {
         ZStack(alignment: .top){
@@ -222,7 +222,7 @@ struct ActivityListView: View {
         return formatter.string(from: date)
     }
     
-    private func getActivity(type: ActivityType, date: Date, pagingCorsor: Binding<FBManager.Document?>, isLoading: Binding<Bool>) async {
+    private func getActivity(type: ActivityType, date: Date, pagingCorsor: Binding<FirebaseManager.Document?>, isLoading: Binding<Bool>) async {
         isLoading.wrappedValue = true
         if pagingCorsor.wrappedValue == nil {
             activityList.removeAll()
@@ -254,7 +254,7 @@ struct ActivityListView: View {
             snapshots.documents.forEach { document in
                 let data = document.data()
 
-                guard let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() else {return}
+                guard let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() else {return}
                 guard let type = data["type"] as? String else {return}
                 guard let friendNickname = data["friendNickname"] as? String else {return}
                 guard let songId = data["songId"] as? String else {return}
@@ -474,7 +474,7 @@ struct ActivityItem: View {
 
 struct ActivityBottomSheet: View {
     let activity: Activity
-    let functions = FBManager.shared.functions
+    let functions = FirebaseManager.shared.functions
     @Binding var activityList: [String: [Activity]]
     @Binding var isLoading: Bool
     @State var isPresentConfimPopup: Bool = false
@@ -559,7 +559,7 @@ struct ActivityBottomSheet: View {
     
     
     private func deleteComment(commentId: String, mumoryId: String) async {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         guard let deleteResult = try? await db.collection("Mumory").document(mumoryId).collection("Comment").document(commentId).delete() else {return}
         let query = db.collection("Mumory").document(mumoryId).collection("Comment")
             .whereField("parentId", isEqualTo: commentId)

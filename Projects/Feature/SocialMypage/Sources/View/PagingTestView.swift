@@ -12,8 +12,8 @@ import FirebaseFunctions
 
 public struct PagingTestView: View {
     @State var titles: [String] = []
-    @State var cursor: FBManager.Document?
-    let db = FBManager.shared.db
+    @State var cursor: FirebaseManager.Document?
+    let db = FirebaseManager.shared.db
     public init(){}
     public var body: some View {
         VStack{

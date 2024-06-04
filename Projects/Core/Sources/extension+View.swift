@@ -88,7 +88,6 @@ extension View {
         self
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(
-                
                 ZStack {
                     
                     if show.wrappedValue {
@@ -107,19 +106,4 @@ extension View {
                 , alignment: .topLeading
             )
     }
-
 }
-
-//
-//func handleScrollDirection(_ direction: ScrollDirection) {
-//    switch direction {
-//    case .up:
-//        withAnimation(Animation.easeInOut(duration: 0.2)) {
-//            parent.appCoordinator.isNavigationBarShown = true
-//        }
-//    case .down:
-//        withAnimation(Animation.easeInOut(duration: 0.2)) {
-//            parent.appCoordinator.isNavigationBarShown = false
-//        }
-//    }
-//}

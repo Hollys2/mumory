@@ -8,9 +8,40 @@
 
 
 import SwiftUI
-
 import Shared
 
+
+struct MumoryCardView: View {
+    
+    @Binding var isAnnotationTapped: Bool
+    
+    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.6)
+                .onTapGesture {
+                    self.isAnnotationTapped = false
+                }
+            
+            VStack(spacing: 16) {
+                
+                MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
+                    .frame(height: 418)
+                    .padding(.horizontal, (UIScreen.main.bounds.width - (getUIScreenBounds().width == 375 ? 296 : 310)) / 2 - 10)
+                
+                Button(action: {
+                    self.isAnnotationTapped = false
+                }, label: {
+                    SharedAsset.closeButtonMumoryPopup.swiftUIImage
+                        .resizable()
+                        .frame(width: 26, height: 26)
+                })
+            }
+            .offset(y: 10)
+        }
+    }
+}
 
 struct MumoryCarouselUIViewRepresentable: UIViewRepresentable {
     

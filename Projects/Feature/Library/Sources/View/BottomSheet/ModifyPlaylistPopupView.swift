@@ -171,7 +171,7 @@ struct ModifyPlaylistPopupView: View {
         playlist.title = self.playlistTitle
         playlist.isPublic = self.isPublic
         
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
         db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).updateData([

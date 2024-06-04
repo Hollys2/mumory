@@ -55,7 +55,7 @@ public class CurrentUserData: ObservableObject {
     func FriendRequestListener() {
         DispatchQueue.main.async {
             
-            let db = FBManager.shared.db
+            let db = FirebaseManager.shared.db
             self.friendCollectionListener = db.collection("User").document(self.uId).collection("Friend").addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
                 self.recievedRequests.removeAll()
@@ -108,7 +108,7 @@ public class CurrentUserData: ObservableObject {
     }
     
     func FriendUpdateListener() {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         DispatchQueue.main.async {
             self.friendDocumentListener = db.collection("User").document(self.uId).addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else {return}
@@ -124,7 +124,7 @@ public class CurrentUserData: ObservableObject {
     }
     
     func NotificationListener() {
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let query = db.collection("User").document(self.uId).collection("Notification")
             .whereField("isRead", isEqualTo: false)
         
@@ -138,7 +138,7 @@ public class CurrentUserData: ObservableObject {
     
     public func savePlaylist() async -> [MusicPlaylist]{
         if self.uId.isEmpty {return []}
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
             var playlists: [MusicPlaylist] = []
@@ -156,7 +156,7 @@ public class CurrentUserData: ObservableObject {
                         let title = data["title"] as? String ?? ""
                         let isPublic = data["isPublic"] as? Bool ?? false
                         let songIDs = data["songIds"] as? [String] ?? []
-                        let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+                        let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
                         let id = document.reference.documentID
                         var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
                         let startIndex = 0
@@ -182,7 +182,7 @@ public class CurrentUserData: ObservableObject {
     
     private func savePlaylist() async {
         if self.uId.isEmpty {return}
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         self.playlistArray = await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
             var playlists: [MusicPlaylist] = []
@@ -200,7 +200,7 @@ public class CurrentUserData: ObservableObject {
                         let title = data["title"] as? String ?? ""
                         let isPublic = data["isPublic"] as? Bool ?? false
                         let songIDs = data["songIds"] as? [String] ?? []
-                        let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+                        let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
                         let id = document.reference.documentID
                         var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
                         
@@ -228,7 +228,7 @@ public class CurrentUserData: ObservableObject {
     public func requestMorePlaylistSong(playlistID: String) async -> [Song]{
         if self.uId.isEmpty {return []}
 
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
             var returnValue:[Song] = []
             let query = db.collection("User").document(uId).collection("Playlist").document(playlistID)
@@ -264,7 +264,7 @@ public class CurrentUserData: ObservableObject {
     public func refreshPlaylist(playlistId: String) async {
         if self.uId.isEmpty {return}
 
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let songs = await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
             var returnValue:[Song] = []
             let query = db.collection("User").document(uId).collection("Playlist").document(playlistId)

@@ -267,7 +267,7 @@ struct ProfileSettingView: View {
     }
     
     private func checkID(id: String){
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let query = db.collection("User").whereField("id", isEqualTo: id)
         
         query.getDocuments { snapshot, error in
@@ -301,7 +301,7 @@ struct ProfileSettingView: View {
     }
     
     private func checkNickname(nickname: String){
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let query = db.collection("User").whereField("nickname", isEqualTo: nickname)
         
         query.getDocuments { snapshot, error in

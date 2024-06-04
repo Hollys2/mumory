@@ -24,7 +24,7 @@ class FriendDataViewModel: ObservableObject {
     }
     
     public func savePlaylist(uId: String) async -> [MusicPlaylist]{
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
             var playlists: [MusicPlaylist] = []
@@ -44,7 +44,7 @@ class FriendDataViewModel: ObservableObject {
                         let title = data["title"] as? String ?? ""
                         let isPublic = data["isPublic"] as? Bool ?? false
                         let songIDs = data["songIds"] as? [String] ?? []
-                        let date = (data["date"] as? FBManager.TimeStamp)?.dateValue() ?? Date()
+                        let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
                         let id = document.reference.documentID
                         var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
                         

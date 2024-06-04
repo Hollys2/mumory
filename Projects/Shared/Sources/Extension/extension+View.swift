@@ -30,6 +30,11 @@ extension View {
     }
 }
 
+extension View {
+  public func hideKeyboard() {
+    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+  }
+}
 
 private struct LoadingLottie: ViewModifier {
     

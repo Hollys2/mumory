@@ -52,7 +52,6 @@ public struct BottomSheetWrapper: View {
                     .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
                     .padding(.bottom, 29)
                 }
-                
             })
             .ignoresSafeArea()
             .onAppear(perform: {
@@ -92,6 +91,5 @@ public struct BottomSheetWrapper: View {
                   }
                   
               })
-        
     }
 }

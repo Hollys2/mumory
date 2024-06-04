@@ -112,8 +112,8 @@ struct ChartListView: View {
                 })
             })
             
-            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown, offsetY: $appCoordinator.offsetY)
-                .ignoresSafeArea()
+//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
+//                .ignoresSafeArea()
 
             
         }

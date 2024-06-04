@@ -313,7 +313,7 @@ public struct PlaylistImageTest: View {
 }
 
 public func requestPlaylistSong(uId: String, playlistID: String) async -> [Song]{
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
         var returnValue:[Song] = []
         let query = db.collection("User").document(uId).collection("Playlist").document(playlistID)

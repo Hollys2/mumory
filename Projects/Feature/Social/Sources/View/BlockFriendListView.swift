@@ -12,7 +12,7 @@ import Shared
 struct BlockFriendListView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
-    let db = FBManager.shared.db
+    let db = FirebaseManager.shared.db
     var body: some View {
         ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
@@ -70,7 +70,7 @@ struct BlockFriendListView: View {
 struct BlockFriendItem: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @State var isPresentRequestPopup: Bool = false
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
     let friend: MumoriUser
     init(friend: MumoriUser) {
         self.friend = friend
@@ -114,7 +114,7 @@ struct BlockFriendItem: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
                 .onTapGesture {
                     let query = Firebase.db.collection("User").document(currentUserData.uId)
-                    query.updateData(["blockFriends": FBManager.Fieldvalue.arrayRemove([self.friend.uId])])
+                    query.updateData(["blockFriends": FirebaseManager.Fieldvalue.arrayRemove([self.friend.uId])])
                 }
         })
         .padding(.horizontal, 20)

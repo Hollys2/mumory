@@ -205,7 +205,8 @@ public struct MumoryDetailView: View {
                 Spacer()
                 
                 Button(action: {
-                    appCoordinator.isMumoryDetailMenuSheetShown = true
+//                    appCoordinator.isMumoryDetailMenuSheetShown = true
+                    appCoordinator.bottomSheet = .mumoryDetail
                 }, label: {
                     Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
                         .resizable()
@@ -222,15 +223,15 @@ public struct MumoryDetailView: View {
                 MumoryDetailReactionBarView(mumory: self.mumory, isOn: true)
             }
             
-            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+//            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
+//                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
             
-            ZStack {
-                Color.clear
-                    .ignoresSafeArea()
-                
-                LoadingAnimationView(isLoading: self.$mumoryDataViewModel.isUpdating)
-            }
+//            ZStack {
+//                Color.clear
+//                    .ignoresSafeArea()
+//                
+//                LoadingAnimationView(isLoading: self.$mumoryDataViewModel.isUpdating)
+//            }
         } // ZStack
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .onAppear {
@@ -248,7 +249,7 @@ public struct MumoryDetailView: View {
         .fullScreenCover(isPresented: self.$isMapSheetShown) {
             FriendMumoryMapView(isShown: self.$isMapSheetShown, mumorys: [self.mumory], user: self.user)
         }
-        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
+//        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

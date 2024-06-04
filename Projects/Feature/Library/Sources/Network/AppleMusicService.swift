@@ -43,7 +43,7 @@ public class AppleMusicService {
         } else {
             url = url + chartURL
         }
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
         db.collection("Admin").document("Key").getDocument { snapshot, error in

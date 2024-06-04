@@ -119,7 +119,7 @@ struct EmailLoginView: View {
     // 로그인 완료 후 커스터마이징 여부 확인 후 홈 화면 혹은 커스터마이징 시작 화면으로 이동
     func tapLoginButton(email: String, password: String) async {
         isLoading = true
-        let Firebase = FBManager.shared
+        let Firebase = FirebaseManager.shared
         let Auth = Firebase.auth
         let db = Firebase.db
         let messaging = Firebase.messaging

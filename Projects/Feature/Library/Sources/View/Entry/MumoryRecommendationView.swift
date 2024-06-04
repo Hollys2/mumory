@@ -149,7 +149,7 @@ public struct MumoryRecommendationView: View {
     
     private func getMostPostedSongs() async -> [Song] {
         return await withTaskGroup(of: String?.self) { taskGroup -> [Song] in
-            let db = FBManager.shared.db
+            let db = FirebaseManager.shared.db
             let query = db.collection("RecordData")
                 .order(by: "count", descending: true)
                 .limit(to: 50)
@@ -175,7 +175,7 @@ public struct MumoryRecommendationView: View {
     }
     
     private func getSimilarTasteSongs() async -> [Song]{
-        let db = FBManager.shared.db
+        let db = FirebaseManager.shared.db
         let songIds: [String] = await withTaskGroup(of: [String].self) { taskGroup -> [String] in
             var songIds: [String] = []
             for favoriteGenre in currentUserData.favoriteGenres {
