@@ -12,7 +12,7 @@ import MusicKit
 
 struct UneditablePlaylistView: View {
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var offset: CGPoint = .zero

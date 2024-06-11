@@ -12,8 +12,8 @@ import Foundation
 public enum MumoryViewType: Equatable, Hashable {
     case mumoryDetailView
     case editMumoryView
-    case myMumoryView(MumoriUser)
-    case regionMyMumoryView(MumoriUser)
+    case myMumoryView(UserProfile)
+    case regionMyMumoryView(UserProfile)
     
     public func hash(into hasher: inout Hasher) {
         switch self {
@@ -34,13 +34,13 @@ public enum MumoryViewType: Equatable, Hashable {
 public struct MumoryView: Hashable {
     
     public let type: MumoryViewType
-    public let user: MumoriUser?
+    public let user: UserProfile?
     public let mumoryAnnotation: Mumory
     public let region: String?
     public let mumorys: [Mumory]?
 //    public let songID: MusicItemID?
     
-    public init(type: MumoryViewType, user: MumoriUser? = nil, mumoryAnnotation: Mumory, region: String? = nil, mumorys: [Mumory]? = nil) {
+    public init(type: MumoryViewType, user: UserProfile? = nil, mumoryAnnotation: Mumory, region: String? = nil, mumorys: [Mumory]? = nil) {
         self.type = type
         self.user = user
         self.mumoryAnnotation = mumoryAnnotation

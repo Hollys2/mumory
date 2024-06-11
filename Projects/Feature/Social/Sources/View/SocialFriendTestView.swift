@@ -30,13 +30,13 @@ struct SocialFriendTestView: View {
         
     }
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
 
     @State private var itemSelection = 0
     @State private var searchText = ""
     
-    @State private var friendSearchResult: MumoriUser?
+    @State private var friendSearchResult: UserProfile?
     @State private var isPresentFriendBottomSheet: Bool = false
     @State private var status: FriendRequestStatus = .normal
     //검색 결과가 있는지
@@ -261,8 +261,7 @@ struct SocialFriendTestView: View {
             }else {
                 status = .valid
             }
-            
-            self.friendSearchResult = await MumoriUser(uId: friendUID)
+            self.friendSearchResult = await FetchManager.shared.fetchUser(uId: friendUID)
         }
     }
 }
@@ -331,9 +330,9 @@ struct SearchFriendTextField: View {
 }
 
 struct AlreadFriendItem: View {
-    let friend: MumoriUser
+    let friend: UserProfile
     @Binding var status: FriendRequestStatus
-    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
+    init(friend: UserProfile, status: Binding<FriendRequestStatus>) {
         self.friend = friend
         self._status = status
     }
@@ -379,9 +378,9 @@ struct AlreadFriendItem: View {
 }
 
 struct FriendAddItem: View {
-    let friend: MumoriUser
+    let friend: UserProfile
     @Binding var status: FriendRequestStatus
-    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
+    init(friend: UserProfile, status: Binding<FriendRequestStatus>) {
         self.friend = friend
         self._status = status
     }
@@ -462,11 +461,11 @@ struct FriendAddItem: View {
 }
 
 struct RecievedRequestItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @Binding var status: FriendRequestStatus
     var uId: String = ""
-    let friend: MumoriUser
-    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
+    let friend: UserProfile
+    init(friend: UserProfile, status: Binding<FriendRequestStatus>) {
         self.friend = friend
         self._status = status
     }

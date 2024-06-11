@@ -38,14 +38,14 @@ struct TagView: View {
 struct MumoryDetailScrollContentView: View {
     
     @Binding var mumory: Mumory
-    @State var user: MumoriUser = MumoriUser()
+    @State var user: UserProfile = UserProfile()
     @State var isMapViewShown: Bool = false
     @State var isPopUpShown: Bool = true
     @State var playButtonOpacity: CGFloat = 1
 
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     var body: some View {
@@ -123,7 +123,7 @@ struct MumoryDetailScrollContentView: View {
                                 if self.user.uId == currentUserData.user.uId {
                                     appCoordinator.rootPath.append(MumoryPage.myPage)
                                 } else {
-                                    let friend = await MumoriUser(uId: self.user.uId)
+                                    let friend = await FetchManager.shared.fetchUser(uId: self.user.uId)
                                     appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                                 }
                             }
@@ -340,7 +340,7 @@ struct MumoryDetailScrollContentView: View {
             Task {
                 mumoryDataViewModel.isUpdating = true
                 self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
-                self.user = await MumoriUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
                 print("MumoryDetailScrollContentView onAppear")
                 for friend in self.currentUserData.friends {
                     Task {

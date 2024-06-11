@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct SimilarTasteListView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     

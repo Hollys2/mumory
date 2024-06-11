@@ -30,26 +30,32 @@ struct MumorySimpleButton: View {
 }
 
 struct MumoryLoadingButton: View {
-    var title: String
-    var isEnabled: Bool = false
-    var showShadow: Bool = true
-    @Binding var isLoading: Bool
-    
+    // MARK: - Object lifecycle
     init(title: String, isEnabled: Bool, isLoading: Binding<Bool>) {
         self.title = title
         self.isEnabled = isEnabled
         self._isLoading = isLoading
     }
     
+    // MARK: - Propoerties
+    @Binding var isLoading: Bool
+    var title: String
+    var isEnabled: Bool = false
+    var showShadow: Bool = true
+    
+
+    
     var body: some View {
-        VStack{
-            if isLoading {
-                WhiteLoadingAnimationView(isLoading: $isLoading)
-            }else {
-                Text(title)
-                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
-                    .foregroundStyle(Color.black)
-            }
+        HStack{
+            Text(title)
+                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
+                .foregroundStyle(Color.black)
+                .opacity(isLoading ? 0 : 1)
+                .overlay {
+                    if isLoading {
+                        WhiteLoadingAnimationView(isLoading: $isLoading)
+                    }
+                }
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .frame(height: 58)
@@ -57,7 +63,7 @@ struct MumoryLoadingButton: View {
         .background(isEnabled ? ColorSet.mainPurpleColor : ColorSet.subGray)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
         .shadow(color: showShadow ? Color.black.opacity(0.25) : Color.clear, radius: 10, y: 6)
-
+        .animation(nil, value: isEnabled)
     }
 }
 

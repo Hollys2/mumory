@@ -48,7 +48,3 @@ struct AuthTextField: View {
             .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
     }
 }
-
-//#Preview {
-//    AuthTextField()
-//}

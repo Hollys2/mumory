@@ -9,10 +9,10 @@
 import SwiftUI
 import Shared
 
-struct LastOfCustomizationView: View {
+struct ProfileCardView: View {
     @EnvironmentObject var manager: CustomizationManageViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State var firstYOffset: CGFloat = 0
     @State var firstOpacity: CGFloat = 0
@@ -373,7 +373,3 @@ struct LastOfCustomizationView: View {
         return ""
     }
 }
-
-//#Preview {
-//    LastOfCustomizationView()
-//}

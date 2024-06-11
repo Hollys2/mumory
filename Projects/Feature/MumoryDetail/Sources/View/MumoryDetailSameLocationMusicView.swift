@@ -12,7 +12,7 @@ import Shared
 import MusicKit
 
 struct MumoryDetailSameLocationMusicView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false

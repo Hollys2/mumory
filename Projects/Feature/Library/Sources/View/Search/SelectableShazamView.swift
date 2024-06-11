@@ -14,7 +14,7 @@ import ShazamKit
 
 struct SelectableShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State var startsRecording: Bool = false

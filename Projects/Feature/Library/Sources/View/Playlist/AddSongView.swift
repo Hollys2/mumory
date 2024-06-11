@@ -11,7 +11,7 @@ import Shared
 
 struct AddSongView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
 
     @State var originPlaylist: MusicPlaylist

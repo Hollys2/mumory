@@ -8,19 +8,21 @@
 
 import Foundation
 import FirebaseAuth
+import SwiftUI
+import Shared
 
 /// 회원가입, 커스터마이징 관리를 위한 뷰모델
-
-class SignUpData: ObservableObject {
+public class SignUpViewModel: ObservableObject {
     // MARK: - Object lifecycle
     
-    init() {
+    public init() {
         self.email = ""
         self.signInMethod = .none
         self.favoriteGenres = []
-        self.notificationTime = 0
+        self.notificationTime = .none
+        isCheckedRequireItems = false
         self.isSubscribedToService = false
-        self.isSubscribedToSocial = false
+        self.isSubscribedToSocial = true
         self.nickname = ""
         self.id = ""
         self.profileIndex = Int.random(in: 0...3)
@@ -35,10 +37,11 @@ class SignUpData: ObservableObject {
     @Published var signInMethod: SignInMethod
     @Published var profileIndex: Int
     @Published var email: String
+    @Published var isCheckedRequireItems: Bool
     @Published var isSubscribedToService: Bool
     @Published var isSubscribedToSocial: Bool
-    @Published var favoriteGenres:[Int]
-    @Published var notificationTime: Int
+    @Published var favoriteGenres:[MusicGenre]
+    @Published var notificationTime: TimeZone
     @Published var nickname: String
     @Published var id: String
     //프로필 이미지?
@@ -57,6 +60,8 @@ class SignUpData: ObservableObject {
     @Published var isValidEmail: Bool
     @Published var isValidPassword: Bool
     
+    @Published var isLoading: Bool = false
+    
     // MARK: - Methods
     
     public func startSignUp(method: SignInMethod) {
@@ -72,12 +77,57 @@ class SignUpData: ObservableObject {
     }
     
     public func goNext() {
-        step += 1
-        //
+        withAnimation {
+            step += 1
+        }
     }
     
     public func goPrevious() {
-        step -= 1
+        withAnimation {
+            step -= 1
+        }
+    }
+    
+    public func getButtonTitle() -> String {
+        switch step {
+        case 2: return "회원가입"
+        case 3: return "시작하기"
+        case 6: return "완료"
+        default: return "다음"
+        }
+    }
+    
+    public func getNavigationTitle() -> String {
+        switch step {
+        case 0: return "이메일 입력하기"
+        case 1: return "비밀번호 입력하기"
+        default: return ""
+        }
+    }
+    
+    public func isButtonEnabled() -> Bool {
+        switch step {
+        case 0: return isValidEmail
+        case 1: return isValidPassword
+        case 2: return isCheckedRequireItems
+        case 4: return favoriteGenres.count > 0
+        case 5: return notificationTime != .none
+        default: return false
+        }
+    }
+    
+    public func appendGenre(genre: MusicGenre){
+        if favoriteGenres.contains(where: {$0.id == genre.id}){
+            favoriteGenres.removeAll(where: {$0.id == genre.id})
+        }else {
+            if favoriteGenres.count < 5 {
+                favoriteGenres.append(genre)
+            }
+        }
+    }
+    
+    public func contains(genre: MusicGenre) -> Bool{
+        return favoriteGenres.contains(where: {$0.id == genre.id})
     }
 }
 

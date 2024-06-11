@@ -30,7 +30,7 @@ struct MusicListItem: View {
     @State var isPresentBottomSheet: Bool = false
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -131,7 +131,7 @@ struct MusicListItemInUneditablePage: View {
     @State var isPresentBottomSheet: Bool = false
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     var body: some View {
         HStack(spacing: 0, content: {

@@ -80,7 +80,7 @@ struct RewardContentView: View {
     
     @State var count: Int = 0
     
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     var body: some View {
         
@@ -234,7 +234,7 @@ struct RewardContent3: View {
     
     @State private var myRewards: [String] = []
     
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     public init(index: Int, index2: Int) {
         self.i = index

@@ -11,7 +11,7 @@ import Core
 import MusicKit
 import Firebase
 
-public class CurrentUserData: ObservableObject {
+public class CurrentUserViewModel: ObservableObject {
     
     //사용자 정보 및 디바이스 크기 정보
     @Published public var uId: String = "" {
@@ -28,18 +28,24 @@ public class CurrentUserData: ObservableObject {
         }
     }
     
-    @Published public var user: MumoriUser = MumoriUser()
+    @Published public var user: UserProfile = UserProfile(uId: "", nickname: "", id: "", defaultProfileImage: SharedAsset.profileWithdrawal.swiftUIImage, signUpDate: Date())
     
-    @Published public var friends: [MumoriUser] = []
-    @Published public var blockFriends: [MumoriUser] = []
-    @Published public var friendRequests: [MumoriUser] = []
-    @Published public var recievedRequests: [MumoriUser] = []
+    @Published public var friends: [UserProfile] = []
+    @Published public var blockFriends: [UserProfile] = []
+    @Published public var friendRequests: [UserProfile] = []
+    @Published public var recievedRequests: [UserProfile] = []
+    
     @Published public var recievedNewFriends: Bool = false
     @Published public var existUnreadNotification: Bool = false    
+    
     @Published public var reward: Reward = .none
+    
     @Published public var favoriteGenres: [Int] = []
     @Published public var playlistArray: [MusicPlaylist] = []
-
+    
+    
+    
+    
     
     //삭제 예정...
     @Published public var topInset: CGFloat = 0
@@ -51,6 +57,12 @@ public class CurrentUserData: ObservableObject {
     var friendDocumentListener: ListenerRegistration?
     var notificationListener: ListenerRegistration?
     
+//    func mumoryInit() {
+//        user.start()
+//        friendViewModel.start()
+//        mumory.start()
+//        mumory.fetchMyMumoryListener()
+//    }
     
     func FriendRequestListener() {
         DispatchQueue.main.async {
@@ -69,7 +81,7 @@ public class CurrentUserData: ObservableObject {
                         if type == "recieve" {
                             guard let friendUId = data["uId"] as? String else {return}
                             Task {
-                                let user = await MumoriUser(uId: friendUId)
+                                let user = await UserProfile()
                                 DispatchQueue.main.async {
                                     self.recievedNewFriends = true
                                     self.recievedRequests.append(user)
@@ -78,7 +90,7 @@ public class CurrentUserData: ObservableObject {
                         } else if type == "request" {
                             guard let friendUId = data["uId"] as? String else {return}
                             Task {
-                                let user = await MumoriUser(uId: friendUId)
+                                let user = await UserProfile()
                                 DispatchQueue.main.async {
                                     self.friendRequests.append(user)
                                 }
@@ -308,7 +320,7 @@ public class CurrentUserData: ObservableObject {
         case block
         
     }
-    public func getFriendStatus(friend: MumoriUser) -> FriendStatus {
+    public func getFriendStatus(friend: UserProfile) -> FriendStatus {
         if self.friends.contains(friend) {
             return .friend
         }else if self.blockFriends.contains(friend) {
@@ -324,7 +336,7 @@ public class CurrentUserData: ObservableObject {
     
     public func removeAllData(){
         uId = ""
-        user = MumoriUser()
+        user = UserProfile()
         friends.removeAll()
         blockFriends.removeAll()
         friendRequests.removeAll()
@@ -338,12 +350,12 @@ public class CurrentUserData: ObservableObject {
         notificationListener?.remove()
     }
     
-    private func fetchFriend(friendIds: [String]) async -> [MumoriUser] {
-        return await withTaskGroup(of: MumoriUser?.self) { taskGroup -> [MumoriUser] in
-            var friendList: [MumoriUser] = []
+    private func fetchFriend(friendIds: [String]) async -> [UserProfile] {
+        return await withTaskGroup(of: UserProfile?.self) { taskGroup -> [UserProfile] in
+            var friendList: [UserProfile] = []
             for friendId in friendIds {
                 taskGroup.addTask {
-                    let user = await MumoriUser(uId: friendId)
+                    let user = await FetchManager.shared.fetchUser(uId: self.uId)
                     print("friend!!!!! nickname: \(user.nickname)")
                     if user.nickname == "탈퇴계정" {return nil}
                     return user

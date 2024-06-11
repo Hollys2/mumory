@@ -19,7 +19,7 @@ import Lottie
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -254,10 +254,6 @@ struct SettingView: View {
         }
     }
 }
-
-//#Preview {
-//    SettingView()
-//}
 
 struct SettingItem: View {
     @State var title: String

@@ -14,7 +14,7 @@ import MusicKit
 //플레이리스트 아이템(플레이리스트 뷰)
 struct PlaylistItem_Big: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @Binding var playlist: MusicPlaylist
     @Binding var isEditing: Bool

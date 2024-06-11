@@ -12,7 +12,7 @@ import MusicKit
 
 
 struct FavoriteGenreRecommendationView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isEditGenreViewPresent: Bool = false
     @State var isEditGenreInfoPresent: Bool = false
     
@@ -247,8 +247,3 @@ private struct test: View {
     }
 }
 
-
-//#Preview {
-//    test()
-//        
-//}

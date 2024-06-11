@@ -15,14 +15,14 @@ import _MapKit_SwiftUI
 struct FriendPageView: View {
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isStranger: Bool = true
     @State var isPresentFriendBottomSheet: Bool = false
     @State var isPresentBlockConfirmPopup: Bool = false
     
-    @State var friend: MumoriUser
+    @State var friend: UserProfile
     
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self._friend = .init(initialValue: friend)
     }
     
@@ -73,14 +73,14 @@ struct FriendPageView: View {
         })
         .onAppear(perform: {
             Task {
-                self.friend = await MumoriUser(uId: self.friend.uId)
+                self.friend = await FetchManager.shared.fetchUser(uId: self.friend.uId)
             }
         })
     }
 }
 
 struct KnownFriendPageView: View {
-    let friend: MumoriUser
+    let friend: UserProfile
     let lineGray = Color(white: 0.37)
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
@@ -90,7 +90,7 @@ struct KnownFriendPageView: View {
     @State private var isLoading: Bool = true
     @State private var playlists: [MusicPlaylist] = []
     @State private var isPlaylistLoading: Bool = true
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self.friend = friend
     }
     
@@ -169,7 +169,7 @@ struct KnownFriendPageView: View {
             }
             
             Task {
-                friendDataViewModel.friend = await MumoriUser(uId: friend.uId)
+                friendDataViewModel.friend = await FetchManager.shared.fetchUser(uId: friend.uId)
                 friendDataViewModel.playlistArray = await friendDataViewModel.savePlaylist(uId: friend.uId)
                 friendDataViewModel.isPlaylistLoading = false
             }
@@ -179,15 +179,15 @@ struct KnownFriendPageView: View {
 
 
 struct UnkownFriendPageView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentPopup: Bool = false
     @State var isRequested: Bool = false
     @State var myRequestList: [String] = []//이미 요청한 친구 uid배열
     @State var status: FriendRequestStatus = .normal
-    let friend: MumoriUser
+    let friend: UserProfile
     let secretId: String
     let secretNickname: String
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self.friend = friend
         secretId = friend.id.isEmpty ? "*******" : String(friend.id.prefix(2)) + String(repeating: "*", count: friend.id.count-2)
         secretNickname = friend.nickname.isEmpty ? "*******" : String(friend.nickname.prefix(2)) + String(repeating: "*", count: friend.nickname.count-2)
@@ -434,12 +434,12 @@ struct UnkownFriendPageView: View {
 
 
 struct FriendInfoView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentConfirmPopup: Bool = false
     
-    let friend: MumoriUser
-    init(friend: MumoriUser) {
+    let friend: UserProfile
+    init(friend: UserProfile) {
         self.friend = friend
     }
     @Environment(\.dismiss) var dismiss
@@ -626,11 +626,11 @@ struct FriendPlaylistView: View {
 
 struct FriendPageCommonBottomSheetView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
-    let friend: MumoriUser
+    let friend: UserProfile
     @Binding var isPresentBlockConfirmPopup: Bool
-    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>) {
+    init(friend: UserProfile, isPresentBlockConfirmPopup: Binding<Bool>) {
         self.friend = friend
         self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
     }
@@ -655,10 +655,10 @@ struct FriendPageCommonBottomSheetView: View {
 
 struct FriendDeleteBlockBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
-    let friend: MumoriUser
+    let friend: UserProfile
     @Binding var isPresentBlockConfirmPopup: Bool
     @Binding var isPresentDeleteConfirmPopup: Bool
-    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>, isPresentDeleteConfirmPopup: Binding<Bool>) {
+    init(friend: UserProfile, isPresentBlockConfirmPopup: Binding<Bool>, isPresentDeleteConfirmPopup: Binding<Bool>) {
         self.friend = friend
         self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
         self._isPresentDeleteConfirmPopup = isPresentDeleteConfirmPopup
@@ -720,11 +720,11 @@ public func deleteFriend(uId: String, friendUId: String){
 }
 
 struct DeleteFriendBottomSheetView: View {
-    @EnvironmentObject var currentUserDat: CurrentUserData
+    @EnvironmentObject var currentUserDat: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
     @Binding var isPresentPopup: Bool
-    let friend: MumoriUser
-    init(friend: MumoriUser, isPresentPopup: Binding<Bool>) {
+    let friend: UserProfile
+    init(friend: UserProfile, isPresentPopup: Binding<Bool>) {
         self.friend = friend
         self._isPresentPopup = isPresentPopup
     }

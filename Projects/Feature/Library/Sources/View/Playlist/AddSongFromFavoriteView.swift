@@ -11,7 +11,7 @@ import Shared
 import Core
 
 struct AddSongFromFavoriteView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var favoritePlaylist: MusicPlaylist?
@@ -58,7 +58,3 @@ struct AddSongFromFavoriteView: View {
     }
     
 }
-
-//#Preview {
-//    AddSongFromFavoriteView()
-//}

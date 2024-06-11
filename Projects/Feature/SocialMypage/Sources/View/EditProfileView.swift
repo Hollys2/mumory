@@ -15,7 +15,7 @@ import FirebaseFirestore
 //여기 내부에서만 사용하는 observable을 만들어서 사용할까?? - 이게좋을듯함
 //아이템 내부에 type, status, value 정의해서 사용
 struct EditProfileView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @StateObject private var editProfileViewModel: EditProfileViewModel = EditProfileViewModel()
     @State var isLoading: Bool = false
     
@@ -68,7 +68,7 @@ public struct ImageBundle {
     public var data: Data?
 }
 private struct UserProfile: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @Environment(\.dismiss) var dismiss
     @State var isPresentBackgroundBottomSheet: Bool = false
@@ -215,7 +215,7 @@ private struct UserProfile: View {
 }
 
 private struct IdStackView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State private var isTappedInfo: Bool = false
     @State private var timer: Timer?
@@ -265,7 +265,7 @@ private struct IdStackView: View {
             .frame(height: 17)
             
             
-            AuthTextFieldSmall(text: $editProfileViewModel.id, prompt: "ID를 입력해 주세요!")
+            AuthTextField_16(text: $editProfileViewModel.id, prompt: "ID를 입력해 주세요!")
                 .onChange(of: editProfileViewModel.id, perform: { value in
                     timer?.invalidate()
                     withAnimation {
@@ -335,7 +335,7 @@ private struct IdStackView: View {
 }
 
 private struct NicknameStackView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State var timer: Timer?
     let db = FirebaseManager.shared.db
@@ -362,7 +362,7 @@ private struct NicknameStackView: View {
             .frame(height: 17)
             
             
-            AuthTextFieldSmall(text: $editProfileViewModel.nickname, prompt: "닉네임을 입력해 주세요!")
+            AuthTextField_16(text: $editProfileViewModel.nickname, prompt: "닉네임을 입력해 주세요!")
                 .onChange(of: editProfileViewModel.nickname, perform: { value in
                     timer?.invalidate()
                     withAnimation {
@@ -433,7 +433,7 @@ private struct NicknameStackView: View {
 
 
 struct BioStackView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     
     var body: some View {
@@ -453,7 +453,7 @@ struct BioStackView: View {
             })
             .frame(height: 17)
             
-            AuthTextFieldSmall(text: $editProfileViewModel.bio, prompt: "회원님에 대해 소개해주세요!")
+            AuthTextField_16(text: $editProfileViewModel.bio, prompt: "회원님에 대해 소개해주세요!")
                 .onChange(of: editProfileViewModel.bio, perform: { value in
                     if editProfileViewModel.bio.count > 50 {
                         editProfileViewModel.bio = String(value.prefix(50))

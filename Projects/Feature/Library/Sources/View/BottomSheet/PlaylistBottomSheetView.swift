@@ -13,7 +13,7 @@ import MusicKit
 struct PlaylistBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentDeletePlaylistBottomSheet: Bool = false
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
@@ -81,10 +81,6 @@ struct PlaylistBottomSheetView: View {
         })
     }
 }
-
-//#Preview {
-//    PlaylistBottomSheetView()
-//}
 
 private struct MiniPlaylistImage: View {
     var songs: [Song]

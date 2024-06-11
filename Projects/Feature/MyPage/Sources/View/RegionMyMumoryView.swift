@@ -14,7 +14,7 @@ import Shared
 
 public struct RegionMyMumoryView: View {
     
-    let user: MumoriUser
+    let user: UserProfile
     let region: String
     @State var mumorys: [Mumory]
     
@@ -25,7 +25,7 @@ public struct RegionMyMumoryView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @State private var offset: CGFloat = 0.0
     @State private var scrollViewOffsetY: CGFloat = 0.0

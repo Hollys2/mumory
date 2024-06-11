@@ -15,7 +15,7 @@ import Shared
 
 public struct MyMumoryView: View {
     
-    let user: MumoriUser
+    let user: UserProfile
     
     @State private var selectedDate: Date = Date()
     @State private var currentTabSelection: Int = 0
@@ -27,7 +27,7 @@ public struct MyMumoryView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @State private var offset: CGFloat = 0.0
     @State private var scrollViewOffsetY: CGFloat = 0.0
@@ -38,7 +38,7 @@ public struct MyMumoryView: View {
         GridItem(.flexible(), spacing: 0)
     ]
     
-    public init(user: MumoriUser) {
+    public init(user: UserProfile) {
         self.user = user
     }
     

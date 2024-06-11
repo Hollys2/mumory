@@ -88,16 +88,16 @@ struct TermsOfServiceForSocialView: View {
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     
-                    SignUpConsentItem(type: .required, title: "이용약관 동의", isChecked: $isCheckedFirstItem)
-                        .padding(.top, 48)
-                    
-                    SignUpConsentItem(type: .required, title: "개인정보 수집 및 이용 동의", isChecked: $isCheckedSecondItem)
-                        .padding(.top, 35)
-                    
-                    
-                    SignUpConsentItem(type: .select, title: "서비스 소식 수신 동의", isChecked: $isCheckedServiceNewsNotification)
-                        .padding(.top, 35)
-                        .padding(.bottom, 64)
+//                    SignUpConsentItem(type: .required, title: "이용약관 동의", isChecked: $isCheckedFirstItem)
+//                        .padding(.top, 48)
+//                    
+//                    SignUpConsentItem(type: .required, title: "개인정보 수집 및 이용 동의", isChecked: $isCheckedSecondItem)
+//                        .padding(.top, 35)
+//                    
+//                    
+//                    SignUpConsentItem(type: .select, title: "서비스 소식 수신 동의", isChecked: $isCheckedServiceNewsNotification)
+//                        .padding(.top, 35)
+//                        .padding(.bottom, 64)
                     
                     
                     Button(action: {
@@ -125,6 +125,3 @@ struct TermsOfServiceForSocialView: View {
 
 }
 
-//#Preview {
-//    TermsOfServiceForSocialView()
-//}

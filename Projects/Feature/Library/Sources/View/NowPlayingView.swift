@@ -12,7 +12,7 @@ import MusicKit
 
 public struct NowPlayingView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
@@ -105,7 +105,7 @@ public struct NowPlayingView: View {
 }
 
 struct PlayControlView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var isPresentQueue: Bool
@@ -690,7 +690,7 @@ struct PlayTogetherView: View {
 struct PlayTogetherItem: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var viewWidth: CGFloat = .zero
     var song: Song

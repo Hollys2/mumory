@@ -19,7 +19,7 @@ struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isEntireOn: Bool = false
     @State var checkedResult = 0
     var homeIconHidden: Bool = false

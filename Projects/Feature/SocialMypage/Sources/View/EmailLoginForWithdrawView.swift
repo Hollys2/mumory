@@ -104,7 +104,7 @@ struct EmailLoginForWithdrawView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .navigationDestination(isPresented: $isWithdrawSuccess, destination: {
-            LoginView()
+            EmptyView()
         })
         .background(LibraryColorSet.background)
         .navigationBarBackButtonHidden()
@@ -114,7 +114,3 @@ struct EmailLoginForWithdrawView: View {
         .disabled(isLoading)
     }
 }
-
-//#Preview {
-//    EmailLoginForWithdrawView()
-//}

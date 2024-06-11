@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct AddMusicItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var originPlaylist: MusicPlaylist
     @State var isSnackBarPresent: Bool = false
@@ -99,7 +99,3 @@ struct AddMusicItem: View {
         }
     }
 }
-
-//#Preview {
-//    AddSongItem()
-//}

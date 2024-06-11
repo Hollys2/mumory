@@ -22,54 +22,92 @@ struct LoginData {
 }
 
 public struct LoginView: View {
-    public init() {}
+    public init() {
+    }
     
     // MARK: - Properties
-    
-    let Firebase = FBManager.shared
+    let Firebase = FirebaseManager.shared
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @State var isLoading: Bool = false
     
+    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
+    
+    @StateObject var authCoordinator: AuthCoordinator = .init()
+    @StateObject var signUpViewModel: SignUpViewModel = .init()
+
     // 여러 개의 메서드에서 중복되어 사용되는 로그인 관련 변수만 정의해둔 구조체
     @State var loginData: LoginData = .init()
-    // MARK: - View
     
+    // MARK: - View
     public var body: some View {
-        ZStack{
-            ColorSet.background.ignoresSafeArea()
-            VStack(spacing: 0){
-                SharedAsset.logo.swiftUIImage
-                    .padding(.top, getUIScreenBounds().height > 700 ? 127 : 71)
-                
-                LoginButton(type: .email, action: emailLogin)
-                    .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
-                LoginButton(type: .kakao, action: kakaoLogin)
-                LoginButton(type: .google, action: googleLogin)
-                LoginButton(type: .apple, action: appleLogin)
-                    .onChange(of: signInWithAppleManager.isUserAuthenticated) { isUserAuthenticated in
-                        if isUserAuthenticated{
-                            if let currentUser = Firebase.auth.currentUser {
-                                Task {
-                                    await finishSignInProcess()
+        NavigationStack(path: $authCoordinator.path) {
+            ZStack{
+                ColorSet.background.ignoresSafeArea()
+                VStack(spacing: 0){
+                    SharedAsset.logo.swiftUIImage
+                        .padding(.top, getUIScreenBounds().height > 700 ? 127 : 71)
+                    
+                    LoginButton(type: .email, action: emailLogin)
+                        .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
+                    
+                    LoginButton(type: .kakao, action: kakaoLogin)
+                    LoginButton(type: .google, action: googleLogin)
+                    LoginButton(type: .apple, action: appleLogin)
+                        .onChange(of: signInWithAppleManager.isUserAuthenticated) { isUserAuthenticated in
+                            if isUserAuthenticated{
+                                if let currentUser = Firebase.auth.currentUser {
+                                    Task {
+                                        await finishSignInProcess()
+                                    }
                                 }
                             }
                         }
-                    }
+                    
+                    signUpButton
+                }
+                LoadingAnimationView(isLoading: $isLoading)
                 
-                signUpButton
+                if bootstrapViewModel.isShownOnBoarding {
+                    OnboardingView()
+                }
             }
-            LoadingAnimationView(isLoading: $isLoading)
+            .navigationBarBackButtonHidden()
+            //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
+            .onDisappear(perform: {
+                isLoading = false
+                signInWithAppleManager.isUserAuthenticated = false
+            })
+            .navigationDestination(for: AuthPage.self) { page in
+                switch page {
+                case .singUpCenter:
+                    SignUpCenterView()
+                        .environmentObject(authCoordinator)
+                        .environmentObject(signUpViewModel)
+                        
+                case .introOfCustomization:
+                    IntroOfCustomization()
+                        .environmentObject(authCoordinator)
+                        .environmentObject(signUpViewModel)
+                    
+                case .customizationCenter:
+                    CustomizationCenterView()
+                        .environmentObject(authCoordinator)
+                        .environmentObject(signUpViewModel)
+                    
+                case .emailLogin:
+                    EmailLoginView()
+                        .environmentObject(authCoordinator)
+                        .environmentObject(signUpViewModel)
+                default:
+                    EmptyView()
+                }
+            }
         }
-        .navigationBarBackButtonHidden()
-        //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
-        .onDisappear(perform: {
-            isLoading = false
-            signInWithAppleManager.isUserAuthenticated = false
-        })
+
     }
     
     
@@ -92,10 +130,12 @@ public struct LoginView: View {
     private var handleSignUpGesture: some Gesture {
         TapGesture()
             .onEnded { gesture in
-                appCoordinator.rootPath.append(MumoryPage.signUp)
+                signUpViewModel.startSignUp(method: .email)
+                signUpViewModel.step = 4 //test code
+                authCoordinator.push(destination: .customizationCenter) // test code
             }
     }
-        
+    
     // MARK: - Methods
     
     private func googleLogin(){
@@ -121,7 +161,7 @@ public struct LoginView: View {
                 await finishSignInProcess()
                 isLoading = false
             }
-       
+            
         }
     }
     
@@ -132,9 +172,9 @@ public struct LoginView: View {
         loginData.fcmToken = Messaging.messaging().fcmToken ?? ""
         loginData.method = method
     }
-
+    
     private func emailLogin() {
-        appCoordinator.rootPath.append(MumoryPage.emailLogin)
+        authCoordinator.push(destination: .emailLogin)
     }
     
     private func appleLogin(){
@@ -200,14 +240,14 @@ public struct LoginView: View {
         guard let documents = try? await checkOldUserQuery.getDocuments() else {return false}
         return documents.isEmpty
     }
-
-        
+    
+    
     private func setLoginHistory() {
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
     }
     
-        
+    
     private func finishSignInProcess() async {
         setLoginHistory()
         let query = Firebase.db.collection("User").document(loginData.uid)
@@ -225,15 +265,15 @@ public struct LoginView: View {
             }
             await handleOldUser(data: data)
         }else {
-           await handleNewUser()
+            await handleNewUser()
         }
-     }
+    }
     
     private func handleOldUser(data: [String: Any]) async{
         let query = Firebase.db.collection("User").document(loginData.uid)
-
+        let user = await FetchManager.shared.fetchUser(uId: loginData.uid)
         currentUserData.uId = loginData.uid
-        currentUserData.user = await MumoriUser(uId: loginData.uid)
+        currentUserData.user = user
         currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
         try? await query.updateData(["fcmToken": loginData.fcmToken])
         appCoordinator.selectedTab = .home

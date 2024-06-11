@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 //Deprecated
 struct ArtistOfSongView: View {
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
@@ -201,8 +201,3 @@ struct ArtistOfSongView: View {
     }
 }
 
-
-
-//#Preview {
-//    ArtistView()
-//}

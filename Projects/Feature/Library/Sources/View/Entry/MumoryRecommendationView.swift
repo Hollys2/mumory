@@ -16,7 +16,7 @@ public struct MumoryRecommendationView: View {
     @State var isTouch: Bool = false
     @State private var path = NavigationPath()
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State private var contentOffset: CGPoint = .zero

@@ -97,7 +97,6 @@ public class SignInWithAppleManager: NSObject, ObservableObject, ASAuthorization
             }
             
             let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: idTokenString, rawNonce: nonce)
-            print("credential1122")
             
             Auth.auth().signIn(with: credential) { result, error in
                 if let error = error {

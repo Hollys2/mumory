@@ -11,7 +11,7 @@ import SwiftUI
 import Shared
 
 public struct PlayingMusicBarView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 //    @State var isPresentPlayingView: Bool = false

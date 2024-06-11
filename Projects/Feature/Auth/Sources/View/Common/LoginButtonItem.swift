@@ -104,12 +104,6 @@ struct LoginButtonItem: View {
     }
 }
 
-//#Preview {
-//    LoginButtonItem(type: .google) {
-//        //
-//    }
-//}
-
 struct KakaoLoginButton: View {
     var body: some View {
         HStack(spacing: 0){

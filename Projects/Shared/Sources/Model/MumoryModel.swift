@@ -160,17 +160,17 @@ extension Mumory {
     }
 }
 
-public struct UserModel {
-
-    public var uId: String
-    public var nickname: String
-    public var id: String
-    public var profileURL: URL?
-    
-    public init(uId: String, nickname: String, id: String, profileURL: URL? = nil) {
-        self.uId = uId
-        self.nickname = nickname
-        self.id = id
-        self.profileURL = profileURL
-    }
-}
+//public struct UserModel {
+//
+//    public var uId: String
+//    public var nickname: String
+//    public var id: String
+//    public var profileURL: URL?
+//    
+//    public init(uId: String, nickname: String, id: String, profileURL: URL? = nil) {
+//        self.uId = uId
+//        self.nickname = nickname
+//        self.id = id
+//        self.profileURL = profileURL
+//    }
+//}

@@ -11,13 +11,13 @@ import Shared
 import MusicKit
 
 class FriendDataViewModel: ObservableObject {
-    @Published var friend: MumoriUser = MumoriUser()
+    @Published var friend: UserProfile = UserProfile()
     @Published var playlistArray: [MusicPlaylist] = []
     @Published var isPlaylistLoading: Bool = false
     @Published var isMumoryLoading: Bool = false
     
     init() {
-        self.friend = MumoriUser()
+        self.friend = UserProfile()
         self.playlistArray = []
         self.isPlaylistLoading = false
         self.isMumoryLoading = false

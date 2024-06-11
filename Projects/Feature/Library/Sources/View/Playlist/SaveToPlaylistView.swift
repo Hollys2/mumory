@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct SaveToPlaylistView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -217,7 +217,3 @@ struct SaveToPlaylistView: View {
         }
     }
 }
-
-//#Preview {
-//    SaveToPlaylistView()
-//}

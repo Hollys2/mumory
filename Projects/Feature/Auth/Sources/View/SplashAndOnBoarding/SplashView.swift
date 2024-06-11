@@ -10,9 +10,16 @@ import SwiftUI
 import Shared
 import Lottie
 
+/// 초반 스플래시 뷰
 public struct SplashView: View {
     // MARK: - Object lifecycle
-    public init(){}
+    public init(){
+    }
+    
+    // MARK: - Propoerties
+    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
+
+
     
     // MARK: - View
     public var body: some View {
@@ -22,11 +29,15 @@ public struct SplashView: View {
                     LottieView(animation: .named("splash", bundle: .module))
                         .looping()
                 }
-                .transition(.opacity)
+        }
+        .onAppear {
+            Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
+                self.bootstrapViewModel.isShownSplashView = false
+            }
         }
     }
-}
+    
+    // MARK: - Methods
 
-#Preview {
-    SplashView()
+
 }

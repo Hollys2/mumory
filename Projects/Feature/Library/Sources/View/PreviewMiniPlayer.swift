@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct PreviewMiniPlayer: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator

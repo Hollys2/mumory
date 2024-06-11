@@ -16,23 +16,50 @@ struct MumoryApp: App {
     @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
     @StateObject var firebaseManager: FirebaseManager = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
-    @StateObject var currentUserData: CurrentUserData = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
+    
+    @StateObject var bootstrapViewModel: BootstrapViewModel = .init()
+    @StateObject var currentUserViewModel: CurrentUserViewModel = .init()
+
     
     var body: some Scene {
         WindowGroup {
             ZStack {
-                NavigationStack {
+                if bootstrapViewModel.isShownHomeView {
+                    HomeView()
+                        .environmentObject(appCoordinator)
+                        .onAppear {
+                            Task {
+                                guard let uId = FirebaseManager.shared.auth.currentUser?.uid else {return}
+                                currentUserViewModel.user = await FetchManager.shared.fetchUser(uId: uId)
+                            }
+                        }
+                    
+                } else {
                     LoginView()
                 }
                 
-                NavigationStack {
-                    HomeView()
+                if bootstrapViewModel.isShownSplashView {
+                    SplashView()
                 }
-                
-                SplashView()
-                
+    
+            }
+            .ignoresSafeArea()
+            .preferredColorScheme(.dark)
+            .environmentObject(locationManager)
+            .environmentObject(localSearchViewModel)
+            .environmentObject(mumoryDataViewModel)
+            .environmentObject(firebaseManager)
+            .environmentObject(keyboardResponder)
+            .environmentObject(currentUserViewModel)
+            .environmentObject(snackBarViewModel)
+            .environmentObject(playerViewModel)
+            
+            .environmentObject(bootstrapViewModel)
+
+            
+
                 
 //                ZStack {
 //
@@ -132,7 +159,6 @@ struct MumoryApp: App {
 //                .environmentObject(currentUserData)
 //                .environmentObject(playerViewModel)
 //                .environmentObject(snackBarViewModel)
-            }
         }
     }
 }

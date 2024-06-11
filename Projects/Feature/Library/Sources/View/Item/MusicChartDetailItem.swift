@@ -12,7 +12,7 @@ import MusicKit
 
 struct MusicChartDetailItem: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false
     
@@ -110,7 +110,3 @@ struct MusicChartDetailItem: View {
         }
     }
 }
-
-//#Preview {
-//    MusicChartDetailItem()
-//}

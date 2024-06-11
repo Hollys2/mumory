@@ -48,7 +48,7 @@ struct Activity: Hashable{
 }
 struct ActivityListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @State var selection: ActivityType = .all
     @State var date: Date = Date()
@@ -277,10 +277,6 @@ struct ActivityListView: View {
     
 }
 
-//#Preview {
-//    ActivityListView()
-//}
-
 struct SelectionButtonView: View {
     let type: ActivityType
     let title: String
@@ -307,7 +303,7 @@ struct SelectionButtonView: View {
 }
 
 struct DatePickerView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
     @Binding var date: Date
     @State var dateArray: [Date] = []
@@ -378,7 +374,7 @@ struct DatePickerView: View {
 struct ActivityItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentDeletedMumoryPopup: Bool = false
     @State var song: Song?

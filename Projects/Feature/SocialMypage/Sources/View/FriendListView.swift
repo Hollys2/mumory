@@ -11,11 +11,11 @@ import Shared
 
 struct FriendListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
 
     private let lineGray = Color(white: 0.48)
     @State var term: String = ""
-    @State var results: [MumoriUser] = []
+    @State var results: [UserProfile] = []
 
     
     var body: some View {
@@ -112,10 +112,6 @@ struct FriendListView: View {
         })
     }
 }
-
-//#Preview {
-//    FriendListView()
-//}
 
 struct SearchTextField: View {
     @Binding var term: String

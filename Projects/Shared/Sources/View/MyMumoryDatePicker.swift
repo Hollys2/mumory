@@ -14,7 +14,7 @@ public struct MyMumoryDatePicker: View {
     
     @Binding var selectedDate: Date
     
-    let user: MumoriUser
+    let user: UserProfile
     
     @State private var pickerDate: Date = Date()
     @State private var selectedYear: Int = 0
@@ -22,11 +22,11 @@ public struct MyMumoryDatePicker: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @Environment(\.dismiss) private var dismiss
     
-    public init(selectedDate: Binding<Date>, user: MumoriUser) {
+    public init(selectedDate: Binding<Date>, user: UserProfile) {
         self._selectedDate = selectedDate
         self.user = user
     }
@@ -150,7 +150,7 @@ public struct MonthlyStatDatePicker: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @Environment(\.dismiss) private var dismiss
 

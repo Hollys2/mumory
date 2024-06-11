@@ -196,7 +196,3 @@ struct QuestionView: View {
         
     }
 }
-
-//#Preview {
-//    QuestionView()
-//}

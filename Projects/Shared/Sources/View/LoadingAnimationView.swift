@@ -18,8 +18,7 @@ public struct LoadingAnimationView: View {
     
     public var body: some View {
         ZStack(alignment: .center){
-            Color.black.opacity(0.5)
-            
+//            Color.black.opacity(0.5)
             LottieView(animation: .named("loading", bundle: .module))
                 .looping()
                 .opacity(isLoading ? 1 : 0)
@@ -27,9 +26,3 @@ public struct LoadingAnimationView: View {
         }
     }
 }
-
-
-
-//#Preview {
-//    LoadingAnimationView(isLoading: .constant(true))
-//}

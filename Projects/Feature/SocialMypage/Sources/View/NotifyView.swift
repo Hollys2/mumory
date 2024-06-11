@@ -11,7 +11,7 @@ import MusicKit
 import Shared
 
 struct NotifyView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject var notificationViewModel: NotificationViewModel = NotificationViewModel()
@@ -156,7 +156,7 @@ struct UnreadText: View {
 }
 
 struct NotifyLikeItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
@@ -253,7 +253,7 @@ struct NotifyLikeItem: View {
 struct NotifyCommentItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
     @State var isPresentDeleteMumoryPopup: Bool = false
@@ -348,7 +348,7 @@ struct NotifyCommentItem: View {
 }
 
 struct NotifyFriendItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
@@ -401,7 +401,7 @@ struct NotifyFriendItem: View {
         .onTapGesture {
             print("friend")
             Task {
-                let friend = await MumoriUser(uId: notification.friendUId)
+                let friend = await FetchManager.shared.fetchUser(uId: notification.friendUId)
                 appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
             }
             if !notification.isRead {
@@ -415,7 +415,7 @@ struct NotifyFriendItem: View {
 }
 
 struct NotifyPostItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
@@ -541,7 +541,7 @@ private func dateToString(date: Date) -> String{
 
 
 struct ReadAllButton: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var notifications: [Notification]
     init(notifications: Binding<[Notification]>) {
@@ -580,7 +580,7 @@ struct ReadAllButton: View {
 
 struct NotifyMenuBotton: View {
     @EnvironmentObject var notificationViewModel: NotificationViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentPopup: Bool = false
     let notification: Notification

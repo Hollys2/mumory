@@ -16,7 +16,7 @@ struct ModifyPlaylistPopupView: View {
         case old
     }
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     @State var playlistTitle: String = ""
     @State var isPublic: Bool = true
@@ -183,7 +183,3 @@ struct ModifyPlaylistPopupView: View {
         isLoading = false
     }
 }
-
-//#Preview {
-//    CreatePlaylistPopupView()
-//}

@@ -11,7 +11,7 @@ import Shared
 import Core
 
 struct EditFavoriteGenreView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     @State var isLoading: Bool = false
@@ -174,7 +174,3 @@ struct EditFavoriteGenreView: View {
         return returnValue
     }
 }
-
-//#Preview {
-//    EditFavoriteGenreView()
-//}

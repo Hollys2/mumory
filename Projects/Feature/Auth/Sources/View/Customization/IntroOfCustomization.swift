@@ -10,13 +10,14 @@ import SwiftUI
 import Shared
 import Lottie
 
-struct StartCostomizationView: View {
-    @EnvironmentObject var manager: CustomizationManageViewModel
+struct IntroOfCustomization: View {
+    @EnvironmentObject var signUpViewModel: SignUpViewModel
+    @EnvironmentObject var authCoordinator: AuthCoordinator
 
     var body: some View {
         
         ZStack{
-            LibraryColorSet.background.ignoresSafeArea()
+            ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
                 Text("음악과 일상을  나누는 새로운 방법,\n뮤모리를 통해 친구들과\n특별한 순간을 기록하세요")
@@ -46,28 +47,18 @@ struct StartCostomizationView: View {
                 
                 Text("뮤모리는 Apple Music과 연계된 어플입니다.")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                
-            
-                NavigationLink {
-                    CustomizationView()
-                        .environmentObject(manager)
+                    .foregroundColor(ColorSet.mainPurpleColor)
+                            
+                Button {
+                    authCoordinator.push(destination: .customizationCenter)
                 } label: {
-                    //enable을 true로 설정하면 배경이 보라색으로 바뀜
                     MumorySimpleButton(title: "시작하기", isEnabled: true)
-                        .padding(.leading, 20)
-                        .padding(.trailing, 20)
-                        .padding(.bottom, 20)
-                        .padding(.top, 25)
+                        .padding(20)
+                        .padding(.top, 5)
                 }
-
                 
             })
         }
         .navigationBarBackButtonHidden()
     }
 }
-
-//#Preview {
-//    StartCostomizationView()
-//}

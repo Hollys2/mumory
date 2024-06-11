@@ -14,7 +14,7 @@ import ShazamKit
 
 struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel

@@ -44,7 +44,7 @@ public struct MumoryEditView: View {
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var dateManager: DateManager
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel

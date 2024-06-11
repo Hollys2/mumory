@@ -109,7 +109,3 @@ struct AccountManageView: View {
     }
     
 }
-
-//#Preview {
-//    AccountManageView()
-//}

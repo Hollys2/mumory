@@ -12,7 +12,7 @@ import MusicKit
 
 struct LibraryView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isTapMyMusic: Bool = true

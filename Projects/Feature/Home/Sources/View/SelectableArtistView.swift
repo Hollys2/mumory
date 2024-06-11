@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct SelectableArtistView: View {
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false

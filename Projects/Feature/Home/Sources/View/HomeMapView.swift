@@ -19,7 +19,7 @@ struct HomeMapView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var keyboardResponder: KeyboardResponder
     @EnvironmentObject var settingViewModel: SettingViewModel

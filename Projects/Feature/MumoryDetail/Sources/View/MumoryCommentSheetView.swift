@@ -24,11 +24,11 @@ struct CommentView: View {
     
     var scrollToComment: () -> Void
     
-    @State private var commentUser: MumoriUser = MumoriUser()
+    @State private var commentUser: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     var body: some View {
         
@@ -212,7 +212,7 @@ struct CommentView: View {
         .padding(.top, 12)
         .onAppear {
             Task {
-                self.commentUser = await MumoriUser(uId: comment.uId)
+                self.commentUser = await FetchManager.shared.fetchUser(uId: comment.uId)
             }
         }
         
@@ -240,12 +240,12 @@ struct Reply: View {
     let comment: Comment
     let mumory: Mumory
     
-    @State private var commentUser: MumoriUser = MumoriUser()
+    @State private var commentUser: UserProfile = UserProfile()
     @State private var isMyComment: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     var body: some View {
         
@@ -411,7 +411,7 @@ struct Reply: View {
         .padding(.leading, 45)
         .onAppear {
             Task {
-                self.commentUser = await MumoriUser(uId: comment.uId)
+                self.commentUser = await FetchManager.shared.fetchUser(uId: comment.uId)
                 self.isMyComment = await mumoryDataViewModel.checkIsMyComment(mumoryId: mumory.id, reply: comment, currentUser: currentUserData.user)
             }
         }
@@ -425,7 +425,7 @@ public struct MumoryCommentSheetView: View {
     @State var mumory: Mumory = Mumory()
     @State var comments: [Comment] = []
     @State var replies: [Comment] = []
-    @State var selectedCommentUser: MumoriUser = MumoriUser()
+    @State var selectedCommentUser: UserProfile = UserProfile()
     
     @State private var commentText: String = ""
     //    @State private var replyText: String = ""
@@ -445,7 +445,7 @@ public struct MumoryCommentSheetView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
@@ -640,7 +640,7 @@ public struct MumoryCommentSheetView: View {
                         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
                         .onAppear {
                             Task {
-                                self.selectedCommentUser = await MumoriUser(uId: self.selectedComment.uId)
+                                self.selectedCommentUser = await FetchManager.shared.fetchUser(uId: self.selectedComment.uId)
                             }
                         }
                     }

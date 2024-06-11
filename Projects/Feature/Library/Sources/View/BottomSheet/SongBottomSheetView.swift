@@ -19,7 +19,7 @@ struct SongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -195,7 +195,7 @@ struct OptionalSongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -399,7 +399,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -569,7 +569,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -761,7 +761,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         

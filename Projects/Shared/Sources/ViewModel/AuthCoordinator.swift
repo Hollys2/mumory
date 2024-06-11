@@ -7,3 +7,21 @@
 //
 
 import Foundation
+
+public class AuthCoordinator: ObservableObject {
+    // MARK: - Object lifecycle
+    public init() {}
+    
+    // MARK: - Propoerties
+    @Published public var path: [AuthPage] = []
+    
+    
+    // MARK: - Methods
+    public func push(destination: AuthPage) {
+        self.path.append(destination)
+    }
+    
+    public func pop() {
+        _ = path.popLast()
+    }
+}

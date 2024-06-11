@@ -12,7 +12,7 @@ import MusicKit
 import MapKit
 
 struct ArtistView: View {
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false

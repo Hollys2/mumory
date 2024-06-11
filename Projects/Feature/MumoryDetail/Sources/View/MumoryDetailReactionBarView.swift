@@ -21,7 +21,7 @@ struct MumoryDetailReactionBarView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     

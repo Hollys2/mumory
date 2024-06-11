@@ -14,7 +14,7 @@ import MusicKit
 //라이브러리 첫 화면 - 최근 뮤모리 뮤직 하단 뷰
 struct MyPlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentCreatePlaylistPopup: Bool = false
 
     var rows: [GridItem] = [
@@ -158,12 +158,3 @@ struct MyPlaylistView: View {
     
 }
 
-
-
-
-
-
-
-//#Preview {
-//    MyPlaylistView()
-//}

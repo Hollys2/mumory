@@ -13,7 +13,7 @@ import Core
 import MapKit
 
 struct PlaylistView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
@@ -365,7 +365,7 @@ struct PlaylistView: View {
 
 
 public struct PlaylistImage: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var imageWidth: CGFloat = 0
     @Binding var songs: [Song]
     

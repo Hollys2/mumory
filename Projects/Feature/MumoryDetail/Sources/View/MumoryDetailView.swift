@@ -102,13 +102,13 @@ import Shared
 public struct MumoryDetailView: View {
 
     @State var mumory: Mumory
-    @State var user: MumoriUser = MumoriUser()
+    @State var user: UserProfile = UserProfile()
     @State var offsetY: Double = .zero
     @State var isMapSheetShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(mumory: Mumory) {
@@ -239,7 +239,7 @@ public struct MumoryDetailView: View {
             Task {
 //                mumoryDataViewModel.isUpdating = true
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
-                self.user = await MumoriUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
                 print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
 //                mumoryDataViewModel.isUpdating = false
             }

@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct BlockFriendListView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     let db = FirebaseManager.shared.db
     var body: some View {
@@ -68,11 +68,11 @@ struct BlockFriendListView: View {
 
 
 struct BlockFriendItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentRequestPopup: Bool = false
     let Firebase = FirebaseManager.shared
-    let friend: MumoriUser
-    init(friend: MumoriUser) {
+    let friend: UserProfile
+    init(friend: UserProfile) {
         self.friend = friend
     }
     

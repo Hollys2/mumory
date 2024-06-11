@@ -10,13 +10,13 @@ import SwiftUI
 import Shared
 
 struct FriendListItem: View {
-    let friend: MumoriUser
-    @EnvironmentObject var currentUserData: CurrentUserData
+    let friend: UserProfile
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentBlockConfirmPopup: Bool = false
     @State var isPresentDeleteConfirmPopup: Bool = false
     
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self.friend = friend
     }
     

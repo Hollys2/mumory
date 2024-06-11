@@ -13,7 +13,7 @@ import Lottie
 
 struct SetPWView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
 
@@ -171,7 +171,3 @@ struct SetPWView: View {
         
     }
 }
-
-//#Preview {
-//    SetPWView()
-//}

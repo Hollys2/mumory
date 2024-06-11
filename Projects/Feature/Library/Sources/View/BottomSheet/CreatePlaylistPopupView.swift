@@ -16,7 +16,7 @@ struct CreatePlaylistPopupView: View {
         case old
     }
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isLoading: Bool = false
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
@@ -190,7 +190,3 @@ struct DarkMenuStyle: MenuStyle {
             .foregroundColor(.white) // 텍스트 색상을 흰색으로 설정합니다.
     }
 }
-
-//#Preview {
-//    CreatePlaylistPopupView()
-//}

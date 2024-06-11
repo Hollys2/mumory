@@ -13,6 +13,7 @@ import Lottie
 import Core
 
 struct ProfileSettingView: View {
+    // MARK: - Propoerties
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var manager: CustomizationManageViewModel
     
@@ -34,9 +35,7 @@ struct ProfileSettingView: View {
     
     @State var isPresentBottomSheet: Bool = false
     
-    
-    
-            
+    // MARK: - View
     var body: some View {
             ZStack{
                 ColorSet.background.ignoresSafeArea()
@@ -117,7 +116,7 @@ struct ProfileSettingView: View {
                         .padding(.trailing, 20)
                         
                             
-                        AuthTextFieldSmall(text: $nickname, prompt: "닉네임을 입력해 주세요!")
+                        AuthTextField_16(text: $nickname, prompt: "닉네임을 입력해 주세요!")
                             .padding(.leading, 20)
                             .padding(.trailing, 20)
                             .padding(.top, 15)
@@ -177,8 +176,7 @@ struct ProfileSettingView: View {
                                     }
                                 
                             }
-                            .padding(.top, 10)
-                            .padding(.bottom, 10)
+                            .padding(.vertical, 10)
                             .padding(.trailing, 12)
                             .padding(.leading, 16)
                             .background(ColorSet.mainPurpleColor)
@@ -201,7 +199,7 @@ struct ProfileSettingView: View {
                         .padding(.trailing, 20)
                         
                         
-                       AuthTextFieldSmall(text: $id, prompt: "ID를 입력해 주세요!")
+                       AuthTextField_16(text: $id, prompt: "ID를 입력해 주세요!")
                         .padding(.leading, 20)
                         .padding(.trailing, 20)
                         .padding(.top, 10)
@@ -327,8 +325,4 @@ struct ProfileSettingView: View {
 
 
 }
-
-//#Preview {
-//    ProfileSettingView()
-//}
 

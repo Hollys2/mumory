@@ -13,7 +13,7 @@ import MusicKit
 struct FavoriteListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isLoading: Bool = true
     @State var isPresentBottomSheet: Bool = false
     @State var showFavoriteInfo: Bool = false
@@ -168,7 +168,7 @@ struct SongListBigItem: View {
         case recentMumory
     }
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false
     let song: Song

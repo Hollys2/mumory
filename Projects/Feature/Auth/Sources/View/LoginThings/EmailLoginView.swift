@@ -13,10 +13,10 @@ import Lottie
 
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    
+    @EnvironmentObject var authCoordinator: AuthCoordinator
+    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State var email: String = ""
@@ -31,7 +31,7 @@ struct EmailLoginView: View {
             ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-                NavigationBar
+                NavigationBar(leadingItem: BackButton)
                 
                 Text("이메일로 로그인 하기")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 22))
@@ -63,19 +63,15 @@ struct EmailLoginView: View {
         .disabled(isLoading)
     }
     
-    var NavigationBar: some View {
-        HStack{
-            SharedAsset.xWhite.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 30, height: 30)
-                .onTapGesture {
-                    appCoordinator.rootPath.removeLast()
-                }
-            Spacer()
-        }
-        .padding(.horizontal)
-        .frame(height: 63)
+    var BackButton: some View {
+        SharedAsset.xWhite.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: 30, height: 30)
+            .onTapGesture {
+                authCoordinator.pop()
+            }
+        
     }
     
     var ErrorText: some View {
@@ -132,57 +128,56 @@ struct EmailLoginView: View {
             return
         }
         
-        let qeury = db.collection("user").whereField("dd", isNotEqualTo: "")
-        try? await qeury.getDocuments().documents.first?.reference.delete()
+        bootstrapViewModel.isShownHomeView = true
         
-        
-        guard let id = data["id"] as? String,
-              let nickname = data["nickname"] as? String else {
-            appCoordinator.rootPath.append(MumoryPage.startCustomization)
-            return
-        }
-        try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
-        currentUserData.uId = result.user.uid
-        currentUserData.user = await MumoriUser(uId: result.user.uid)
-        currentUserData.playlistArray = await currentUserData.savePlaylist()
-        currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
-        let userDefualt = UserDefaults.standard
-        userDefualt.setValue(Date(), forKey: "loginHistory")
-        
-        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
-            switch result {
-            case .success(let mumorys):
-                print("fetchMumorys successfully: \(mumorys)")
-                DispatchQueue.main.async {
-                    self.mumoryDataViewModel.myMumorys = mumorys
-                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
-                }
-            case .failure(let error):
-                print("ERROR: \(error)")
-            }
-            
-            DispatchQueue.main.async {
-                self.mumoryDataViewModel.isUpdating = false
-            }
-        }
-        
-        isLoading = false
-        appCoordinator.initPage = .home
-        appCoordinator.isCreateMumorySheetShown = false
-        appCoordinator.selectedTab = .home
-        
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            appCoordinator.rootPath = NavigationPath()
-        }
+//        let qeury = db.collection("user").whereField("dd", isNotEqualTo: "")
+//        try? await qeury.getDocuments().documents.first?.reference.delete()
+//        
+//        
+//        guard let id = data["id"] as? String,
+//              let nickname = data["nickname"] as? String else {
+//            appCoordinator.rootPath.append(MumoryPage.startCustomization)
+//            return
+//        }
+//        try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
+//        let user = await FetchManager.shared.fetchUser(uId: result.user.uid)
+//        currentUserData.uId = result.user.uid
+//        currentUserData.user = user
+//        currentUserData.playlistArray = await currentUserData.savePlaylist()
+//        currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
+//        let userDefualt = UserDefaults.standard
+//        userDefualt.setValue(Date(), forKey: "loginHistory")
+//        
+//        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+//        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
+//        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+//            switch result {
+//            case .success(let mumorys):
+//                print("fetchMumorys successfully: \(mumorys)")
+//                DispatchQueue.main.async {
+//                    self.mumoryDataViewModel.myMumorys = mumorys
+//                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+//                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+//                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+//                }
+//            case .failure(let error):
+//                print("ERROR: \(error)")
+//            }
+//            
+//            DispatchQueue.main.async {
+//                self.mumoryDataViewModel.isUpdating = false
+//            }
+//        }
+//        
+//        isLoading = false
+//        appCoordinator.initPage = .home
+//        appCoordinator.isCreateMumorySheetShown = false
+//        appCoordinator.selectedTab = .home
+//        
+//        var transaction = Transaction()
+//        transaction.disablesAnimations = true
+//        withTransaction(transaction) {
+//            appCoordinator.rootPath = NavigationPath()
+//        }
     }
 }
-
-//#Preview {
-//    EmailLoginView()
-//}

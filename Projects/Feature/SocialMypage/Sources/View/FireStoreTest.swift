@@ -67,7 +67,3 @@ public struct FireStoreTest: View {
 //        }
     }
 }
-
-//#Preview {
-//    FireStoreTest()
-//}

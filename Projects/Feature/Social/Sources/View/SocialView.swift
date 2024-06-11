@@ -24,7 +24,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     init(shouldUpdate: Binding<Bool>, contentOffsetY: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
         self._shouldUpdate = shouldUpdate
@@ -185,7 +185,7 @@ struct SocialScrollCotentView: View {
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -208,11 +208,11 @@ struct SocialItemView: View {
     @State private var isTruncated: Bool = false
     @State private var isLocationTitleTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
-    @State var user: MumoriUser = MumoriUser()
+    @State var user: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     let mumory: Mumory
@@ -241,7 +241,7 @@ struct SocialItemView: View {
                         appCoordinator.rootPath.append(MumoryPage.myPage)
                     } else {
                         Task {
-                            let friend = await MumoriUser(uId: self.user.uId)
+                            let friend = await FetchManager.shared.fetchUser(uId: self.user.uId)
                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                         }
                     }
@@ -637,7 +637,7 @@ struct SocialItemView: View {
         .frame(height: getUIScreenBounds().width + 71)
         .onAppear {
             Task {
-                self.user = await MumoriUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
             }
         }
         .fullScreenCover(isPresented: self.$isMapViewShown) {
@@ -657,7 +657,7 @@ public struct SocialView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     public init(isShown: Binding<Bool>) {
         UIScrollView.appearance().bounces = true

@@ -37,7 +37,7 @@ public struct CreateMumoryBottomSheetView: View {
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     

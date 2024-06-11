@@ -12,7 +12,7 @@ import Foundation
 public class FriendManager: ObservableObject {
     
 //    @Published public var searchedFriend: MumoriUser?
-    @Published public var searchedFriends: [MumoriUser] = []
+    @Published public var searchedFriends: [UserProfile] = []
     
     public init() {}
     
@@ -36,7 +36,8 @@ public class FriendManager: ObservableObject {
                         
                         DispatchQueue.main.async {
                             Task {
-                                self.searchedFriends.append(await MumoriUser(uId: document.documentID))
+                                let user = await FetchManager.shared.fetchUser(uId: document.documentID)
+                                self.searchedFriends.append(user)
                             }
                         }
                     }

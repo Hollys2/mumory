@@ -11,7 +11,7 @@ import Shared
 
 struct ReportView: View {
     @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator   
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var menuTitle: String = "신고 유형을 선택해주세요."

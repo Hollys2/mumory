@@ -17,12 +17,12 @@ struct MumoryMapView: View {
     
     @Binding private var isShown: Bool
     let mumory: Mumory
-    let user: MumoriUser
+    let user: UserProfile
 //    @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
-    init(isShown: Binding<Bool>, mumory: Mumory, user: MumoriUser) {
+    init(isShown: Binding<Bool>, mumory: Mumory, user: UserProfile) {
         self._isShown = isShown
         self.mumory = mumory
         self.user = user
@@ -93,12 +93,12 @@ struct FriendMumoryMapView: View {
     @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
 
     let mumorys: [Mumory]
-    let user: MumoriUser
+    let user: UserProfile
     var isFriendPage: Bool?
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
-    init(isShown: Binding<Bool>, mumorys: [Mumory], user: MumoriUser, isFriendPage: Bool? = nil) {
+    init(isShown: Binding<Bool>, mumorys: [Mumory], user: UserProfile, isFriendPage: Bool? = nil) {
         self._isShown = isShown
         self._region = State(initialValue: MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan))
 

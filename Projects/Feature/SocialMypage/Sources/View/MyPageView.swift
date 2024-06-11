@@ -12,7 +12,7 @@ import Core
 
 public struct MyPageView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -96,7 +96,7 @@ public struct MyPageView: View {
 }
 
 struct UserInfoView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @State var isPresentEditView: Bool = false
     
     var body: some View {
@@ -185,7 +185,7 @@ struct UserInfoView: View {
 
 struct SimpleFriendView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -245,7 +245,7 @@ struct MumorySample: Hashable{
 
 struct MyMumori: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     let Firebase = FirebaseManager.shared

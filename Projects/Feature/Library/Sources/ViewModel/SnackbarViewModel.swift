@@ -98,7 +98,7 @@ public class SnackBarViewModel: ObservableObject {
 public struct SnackBarView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserData: CurrentUserViewModel
     
     var additionalAction: () -> Void = {}
     public init(){}
