@@ -124,7 +124,7 @@ public struct MumoryDetailView: View {
                         
             ZStack(alignment: .bottomLeading) {
                 
-                AsyncImage(url: mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                AsyncImage(url: mumory.song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -146,13 +146,13 @@ public struct MumoryDetailView: View {
                 
                 VStack(spacing: 10) {
 
-                    Text("\(mumory.musicModel.title)")
+                    Text("\(mumory.song.title)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                         .lineLimit(3)
                         .foregroundColor(.white)
                         .frame(width: 301, alignment: .leading)
 
-                    Text("\(mumory.musicModel.artist)")
+                    Text("\(mumory.song.artist)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
                         .lineLimit(2)
                         .foregroundColor(.white.opacity(0.8))
@@ -238,7 +238,7 @@ public struct MumoryDetailView: View {
             playerViewModel.setLibraryPlayerVisibility(isShown: false)
             Task {
 //                mumoryDataViewModel.isUpdating = true
-                self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
+                self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
                 self.user = await MumoriUser(uId: self.mumory.uId)
                 print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
 //                mumoryDataViewModel.isUpdating = false

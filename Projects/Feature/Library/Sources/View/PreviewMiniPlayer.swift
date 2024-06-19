@@ -85,7 +85,7 @@ struct PreviewMiniPlayer: View {
                 .padding(.trailing, 30)
                 .onTapGesture {
                     guard let song = playerViewModel.currentSong else {return}
-                    mumoryDataViewModel.choosedMusicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    mumoryDataViewModel.choosedMusicModel = SongModel(songId: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                     appCoordinator.rootPath = NavigationPath()
                     playerViewModel.pause()
                     playerViewModel.isShownPreview = false

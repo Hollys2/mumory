@@ -479,7 +479,7 @@ struct SearchedMumoryItemView: View {
                 
                 Spacer().frame(width: 4)
                 
-                Text("\(mumory.locationModel.locationTitle)")
+                Text("\(mumory.location.locationTitle)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                     .lineLimit(1)
                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
@@ -520,14 +520,14 @@ struct SearchedMumoryItemView: View {
                         
                         Spacer().frame(width: 5)
                         
-                        Text(mumory.musicModel.title)
+                        Text(mumory.song.title)
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                             .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             .fixedSize(horizontal: true, vertical: false)
                         
                         Spacer().frame(width: 6)
                         
-                        Text(mumory.musicModel.artist)
+                        Text(mumory.song.artist)
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                             .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             .lineLimit(1)

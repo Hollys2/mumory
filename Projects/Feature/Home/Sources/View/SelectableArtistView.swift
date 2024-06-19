@@ -185,7 +185,7 @@ struct SelectableMusicListItem: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
-                        let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                        let musicModel = SongModel(songId: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                         mumoryDataViewModel.choosedMusicModel = musicModel
                         appCoordinator.rootPath.removeLast()
                         appCoordinator.rootPath.removeLast()

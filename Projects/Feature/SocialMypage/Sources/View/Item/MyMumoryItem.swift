@@ -62,7 +62,7 @@ struct MyMumoryItem: View {
                         .frame(width: 18, height: 18)
                         .scaledToFit()
                     
-                    Text(mumory.locationModel.locationTitle)
+                    Text(mumory.location.locationTitle)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                         .foregroundStyle(Color.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -77,7 +77,7 @@ struct MyMumoryItem: View {
         })
         .onAppear {
             Task {
-                self.song = await fetchSong(songID: mumory.musicModel.songID.rawValue)
+                self.song = await fetchSong(songID: mumory.song.songId)
             }
         }
     }

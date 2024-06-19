@@ -10,9 +10,12 @@ import SwiftUI
 import Shared
 
 struct BlockFriendListView: View {
+    
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
+    
     let db = FirebaseManager.shared.db
+    
     var body: some View {
         ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()

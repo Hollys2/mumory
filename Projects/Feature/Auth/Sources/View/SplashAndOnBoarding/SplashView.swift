@@ -15,6 +15,11 @@ import Firebase
 import FirebaseAuth
 
 
+enum testpath {
+    case a
+    case b
+}
+
 public struct SplashView: View {
     
     @EnvironmentObject var currentUserData: CurrentUserData
@@ -35,10 +40,15 @@ public struct SplashView: View {
     
     @State private var popUp: PopUp = .none
     
+    @State var testP: [String] = []
+    
     public init() {}
     
     public var body: some View {
         ZStack {
+            NavigationStack(path: $testP) {
+                
+            }
             NavigationStack(path: $appCoordinator.rootPath) {
                 VStack(spacing: 0) {
                     switch(appCoordinator.initPage){

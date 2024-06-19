@@ -193,7 +193,7 @@ struct MumoryDetailFriendMumoryView: View {
                                 
                                 Spacer().frame(width: 5)
                                 
-                                Text(self.mumory.locationModel.locationTitle)
+                                Text(self.mumory.location.locationTitle)
                                     .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14)))
                                     .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                     .frame(maxWidth: getUIScreenBounds().width * 0.2846153)
@@ -295,14 +295,14 @@ struct MumoryDetailFriendMumoryView: View {
                     
                     Spacer().frame(width: 5)
                     
-                    Text("\(self.mumory.musicModel.artist)")
+                    Text("\(self.mumory.song.artist)")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                         .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                         .lineLimit(1)
                     
                     Spacer().frame(width: 6)
                     
-                    Text("\(self.mumory.musicModel.title)")
+                    Text("\(self.mumory.song.title)")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                         .lineLimit(1)

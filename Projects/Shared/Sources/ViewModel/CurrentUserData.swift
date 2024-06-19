@@ -137,7 +137,7 @@ public class CurrentUserData: ObservableObject {
     }
     
     public func savePlaylist() async -> [MusicPlaylist]{
-        if self.uId.isEmpty {return []}
+        if self.uId.isEmpty { return [] }
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in

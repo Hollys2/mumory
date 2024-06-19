@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 import Core
 
-
+/// 뮤모리 유저
 public struct MumoriUser: Hashable {
     public static func == (lhs: MumoriUser, rhs: MumoriUser) -> Bool {
         return lhs.uId == rhs.uId

@@ -99,7 +99,7 @@ public struct LoginView: View {
                 
                 
                 //로딩 로티 애니메이션 - Z스택 최상단
-                LoadingAnimationView(isLoading: $isLoading)
+//                LoadingAnimationView(isLoading: $isLoading)
                 
             }
             .navigationBarBackButtonHidden()

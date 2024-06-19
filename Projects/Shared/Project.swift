@@ -17,6 +17,7 @@ let project = Project(name: "Shared",
                                        dependencies: [
                                         .external(name: "FirebaseAuth"),
                                         .external(name: "FirebaseFirestore"),
+                                        .external(name: "FirebaseFirestoreSwift"),
                                         .external(name: "FirebaseStorage"),
                                         .external(name: "FirebaseMessaging"),
                                         .external(name: "FirebaseDatabase"),

@@ -128,7 +128,7 @@ struct MumoryCard: View {
                     .foregroundColor(.clear)
                     .frame(width: getUIScreenBounds().width == 375 ? 296 : 310, height: getUIScreenBounds().width == 375 ? 296 : 310)
                     .background(
-                        AsyncImage(url: mumory.musicModel.artworkUrl) { phase in
+                        AsyncImage(url: mumory.song.artworkUrl) { phase in
                             switch phase {
                             case .success(let image):
                                 image
@@ -203,7 +203,7 @@ struct MumoryCard: View {
                         .resizable()
                         .frame(width: 17, height: 17)
                     
-                    Text("\(mumory.locationModel.locationTitle)")
+                    Text("\(mumory.location.locationTitle)")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                         .foregroundColor(.white)
                         .lineLimit(1)
@@ -219,13 +219,13 @@ struct MumoryCard: View {
                 
                 HStack {
                     VStack(spacing: 8) {
-                        Text("\(mumory.musicModel.title)")
+                        Text("\(mumory.song.title)")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                             .foregroundColor(.white)
                             .frame(width: 199, height: 13, alignment: .topLeading)
                             .lineLimit(1)
                         
-                        Text("\(mumory.musicModel.artist)")
+                        Text("\(mumory.song.artist)")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .foregroundColor(.white)
                             .frame(width: 199, height: 13, alignment: .topLeading)

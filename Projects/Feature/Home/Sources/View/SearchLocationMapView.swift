@@ -12,7 +12,7 @@ import Core
 import Shared
 import _MapKit_SwiftUI
 
-@available(iOS 16.0, *)
+
 public struct SearchLocationMapView: View {
     
     @State var locationModel: LocationModel = .init()

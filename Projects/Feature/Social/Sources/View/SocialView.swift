@@ -61,14 +61,12 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         hostingController.view.backgroundColor = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
         
         let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-        print("FUCK contentHeight: \(contentHeight)")
         
         hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: contentHeight)
         
         uiView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
         
         if context.coordinator.contentHeight != contentHeight {
-            print("FUCKYOU")
             uiView.subviews.forEach { $0.removeFromSuperview() }
             uiView.addSubview(hostingController.view)
         }
@@ -190,7 +188,7 @@ struct SocialScrollCotentView: View {
     var body: some View {
         VStack(spacing: 0) {
             
-            ForEach(Array(Set(self.mumoryDataViewModel.socialMumorys)).sorted(by: { $0.date > $1.date }), id: \.uuid) { i in
+            ForEach(Array(Set(self.mumoryDataViewModel.socialMumorys)).sorted(by: { $0.date > $1.date }), id: \.id) { i in
                 SocialItemView(mumory: i)
             }
             
@@ -278,7 +276,7 @@ struct SocialItemView: View {
                             
                             Spacer().frame(width: 5)
                             
-                            Text(self.mumory.locationModel.locationTitle)
+                            Text(self.mumory.location.locationTitle)
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                 .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                 .frame(maxWidth: getUIScreenBounds().width * 0.33589)
@@ -287,7 +285,7 @@ struct SocialItemView: View {
                                 .background(
                                     GeometryReader { proxy in
                                         Color.clear.onAppear {
-                                            let size = self.mumory.locationModel.locationTitle.size(withAttributes: [.font: SharedFontFamily.Pretendard.medium.font(size: 14)])
+                                            let size = self.mumory.location.locationTitle.size(withAttributes: [.font: SharedFontFamily.Pretendard.medium.font(size: 14)])
                                             
                                             if size.width > proxy.size.width {
                                                 self.isLocationTitleTruncated = true
@@ -316,7 +314,7 @@ struct SocialItemView: View {
                     .foregroundColor(.clear)
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                     .background(
-                        AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                        AsyncImage(url: self.mumory.song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                             switch phase {
                             case .success(let image):
                                 image
@@ -392,7 +390,7 @@ struct SocialItemView: View {
                         
                         Spacer().frame(width: 6)
                         
-                        Text(self.mumory.musicModel.title)
+                        Text(self.mumory.song.title)
                             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                             .multilineTextAlignment(.trailing)
                             .foregroundColor(.white)
@@ -400,7 +398,7 @@ struct SocialItemView: View {
                         
                         Spacer().frame(width: 8)
                         
-                        Text(self.mumory.musicModel.artist)
+                        Text(self.mumory.song.artist)
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                             .foregroundColor(.white)
                             .lineLimit(1)
@@ -409,7 +407,7 @@ struct SocialItemView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         Task {
-                            guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
+                            guard let song = await fetchSong(songID: mumory.song.songId) else {return}
                             playerViewModel.playNewSong(song: song, isPlayerShown: false)
                             withAnimation {
                                 playerViewModel.userWantsShown = true

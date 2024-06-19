@@ -109,12 +109,12 @@ struct MumoryDetailReactionBarView: View {
                 
                 Spacer()
                 
-                if playerViewModel.favoriteSongIds.contains(mumory.musicModel.songID.rawValue) {
+                if playerViewModel.favoriteSongIds.contains(mumory.song.songId) {
                     SharedAsset.starOnMumoryDetail.swiftUIImage
                         .resizable()
                         .frame(width: 42, height: 42)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.musicModel.songID.rawValue)
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.song.songId)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -123,7 +123,7 @@ struct MumoryDetailReactionBarView: View {
                         .frame(width: 42, height: 42)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.musicModel.songID.rawValue)
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.song.songId)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }

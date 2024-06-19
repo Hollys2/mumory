@@ -11,6 +11,7 @@ import MapKit
 import SwiftUI
 import Core
 import Shared
+import Firebase
 
 
 struct AddressRow: View {
@@ -234,7 +235,7 @@ struct SearchLocationView: View {
                                         self.localSearchViewModel.removeRecentSearch(value)
                                     }
                                     .onTapGesture {
-                                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, coordinate: CLLocationCoordinate2D(latitude: value.latitude, longitude: value.longitude), country: value.country, administrativeArea: value.administrativeArea)
+                                        mumoryDataViewModel.choosedLocationModel = LocationModel(geoPoint: GeoPoint(latitude: value.latitude, longitude: value.longitude), locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, country: value.country, administrativeArea: value.administrativeArea)
                                         
                                         appCoordinator.rootPath.removeLast()
                                     }

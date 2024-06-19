@@ -412,7 +412,7 @@ struct Reply: View {
         .onAppear {
             Task {
                 self.commentUser = await MumoriUser(uId: comment.uId)
-                self.isMyComment = await mumoryDataViewModel.checkIsMyComment(mumoryId: mumory.id, reply: comment, currentUser: currentUserData.user)
+                self.isMyComment = await mumoryDataViewModel.checkIsMyComment(mumoryId: mumory.id ?? "", reply: comment, currentUser: currentUserData.user)
             }
         }
     }
@@ -577,9 +577,9 @@ public struct MumoryCommentSheetView: View {
                         self.replies = []
                         
                         Task {
-                            self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id)
+                            self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
                             
-                            let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id) ?? []
+                            let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
                             for i in commentAndReply {
                                 if i.parentId == "" {
                                     self.comments.append(i)
@@ -590,7 +590,7 @@ public struct MumoryCommentSheetView: View {
                                 self.replies.sort { $0.date < $1.date }
                             }
                             
-                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                         }
                     }
                     .onAppear {
@@ -680,7 +680,7 @@ public struct MumoryCommentSheetView: View {
                                         isButtonDisabled = true
                                         
                                         Task {
-                                            mumoryDataViewModel.createReply(mumoryId: mumory.id, reply: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id, date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
+                                            mumoryDataViewModel.createReply(mumoryId: mumory.id  ?? "", reply: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id ?? "", date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
                                                 self.commentText = ""
                                                 switch result {
                                                 case .success(let replies):
@@ -695,12 +695,12 @@ public struct MumoryCommentSheetView: View {
                                         isButtonDisabled = true
                                         
                                         Task {
-                                            mumoryDataViewModel.createComment(mumory: mumory, comment: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: "", mumoryId: mumory.id, date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
+                                            mumoryDataViewModel.createComment(mumory: mumory, comment: Comment(id: "", uId: currentUserData.user.uId, nickname: currentUserData.user.nickname, parentId: "", mumoryId: mumory.id ?? "", date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
                                                 commentText = ""
                                                 self.comments = comments
                                                 isButtonDisabled = false
                                             }
-                                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+                                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                                         }
                                     }
                                     
@@ -758,9 +758,9 @@ public struct MumoryCommentSheetView: View {
                 self.replies = []
                 
                 Task {
-                    self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id)
+                    self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
                     
-                    let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id) ?? []
+                    let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
                     for i in commentAndReply {
                         if i.parentId == "" {
                             self.comments.append(i)
@@ -771,7 +771,7 @@ public struct MumoryCommentSheetView: View {
                         self.replies.sort { $0.date < $1.date }
                     }
                     
-                    mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+                    mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                     //                        mumory.commentCount = comments.count
                 }
             }
@@ -810,7 +810,7 @@ public struct MumoryCommentSheetView: View {
                                 }
                             }
                             
-                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id)
+                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                             
                             mumoryDataViewModel.updateMumory(mumory) {
                                 mumoryDataViewModel.isUpdating = false

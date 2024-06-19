@@ -320,7 +320,7 @@ struct MumoryItemView2: View {
 
                     Spacer().frame(width: 4)
 
-                    Text(self.mumory.locationModel.locationTitle)
+                    Text(self.mumory.location.locationTitle)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                         .frame(width: 210, height: 10, alignment: .leading)
@@ -340,7 +340,7 @@ struct MumoryItemView2: View {
                 
                 ZStack(alignment: .topLeading) {
                     
-                    AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                    AsyncImage(url: self.mumory.song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -390,10 +390,10 @@ struct MumoryItemView2: View {
                         Spacer().frame(width: 5)
                         
                         Group {
-                            Text(self.mumory.musicModel.title)
+                            Text(self.mumory.song.title)
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                             
-                            + Text("  \(self.mumory.musicModel.artist)")
+                            + Text("  \(self.mumory.song.artist)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         }
                         .foregroundColor(.white)

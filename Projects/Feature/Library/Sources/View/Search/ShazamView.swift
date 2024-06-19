@@ -220,7 +220,7 @@ struct ShazamView: View {
                                         guard let title = shazamItem.title else {return}
                                         guard let artist = shazamItem.artist else {return}
                                         let artwork = shazamItem.artworkURL
-                                        mumoryDataViewModel.choosedMusicModel = MusicModel(songID: MusicItemID(rawValue: appleMusicID), title: title, artist: artist, artworkUrl: artwork)
+                                        mumoryDataViewModel.choosedMusicModel = SongModel(songId: appleMusicID, title: title, artist: artist, artworkUrl: artwork)
                                         appCoordinator.rootPath.removeLast(2)
                                     }else {
                                         Task {
@@ -426,7 +426,7 @@ struct ShazamAddButton: View {
                 guard let appleMusicID = item?.appleMusicID else {return}
                 guard let title = item?.title else {return}
                 guard let artist = item?.artist else {return}
-                mumoryDataViewModel.choosedMusicModel = MusicModel(songID: MusicItemID(appleMusicID), title: title, artist: artist, artworkUrl: item?.artworkURL)
+                mumoryDataViewModel.choosedMusicModel = SongModel(songId: appleMusicID, title: title, artist: artist, artworkUrl: item?.artworkURL)
                 appCoordinator.rootPath.removeLast(2)
             }
         }

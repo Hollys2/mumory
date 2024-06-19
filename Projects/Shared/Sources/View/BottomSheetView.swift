@@ -42,7 +42,6 @@ public struct MumoryBottomSheet {
     
     @Binding var mumoryAnnotation: Mumory
     
-    
     public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: Binding<Mumory>, isPublic: Binding<Bool>? = nil, isMapSheetShown: Binding<Bool>? = nil) {
         self.appCoordinator = appCoordinator
         self.mumoryDataViewModel = mumoryDataViewModel

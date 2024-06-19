@@ -68,8 +68,8 @@ public struct MyRecentMumoryView: View {
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
             let mumorys = Array(mumoryDataViewModel.myMumorys.prefix(15))
             for mumory in mumoryDataViewModel.myMumorys {
-                if recentSongIds.contains(where: {$0 == mumory.musicModel.songID.rawValue}) {continue}
-                recentSongIds.append(mumory.musicModel.songID.rawValue)
+                if recentSongIds.contains(where: {$0 == mumory.song.songId}) {continue}
+                recentSongIds.append(mumory.song.songId)
             }
         })
     }
