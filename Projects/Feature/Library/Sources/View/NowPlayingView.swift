@@ -12,7 +12,7 @@ import MusicKit
 
 public struct NowPlayingView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
@@ -105,7 +105,7 @@ public struct NowPlayingView: View {
 }
 
 struct PlayControlView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var isPresentQueue: Bool
@@ -190,11 +190,11 @@ struct PlayControlView: View {
             Button(action: {
                 guard let nowSong = playerViewModel.currentSong else {return}
                 if playerViewModel.favoriteSongIds.contains(nowSong.id.rawValue) {
-                    playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: nowSong.id.rawValue)
+                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: nowSong.id.rawValue)
                     snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                 }else {
                     self.generateHapticFeedback(style: .medium)
-                    playerViewModel.addToFavorite(uid: currentUserData.uId, songId: nowSong.id.rawValue)
+                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: nowSong.id.rawValue)
                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                 }
                 
@@ -690,7 +690,7 @@ struct PlayTogetherView: View {
 struct PlayTogetherItem: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var viewWidth: CGFloat = .zero
     var song: Song
@@ -737,7 +737,7 @@ struct PlayTogetherItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
@@ -748,7 +748,7 @@ struct PlayTogetherItem: View {
                     .padding(.trailing, 23)
                     .onTapGesture {
                         self.generateHapticFeedback(style: .medium)
-                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }

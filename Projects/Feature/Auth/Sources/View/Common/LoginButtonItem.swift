@@ -63,13 +63,11 @@ struct LoginButton: View {
                 .padding(.leading, 18)
                 .foregroundStyle(textForegroundColor)
         }
-        .padding(.top, 18)
-        .padding(.bottom, 18)
+        .frame(height: 60)
         .frame(maxWidth: .infinity)
         .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
-        .padding(.leading, 20)
-        .padding(.trailing, 20)
+        .padding(.horizontal, 20)
         .padding(.top, 10)
         .onTapGesture {
             action()
@@ -158,13 +156,11 @@ struct AppleLoginButton: View {
                 .padding(.leading, 18)
                 .foregroundStyle(.white)
         }
-        .padding(.top, 18)
-        .padding(.bottom, 18)
+        .padding(.vertical, 18)
         .frame(maxWidth: .infinity)
         .background(Color.black)
         .clipShape(RoundedRectangle(cornerSize: CGSize(width: 30, height: 30), style: .circular))
-        .padding(.leading, 20)
-        .padding(.trailing, 20)
+        .padding(.horizontal, 20)
     }
 }
 

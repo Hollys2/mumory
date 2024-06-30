@@ -22,7 +22,7 @@ import Shared
 //    
 //    @EnvironmentObject var appCoordinator: AppCoordinator
 //    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-//    @EnvironmentObject var currentUserData: CurrentUserData
+//    @EnvironmentObject var currentUserViewModel: currentUserViewModel
 //    
 //    func makeUIView(context: Context) -> UIScrollView {
 //        let scrollView = UIScrollView()
@@ -37,7 +37,7 @@ import Shared
 //        let hostingController = UIHostingController(rootView: MumoryDetailScrollContentView(mumory: self.mumory)
 //            .environmentObject(appCoordinator)
 //            .environmentObject(mumoryDataViewModel)
-//            .environmentObject(currentUserData)
+//            .environmentObject(currentUserViewModel)
 //        )
 //        
 //        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
@@ -108,7 +108,7 @@ public struct MumoryDetailView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(mumory: Mumory) {
@@ -224,7 +224,7 @@ public struct MumoryDetailView: View {
             }
             
 //            MumoryCommentSheetView(isSheetShown: $appCoordinator.isMumoryDetailCommentSheetViewShown, offsetY: $appCoordinator.offsetY)
-//                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserData.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
+//                .bottomSheet(isShown: $appCoordinator.isCommentBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: .mumoryCommentMyView(isMe: mumoryDataViewModel.selectedComment.uId == currentUserViewModel.user.uId ? true : false), mumoryAnnotation: .constant(Mumory())))
             
 //            ZStack {
 //                Color.clear
@@ -249,7 +249,7 @@ public struct MumoryDetailView: View {
         .fullScreenCover(isPresented: self.$isMapSheetShown) {
             FriendMumoryMapView(isShown: self.$isMapSheetShown, mumorys: [self.mumory], user: self.user)
         }
-//        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: mumory.uId == currentUserData.user.uId ? .mumoryDetailView : .mumoryCommentFriendView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
+//        .bottomSheet(isShown: $appCoordinator.isMumoryDetailMenuSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: mumory.uId == currentUserViewModel.user.uId ? .mumoryDetailView : .mumoryCommentFriendView, mumoryAnnotation: self.$mumory, isMapSheetShown: self.$isMapSheetShown))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(mumory) {

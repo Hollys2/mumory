@@ -13,7 +13,7 @@ import MusicKit
 struct FavoriteListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isLoading: Bool = true
     @State var isPresentBottomSheet: Bool = false
     @State var showFavoriteInfo: Bool = false
@@ -50,7 +50,7 @@ struct FavoriteListView: View {
                 .padding(.horizontal, 20)
                 
                 HStack(alignment: .bottom){
-                    Text("\(currentUserData.playlistArray[0].songIDs.count)곡")
+                    Text("\(currentUserViewModel.playlistViewModel.playlistArray[0].songIDs.count)곡")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.subGray)
                     
@@ -58,7 +58,7 @@ struct FavoriteListView: View {
                     
                     PlayAllButton()
                         .onTapGesture {
-                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs)
+                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserViewModel.playlistViewModel.playlistArray[0].songs)
                             AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
                         }
                 }
@@ -94,21 +94,24 @@ struct FavoriteListView: View {
                 Divider05()
                     .padding(.top, 15)
                 
-                if !isLoading && currentUserData.playlistArray[0].songIDs.isEmpty {
+                if !isLoading && currentUserViewModel.playlistViewModel.isFavoriteEmpty() {
                     InitialSettingView(title: "즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요", buttonTitle: "추천 음악 보러가기") {
-                        let myRandomGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
-                        appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: myRandomGenre))
+                        let favoriteGenres = currentUserViewModel.playlistViewModel.favoriteGenres
+                        let randomGenre = favoriteGenres[Int.random(in: favoriteGenres.indices)]
+                        appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: randomGenre))
                     }
                     .padding(.top, getUIScreenBounds().height * 0.25)
                 } else {
                     
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
-                            ForEach(currentUserData.playlistArray[0].songs, id: \.id) { song in
+                            ForEach(currentUserViewModel.playlistViewModel.playlistArray[0].songs, id: \.id) { song in
                                 SongListBigItem(song: song)
                                     .onTapGesture {
                                         let tappedSong = song
-                                        playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserData.playlistArray[0].songs, startingItem: tappedSong)
+                                        playerViewModel.playAll(title: "즐겨찾기 목록",
+                                                                songs: currentUserViewModel.playlistViewModel.playlistArray[0].songs,
+                                                                startingItem: tappedSong)
                                     }
                             }
                             if isLoading {
@@ -123,7 +126,7 @@ struct FavoriteListView: View {
                     .refreshable {
                         Task {
                             self.isLoading = true
-                            currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
+                            currentUserViewModel.playlistViewModel.playlistArray[0].songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: "favorite")
                             self.isLoading = false
                         }
                     }
@@ -138,7 +141,7 @@ struct FavoriteListView: View {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
-                currentUserData.playlistArray[0].songs = await currentUserData.requestMorePlaylistSong(playlistID: "favorite")
+                currentUserViewModel.playlistViewModel.playlistArray[0].songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: "favorite")
                 self.isLoading = false
             }
             Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { timer in
@@ -168,7 +171,7 @@ struct SongListBigItem: View {
         case recentMumory
     }
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentBottomSheet: Bool = false
     let song: Song
@@ -223,7 +226,7 @@ struct SongListBigItem: View {
                     .frame(width: 24, height: 24)
                     .padding(.trailing, 20)
                     .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
@@ -234,7 +237,7 @@ struct SongListBigItem: View {
                     .padding(.trailing, 20)
                     .onTapGesture {
                         self.generateHapticFeedback(style: .medium)
-                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }

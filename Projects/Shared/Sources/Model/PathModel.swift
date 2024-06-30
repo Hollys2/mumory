@@ -229,7 +229,7 @@ public enum InitPage {
 public enum AuthPage {
     case login
     case emailLogin
-    case singUpCenter
+    case signUpCenter
     case TOSForSocial
     case introOfCustomization
     case customizationCenter

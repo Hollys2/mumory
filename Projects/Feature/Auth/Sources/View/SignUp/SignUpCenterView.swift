@@ -15,13 +15,8 @@ import Core
 struct SignUpCenterView: View {
     // MARK: - Propoerties
     @Environment(\.dismiss) private var dismiss
-//    @EnvironmentObject var currentUserData: CurrentUserData
-    @EnvironmentObject var authCoordinator: AuthCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var signUpViewModel: SignUpViewModel
-
-    @State private var isSignUpCompleted = false
-    @State private var isSignUpErrorShowing: Bool = false
-    
     
     // MARK: - View
     var body: some View {
@@ -31,12 +26,15 @@ struct SignUpCenterView: View {
             VStack(spacing: 0) {
                 NavigationBar(leadingItem: BackButton, centerItem: TitleText)
                 
-                ProcessIndicator
+                //이메일 회원 가입시에만 보여야함
+                if signUpViewModel.signInMethod == .email {
+                    ProcessIndicator
+                }
                 
                 switch(signUpViewModel.step){
                 case 0: EmailInputView()
                 case 1: PasswordInputView()
-                case 2: TOSView()
+                case 2: TermsOfServiceView()
                 default: EmptyView()
                 }
                 
@@ -53,9 +51,9 @@ struct SignUpCenterView: View {
     
     var BackButton: some View {
         Button(action: {
-            if signUpViewModel.step == 0 {
-                dismiss()
-            }else{
+            if isSocialSignIn() || signUpViewModel.step == 0 {
+                appCoordinator.pop(target: .auth)
+            } else {
                 signUpViewModel.goPrevious()
             }
         }, label: {
@@ -77,10 +75,9 @@ struct SignUpCenterView: View {
             
             Button(action: {
                 if signUpViewModel.step == 2 {
-                    authCoordinator.push(destination: .introOfCustomization)
-                } else {
-                    signUpViewModel.goNext()
+                    appCoordinator.push(destination: AuthPage.introOfCustomization)
                 }
+                signUpViewModel.goNext()
             }, label: {
                 MumoryLoadingButton(title: signUpViewModel.getButtonTitle(),
                                     isEnabled: signUpViewModel.isButtonEnabled(),
@@ -115,64 +112,12 @@ struct SignUpCenterView: View {
         return getUIScreenBounds().width * (CGFloat(stepToNaturalNumber) / 3)
     }
     
-//    private func createUser(email: String, password: String){
-//        let auth = FirebaseManager.shared.auth
-//        auth.createUser(withEmail: email, password: password) { data, error in
-//            if let error = error {
-//                print("create user error: \(error)")
-//                manager.isLoading = false
-//                UIView.setAnimationsEnabled(false)
-//                isSignUpErrorShowing = true
-//            }else {
-//                print("create user success")
-//                guard let result = data else {return}
-//                
-//                let userDefault = UserDefaults.standard
-//                userDefault.setValue(result.user.uid, forKeyPath: "uid")
-//                
-//                uploadUserData(uid: result.user.uid)
-//            }
-//        }
-//    }
-    
-//    private func uploadUserData(uid: String){
-//        let Firebase = FirebaseManager.shared
-//        let db = Firebase.db
-//        let messaging = Firebase.messaging
-//        let query = db.collection("User").document(uid)
-//        
-//        //유저데이터 업로드
-//        let userData: [String : Any] = [
-//            "uid": uid,
-//            "email": manager.email,
-//            "signInMethod": "Email",
-//            "isSubscribedToService": manager.isCheckedServiceNewsNotification,
-//            "isSubscribedToSocial": true,
-//            "fcmToken": messaging.fcmToken ?? "",
-//            "signUpDate": Date()
-//        ]
-//        
-//        if manager.isCheckedServiceNewsNotification {
-//            messaging.subscribe(toTopic: "Service")
-//        }
-//        
-//        messaging.subscribe(toTopic: "Social")
-//        
-//        
-//        query.setData(userData) { error in
-//            if let error = error {
-//                print("firestore error \(error)")
-//                isSignUpErrorShowing = true
-//                manager.isLoading = false
-//            }else {
-//                print("firestore upload user data successful")
-//                manager.isLoading = false
-//                isSignUpCompleted = true
-//                appCoordinator.rootPath.append(MumoryPage.startCustomization)
-//            }
-//        }
-//        
-//    }
+    private func isSocialSignIn() -> Bool {
+        switch signUpViewModel.signInMethod {
+        case .kakao, .google, .apple: return true
+        default: return false
+        }
+    }
 }
 
 struct TitleTextForSignUpField: View {
@@ -218,4 +163,6 @@ struct FeedbackTextForSignUp: View {
             .padding(.leading, 40)
             .padding(.top, 15)
     }
+    
+    
 }

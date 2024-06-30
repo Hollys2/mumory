@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 //Deprecated
 struct ArtistOfSongView: View {
-    @EnvironmentObject private var currentUserData: CurrentUserViewModel
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @State private var isBottomSheetPresent: Bool = false
@@ -43,7 +43,7 @@ struct ArtistOfSongView: View {
                     .scaledToFill()
                     .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().width)
             }
-            .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
+            .offset(y: offset.y < -getSafeAreaInsets().top ? -(offset.y+getSafeAreaInsets().top) : 0)
 
 
         
@@ -55,7 +55,7 @@ struct ArtistOfSongView: View {
                         .resizable()
                         .scaledToFill()
                         .frame(width: getUIScreenBounds().width, height: 45)
-                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, getUIScreenBounds().width - getSafeAreaInsets().top - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     //그라데이션 하위
                     VStack(spacing: 0, content: {
@@ -132,7 +132,7 @@ struct ArtistOfSongView: View {
                 
             })
             .frame(height: 65)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
             
 
         }

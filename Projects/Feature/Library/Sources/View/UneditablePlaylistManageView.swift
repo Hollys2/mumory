@@ -102,7 +102,7 @@ struct UneditablePlaylistManageView: View {
 
 struct UneditablePlaylistBigItem: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @Binding var playlist: MusicPlaylist
     @State var itemSize: CGFloat = .zero
 

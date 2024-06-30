@@ -12,7 +12,7 @@ import Lottie
 
 struct IntroOfCustomization: View {
     @EnvironmentObject var signUpViewModel: SignUpViewModel
-    @EnvironmentObject var authCoordinator: AuthCoordinator
+    @EnvironmentObject var appCoordinator: AppCoordinator
 
     var body: some View {
         
@@ -50,7 +50,8 @@ struct IntroOfCustomization: View {
                     .foregroundColor(ColorSet.mainPurpleColor)
                             
                 Button {
-                    authCoordinator.push(destination: .customizationCenter)
+                    signUpViewModel.goNext()
+                    appCoordinator.push(destination: AuthPage.customizationCenter)
                 } label: {
                     MumorySimpleButton(title: "시작하기", isEnabled: true)
                         .padding(20)

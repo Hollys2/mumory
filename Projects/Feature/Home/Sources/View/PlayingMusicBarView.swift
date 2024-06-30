@@ -11,7 +11,7 @@ import SwiftUI
 import Shared
 
 public struct PlayingMusicBarView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 //    @State var isPresentPlayingView: Bool = false
@@ -87,7 +87,7 @@ public struct PlayingMusicBarView: View {
                             .onTapGesture {
                                 playerViewModel.pause()
                             }
-                    }else {
+                    } else {
                         SharedAsset.playButtonTopbar.swiftUIImage
                             .resizable()
                             .scaledToFit()
@@ -107,12 +107,12 @@ public struct PlayingMusicBarView: View {
               .padding(.leading, 20)
             
             //사용자 프로필 이미지
-            AsyncImage(url: currentUserData.user.profileImageURL) { image in
+            AsyncImage(url: currentUserViewModel.user.profileImageURL) { image in
                 image
                     .resizable()
                  
             } placeholder: {
-                currentUserData.user.defaultProfileImage
+                currentUserViewModel.user.defaultProfileImage
                     .resizable()
             }
             .scaledToFill()
@@ -120,7 +120,7 @@ public struct PlayingMusicBarView: View {
             .clipShape(Circle())
             .padding(.trailing, 14)
             .onTapGesture {
-                appCoordinator.setBottomAnimationPage(page: .myPage)
+                appCoordinator.isMyPageViewShown = true
             }
      
                         
@@ -134,9 +134,3 @@ public struct PlayingMusicBarView: View {
     }
 
 }
-
-//struct PlayingMusicBarVIew_Previews: PreviewProvider {
-//    static var previews: some View {
-//        PlayingMusicBarVIew()
-//    }
-//}

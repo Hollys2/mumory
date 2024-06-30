@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct MostPostedSongListView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
@@ -29,7 +29,7 @@ struct MostPostedSongListView: View {
             //이미지
             PlaylistImage(songs: $songs)
                 .frame(width: getUIScreenBounds().width)
-                .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
+                .offset(y: offset.y < -getSafeAreaInsets().top ? -(offset.y+getSafeAreaInsets().top) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
                 }
@@ -42,7 +42,7 @@ struct MostPostedSongListView: View {
                         .resizable()
                         .frame(width: getUIScreenBounds().width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, getUIScreenBounds().width - getSafeAreaInsets().top - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text("뮤모리로 많이 기록된 음악")
@@ -134,7 +134,7 @@ struct MostPostedSongListView: View {
                     }
             })
             .frame(height: 65)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
             
 //            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
 //                .ignoresSafeArea()

@@ -21,11 +21,11 @@ public struct UserProfile: Hashable {
     
     public init() {
         self.uId = ""
-        self.nickname = "nickname"
-        self.id = "id"
+        self.nickname = "UNKNOWN"
+        self.id = ""
         self.profileImageURL = URL(string: "")
         self.backgroundImageURL = URL(string: "")
-        self.bio = "bio"
+        self.bio = ""
         self.defaultProfileImage = SharedAsset.profileWithdrawal.swiftUIImage
         self.signUpDate = Date()
     }

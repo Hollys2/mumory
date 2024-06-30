@@ -11,7 +11,7 @@ import Shared
 import Core
 
 struct EditFavoriteGenreView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @Environment(\.dismiss) private var dismiss
     @State var isLoading: Bool = false
@@ -84,7 +84,7 @@ struct EditFavoriteGenreView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 70, alignment: .center)
             .padding(.horizontal, 20)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
             .background(ColorSet.background.opacity(0.9))
             .padding(.bottom, 5)
             
@@ -108,7 +108,7 @@ struct EditFavoriteGenreView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            selectedGenres = currentUserData.favoriteGenres
+            selectedGenres = currentUserViewModel.playlistViewModel.favoriteGenres
         }
     }
     
@@ -120,9 +120,9 @@ struct EditFavoriteGenreView: View {
             "favoriteGenres" : selectedGenres
         ]
         
-        db.collection("User").document(currentUserData.uId).setData(data, merge: true) { error in
+        db.collection("User").document(currentUserViewModel.user.uId).setData(data, merge: true) { error in
             if error == nil {
-                currentUserData.favoriteGenres = selectedGenres
+                currentUserViewModel.playlistViewModel.favoriteGenres = selectedGenres
                 isLoading
                 dismiss()
             }else {

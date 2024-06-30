@@ -10,25 +10,26 @@ import SwiftUI
 import Shared
 import Core
 
+///유효성 검사 결과 타입 - 중복 에러 포함
+public enum ValidationState {
+    case none
+    case valid
+    case formatError
+    case duplicationError
+}
 
 public struct EmailInputView: View {
     // MARK: - Object lifecycle
     init() {}
     
     // MARK: - Propoerties
-    ///유효성 검사 결과 타입
-    public enum EmailValidationStatDate {
-        case none
-        case valid
-        case formatError
-        case duplicationError
-    }
+    
+
     
     @EnvironmentObject var signUpViewModel: SignUpViewModel
-    @State var email: String = ""
     @State var previousEmail: String = ""
     @State var timer: Timer?
-    @State private var validationStatus: EmailValidationStatDate = .none
+    @State private var validationStatus: ValidationState = .none
     @FocusState var isFocused: Bool
     
     // MARK: - View
@@ -37,12 +38,12 @@ public struct EmailInputView: View {
             
             TitleTextForSignUpField(title: "이메일", topPadding: 43)
             
-            AuthTextField_16(text: $email, prompt: "ex) abcdefg@hhhhh.com")
+            AuthTextField_16(text: $signUpViewModel.email, prompt: "ex) abcdefg@hhhhh.com")
                 .padding(.top, 14)
                 .padding(.horizontal, 20)
                 .focused($isFocused)
-                .onChange(of: email, perform: { value in
-                    setSignUpData(status: .none)
+                .onChange(of: signUpViewModel.email, perform: { value in
+                    setValidation(state: .none)
                     if !(timer?.isValid ?? false) {
                         setTimerFunctionedForCheckingEmailValidation()
                     }
@@ -51,9 +52,6 @@ public struct EmailInputView: View {
             FeedbackTextForSignUp(title: getFeedbackMsg(), isValid: signUpViewModel.isValidEmail)
         })
         .onAppear(perform: {
-            if signUpViewModel.isValidEmail {
-                self.email = signUpViewModel.email
-            }
             setTimerFunctionedForCheckingEmailValidation()
         })
         .onDisappear(perform: {
@@ -63,31 +61,31 @@ public struct EmailInputView: View {
     
     // MARK: - Methods
     private func setTimerFunctionedForCheckingEmailValidation() {
-        self.previousEmail = self.email
+        self.previousEmail = self.signUpViewModel.email
         self.timer = Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { timer in
             signUpViewModel.isLoading = true
-            guard !email.isEmpty else {
-                setSignUpData(status: .none)
+            guard !signUpViewModel.email.isEmpty else {
+                setValidation(state: .none)
                 return
             }
             
-            let isEndEditing = (previousEmail == email)
+            let isEndEditing = (previousEmail == signUpViewModel.email)
             guard isEndEditing else {
-                previousEmail = email
+                previousEmail = signUpViewModel.email
                 return
             }
             
             guard isCorrectFormat() else {
-                setSignUpData(status: .formatError)
+                setValidation(state: .formatError)
                 return
             }
             
             Task {
                 if await isValidEmail() {
-                    setSignUpData(status: .valid)
+                    setValidation(state: .valid)
                     self.timer?.invalidate()
                 } else {
-                    setSignUpData(status: .duplicationError)
+                    setValidation(state: .duplicationError)
                 }
             }
             
@@ -98,12 +96,12 @@ public struct EmailInputView: View {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
         let emailPredicate = NSPredicate(format:"SELF MATCHES %@", emailRegex)
         
-        return emailPredicate.evaluate(with: self.email)
+        return emailPredicate.evaluate(with: self.signUpViewModel.email)
     }
     
     private func isValidEmail() async -> Bool {
         let db = FirebaseManager.shared.db
-        let query = db.collection("User").whereField("email", isEqualTo: email)
+        let query = db.collection("User").whereField("email", isEqualTo: signUpViewModel.email)
         guard let documents = try? await query.getDocuments() else {return false}
         
         return documents.isEmpty
@@ -122,16 +120,9 @@ public struct EmailInputView: View {
     }
     
     ///유효성 결과 설정 및 로딩 상태, 회원가입 뷰모델 내부 이메일 값 수정
-    private func setSignUpData(status: EmailValidationStatDate) {
-        self.validationStatus = status
-        switch status {
-        case .valid:
-            signUpViewModel.isValidEmail = true
-            signUpViewModel.email = self.email
-        default:
-            signUpViewModel.isValidEmail = false
-            signUpViewModel.email = ""
-        }
+    private func setValidation(state: ValidationState) {
+        self.validationStatus = state
+        signUpViewModel.isValidEmail = (validationStatus == .valid)
         signUpViewModel.isLoading = false
     }
 }

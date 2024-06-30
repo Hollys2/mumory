@@ -10,6 +10,10 @@ import Foundation
 import MusicKit
 
 public struct MusicGenre: Hashable{
+    public init(name: String, id: Int) {
+        self.name = name
+        self.id = id
+    }
     public let name: String
     public let id: Int
 }

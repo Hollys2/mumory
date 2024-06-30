@@ -11,7 +11,7 @@ import Shared
 
 struct FriendListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 
     private let lineGray = Color(white: 0.48)
     @State var term: String = ""
@@ -36,7 +36,7 @@ struct FriendListView: View {
                         .foregroundStyle(Color.white)
                     Spacer()
                     
-                    (currentUserData.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
+                    (currentUserViewModel.friendViewModel.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
@@ -56,10 +56,10 @@ struct FriendListView: View {
                             .onChange(of: term) { value in
                                 if term.isEmpty {
                                     DispatchQueue.main.async {
-                                        self.results = currentUserData.friends
+                                        self.results = currentUserViewModel.friendViewModel.friends
                                     }
                                 }else {
-                                    let result = currentUserData.friends.filter({ user in
+                                    let result = currentUserViewModel.friendViewModel.friends.filter({ user in
                                         return user.nickname.contains(value.lowercased()) || user.id.contains(value.lowercased())
                                     })
                                     if result != self.results {
@@ -70,13 +70,13 @@ struct FriendListView: View {
                                 }
                             }
                         
-                        Text("\(currentUserData.friends.count)명")
+                        Text("\(currentUserViewModel.friendViewModel.friends.count)명")
                             .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                             .foregroundStyle(ColorSet.subGray)
                             .padding(.leading, 20)
                             .padding(.bottom, 15)
                         
-                        if currentUserData.friends.isEmpty {
+                        if currentUserViewModel.friendViewModel.friends.isEmpty {
                             InitialSettingView(title: "서로의 일상과 음악 취향을\n공유하고 싶은 친구들을 초대해보세요", buttonTitle: "친구 초대하러 가기") {
                                 appCoordinator.rootPath.append(MumoryPage.searchFriend)
                             }
@@ -108,7 +108,7 @@ struct FriendListView: View {
             })
         })
         .onAppear(perform: {
-            results = currentUserData.friends
+            results = currentUserViewModel.friendViewModel.friends
         })
     }
 }

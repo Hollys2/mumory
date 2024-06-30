@@ -14,7 +14,6 @@ struct OnboardingView: View {
     
     // MARK: - Propoerties
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
     @State var isPresentNextView = false
     @State var selection: OnboardingType = .record
 
@@ -42,12 +41,12 @@ struct OnboardingView: View {
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(20)
                 .onTapGesture {
-                    bootstrapViewModel.isShownOnBoarding = false
+                    appCoordinator.isOnboardingShown = false
                 }
             
         }
         .navigationBarBackButtonHidden()
-        .animation(.default, value: bootstrapViewModel.isShownOnBoarding)
+        .animation(.default, value: appCoordinator.isOnboardingShown)
         .transition(.opacity)
     }
     

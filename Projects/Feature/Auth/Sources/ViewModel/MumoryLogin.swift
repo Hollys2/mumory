@@ -108,24 +108,24 @@ class MumoryLogin: ObservableObject {
 //                appCoordinator.rootPath.append(MumoryPage.customization)
 //            }
 //            
-//            currentUserData.uId = uid
-//            currentUserData.user = await MumoriUser(uId: uid)
-//            currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
+//            currentUserViewModel.user.uId = uid
+//            currentUserViewModel.user = await MumoriUser(uId: uid)
+//            currentUserViewModel.playlistViewModel.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
 //            try? await query.updateData(["fcmToken": fcmToken])
 //            appCoordinator.selectedTab = .home
 //            appCoordinator.initPage = .home
 //            
-//            self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-//            self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-//            self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+//            self.mumoryDataViewModel.fetchRewards(uId: currentUserViewModel.user.uId)
+//            self.mumoryDataViewModel.fetchActivitys(uId: currentUserViewModel.user.uId)
+//            self.mumoryDataViewModel.fetchMumorys(uId: currentUserViewModel.user.uId) { result in
 //                switch result {
 //                case .success(let mumorys):
 //                    print("fetchMumorys successfully: \(mumorys)")
 //                    DispatchQueue.main.async {
 //                        self.mumoryDataViewModel.myMumorys = mumorys
-//                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-//                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-//                        self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+//                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserViewModel.user.uId)
+//                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserViewModel.user)
+//                        self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserViewModel.user.uId)
 //                    }
 //                case .failure(let error):
 //                    print("ERROR: \(error)")

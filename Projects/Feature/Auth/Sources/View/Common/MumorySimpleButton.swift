@@ -43,8 +43,6 @@ struct MumoryLoadingButton: View {
     var isEnabled: Bool = false
     var showShadow: Bool = true
     
-
-    
     var body: some View {
         HStack{
             Text(title)

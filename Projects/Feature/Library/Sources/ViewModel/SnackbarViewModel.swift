@@ -98,7 +98,7 @@ public class SnackBarViewModel: ObservableObject {
 public struct SnackBarView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var additionalAction: () -> Void = {}
     public init(){}
@@ -188,7 +188,7 @@ public struct SnackBarView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             
             Button {
-                snackBarViewModel.removeRecentSaveData(uId: currentUserData.uId)
+                snackBarViewModel.removeRecentSaveData(uId: currentUserViewModel.user.uId)
                 snackBarViewModel.setPresentValue(isPresent: false)
             } label: {
                 Text("실행취소")

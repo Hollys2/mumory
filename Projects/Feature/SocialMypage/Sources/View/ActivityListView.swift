@@ -48,7 +48,7 @@ struct Activity: Hashable{
 }
 struct ActivityListView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @State var selection: ActivityType = .all
     @State var date: Date = Date()
@@ -234,7 +234,7 @@ struct ActivityListView: View {
         }
         
         Task {
-            var query = db.collection("User").document(currentUserData.uId).collection("Activity")
+            var query = db.collection("User").document(currentUserViewModel.user.uId).collection("Activity")
                 .whereField("date", isLessThan: targetDate)
                 .order(by: "date", descending: true)
             
@@ -266,7 +266,7 @@ struct ActivityListView: View {
                 if !self.activityList.keys.contains(dateString) {
                     self.activityList[dateString] = []
                 }
-                self.activityList[dateString]?.append(Activity(type: type, songId: songId, mumoryId: mumoryId, friendNickname: friendNickname, myNickname: currentUserData.user.nickname, content: content, commentId: commentId))
+                self.activityList[dateString]?.append(Activity(type: type, songId: songId, mumoryId: mumoryId, friendNickname: friendNickname, myNickname: currentUserViewModel.user.nickname, content: content, commentId: commentId))
             }
             isLoading.wrappedValue = false
             
@@ -303,7 +303,7 @@ struct SelectionButtonView: View {
 }
 
 struct DatePickerView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
     @Binding var date: Date
     @State var dateArray: [Date] = []
@@ -341,7 +341,7 @@ struct DatePickerView: View {
             let components: Set<Calendar.Component> = [.year, .month]
             let originDate = calendar.dateComponents(components, from: self.date)
             let thisMonthDate = calendar.dateComponents(components, from: Date())
-            let signUpDate = calendar.dateComponents(components, from: currentUserData.user.signUpDate)
+            let signUpDate = calendar.dateComponents(components, from: currentUserViewModel.user.signUpDate)
             
             let startDateComponents = DateComponents(year: signUpDate.year, month: signUpDate.month)
             let endDateComponents = DateComponents(year: thisMonthDate.year, month: thisMonthDate.month)
@@ -374,7 +374,7 @@ struct DatePickerView: View {
 struct ActivityItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentDeletedMumoryPopup: Bool = false
     @State var song: Song?

@@ -12,7 +12,7 @@ import Core
 
 public struct MyPageView: View {
     @Environment(\.dismiss) var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -55,8 +55,8 @@ public struct MyPageView: View {
                     .frame(width: 30, height: 30)
                     .onTapGesture {
                         isTapBackButton = true
-                        if appCoordinator.bottomAnimationViewStatus == .myPage {
-                            appCoordinator.setBottomAnimationPage(page: .remove)
+                        if appCoordinator.isMyPageViewShown {
+                            appCoordinator.isMyPageViewShown.toggle()
                             if appCoordinator.selectedTab == .social {
                                 Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
                                     playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
@@ -81,11 +81,11 @@ public struct MyPageView: View {
             }
             .padding(.horizontal, 20)
             .frame(height: 63)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
         }
         .ignoresSafeArea()
         .onAppear {
-            settingViewModel.uid = currentUserData.uId
+            settingViewModel.uid = currentUserViewModel.user.uId
             AnalyticsManager.shared.setScreenLog(screenTitle: "MyPageView")
         }
 //        .environmentObject(withdrawViewModel)
@@ -96,13 +96,13 @@ public struct MyPageView: View {
 }
 
 struct UserInfoView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentEditView: Bool = false
     
     var body: some View {
         
         VStack(spacing: 0, content: {
-            AsyncImage(url: currentUserData.user.backgroundImageURL) { image in
+            AsyncImage(url: currentUserViewModel.user.backgroundImageURL) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -119,30 +119,30 @@ struct UserInfoView: View {
             
             
             VStack(alignment: .leading, spacing: 4, content: {
-                Text(currentUserData.user.nickname)
+                Text(currentUserViewModel.user.nickname)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 24))
                     .foregroundStyle(Color.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 20)
                 
-                Text("@\(currentUserData.user.id)")
+                Text("@\(currentUserViewModel.user.id)")
                     .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 16))
                     .foregroundStyle(ColorSet.charSubGray)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text(currentUserData.user.bio)
+                Text(currentUserViewModel.user.bio)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.subGray)
                     .frame(height: 52, alignment: .bottom)
                     .padding(.bottom, 18)
             })
             .overlay {
-                AsyncImage(url: currentUserData.user.profileImageURL) { image in
+                AsyncImage(url: currentUserViewModel.user.profileImageURL) { image in
                     image
                         .resizable()
 
                 } placeholder: {
-                    currentUserData.user.defaultProfileImage
+                    currentUserViewModel.user.defaultProfileImage
                         .resizable()
 
                 }
@@ -185,7 +185,7 @@ struct UserInfoView: View {
 
 struct SimpleFriendView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -194,7 +194,7 @@ struct SimpleFriendView: View {
                     .foregroundStyle(Color.white)
                 
                 Spacer()
-                Text("\(currentUserData.friends.count)")
+                Text("\(currentUserViewModel.friendViewModel.friends.count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.charSubGray)
                     .padding(.trailing, 3)
@@ -210,14 +210,14 @@ struct SimpleFriendView: View {
                 appCoordinator.rootPath.append(MumoryPage.friendList)
             }
             
-            if currentUserData.friends.isEmpty {
+            if currentUserViewModel.friendViewModel.friends.isEmpty {
                 InitialSettingView(title: "서로의 일상과 음악 취향을\n공유하고 싶은 친구들을 초대해보세요", buttonTitle: "친구 초대하러 가기") {
                     appCoordinator.rootPath.append(MumoryPage.searchFriend)
                 }
             }else {
                 ScrollView(.horizontal) {
                     HStack(spacing: 12, content: {
-                        ForEach(currentUserData.friends, id: \.self) { friend in
+                        ForEach(currentUserViewModel.friendViewModel.friends, id: \.self) { friend in
                             FriendHorizontalItem(user: friend)
                                 .onTapGesture {
                                     if friend.nickname == "탈퇴계정" {return}
@@ -245,7 +245,7 @@ struct MumorySample: Hashable{
 
 struct MyMumori: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     let Firebase = FirebaseManager.shared
@@ -272,14 +272,14 @@ struct MyMumori: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .onTapGesture {
-                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(currentUserData.user), mumoryAnnotation: Mumory()))
+                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(currentUserViewModel.user), mumoryAnnotation: Mumory()))
 
             }
             
             if mumoryDataViewModel.myMumorys.isEmpty {
                 
                 InitialSettingView(title: "음악과 일상 기록을 통해\n나만의 뮤모리를 채워보세요", buttonTitle: "뮤모리 기록하러 가기") {
-                    appCoordinator.setBottomAnimationPage(page: .remove)
+                    appCoordinator.isMyPageViewShown = false
                     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             appCoordinator.isCreateMumorySheetShown = true

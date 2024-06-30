@@ -19,7 +19,7 @@ struct SongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -114,7 +114,7 @@ struct SongBottomSheetView: View {
                         if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
                             BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
                                 .onTapGesture {
-                                    playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                     dismiss()
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                 }
@@ -122,7 +122,7 @@ struct SongBottomSheetView: View {
                             BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                                 .onTapGesture {
                                     self.generateHapticFeedback(style: .medium)
-                                    playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                     dismiss()
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                 }
@@ -195,7 +195,7 @@ struct OptionalSongBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -313,7 +313,7 @@ struct OptionalSongBottomSheetView: View {
                             if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
                                 BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
                                     .onTapGesture {
-                                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                         dismiss()
                                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                     }
@@ -321,7 +321,7 @@ struct OptionalSongBottomSheetView: View {
                                 BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                                     .onTapGesture {
                                         self.generateHapticFeedback(style: .medium)
-                                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                         dismiss()
                                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                     }
@@ -399,7 +399,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -483,7 +483,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                         if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
                             BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
                                 .onTapGesture {
-                                    playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                     dismiss()
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                 }
@@ -491,7 +491,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                             BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                                 .onTapGesture {
                                     self.generateHapticFeedback(style: .medium)
-                                    playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                     dismiss()
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                 }
@@ -569,7 +569,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -673,7 +673,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                             if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
                                 BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
                                     .onTapGesture {
-                                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                         dismiss()
                                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                     }
@@ -681,7 +681,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                                 BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                                     .onTapGesture {
                                         self.generateHapticFeedback(style: .medium)
-                                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                         dismiss()
                                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                     }
@@ -761,7 +761,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
         
@@ -856,7 +856,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                         if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
                             BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 삭제")
                                 .onTapGesture {
-                                    playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                     dismiss()
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                 }
@@ -864,7 +864,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                             BottomSheetItem(image: SharedAsset.bookmark.swiftUIImage, title: "즐겨찾기 목록에 추가")
                                 .onTapGesture {
                                     self.generateHapticFeedback(style: .medium)
-                                    playerViewModel.addToFavorite(uid: currentUserData.uId, songId: song.id.rawValue)
+                                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: song.id.rawValue)
                                     dismiss()
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                 }
@@ -874,7 +874,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                     BottomSheetItem(image: SharedAsset.addPurple.swiftUIImage, title: "뮤모리 추가", type: .accent)
                         .onTapGesture {
                             dismiss()
-                            appCoordinator.setBottomAnimationPage(page: .remove)
+                            appCoordinator.isMyPageViewShown = false
                             appCoordinator.rootPath = NavigationPath()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let musicModel = MusicModel(songID: song.id, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))

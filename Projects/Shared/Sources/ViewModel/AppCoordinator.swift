@@ -10,13 +10,19 @@
 import SwiftUI
 import MapKit
 import MusicKit
-
 import Firebase
 
+public enum AppNavigationType {
+    case auth
+    case mumory
+}
 
 public class AppCoordinator: ObservableObject {
+    public init(){}
     
     @Published public var rootPath: NavigationPath = NavigationPath()
+    @Published public var authPath: [AuthPage] = []
+    
     @Published public var initPage: InitPage = .login
     @Published public var selectedTab: Tab = .home
     
@@ -50,21 +56,30 @@ public class AppCoordinator: ObservableObject {
     @Published public var safeAreaInsetsTop: CGFloat = 0.0
     @Published public var safeAreaInsetsBottom: CGFloat = 0.0
     
-    @Published public var bottomAnimationViewStatus: BottomAnimationPage = .remove
+    @Published public var isMyPageViewShown = false
+    @Published public var isSplashViewShown: Bool = true
+    @Published public var isHomeViewShown: Bool = false
+    @Published public var isOnboardingShown: Bool = false
     
-    //아래에서 나오는 뷰 관리 용도
-    public enum BottomAnimationPage {
-        case myPage
-        case play
-        case remove
-    }
     
-    public func setBottomAnimationPage(page: BottomAnimationPage) {
-        withAnimation {
-            self.bottomAnimationViewStatus = page
+
+    
+    public func push<T>(destination: T) {
+        if let dst = destination as? AuthPage {
+            authPath.append(dst)
+        } else if let dst = destination as? MumoryPage {
+            rootPath.append(dst)
         }
     }
     
-    public init () {}
+    public func pop(target: AppNavigationType) {
+        if target == .auth {
+            _ = authPath.popLast()
+        } else if target == .mumory {
+            rootPath.removeLast()
+        }
+    }
+    
+
 }
 

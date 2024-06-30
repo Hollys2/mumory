@@ -12,14 +12,14 @@ import MusicKit
 
 
 struct FavoriteGenreRecommendationView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isEditGenreViewPresent: Bool = false
     @State var isEditGenreInfoPresent: Bool = false
     
     var body: some View {
         ZStack{
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(currentUserData.favoriteGenres, id: \.self){genreID in
+                ForEach(currentUserViewModel.playlistViewModel.favoriteGenres, id: \.self){genreID in
                     RecommendationScrollView(genreID: genreID)
                         .frame(height: 210)
                         .padding(.top, 35)
@@ -40,7 +40,7 @@ struct FavoriteGenreRecommendationView: View {
                                     .stroke(Color.white, lineWidth: 1)
                             }
                         
-                        ForEach(currentUserData.favoriteGenres, id: \.self){ genreID in
+                        ForEach(currentUserViewModel.playlistViewModel.favoriteGenres, id: \.self){ genreID in
                             GenreItem(genreID: genreID)
                         }
                         

@@ -17,8 +17,7 @@ public struct SplashView: View {
     }
     
     // MARK: - Propoerties
-    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
-
+    @EnvironmentObject var appCoordinator: AppCoordinator
 
     
     // MARK: - View
@@ -32,7 +31,7 @@ public struct SplashView: View {
         }
         .onAppear {
             Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
-                self.bootstrapViewModel.isShownSplashView = false
+                self.appCoordinator.isSplashViewShown = false
             }
         }
     }

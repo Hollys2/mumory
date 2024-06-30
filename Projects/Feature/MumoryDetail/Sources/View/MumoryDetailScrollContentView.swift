@@ -45,7 +45,7 @@ struct MumoryDetailScrollContentView: View {
 
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     var body: some View {
@@ -120,7 +120,7 @@ struct MumoryDetailScrollContentView: View {
                         .mask {Circle()}
                         .onTapGesture {
                             Task {
-                                if self.user.uId == currentUserData.user.uId {
+                                if self.user.uId == currentUserViewModel.user.uId {
                                     appCoordinator.rootPath.append(MumoryPage.myPage)
                                 } else {
                                     let friend = await FetchManager.shared.fetchUser(uId: self.user.uId)
@@ -342,7 +342,7 @@ struct MumoryDetailScrollContentView: View {
                 self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
                 self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
                 print("MumoryDetailScrollContentView onAppear")
-                for friend in self.currentUserData.friends {
+                for friend in self.currentUserViewModel.friendViewModel.friends {
                     Task {
                         await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue, mumory: self.mumory)
                     }

@@ -14,7 +14,7 @@ enum TOSChecklist {
     case serviceNotification
 }
 
-struct TOSView: View {
+struct TermsOfServiceView: View {
     // MARK: - Propoerties
 
     @Environment(\.dismiss) private var dismiss

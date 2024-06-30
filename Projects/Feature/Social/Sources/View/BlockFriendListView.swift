@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct BlockFriendListView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     let db = FirebaseManager.shared.db
     var body: some View {
@@ -39,7 +39,7 @@ struct BlockFriendListView: View {
                 .frame(height: 65)
                 
                 Divider05()
-                if currentUserData.blockFriends.isEmpty {
+                if currentUserViewModel.friendViewModel.blockFriends.isEmpty {
                     VStack(spacing: 16) {
                         Text("차단한 친구가 없어요")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
@@ -53,7 +53,7 @@ struct BlockFriendListView: View {
                 }else {
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
-                            ForEach(currentUserData.blockFriends, id: \.uId){ friend in
+                            ForEach(currentUserViewModel.friendViewModel.blockFriends, id: \.uId){ friend in
                                 BlockFriendItem(friend: friend)
                             }
                         })
@@ -68,7 +68,7 @@ struct BlockFriendListView: View {
 
 
 struct BlockFriendItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentRequestPopup: Bool = false
     let Firebase = FirebaseManager.shared
     let friend: UserProfile
@@ -113,7 +113,7 @@ struct BlockFriendItem: View {
                 .background(ColorSet.subGray)
                 .clipShape(RoundedRectangle(cornerRadius: 16.5, style: .circular))
                 .onTapGesture {
-                    let query = Firebase.db.collection("User").document(currentUserData.uId)
+                    let query = Firebase.db.collection("User").document(currentUserViewModel.user.uId)
                     query.updateData(["blockFriends": FirebaseManager.Fieldvalue.arrayRemove([self.friend.uId])])
                 }
         })

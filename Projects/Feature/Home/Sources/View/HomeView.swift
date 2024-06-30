@@ -28,7 +28,7 @@ public struct HomeView: View {
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserViewModel
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var withdrawViewModel: WithdrawViewModel
@@ -54,6 +54,7 @@ public struct HomeView: View {
                     }
                     
                     MumoryTabView()
+                        .ignoresSafeArea()
                         .overlay(CreateMumoryPopUpView(), alignment: .top)
                 }
                 
@@ -86,11 +87,12 @@ public struct HomeView: View {
                 }
                 
                 if self.appCoordinator.isAddFriendViewShown {
-                    SocialFriendTestView()
+                    SocialFriendView()
                 }
                 
-                if self.appCoordinator.bottomAnimationViewStatus == .myPage {
+                if self.appCoordinator.isMyPageViewShown {
                     MyPageView()
+                        .animation(.default, value: appCoordinator.isMyPageViewShown)
                         .environmentObject(settingViewModel)
                 }
                 
@@ -100,6 +102,11 @@ public struct HomeView: View {
             } // ZStack
             .navigationBarBackButtonHidden()
             .onAppear {
+                Task {
+                    guard let uId = FirebaseManager.shared.auth.currentUser?.uid else {return}
+                    currentUserViewModel.user = await FetchManager.shared.fetchUser(uId: uId)
+                }
+                
                 let userDefualt = UserDefaults.standard
                 if !userDefualt.bool(forKey: "firstLogined") {
                     userDefualt.setValue(true, forKey: "firstLogined")
@@ -121,7 +128,7 @@ public struct HomeView: View {
                             self.showAlertToRedirectToSettings()
                         }
                     }
-                    currentUserData.playlistArray = await currentUserData.savePlaylist()
+                    currentUserViewModel.playlistViewModel.savePlaylist()
                 }
                 print("HomeView onAppear")
             }
@@ -185,7 +192,7 @@ public struct HomeView: View {
                         .environmentObject(friendDataViewModel)
                     
                 case .searchFriend:
-                    SocialFriendTestView()
+                    SocialFriendView()
                     
                 case .mostPostedSongList(songs: let songs):
                     MostPostedSongListView(songs: songs)
@@ -243,7 +250,7 @@ public struct HomeView: View {
                         .navigationBarBackButtonHidden()
                     
                 case .playlistWithIndex(index: let index):
-                    PlaylistView(playlist: $currentUserData.playlistArray[index])
+                    PlaylistView(playlist: $currentUserViewModel.playlistViewModel.playlistArray[index])
                     
                 case .myPage:
                     MyPageView()

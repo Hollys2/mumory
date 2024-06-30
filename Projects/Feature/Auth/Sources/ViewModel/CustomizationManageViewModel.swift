@@ -90,11 +90,11 @@ public class CustomizationManageViewModel: ObservableObject{
     
     public func getSelectProfileImage() -> Image {
         switch(self.randomProfileIndex) {
-        case 0: return SharedAsset.profileSelectRed.swiftUIImage
-        case 1: return SharedAsset.profileSelectPurple.swiftUIImage
-        case 2: return SharedAsset.profileSelectYellow.swiftUIImage
-        case 3: return SharedAsset.profileSelectOrange.swiftUIImage
-        default: return SharedAsset.profileSelectRed.swiftUIImage
+        case 0: return SharedAsset.profileRedForSelection.swiftUIImage
+        case 1: return SharedAsset.profilePurpleForSelection.swiftUIImage
+        case 2: return SharedAsset.profileYellowForSelection.swiftUIImage
+        case 3: return SharedAsset.profileOrangeForSelection.swiftUIImage
+        default: return SharedAsset.profileRedForSelection.swiftUIImage
         }
     }
     

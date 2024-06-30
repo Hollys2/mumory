@@ -10,318 +10,172 @@ import SwiftUI
 import Shared
 
 struct ProfileCardView: View {
-    @EnvironmentObject var manager: CustomizationManageViewModel
+    // MARK: - Propoerties
+    @EnvironmentObject var signUpViewModel: SignUpViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @State var firstYOffset: CGFloat = 0
-    @State var firstOpacity: CGFloat = 0
-    @State var secondYOffset: CGFloat = 0
-    @State var secondOpacity: CGFloat = 0
-    @State var thirdYOffset: CGFloat = 0
-    @State var thirdOpacity: CGFloat = 0
-    //    var selectedGenreList = ["K-POP", "J-POP", "라이브음악", "인디", "HIP/HOP"]
-
+    @State var isTitleShown: Bool = false
+    @State var isCardShown: Bool = false
+    @State var isSubTitleShown: Bool = false
+    
+    // MARK: - View
     var body: some View {
-        ZStack{
+        ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
-            //미니, se만 스크롤 되게 하기
-            if getUIScreenBounds().height <= 815 {
-                ScrollView(.vertical) {
-                    VStack(spacing: 0){
-                        Text("프로필 생성이 완료되었습니다!")
-                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                            .foregroundStyle(.white)
-                            .padding(.top, getUIScreenBounds().height > 815 ? 65 : 50)
-                            .offset(y: firstYOffset)
-                            .opacity(firstOpacity)
-                        
-                        VStack(spacing: 0, content: {
-                            VStack(spacing: 0, content: {
-                                
-                                
-                                manager.getProfileImage()
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 105, height: 105)
-                                    .clipShape(Circle())
-                                    .padding(.top, 38)
-                                
-                                
-                                Text(manager.nickname)
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
-                                    .foregroundStyle(.white)
-                                    .padding(.top, 18)
-                                
-                                Text("@\(manager.id)")
-                                    .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
-                                    .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                    .padding(.top, 8)
-                                    .padding(.bottom, 25)
-                            })
-                            
-                            VStack(spacing: 0, content: {
-                                Text("관심 음악 장르")
-                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                                    .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                    .padding(.top, 6)
-                                    .padding(.bottom, 6)
-                                    .padding(.leading, 12)
-                                    .padding(.trailing, 12)
-                                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
-                                    .padding(.top, 18)
-                                
-                                
-                                Text(getGenreText(list: manager.selectedGenres, screen: getUIScreenBounds().size))
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                    .foregroundColor(ColorSet.mainPurpleColor)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.top, 13)
-                                    .lineSpacing(5)
-                                    .lineLimit(5)
-                                
-                                Rectangle()
-                                    .frame(height: 1)
-                                    .padding(.leading, 57)
-                                    .padding(.trailing, 57)
-                                    .padding(.top, 20)
-                                    .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
-                                
-                                Text("음악 감상 시간대")
-                                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                                    .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                    .padding(.top, 6)
-                                    .padding(.bottom, 6)
-                                    .padding(.leading, 12)
-                                    .padding(.trailing, 12)
-                                    .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                                    .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
-                                    .padding(.top, 21)
-                                
-                                
-                                Text(getTimeZoneComment(timeZone: manager.selectedTime))
-                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                    .foregroundColor(ColorSet.mainPurpleColor)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(5)
-                                    .padding(.top, 12)
-                                    .padding(.bottom, 20)
-                                
-                            })
-                            .frame(maxWidth: .infinity)
-                            .background(ColorSet.moreDeepGray)
-                            
-                            
-                        })
-                        .frame(maxWidth: .infinity)
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
-                        .overlay(content: {
-                            RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .circular)
-                                .stroke(ColorSet.subGray, lineWidth: 0.5)
-                        })
-                        .padding(.leading, 58)
-                        .padding(.trailing, 58)
-                        .padding(.top, 37)
-                        .offset(y: secondYOffset)
-                        .opacity(secondOpacity)
-                        
-                        Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
-                            .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
-                            .foregroundStyle(ColorSet.subGray)
-                            .multilineTextAlignment(.center)
-                            .padding(.top, 37)
-                            .tracking(0.3)
-                            .lineSpacing(5)
-                            .offset(y: thirdYOffset)
-                            .opacity(thirdOpacity)
-
-                        
-                        Spacer()
-                        
-                        
-                    }
-                    .padding(.bottom, 100)
-                }
-                .scrollIndicators(.hidden)
-
-            } else {
-                VStack(spacing: 0){
-                    Text("프로필 생성이 완료되었습니다!")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
-                        .foregroundStyle(.white)
-                        .padding(.top, getUIScreenBounds().height > 815 ? 65 : 50)
-                        .offset(y: firstYOffset)
-                        .opacity(firstOpacity)
-                    
-                    VStack(spacing: 0, content: {
-                        VStack(spacing: 0, content: {
-                            
-                            
-                            manager.getProfileImage()
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 105, height: 105)
-                                .clipShape(Circle())
-                                .padding(.top, 38)
-                            
-                            
-                            Text(manager.nickname)
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
-                                .foregroundStyle(.white)
-                                .padding(.top, 18)
-                            
-                            Text("@\(manager.id)")
-                                .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
-                                .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
-                                .padding(.top, 8)
-                                .padding(.bottom, 25)
-                        })
-                        
-                        VStack(spacing: 0, content: {
-                            Text("관심 음악 장르")
-                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 6)
-                                .padding(.bottom, 6)
-                                .padding(.leading, 12)
-                                .padding(.trailing, 12)
-                                .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
-                                .padding(.top, 18)
-                            
-                            
-                            Text(getGenreText(list: manager.selectedGenres, screen: getUIScreenBounds().size))
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                .foregroundColor(ColorSet.mainPurpleColor)
-                                .multilineTextAlignment(.center)
-                                .padding(.top, 13)
-                                .lineSpacing(5)
-                            
-                            Rectangle()
-                                .frame(height: 1)
-                                .padding(.leading, 57)
-                                .padding(.trailing, 57)
-                                .padding(.top, 20)
-                                .foregroundStyle(Color(red: 0.2, green: 0.2, blue: 0.2))
-                            
-                            Text("음악 감상 시간대")
-                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
-                                .foregroundStyle(Color(red: 0.96, green: 0.96, blue: 0.96))
-                                .padding(.top, 6)
-                                .padding(.bottom, 6)
-                                .padding(.leading, 12)
-                                .padding(.trailing, 12)
-                                .background(Color(red: 0.16, green: 0.16, blue: 0.16))
-                                .clipShape(RoundedRectangle(cornerSize: CGSize(width: 40, height: 40), style: .circular))
-                                .padding(.top, 21)
-                            
-                            
-                            Text(getTimeZoneComment(timeZone: manager.selectedTime))
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                .foregroundColor(ColorSet.mainPurpleColor)
-                                .multilineTextAlignment(.center)
-                                .lineSpacing(5)
-                                .padding(.top, 12)
-                                .padding(.bottom, 20)
-                            
-                        })
-                        .frame(maxWidth: .infinity)
-                        .background(ColorSet.moreDeepGray)
-                        
-                        
-                    })
-                    .frame(maxWidth: .infinity)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
-                    .overlay(content: {
-                        RoundedRectangle(cornerSize: CGSize(width: 20, height: 20), style: .circular)
-                            .stroke(ColorSet.subGray, lineWidth: 0.5)
-                    })
-                    .padding(.leading, 58)
-                    .padding(.trailing, 58)
-                    .padding(.top, getUIScreenBounds().height > 815 ? 40 : 20)
-                    .offset(y: secondYOffset)
-                    .opacity(secondOpacity)
-                    
-                    Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
-                        .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
-                        .foregroundStyle(ColorSet.subGray)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 37)
-                        .tracking(0.3)
-                        .lineSpacing(5)
-                        .offset(y: thirdYOffset)
-                        .opacity(getUIScreenBounds().height > 815 ? thirdOpacity : 0)
-                    
-                    
-                    Spacer()
-                    
-                    
-                }
+            VStack(spacing: 0){
+                Text("프로필 생성이 완료되었습니다!")
+                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
+                    .foregroundStyle(.white)
+                    .padding(.top, getUIScreenBounds().height > 815 ? 65 : 50)
+                    .offset(y: isTitleShown ? -15 : 0)
+                    .opacity(isTitleShown ? 1 : 0)
+                
+                CardView
+                
+                Text("지금부터 뮤모리를 통해\n많은 음악과 특별한 순간을 공유해보세요")
+                    .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 15))
+                    .foregroundStyle(ColorSet.subGray)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 37)
+                    .tracking(0.3)
+                    .lineSpacing(5)
+                    .offset(y: isSubTitleShown ? -15 : 0)
+                    .opacity(isSubTitleShown ? 1 : 0)
             }
             
-            VStack{
-                Spacer()
-                MumorySimpleButton(title: "시작하기", isEnabled: true)
-                    .padding(.bottom, 20)
-                    .padding(.leading, 20)
-                    .padding(.trailing, 20)
-                    .onTapGesture {
-                        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-                        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-                        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
-                            switch result {
-                            case .success(let mumorys):
-                                print("fetchMumorys successfully: \(mumorys)")
-                                DispatchQueue.main.async {
-                                    self.mumoryDataViewModel.myMumorys = mumorys
-                                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-                                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
-                                }
-                            case .failure(let error):
-                                print("ERROR: \(error)")
-                            }
-                            
-                            DispatchQueue.main.async {
-                                self.mumoryDataViewModel.isUpdating = false
-                            }
-                        }
-                        
-                        appCoordinator.initPage = .home                        
-                        var transaction = Transaction()
-                        transaction.disablesAnimations = true
-                        appCoordinator.isCreateMumorySheetShown = false
-                        withTransaction(transaction) {
-                            appCoordinator.rootPath = NavigationPath()
-                        }
-                    }
-            }
+            StartButton
+      
         }
         .navigationBarBackButtonHidden()
-        .onAppear(perform: {
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    firstYOffset -= 15
-                    firstOpacity = 1
-                }
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    secondYOffset -= 15
-                    secondOpacity = 1
-                }
-            }
-            
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5) {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    thirdYOffset -= 15
-                    thirdOpacity = 1
-                }
-            }
-        })
+        .onAppear {
+            setAnimationTimer()
+        }
     }
+    
+    var StartButton: some View {
+        VStack {
+            Spacer()
+            Button {
+                appCoordinator.isHomeViewShown = true
+            } label: {
+                MumorySimpleButton(title: "시작하기", isEnabled: true)
+                    .padding(.bottom, 20)
+                    .padding(.horizontal, 20)
+            }
+        }
+    }
+    
+    var CardView: some View {
+        VStack(spacing: 0, content: {
+            VStack(spacing: 0, content: {
+                Group {
+                    if let image = signUpViewModel.profileImage {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 105, height: 105)
+                            .clipShape(Circle())
+                        
+                    } else {
+                        signUpViewModel.getDefaultProfileImage()
+                    }
+                }
+                .padding(.top, 33)
+                
+                Text(signUpViewModel.nickname)
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 20))
+                    .foregroundStyle(.white)
+                    .padding(.top, 18)
+                
+                Text("@\(signUpViewModel.id)")
+                    .font(SharedFontFamily.Pretendard.extraLight.swiftUIFont(size: 15))
+                    .foregroundStyle(Color(red: 0.72, green: 0.72, blue: 0.72))
+                    .padding(.top, 8)
+                    .padding(.bottom, 25)
+            })
+            
+            VStack(spacing: 0, content: {
+                Text("관심 음악 장르")
+                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
+                    .foregroundStyle(Color(white: 0.96))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color(white: 0.16))
+                    .clipShape(RoundedRectangle(cornerRadius: 40, style: .circular))
+                    .padding(.top, 18)
+                
+                
+                Text(getGenreText(list: signUpViewModel.favoriteGenres, screen: getUIScreenBounds().size))
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                    .foregroundColor(ColorSet.mainPurpleColor)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 13)
+                    .lineSpacing(5)
+                    .lineLimit(5)
+                
+                Divider()
+                    .background(Color(white: 0.2))
+                    .frame(height: 1)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 57)
+                    .padding(.top, 20)
+                
+                Text("음악 감상 시간대")
+                    .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 12))
+                    .foregroundStyle(Color(white: 0.96))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color(white: 0.16))
+                    .clipShape(RoundedRectangle(cornerRadius: 40, style: .circular))
+                    .padding(.top, 21)
+                
+                
+                Text(getTimeZoneText(timeZone: signUpViewModel.notificationTime))
+                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                    .foregroundColor(ColorSet.mainPurpleColor)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(5)
+                    .padding(.top, 12)
+                    .padding(.bottom, 20)
+                
+            })
+            .frame(maxWidth: .infinity)
+            .background(ColorSet.moreDeepGray)
+            
+            
+        })
+        .frame(maxWidth: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .circular))
+        .overlay(content: {
+            RoundedRectangle(cornerRadius: 20, style: .circular)
+                .stroke(ColorSet.subGray, lineWidth: 1)
+        })
+        .padding(.horizontal, 58)
+        .padding(.top, 37)
+        .offset(y: isCardShown ? -15 : 0)
+        .opacity(isCardShown ? 1 : 0)
+    }
+    
+    // MARK: - Methods
+    private func setAnimationTimer() {
+        var count: Int = 0
+        Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { timer in
+            withAnimation(.easeOut(duration: 0.3)) {
+                if count == 1 {
+                    print("첫번째")
+                    isTitleShown = true
+                } else if count == 2 {
+                    isCardShown = true
+                } else if count == 3 {
+                    isSubTitleShown = true
+                    timer.invalidate()
+                }
+                count += 1
+            }
+        }
+    }
+    
     private func getTextWidth(term: String) -> CGFloat {
         let fontAttribute = [NSAttributedString.Key.font: SharedFontFamily.Pretendard.medium.font(size: 13)]
         var width = (term as NSString).size(withAttributes: fontAttribute).width
@@ -357,19 +211,20 @@ struct ProfileCardView: View {
         return result
     }
     
-    private func getTimeZoneComment(timeZone: Int) -> String {
-        if timeZone == 1 {
+    private func getTimeZoneText(timeZone: TimeZone) -> String {
+        switch timeZone {
+        case .moring:
             return "아침 6:00AM ~ 11:00AM"
-        }else if timeZone == 2 {
+        case .afternoon:
             return "점심 11:00AM - 4:00PM"
-        }else if timeZone == 3 {
+        case .evening:
             return "저녁 4:00PM - 9:00PM"
-        }else if timeZone == 4 {
+        case .night:
             return "밤 9:00PM - 2:00AM"
-        }else if timeZone == 5 {
+        case .auto:
             return "이용 시간대를 분석해 자동으로 설정"
+        case .none:
+            return ""
         }
-        
-        return ""
     }
 }

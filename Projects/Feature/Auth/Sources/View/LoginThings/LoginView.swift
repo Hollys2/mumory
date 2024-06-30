@@ -13,6 +13,7 @@ import KakaoSDKUser
 import Lottie
 import GoogleSignIn
 import Firebase
+import KakaoSDKAuth
 
 struct LoginData {
     var uid: String = ""
@@ -28,15 +29,11 @@ public struct LoginView: View {
     // MARK: - Properties
     let Firebase = FirebaseManager.shared
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @StateObject var signInWithAppleManager: SignInWithAppleManager = SignInWithAppleManager()
     @State var isLoading: Bool = false
     
-    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
-    
-    @StateObject var authCoordinator: AuthCoordinator = .init()
     @StateObject var signUpViewModel: SignUpViewModel = .init()
 
     // 여러 개의 메서드에서 중복되어 사용되는 로그인 관련 변수만 정의해둔 구조체
@@ -44,7 +41,7 @@ public struct LoginView: View {
     
     // MARK: - View
     public var body: some View {
-        NavigationStack(path: $authCoordinator.path) {
+        NavigationStack(path: $appCoordinator.authPath) {
             ZStack{
                 ColorSet.background.ignoresSafeArea()
                 VStack(spacing: 0){
@@ -53,59 +50,56 @@ public struct LoginView: View {
                     
                     LoginButton(type: .email, action: emailLogin)
                         .padding(.top, getUIScreenBounds().height > 700 ? 116 : 90)
-                    
                     LoginButton(type: .kakao, action: kakaoLogin)
                     LoginButton(type: .google, action: googleLogin)
-                    LoginButton(type: .apple, action: appleLogin)
-                        .onChange(of: signInWithAppleManager.isUserAuthenticated) { isUserAuthenticated in
-                            if isUserAuthenticated{
-                                if let currentUser = Firebase.auth.currentUser {
-                                    Task {
-                                        await finishSignInProcess()
-                                    }
-                                }
-                            }
-                        }
+                    AppleSignInButton()
+                    .environmentObject(signUpViewModel)
+                    .padding(.top, 10)
+                    .frame(height: 60)
+
                     
                     signUpButton
                 }
                 LoadingAnimationView(isLoading: $isLoading)
                 
-                if bootstrapViewModel.isShownOnBoarding {
+                if appCoordinator.isOnboardingShown {
                     OnboardingView()
                 }
-            }
-            .navigationBarBackButtonHidden()
-            //애플 로그인 하고서 커스텀에서 다시 로그인으로 왔을 때, 애플로그인이 다시 안 되는 에러가 있어서 인증 여부를 해제함
-            .onDisappear(perform: {
-                isLoading = false
-                signInWithAppleManager.isUserAuthenticated = false
+            }            
+            .onOpenURL(perform: { url in
+                if (AuthApi.isKakaoTalkLoginUrl(url)) {
+                    AuthController.handleOpenUrl(url: url)
+                }
             })
             .navigationDestination(for: AuthPage.self) { page in
                 switch page {
-                case .singUpCenter:
+                case .signUpCenter:
                     SignUpCenterView()
-                        .environmentObject(authCoordinator)
                         .environmentObject(signUpViewModel)
-                        
+                    
                 case .introOfCustomization:
                     IntroOfCustomization()
-                        .environmentObject(authCoordinator)
                         .environmentObject(signUpViewModel)
                     
                 case .customizationCenter:
                     CustomizationCenterView()
-                        .environmentObject(authCoordinator)
                         .environmentObject(signUpViewModel)
                     
                 case .emailLogin:
                     EmailLoginView()
-                        .environmentObject(authCoordinator)
                         .environmentObject(signUpViewModel)
+                    
+                case .profileCard:
+                    ProfileCardView()
+                        .environmentObject(signUpViewModel)
+                    
                 default:
                     EmptyView()
                 }
             }
+            .navigationBarBackButtonHidden()
+
+
         }
 
     }
@@ -126,18 +120,15 @@ public struct LoginView: View {
         .gesture(handleSignUpGesture)
     }
     
-    // 회원 가입 버튼 제스처 정의
     private var handleSignUpGesture: some Gesture {
         TapGesture()
             .onEnded { gesture in
-                signUpViewModel.startSignUp(method: .email)
-                signUpViewModel.step = 4 //test code
-                authCoordinator.push(destination: .customizationCenter) // test code
+                signUpViewModel.setSignUpData(method: .email)
+                appCoordinator.push(destination: AuthPage.signUpCenter)
             }
     }
     
     // MARK: - Methods
-    
     private func googleLogin(){
         isLoading = true
         guard let id = FirebaseApp.app()?.options.clientID else { return }
@@ -151,39 +142,31 @@ public struct LoginView: View {
             return
         }
         
-        GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) { result, error in
-            guard error == nil else {isLoading = false; return}
-            guard let idToken = result?.user.idToken?.tokenString else {return}
-            guard let accessToken = result?.user.accessToken.tokenString else {return}
+        Task {
+            guard let gidResult = try? await GIDSignIn.sharedInstance.signIn(withPresenting: presentingVC) else {return}
+            guard let idToken = gidResult.user.idToken?.tokenString else {return}
+            let accessToken = gidResult.user.accessToken.tokenString
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
-            Task {
-                await firebaseSignInWithCredential(credential: credential, method: "Google")
-                await finishSignInProcess()
-                isLoading = false
+            guard let email = gidResult.user.profile?.email else {return}
+
+            if await FetchManager.shared.isNewUser(email: email, method: .google) {
+                signUpViewModel.setSignUpData(method: .google, email: email, googleCredential: credential)
+                appCoordinator.push(destination: AuthPage.signUpCenter)
+            } else {
+                guard let result = try? await FirebaseManager.shared.auth.signIn(with: credential) else {return}
+                await currentUserViewModel.initializeUserData(uId: result.user.uid)
+                appCoordinator.isHomeViewShown = true
             }
-            
+
         }
     }
     
-    private func firebaseSignInWithCredential(credential: AuthCredential, method: String) async {
-        guard let result = try? await FirebaseManager.shared.auth.signIn(with: credential) else {return}
-        loginData.uid = result.user.uid
-        loginData.email = result.user.email ?? ""
-        loginData.fcmToken = Messaging.messaging().fcmToken ?? ""
-        loginData.method = method
-    }
-    
     private func emailLogin() {
-        authCoordinator.push(destination: .emailLogin)
-    }
-    
-    private func appleLogin(){
-        isLoading = true
-        signInWithAppleManager.performSignIn()
+        appCoordinator.push(destination: AuthPage.emailLogin)
     }
     
     
-    public func kakaoLogin(){
+    private func kakaoLogin(){
         isLoading = true
         if UserApi.isKakaoTalkLoginAvailable() {
             UserApi.shared.loginWithKakaoTalk { authToken, error in
@@ -196,140 +179,38 @@ public struct LoginView: View {
         }
     }
     
+
     private func handleKakaoLogin(error: Error?) {
         guard error == nil else {self.isLoading = false; return}
-        Task {
-            await firebaseSignUpWithKakao()
-        }
+        firebaseSignUpWithKakao()
     }
     
-    private func firebaseSignUpWithKakao() async {
+    private func firebaseSignUpWithKakao() {
         UserApi.shared.me { user, error in
             if let error = error { return }
             guard let user = user else {return}
             guard let email = user.kakaoAccount?.email else {return}
             guard let kakaoUid = user.id else {return}
-            
+            let password = String(kakaoUid)
             Task {
-                let firebaseEmail = "kakao/\(email)"
-                let firebasePassword = "kakao/\(kakaoUid)"
-                
-                if await self.isNewKakaoUser(email: email) {
-                    guard let result = try? await FirebaseManager.shared.auth.createUser(withEmail: firebaseEmail, password: firebasePassword) else {return}
-                    self.loginData.uid = result.user.uid
-                }else {
+                if await FetchManager.shared.isNewUser(email: email, method: .kakao) {
+                    signUpViewModel.setSignUpData(method: .kakao, email: email, password: password)
+                    appCoordinator.push(destination: AuthPage.signUpCenter)
+                } else {
+                    let firebaseEmail = "kakao/\(email)"
+                    let firebasePassword = "kakao/\(kakaoUid)"
                     guard let result = try? await FirebaseManager.shared.auth.signIn(withEmail: firebaseEmail, password: firebasePassword) else {return}
-                    self.loginData.uid = result.user.uid
+                    await currentUserViewModel.initializeUserData(uId: result.user.uid)
+                    appCoordinator.isHomeViewShown = true
                 }
-                
-                self.loginData.email = email
-                self.loginData.method = "Kakao"
-                self.loginData.fcmToken = Messaging.messaging().fcmToken ?? ""
-                
-                await self.finishSignInProcess()
             }
         }
     }
-    
-    private func isNewKakaoUser(email: String) async -> Bool{
-        let db = FirebaseManager.shared.db
-        let checkOldUserQuery = db.collection("User")
-            .whereField("email", isEqualTo: email)
-            .whereField("signInMethod", isEqualTo: "Kakao")
-        
-        guard let documents = try? await checkOldUserQuery.getDocuments() else {return false}
-        return documents.isEmpty
-    }
-    
-    
+
     private func setLoginHistory() {
         let userDefualt = UserDefaults.standard
         userDefualt.setValue(Date(), forKey: "loginHistory")
     }
-    
-    
-    private func finishSignInProcess() async {
-        setLoginHistory()
-        let query = Firebase.db.collection("User").document(loginData.uid)
-        guard let snapshot = try? await query.getDocument() else {
-            self.isLoading = false
-            return
-        }
-        let isOldUser = snapshot.exists
-        
-        if isOldUser {
-            guard let data = snapshot.data() else {return}
-            if !isCompletedCustomization(data: data) {
-                appCoordinator.rootPath.append(MumoryPage.customization)
-                return
-            }
-            await handleOldUser(data: data)
-        }else {
-            await handleNewUser()
-        }
-    }
-    
-    private func handleOldUser(data: [String: Any]) async{
-        let query = Firebase.db.collection("User").document(loginData.uid)
-        let user = await FetchManager.shared.fetchUser(uId: loginData.uid)
-        currentUserData.uId = loginData.uid
-        currentUserData.user = user
-        currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
-        try? await query.updateData(["fcmToken": loginData.fcmToken])
-        appCoordinator.selectedTab = .home
-        appCoordinator.initPage = .home
-        
-        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
-            switch result {
-            case .success(let mumorys):
-                print("fetchMumorys successfully: \(mumorys)")
-                DispatchQueue.main.async {
-                    self.mumoryDataViewModel.myMumorys = mumorys
-                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
-                }
-            case .failure(let error):
-                print("ERROR: \(error)")
-            }
-            
-            DispatchQueue.main.async {
-                self.mumoryDataViewModel.isUpdating = false
-            }
-        }
-        
-        var transaction = Transaction()
-        transaction.disablesAnimations = true
-        appCoordinator.isCreateMumorySheetShown = false
-        withTransaction(transaction) {
-            appCoordinator.rootPath = NavigationPath()
-        }
-    }
-    
-    private func handleNewUser() async {
-        let query = Firebase.db.collection("User").document(loginData.uid)
-        var userData: [String: Any] = [
-            "uid": loginData.uid,
-            "email": loginData.email,
-            "signInMethod": loginData.method,
-            "fcmToken": loginData.fcmToken,
-            "signUpDate": Date()
-        ]
-        try? await query.setData(userData)
-        self.isLoading = false
-        appCoordinator.rootPath.append(MumoryPage.customization)
-    }
-    
-    private func isCompletedCustomization(data: [String: Any]) -> Bool {
-        guard let id = data["id"] as? String,
-              let nickname = data["nickname"] as? String else {
-            return false
-        }
-        return true
-    }
-    
 }
 
 

@@ -15,8 +15,7 @@ struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var authCoordinator: AuthCoordinator
-    @EnvironmentObject var bootstrapViewModel: BootstrapViewModel
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @StateObject var customManager: CustomizationManageViewModel = CustomizationManageViewModel()
 
     @State var email: String = ""
@@ -49,7 +48,9 @@ struct EmailLoginView: View {
                     .padding(.top, 11)
                 
                 ErrorText
+                
                 LoginButton
+                
                 FindPasswordButton
    
             })
@@ -69,7 +70,7 @@ struct EmailLoginView: View {
             .scaledToFit()
             .frame(width: 30, height: 30)
             .onTapGesture {
-                authCoordinator.pop()
+                appCoordinator.pop(target: .auth)
             }
         
     }
@@ -128,7 +129,7 @@ struct EmailLoginView: View {
             return
         }
         
-        bootstrapViewModel.isShownHomeView = true
+        appCoordinator.isHomeViewShown = true
         
 //        let qeury = db.collection("user").whereField("dd", isNotEqualTo: "")
 //        try? await qeury.getDocuments().documents.first?.reference.delete()
@@ -141,24 +142,24 @@ struct EmailLoginView: View {
 //        }
 //        try? await db.collection("User").document(result.user.uid).updateData(["fcmToken": messaging.fcmToken ?? ""])
 //        let user = await FetchManager.shared.fetchUser(uId: result.user.uid)
-//        currentUserData.uId = result.user.uid
-//        currentUserData.user = user
-//        currentUserData.playlistArray = await currentUserData.savePlaylist()
-//        currentUserData.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
+//        currentUserViewModel.user.uId = result.user.uid
+//        currentUserViewModel.user = user
+//        currentUserViewModel.playlistViewModel.playlistArray = await currentUserViewModel.savePlaylist()
+//        currentUserViewModel.playlistViewModel.favoriteGenres = data["favoriteGenres"] as? [Int] ?? []
 //        let userDefualt = UserDefaults.standard
 //        userDefualt.setValue(Date(), forKey: "loginHistory")
 //        
-//        self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-//        self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-//        self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+//        self.mumoryDataViewModel.fetchRewards(uId: currentUserViewModel.user.uId)
+//        self.mumoryDataViewModel.fetchActivitys(uId: currentUserViewModel.user.uId)
+//        self.mumoryDataViewModel.fetchMumorys(uId: currentUserViewModel.user.uId) { result in
 //            switch result {
 //            case .success(let mumorys):
 //                print("fetchMumorys successfully: \(mumorys)")
 //                DispatchQueue.main.async {
 //                    self.mumoryDataViewModel.myMumorys = mumorys
-//                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-//                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-//                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+//                    self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserViewModel.user.uId)
+//                    self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserViewModel.user)
+//                    self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserViewModel.user.uId)
 //                }
 //            case .failure(let error):
 //                print("ERROR: \(error)")

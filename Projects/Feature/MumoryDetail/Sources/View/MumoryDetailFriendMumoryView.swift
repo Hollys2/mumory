@@ -104,7 +104,7 @@ struct MumoryDetailFriendMumoryScrollContentView: View {
     @State var date: String = ""
     
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         HStack(spacing: 0) {

@@ -12,7 +12,7 @@ import SwiftUI
 import MusicKit
 
 struct ScrollWrapperWithIndex<Content: View>: UIViewControllerRepresentable {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 
     @Binding var contentOffset: CGPoint
     @Binding var songs: [Song]

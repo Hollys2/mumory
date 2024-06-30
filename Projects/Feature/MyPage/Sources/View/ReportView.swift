@@ -11,7 +11,7 @@ import Shared
 
 struct ReportView: View {
     @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator   
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var menuTitle: String = "신고 유형을 선택해주세요."
@@ -195,7 +195,7 @@ struct ReportView: View {
         }
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
-            settingViewModel.uid = currentUserData.uId
+            settingViewModel.uid = currentUserViewModel.user.uId
             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
                 playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
             }

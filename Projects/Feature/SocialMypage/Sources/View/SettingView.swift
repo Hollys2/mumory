@@ -19,7 +19,7 @@ import Lottie
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -52,7 +52,7 @@ struct SettingView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.isMyPageViewShown = false
                             appCoordinator.selectedTab = .home
                             appCoordinator.isSocialCommentSheetViewShown = false
                             appCoordinator.isMumoryDetailCommentSheetViewShown = false
@@ -110,9 +110,9 @@ struct SettingView: View {
                         let Firebase = FirebaseManager.shared
                         let auth = Firebase.auth
                         guard let signOut = try? auth.signOut() else {return}
-                        Firebase.db.collection("User").document(currentUserData.uId).updateData(["fcmToken": ""])
-                        currentUserData.removeAllData()
-                        appCoordinator.bottomAnimationViewStatus = .remove
+                        Firebase.db.collection("User").document(currentUserViewModel.user.uId).updateData(["fcmToken": ""])
+                        currentUserViewModel.removeAllData()
+                        appCoordinator.isMyPageViewShown = false
                         appCoordinator.isCreateMumorySheetShown = false
                         appCoordinator.initPage = .onBoarding
                         appCoordinator.selectedTab = .home
@@ -194,7 +194,7 @@ struct SettingView: View {
                         print("delete document error: \(error)")
                     }else {
                         print("delete docs successful")
-                        appCoordinator.bottomAnimationViewStatus = .remove
+                        appCoordinator.isMyPageViewShown = false
                         appCoordinator.initPage = .onBoarding
                         appCoordinator.rootPath = NavigationPath()
                     }
@@ -242,8 +242,8 @@ struct SettingView: View {
                             for key in UserDefaults.standard.dictionaryRepresentation().keys {
                                 UserDefaults.standard.removeObject(forKey: key.description)
                             }
-                            appCoordinator.bottomAnimationViewStatus = .remove
-                            currentUserData.removeAllData()
+                            appCoordinator.isMyPageViewShown = false
+                            currentUserViewModel.removeAllData()
                             appCoordinator.initPage = .onBoarding
                             appCoordinator.rootPath = NavigationPath()
                         }

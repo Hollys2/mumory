@@ -12,7 +12,7 @@ import MusicKit
 import FirebaseFirestore
 
 struct PlaylistManageView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var isCreatePlaylistCompleted: Bool = false
@@ -99,10 +99,10 @@ struct PlaylistManageView: View {
                         GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12),
                         GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12)
                     ], spacing: 30, content: {
-                        ForEach(0 ..< currentUserData.playlistArray.count, id: \.self) { index in
-                            PlaylistItem_Big(playlist: $currentUserData.playlistArray[index], isEditing: $isEditing)
+                        ForEach(0 ..< currentUserViewModel.playlistViewModel.playlistArray.count, id: \.self) { index in
+                            PlaylistItem_Big(playlist: $currentUserViewModel.playlistViewModel.playlistArray[index], isEditing: $isEditing)
                                 .onTapGesture {
-                                    if currentUserData.playlistArray[index].id == "favorite"{
+                                    if currentUserViewModel.playlistViewModel.playlistArray[index].id == "favorite"{
                                         appCoordinator.rootPath.append(MumoryPage.favorite)
                                     }else {
                                         appCoordinator.rootPath.append(MumoryPage.playlistWithIndex(index: index))
@@ -121,7 +121,7 @@ struct PlaylistManageView: View {
                 .scrollIndicators(.hidden)
                 .refreshable {
                     Task {
-                        currentUserData.playlistArray = await currentUserData.savePlaylist()
+                        currentUserViewModel.playlistViewModel.savePlaylist()
                     }
                 }
                 

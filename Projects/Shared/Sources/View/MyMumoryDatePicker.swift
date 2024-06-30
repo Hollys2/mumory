@@ -22,7 +22,7 @@ public struct MyMumoryDatePicker: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @Environment(\.dismiss) private var dismiss
     
@@ -56,7 +56,7 @@ public struct MyMumoryDatePicker: View {
                 let calendar = Calendar.current
                 let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
                 let range = ...lastDayOfMonth
-                let newDataBeforeSelectedDate = self.user.uId == currentUserData.user.uId ? mumoryDataViewModel.myMumorys.filter { range.contains($0.date) } : mumoryDataViewModel.friendMumorys.filter { range.contains($0.date) }
+                let newDataBeforeSelectedDate = self.user.uId == currentUserViewModel.user.uId ? mumoryDataViewModel.myMumorys.filter { range.contains($0.date) } : mumoryDataViewModel.friendMumorys.filter { range.contains($0.date) }
                 
                 mumoryDataViewModel.monthlyMumorys = []
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -109,7 +109,7 @@ public struct MyMumoryDatePicker: View {
         // Mumory 배열을 순회하면서 연도와 월을 추출하여 배열에 추가
         
 //        let mumoryArray: [Mumory] = mumoryDataViewModel.myMumorys
-        let mumoryArray: [Mumory] = self.user.uId == currentUserData.user.uId ? mumoryDataViewModel.myMumorys : mumoryDataViewModel.friendMumorys
+        let mumoryArray: [Mumory] = self.user.uId == currentUserViewModel.user.uId ? mumoryDataViewModel.myMumorys : mumoryDataViewModel.friendMumorys
         
         // 딕셔너리를 생성하여 연도를 키로 하고 해당 연도에 속하는 월의 배열을 값으로 함
 //        var yearMonthDictionary = [Int: [Int]]()
@@ -150,7 +150,7 @@ public struct MonthlyStatDatePicker: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @Environment(\.dismiss) private var dismiss
 
@@ -218,7 +218,7 @@ public struct MonthlyStatDatePicker: View {
     
     func getYears() -> [Int] {
         let currentYear = Calendar.current.component(.year, from: Date())
-        let siginUpYear = Calendar.current.component(.year, from: currentUserData.user.signUpDate)
+        let siginUpYear = Calendar.current.component(.year, from: currentUserViewModel.user.signUpDate)
         return Array(siginUpYear...currentYear)
     }
 
@@ -226,8 +226,8 @@ public struct MonthlyStatDatePicker: View {
         let currentYear = Calendar.current.component(.year, from: Date())
         let currentMonth = Calendar.current.component(.month, from: Date())
         
-        let siginUpYear = Calendar.current.component(.year, from: currentUserData.user.signUpDate)
-        let siginUpMonth = Calendar.current.component(.month, from: currentUserData.user.signUpDate)
+        let siginUpYear = Calendar.current.component(.year, from: currentUserViewModel.user.signUpDate)
+        let siginUpMonth = Calendar.current.component(.month, from: currentUserViewModel.user.signUpDate)
         
         var months: [Int] = []
         if year == currentYear { // 현재 연도라면 현재 월까지만 추가

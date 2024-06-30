@@ -16,7 +16,7 @@ public struct MumoryRecommendationView: View {
     @State var isTouch: Bool = false
     @State private var path = NavigationPath()
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State private var contentOffset: CGPoint = .zero
@@ -178,12 +178,12 @@ public struct MumoryRecommendationView: View {
         let db = FirebaseManager.shared.db
         let songIds: [String] = await withTaskGroup(of: [String].self) { taskGroup -> [String] in
             var songIds: [String] = []
-            for favoriteGenre in currentUserData.favoriteGenres {
+            for favoriteGenre in currentUserViewModel.playlistViewModel.favoriteGenres {
                 let query = db.collection("User")
                     .whereField("favoriteGenres", arrayContains: favoriteGenre)
                 guard let snapshots = try? await query.getDocuments() else {print("a");return []}
                 var documents = snapshots.documents.shuffled()
-                documents.removeAll(where: {$0.documentID == currentUserData.uId})
+                documents.removeAll(where: {$0.documentID == currentUserViewModel.user.uId})
                 
                 for document in documents {
                     taskGroup.addTask {

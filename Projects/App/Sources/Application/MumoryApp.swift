@@ -18,32 +18,22 @@ struct MumoryApp: App {
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
-    
-    @StateObject var bootstrapViewModel: BootstrapViewModel = .init()
     @StateObject var currentUserViewModel: CurrentUserViewModel = .init()
 
     
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if bootstrapViewModel.isShownHomeView {
+                if appCoordinator.isHomeViewShown {
                     HomeView()
-                        .environmentObject(appCoordinator)
-                        .onAppear {
-                            Task {
-                                guard let uId = FirebaseManager.shared.auth.currentUser?.uid else {return}
-                                currentUserViewModel.user = await FetchManager.shared.fetchUser(uId: uId)
-                            }
-                        }
-                    
+                     
                 } else {
                     LoginView()
                 }
                 
-                if bootstrapViewModel.isShownSplashView {
+                if appCoordinator.isSplashViewShown {
                     SplashView()
                 }
-    
             }
             .ignoresSafeArea()
             .preferredColorScheme(.dark)
@@ -55,110 +45,33 @@ struct MumoryApp: App {
             .environmentObject(currentUserViewModel)
             .environmentObject(snackBarViewModel)
             .environmentObject(playerViewModel)
-            
-            .environmentObject(bootstrapViewModel)
-
-            
-
-                
-//                ZStack {
-//
-//                    if {
-//                        NavigationStack(path1) {
-//                            ZStack {
-//                                if {
-//                                    온보딩뷰
-//                                }
-//
-//                                로그인뷰
-//                                    .navigationDestination()
-//                            }
-//                        }
-//                    } else {
-//                        NavigationStack(path2) {
-//                            ZStack {
-//                                홈뷰
-//
-//                                소셜, 라이브러리 -> A B, 알람
-//                                    .navigationDestination()
-//
-//                            }
-//
-//                        }
-//                    }
-//
-//
-//                    if  {
-//                        스플래쉬
-//                            .onAppear {
-//                                0-1.
-//
-//                                1-1. 로그인 여부 (파이어베이스 캐시) X -> 온보딩뷰
-//                                1-2. 로그인 여부 (파이어베이스 캐시) O -> 홈뷰
-//
-//                                2.
-//                            }
-//                    }
-//
-//                    CreateMumoryBottomSheetView()
-//
-//                    if appState.isPopUpShown {
-////                        팝업(언제: Bool, 어떻게: {appState.sajkdhaskjdh}})
-//
-//                        func testFunc() -> Void {
-//
-//                        }
-//
-//                        팝업(type: enum, action: {})) // 테스트 요망
-//                    }
-//
-//                    if appState.isBottomShown {
-//
-//                    }
-//
-//                    스낵바
-//
-//                    리워드
-//
-//                    뮤직플레이어
-//                }
-
-//                ZStack {
-//                    SplashView()
-//                        .onOpenURL(perform: { url in
-//                            if (AuthApi.isKakaoTalkLoginUrl(url)) {
-//                                AuthController.handleOpenUrl(url: url)
-//                            }
-//                        })
-//                        .onAppear {
-//                            appCoordinator.safeAreaInsetsTop = geometry.safeAreaInsets.top
-//                            appCoordinator.safeAreaInsetsBottom = geometry.safeAreaInsets.bottom
-//
-//                            currentUserData.topInset = geometry.safeAreaInsets.top
-//                            currentUserData.bottomInset = geometry.safeAreaInsets.bottom
-//
-//                            playerViewModel.isShownMiniPlayer = false
-//                        }
-//
-//                    MiniPlayerViewInLibrary()
-//                        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView, content: {
-//                            NowPlayingView()
-//                        })
-//
-//                    SnackBarView()
-//                        .rewardBottomSheet(isShown: self.$mumoryDataViewModel.isRewardPopUpShown)
-//                }
-//                .ignoresSafeArea()
-//                .preferredColorScheme(.dark)
-//                .environmentObject(appCoordinator)
-//                .environmentObject(locationManager)
-//                .environmentObject(localSearchViewModel)
-//                .environmentObject(mumoryDataViewModel)
-//                .environmentObject(firebaseManager)
-//                .environmentObject(keyboardResponder)
-//                .environmentObject(currentUserData)
-//                .environmentObject(playerViewModel)
-//                .environmentObject(snackBarViewModel)
+            .environmentObject(appCoordinator)
+            .onAppear {
+                bootstrap()
+            }
         }
+    }
+    
+    // MARK: - Methods
+    private func bootstrap() {
+        appCoordinator.isOnboardingShown = hasSignInHistory()
+        let currentUserExists = hasCurrentUser()
+        appCoordinator.isHomeViewShown = currentUserExists
+        if currentUserExists {
+            Task {
+                let auth = FirebaseManager.shared.auth
+                guard let currentUser = auth.currentUser else {return}
+                await currentUserViewModel.initializeUserData(uId: currentUser.uid)
+            }
+        }
+    }
+        
+    private func hasSignInHistory() -> Bool {
+        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
+    }
+    
+    private func hasCurrentUser() -> Bool {
+        let auth = FirebaseManager.shared.auth
+        return auth.currentUser != nil
     }
 }

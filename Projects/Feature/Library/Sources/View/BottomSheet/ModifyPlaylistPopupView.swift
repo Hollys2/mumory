@@ -16,7 +16,7 @@ struct ModifyPlaylistPopupView: View {
         case old
     }
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @State var playlistTitle: String = ""
     @State var isPublic: Bool = true
@@ -174,7 +174,7 @@ struct ModifyPlaylistPopupView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).updateData([
+        db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(playlist.id).updateData([
             "title": playlistTitle,
             "isPublic": isPublic
         ])

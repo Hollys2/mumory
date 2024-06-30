@@ -20,7 +20,7 @@
 //    public init() {}
 //
 //    
-//    @EnvironmentObject var currentUserData: CurrentUserData
+//    @EnvironmentObject var currentUserViewModel: currentUserViewModel
 //    @EnvironmentObject var appCoordinator: AppCoordinator
 //    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
 //    @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -202,7 +202,7 @@
 //                            .navigationBarBackButtonHidden()
 //                        
 //                    case .playlistWithIndex(index: let index):
-//                        PlaylistView(playlist: $currentUserData.playlistArray[index])
+//                        PlaylistView(playlist: $currentUserViewModel.playlistViewModel.playlistArray[index])
 //                        
 //                    case .myPage:
 //                        MyPageView()
@@ -320,22 +320,22 @@
 //                return
 //            }
 //
-//            currentUserData.uId = user.uid
-//            currentUserData.user = await MumoriUser(uId: user.uid)
-//            currentUserData.favoriteGenres = favoriteGenres
+//            currentUserViewModel.user.uId = user.uid
+//            currentUserViewModel.user = await MumoriUser(uId: user.uid)
+//            currentUserViewModel.playlistViewModel.favoriteGenres = favoriteGenres
 //            UserDefaults.standard.setValue(Date(), forKey: "loginHistory")
 //            
-//            self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
-//            self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
-//            self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
+//            self.mumoryDataViewModel.fetchRewards(uId: currentUserViewModel.user.uId)
+//            self.mumoryDataViewModel.fetchActivitys(uId: currentUserViewModel.user.uId)
+//            self.mumoryDataViewModel.fetchMumorys(uId: currentUserViewModel.user.uId) { result in
 //                switch result {
 //                case .success(let mumorys):
 //                    print("fetchMumorys successfully: \(mumorys)")
 //                    DispatchQueue.main.async {
 //                        self.mumoryDataViewModel.myMumorys = mumorys
-//                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-//                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
-//                        self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
+//                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserViewModel.user.uId)
+//                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserViewModel.user)
+//                        self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserViewModel.user.uId)
 //                    }
 //                case .failure(let error):
 //                    print("ERROR: \(error)")

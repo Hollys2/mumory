@@ -19,7 +19,7 @@ public struct MonthlyStatView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     public init() {}
     
@@ -95,7 +95,7 @@ struct ContentView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         
@@ -111,7 +111,7 @@ struct ContentView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     
-                    Text("\(currentUserData.user.nickname)님의 이달의 관심 음악 장르는")
+                    Text("\(currentUserViewModel.user.nickname)님의 이달의 관심 음악 장르는")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundColor(.white)
                     
@@ -478,7 +478,7 @@ struct ContentView: View {
             
             for mumory in self.mumoryDataViewModel.monthlyMumorys {
                 for uId in mumory.likes {
-                    if uId != currentUserData.user.uId {
+                    if uId != currentUserViewModel.user.uId {
                         mumoriesLikeCount += 1
                     }
                 }
@@ -585,9 +585,9 @@ struct ContentView: View {
                 
             }
             
-            self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count - 1
+            self.playListCount = currentUserViewModel.playlistViewModel.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count - 1
             Task {
-                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
+                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserViewModel.user)
                 self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
             
@@ -637,7 +637,7 @@ struct ContentView: View {
             
             for mumory in self.mumoryDataViewModel.monthlyMumorys {
                 for uId in mumory.likes {
-                    if uId != currentUserData.user.uId {
+                    if uId != currentUserViewModel.user.uId {
                         mumoriesLikeCount += 1
                     }
                 }
@@ -743,10 +743,10 @@ struct ContentView: View {
                 }
             }
             
-            self.playListCount = currentUserData.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
+            self.playListCount = currentUserViewModel.playlistViewModel.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
             
             Task {
-                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserData.user)
+                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserViewModel.user)
                 self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
             

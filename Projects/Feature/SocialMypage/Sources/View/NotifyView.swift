@@ -11,7 +11,7 @@ import MusicKit
 import Shared
 
 struct NotifyView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject var notificationViewModel: NotificationViewModel = NotificationViewModel()
@@ -91,7 +91,7 @@ struct NotifyView: View {
                     }
                 
                 })
-                .padding(.top, currentUserData.topInset)
+                .padding(.top, getSafeAreaInsets().top)
             }
             .onAppear{
                 playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
@@ -107,7 +107,7 @@ struct NotifyView: View {
     private func getNotification() {
         Task {
             do {
-                let result = try await db.collection("User").document(currentUserData.uId).collection("Notification")
+                let result = try await db.collection("User").document(currentUserViewModel.user.uId).collection("Notification")
                     .order(by: "date", descending: true)
                     .getDocuments()
                 
@@ -156,7 +156,7 @@ struct UnreadText: View {
 }
 
 struct NotifyLikeItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
@@ -235,7 +235,7 @@ struct NotifyLikeItem: View {
             }
             if !notification.isRead {
                 DispatchQueue.global().async {
-                    db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    db.collection("User").document(currentUserViewModel.user.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                     
                 }
                 self.notification.isRead = true
@@ -253,7 +253,7 @@ struct NotifyLikeItem: View {
 struct NotifyCommentItem: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
     @State var isPresentDeleteMumoryPopup: Bool = false
@@ -334,7 +334,7 @@ struct NotifyCommentItem: View {
             }
             if !notification.isRead {
                 DispatchQueue.global().async {
-                    db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    db.collection("User").document(currentUserViewModel.user.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                 }
                 self.notification.isRead = true
             }
@@ -348,7 +348,7 @@ struct NotifyCommentItem: View {
 }
 
 struct NotifyFriendItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
@@ -406,7 +406,7 @@ struct NotifyFriendItem: View {
             }
             if !notification.isRead {
                 DispatchQueue.global().async {
-                    db.collection("User").document(currentUserData.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
+                    db.collection("User").document(currentUserViewModel.user.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
                 }
                 self.notification.isRead = true
             }
@@ -415,7 +415,7 @@ struct NotifyFriendItem: View {
 }
 
 struct NotifyPostItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
@@ -541,7 +541,7 @@ private func dateToString(date: Date) -> String{
 
 
 struct ReadAllButton: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var notifications: [Notification]
     init(notifications: Binding<[Notification]>) {
@@ -558,7 +558,7 @@ struct ReadAllButton: View {
             .onTapGesture {
                 if notifications.filter({!$0.isRead}).count > 0 {
                     let db = FirebaseManager.shared.db
-                    let query = db.collection("User").document(currentUserData.uId).collection("Notification")
+                    let query = db.collection("User").document(currentUserViewModel.user.uId).collection("Notification")
                         .whereField("isRead", isEqualTo: false)
                     query.getDocuments { snapshot, error in
                         guard let snapshot = snapshot else {return}
@@ -580,7 +580,7 @@ struct ReadAllButton: View {
 
 struct NotifyMenuBotton: View {
     @EnvironmentObject var notificationViewModel: NotificationViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentPopup: Bool = false
     let notification: Notification
@@ -614,7 +614,7 @@ struct NotifyMenuBotton: View {
         }
         .fullScreenCover(isPresented: $isPresentPopup) {
             TwoButtonPopupView(title: "해당 알림을 삭제하시겠습니까?", positiveButtonTitle: "확인") {
-                let query = db.collection("User").document(currentUserData.uId).collection("Notification").document(notification.id)
+                let query = db.collection("User").document(currentUserViewModel.user.uId).collection("Notification").document(notification.id)
                 query.delete()
                 notificationViewModel.notifications.removeAll(where: {$0.id == self.notification.id})
             }

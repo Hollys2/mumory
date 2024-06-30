@@ -98,14 +98,14 @@ public class SignInWithAppleManager: NSObject, ObservableObject, ASAuthorization
             
             let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: idTokenString, rawNonce: nonce)
             
-            Auth.auth().signIn(with: credential) { result, error in
-                if let error = error {
-                    print("sign in with firebase error: \(error)")
-                }else if let result = result {
-                    print("sign in successful")
-                    self.isUserAuthenticated = true
-                }
-            }
+//            Auth.auth().signIn(with: credential) { result, error in
+//                if let error = error {
+//                    print("sign in with firebase error: \(error)")
+//                }else if let result = result {
+//                    print("sign in successful")
+//                    self.isUserAuthenticated = true
+//                }
+//            }
         }
     }
     

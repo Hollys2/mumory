@@ -80,7 +80,7 @@ public struct SocialSearchView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(isShown: Binding<Bool>) {
@@ -301,7 +301,7 @@ public struct SocialSearchView: View {
                                 .frame(height: 70)
                                 .onTapGesture {
                                     Task {
-                                        if friend.uId == currentUserData.user.uId {
+                                        if friend.uId == currentUserViewModel.user.uId {
                                             appCoordinator.rootPath.append(MumoryPage.myPage)
                                         } else {
                                             let friend = await FetchManager.shared.fetchUser(uId: friend.uId)

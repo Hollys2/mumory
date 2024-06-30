@@ -15,7 +15,7 @@ import FirebaseFirestore
 //여기 내부에서만 사용하는 observable을 만들어서 사용할까?? - 이게좋을듯함
 //아이템 내부에 type, status, value 정의해서 사용
 struct EditProfileView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @StateObject private var editProfileViewModel: EditProfileViewModel = EditProfileViewModel()
     @State var isLoading: Bool = false
     
@@ -49,11 +49,11 @@ struct EditProfileView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             DispatchQueue.main.async {
-                editProfileViewModel.nickname = currentUserData.user.nickname
-                editProfileViewModel.id = currentUserData.user.id
-                editProfileViewModel.bio = currentUserData.user.bio
-                editProfileViewModel.profileURL = currentUserData.user.profileImageURL
-                editProfileViewModel.backgroundURL = currentUserData.user.backgroundImageURL
+                editProfileViewModel.nickname = currentUserViewModel.user.nickname
+                editProfileViewModel.id = currentUserViewModel.user.id
+                editProfileViewModel.bio = currentUserViewModel.user.bio
+                editProfileViewModel.profileURL = currentUserViewModel.user.profileImageURL
+                editProfileViewModel.backgroundURL = currentUserViewModel.user.backgroundImageURL
             }
         })
         .disabled(editProfileViewModel.isLoading)
@@ -68,7 +68,7 @@ public struct ImageBundle {
     public var data: Data?
 }
 private struct UserProfile: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @Environment(\.dismiss) var dismiss
     @State var isPresentBackgroundBottomSheet: Bool = false
@@ -124,7 +124,7 @@ private struct UserProfile: View {
                             .frame(width: 90, height: 90)
                             .clipped()
                     }else {
-                        currentUserData.user.defaultProfileImage
+                        currentUserViewModel.user.defaultProfileImage
                             .resizable()
                             .scaledToFill()
                             .frame(width: 90, height: 90)
@@ -188,13 +188,13 @@ private struct UserProfile: View {
                     .onTapGesture {
                         editProfileViewModel.isLoading = true
                         Task {
-                            await editProfileViewModel.saveUserProfile(uid: currentUserData.uId)
+                            await editProfileViewModel.saveUserProfile(uid: currentUserViewModel.user.uId)
                             DispatchQueue.main.async {
-                                currentUserData.user.nickname = editProfileViewModel.nickname
-                                currentUserData.user.id = editProfileViewModel.id
-                                currentUserData.user.bio = editProfileViewModel.bio
-                                currentUserData.user.profileImageURL = editProfileViewModel.profileURL
-                                currentUserData.user.backgroundImageURL = editProfileViewModel.backgroundURL
+                                currentUserViewModel.user.nickname = editProfileViewModel.nickname
+                                currentUserViewModel.user.id = editProfileViewModel.id
+                                currentUserViewModel.user.bio = editProfileViewModel.bio
+                                currentUserViewModel.user.profileImageURL = editProfileViewModel.profileURL
+                                currentUserViewModel.user.backgroundImageURL = editProfileViewModel.backgroundURL
                                 editProfileViewModel.isLoading = false
                                 dismiss()
                             }
@@ -206,7 +206,7 @@ private struct UserProfile: View {
             }
             .padding(.horizontal, 20)
             .frame(height: 63)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
         }
     }
     
@@ -215,7 +215,7 @@ private struct UserProfile: View {
 }
 
 private struct IdStackView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State private var isTappedInfo: Bool = false
     @State private var timer: Timer?
@@ -276,7 +276,7 @@ private struct IdStackView: View {
                         editProfileViewModel.id = String(value.prefix(15))
                     }
                     
-                    if value == currentUserData.user.id {
+                    if value == currentUserViewModel.user.id {
                         withAnimation {
                             editProfileViewModel.idStatus = .normal
                         }
@@ -335,7 +335,7 @@ private struct IdStackView: View {
 }
 
 private struct NicknameStackView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     @State var timer: Timer?
     let db = FirebaseManager.shared.db
@@ -373,7 +373,7 @@ private struct NicknameStackView: View {
                         editProfileViewModel.nickname =  String(value.prefix(7))
                     }
                     
-                    if value == currentUserData.user.nickname {
+                    if value == currentUserViewModel.user.nickname {
                         withAnimation {
                             editProfileViewModel.nicknameStatus = .normal
                         }
@@ -433,7 +433,7 @@ private struct NicknameStackView: View {
 
 
 struct BioStackView: View {
-    @EnvironmentObject var currentUserData: CurrentUserViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var editProfileViewModel: EditProfileViewModel
     
     var body: some View {
@@ -458,7 +458,7 @@ struct BioStackView: View {
                     if editProfileViewModel.bio.count > 50 {
                         editProfileViewModel.bio = String(value.prefix(50))
                     }
-                    editProfileViewModel.bioStatus = (value == currentUserData.user.bio) ? .normal : .valid
+                    editProfileViewModel.bioStatus = (value == currentUserViewModel.user.bio) ? .normal : .valid
                 })
             
         })
