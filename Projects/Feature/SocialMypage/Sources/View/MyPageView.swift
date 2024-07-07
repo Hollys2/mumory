@@ -11,6 +11,7 @@ import Shared
 import Core
 
 public struct MyPageView: View {
+    // MARK: - Propoerties
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var withdrawManager: WithdrawViewModel
@@ -21,6 +22,8 @@ public struct MyPageView: View {
     @State var isTapBackButton: Bool = false
     @State var isPresentEditProfile: Bool = false
     let lineGray = Color(white: 0.37)
+    
+    // MARK: - View
     public var body: some View {
 
         ZStack(alignment: .top){
@@ -36,7 +39,7 @@ public struct MyPageView: View {
                     
                     Divider05()
                     
-                    MyMumori()
+                    MyMumory()
                     
                     SubFunctionView()
                     
@@ -47,52 +50,51 @@ public struct MyPageView: View {
             }
             .scrollIndicators(.hidden)
             
-            //상단바
-            HStack{
-                SharedAsset.xGradient.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        isTapBackButton = true
-                        if appCoordinator.isMyPageViewShown {
-                            appCoordinator.isMyPageViewShown.toggle()
-                            if appCoordinator.selectedTab == .social {
-                                Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
-                                    playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
-                                }
-                            }
-                        }else {
-                            appCoordinator.rootPath.removeLast()
-                        }
-                    }
-                    .disabled(isTapBackButton)
-                
-                Spacer()
-                
-                SharedAsset.setGradient.swiftUIImage
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30, height: 30)
-                    .onTapGesture {
-                        appCoordinator.rootPath.append(MumoryPage.setting)
-                    }
-                
-            }
-            .padding(.horizontal, 20)
-            .frame(height: 63)
-            .padding(.top, getSafeAreaInsets().top)
+            NavigationBar(leadingItem: backButton, trailingItem: settingButton)
+                .padding(.top, getSafeAreaInsets().top)
+
         }
         .ignoresSafeArea()
         .onAppear {
             settingViewModel.uid = currentUserViewModel.user.uId
             AnalyticsManager.shared.setScreenLog(screenTitle: "MyPageView")
         }
-//        .environmentObject(withdrawViewModel)
-//        .environmentObject(settingViewModel)
         .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
         .zIndex(.infinity)
     }
+    
+    var backButton: some View {
+        SharedAsset.xGradient.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: 30, height: 30)
+            .onTapGesture {
+                isTapBackButton = true
+                if appCoordinator.isMyPageViewShown {
+                    appCoordinator.isMyPageViewShown.toggle()
+                    if appCoordinator.selectedTab == .social {
+                        Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
+                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
+                        }
+                    }
+                }else {
+                    appCoordinator.rootPath.removeLast()
+                }
+            }
+            .disabled(isTapBackButton)
+    }
+    
+    var settingButton: some View {
+        SharedAsset.setGradient.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: 30, height: 30)
+            .onTapGesture {
+                appCoordinator.rootPath.append(MumoryPage.setting)
+            }
+    }
+    
+    
 }
 
 struct UserInfoView: View {
@@ -243,7 +245,7 @@ struct MumorySample: Hashable{
     var isPublic: Bool
 }
 
-struct MyMumori: View {
+struct MyMumory: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel

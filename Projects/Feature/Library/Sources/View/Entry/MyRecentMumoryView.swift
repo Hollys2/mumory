@@ -43,10 +43,8 @@ public struct MyRecentMumoryView: View {
             
             if mumoryDataViewModel.myMumorys.isEmpty{
                 InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
-                    appCoordinator.selectedTab = .home
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
-                        appCoordinator.isCreateMumorySheetShown = true
-                        appCoordinator.offsetY = CGFloat.zero
+                        self.appCoordinator.sheet = .createMumory
                     }
                 }
                 .frame(maxHeight: .infinity, alignment: .center)

@@ -59,7 +59,7 @@ struct ProfileCardView: View {
             Button {
                 appCoordinator.isHomeViewShown = true
             } label: {
-                MumorySimpleButton(title: "시작하기", isEnabled: true)
+                CommonButton(title: "시작하기", isEnabled: true)
                     .padding(.bottom, 20)
                     .padding(.horizontal, 20)
             }

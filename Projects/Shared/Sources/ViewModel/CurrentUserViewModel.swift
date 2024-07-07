@@ -26,7 +26,9 @@ public class CurrentUserViewModel: ObservableObject {
 
     // MARK: - Methods
     @MainActor
-    public func initializeUserData(uId: String) async {
+    public func initializeUserData() async {
+        guard let currentUser = FirebaseManager.shared.auth.currentUser else {return}
+        let uId = currentUser.uid
         self.user = await FetchManager.shared.fetchUser(uId: uId)
         friendViewModel = .init(uId: uId)
         playlistViewModel = .init(uId: uId)

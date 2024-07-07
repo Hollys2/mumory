@@ -130,7 +130,7 @@ struct CreatePlaylistPopupView: View {
                 Button(action: {
                     createPlaylist()
                 }, label: {
-                    MumoryLoadingButtonMedium(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
+                    CommonLoadingButtonSmall(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
                         .padding(.horizontal, 30)
                 })
                 .frame(height: 50)

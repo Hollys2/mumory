@@ -141,7 +141,6 @@ struct LibraryView: View {
                 .frame(height: appCoordinator.safeAreaInsetsTop)
         }
         .frame(width: getUIScreenBounds().width)
-        .ignoresSafeArea()
         .onAppear(perform: {
             Task {
                 let authorizationStatus = await MusicAuthorization.request()

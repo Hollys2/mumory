@@ -179,7 +179,7 @@ struct ReportView: View {
                 }
                 .scrollIndicators(.visible)
             }
-            MumoryLoadingButton(title: "보내기", isEnabled: !title.isEmpty && !content.isEmpty && !settingViewModel.email.isEmpty && !settingViewModel.nickname.isEmpty, isLoading: $isLoading)
+            CommonLoadingButton(title: "보내기", isEnabled: !title.isEmpty && !content.isEmpty && !settingViewModel.email.isEmpty && !settingViewModel.nickname.isEmpty, isLoading: $isLoading)
                 .padding(20)
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .onTapGesture {

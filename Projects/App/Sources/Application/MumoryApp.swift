@@ -8,7 +8,7 @@ import Combine
 
 @main
 struct MumoryApp: App {
-    
+    // MARK: - Propoerties
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject var appCoordinator: AppCoordinator = .init()
     @StateObject var locationManager: LocationManager = .init()
@@ -20,7 +20,6 @@ struct MumoryApp: App {
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
     @StateObject var currentUserViewModel: CurrentUserViewModel = .init()
 
-    
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -35,7 +34,6 @@ struct MumoryApp: App {
                     SplashView()
                 }
             }
-            .ignoresSafeArea()
             .preferredColorScheme(.dark)
             .environmentObject(locationManager)
             .environmentObject(localSearchViewModel)
@@ -47,31 +45,13 @@ struct MumoryApp: App {
             .environmentObject(playerViewModel)
             .environmentObject(appCoordinator)
             .onAppear {
-                bootstrap()
+                Task {
+                    await appCoordinator.setupInitialScreen()
+                    await currentUserViewModel.initializeUserData()
+                }
             }
+            
+            
         }
-    }
-    
-    // MARK: - Methods
-    private func bootstrap() {
-        appCoordinator.isOnboardingShown = hasSignInHistory()
-        let currentUserExists = hasCurrentUser()
-        appCoordinator.isHomeViewShown = currentUserExists
-        if currentUserExists {
-            Task {
-                let auth = FirebaseManager.shared.auth
-                guard let currentUser = auth.currentUser else {return}
-                await currentUserViewModel.initializeUserData(uId: currentUser.uid)
-            }
-        }
-    }
-        
-    private func hasSignInHistory() -> Bool {
-        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
-    }
-    
-    private func hasCurrentUser() -> Bool {
-        let auth = FirebaseManager.shared.auth
-        return auth.currentUser != nil
     }
 }

@@ -325,7 +325,7 @@ struct DatePickerView: View {
                 }
                 .pickerStyle(.wheel)
                 
-                MumorySimpleButton(title: "완료", isEnabled: true, showShadow: false)
+                CommonButton(title: "완료", isEnabled: true, showShadow: false)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 30)
                     .onTapGesture {

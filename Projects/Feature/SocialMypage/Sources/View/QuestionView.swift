@@ -139,7 +139,7 @@ struct QuestionView: View {
                             Button(action: {
                                 uploadQuestion()
                             }, label: {
-                                MumoryLoadingButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0, isLoading: $isLoading)
+                                CommonLoadingButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0, isLoading: $isLoading)
                                     .padding(.leading, 20)
                                     .padding(.trailing, 20)
                             })

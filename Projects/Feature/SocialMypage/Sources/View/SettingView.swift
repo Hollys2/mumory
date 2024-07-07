@@ -17,6 +17,7 @@ import KakaoSDKUser
 import Lottie
 
 struct SettingView: View {
+    // MARK: - Propoerties
     @Environment(\.dismiss) private var dismiss
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
@@ -28,7 +29,8 @@ struct SettingView: View {
     @State var isShowingWithdrawPopup = false
     @State var isLoading: Bool = false
     
-    var body: some View {        
+    // MARK: - View
+    var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
             
@@ -98,31 +100,8 @@ struct SettingView: View {
                 Spacer()
                 
                 
-                LogoutButton()
-                    .onTapGesture {
-                        isLoading = true
-                        mumoryDataViewModel.myMumorys.removeAll()
-                        mumoryDataViewModel.myActivity.removeAll()
-                        mumoryDataViewModel.socialMumorys.removeAll()
-                        mumoryDataViewModel.myRewards.removeAll()
-                        mumoryDataViewModel.choosedMusicModel = nil
-                        mumoryDataViewModel.choosedLocationModel = nil
-                        let Firebase = FirebaseManager.shared
-                        let auth = Firebase.auth
-                        guard let signOut = try? auth.signOut() else {return}
-                        Firebase.db.collection("User").document(currentUserViewModel.user.uId).updateData(["fcmToken": ""])
-                        currentUserViewModel.removeAllData()
-                        appCoordinator.isMyPageViewShown = false
-                        appCoordinator.isCreateMumorySheetShown = false
-                        appCoordinator.initPage = .onBoarding
-                        appCoordinator.selectedTab = .home
-                        for key in UserDefaults.standard.dictionaryRepresentation().keys {
-                            UserDefaults.standard.removeObject(forKey: key.description)
-                        }
-                        appCoordinator.rootPath = NavigationPath()
-                        
-                        isLoading = false
-                    }
+                LogoutButton
+                 
                 
                 
                 WithdrawButton()
@@ -157,6 +136,48 @@ struct SettingView: View {
         
     }
     
+    var LogoutButton: some View {
+        Button {
+            isLoading = true
+            mumoryDataViewModel.myMumorys.removeAll()
+            mumoryDataViewModel.myActivity.removeAll()
+            mumoryDataViewModel.socialMumorys.removeAll()
+            mumoryDataViewModel.myRewards.removeAll()
+            mumoryDataViewModel.choosedMusicModel = nil
+            mumoryDataViewModel.choosedLocationModel = nil
+            let Firebase = FirebaseManager.shared
+            let auth = Firebase.auth
+            guard let signOut = try? auth.signOut() else {return}
+            Firebase.db.collection("User").document(currentUserViewModel.user.uId).updateData(["fcmToken": ""])
+            currentUserViewModel.removeAllData()
+            appCoordinator.isMyPageViewShown = false
+            appCoordinator.isCreateMumorySheetShown = false
+            appCoordinator.isHomeViewShown = false
+            appCoordinator.selectedTab = .home
+            for key in UserDefaults.standard.dictionaryRepresentation().keys {
+                UserDefaults.standard.removeObject(forKey: key.description)
+            }
+            appCoordinator.rootPath = NavigationPath()
+            
+            isLoading = false
+        } label: {
+            Text("로그아웃")
+                .foregroundColor(.white)
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                .padding(.top, 15)
+                .padding(.bottom, 15)
+                .padding(.trailing, 62)
+                .padding(.leading, 62)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 30, style: .circular)
+                        .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
+                )
+        }
+
+
+    }
+    
+    // MARK: - Methods
     func findNavigationController(viewController: UIViewController?) -> UINavigationController? {
       guard let viewController = viewController else {
         return nil
@@ -195,7 +216,7 @@ struct SettingView: View {
                     }else {
                         print("delete docs successful")
                         appCoordinator.isMyPageViewShown = false
-                        appCoordinator.initPage = .onBoarding
+                        appCoordinator.isHomeViewShown = false
                         appCoordinator.rootPath = NavigationPath()
                     }
                 }
@@ -244,7 +265,7 @@ struct SettingView: View {
                             }
                             appCoordinator.isMyPageViewShown = false
                             currentUserViewModel.removeAllData()
-                            appCoordinator.initPage = .onBoarding
+                            appCoordinator.isHomeViewShown = false
                             appCoordinator.rootPath = NavigationPath()
                         }
                     }
@@ -283,21 +304,6 @@ private struct WithdrawButton: View {
     }
 }
 
-private struct LogoutButton: View {
-    var body: some View {
-        Text("로그아웃")
-            .foregroundColor(.white)
-            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-            .padding(.top, 15)
-            .padding(.bottom, 15)
-            .padding(.trailing, 62)
-            .padding(.leading, 62)
-            .overlay(
-                RoundedRectangle(cornerRadius: 30, style: .circular)
-                    .stroke(Color(red: 0.65, green: 0.65, blue: 0.65), lineWidth: 1)
-            )
-    }
-}
 
 private func removeMyData(uid: String) async {
     let Firebase = FirebaseManager.shared

@@ -110,7 +110,7 @@ struct AppleSignInButton: UIViewControllerRepresentable {
 
                     } else {
                         guard let result = try? await FirebaseManager.shared.auth.signIn(with: credential) else {return}
-                        await currentUserViewModel.initializeUserData(uId: result.user.uid)
+                        await currentUserViewModel.initializeUserData()
                         appCoordinator.isHomeViewShown = true
                     }
                 }

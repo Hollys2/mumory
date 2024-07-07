@@ -16,9 +16,11 @@ import KakaoSDKUser
 import Firebase
 import GoogleSignIn
 
-class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+public class WithdrawViewModel: NSObject, ObservableObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
     @Published var isAppleUserAuthenticated = false
     @Published var isEmailUserAuthenticated = false
+    
+    public override init(){}
     
     func AppleLogin() {
         let request = createAppleIdRequest()

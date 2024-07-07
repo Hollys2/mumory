@@ -22,8 +22,6 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var authPath: [AuthPage] = []
-    
-    @Published public var initPage: InitPage = .login
     @Published public var selectedTab: Tab = .home
     
     @Published public var scrollToTop: Bool = false
@@ -80,6 +78,18 @@ public class AppCoordinator: ObservableObject {
         }
     }
     
-
+    private func hasSignInHistory() -> Bool {
+        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
+    }
+    
+    private func hasCurrentUser() -> Bool {
+        let auth = FirebaseManager.shared.auth
+        return auth.currentUser != nil
+    }
+    
+    public func setupInitialScreen() async {
+        isOnboardingShown = hasSignInHistory()
+        isHomeViewShown = hasCurrentUser()
+    }
 }
 

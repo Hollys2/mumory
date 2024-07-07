@@ -98,7 +98,7 @@ struct EditFavoriteGenreView: View {
                 Button {
                     saveGenre()
                 } label: {
-                    MumoryLoadingButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6, isLoading: $isLoading)
+                    CommonLoadingButton(title: "저장", isEnabled: selectedGenres.count > 0 && selectedGenres.count < 6, isLoading: $isLoading)
                         .padding(.bottom, 20 + appCoordinator.safeAreaInsetsBottom)
                         .padding(.horizontal, 20)
                         

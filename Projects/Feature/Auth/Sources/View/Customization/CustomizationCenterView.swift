@@ -65,7 +65,7 @@ public struct CustomizationCenterView: View {
                     signUpViewModel.goNext()
                 }
             }, label: {
-                MumoryLoadingButton(title: signUpViewModel.getButtonTitle(), isEnabled: signUpViewModel.isButtonEnabled(), isLoading: $signUpViewModel.isLoading)
+                CommonLoadingButton(title: signUpViewModel.getButtonTitle(), isEnabled: signUpViewModel.isButtonEnabled(), isLoading: $signUpViewModel.isLoading)
                     .padding(.bottom, 20)
                     .padding(.horizontal, 20)
             })
@@ -126,7 +126,7 @@ public struct CustomizationCenterView: View {
             let profileImageURL = await signUpViewModel.getUploadedImageURL(uId: uId)
             await signUpViewModel.uploadFavoritePlaylist(uId: uId)
             await signUpViewModel.uploadUserData(uId: uId, profileImageURL: profileImageURL)
-            await currentUserViewModel.initializeUserData(uId: uId)
+            await currentUserViewModel.initializeUserData()
             appCoordinator.push(destination: AuthPage.profileCard)
         }
     }

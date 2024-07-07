@@ -31,10 +31,10 @@ public struct HomeView: View {
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
-    @EnvironmentObject private var withdrawViewModel: WithdrawViewModel
     
     @StateObject private var settingViewModel: SettingViewModel = .init()
     @StateObject private var friendDataViewModel: FriendDataViewModel = .init()
+    @StateObject private var withdrawViewModel: WithdrawViewModel = .init()
     public init() {}
     
     public var body: some View {
@@ -54,7 +54,6 @@ public struct HomeView: View {
                     }
                     
                     MumoryTabView()
-                        .ignoresSafeArea()
                         .overlay(CreateMumoryPopUpView(), alignment: .top)
                 }
                 
@@ -102,11 +101,6 @@ public struct HomeView: View {
             } // ZStack
             .navigationBarBackButtonHidden()
             .onAppear {
-                Task {
-                    guard let uId = FirebaseManager.shared.auth.currentUser?.uid else {return}
-                    currentUserViewModel.user = await FetchManager.shared.fetchUser(uId: uId)
-                }
-                
                 let userDefualt = UserDefaults.standard
                 if !userDefualt.bool(forKey: "firstLogined") {
                     userDefualt.setValue(true, forKey: "firstLogined")

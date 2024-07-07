@@ -79,7 +79,7 @@ struct SignUpCenterView: View {
                 }
                 signUpViewModel.goNext()
             }, label: {
-                MumoryLoadingButton(title: signUpViewModel.getButtonTitle(),
+                CommonLoadingButton(title: signUpViewModel.getButtonTitle(),
                                     isEnabled: signUpViewModel.isButtonEnabled(),
                                     isLoading: $signUpViewModel.isLoading)
                 .padding(.horizontal, 20)

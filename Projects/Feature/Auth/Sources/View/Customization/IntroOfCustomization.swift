@@ -53,7 +53,7 @@ struct IntroOfCustomization: View {
                     signUpViewModel.goNext()
                     appCoordinator.push(destination: AuthPage.customizationCenter)
                 } label: {
-                    MumorySimpleButton(title: "시작하기", isEnabled: true)
+                    CommonButton(title: "시작하기", isEnabled: true)
                         .padding(20)
                         .padding(.top, 5)
                 }
