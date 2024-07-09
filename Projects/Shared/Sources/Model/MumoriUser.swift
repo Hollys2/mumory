@@ -60,4 +60,4 @@ public struct MumoriUser: Hashable {
     }
 }
 
-public let randomProfiles: [Image] = [SharedAsset.profileRed.swiftUIImage, SharedAsset.profilePurple.swiftUIImage, SharedAsset.profileYellow.swiftUIImage, SharedAsset.profileOrange.swiftUIImage]
+

@@ -239,7 +239,7 @@ public struct MumoryDetailView: View {
             Task {
 //                mumoryDataViewModel.isUpdating = true
                 self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
-                self.user = await MumoriUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
                 print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
 //                mumoryDataViewModel.isUpdating = false
             }

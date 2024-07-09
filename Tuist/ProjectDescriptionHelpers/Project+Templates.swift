@@ -90,39 +90,38 @@ extension Project {
     }
     
     public static func makeInfoPlist(merging other: [String: InfoPlist.Value] = [:]) -> InfoPlist {
-//        var extendedPlist: [String: InfoPlist.Value] = [
-//            //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
-//            "ITSAppUsesNonExemptEncryption": false,
-//            "UILaunchScreen": [],
-//            "UISupportedInterfaceOrientations":
-//                [
-//                    "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
-//                ],
-//            "UIUserInterfaceStyle": "Dark",
-//            "CFBundleVersion": "\(bundleVersion)",
-//            "CFBundleShortVersionString": "\(appStoreVersion)",
-//            "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
-//            "NSLocationWhenInUseUsageDescription": "뮤모리 작성 시 현 위치(GPS) 기능 사용 및 검색을 위해 위치 권한을 허용해주세요",
-//            "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
-//            "FirebaseAppDelegateProxyEnabled": false,
-//            "CFBundleURLTypes" : [
-//                [
-//                    "CFBundleTypeRole" : "Editor",
-//                    "CFBundleURLName" : "kakao",
-//                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
-//                ],
-//                [
-//                    "CFBundleTypeRole" : "Editor",
-//                    "CFBundleURLName" : "fireBase-google",
-//                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
-//                ]
-//            ],
-//            "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한을 허용해주세요",
-//            "NSAppleMusicUsageDescription" : "음악 검색 및 음악 감상, 뮤모리 작성을 위해 권한을 허용해주세요."
-//        ]
+        //        var extendedPlist: [String: InfoPlist.Value] = [
+        //            //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
+        //            "ITSAppUsesNonExemptEncryption": false,
+        //            "UILaunchScreen": [],
+        //            "UISupportedInterfaceOrientations":
+        //                [
+        //                    "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
+        //                ],
+        //            "UIUserInterfaceStyle": "Dark",
+        //            "CFBundleVersion": "\(bundleVersion)",
+        //            "CFBundleShortVersionString": "\(appStoreVersion)",
+        //            "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
+        //            "NSLocationWhenInUseUsageDescription": "뮤모리 작성 시 현 위치(GPS) 기능 사용 및 검색을 위해 위치 권한을 허용해주세요",
+        //            "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
+        //            "FirebaseAppDelegateProxyEnabled": false,
+        //            "CFBundleURLTypes" : [
+        //                [
+        //                    "CFBundleTypeRole" : "Editor",
+        //                    "CFBundleURLName" : "kakao",
+        //                    "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
+        //                ],
+        //                [
+        //                    "CFBundleTypeRole" : "Editor",
+        //                    "CFBundleURLName" : "fireBase-google",
+        //                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
+        //                ]
+        //            ],
+        //            "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한을 허용해주세요",
+        //            "NSAppleMusicUsageDescription" : "음악 검색 및 음악 감상, 뮤모리 작성을 위해 권한을 허용해주세요."
+        //        ]
         
         var extendedPlist: [String: InfoPlist.Value] = [
-<<<<<<< HEAD
             //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
             "ITSAppUsesNonExemptEncryption": false,
             "UILaunchScreen": [],
@@ -147,37 +146,9 @@ extension Project {
                     "CFBundleTypeRole" : "Editor",
                     "CFBundleURLName" : "fireBase-google",
                     "CFBundleURLSchemes" : ["com.googleusercontent.apps.108840634909-mcjqomjccpsc14ubnhor8uet1shj0bcq"]
-=======
-                    //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],
-                    "ITSAppUsesNonExemptEncryption": false,
-                    "UILaunchScreen": [],
-                    "UISupportedInterfaceOrientations":
-                        [
-                            "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
-                        ],
-                    "UIUserInterfaceStyle": "Dark",
-                    "CFBundleVersion": "\(bundleVersion)",
-                    "CFBundleShortVersionString": "\(appStoreVersion)",
-                    "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
-                    "NSLocationWhenInUseUsageDescription": "뮤모리 작성 시 현 위치(GPS) 기능 사용 및 검색을 위해 위치 권한을 허용해주세요",
-                    "LSApplicationQueriesSchemes" : ["kakaokompassauth"],
-                    "FirebaseAppDelegateProxyEnabled": false,
-                    "CFBundleURLTypes" : [
-                        [
-                            "CFBundleTypeRole" : "Editor",
-                            "CFBundleURLName" : "kakao",
-                            "CFBundleURLSchemes" : ["kakaoac7735b6f63e81d971e4a58a05994260"]
-                        ],
-                        [
-                            "CFBundleTypeRole" : "Editor",
-                            "CFBundleURLName" : "fireBase-google",
-                            "CFBundleURLSchemes" : ["com.googleusercontent.apps.108840634909-mcjqomjccpsc14ubnhor8uet1shj0bcq"]
-                        ]
-                    ],
-                    "NSMicrophoneUsageDescription" : "음악 인식을 위해 마이크 권한을 허용해주세요",
-                    "NSAppleMusicUsageDescription" : "음악 검색 및 음악 감상, 뮤모리 작성을 위해 권한을 허용해주세요."
->>>>>>> develop
                 ]
+            ]
+        ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in
             extendedPlist[key] = value
