@@ -11,8 +11,8 @@ import Shared
 
 struct RoundedTextField: View {
     // MARK: - Object lifecycle
-    init(text: String, placeHolder: String, fontSize: CGFloat) {
-        self.text = text
+    init(text: Binding<String>, placeHolder: String, fontSize: CGFloat) {
+        self._text = text
         self.placeHolder = placeHolder
         self.fontSize = fontSize
     }
@@ -55,12 +55,13 @@ struct RoundedTextField: View {
                 .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: fontSize))
         }
     }
+}
+
+struct RoundedTextField_18: View {
+    @Binding var text: String
+    var prompt: String = ""
     
-    struct RoundedTextField_18: View {
-        @Binding var text: String
-        var prompt: String = ""
-        
-        var body: some View {
+    var body: some View {
         HStack(spacing: 0){
             TextField("", text: $text, prompt: getPrompt())
                 .frame(maxWidth: .infinity)
@@ -86,7 +87,7 @@ struct RoundedTextField: View {
         .padding(.bottom, 18)
         .background(Color(red: 0.24, green: 0.24, blue: 0.24))
         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
-
+        
     }
     
     func getPrompt() -> Text {
