@@ -264,8 +264,7 @@ private struct IdStackView: View {
             })
             .frame(height: 17)
             
-            
-            AuthTextField_16(text: $editProfileViewModel.id, prompt: "ID를 입력해 주세요!")
+            RoundedTextField(text: $editProfileViewModel.id, placeHolder: "ID를 입력해 주세요!", fontSize: 16)
                 .onChange(of: editProfileViewModel.id, perform: { value in
                     timer?.invalidate()
                     withAnimation {
@@ -361,8 +360,7 @@ private struct NicknameStackView: View {
             })
             .frame(height: 17)
             
-            
-            AuthTextField_16(text: $editProfileViewModel.nickname, prompt: "닉네임을 입력해 주세요!")
+            RoundedTextField(text: $editProfileViewModel.nickname, placeHolder: "ID를 입력해 주세요!", fontSize: 16)
                 .onChange(of: editProfileViewModel.nickname, perform: { value in
                     timer?.invalidate()
                     withAnimation {
@@ -452,8 +450,7 @@ struct BioStackView: View {
                     .foregroundStyle(ColorSet.subGray)
             })
             .frame(height: 17)
-            
-            AuthTextField_16(text: $editProfileViewModel.bio, prompt: "회원님에 대해 소개해주세요!")
+            RoundedTextField(text: $editProfileViewModel.nickname, placeHolder: "회원님에 대해 소개해주세요!", fontSize: 16)
                 .onChange(of: editProfileViewModel.bio, perform: { value in
                     if editProfileViewModel.bio.count > 50 {
                         editProfileViewModel.bio = String(value.prefix(50))

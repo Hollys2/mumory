@@ -25,8 +25,8 @@ public enum MumoryPage: Hashable {
     case friendPlaylist(playlistIndex: Int)
     case friendPlaylistManage
     case searchFriend
-    case mostPostedSongList(songs: Binding<[Song]>)
-    case similarTasteList(songs: Binding<[Song]>)
+    case mostPostedSongList(songs: Binding<[SongModel]>)
+    case similarTasteList(songs: Binding<[SongModel]>)
     case myRecentMumorySongList
     case report
     case mumoryReport(mumoryId: String)
@@ -34,9 +34,9 @@ public enum MumoryPage: Hashable {
     case search(term: String)
     case playlistManage
     case artist(artist: Artist)
-    case playlist(playlist: Binding<MusicPlaylist>)
+    case playlist(playlist: Binding<SongPlaylist>)
     case shazam(type: ShazamViewType)
-    case addSong(originPlaylist: MusicPlaylist)
+    case addSong(originPlaylist: SongPlaylist)
     case saveToPlaylist(songs: [Song])
     case recommendation(genreID: Int)
     case selectableArtist(artist: Artist)

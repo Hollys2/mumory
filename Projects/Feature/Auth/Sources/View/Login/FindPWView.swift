@@ -48,7 +48,8 @@ struct FindPWView: View {
                     .padding(.top, 30)
                 
                 //이메일 텍스트 필드(재사용)
-                RoundedTextField_18(text: $email, prompt: "가입한 이메일을 입력해주세요")
+                
+                RoundedTextField(text: $email, placeHolder: "가입한 이메일을 입력해주세요", fontSize: 18)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 55)

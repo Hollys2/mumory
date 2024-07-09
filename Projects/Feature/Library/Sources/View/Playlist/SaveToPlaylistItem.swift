@@ -10,9 +10,9 @@ import SwiftUI
 import Shared
 
 struct SaveToPlaylistItem: View {
-    var playlist: MusicPlaylist
+    var playlist: SongPlaylist
     
-    init(playlist: MusicPlaylist) {
+    init(playlist: SongPlaylist) {
         self.playlist = playlist
     }
     

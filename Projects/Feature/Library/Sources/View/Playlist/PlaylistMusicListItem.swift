@@ -11,20 +11,24 @@ import Shared
 import MusicKit
 
 struct PlaylistMusicListItem: View {
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @Binding var isEditing: Bool
-    @Binding var selectedSongs: [Song]
-    var song: Song
-    
-    @State var isPresentBottomSheet: Bool = false
-
-    init( song: Song, isEditing: Binding<Bool>, selectedSongs: Binding<[Song]>) {
+    // MARK: - Object lifecycle
+    init( song: SongModel, isEditing: Binding<Bool>, selectedSongs: Binding<[SongModel]>) {
         self._isEditing = isEditing
         self._selectedSongs = selectedSongs
         self.song = song
     }
+    
+    // MARK: - Propoerties
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @Binding var isEditing: Bool
+    @Binding var selectedSongs: [SongModel]
+    @State var isPresentBottomSheet: Bool = false
+    var song: SongModel
+    
+
+
     
     var body: some View {
             HStack(spacing: 0, content: {
@@ -47,7 +51,7 @@ struct PlaylistMusicListItem: View {
                 }
                 
                 
-                AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
+                AsyncImage(url: song.artworkUrl) { image in
                     image
                         .resizable()
                         .frame(width: 40, height: 40)
@@ -80,14 +84,14 @@ struct PlaylistMusicListItem: View {
                 if !isEditing {
                     HStack(spacing: 0) {
                         Spacer()
-                        if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+                        if playerViewModel.favoriteSongIds.contains(song.id) {
                             SharedAsset.bookmarkFilled.swiftUIImage
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 20, height: 20)
                                 .padding(.trailing, 23)
                                 .onTapGesture {
-                                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
+                                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id)
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                 }
                         }else {
@@ -98,7 +102,7 @@ struct PlaylistMusicListItem: View {
                                 .padding(.trailing, 23)
                                 .onTapGesture {
                                     self.generateHapticFeedback(style: .medium)
-                                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
+                                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id)
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                 }
                         }
@@ -128,7 +132,7 @@ struct PlaylistMusicListItem: View {
 //            }
             .fullScreenCover(isPresented: $isPresentBottomSheet, content: {
                 BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                    SongBottomSheetView(song: song, types: [.withoutBookmark])
+                    SongModelBottomSheetView(song: song, types: [.withoutBookmark])
                 }
                 .background(TransparentBackground())
             })

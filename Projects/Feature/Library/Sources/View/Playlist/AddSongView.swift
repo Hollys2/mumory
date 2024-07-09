@@ -10,17 +10,21 @@ import SwiftUI
 import Shared
 
 struct AddSongView: View {
+    // MARK: - Object lifecycle
+    init(originPlaylist: SongPlaylist) {
+        self.originPlaylist = originPlaylist
+    }
+    
+    // MARK: - Propoerties
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
 
-    @State var originPlaylist: MusicPlaylist
+    @State var originPlaylist: SongPlaylist
     @State var selection: Int = 0
     private let noneSelectedColor = Color(white: 0.65)
     
-    init(originPlaylist: MusicPlaylist) {
-        _originPlaylist = State<MusicPlaylist>.init(initialValue: originPlaylist)
-    }
+
 
     var body: some View {
         ZStack(alignment: .top){

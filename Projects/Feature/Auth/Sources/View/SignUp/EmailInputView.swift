@@ -37,8 +37,8 @@ public struct EmailInputView: View {
         VStack(spacing: 0, content: {
             
             TitleTextForSignUpField(title: "이메일", topPadding: 43)
-            
-            AuthTextField_16(text: $signUpViewModel.email, prompt: "ex) abcdefg@hhhhh.com")
+                
+            RoundedTextField(text: $signUpViewModel.email, placeHolder: "ex) abcdefg@hhhhh.com", fontSize: 16)
                 .padding(.top, 14)
                 .padding(.horizontal, 20)
                 .focused($isFocused)

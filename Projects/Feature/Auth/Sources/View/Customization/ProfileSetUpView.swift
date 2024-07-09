@@ -84,8 +84,7 @@ struct ProfileSetUpView: View {
                         
                         NicknameStack
                         
-                            
-                        AuthTextField_16(text: $signUpViewModel.nickname, prompt: "닉네임을 입력해 주세요!")
+                        RoundedTextField(text: $signUpViewModel.nickname, placeHolder: "닉네임을 입력해 주세요!", fontSize: 16)
                             .padding(.horizontal, 20)
                             .padding(.top, 15)
                         
@@ -131,7 +130,7 @@ struct ProfileSetUpView: View {
                         .padding(.horizontal, 20)
                         
                         
-                        AuthTextField_16(text: $signUpViewModel.id, prompt: "ID를 입력해 주세요!")
+                        RoundedTextField(text: $signUpViewModel.id, placeHolder: "ID를 입력해 주세요!", fontSize: 16)
                         .padding(.horizontal, 20)
                         .padding(.top, 10)
                         .onChange(of: signUpViewModel.id) { newValue in

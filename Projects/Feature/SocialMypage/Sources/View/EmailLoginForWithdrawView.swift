@@ -55,7 +55,7 @@ struct EmailLoginForWithdrawView: View {
                     .padding(.top, 55)
                 
                 //비밀번호 보안 텍스트 필드(재사용)
-                AuthSecureTextField(text: $password, prompt: "비밀번호")
+                RoundedSecureField(text: $password, prompt: "비밀번호")
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 11)

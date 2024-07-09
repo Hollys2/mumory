@@ -11,7 +11,7 @@ import Shared
 import MusicKit
 
 struct AddSongFromSearchView: View {
-    @Binding var originPlaylist: MusicPlaylist
+    @Binding var originPlaylist: SongPlaylist
     
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 

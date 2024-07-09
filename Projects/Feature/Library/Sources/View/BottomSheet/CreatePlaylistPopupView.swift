@@ -176,7 +176,7 @@ struct CreatePlaylistPopupView: View {
                 isLoading = false
                 dismiss()
                 Task {
-                    currentUserViewModel.playlistViewModel.savePlaylist()
+                    await currentUserViewModel.playlistViewModel.savePlaylist()
                 }
             }
         }

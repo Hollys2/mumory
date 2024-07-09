@@ -11,12 +11,12 @@ import Shared
 import MusicKit
 
 struct PlaylistItem: View {
-    @Binding var playlist: MusicPlaylist
+    @Binding var playlist: SongPlaylist
     
     var radius: CGFloat = 10
     let itemSize: CGFloat
     
-    init(playlist: Binding<MusicPlaylist>,itemSize: CGFloat){
+    init(playlist: Binding<SongPlaylist>,itemSize: CGFloat){
         self._playlist = playlist
         self.itemSize = itemSize
     }

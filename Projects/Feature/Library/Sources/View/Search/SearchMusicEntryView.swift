@@ -13,16 +13,7 @@ import AVFAudio
 import MusicKit
 
 struct SearchMusicEntryView: View {
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
-    @State var popularSearchTerm: [String] = []
-    
-    @Binding var term: String
-    @Binding private var songs: MusicItemCollection<Song>
-    @Binding private var artists: MusicItemCollection<Artist>
-    @Binding private var isLoading: Bool
-    var shazamViewType: ShazamViewType = .normal
-    
+    // MARK: - Object lifecycle
     init(term: Binding<String>, songs: Binding<MusicItemCollection<Song>>, artists: Binding<MusicItemCollection<Artist>>, isLoading: Binding<Bool>) {
         self._term = term
         self._songs = songs
@@ -37,8 +28,19 @@ struct SearchMusicEntryView: View {
         self._isLoading = isLoading
         self.shazamViewType = shazamViewType
     }
-
-
+    
+    // MARK: - Propoerties
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @StateObject var recentSearchObject: RecentSearchObject = RecentSearchObject()
+    @State var popularSearchTerm: [String] = []
+    
+    @Binding var term: String
+    @Binding private var songs: MusicItemCollection<Song>
+    @Binding private var artists: MusicItemCollection<Artist>
+    @Binding private var isLoading: Bool
+    var shazamViewType: ShazamViewType = .normal
+    
+    // MARK: - View
     var body: some View {
         ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()

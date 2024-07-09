@@ -22,8 +22,8 @@ struct ModifyPlaylistPopupView: View {
     @State var isPublic: Bool = true
     @State var backgroundOpacity = 0.0
     @State var isLoading: Bool = false
-    @Binding var playlist: MusicPlaylist
-    init(playlist: Binding<MusicPlaylist>) {
+    @Binding var playlist: SongPlaylist
+    init(playlist: Binding<SongPlaylist>) {
         self._playlist = playlist
     }
     

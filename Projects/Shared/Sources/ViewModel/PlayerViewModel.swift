@@ -38,7 +38,7 @@ public class PlayerViewModel: ObservableObject {
     @Published public var queueTitle: String = ""
     
     @Published public var favoriteSongIds: [String] = []
-    @Published public var playlistArray: [MusicPlaylist] = []
+    @Published public var playlistArray: [SongPlaylist] = []
     @Published public var playingTime: TimeInterval = 0.0
     @Published public var isPresentNowPlayingView: Bool = false
     @Published public var shuffleState: ShuffleState = .off
@@ -87,6 +87,7 @@ public class PlayerViewModel: ObservableObject {
             
         }
     }
+
     
     public func playNewSongShowingPlayingView(song: Song){
         player.queue = [song]
@@ -272,6 +273,7 @@ public class PlayerViewModel: ObservableObject {
         }
    
     }
+    
     
     public func removeFromFavorite(uid: String, songId: String) {
         let query = db.collection("User").document(uid).collection("Playlist").document("favorite")

@@ -19,8 +19,8 @@ struct UneditablePlaylistView: View {
     @State var isBottomSheetPresent: Bool = false
     @State var isCompletedGetSongs: Bool = false
     @State var searchIndex: Int = 0
-    @Binding var playlist: MusicPlaylist
-    init(playlist: Binding<MusicPlaylist>){
+    @Binding var playlist: SongPlaylist
+    init(playlist: Binding<SongPlaylist>){
         self._playlist = playlist
     }
     let itemHeight: CGFloat = 70
@@ -203,11 +203,11 @@ struct UneditablePlaylistView: View {
 
 public struct PlaylistImageTest: View {
     @State var imageWidth: CGFloat = 0
-    @Binding var playlist: MusicPlaylist
+    @Binding var playlist: SongPlaylist
     
     let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     
-    init(playlist: Binding<MusicPlaylist>) {
+    init(playlist: Binding<SongPlaylist>) {
         self._playlist = playlist
     }
     

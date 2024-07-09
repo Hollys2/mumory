@@ -37,7 +37,7 @@ struct PasswordInputView: View {
             VStack(spacing: 0){
                 TitleTextForSignUpField(title: "비밀번호", topPadding: 43)
                 
-                AuthSecureField_16(text: $password, prompt: "영문, 숫자, 특수기호로 모두 조합된 8~20자")
+                RoundedSecureField(text: $password, placeHolder: "영문, 숫자, 특수기호로 모두 조합된 8~20자", fontSize: 16)
                     .padding(.horizontal, 20)
                     .padding(.top, 14)
                     .onChange(of: password, perform: { value in
@@ -55,7 +55,7 @@ struct PasswordInputView: View {
                 
                 TitleTextForSignUpField(title: "비밀번호 확인", topPadding: 33)
                 
-                AuthSecureField_16(text: $confirmPassword, prompt: "한 번 더 입력해 주세요!")
+                RoundedSecureField(text: $confirmPassword, placeHolder: "한 번 더 입력해 주세요!", fontSize: 16)
                     .padding(.horizontal, 20)
                     .padding(.top, 11)
                     .onChange(of: confirmPassword, perform: { value in

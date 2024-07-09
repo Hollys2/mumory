@@ -17,9 +17,9 @@ struct MostPostedSongListView: View {
     
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
-    @Binding var songs: [Song]
+    @Binding var songs: [SongModel]
     
-    init(songs: Binding<[Song]>) {
+    init(songs: Binding<[SongModel]>) {
         self._songs = songs
     }
     var body: some View {

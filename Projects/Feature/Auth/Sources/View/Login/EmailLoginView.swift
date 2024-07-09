@@ -36,12 +36,12 @@ struct EmailLoginView: View {
                     .foregroundColor(.white)
                     .padding(.top, 30)
                 
-                RoundedTextField_18(text: $email, prompt: "이메일")
+                RoundedTextField(text: $email, placeHolder: "이메일", fontSize: 18)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 55)
                 
-                AuthSecureTextField(text: $password, prompt: "비밀번호")
+                RoundedSecureField(text: $password, placeHolder: "비밀번호", fontSize: 18)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 11)

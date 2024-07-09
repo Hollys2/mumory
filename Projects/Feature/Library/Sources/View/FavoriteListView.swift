@@ -14,43 +14,19 @@ struct FavoriteListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    
     @State var isLoading: Bool = true
     @State var isPresentBottomSheet: Bool = false
     @State var showFavoriteInfo: Bool = false
+    
     var body: some View {
-        ZStack(alignment: .top){
+        ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
             VStack(spacing: 0, content: {
-                //상단바
-                HStack(content: {
-                    SharedAsset.back.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            appCoordinator.rootPath.removeLast()
-                        }
-                    Spacer()
-                    Text("즐겨찾기 목록")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                        .foregroundStyle(.white)
-              
-                    Spacer()
-                    
-                    SharedAsset.menuWhite.swiftUIImage
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            UIView.setAnimationsEnabled(false)
-                            isPresentBottomSheet = true
-                        }
-                })
-                .frame(height: 65)
-                .padding(.horizontal, 20)
+                NavigationBar(leadingItem: BackButton, centerItem: NavigationTitle, trailingItem: MenuButton)
                 
                 HStack(alignment: .bottom){
-                    Text("\(currentUserViewModel.playlistViewModel.playlistArray[0].songIDs.count)곡")
+                    Text("\(currentUserViewModel.playlistViewModel.getCountOfSongs(id: "favorite"))곡")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundStyle(ColorSet.subGray)
                     
@@ -58,8 +34,9 @@ struct FavoriteListView: View {
                     
                     PlayAllButton()
                         .onTapGesture {
-                            playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserViewModel.playlistViewModel.playlistArray[0].songs)
-                            AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
+                            //음악 재생
+                            //playerViewModel.playAll(title: "즐겨찾기 목록", songs: currentUserViewModel.playlistViewModel.playlistArray[0].songs)
+                            //AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
                         }
                 }
                 .padding(.horizontal, 20)
@@ -105,13 +82,13 @@ struct FavoriteListView: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
-                            ForEach(currentUserViewModel.playlistViewModel.playlistArray[0].songs, id: \.id) { song in
+                            ForEach(currentUserViewModel.playlistViewModel.playlists[0].songs, id: \.id) { song in
                                 SongListBigItem(song: song)
                                     .onTapGesture {
-                                        let tappedSong = song
-                                        playerViewModel.playAll(title: "즐겨찾기 목록",
-                                                                songs: currentUserViewModel.playlistViewModel.playlistArray[0].songs,
-                                                                startingItem: tappedSong)
+//                                        let tappedSong = song
+//                                        playerViewModel.playAll(title: "즐겨찾기 목록",
+//                                                                songs: currentUserViewModel.playlistViewModel.playlistArray[0].songs,
+//                                                                startingItem: tappedSong)
                                     }
                             }
                             if isLoading {
@@ -126,7 +103,7 @@ struct FavoriteListView: View {
                     .refreshable {
                         Task {
                             self.isLoading = true
-                            currentUserViewModel.playlistViewModel.playlistArray[0].songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: "favorite")
+                            await currentUserViewModel.playlistViewModel.refreshPlaylist(playlistId: "favorite")
                             self.isLoading = false
                         }
                     }
@@ -141,9 +118,10 @@ struct FavoriteListView: View {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
-                currentUserViewModel.playlistViewModel.playlistArray[0].songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: "favorite")
+                await currentUserViewModel.playlistViewModel.refreshPlaylist(playlistId: "favorite")
                 self.isLoading = false
             }
+            
             Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { timer in
                 withAnimation {
                     showFavoriteInfo = UserDefaults.standard.value(forKey: "favoriteInfo") == nil
@@ -162,32 +140,65 @@ struct FavoriteListView: View {
             .background(TransparentBackground())
         }
     }
+    
+    var BackButton: some View {
+        SharedAsset.back.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: 30, height: 30)
+            .onTapGesture {
+                appCoordinator.rootPath.removeLast()
+            }
+    }
+    
+    var NavigationTitle: some View {
+        Text("즐겨찾기 목록")
+            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+            .foregroundStyle(.white)
+
+    }
+    
+    var MenuButton: some View {
+        SharedAsset.menuWhite.swiftUIImage
+            .resizable()
+            .scaledToFit()
+            .frame(width: 30, height: 30)
+            .onTapGesture {
+                UIView.setAnimationsEnabled(false)
+                isPresentBottomSheet = true
+            }
+    }
 
 }
 
 struct SongListBigItem: View {
-    enum ViewType {
-        case favorite
-        case recentMumory
-    }
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @State var isPresentBottomSheet: Bool = false
-    let song: Song
-    var type: ViewType = .favorite
-    init(song: Song) {
+    // MARK: - Object lifecycle
+    init(song: SongModel) {
         self.song = song
     }
-    init(song: Song, type: ViewType) {
+    init(song: SongModel, type: ViewType) {
         self.song = song
         self.type = type
     }
     
+    enum ViewType {
+        case favorite
+        case recentMumory
+    }
+    
+    // MARK: - Propoerties
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @State var isPresentBottomSheet: Bool = false
+    let song: SongModel
+    var type: ViewType = .favorite
+
+    
     
     var body: some View {
         HStack(spacing: 0, content: {
-            AsyncImage(url: song.artwork?.url(width: 200, height: 200)) { image in
+            AsyncImage(url: song.artworkUrl) { image in
                 image
                     .resizable()
                     .scaledToFill()
@@ -219,14 +230,14 @@ struct SongListBigItem: View {
             })
             .padding(.trailing, 27)
             
-            if playerViewModel.favoriteSongIds.contains(song.id.rawValue) {
+            if playerViewModel.favoriteSongIds.contains(song.id) {
                 SharedAsset.bookmarkFilled.swiftUIImage
                     .resizable()
                     .scaledToFit()
                     .frame(width: 24, height: 24)
                     .padding(.trailing, 20)
                     .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
@@ -237,7 +248,7 @@ struct SongListBigItem: View {
                     .padding(.trailing, 20)
                     .onTapGesture {
                         self.generateHapticFeedback(style: .medium)
-                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
+                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }
@@ -260,10 +271,10 @@ struct SongListBigItem: View {
 //            isPresentBottomSheet = true
 //        })
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
-            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
-                SongBottomSheetView(song: song, types: [.withoutBookmark])
-            }
-            .background(TransparentBackground())
+//            BottomSheetWrapper(isPresent: $isPresentBottomSheet) {
+//                SongBottomSheetView(song: song, types: [.withoutBookmark])
+//            }
+//            .background(TransparentBackground())
         }
     }
 }

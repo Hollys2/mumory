@@ -88,7 +88,7 @@ struct KnownFriendPageView: View {
     @State private var mumorys: [Mumory] = []
     @State private var firstMumory: Mumory = Mumory()
     @State private var isLoading: Bool = true
-    @State private var playlists: [MusicPlaylist] = []
+    @State private var playlists: [SongPlaylist] = []
     @State private var isPlaylistLoading: Bool = true
     init(friend: UserProfile) {
         self.friend = friend
@@ -740,11 +740,11 @@ struct DeleteFriendBottomSheetView: View {
 
 
 struct PlaylistItemTest: View {
-    @Binding var playlist: MusicPlaylist
+    @Binding var playlist: SongPlaylist
     var radius: CGFloat = 10
     var emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     let itemSize: CGFloat
-    init(playlist: Binding<MusicPlaylist>,itemSize: CGFloat){
+    init(playlist: Binding<SongPlaylist>,itemSize: CGFloat){
         self._playlist = playlist
         self.itemSize = itemSize
     }
@@ -984,7 +984,7 @@ struct FriendMumoryView: View {
 }
 
 
-public func fetchSongToPlaylist(playlistArray: Binding<[MusicPlaylist]>) {
+public func fetchSongToPlaylist(playlistArray: Binding<[SongPlaylist]>) {
     for i in 0 ..< playlistArray.count {
         let songIDs = playlistArray.wrappedValue[i].songIDs
         for id in songIDs {

@@ -69,7 +69,7 @@ public class SnackBarViewModel: ObservableObject {
         })
     }
     
-    public func setRecentSaveData(playlist: MusicPlaylist, songIds: [String]) {
+    public func setRecentSaveData(playlist: SongPlaylist, songs: [SongModel]) {
         self.recentSaveData = RecentSaveData(playlistId: playlist.id, songIds: songIds)
     }
     

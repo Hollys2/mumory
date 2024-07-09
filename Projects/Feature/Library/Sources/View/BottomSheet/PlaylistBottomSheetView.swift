@@ -11,26 +11,27 @@ import Shared
 import MusicKit
 
 struct PlaylistBottomSheetView: View {
+    // MARK: - Object lifecycle
+    init(playlist: SongPlaylist, editPlaylistNameAction: @escaping () -> Void) {
+        self.playlist = playlist
+        self.editPlaylistNameAction = editPlaylistNameAction
+    }
+    
+    // MARK: - Propoerties
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentDeletePlaylistBottomSheet: Bool = false
-    private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
-    
-    var playlist: MusicPlaylist
-    var songs: [Song]
+    private let lineGray = Color(white: 0.28)
+    var playlist: SongPlaylist
     var editPlaylistNameAction: () -> Void
     
-    init(playlist: MusicPlaylist, songs: [Song], editPlaylistNameAction: @escaping () -> Void) {
-        self.playlist = playlist
-        self.songs = songs
-        self.editPlaylistNameAction = editPlaylistNameAction
-    }
+
     
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(alignment: .center,spacing: 10,content: {
-                MiniPlaylistImage(songs: songs)
+                MiniPlaylistImage(songs: playlist.songs)
                 
                 
                 Text(playlist.title)
@@ -75,7 +76,7 @@ struct PlaylistBottomSheetView: View {
                 let path = db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(playlist.id)
                 path.delete()
                 appCoordinator.rootPath.removeLast()
-                currentUserViewModel.playlistViewModel.playlistArray.removeAll(where: {$0.id == playlistId})
+                currentUserViewModel.playlistViewModel.playlists.removeAll(where: {$0.id == playlistId})
             }
             .background(TransparentBackground())
         })
@@ -83,9 +84,17 @@ struct PlaylistBottomSheetView: View {
 }
 
 private struct MiniPlaylistImage: View {
-    var songs: [Song]
+    // MARK: - Object lifecycle
+    init(songs: [SongModel]) {
+        self.songs = songs
+    }
+    
+    // MARK: - Propoerties
+    var songs: [SongModel]
     let imageSize = 30.0
     let border = 0.5
+    
+    // MARK: - View
     var body: some View {
         VStack(spacing: 0, content: {
             HStack(spacing: 0, content: {
@@ -95,7 +104,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[0].artworkUrl, transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -120,7 +129,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[1].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[1].artworkUrl, transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -149,7 +158,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[2].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[2].artworkUrl, transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -174,7 +183,7 @@ private struct MiniPlaylistImage: View {
                         .fill(ColorSet.darkGray)
                         .frame(width: imageSize, height: imageSize)
                 }else{
-                    AsyncImage(url: songs[3].artwork?.url(width: 100, height: 100),transaction: Transaction(animation: .default)) { phase in
+                    AsyncImage(url: songs[3].artworkUrl, transaction: Transaction(animation: .default)) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -187,6 +196,7 @@ private struct MiniPlaylistImage: View {
                         }
                     }
                 }
+                
                 
             })
         })

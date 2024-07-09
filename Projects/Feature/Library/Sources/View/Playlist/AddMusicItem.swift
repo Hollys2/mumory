@@ -12,15 +12,19 @@ import MusicKit
 import Core
 
 struct AddMusicItem: View {
-    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @Binding var originPlaylist: MusicPlaylist
-    @State var isSnackBarPresent: Bool = false
-    let song: Song
-    init(song: Song, originPlaylist: Binding<MusicPlaylist>) {
+    // MARK: - Object lifecycle
+    init(song: Song, originPlaylist: Binding<SongPlaylist>) {
         self._originPlaylist = originPlaylist
         self.song = song
     }
+    
+    // MARK: - Propoerties
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    @EnvironmentObject var snackBarViewModel: SnackBarViewModel
+    @Binding var originPlaylist: SongPlaylist
+    @State var isSnackBarPresent: Bool = false
+    let song: Song
+
     var body: some View {
         HStack(spacing: 0, content: {
             AsyncImage(url: song.artwork?.url(width: 300, height: 300)) { image in
@@ -37,14 +41,14 @@ struct AddMusicItem: View {
             
             
             VStack(content: {
-                Text(song.title ?? "")
+                Text(song.title)
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .truncationMode(.tail)
                 
-                Text(song.artistName ?? "")
+                Text(song.artistName)
                     .frame(maxWidth: .infinity,alignment: .leading)
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(LibraryColorSet.lightGrayTitle)
@@ -53,14 +57,14 @@ struct AddMusicItem: View {
             })
             
             Spacer()
+            
             SharedAsset.addPurpleCircleFilled.swiftUIImage
                 .resizable()
                 .scaledToFill()
                 .frame(width: 31, height: 31)
                 .onTapGesture {
                     hideKeyboard()
-                    addMusicToPlaylist(song: song)
-                    
+                    addSongToPlaylist()
                 }
         })
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -68,34 +72,40 @@ struct AddMusicItem: View {
         .frame(height: 70)
         
     }
-    private func addMusicToPlaylist(song: Song) {
+    private func addSongToPlaylist() {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        let songID = song.id.rawValue
+        let alreadyExists: Bool = originPlaylist.songs.contains(where: {$0.id == song.id.rawValue})
         
-        if !originPlaylist.songIDs.contains(songID) {
-            //선택한 곡이 기존 플리에 없을 때 - 추가 진행
-            originPlaylist.songIDs.append(songID)
+        if alreadyExists {
+            snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: originPlaylist.title)
+        } else {
+            let song: SongModel = SongModel(id: song.id.rawValue, title: song.title, artistName: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
+            originPlaylist.songs.append(song)
             
-            let songData: [String: Any] = [
-                "songIds" : FirebaseManager.Fieldvalue.arrayUnion([songID])
+            let songData = [
+                "id" : song.id,
+                "title": song.title,
+                "artistName": song.artistName,
+                "image": song.artworkUrl?.absoluteString ?? ""
             ]
+            
             let monthlyStatData: [String: Any] = [
                 "date": Date(),
-                "songId": songID,
+                "songId": song.id,
                 "type": "playlist"
             ]
+            
             db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(originPlaylist.id)
-                .updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion([songID])])
+                .updateData(["songs": FirebaseManager.Fieldvalue.arrayUnion([songData])])
             db.collection("User").document(currentUserViewModel.user.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
+            
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
-            snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songIds: [songID])
-            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
-            currentUserViewModel.playlistViewModel.playlistArray[index].songIDs.append(songID)
-            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(song)
-        }else {
-            //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함
-            snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: originPlaylist.title)
+            snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songs: [song])
+            
+            guard let index = currentUserViewModel.playlistViewModel.playlists.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
+            currentUserViewModel.playlistViewModel.playlists[index].songs.append(song)
+
         }
     }
 }

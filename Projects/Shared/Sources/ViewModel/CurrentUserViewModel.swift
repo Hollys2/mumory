@@ -36,7 +36,7 @@ public class CurrentUserViewModel: ObservableObject {
 
         friendViewModel.FriendUpdateListener()
         friendViewModel.FriendRequestListener()
-        playlistViewModel.savePlaylist()
+        await playlistViewModel.savePlaylist()
     }
     
     private func NotificationListener(uId: String) {
@@ -57,4 +57,6 @@ public class CurrentUserViewModel: ObservableObject {
         existUnreadNotification = false
         notificationListener?.remove()
     }
+    
+   
 }

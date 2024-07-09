@@ -17,7 +17,7 @@ struct SaveToPlaylistView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
-    @State var playlistArray: [MusicPlaylist] = []
+    @State var playlistArray: [SongPlaylist] = []
     @State var isCreatePopupPresent: Bool = false
     var songIDs: [String]
     
@@ -109,7 +109,7 @@ struct SaveToPlaylistView: View {
 
     }
     
-    private func saveSongToPlaylist(to: MusicPlaylist)  {
+    private func saveSongToPlaylist(to: SongPlaylist)  {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
@@ -205,7 +205,7 @@ struct SaveToPlaylistView: View {
                     
                     withAnimation {
                         if !(id == "favorite") {
-                            self.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date))
+                            self.playlistArray.append(SongPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date))
                         }
                     }
                     

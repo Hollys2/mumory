@@ -29,7 +29,7 @@ struct LibraryView: View {
             StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, refreshAction: {
                 generateHapticFeedback(style: .light)
                 Task {
-                 currentUserViewModel.playlistViewModel.savePlaylist()
+                 await currentUserViewModel.playlistViewModel.savePlaylist()
                 }
             }, content: {
                 
@@ -75,26 +75,19 @@ struct LibraryView: View {
                             MyMusicView()
                                 .padding(.top, 26)
                                 .frame(width: getUIScreenBounds().width)
-
-                                
                         }else {
                             MumoryRecommendationView()
                                 .padding(.top, 26)
-                            
                         }
                         
                         Rectangle()
                             .foregroundStyle(.clear)
                             .frame(height: 87)
+                        
                     }
                     .frame(width: getUIScreenBounds().width)
                 }
                 .frame(width: getUIScreenBounds().width)
-                .onAppear {
-                    print("screent width: \(getUIScreenBounds().width), height: \(getUIScreenBounds().height)")
-                }
-        
-                
             })
             .frame(width: getUIScreenBounds().width)
             .scrollIndicators(.hidden)
@@ -151,16 +144,13 @@ struct LibraryView: View {
                     }
                 } else {
                     playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
-                    if !appCoordinator.isCreateMumorySheetShown {
-                        if playerViewModel.isShownMiniPlayerInLibrary {
-                            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
-                        } else {
-                            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
-                        }
+                    guard !appCoordinator.isCreateMumorySheetShown else {return}
+                    if playerViewModel.isShownMiniPlayerInLibrary {
+                        playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
+                    } else {
+                        playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
                     }
-                    
-                    
-                    currentUserViewModel.playlistViewModel.savePlaylist()
+                    await currentUserViewModel.playlistViewModel.savePlaylist()
                 }
             }
         })

@@ -16,7 +16,7 @@ struct PlaylistItem_Big: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
-    @Binding var playlist: MusicPlaylist
+    @Binding var playlist: SongPlaylist
     @Binding var isEditing: Bool
     @State var isDeletePupupPresent: Bool = false
     @State var itemSize: CGFloat = .zero
@@ -25,7 +25,7 @@ struct PlaylistItem_Big: View {
     var favoriteEditingSubTextColor = Color(red: 0.45, green: 0.45, blue: 0.45)
     var radius: CGFloat = 10
     
-    init(playlist: Binding<MusicPlaylist>, isEditing: Binding<Bool>) {
+    init(playlist: Binding<SongPlaylist>, isEditing: Binding<Bool>) {
         self._playlist = playlist
         self._isEditing = isEditing
     }
@@ -197,7 +197,7 @@ struct PlaylistItem_Big: View {
         ref.delete()
         
         withAnimation {
-            currentUserViewModel.playlistViewModel.playlistArray.removeAll(where: {$0.id == playlist.id})
+            currentUserViewModel.playlistViewModel.playlists.removeAll(where: {$0.id == playlist.id})
         }
     }
     

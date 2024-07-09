@@ -13,6 +13,12 @@ import Core
 import MapKit
 
 struct PlaylistView: View {
+    // MARK: - Object lifecycle
+    init(playlist: Binding<SongPlaylist>){
+        self._playlist = playlist
+    }
+    
+    // MARK: - Propoerties
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -21,16 +27,14 @@ struct PlaylistView: View {
     @State var isBottomSheetPresent: Bool = false
     @State var isEditing: Bool = false
     @State var isSongDeletePopupPresent: Bool = false
-    @State var selectedSongsForDelete: [Song] = []
+    @State var selectedSongsForDelete: [SongModel] = []
     @State var isPresentModifyPlaylistView: Bool = false
     @State var selectedTab: Tab = .library
     @State private var isLoading: Bool = false
     @State var searchIndex: Int = 0
-    @Binding var playlist: MusicPlaylist
+    @Binding var playlist: SongPlaylist
     let itemHeight: CGFloat = 70
-    init(playlist: Binding<MusicPlaylist>){
-        self._playlist = playlist
-    }
+  
     
     var body: some View {
         ZStack(alignment: .top){
@@ -118,7 +122,7 @@ struct PlaylistView: View {
                             
                             //평소 보이는 곡 개수와 편집, 전체 재생 버튼
                             HStack(alignment: .bottom,spacing: 8, content: {
-                                Text("\(playlist.songIDs.count)곡")
+                                Text("\(playlist.songs.count)곡")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                                     .foregroundStyle(ColorSet.subGray)
                                 Spacer()
@@ -133,7 +137,7 @@ struct PlaylistView: View {
                                 
                                 PlayAllButton()
                                     .onTapGesture {
-                                        playerViewModel.playAll(title: playlist.title, songs: playlist.songs)
+//                                        playerViewModel.playAll(title: playlist.title, songs: playlist.songs)
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -157,26 +161,26 @@ struct PlaylistView: View {
                             PlaylistMusicListItem(song: song, isEditing: $isEditing, selectedSongs: $selectedSongsForDelete)
                                 .animation(.default, value: isEditing)
                                 .onTapGesture {
-                                    if isEditing{
-                                        if selectedSongsForDelete.contains(song) {
-                                            selectedSongsForDelete.removeAll(where: {$0.id == song.id})
-                                        }else {
-                                            selectedSongsForDelete.append(song)
-                                        }
-                                    }else {
-                                        let nowTappedSong = song
-                                        playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: nowTappedSong)
-                                        searchIndex = playlist.songIDs.count / 20 + 1 //스크롤 이동 시 새로 로드되는 걸 막기 위해서
-                                        let startIndex = playlist.songs.count
-                                        let endIndex = playlist.songIDs.endIndex
-                                        let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
-                                        Task {
-                                            let songs = await fetchSongs(songIDs: requestSongIds)
-                                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: songs)
-                                            playerViewModel.setQueue(songs: playlist.songs, startSong: nowTappedSong)
-                                        }
-                                    }
+//                                    if isEditing{
+//                                        if selectedSongsForDelete.contains(song) {
+//                                            selectedSongsForDelete.removeAll(where: {$0.id == song.id})
+//                                        }else {
+//                                            selectedSongsForDelete.append(song)
+//                                        }
+//                                    }else {
+//                                        let nowTappedSong = song
+//                                        playerViewModel.playAll(title: playlist.title, songs: playlist.songs, startingItem: nowTappedSong)
+//                                        searchIndex = playlist.songIDs.count / 20 + 1 //스크롤 이동 시 새로 로드되는 걸 막기 위해서
+//                                        let startIndex = playlist.songs.count
+//                                        let endIndex = playlist.songIDs.endIndex
+//                                        let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+//                                        Task {
+//                                            let songs = await fetchSongs(songIDs: requestSongIds)
+//                                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+//                                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: songs)
+//                                            playerViewModel.setQueue(songs: playlist.songs, startSong: nowTappedSong)
+//                                        }
+//                                    }
                                 }
                         }
                         
@@ -207,29 +211,29 @@ struct PlaylistView: View {
             }
             .refreshAction {
                 generateHapticFeedback(style: .light)
-                Task {
-                    self.isLoading = true
-                    let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
-                    guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                    currentUserViewModel.playlistViewModel.playlistArray[index].songs = songs
-                    self.isLoading = false
-                }
+//                Task {
+//                    self.isLoading = true
+//                    let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
+//                    guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+//                    currentUserViewModel.playlistViewModel.playlistArray[index].songs = songs
+//                    self.isLoading = false
+//                }
             }
             .scrollIndicators(.hidden)
             .onChange(of: offset, perform: { value in
                 if offset.y > CGFloat(searchIndex) * itemHeight * 17 {
                     searchIndex += 1
-                    DispatchQueue.main.async {
-                        Task {
-                            let startIndex = searchIndex * 20
-                            guard startIndex < playlist.songIDs.endIndex else {return}
-                            var endIndex = startIndex + 20
-                            endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
-                            let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
-                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
-                        }
-                    }
+//                    DispatchQueue.main.async {
+//                        Task {
+//                            let startIndex = searchIndex * 20
+//                            guard startIndex < playlist.songIDs.endIndex else {return}
+//                            var endIndex = startIndex + 20
+//                            endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
+//                            let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+//                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+//                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
+//                        }
+//                    }
                 }
             })
             
@@ -301,23 +305,23 @@ struct PlaylistView: View {
         .onAppear(perform: {
             UIView.setAnimationsEnabled(true)
             playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
-            Task {
-                isLoading = true
-                let startIndex = 0
-                var endIndex = playlist.songIDs.endIndex < 20 ? playlist.songIDs.endIndex : 20
-                let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
-
-                let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
-                guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                currentUserViewModel.playlistViewModel.playlistArray[index].songs = await fetchSongs(songIDs: requestSongIds)
-                isLoading = false
-            }
-            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
+//            Task {
+//                isLoading = true
+//                let startIndex = 0
+//                var endIndex = playlist.songIDs.endIndex < 20 ? playlist.songIDs.endIndex : 20
+//                let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
+//
+//                let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
+//                guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+//                currentUserViewModel.playlistViewModel.playlistArray[index].songs = await fetchSongs(songIDs: requestSongIds)
+//                isLoading = false
+//            }
+//            AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
         })
         //플레이리스트의 바텀시트
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {
             BottomSheetWrapper(isPresent: $isBottomSheetPresent)  {
-                PlaylistBottomSheetView(playlist: playlist, songs: playlist.songs, editPlaylistNameAction: {
+                PlaylistBottomSheetView(playlist: playlist, editPlaylistNameAction: {
                     isBottomSheetPresent = false
                     DispatchQueue.main.async {
                         UIView.setAnimationsEnabled(true)
@@ -352,7 +356,7 @@ struct PlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        let songIdsForDelete = selectedSongsForDelete.map{$0.id.rawValue}
+        let songIdsForDelete = selectedSongsForDelete.map{$0.id}
 
         
         db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(playlist.id)
@@ -367,11 +371,11 @@ struct PlaylistView: View {
 public struct PlaylistImage: View {
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var imageWidth: CGFloat = 0
-    @Binding var songs: [Song]
+    @Binding var songs: [SongModel]
     
     let emptyGray = Color(red: 0.18, green: 0.18, blue: 0.18)
     
-    public init(songs: Binding<[Song]>) {
+    public init(songs: Binding<[SongModel]>) {
         self._songs = songs
     }
     
@@ -384,7 +388,7 @@ public struct PlaylistImage: View {
                         .frame(width: imageWidth, height: imageWidth)
                         .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[0].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+                    AsyncImage(url: songs[0].artworkUrl) { image in
                         image
                             .resizable()
                             .frame(width: imageWidth, height: imageWidth)
@@ -406,7 +410,7 @@ public struct PlaylistImage: View {
                         .frame(width: imageWidth, height: imageWidth)
                         .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[1].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+                    AsyncImage(url: songs[1].artworkUrl) { image in
                         image
                             .resizable()
                             .frame(width: imageWidth, height: imageWidth)
@@ -432,7 +436,7 @@ public struct PlaylistImage: View {
                         .frame(width: imageWidth, height: imageWidth)
                         .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[2].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+                    AsyncImage(url: songs[2].artworkUrl) { image in
                         image
                             .resizable()
                             .frame(width: imageWidth, height: imageWidth)
@@ -454,7 +458,7 @@ public struct PlaylistImage: View {
                         .frame(width: imageWidth, height: imageWidth)
                         .foregroundStyle(emptyGray)
                 }else{
-                    AsyncImage(url: songs[3].artwork?.url(width: 600, height: 600) ?? URL(string: "")) { image in
+                    AsyncImage(url: songs[3].artworkUrl) { image in
                         image
                             .resizable()
                             .frame(width: imageWidth, height: imageWidth)

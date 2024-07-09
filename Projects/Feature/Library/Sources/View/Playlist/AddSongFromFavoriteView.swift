@@ -14,13 +14,13 @@ struct AddSongFromFavoriteView: View {
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 
-    @State var favoritePlaylist: MusicPlaylist?
+    @State var favoritePlaylist: SongPlaylist?
     @State var favoriteSong = []
-    @Binding var originPlaylist: MusicPlaylist
+    @Binding var originPlaylist: SongPlaylist
     private let lineGray = Color(white: 0.31)
 
     
-    init(originPlaylist: Binding<MusicPlaylist>) {
+    init(originPlaylist: Binding<SongPlaylist>) {
         self._originPlaylist = originPlaylist
     }
 

@@ -102,7 +102,7 @@ struct MyPlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        currentUserViewModel.playlistViewModel.playlistArray.removeAll()
+        currentUserViewModel.playlistViewModel.playlists.removeAll()
         
         let query = db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist")
             .order(by: "date", descending: false)
@@ -132,14 +132,14 @@ struct MyPlaylistView: View {
             let id = document.reference.documentID
             
             withAnimation {
-                currentUserViewModel.playlistViewModel.playlistArray.append(MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date))
+                currentUserViewModel.playlistViewModel.playlistArray.append(SongPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date))
                 fetchSongWithPlaylistID(playlistId: id)
             }
         }
     }
 
     private func fetchSongWithPlaylistID(playlistId: String) {
-        guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlistId}) else {print("no index");return}
+        guard let index = currentUserViewModel.playlistViewModel.playlists.firstIndex(where: {$0.id == playlistId}) else {print("no index");return}
         let songIDs = currentUserViewModel.playlistViewModel.playlistArray[index].songIDs
         for id in songIDs {
             Task {

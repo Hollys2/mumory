@@ -12,7 +12,7 @@ import MusicKit
 
 class FriendDataViewModel: ObservableObject {
     @Published var friend: UserProfile = UserProfile()
-    @Published var playlistArray: [MusicPlaylist] = []
+    @Published var playlistArray: [SongPlaylist] = []
     @Published var isPlaylistLoading: Bool = false
     @Published var isMumoryLoading: Bool = false
     
@@ -23,11 +23,11 @@ class FriendDataViewModel: ObservableObject {
         self.isMumoryLoading = false
     }
     
-    public func savePlaylist(uId: String) async -> [MusicPlaylist]{
+    public func savePlaylist(uId: String) async -> [SongPlaylist]{
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
-        return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
-            var playlists: [MusicPlaylist] = []
+        return await withTaskGroup(of: SongPlaylist.self, body: { taskGroup -> [SongPlaylist] in
+            var playlists: [SongPlaylist] = []
             
             let query = db.collection("User").document(uId).collection("Playlist")
                 .order(by: "date", descending: false)
@@ -46,7 +46,7 @@ class FriendDataViewModel: ObservableObject {
                         let songIDs = data["songIds"] as? [String] ?? []
                         let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
                         let id = document.reference.documentID
-                        var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
+                        var playlist = SongPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
                         
                         let startIndex = 0
                         var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4

@@ -17,7 +17,7 @@ struct MyRecentMumoryListView: View {
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isLoading: Bool = true
-    @State var songs: [Song] = []
+    @State var songs: [SongModel] = []
     @State var songIds: [String] = []
     var body: some View {
         ZStack(alignment: .top){
@@ -58,9 +58,9 @@ struct MyRecentMumoryListView: View {
                     
                     PlayAllButton()
                         .onTapGesture {
-                            guard isLoading == false else {return}
-                            playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs)
-                            AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
+//                            guard isLoading == false else {return}
+//                            playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs)
+//                            AnalyticsManager.shared.setSelectContentLog(title: "FavoriteListViewPlayAllButton")
                         }
                 }
                 .padding(.horizontal, 20)
@@ -90,8 +90,8 @@ struct MyRecentMumoryListView: View {
                             ForEach(songs, id: \.id) { song in
                                 SongListBigItem(song: song, type: .recentMumory)
                                     .onTapGesture {
-                                        let tappedSong = song
-                                        playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs, startingItem: tappedSong)
+//                                        let tappedSong = song
+//                                        playerViewModel.playAll(title: "나의 최근 뮤모리 뮤직", songs: songs, startingItem: tappedSong)
                                     }
                             }
                         }
@@ -104,16 +104,17 @@ struct MyRecentMumoryListView: View {
                 .refreshable {
                     Task {
                         self.isLoading = true
+                        //뮤모리에 있는 SongModel 넣기
                         
-                        var testSongIds: [String] = []
-                        for mumory in mumoryDataViewModel.myMumorys {
-                            let songId = mumory.musicModel.songID.rawValue
-                            if !testSongIds.contains(songId) {
-                                testSongIds.append(mumory.musicModel.songID.rawValue)
-                            }
-                        }
-                        self.songIds = testSongIds
-                        self.songs = await fetchSongs(songIDs: testSongIds)
+//                        var testSongIds: [String] = []
+//                        for mumory in mumoryDataViewModel.myMumorys {
+//                            let songId = mumory.musicModel.songID.rawValue
+//                            if !testSongIds.contains(songId) {
+//                                testSongIds.append(mumory.musicModel.songID.rawValue)
+//                            }
+//                        }
+//                        self.songIds = testSongIds
+//                        self.songs = await fetchSongs(songIDs: testSongIds)
                         
                         self.isLoading = false
                     }
@@ -131,15 +132,15 @@ struct MyRecentMumoryListView: View {
             Task {
                 self.isLoading = true
                 
-                var testSongIds: [String] = []
-                for mumory in mumoryDataViewModel.myMumorys {
-                    let songId = mumory.musicModel.songID.rawValue
-                    if !testSongIds.contains(songId) {
-                        testSongIds.append(mumory.musicModel.songID.rawValue)
-                    }
-                }
-                self.songIds = testSongIds
-                self.songs = await fetchSongs(songIDs: testSongIds)
+//                var testSongIds: [String] = []
+//                for mumory in mumoryDataViewModel.myMumorys {
+//                    let songId = mumory.musicModel.songID.rawValue
+//                    if !testSongIds.contains(songId) {
+//                        testSongIds.append(mumory.musicModel.songID.rawValue)
+//                    }
+//                }
+//                self.songIds = testSongIds
+//                self.songs = await fetchSongs(songIDs: testSongIds)
                 
                 self.isLoading = false
             }
