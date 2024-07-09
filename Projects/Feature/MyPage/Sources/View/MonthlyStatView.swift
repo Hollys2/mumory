@@ -138,7 +138,7 @@ struct ContentView: View {
                         .onAppear {
                             Task {
                                 // 뮤모리 외 MonthlyStat 컬렉션 추후 사용하기
-                                let mumorySongIds: [String] = self.mumoryDataViewModel.monthlyMumorys.map { $0.musicModel.songID.rawValue }
+                                let mumorySongIds: [String] = self.mumoryDataViewModel.monthlyMumorys.map { $0.song.songId }
                                 self.favoriteGenre = await getModeGenre(songIds: mumorySongIds)
                             }
                         }
@@ -489,8 +489,8 @@ struct ContentView: View {
             
             mumoryDataViewModel.locationMumorys = [:]
             for mumory in mumoryDataViewModel.monthlyMumorys {
-                var country = mumory.locationModel.country
-                let administrativeArea = mumory.locationModel.administrativeArea
+                var country = mumory.location.country
+                let administrativeArea = mumory.location.administrativeArea
                 
                 if country != "대한민국" {
                     if country == "영국" {
@@ -648,8 +648,8 @@ struct ContentView: View {
             
             mumoryDataViewModel.locationMumorys = [:]
             for mumory in mumoryDataViewModel.monthlyMumorys {
-                var country = mumory.locationModel.country
-                let administrativeArea = mumory.locationModel.administrativeArea
+                var country = mumory.location.country
+                let administrativeArea = mumory.location.administrativeArea
                 
                 if country != "대한민국" {
                     if country == "영국" {

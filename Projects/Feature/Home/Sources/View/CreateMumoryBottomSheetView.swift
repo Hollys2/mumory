@@ -349,7 +349,7 @@ public struct CreateMumoryBottomSheetView: View {
 
                         dispatchGroup.notify(queue: .main) {
 
-                            let newMumoryAnnotation = Mumory(id: "", uId: currentUserViewModel.user.uId, date: self.calendarDate, musicModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0, myCommentCount: 0)
+                            let newMumoryAnnotation = Mumory(id: "", uId: currentUserViewModel.user.uId, date: self.calendarDate, songModel: choosedMusicModel, locationModel: choosedLocationModel, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, isPublic: self.isPublic, likes: [], commentCount: 0, myCommentCount: 0)
 
                             mumoryDataViewModel.createMumory(newMumoryAnnotation) { result in
                                 switch result {
@@ -365,8 +365,6 @@ public struct CreateMumoryBottomSheetView: View {
                                     self.contentText.removeAll()
                                     photoPickerViewModel.removeAllSelectedImages()
                                     self.imageURLs.removeAll()
-
-
 
                                 case .failure(let error):
                                     print("뮤모리 만들기 실패: \(error.localizedDescription)")
@@ -557,7 +555,7 @@ struct ContainerView: View {
                                 .foregroundColor(.clear)
                                 .frame(width: 36, height: 36)
                                 .background(
-                                    AsyncImage(url: mumoryAnnotation.musicModel.artworkUrl) { phase in
+                                    AsyncImage(url: mumoryAnnotation.song.artworkUrl) { phase in
                                         switch phase {
                                         case .success(let image):
                                             image
@@ -576,13 +574,13 @@ struct ContainerView: View {
                             
                             VStack(spacing: 5) {
                                 
-                                Text("\(mumoryAnnotation.musicModel.title)")
+                                Text("\(mumoryAnnotation.song.title)")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
                                     .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
                                 
-                                Text("\(mumoryAnnotation.musicModel.artist)")
+                                Text("\(mumoryAnnotation.song.artist)")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                     .lineLimit(1)
@@ -672,7 +670,7 @@ struct ContainerView: View {
                                 .resizable()
                                 .frame(width: 31, height: 31)
                         } else {
-                            Text("\(mumoryAnnotation.locationModel.locationTitle)")
+                            Text("\(mumoryAnnotation.location.locationTitle)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                 .foregroundColor(.white)
                                 .lineLimit(1)

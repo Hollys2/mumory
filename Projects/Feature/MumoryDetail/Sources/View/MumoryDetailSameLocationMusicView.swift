@@ -34,7 +34,7 @@ struct MumoryDetailSameLocationMusicView: View {
             
             HStack(spacing: 0) {
                 
-                AsyncImage(url: self.mumory.musicModel.artworkUrl) { phase in
+                AsyncImage(url: self.mumory.song.artworkUrl) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -51,13 +51,13 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 VStack(spacing: 0) {
                     
-                    Text("\(mumory.musicModel.title)")
+                    Text("\(mumory.song.title)")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                         .foregroundColor(.white)
                         .lineLimit(1)
                         .frame(width: 169, alignment: .leading)
                     
-                    Text("\(mumory.musicModel.artist)")
+                    Text("\(mumory.song.artist)")
                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                         .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                         .lineLimit(1)
@@ -67,12 +67,12 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 Spacer()
                 
-                if playerViewModel.favoriteSongIds.contains(mumory.musicModel.songID.rawValue) {
+                if playerViewModel.favoriteSongIds.contains(mumory.song.songId) {
                     SharedAsset.bookmarkOnMumoryDatail.swiftUIImage
                         .resizable()
                         .frame(width: 20, height: 20)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.musicModel.songID.rawValue)
+                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -81,7 +81,7 @@ struct MumoryDetailSameLocationMusicView: View {
                         .frame(width: 20, height: 20)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.musicModel.songID.rawValue)
+                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }
@@ -102,7 +102,7 @@ struct MumoryDetailSameLocationMusicView: View {
         .background(ColorSet.background)
         .onAppear(perform: {
             Task {
-                song = await fetchSong(songID: mumory.musicModel.songID.rawValue)
+                song = await fetchSong(songID: mumory.song.songId)
             }
         })
         .fullScreenCover(isPresented: $isPresentBottomSheet, content: {

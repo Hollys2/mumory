@@ -33,13 +33,13 @@ struct MumoryMapView: View {
 
             Map(coordinateRegion: .constant(MKCoordinateRegion(center: self.mumory.coordinate, span: MapConstant.defaultSpan)), annotationItems: [mumory]) { m in
 
-                MapAnnotation(coordinate: m.locationModel.coordinate) {
+                MapAnnotation(coordinate: m.location.coordinate) {
                     ZStack(alignment: .topLeading) {
                         SharedAsset.musicPin.swiftUIImage
                             .resizable()
                             .frame(width: 74, height: 81)
                         
-                        AsyncImage(url: m.musicModel.artworkUrl) { phase in
+                        AsyncImage(url: m.song.artworkUrl) { phase in
                             switch phase {
                             case .success(let image):
                                 image

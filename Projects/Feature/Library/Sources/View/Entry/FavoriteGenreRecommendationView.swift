@@ -188,6 +188,7 @@ private struct RecommendationScrollView: View {
                     print("no song")
                     return
                 }
+                
                 withAnimation {
                     self.songs.append(song)
                 }

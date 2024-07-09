@@ -53,8 +53,8 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        let mumoryIds: [String] = self.mumoryDataViewModel.myMumorys.map { $0.id }
-        let annotationsToRemove = self.mumoryDataViewModel.myMumorys.filter { !mumoryIds.contains($0.id) }
+        let mumoryIds: [String] = self.mumoryDataViewModel.myMumorys.map { $0.id ?? "" }
+        let annotationsToRemove = self.mumoryDataViewModel.myMumorys.filter { !mumoryIds.contains($0.id ?? "") }
 //        let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !mumoryIds.contains($0.id) }
         
         uiView.removeAnnotations(annotationsToRemove)
@@ -187,7 +187,7 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             annotationView.image = SharedAsset.musicPin.image
             annotationView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
-            if let mumoryAnnotation = annotation as? Mumory, let url = mumoryAnnotation.musicModel.artworkUrl {
+            if let mumoryAnnotation = annotation as? Mumory, let url = mumoryAnnotation.song.artworkUrl {
                 let artwork = AsyncImageView()
 
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
@@ -216,7 +216,7 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             clusterView.image = SharedAsset.musicPin.image
             clusterView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
-            if let mumoryAnnotation = topAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
+            if let mumoryAnnotation = topAnnotation, let url = mumoryAnnotation.song.artworkUrl {
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
                 artwork.layer.cornerRadius = 12

@@ -40,15 +40,15 @@ public struct TopBarView: View {
                 
                 Spacer()
                 
-                if let rightBarButtonNavigationPath = self.rightBarButtonNavigationPath {
-                    Button(action: {
-                        self.appCoordinator.rootPath.append(rightBarButtonNavigationPath)
-                    }, label: {
-                        SharedAsset.searchButtonMypage.swiftUIImage
-                            .resizable()
-                            .frame(width: 30, height: 30)
-                    })
-                }
+//                if let rightBarButtonNavigationPath = self.rightBarButtonNavigationPath {
+//                    Button(action: {
+//                        self.appCoordinator.rootPath.append(rightBarButtonNavigationPath)
+//                    }, label: {
+//                        SharedAsset.searchButtonMypage.swiftUIImage
+//                            .resizable()
+//                            .frame(width: 30, height: 30)
+//                    })
+//                }
             }
             
             Text("\(title)")

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1070391821667-amji34rll9iodc75j6adq918p50nkf6u.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAczhI8kIhZnWF0cw4sOm3VGx1A9CSOrac</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1070391821667</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.hollys.mumory</string>
+	<key>PROJECT_ID</key>
+	<string>music-app-62ca9</string>
+	<key>STORAGE_BUCKET</key>
+	<string>music-app-62ca9.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1070391821667:ios:46154049fec903827c7f56</string>
+	<key>DATABASE_URL</key>
+	<string>https://music-app-62ca9-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>

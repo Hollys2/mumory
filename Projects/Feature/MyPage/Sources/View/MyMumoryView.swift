@@ -277,8 +277,8 @@ public struct MyMumoryView: View {
             mumoryDataViewModel.locationMumorys = [:]
             
             for mumory in mumoryDataViewModel.monthlyMumorys {
-                var country = mumory.locationModel.country
-                let administrativeArea = mumory.locationModel.administrativeArea
+                var country = mumory.location.country
+                let administrativeArea = mumory.location.administrativeArea
                 
                 if country != "대한민국" {
                     if country == "영국" {
@@ -517,7 +517,7 @@ struct MumoryItemView: View {
 
                     Spacer().frame(width: 4)
 
-                    Text(self.mumory.locationModel.locationTitle)
+                    Text(self.mumory.location.locationTitle)
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                         .frame(width: 210, height: 10, alignment: .leading)
@@ -537,7 +537,7 @@ struct MumoryItemView: View {
                 
                 ZStack(alignment: .topLeading) {
                     
-                    AsyncImage(url: self.mumory.musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                    AsyncImage(url: self.mumory.song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                         switch phase {
                         case .success(let image):
                             image
@@ -586,10 +586,10 @@ struct MumoryItemView: View {
                         Spacer().frame(width: 5)
                         
                         Group {
-                            Text(self.mumory.musicModel.title)
+                            Text(self.mumory.song.title)
                                 .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
                             
-                            + Text("  \(self.mumory.musicModel.artist)")
+                            + Text("  \(self.mumory.song.artist)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                         }
                         .foregroundColor(.white)
@@ -766,7 +766,7 @@ struct RoundedSquareView: View {
               .foregroundColor(.clear)
               .frame(width: getUIScreenBounds().width * 0.435, height: getUIScreenBounds().width * 0.435)
               .background(
-                AsyncImage(url: self.mumorys[0].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                AsyncImage(url: self.mumorys[0].song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -833,7 +833,7 @@ struct RoundedSquareView: View {
                         .foregroundColor(.clear)
                         .frame(width: 36, height: 36)
                         .background(
-                            AsyncImage(url: self.mumorys[2].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                            AsyncImage(url: self.mumorys[2].song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                                 switch phase {
                                 case .success(let image):
                                     image
@@ -863,7 +863,7 @@ struct RoundedSquareView: View {
                         .foregroundColor(.clear)
                         .frame(width: 36, height: 36)
                         .background(
-                            AsyncImage(url: self.mumorys[1].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                            AsyncImage(url: self.mumorys[1].song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                                 switch phase {
                                 case .success(let image):
                                     image
@@ -894,7 +894,7 @@ struct RoundedSquareView: View {
                         .foregroundColor(.clear)
                         .frame(width: 36, height: 36)
                         .background(
-                            AsyncImage(url: self.mumorys[0].musicModel.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
+                            AsyncImage(url: self.mumorys[0].song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                                 switch phase {
                                 case .success(let image):
                                     image

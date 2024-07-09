@@ -124,7 +124,7 @@ extension FriendMapViewRepresentable.Coordinator: MKMapViewDelegate {
             annotationView.image = SharedAsset.musicPin.image
             annotationView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
-            if let mumoryAnnotation = annotation as? Mumory, let url = mumoryAnnotation.musicModel.artworkUrl {
+            if let mumoryAnnotation = annotation as? Mumory, let url = mumoryAnnotation.song.artworkUrl {
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
                 artwork.layer.cornerRadius = 12
@@ -139,7 +139,7 @@ extension FriendMapViewRepresentable.Coordinator: MKMapViewDelegate {
                     annotationView.addSubview(imageView)
                 }
                 
-                let text = "\(mumoryAnnotation.locationModel.locationTitle)"
+                let text = "\(mumoryAnnotation.location.locationTitle)"
                 // UILabel 생성
                 let label = UILabel()
                 label.text = text
@@ -204,7 +204,7 @@ extension FriendMapViewRepresentable.Coordinator: MKMapViewDelegate {
             clusterView.image = SharedAsset.musicPin.image
             clusterView.frame = CGRect(x: 0, y: 0, width: 74, height: 81)
             
-            if let mumoryAnnotation = topAnnotation, let url = mumoryAnnotation.musicModel.artworkUrl {
+            if let mumoryAnnotation = topAnnotation, let url = mumoryAnnotation.song.artworkUrl {
                 let artwork = AsyncImageView()
                 artwork.frame = CGRect(x: 6.74, y: 6.74, width: 60.65238, height: 60.65238)
                 artwork.layer.cornerRadius = 12

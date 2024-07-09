@@ -91,7 +91,7 @@ struct MumoryDetailScrollContentView: View {
                     .opacity(self.playButtonOpacity)
                     .onTapGesture {
                         Task {
-                            guard let song = await fetchSong(songId: self.mumory.musicModel.songID.rawValue) else {return}
+                            guard let song = await fetchSong(songId: self.mumory.song.songId) else {return}
                             playerViewModel.playNewSongShowingPlayingView(song: song)
                             playerViewModel.userWantsShown = true
                             playerViewModel.isShownMiniPlayer = true
@@ -161,7 +161,7 @@ struct MumoryDetailScrollContentView: View {
                                     
                                     Spacer().frame(width: 5)
                                     
-                                    Text("\(self.mumory.locationModel.locationTitle)")
+                                    Text("\(self.mumory.location.locationTitle)")
                                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                         .foregroundColor(Color(red: 0.72, green: 0.72, blue: 0.72))
                                         .frame(maxWidth: getUIScreenBounds().width * 0.27)
@@ -339,12 +339,12 @@ struct MumoryDetailScrollContentView: View {
         .onAppear {
             Task {
                 mumoryDataViewModel.isUpdating = true
-                self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id)
-                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
+                self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
+                self.user = await MumoriUser(uId: self.mumory.uId)
                 print("MumoryDetailScrollContentView onAppear")
                 for friend in self.currentUserViewModel.friendViewModel.friends {
                     Task {
-                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.musicModel.songID.rawValue, mumory: self.mumory)
+                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.song.songId, mumory: self.mumory)
                     }
                     Task {
                         await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
