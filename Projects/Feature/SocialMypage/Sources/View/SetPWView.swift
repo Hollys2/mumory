@@ -13,7 +13,7 @@ import Lottie
 
 struct SetPWView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
 
@@ -63,7 +63,7 @@ struct SetPWView: View {
                     .padding(.top, 25)
                 
                 //이메일 텍스트 필드(재사용)
-                AuthTextField(text: $email, prompt: "가입한 이메일을 입력해주세요")
+                RoundedTextField_18(text: $email, prompt: "가입한 이메일을 입력해주세요")
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 15)
@@ -92,7 +92,7 @@ struct SetPWView: View {
                 
                 
                 //로그인 버튼(재사용)
-                MumorySimpleButton(title: "비밀번호 찾기", isEnabled: true)
+                CommonButton(title: "비밀번호 찾기", isEnabled: true)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 30)
@@ -171,7 +171,3 @@ struct SetPWView: View {
         
     }
 }
-
-//#Preview {
-//    SetPWView()
-//}

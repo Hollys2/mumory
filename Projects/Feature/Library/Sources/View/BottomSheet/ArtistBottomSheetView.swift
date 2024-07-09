@@ -76,7 +76,3 @@ struct ArtistBottomSheetView: View {
         .background(ColorSet.background)
     }
 }
-
-//#Preview {
-//    ArtistBottomSheet()
-//}

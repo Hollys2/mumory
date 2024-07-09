@@ -53,7 +53,3 @@ struct TopBar: View {
 
     }
 }
-
-//#Preview {
-//    TopBar()
-//}

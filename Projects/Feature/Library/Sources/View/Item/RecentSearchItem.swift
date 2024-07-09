@@ -42,7 +42,3 @@ struct RecentSearchItem: View {
         
     }
 }
-
-//#Preview {
-//    RecentSearchItem()
-//}

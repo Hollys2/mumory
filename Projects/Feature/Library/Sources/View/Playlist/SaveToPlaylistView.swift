@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct SaveToPlaylistView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -113,7 +113,7 @@ struct SaveToPlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        let path = db.collection("User").document(currentUserData.uId).collection("Playlist")
+        let path = db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist")
         
         if self.songIDs.count > 1 {
             //리스트로 저장할 때
@@ -128,7 +128,7 @@ struct SaveToPlaylistView: View {
                         "songId": firstSongId,
                         "type": "playlist"
                     ]
-                    db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
+                    db.collection("User").document(currentUserViewModel.user.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
                     snackBarViewModel.setRecentSaveData(playlist: to, songIds: songIDs)
                     snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                 }
@@ -153,7 +153,7 @@ struct SaveToPlaylistView: View {
                             "songId": song,
                             "type": "playlist"
                         ]
-                        db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
+                        db.collection("User").document(currentUserViewModel.user.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
                         snackBarViewModel.setRecentSaveData(playlist: to, songIds: [song])
                         snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: to.title)
                     }
@@ -171,7 +171,7 @@ struct SaveToPlaylistView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        let path = db.collection("User").document(currentUserData.uId).collection("Playlist")
+        let path = db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist")
         
         path.getDocuments { snapshots, error in
             if error == nil {
@@ -217,7 +217,3 @@ struct SaveToPlaylistView: View {
         }
     }
 }
-
-//#Preview {
-//    SaveToPlaylistView()
-//}

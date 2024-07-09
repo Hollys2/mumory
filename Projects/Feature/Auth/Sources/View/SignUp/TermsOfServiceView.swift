@@ -8,16 +8,21 @@
 
 import SwiftUI
 import Shared
+enum TOSChecklist {
+    case tos
+    case personalInformation
+    case serviceNotification
+}
 
 struct TermsOfServiceView: View {
-    @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var manager: SignUpManageViewModel
-//    @State var isSignUpSuccess: Bool = false
-    @State var isEntireChecked: Bool = false
-    @State var isCheckedFirstItem: Bool = false
-    @State var isCheckedSecondItem: Bool = false
-    @State var isCheckedThirdItem: Bool = false
+    // MARK: - Propoerties
 
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var signUpViewModel: SignUpViewModel
+    @State var checkedList: [TOSChecklist] = []
+    let nextButtonHeight: CGFloat = 78
+
+    // MARK: - View
     var body: some View {
         ZStack{
             LibraryColorSet.background.ignoresSafeArea()
@@ -33,67 +38,140 @@ struct TermsOfServiceView: View {
                 
                 Spacer()
                 
-                HStack{
-                    Text("전체 동의")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
-                        .foregroundColor(.white)
-                    
-                    Spacer()
-                    
-                    //동의항목 선택 여부에 따라 전체동의 아이콘 변경 및 동작
-                    if isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem {
-                        SharedAsset.checkCircleFill.swiftUIImage
-                            .onTapGesture {
-                                isEntireChecked = 
-                                !(isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem)
-                                
-                                isCheckedFirstItem = isEntireChecked
-                                isCheckedSecondItem = isEntireChecked
-                                isCheckedThirdItem = isEntireChecked
-                            }
-                    }else {
-                        SharedAsset.checkCircle.swiftUIImage
-                            .onTapGesture {
-                                isEntireChecked = 
-                                !(isCheckedFirstItem&&isCheckedSecondItem&&isCheckedThirdItem)
-                                
-                                isCheckedFirstItem = isEntireChecked
-                                isCheckedSecondItem = isEntireChecked
-                                isCheckedThirdItem = isEntireChecked
-                            }
+                AllAgreeButton
+                    .onChange(of: checkedList) { newValue in
+                        signUpViewModel.isCheckedRequireItems = checkedList.contains(where: {$0 == .tos}) && checkedList.contains(where: {$0 == .personalInformation})
+                        signUpViewModel.isSubscribedToService = checkedList.contains(where: {$0 == .serviceNotification})
                     }
-                    
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.leading, 20)
-                .padding(.trailing, 20)
                 
-                SignUpConsentItem(type: .required, title: "이용약관 동의", isChecked: $isCheckedFirstItem)
+                SignUpConsentItem(type: .tos, checkedList: $checkedList)
                     .padding(.top, 35)
-                    .onChange(of: isCheckedFirstItem, perform: { value in
-                        //필수항목 2가지 모두 체크 되어있는지 확인
-                        manager.isCheckedRequiredItems = isCheckedFirstItem && isCheckedSecondItem
-                    })
                 
-                SignUpConsentItem(type: .required, title: "개인정보 수집 및 이용 동의", isChecked: $isCheckedSecondItem)
+                SignUpConsentItem(type: .personalInformation, checkedList: $checkedList)
                     .padding(.top, 30)
-                    .onChange(of: isCheckedSecondItem, perform: { value in
-                        //필수항목 2가지 모두 isCheckedRequiredItems 되어있는지 확인
-                        manager.isCheckedRequiredItems = isCheckedFirstItem && isCheckedSecondItem
-                    })
                 
-                SignUpConsentItem(type: .select, title: "서비스 소식 수신 동의", isChecked: $isCheckedThirdItem)
+                SignUpConsentItem(type: .serviceNotification, checkedList: $checkedList)
                     .padding(.top, 30)
-                    .padding(.bottom, 55)
-                    .onChange(of: isCheckedThirdItem, perform: { value in
-                        manager.isCheckedServiceNewsNotification = value
-                    })
+                    .padding(.bottom, 64 + nextButtonHeight)
+
             }
             
         }
     }
+    
+    var AllAgreeButton: some View {
+        HStack{
+            Text("전체 동의")
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            let allAgreed: Bool = haveAllItem()
+            Image(asset: allAgreed ? SharedAsset.checkCircleFill : SharedAsset.checkCircle)
+                .resizable()
+                .frame(width: 32, height: 32)
+                .onTapGesture {
+                    if allAgreed {
+                        checkedList.removeAll()
+                    } else {
+                        checkedList = [.tos, .personalInformation, .serviceNotification]
+                    }
+                }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    // MARK: - Methods
+    
+    private func haveAllItem() -> Bool {
+        guard checkedList.contains(where: {$0 == .tos}) else {return false}
+        guard checkedList.contains(where: {$0 == .personalInformation}) else {return false}
+        guard checkedList.contains(where: {$0 == .serviceNotification}) else {return false}
+        return true
+    }
+    
 }
 
-//#Preview {
-//    TermsOfServiceView()
-//}
+struct SignUpConsentItem: View {
+    @State var isPresentDetail: Bool = false
+    @Binding var checkedList: [TOSChecklist]
+    var type: TOSChecklist
+    var title: String
+    
+    init(type: TOSChecklist, checkedList: Binding<[TOSChecklist]>) {
+        self._checkedList = checkedList
+        self.type = type
+        switch type {
+        case .tos:
+            self.title = "이용약관 동의"
+        case .personalInformation:
+            self.title = "개인정보 수집 및 이용 동의"
+        case .serviceNotification:
+            self.title = "서비스 소식 수신 동의"
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 5){
+            
+            switch(type){
+            case .tos, .personalInformation:
+                Text("(필수)")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                    .foregroundColor(ColorSet.mainPurpleColor)
+            case .serviceNotification:
+                Text("(선택)")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                    .foregroundColor(Color(white: 0.6))
+            }
+            
+            Text(title)
+                .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                .foregroundColor(Color(white: 0.6))
+            
+            if type == .tos || type == .personalInformation {
+                Text("보기")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
+                    .foregroundColor(Color(white: 0.6))
+                    .padding(.leading, 5)
+                    .underline()
+                    .onTapGesture {
+                        isPresentDetail.toggle()
+                    }
+            }
+            
+            Spacer()
+            
+            CheckButton
+            
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 20)
+        .padding(.trailing, 24)
+        .fullScreenCover(isPresented: $isPresentDetail, content: {
+            switch type {
+            case .tos:
+                TOSDetailView()
+            case .personalInformation:
+                PersonalTOSDetailView()
+            case .serviceNotification:
+                EmptyView()
+            }
+        })
+    }
+    
+    var CheckButton: some View {
+        let contains = checkedList.contains(where: {$0 == type})
+        return Image(asset: contains ? SharedAsset.checkFill : SharedAsset.check)
+            .resizable()
+            .frame(width: 23, height: 23)
+            .onTapGesture {
+                if contains {
+                    checkedList.removeAll(where: {$0 == type})
+                } else {
+                    checkedList.append(type)
+                }
+            }
+    }
+        
+}

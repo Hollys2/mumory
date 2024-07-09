@@ -340,7 +340,7 @@ final public class MumoryDataViewModel: ObservableObject {
         return listener
     }
     
-    public func fetchRewardListener(user: MumoriUser) -> ListenerRegistration {
+    public func fetchRewardListener(user: UserProfile) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(user.uId).collection("Reward")
         
@@ -798,7 +798,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchSocialMumory(friends: [MumoriUser], me: MumoriUser, isRefreshing: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+    public func fetchSocialMumory(friends: [UserProfile], me: UserProfile, isRefreshing: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         DispatchQueue.main.async {
             self.isUpdating = true
         }
@@ -864,7 +864,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public static func fetchReward(user: MumoriUser) async -> [String] {
+    public static func fetchReward(user: UserProfile) async -> [String] {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(user.uId).collection("Reward")
         
@@ -887,7 +887,7 @@ final public class MumoryDataViewModel: ObservableObject {
         return rewards
     }
     
-    public static func fetchRewardCount(user: MumoriUser, reward: String) async -> Int {
+    public static func fetchRewardCount(user: UserProfile, reward: String) async -> Int {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(user.uId).collection("Reward")
             .whereField("type", isEqualTo: reward)
@@ -901,7 +901,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public static func fetchRewardCount(user: MumoriUser) async -> Int {
+    public static func fetchRewardCount(user: UserProfile) async -> Int {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(user.uId).collection("Reward")
         
@@ -940,7 +940,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func sameSongFriendMumory(friend: MumoriUser, songId: String, mumory: Mumory) async {
+    public func sameSongFriendMumory(friend: UserProfile, songId: String, mumory: Mumory) async {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
             .whereField("uId", isEqualTo: friend.uId)
@@ -972,7 +972,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func surroundingFriendMumory(friend: MumoriUser, mumory: Mumory) async {
+    public func surroundingFriendMumory(friend: UserProfile, mumory: Mumory) async {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
             .whereField("uId", isEqualTo: friend.uId)
@@ -1017,7 +1017,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchFavoriteDate(user: MumoriUser) async {
+    public func fetchFavoriteDate(user: UserProfile) async {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(user.uId).collection("MonthlyStat")
             .whereField("type", isEqualTo: "favorite")
@@ -1242,7 +1242,7 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func checkIsMyComment(mumoryId: String, reply: Comment, currentUser: MumoriUser) async -> Bool {
+    public func checkIsMyComment(mumoryId: String, reply: Comment, currentUser: UserProfile) async -> Bool {
         let db = FirebaseManager.shared.db
         let docReference = db.collection("Mumory").document(mumoryId).collection("Comment").document(reply.parentId)
         

@@ -13,7 +13,7 @@ import Core
 import MapKit
 
 struct PlaylistView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
@@ -39,7 +39,7 @@ struct PlaylistView: View {
             //이미지
             PlaylistImage(songs: $playlist.songs)
                 .frame(width: getUIScreenBounds().width)
-                .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
+                .offset(y: offset.y < -getSafeAreaInsets().top ? -(offset.y+getSafeAreaInsets().top ) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
                     ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
@@ -54,7 +54,7 @@ struct PlaylistView: View {
                         .resizable()
                         .frame(width: getUIScreenBounds().width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, getUIScreenBounds().width - getSafeAreaInsets().top - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(playlist.title)
@@ -172,8 +172,8 @@ struct PlaylistView: View {
                                         let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
                                         Task {
                                             let songs = await fetchSongs(songIDs: requestSongIds)
-                                            guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                                            currentUserData.playlistArray[index].songs.append(contentsOf: songs)
+                                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: songs)
                                             playerViewModel.setQueue(songs: playlist.songs, startSong: nowTappedSong)
                                         }
                                     }
@@ -209,9 +209,9 @@ struct PlaylistView: View {
                 generateHapticFeedback(style: .light)
                 Task {
                     self.isLoading = true
-                    let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
-                    guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                    currentUserData.playlistArray[index].songs = songs
+                    let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
+                    guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                    currentUserViewModel.playlistViewModel.playlistArray[index].songs = songs
                     self.isLoading = false
                 }
             }
@@ -226,8 +226,8 @@ struct PlaylistView: View {
                             var endIndex = startIndex + 20
                             endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
                             let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
-                            guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                            currentUserData.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
+                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
                         }
                     }
                 }
@@ -273,7 +273,7 @@ struct PlaylistView: View {
                 
             })
             .frame(height: 65)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
             
             
             SharedAsset.underGradientLarge.swiftUIImage
@@ -289,7 +289,7 @@ struct PlaylistView: View {
             }
             .shadow(color: Color.black.opacity(0.25), radius: 10, y: 6)
             .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, currentUserData.bottomInset-10)
+            .padding(.bottom, getSafeAreaInsets().bottom - 10)
             .opacity(isEditing ? 1 : 0)
 
 //            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
@@ -307,9 +307,9 @@ struct PlaylistView: View {
                 var endIndex = playlist.songIDs.endIndex < 20 ? playlist.songIDs.endIndex : 20
                 let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
 
-                let songs = await currentUserData.requestMorePlaylistSong(playlistID: playlist.id)
-                guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                currentUserData.playlistArray[index].songs = await fetchSongs(songIDs: requestSongIds)
+                let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
+                guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
+                currentUserViewModel.playlistViewModel.playlistArray[index].songs = await fetchSongs(songIDs: requestSongIds)
                 isLoading = false
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")
@@ -355,7 +355,7 @@ struct PlaylistView: View {
         let songIdsForDelete = selectedSongsForDelete.map{$0.id.rawValue}
 
         
-        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
+        db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(playlist.id)
             .updateData(["songIds": FirebaseManager.Fieldvalue.arrayRemove(songIdsForDelete)])
         
         playlist.songs.removeAll(where: {selectedSongsForDelete.contains($0)})
@@ -365,7 +365,7 @@ struct PlaylistView: View {
 
 
 public struct PlaylistImage: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var imageWidth: CGFloat = 0
     @Binding var songs: [Song]
     

@@ -21,7 +21,7 @@ struct MumoryDetailReactionBarView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     
@@ -49,7 +49,7 @@ struct MumoryDetailReactionBarView: View {
                     let originLikes = self.mumory.likes
 
                     Task {
-                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId) { likes in
+                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserViewModel.user.uId) { likes in
                             self.mumory.likes = likes
                             isButtonDisabled = false
                             
@@ -66,7 +66,7 @@ struct MumoryDetailReactionBarView: View {
                         }
                     }
                 }, label: {
-                    mumory.likes.contains(currentUserData.user.uId) ?
+                    mumory.likes.contains(currentUserViewModel.user.uId) ?
                     Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
@@ -114,7 +114,7 @@ struct MumoryDetailReactionBarView: View {
                         .resizable()
                         .frame(width: 42, height: 42)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.song.songId)
+                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -123,7 +123,7 @@ struct MumoryDetailReactionBarView: View {
                         .frame(width: 42, height: 42)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.song.songId)
+                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }

@@ -12,7 +12,7 @@ import MusicKit
 
 struct PlaylistMusicListItem: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var isEditing: Bool
     @Binding var selectedSongs: [Song]
@@ -87,7 +87,7 @@ struct PlaylistMusicListItem: View {
                                 .frame(width: 20, height: 20)
                                 .padding(.trailing, 23)
                                 .onTapGesture {
-                                    playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                                    playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                                 }
                         }else {
@@ -98,7 +98,7 @@ struct PlaylistMusicListItem: View {
                                 .padding(.trailing, 23)
                                 .onTapGesture {
                                     self.generateHapticFeedback(style: .medium)
-                                    playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                                    playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                                     snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                                 }
                         }

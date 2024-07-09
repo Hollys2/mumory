@@ -11,7 +11,7 @@ import Shared
 import Core
 
 struct AddSongFromFavoriteView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var favoritePlaylist: MusicPlaylist?
@@ -29,14 +29,14 @@ struct AddSongFromFavoriteView: View {
             ColorSet.background.ignoresSafeArea()
             ScrollView(.vertical) {
                 LazyVStack(spacing: 0, content: {
-                    if currentUserData.playlistArray[0].songs.isEmpty {
+                    if currentUserViewModel.playlistViewModel.playlistArray[0].songs.isEmpty {
                         InitialSettingView(title: "즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요", buttonTitle: "추천 음악 보러가기") {
-                            let myRandomGenre = currentUserData.favoriteGenres[Int.random(in: currentUserData.favoriteGenres.indices)]
+                            let myRandomGenre = currentUserViewModel.playlistViewModel.favoriteGenres[Int.random(in: currentUserViewModel.playlistViewModel.favoriteGenres.indices)]
                             appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: myRandomGenre))
                         }
                         .padding(.top, getUIScreenBounds().height * 0.25)
                     }else {
-                        ForEach(currentUserData.playlistArray[0].songs, id: \.self) { song in
+                        ForEach(currentUserViewModel.playlistViewModel.playlistArray[0].songs, id: \.self) { song in
                             AddMusicItem(song: song, originPlaylist: $originPlaylist)
                         }
                     }
@@ -52,13 +52,9 @@ struct AddSongFromFavoriteView: View {
         }
         .onAppear(perform: {
             Task{
-                await currentUserData.refreshPlaylist(playlistId: "favorite")
+                await currentUserViewModel.playlistViewModel.refreshPlaylist(playlistId: "favorite")
             }
         })
     }
     
 }
-
-//#Preview {
-//    AddSongFromFavoriteView()
-//}

@@ -10,8 +10,8 @@ import SwiftUI
 import Shared
 
 struct FriendHorizontalItem: View {
-    let user: MumoriUser
-    init(user: MumoriUser) {
+    let user: UserProfile
+    init(user: UserProfile) {
         self.user = user
     }
     

@@ -8,9 +8,19 @@
 
 import SwiftUI
 import Shared
-struct SelectTimeView: View {
-    @EnvironmentObject var manager: CustomizationManageViewModel
 
+enum TimeZone{
+    case none
+    case moring
+    case afternoon
+    case evening
+    case night
+    case auto
+}
+
+struct SelectTimeView: View {
+    @EnvironmentObject var signUpViewModel: SignUpViewModel
+    
     var body: some View {
         ZStack{
             ColorSet.background.ignoresSafeArea()
@@ -24,7 +34,6 @@ struct SelectTimeView: View {
                         .padding(.leading, 20)
                         .padding(.top, 50)
                     
-                    //서브멘트
                     VStack(spacing: 0, content: {
                         HStack(spacing: 0){
                             Text("시간대를 ")
@@ -65,43 +74,22 @@ struct SelectTimeView: View {
                         .padding(.leading, 20)
                         .padding(.top, 7)
 
-                    TimeItem(timeZone: .moring)
-                        .environmentObject(manager)
-                        .padding(.top, 42)
-                        .onTapGesture {
-                            manager.selectedTime = 1
-                        }
+                    TimeItem(timeZone: .moring, selectedTime: $signUpViewModel.notificationTime)
+
                     
-                    TimeItem(timeZone: .afternoon)
-                        .environmentObject(manager)
-                        .padding(.top, 14)
-                        .onTapGesture {
-                            manager.selectedTime = 2
-                        }
+                    TimeItem(timeZone: .afternoon, selectedTime: $signUpViewModel.notificationTime)
+                       
                     
-                    TimeItem(timeZone: .evening)
-                        .environmentObject(manager)
-                        .padding(.top, 14)
-                        .onTapGesture {
-                            manager.selectedTime = 3
-                        }
+                    TimeItem(timeZone: .evening, selectedTime: $signUpViewModel.notificationTime)
+                        
                     
-                    TimeItem(timeZone: .night)
-                        .environmentObject(manager)
-                        .padding(.top, 14)
-                        .onTapGesture {
-                            manager.selectedTime = 4
-                        }
+                    TimeItem(timeZone: .night, selectedTime: $signUpViewModel.notificationTime)
+                       
                     
-                    TimeItem(timeZone: .auto)
-                        .environmentObject(manager)
-                        .padding(.top, 14)
-                        .onTapGesture {
-                            manager.selectedTime = 5
-                        }
+                    TimeItem(timeZone: .auto, selectedTime: $signUpViewModel.notificationTime)
+                     
                     
-                    Rectangle()
-                        .fill(.clear)
+                    EmptyView()
                         .frame(height: 100)
                     
                 })
@@ -111,137 +99,68 @@ struct SelectTimeView: View {
     }
 }
 
-//#Preview {
-//    SelectTimeView()
-//}
-
 struct TimeItem: View {
-    enum time{
-        case moring
-        case afternoon
-        case evening
-        case night
-        case auto
-    }
-    @EnvironmentObject var manager: CustomizationManageViewModel
-    @State var timeZone: time = .moring
-    @State var selectedTime: Int = 0
-    var body: some View {
-        switch(timeZone){
-        case .moring:
-            VStack(spacing: 0, content: {
-                Text("아침")
-                    .font(manager.selectedTime == 1 ? SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundStyle(manager.selectedTime == 1 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 9)
-                
-            
-                Text("6:00AM ~ 11:00AM")
-                    .font(manager.selectedTime == 1 ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundStyle(manager.selectedTime == 1 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 4)
-                    .padding(.bottom, 9)
+    // MARK: - Object lifecycle
+    init(timeZone: TimeZone, selectedTime: Binding<TimeZone>) {
+        self.timeZone = timeZone
+        self._selectedTimeZone = selectedTime
 
-            })
-            .frame(maxWidth: .infinity)
-            .background(manager.selectedTime == 1 ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
-            .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
-                    .stroke(ColorSet.subGray, lineWidth: manager.selectedTime == 1 ? 0 : 1)
-            })
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            
+        switch timeZone {
+        case .moring:
+            self.title = "아침"
+            self.subTitle = "6:00AM ~ 11:00AM"
         case .afternoon:
-            VStack(spacing: 0, content: {
-                Text("점심")
-                    .font(manager.selectedTime == 2 ? SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundStyle(manager.selectedTime == 2 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 9)
-                
-                Text("11:00AM - 4:00PM")
-                    .font(manager.selectedTime == 2 ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundStyle(manager.selectedTime == 2 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 4)
-                    .padding(.bottom, 9)
-            })
-            .frame(maxWidth: .infinity)
-            .background(manager.selectedTime == 2 ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
-            .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
-                    .stroke(ColorSet.subGray, lineWidth: manager.selectedTime == 2 ? 0 : 1)
-            })
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            
+            self.title = "점심"
+            self.subTitle = "11:00AM - 4:00PM"
         case .evening:
-            VStack(spacing: 0, content: {
-                Text("저녁")
-                    .font(manager.selectedTime == 3 ? SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundStyle(manager.selectedTime == 3 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 9)
-            
-                Text("4:00PM - 9:00PM")
-                    .font(manager.selectedTime == 3 ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundStyle(manager.selectedTime == 3 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 4)
-                    .padding(.bottom, 9)
-            })
-            .frame(maxWidth: .infinity)
-            .background(manager.selectedTime == 3 ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
-            .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
-                    .stroke(ColorSet.subGray, lineWidth: manager.selectedTime == 3 ? 0 : 1)
-            })
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            
+            self.title = "저녁"
+            self.subTitle = "4:00PM - 9:00PM"
         case .night:
-            VStack(spacing: 0, content: {
-                Text("밤")
-                    .font(manager.selectedTime == 4 ? SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                    .foregroundStyle(manager.selectedTime == 4 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 9)
-                
-                Text("9:00PM - 2:00AM")
-                    .font(manager.selectedTime == 4 ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
-                    .foregroundStyle(manager.selectedTime == 4 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 4)
-                    .padding(.bottom, 9)
-            })
-            .frame(maxWidth: .infinity)
-            .background(manager.selectedTime == 4 ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
-            .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
-                    .stroke(ColorSet.subGray, lineWidth: manager.selectedTime == 4 ? 0 : 1)
-            })
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            
+            self.title = "밤"
+            self.subTitle = "9:00PM - 2:00AM"
         case .auto:
-            VStack(spacing: 0, content: {
-                Text("이용 시간대를 분석해 자동으로 설정")
-                    .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
-                    .foregroundStyle(manager.selectedTime == 5 ? Color.black : ColorSet.subGray)
-                    .padding(.top, 19)
-                    .padding(.bottom, 19)
-            })
-            .frame(maxWidth: .infinity)
-            .background(manager.selectedTime == 5 ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
-            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular))
-            .overlay(content: {
-                RoundedRectangle(cornerSize: CGSize(width: 50, height: 50), style: .circular)
-                    .stroke(ColorSet.subGray, lineWidth: manager.selectedTime == 5 ? 0 : 1)
-            })
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
+            self.title = "자동"
+            self.subTitle = "이용 시간대를 분석해 자동으로 설정"
+        case .none:
+            self.title = ""
+            self.subTitle = ""
+        }
+
+    }
+    
+    // MARK: - Propoerties
+    @Binding var selectedTimeZone: TimeZone
+    let timeZone: TimeZone
+    let title: String
+    let subTitle: String
+    
+    // MARK: - View
+    var body: some View {
+        VStack(spacing: 0, content: {
+            Text(title)
+                .font(timeZone == selectedTimeZone ? SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16) : SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                .foregroundStyle(timeZone == selectedTimeZone ? Color.black : ColorSet.subGray)
+                .padding(.top, 9)
             
-            
+        
+            Text(subTitle)
+                .font(timeZone == selectedTimeZone ? SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12) : SharedFontFamily.Pretendard.regular.swiftUIFont(size: 12))
+                .foregroundStyle(timeZone == selectedTimeZone ? Color.black : ColorSet.subGray)
+                .padding(.top, 4)
+                .padding(.bottom, 9)
+
+        })
+        .frame(maxWidth: .infinity)
+        .background(timeZone == selectedTimeZone ? ColorSet.mainPurpleColor : ColorSet.moreDeepGray)
+        .clipShape(RoundedRectangle(cornerRadius: 50, style: .circular))
+        .overlay(content: {
+            RoundedRectangle(cornerRadius: 50, style: .circular)
+                .stroke(ColorSet.subGray, lineWidth: timeZone == selectedTimeZone ? 0 : 1)
+        })
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .onTapGesture {
+            selectedTimeZone = self.timeZone
         }
     }
 }

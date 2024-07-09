@@ -49,7 +49,7 @@ struct EmailLoginForWithdrawView: View {
                     .padding(.top, 30)
                 
                 //이메일 텍스트 필드(재사용)
-                AuthTextField(text: $email, prompt: "이메일")
+                RoundedTextField_18(text: $email, prompt: "이메일")
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 55)
@@ -71,7 +71,7 @@ struct EmailLoginForWithdrawView: View {
                     .frame(height: isLoginError ? nil : 0)
                 
                 //로그인 버튼(재사용)
-                MumorySimpleButton(title: "로그인", isEnabled: true)
+                CommonButton(title: "로그인", isEnabled: true)
                     .padding(.leading, 20)
                     .padding(.trailing, 20)
                     .padding(.top, 20)
@@ -104,7 +104,7 @@ struct EmailLoginForWithdrawView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .navigationDestination(isPresented: $isWithdrawSuccess, destination: {
-            LoginView()
+            EmptyView()
         })
         .background(LibraryColorSet.background)
         .navigationBarBackButtonHidden()
@@ -114,7 +114,3 @@ struct EmailLoginForWithdrawView: View {
         .disabled(isLoading)
     }
 }
-
-//#Preview {
-//    EmailLoginForWithdrawView()
-//}

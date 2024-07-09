@@ -12,7 +12,7 @@ import MusicKit
 
 struct LibraryView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     @State var isTapMyMusic: Bool = true
@@ -29,7 +29,7 @@ struct LibraryView: View {
             StickyHeaderScrollView(changeDetectValue: $changeDetectValue, contentOffset: $contentOffset,viewWidth: $screenWidth,scrollDirection: $scrollDirection, topbarYoffset: $scrollYOffset, refreshAction: {
                 generateHapticFeedback(style: .light)
                 Task {
-                    currentUserData.playlistArray = await currentUserData.savePlaylist()
+                 currentUserViewModel.playlistViewModel.savePlaylist()
                 }
             }, content: {
                 
@@ -141,7 +141,6 @@ struct LibraryView: View {
                 .frame(height: appCoordinator.safeAreaInsetsTop)
         }
         .frame(width: getUIScreenBounds().width)
-        .ignoresSafeArea()
         .onAppear(perform: {
             Task {
                 let authorizationStatus = await MusicAuthorization.request()
@@ -161,7 +160,7 @@ struct LibraryView: View {
                     }
                     
                     
-                    currentUserData.playlistArray = await currentUserData.savePlaylist()
+                    currentUserViewModel.playlistViewModel.savePlaylist()
                 }
             }
         })

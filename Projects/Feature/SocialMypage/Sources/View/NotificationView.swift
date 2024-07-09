@@ -19,7 +19,7 @@ struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isEntireOn: Bool = false
     @State var checkedResult = 0
     var homeIconHidden: Bool = false
@@ -53,7 +53,7 @@ struct NotificationView: View {
                         .frame(width: 30, height: 30)
                         .opacity(homeIconHidden ? 0 : 1)
                         .onTapGesture {
-                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.isMyPageViewShown = false
                             appCoordinator.isSocialCommentSheetViewShown = false
                             appCoordinator.isMumoryDetailCommentSheetViewShown = false
                             appCoordinator.selectedTab = .home
@@ -116,7 +116,7 @@ struct NotificationView: View {
         }
         .onAppear {
             if settingViewModel.uid.isEmpty {
-                settingViewModel.uid = currentUserData.uId
+                settingViewModel.uid = currentUserViewModel.user.uId
                 Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
                     isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
                 }

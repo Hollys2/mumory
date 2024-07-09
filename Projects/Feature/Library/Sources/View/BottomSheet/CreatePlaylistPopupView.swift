@@ -16,7 +16,7 @@ struct CreatePlaylistPopupView: View {
         case old
     }
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isLoading: Bool = false
     @State var playlistTitle: String = ""
     @State var isTapPublic: Bool = true
@@ -130,7 +130,7 @@ struct CreatePlaylistPopupView: View {
                 Button(action: {
                     createPlaylist()
                 }, label: {
-                    MumoryLoadingButtonMedium(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
+                    CommonLoadingButtonSmall(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
                         .padding(.horizontal, 30)
                 })
                 .frame(height: 50)
@@ -170,13 +170,13 @@ struct CreatePlaylistPopupView: View {
             "date": Date()
         ]
         
-        db.collection("User").document(currentUserData.uId).collection("Playlist").addDocument(data: data) { error in
+        db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").addDocument(data: data) { error in
             if error == nil {
                 print("success")
                 isLoading = false
                 dismiss()
                 Task {
-                    currentUserData.playlistArray = await currentUserData.savePlaylist()
+                    currentUserViewModel.playlistViewModel.savePlaylist()
                 }
             }
         }
@@ -190,7 +190,3 @@ struct DarkMenuStyle: MenuStyle {
             .foregroundColor(.white) // 텍스트 색상을 흰색으로 설정합니다.
     }
 }
-
-//#Preview {
-//    CreatePlaylistPopupView()
-//}

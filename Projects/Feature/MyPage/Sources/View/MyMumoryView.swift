@@ -15,7 +15,7 @@ import Shared
 
 public struct MyMumoryView: View {
     
-    let user: MumoriUser
+    let user: UserProfile
     
     @State private var selectedDate: Date = Date()
     @State private var currentTabSelection: Int = 0
@@ -27,7 +27,7 @@ public struct MyMumoryView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @State private var offset: CGFloat = 0.0
     @State private var scrollViewOffsetY: CGFloat = 0.0
@@ -38,7 +38,7 @@ public struct MyMumoryView: View {
         GridItem(.flexible(), spacing: 0)
     ]
     
-    public init(user: MumoriUser) {
+    public init(user: UserProfile) {
         self.user = user
     }
     
@@ -63,7 +63,7 @@ public struct MyMumoryView: View {
 
                         Spacer()
 
-                        TopBarTitleView(title: self.user.uId == currentUserData.user.uId ? "나의 뮤모리" : "\(self.user.nickname)의 뮤모리")
+                        TopBarTitleView(title: self.user.uId == currentUserViewModel.user.uId ? "나의 뮤모리" : "\(self.user.nickname)의 뮤모리")
 
                         Spacer()
 
@@ -265,7 +265,7 @@ public struct MyMumoryView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            if self.user.uId == self.currentUserData.user.uId {
+            if self.user.uId == self.currentUserViewModel.user.uId {
                 self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
                 mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys
             } else {
@@ -379,7 +379,7 @@ public struct MyMumoryView: View {
             }
             .background(TransparentBackground())
         })
-        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.user.uId == currentUserData.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
+        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
                 mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {

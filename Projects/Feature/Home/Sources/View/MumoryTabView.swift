@@ -17,7 +17,7 @@ public struct MumoryTabView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 
     public init() {}
     
@@ -65,15 +65,15 @@ public struct MumoryTabView: View {
                     .frame(width: 43, height: 45)
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
-                        self.tabViewModel.tab = .library
+                        self.appCoordinator.selectedTab = .library
                     }
                 
-                Image(asset: self.tabViewModel.tab == .notification ? currentUserData.existUnreadNotification ? SharedAsset.notificationOnDotTabbar : SharedAsset.notificationOnTabbar : currentUserData.existUnreadNotification ? SharedAsset.notificationOffDotTabbar : SharedAsset.notificationOffTabbar)
+                Image(asset: self.tabViewModel.tab == .notification ? currentUserViewModel.existUnreadNotification ? SharedAsset.notificationOnDotTabbar : SharedAsset.notificationOnTabbar : currentUserViewModel.existUnreadNotification ? SharedAsset.notificationOffDotTabbar : SharedAsset.notificationOffTabbar)
                     .resizable()
                     .frame(width: 31, height: 44)
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
-                        self.tabViewModel.tab = .notification
+                        self.appCoordinator.selectedTab = .notification
                     }
 
             }

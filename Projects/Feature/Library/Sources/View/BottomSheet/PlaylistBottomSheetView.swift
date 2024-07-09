@@ -13,7 +13,7 @@ import MusicKit
 struct PlaylistBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentDeletePlaylistBottomSheet: Bool = false
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     
@@ -72,19 +72,15 @@ struct PlaylistBottomSheetView: View {
             TwoButtonPopupView(title: "해당 플레이리스트를 삭제하시겠습니까?", positiveButtonTitle: "플레이리스트 삭제") {
                 let db = FirebaseManager.shared.db
                 let playlistId = playlist.id
-                let path = db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id)
+                let path = db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(playlist.id)
                 path.delete()
                 appCoordinator.rootPath.removeLast()
-                currentUserData.playlistArray.removeAll(where: {$0.id == playlistId})
+                currentUserViewModel.playlistViewModel.playlistArray.removeAll(where: {$0.id == playlistId})
             }
             .background(TransparentBackground())
         })
     }
 }
-
-//#Preview {
-//    PlaylistBottomSheetView()
-//}
 
 private struct MiniPlaylistImage: View {
     var songs: [Song]

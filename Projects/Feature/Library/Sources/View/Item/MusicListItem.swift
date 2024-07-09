@@ -30,7 +30,7 @@ struct MusicListItem: View {
     @State var isPresentBottomSheet: Bool = false
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -72,7 +72,7 @@ struct MusicListItem: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
@@ -83,7 +83,7 @@ struct MusicListItem: View {
                     .padding(.trailing, 23)
                     .onTapGesture {
                         self.generateHapticFeedback(style: .medium)
-                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }
@@ -131,7 +131,7 @@ struct MusicListItemInUneditablePage: View {
     @State var isPresentBottomSheet: Bool = false
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         HStack(spacing: 0, content: {
@@ -173,7 +173,7 @@ struct MusicListItemInUneditablePage: View {
                     .frame(width: 20, height: 20)
                     .padding(.trailing, 23)
                     .onTapGesture {
-                        playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                     }
             }else {
@@ -184,7 +184,7 @@ struct MusicListItemInUneditablePage: View {
                     .padding(.trailing, 23)
                     .onTapGesture {
                         self.generateHapticFeedback(style: .medium)
-                        playerViewModel.addToFavorite(uid: currentUserData.uId, songId: self.song.id.rawValue)
+                        playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: self.song.id.rawValue)
                         snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                     }
             }

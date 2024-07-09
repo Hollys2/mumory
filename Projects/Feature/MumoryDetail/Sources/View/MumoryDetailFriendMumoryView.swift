@@ -104,7 +104,7 @@ struct MumoryDetailFriendMumoryScrollContentView: View {
     @State var date: String = ""
     
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         HStack(spacing: 0) {
@@ -120,7 +120,7 @@ struct MumoryDetailFriendMumoryView: View {
     
     let mumory: Mumory
 
-    @State private var user: MumoriUser = MumoriUser()
+    @State private var user: UserProfile = UserProfile()
     @State var date: String = ""
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -155,7 +155,7 @@ struct MumoryDetailFriendMumoryView: View {
                     .mask {Circle()}
                     .onTapGesture {
                         Task {
-                            let friend = await MumoriUser(uId: self.user.uId)
+                            let friend = await FetchManager.shared.fetchUser(uId: self.user.uId)
                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                         }
                     }
@@ -317,7 +317,7 @@ struct MumoryDetailFriendMumoryView: View {
         } // ZStack
         .onAppear {
             Task {
-                self.user = await MumoriUser(uId: mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: mumory.uId)
             }
         }
         .onTapGesture {

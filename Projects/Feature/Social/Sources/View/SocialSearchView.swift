@@ -80,7 +80,7 @@ public struct SocialSearchView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(isShown: Binding<Bool>) {
@@ -301,10 +301,10 @@ public struct SocialSearchView: View {
                                 .frame(height: 70)
                                 .onTapGesture {
                                     Task {
-                                        if friend.uId == currentUserData.user.uId {
+                                        if friend.uId == currentUserViewModel.user.uId {
                                             appCoordinator.rootPath.append(MumoryPage.myPage)
                                         } else {
-                                            let friend = await MumoriUser(uId: friend.uId)
+                                            let friend = await FetchManager.shared.fetchUser(uId: friend.uId)
                                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                                         }
                                     }
@@ -430,7 +430,7 @@ struct SearchedMumoryItemView: View {
     
     var mumory: Mumory
     
-    @State private var user: MumoriUser = MumoriUser()
+    @State private var user: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
@@ -592,7 +592,7 @@ struct SearchedMumoryItemView: View {
         }))
         .onAppear {
             Task {
-                self.user = await MumoriUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
             }
         }
     }

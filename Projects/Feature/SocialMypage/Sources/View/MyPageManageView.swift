@@ -121,7 +121,3 @@ struct MyPageManageView: View {
 //            })
     }
 }
-
-//#Preview {
-//    MyPageManageView()
-//}

@@ -150,17 +150,16 @@ public struct PhotoSelectBottomSheet: View {
                 }
             })
             .onEnded({ drag in
-                  if drag.location.y - drag.startLocation.y < 65  {
-                      withAnimation(.linear(duration: 0.2)) {
-                          yOffset = 0
-                      }
-                  }else {
-                      backgroundOpacity = 0
-                      dismiss()
-                  }
-                  
-              })
-        
+                if drag.location.y - drag.startLocation.y < 65  {
+                    withAnimation(.linear(duration: 0.2)) {
+                        yOffset = 0
+                    }
+                }else {
+                    backgroundOpacity = 0
+                    dismiss()
+                }
+                
+            })
     }
 }
 

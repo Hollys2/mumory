@@ -9,7 +9,6 @@
 
 import SwiftUI
 import FirebaseFunctions
-
 import Shared
 
 
@@ -24,7 +23,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     init(shouldUpdate: Binding<Bool>, contentOffsetY: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
         self._shouldUpdate = shouldUpdate
@@ -41,7 +40,6 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
-        //        scrollView.contentInsetAdjustmentBehavior = .never // Disable automatic adjustment
         scrollView.backgroundColor = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
         scrollView.bounces = true
         
@@ -56,7 +54,7 @@ struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
         
         let hostingController = UIHostingController(rootView: self.content()
             .environmentObject(self.mumoryDataViewModel)
-            .environmentObject(self.currentUserData))
+            .environmentObject(self.currentUserViewModel))
         
         hostingController.view.backgroundColor = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
         
@@ -108,7 +106,7 @@ extension SocialScrollViewRepresentable {
             generator.prepare()
             generator.impactOccurred()
             
-            self.parent.mumoryDataViewModel.fetchSocialMumory(friends: self.parent.currentUserData.friends, me: self.parent.currentUserData.user, isRefreshing: true) { _ in
+            self.parent.mumoryDataViewModel.fetchSocialMumory(friends: self.parent.currentUserViewModel.friendViewModel.friends, me: self.parent.currentUserViewModel.user, isRefreshing: true) { _ in
                 DispatchQueue.main.async {
                     sender.endRefreshing()
                 }
@@ -165,7 +163,7 @@ extension SocialScrollViewRepresentable {
                     isRefreshing = true
                     //                    parent.onRefresh()
                     //                onRefresh: {
-                    //                    self.mumoryDataViewModel.fetchEveryMumory(friends: currentUserData.friends, me: currentUserData.user) { _ in
+                    //                    self.mumoryDataViewModel.fetchEveryMumory(friends: currentUserViewModel.friendViewModel.friends, me: currentUserViewModel.user) { _ in
                     
                     //                    }
                     //                    self.generateHapticFeedback(style: .medium)
@@ -183,7 +181,7 @@ struct SocialScrollCotentView: View {
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         VStack(spacing: 0) {
@@ -206,11 +204,11 @@ struct SocialItemView: View {
     @State private var isTruncated: Bool = false
     @State private var isLocationTitleTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
-    @State var user: MumoriUser = MumoriUser()
+    @State var user: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     let mumory: Mumory
@@ -235,11 +233,11 @@ struct SocialItemView: View {
                 .frame(width: 38, height: 38)
                 .mask {Circle()}
                 .onTapGesture {
-                    if self.user.uId == self.currentUserData.user.uId {
+                    if self.user.uId == self.currentUserViewModel.user.uId {
                         appCoordinator.rootPath.append(MumoryPage.myPage)
                     } else {
                         Task {
-                            let friend = await MumoriUser(uId: self.user.uId)
+                            let friend = await FetchManager.shared.fetchUser(uId: self.user.uId)
                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                         }
                     }
@@ -553,7 +551,7 @@ struct SocialItemView: View {
                         _ = self.mumory.likes
                         
                         Task {
-                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserData.user.uId) { likes in
+                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserViewModel.user.uId) { likes in
                                 print("likeMumory successfully")
                                 self.mumory.likes = likes
                                 isButtonDisabled = false
@@ -571,7 +569,7 @@ struct SocialItemView: View {
                             }
                         }
                     }, label: {
-                        mumory.likes.contains(currentUserData.user.uId) ?
+                        mumory.likes.contains(currentUserViewModel.user.uId) ?
                         SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
@@ -635,7 +633,7 @@ struct SocialItemView: View {
         .frame(height: getUIScreenBounds().width + 71)
         .onAppear {
             Task {
-                self.user = await MumoriUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
             }
         }
         .fullScreenCover(isPresented: self.$isMapViewShown) {
@@ -655,7 +653,7 @@ public struct SocialView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     public init(isShown: Binding<Bool>) {
         UIScrollView.appearance().bounces = true
@@ -703,7 +701,7 @@ public struct SocialView: View {
                         self.appCoordinator.isAddFriendViewShown = true
                     }
                 }) {
-                    (currentUserData.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
+                    (currentUserViewModel.friendViewModel.recievedRequests.isEmpty ? SharedAsset.addFriendOffSocial.swiftUIImage : SharedAsset.addFriendOnSocial.swiftUIImage)
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
@@ -711,15 +709,15 @@ public struct SocialView: View {
                 Spacer().frame(width: 12)
                 
                 Button(action: {
-                    appCoordinator.setBottomAnimationPage(page: .myPage)
+                    appCoordinator.isMyPageViewShown = true
                 }) {
-                    AsyncImage(url: currentUserData.user.profileImageURL) { phase in
+                    AsyncImage(url: currentUserViewModel.user.profileImageURL) { phase in
                         switch phase {
                         case .success(let image):
                             image
                                 .resizable()
                         default:
-                            currentUserData.user.defaultProfileImage
+                            currentUserViewModel.user.defaultProfileImage
                                 .resizable()
                         }
                     }
@@ -740,7 +738,7 @@ public struct SocialView: View {
             playerViewModel.isShownMiniPlayerInLibrary = false
             
             if !self.appCoordinator.isFirstTabSelected {
-                self.mumoryDataViewModel.fetchSocialMumory(friends: currentUserData.friends, me: currentUserData.user, isRefreshing: false) { _ in
+                self.mumoryDataViewModel.fetchSocialMumory(friends: currentUserViewModel.friendViewModel.friends, me: currentUserViewModel.user, isRefreshing: false) { _ in
                     print("FUCK fetchSocialMumory")
                 }
                 self.appCoordinator.isFirstTabSelected = true

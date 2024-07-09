@@ -418,7 +418,7 @@ public struct RewardBottomSheetView: View {
     @Binding var isShown: Bool
     
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     
     public var body: some View {
         

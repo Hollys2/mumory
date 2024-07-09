@@ -45,7 +45,3 @@ struct SignUpErrorPopup: View {
         
     }
 }
-
-//#Preview {
-//    SignUpErrorPopup()
-//}

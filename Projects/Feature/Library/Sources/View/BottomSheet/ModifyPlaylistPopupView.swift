@@ -16,7 +16,7 @@ struct ModifyPlaylistPopupView: View {
         case old
     }
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @State var playlistTitle: String = ""
     @State var isPublic: Bool = true
@@ -135,7 +135,7 @@ struct ModifyPlaylistPopupView: View {
                 Button(action: {
                     modifyPlaylist()
                 }, label: {
-                    MumoryLoadingButtonMedium(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
+                    CommonLoadingButtonSmall(title: "만들기", isEnabled: !playlistTitle.isEmpty, isLoading: $isLoading)
                         .padding(.horizontal, 30)
                 })
                 .frame(height: 50)
@@ -174,7 +174,7 @@ struct ModifyPlaylistPopupView: View {
         let Firebase = FirebaseManager.shared
         let db = Firebase.db
         
-        db.collection("User").document(currentUserData.uId).collection("Playlist").document(playlist.id).updateData([
+        db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(playlist.id).updateData([
             "title": playlistTitle,
             "isPublic": isPublic
         ])
@@ -183,7 +183,3 @@ struct ModifyPlaylistPopupView: View {
         isLoading = false
     }
 }
-
-//#Preview {
-//    CreatePlaylistPopupView()
-//}

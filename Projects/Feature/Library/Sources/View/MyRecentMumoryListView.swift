@@ -13,7 +13,7 @@ import MusicKit
 struct MyRecentMumoryListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isLoading: Bool = true

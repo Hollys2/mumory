@@ -10,13 +10,13 @@ import SwiftUI
 import Shared
 
 struct FriendListItem: View {
-    let friend: MumoriUser
-    @EnvironmentObject var currentUserData: CurrentUserData
+    let friend: UserProfile
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentBlockConfirmPopup: Bool = false
     @State var isPresentDeleteConfirmPopup: Bool = false
     
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self.friend = friend
     }
     
@@ -70,13 +70,13 @@ struct FriendListItem: View {
         })
         .fullScreenCover(isPresented: $isPresentBlockConfirmPopup, content: {
             TwoButtonPopupView(title: "\(friend.nickname)님을 차단하시겠습니까?", subTitle: "차단 관리는 친구 추가 > 메뉴 >\n차단친구 관리 페이지에서 관리할 수 있습니다.", positiveButtonTitle: "차단") {
-                blockFriend(uId: currentUserData.uId, friendUId: friend.uId)
+                blockFriend(uId: currentUserViewModel.user.uId, friendUId: friend.uId)
             }
             .background(TransparentBackground())
         })
         .fullScreenCover(isPresented: $isPresentDeleteConfirmPopup, content: {
             TwoButtonPopupView(title: "\(friend.nickname)님과 친구를 끊겠습니까?", positiveButtonTitle: "친구 끊기") {
-                deleteFriend(uId: currentUserData.uId, friendUId: friend.uId)
+                deleteFriend(uId: currentUserViewModel.user.uId, friendUId: friend.uId)
             }
         })
     }

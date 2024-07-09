@@ -13,7 +13,7 @@ import MusicKit
 struct SearchMusicResultView: View {
     @EnvironmentObject private var recentSearchObject: RecentSearchObject
     @EnvironmentObject private var playerViewModel: PlayerViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @Binding private var term: String
     @Binding private var songs: MusicItemCollection<Song>

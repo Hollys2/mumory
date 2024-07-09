@@ -54,7 +54,3 @@ struct SearchArtistItem: View {
         .background(ColorSet.background)
     }
 }
-
-//#Preview {
-//    SearchArtistItem()
-//}

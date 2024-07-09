@@ -80,7 +80,7 @@ struct RewardContentView: View {
     
     @State var count: Int = 0
     
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         
@@ -117,7 +117,7 @@ struct RewardContentView: View {
         }
         .onAppear {
             Task {
-                self.count = await MumoryDataViewModel.fetchRewardCount(user: currentUserData.user)
+                self.count = await MumoryDataViewModel.fetchRewardCount(user: currentUserViewModel.user)
             }
         }
     }
@@ -234,7 +234,7 @@ struct RewardContent3: View {
     
     @State private var myRewards: [String] = []
     
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     public init(index: Int, index2: Int) {
         self.i = index
@@ -384,7 +384,7 @@ struct RewardContent3: View {
         }
         .onAppear {
             Task {
-                self.myRewards = await MumoryDataViewModel.fetchReward(user: currentUserData.user)
+                self.myRewards = await MumoryDataViewModel.fetchReward(user: currentUserViewModel.user)
             }
         }
     }

@@ -54,7 +54,7 @@ struct QuestionView: View {
                             .scaledToFit()
                             .frame(width: 30, height: 30)
                             .onTapGesture {
-                                appCoordinator.bottomAnimationViewStatus = .remove
+                                appCoordinator.isMyPageViewShown = false
                                 appCoordinator.isSocialCommentSheetViewShown = false
                                 appCoordinator.isMumoryDetailCommentSheetViewShown = false
                                 appCoordinator.selectedTab = .home
@@ -139,7 +139,7 @@ struct QuestionView: View {
                             Button(action: {
                                 uploadQuestion()
                             }, label: {
-                                MumoryLoadingButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0, isLoading: $isLoading)
+                                CommonLoadingButton(title: "보내기", isEnabled: title.count > 0 && content.count > 0, isLoading: $isLoading)
                                     .padding(.leading, 20)
                                     .padding(.trailing, 20)
                             })
@@ -196,7 +196,3 @@ struct QuestionView: View {
         
     }
 }
-
-//#Preview {
-//    QuestionView()
-//}

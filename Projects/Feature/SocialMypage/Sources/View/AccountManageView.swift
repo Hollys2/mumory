@@ -39,7 +39,7 @@ struct AccountManageView: View {
                         .scaledToFit()
                         .frame(width: 30, height: 30)
                         .onTapGesture {
-                            appCoordinator.bottomAnimationViewStatus = .remove
+                            appCoordinator.isMyPageViewShown = false
                             appCoordinator.isSocialCommentSheetViewShown = false
                             appCoordinator.isMumoryDetailCommentSheetViewShown = false
                             appCoordinator.selectedTab = .home
@@ -109,7 +109,3 @@ struct AccountManageView: View {
     }
     
 }
-
-//#Preview {
-//    AccountManageView()
-//}

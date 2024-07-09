@@ -15,14 +15,14 @@ import _MapKit_SwiftUI
 struct FriendPageView: View {
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isStranger: Bool = true
     @State var isPresentFriendBottomSheet: Bool = false
     @State var isPresentBlockConfirmPopup: Bool = false
     
-    @State var friend: MumoriUser
+    @State var friend: UserProfile
     
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self._friend = .init(initialValue: friend)
     }
     
@@ -31,7 +31,7 @@ struct FriendPageView: View {
             ColorSet.background
             
             //친구 여부에 따라 친구 페이지 혹은 모르는 사람 페이지 띄우기
-            if currentUserData.getFriendStatus(friend: friend) == .friend{
+            if currentUserViewModel.friendViewModel.getFriendStatus(friend: friend) == .friend{
                 KnownFriendPageView(friend: friend)
                     .environmentObject(friendDataViewModel)
             }else {
@@ -62,7 +62,7 @@ struct FriendPageView: View {
             }
             .padding(.horizontal, 20)
             .frame(height: 65)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
         }
         .ignoresSafeArea()
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
@@ -73,14 +73,14 @@ struct FriendPageView: View {
         })
         .onAppear(perform: {
             Task {
-                self.friend = await MumoriUser(uId: self.friend.uId)
+                self.friend = await FetchManager.shared.fetchUser(uId: self.friend.uId)
             }
         })
     }
 }
 
 struct KnownFriendPageView: View {
-    let friend: MumoriUser
+    let friend: UserProfile
     let lineGray = Color(white: 0.37)
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
@@ -90,7 +90,7 @@ struct KnownFriendPageView: View {
     @State private var isLoading: Bool = true
     @State private var playlists: [MusicPlaylist] = []
     @State private var isPlaylistLoading: Bool = true
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self.friend = friend
     }
     
@@ -169,7 +169,7 @@ struct KnownFriendPageView: View {
             }
             
             Task {
-                friendDataViewModel.friend = await MumoriUser(uId: friend.uId)
+                friendDataViewModel.friend = await FetchManager.shared.fetchUser(uId: friend.uId)
                 friendDataViewModel.playlistArray = await friendDataViewModel.savePlaylist(uId: friend.uId)
                 friendDataViewModel.isPlaylistLoading = false
             }
@@ -179,15 +179,15 @@ struct KnownFriendPageView: View {
 
 
 struct UnkownFriendPageView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentPopup: Bool = false
     @State var isRequested: Bool = false
     @State var myRequestList: [String] = []//이미 요청한 친구 uid배열
     @State var status: FriendRequestStatus = .normal
-    let friend: MumoriUser
+    let friend: UserProfile
     let secretId: String
     let secretNickname: String
-    init(friend: MumoriUser) {
+    init(friend: UserProfile) {
         self.friend = friend
         secretId = friend.id.isEmpty ? "*******" : String(friend.id.prefix(2)) + String(repeating: "*", count: friend.id.count-2)
         secretNickname = friend.nickname.isEmpty ? "*******" : String(friend.nickname.prefix(2)) + String(repeating: "*", count: friend.nickname.count-2)
@@ -251,7 +251,7 @@ struct UnkownFriendPageView: View {
                 
                 HStack(spacing: 4, content: {
                     
-                    switch currentUserData.getFriendStatus(friend: friend) {
+                    switch currentUserViewModel.friendViewModel.getFriendStatus(friend: friend) {
                     case .notFriend:
                         SharedAsset.addFriend.swiftUIImage
                             .resizable()
@@ -298,8 +298,8 @@ struct UnkownFriendPageView: View {
                 })
                 .frame(maxWidth: .infinity)
                 .frame(height: 45)
-                .background(currentUserData.getFriendStatus(friend: friend) == .block ?
-                            ColorSet.subGray : currentUserData.getFriendStatus(friend: friend) == .alreadySendRequest ?
+                .background(currentUserViewModel.friendViewModel.getFriendStatus(friend: friend) == .block ?
+                            ColorSet.subGray : currentUserViewModel.friendViewModel.getFriendStatus(friend: friend) == .alreadySendRequest ?
                             ColorSet.charSubGray : ColorSet.mainPurpleColor)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .circular))
                 .padding(.horizontal, 20)
@@ -358,7 +358,7 @@ struct UnkownFriendPageView: View {
     var PopupView: some View {
         VStack {
             
-            switch currentUserData.getFriendStatus(friend: friend) {
+            switch currentUserViewModel.friendViewModel.getFriendStatus(friend: friend) {
             case .notFriend:
                 TwoButtonPopupView(title: "친구 요청을 보내시겠습니까?", positiveButtonTitle: "친구요청") {
                     status = .friendProcessLoading
@@ -376,7 +376,7 @@ struct UnkownFriendPageView: View {
                 TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
                     status = .friendProcessLoading
                     Task {
-                        guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
+                        guard let result = await deleteFriendRequest(uId: currentUserViewModel.user.uId, friendUId: friend.uId) else {
                             status = .normal
                             return
                         }
@@ -401,7 +401,7 @@ struct UnkownFriendPageView: View {
                     status = .friendProcessLoading
                     Task{
                         let db = FirebaseManager.shared.db
-                        let query = db.collection("User").document(currentUserData.uId)
+                        let query = db.collection("User").document(currentUserViewModel.user.uId)
                         query.updateData(["blockFriends": FirebaseManager.Fieldvalue.arrayRemove([self.friend.uId])])
                         status = .normal
                     }
@@ -414,7 +414,7 @@ struct UnkownFriendPageView: View {
     //내가 보낸 친구 요청 리스트 받아오기
     private func getMyRequestList(){
         let db = FirebaseManager.shared.db
-        let query = db.collection("User").document(currentUserData.uId).collection("Friend")
+        let query = db.collection("User").document(currentUserViewModel.user.uId).collection("Friend")
             .whereField("type", isEqualTo: "request")
         query.getDocuments { snapshot, error in
             Task {
@@ -434,12 +434,12 @@ struct UnkownFriendPageView: View {
 
 
 struct FriendInfoView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
     @State var isPresentConfirmPopup: Bool = false
     
-    let friend: MumoriUser
-    init(friend: MumoriUser) {
+    let friend: UserProfile
+    init(friend: UserProfile) {
         self.friend = friend
     }
     @Environment(\.dismiss) var dismiss
@@ -540,7 +540,7 @@ struct FriendInfoView: View {
             //친구 끊기 확인 팝업
             .fullScreenCover(isPresented: $isPresentConfirmPopup, content: {
                 TwoButtonPopupView(title: "\(friend.nickname)님과 친구를 끊겠습니까?", positiveButtonTitle: "친구 끊기") {
-                    deleteFriend(uId: currentUserData.uId, friendUId: friend.uId)
+                    deleteFriend(uId: currentUserViewModel.user.uId, friendUId: friend.uId)
                 }
                 .background(TransparentBackground())
             })
@@ -626,11 +626,11 @@ struct FriendPlaylistView: View {
 
 struct FriendPageCommonBottomSheetView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
-    let friend: MumoriUser
+    let friend: UserProfile
     @Binding var isPresentBlockConfirmPopup: Bool
-    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>) {
+    init(friend: UserProfile, isPresentBlockConfirmPopup: Binding<Bool>) {
         self.friend = friend
         self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
     }
@@ -640,7 +640,7 @@ struct FriendPageCommonBottomSheetView: View {
             BottomSheetSubTitleItem(image: SharedAsset.blockFriendSocial.swiftUIImage, title: "\(friend.nickname)님 차단", subTitle: "회원님을 검색하거나 친구 추가를 할 수 없습니다.")
                 .onTapGesture {
                     dismiss()
-                    blockFriend(uId: currentUserData.uId, friendUId: friend.uId)
+                    blockFriend(uId: currentUserViewModel.user.uId, friendUId: friend.uId)
                 }
             BottomSheetItem(image: SharedAsset.report.swiftUIImage, title: "신고")
                 .onTapGesture {
@@ -655,10 +655,10 @@ struct FriendPageCommonBottomSheetView: View {
 
 struct FriendDeleteBlockBottomSheetView: View {
     @Environment(\.dismiss) var dismiss
-    let friend: MumoriUser
+    let friend: UserProfile
     @Binding var isPresentBlockConfirmPopup: Bool
     @Binding var isPresentDeleteConfirmPopup: Bool
-    init(friend: MumoriUser, isPresentBlockConfirmPopup: Binding<Bool>, isPresentDeleteConfirmPopup: Binding<Bool>) {
+    init(friend: UserProfile, isPresentBlockConfirmPopup: Binding<Bool>, isPresentDeleteConfirmPopup: Binding<Bool>) {
         self.friend = friend
         self._isPresentBlockConfirmPopup = isPresentBlockConfirmPopup
         self._isPresentDeleteConfirmPopup = isPresentDeleteConfirmPopup
@@ -720,11 +720,11 @@ public func deleteFriend(uId: String, friendUId: String){
 }
 
 struct DeleteFriendBottomSheetView: View {
-    @EnvironmentObject var currentUserDat: CurrentUserData
+    @EnvironmentObject var currentUserDat: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
     @Binding var isPresentPopup: Bool
-    let friend: MumoriUser
-    init(friend: MumoriUser, isPresentPopup: Binding<Bool>) {
+    let friend: UserProfile
+    init(friend: UserProfile, isPresentPopup: Binding<Bool>) {
         self.friend = friend
         self._isPresentPopup = isPresentPopup
     }

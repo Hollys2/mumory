@@ -26,7 +26,3 @@ struct PlayAllButton: View {
         
     }
 }
-
-//#Preview {
-//    PlayAllButton()
-//}

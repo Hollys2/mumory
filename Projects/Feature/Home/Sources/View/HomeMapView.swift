@@ -19,7 +19,7 @@ struct HomeMapView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var keyboardResponder: KeyboardResponder
     @EnvironmentObject var settingViewModel: SettingViewModel
@@ -29,7 +29,6 @@ struct HomeMapView: View {
         ZStack {
             
             HomeMapViewRepresentable(isAnnotationTapped: self.$isAnnotationTapped)
-            
             VStack(spacing: 0) {
                 
                 Rectangle()

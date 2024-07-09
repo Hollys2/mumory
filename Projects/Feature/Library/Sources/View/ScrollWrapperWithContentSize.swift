@@ -12,7 +12,7 @@ import SwiftUI
 import MusicKit
 
 struct ScrollWrapperWithContentSize<Content: View>: UIViewControllerRepresentable {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 
     @Binding var contentOffset: CGPoint
     @Binding var contentSize: CGSize

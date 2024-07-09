@@ -41,7 +41,3 @@ struct ScrollTestView: View {
         }
     }
 }
-
-//#Preview {
-//    ScrollTestView()
-//}

@@ -13,7 +13,7 @@ import Core
 import MapKit
 
 struct RecommendationListView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
@@ -37,7 +37,7 @@ struct RecommendationListView: View {
             //이미지
             PlaylistImage(songs: $songs)
                 .frame(width: getUIScreenBounds().width)
-                .offset(y: offset.y < -currentUserData.topInset ? -(offset.y+currentUserData.topInset) : 0)
+                .offset(y: offset.y < -getSafeAreaInsets().top ? -(offset.y+getSafeAreaInsets().top) : 0)
                 .overlay {
                     LinearGradient(colors: [ColorSet.background.opacity(0.8), Color.clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.3))
                     ColorSet.background.opacity(offset.y/(getUIScreenBounds().width-50.0))
@@ -51,7 +51,7 @@ struct RecommendationListView: View {
                         .resizable()
                         .frame(width: getUIScreenBounds().width, height: 45)
                         .ignoresSafeArea()
-                        .padding(.top, getUIScreenBounds().width - currentUserData.topInset - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
+                        .padding(.top, getUIScreenBounds().width - getSafeAreaInsets().top - 30) //사진 세로 길이 - 세이프공간 높이 - 그라데이션과 사진이 겹치는 부분
                     
                     VStack(spacing: 0, content: {
                         Text(title)
@@ -139,7 +139,7 @@ struct RecommendationListView: View {
                     }
             })
             .frame(height: 65)
-            .padding(.top, currentUserData.topInset)
+            .padding(.top, getSafeAreaInsets().top)
             
 //            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
 //                .ignoresSafeArea()
@@ -215,7 +215,7 @@ struct RecommendationListView: View {
 
 
 //private struct PlaylistImage: View {
-//    @EnvironmentObject var currentUserData: CurrentUserData
+//    @EnvironmentObject var currentUserViewModel: currentUserViewModel
 //    @State var imageWidth: CGFloat = 0
 //    @Binding var songs: [Song]
 //    

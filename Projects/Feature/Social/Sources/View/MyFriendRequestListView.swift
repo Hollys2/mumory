@@ -10,7 +10,7 @@ import SwiftUI
 import Shared
 
 struct MyFriendRequestListView: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @State var status: FriendRequestStatus = .normal
     let db = FirebaseManager.shared.db
@@ -41,7 +41,7 @@ struct MyFriendRequestListView: View {
                 
                 Divider05()
                 
-                if currentUserData.friendRequests.isEmpty {
+                if currentUserViewModel.friendViewModel.friendRequests.isEmpty {
                     VStack(spacing: 16) {
                         Text("보낸 요청 내역이 없어요")
                             .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
@@ -55,7 +55,7 @@ struct MyFriendRequestListView: View {
                 }else {
                     ScrollView {
                         LazyVStack(spacing: 0, content: {
-                            ForEach(currentUserData.friendRequests, id: \.self){ friend in
+                            ForEach(currentUserViewModel.friendViewModel.friendRequests, id: \.self){ friend in
                                 MyRequestFriendItem(friend: friend, status: $status)
                             }
                         })
@@ -78,13 +78,13 @@ struct MyFriendRequestListView: View {
 
 
 public struct MyRequestFriendItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentDeletePopup: Bool = false
     @Binding var status: FriendRequestStatus
-    let friend: MumoriUser
+    let friend: UserProfile
     let Firebase = FirebaseManager.shared
 
-    init(friend: MumoriUser, status: Binding<FriendRequestStatus>) {
+    init(friend: UserProfile, status: Binding<FriendRequestStatus>) {
         self.friend = friend
         self._status = status
     }
@@ -142,7 +142,7 @@ public struct MyRequestFriendItem: View {
             TwoButtonPopupView(title: "친구 요청을 취소하시겠습니까?", positiveButtonTitle: "요청취소") {
                 status = .friendProcessLoading
                 Task {
-                    guard let result = await deleteFriendRequest(uId: currentUserData.uId, friendUId: friend.uId) else {
+                    guard let result = await deleteFriendRequest(uId: currentUserViewModel.user.uId, friendUId: friend.uId) else {
                         return
                     }
                     status = .normal

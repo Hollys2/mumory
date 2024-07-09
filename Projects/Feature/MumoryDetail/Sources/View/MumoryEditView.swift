@@ -44,7 +44,7 @@ public struct MumoryEditView: View {
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var dateManager: DateManager
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
@@ -332,7 +332,7 @@ public struct MumoryEditView: View {
                     }
                     
                     group.notify(queue: .main) {
-                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserData.user.uId, date: self.calendarDate, songModel: mumoryDataViewModel.choosedMusicModel ?? self.mumory.song, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
+                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserViewModel.user.uId, date: self.calendarDate, songModel: mumoryDataViewModel.choosedMusicModel ?? self.mumory.song, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
                         
                         mumoryDataViewModel.updateMumory(newMumory) {
                             

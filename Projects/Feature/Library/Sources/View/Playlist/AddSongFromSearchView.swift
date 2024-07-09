@@ -13,7 +13,7 @@ import MusicKit
 struct AddSongFromSearchView: View {
     @Binding var originPlaylist: MusicPlaylist
     
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 
     @State var term: String = ""
     @State var timer: Timer?

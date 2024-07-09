@@ -12,7 +12,7 @@ import MusicKit
 import Core
 
 struct AddMusicItem: View {
-    @EnvironmentObject var currentUserData: CurrentUserData
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @Binding var originPlaylist: MusicPlaylist
     @State var isSnackBarPresent: Bool = false
@@ -85,21 +85,17 @@ struct AddMusicItem: View {
                 "songId": songID,
                 "type": "playlist"
             ]
-            db.collection("User").document(currentUserData.uId).collection("Playlist").document(originPlaylist.id)
+            db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(originPlaylist.id)
                 .updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion([songID])])
-            db.collection("User").document(currentUserData.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
+            db.collection("User").document(currentUserViewModel.user.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
             snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
             snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songIds: [songID])
-            guard let index = currentUserData.playlistArray.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
-            currentUserData.playlistArray[index].songIDs.append(songID)
-            currentUserData.playlistArray[index].songs.append(song)
+            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
+            currentUserViewModel.playlistViewModel.playlistArray[index].songIDs.append(songID)
+            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(song)
         }else {
             //선택한 곡이 기존 플리에 존재할 때 - 추가 안 함
             snackBarViewModel.setSnackBarAboutPlaylist(status: .failure, playlistTitle: originPlaylist.title)
         }
     }
 }
-
-//#Preview {
-//    AddSongItem()
-//}

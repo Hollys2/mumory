@@ -47,6 +47,7 @@ extension View {
         UIScreen.main.bounds
     }
     
+    
     public func getSafeAreaInsets() -> UIEdgeInsets {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {

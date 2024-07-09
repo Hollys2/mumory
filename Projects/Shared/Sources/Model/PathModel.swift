@@ -21,7 +21,7 @@ public enum MumoryPage: Hashable {
     case login
     case requestFriend
     case blockFriend
-    case friend(friend: MumoriUser)
+    case friend(friend: UserProfile)
     case friendPlaylist(playlistIndex: Int)
     case friendPlaylistManage
     case searchFriend
@@ -51,7 +51,7 @@ public enum MumoryPage: Hashable {
     case emailVerification
     case selectNotificationTime
     case friendList
-    case friendPage(friend: MumoriUser)
+    case friendPage(friend: UserProfile)
     case reward
     case monthlyStat
     case activityList
@@ -225,3 +225,13 @@ public enum InitPage {
     case home
 }
 
+
+public enum AuthPage {
+    case login
+    case emailLogin
+    case signUpCenter
+    case TOSForSocial
+    case introOfCustomization
+    case customizationCenter
+    case profileCard
+}
