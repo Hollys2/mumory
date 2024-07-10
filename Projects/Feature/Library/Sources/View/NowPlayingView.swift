@@ -57,7 +57,7 @@ public struct NowPlayingView: View {
                         PlayControlView(isPresentQueue: $isPresentQueue)
                     }
                     .id("main")
-                    .frame(height: getUIScreenBounds().height - appCoordinator.safeAreaInsetsBottom - (isSE ? 35 : 45))
+                    .frame(height: getUIScreenBounds().height - getSafeAreaInsets().bottom - (isSE ? 35 : 45))
                     
                     if !isPresentQueue {
                         PlayTogetherView(songs: $playTogetherSongs)
@@ -275,7 +275,7 @@ struct PlayingView: View {
             })
             .frame(height: 65)
             .padding(.horizontal, isSE ? 20 : horizontalSpacing)
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             
             AsyncImage(url: playerViewModel.currentSong?.artwork?.url(width: 1000, height: 1000)) { image in
                 image
@@ -529,7 +529,7 @@ struct QueueView: View {
                     .frame(height: 63)
             }
             .padding(.trailing, isSE ? 20 : horizontalSpacing)
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             
             
             HStack(content: {

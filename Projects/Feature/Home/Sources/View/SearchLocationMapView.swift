@@ -65,7 +65,7 @@ public struct SearchLocationMapView: View {
                             .frame(width: 30, height: 30)
                             .padding(20)
                     }
-                    .padding(.top, appCoordinator.safeAreaInsetsTop)
+                    .padding(.top, getSafeAreaInsets().top)
                 }
                 
                 VStack(spacing: 0) {
@@ -154,7 +154,7 @@ public struct SearchLocationMapView: View {
                     .gesture(dragGesture)
                     .transition(.move(edge: .bottom))
                     .zIndex(1)
-                    .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+                    .padding(.bottom, getSafeAreaInsets().bottom)
                     .offset(y: -scrollViewOffset)
                     .onAppear {
                         NotificationCenter.default.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { (notification) in

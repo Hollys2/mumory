@@ -58,7 +58,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isSplashViewShown: Bool = true
     @Published public var isHomeViewShown: Bool = false
     @Published public var isOnboardingShown: Bool = false
-    
+    @Published public var isLoading: Bool = false
     
 
     
@@ -88,8 +88,10 @@ public class AppCoordinator: ObservableObject {
     }
     
     public func setupInitialScreen() async {
-        isOnboardingShown = hasSignInHistory()
-        isHomeViewShown = hasCurrentUser()
+        DispatchQueue.main.async {
+            self.isOnboardingShown = self.hasSignInHistory()
+            self.isHomeViewShown = self.hasCurrentUser()
+        }
     }
 }
 

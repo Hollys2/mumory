@@ -105,7 +105,7 @@ struct SearchMusicView: View {
                 }
                 
             }
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             
 //            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
 //                .ignoresSafeArea()

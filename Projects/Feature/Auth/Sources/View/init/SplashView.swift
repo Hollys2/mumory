@@ -18,7 +18,7 @@ public struct SplashView: View {
     
     // MARK: - Propoerties
     @EnvironmentObject var appCoordinator: AppCoordinator
-
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     // MARK: - View
     public var body: some View {
@@ -33,10 +33,16 @@ public struct SplashView: View {
             Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
                 self.appCoordinator.isSplashViewShown = false
             }
+            
+            Task {
+                await appCoordinator.setupInitialScreen()
+                await currentUserViewModel.initializeUserData()
+            }
+            
         }
     }
     
     // MARK: - Methods
-
-
+    
+    
 }

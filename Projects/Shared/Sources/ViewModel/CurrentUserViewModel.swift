@@ -11,21 +11,35 @@ import Core
 import Firebase
 import Combine
 
+@MainActor
 public class CurrentUserViewModel: ObservableObject {
     // MARK: - Object lifecycle
-    public init(){}
+    public init(){
+        friendViewModel.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+        
+        playlistViewModel.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+    }
+    
 
     // MARK: - Propoerties
-    @Published public var user: UserProfile = UserProfile()
+    @Published public var user: UserProfile = .init()
     @Published public var friendViewModel: FriendViewModel = .init()
     @Published public var playlistViewModel: PlaylistViewModel = .init()
-
     @Published public var existUnreadNotification: Bool = false
     @Published public var reward: Reward = .none
     var notificationListener: ListenerRegistration?
+    var cancellables = Set<AnyCancellable>()
 
+    
     // MARK: - Methods
-    @MainActor
     public func initializeUserData() async {
         guard let currentUser = FirebaseManager.shared.auth.currentUser else {return}
         let uId = currentUser.uid

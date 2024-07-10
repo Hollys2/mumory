@@ -308,7 +308,7 @@ struct SearchLocationView: View {
             }
         } // VStack
         .navigationBarBackButtonHidden(true)
-        .padding(.top, appCoordinator.safeAreaInsetsTop + 12)
+        .padding(.top, getSafeAreaInsets().top + 12)
         .padding(.horizontal, 20)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .loadingLottie(localSearchViewModel.isSearching)

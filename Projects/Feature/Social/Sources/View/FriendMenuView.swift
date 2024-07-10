@@ -43,7 +43,7 @@ struct FriendMenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
-                Spacer().frame(height: self.appCoordinator.safeAreaInsetsTop + 19)
+                Spacer().frame(height: self.getSafeAreaInsets().top + 19)
                 
                 HStack(spacing: 0) {
                     Button(action: {

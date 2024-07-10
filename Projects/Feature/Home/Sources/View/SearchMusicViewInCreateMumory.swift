@@ -99,7 +99,7 @@ struct SearchMusicViewInCreateMumory: View {
                     SearchMusicEntryView(term: $term, songs: $songs, artists: $artists, isLoading: $isLoading, shazamViewType: .createMumory)
                 }
             }
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             .onChange(of: offset, perform: { value in
                 if offset.y > CGFloat(searchIndex) * itemHeight * 20 + (itemHeight * 10) {
                     searchIndex += 1
@@ -114,7 +114,7 @@ struct SearchMusicViewInCreateMumory: View {
             
             PreviewMiniPlayer()
                 .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+                .padding(.bottom, getSafeAreaInsets().bottom)
                 .offset(y: playerViewModel.isShownPreview ? 0 : 120)
                 .animation(.spring(), value: playerViewModel.isShownPreview)
         }

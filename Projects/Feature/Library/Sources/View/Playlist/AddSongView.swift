@@ -95,7 +95,7 @@ struct AddSongView: View {
                 })
                 .tabViewStyle(.page(indexDisplayMode: .never))
             })
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             
         }
         .ignoresSafeArea()

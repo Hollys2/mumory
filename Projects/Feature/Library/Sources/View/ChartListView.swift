@@ -51,7 +51,7 @@ struct ChartListView: View {
                 })
                 .padding(.horizontal, 20)
                 .frame(height: 65)
-                .padding(.top, appCoordinator.safeAreaInsetsTop)
+                .padding(.top, getSafeAreaInsets().top)
                 
                 HStack(alignment: .bottom){
                     Text("100곡")

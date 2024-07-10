@@ -209,7 +209,7 @@ struct SocialFriendView: View {
                 
                 
             })
-            .padding(.top, appCoordinator.isAddFriendViewShown ? appCoordinator.safeAreaInsetsTop : 0)       
+            .padding(.top, appCoordinator.isAddFriendViewShown ? getSafeAreaInsets().top : 0)       
             
             
             if status == .friendProcessLoading || status == .loading {

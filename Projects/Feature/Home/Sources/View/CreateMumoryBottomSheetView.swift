@@ -281,7 +281,7 @@ public struct CreateMumoryBottomSheetView: View {
                             .padding(.horizontal, 20)
                         } // VStack
                         .padding(.top, 20)
-                        .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
+                        .padding(.bottom, 71 + getSafeAreaInsets().bottom)
                         .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
                     } // ScrollView
                     .scrollIndicators(.hidden)
@@ -292,7 +292,7 @@ public struct CreateMumoryBottomSheetView: View {
             } // VStack
             .background(SharedAsset.backgroundColor.swiftUIColor)
             .cornerRadius(23, corners: [.topLeft, .topRight])
-            .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
+            .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
             .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
                 DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
                     .datePickerStyle(.graphical)
@@ -440,7 +440,7 @@ public struct CreateMumoryBottomSheetView: View {
             .frame(height: 55)
             .padding(.leading, 25)
             .padding(.trailing, 20)
-            .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+            .padding(.bottom, getSafeAreaInsets().bottom)
             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
             .overlay(
                 Rectangle()
@@ -449,7 +449,7 @@ public struct CreateMumoryBottomSheetView: View {
                     .frame(height: 0.7)
                 , alignment: .top
             )
-            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + getSafeAreaInsets().bottom : 0)
             .opacity(self.isDatePickerShown ? 0 : 1)
         }
         .offset(y: self.offsetY)

@@ -42,7 +42,7 @@ import Shared
 //        
 //        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
 //        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
-//        hostingController.view.frame = CGRect(x: 0, y: -appCoordinator.safeAreaInsetsTop, width: UIScreen.main.bounds.width, height: contentHeight)
+//        hostingController.view.frame = CGRect(x: 0, y: -getSafeAreaInsets().top, width: UIScreen.main.bounds.width, height: contentHeight)
 //        
 //        scrollView.backgroundColor = .clear
 //        hostingController.view.backgroundColor = .clear
@@ -88,7 +88,7 @@ import Shared
 //            self.parent.contentOffsetY = offsetY
 //        }
 //        
-//        let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
+//        let isNavigationBarColored = offsetY >= UIScreen.main.bounds.width - (parent.getSafeAreaInsets().top + 19 + 30 + 12) - 20
 //        
 //        DispatchQueue.main.async {
 //            if self.parent.appCoordinator.isNavigationBarColored != isNavigationBarColored {
@@ -136,7 +136,7 @@ public struct MumoryDetailView: View {
                 }
                 .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
                 .overlay {
-                    ColorSet.background.opacity((self.offsetY + appCoordinator.safeAreaInsetsTop) / (getUIScreenBounds().width - 150))
+                    ColorSet.background.opacity((self.offsetY + getSafeAreaInsets().top) / (getUIScreenBounds().width - 150))
                 }
                 
                     SharedAsset.albumFilterMumoryDetail.swiftUIImage
@@ -172,7 +172,7 @@ public struct MumoryDetailView: View {
                                 .onChange(of: geometry.frame(in: .global).minY) { newValue in
                                     self.offsetY = newValue
                                     
-                                    let isNavigationBarColored = -newValue >= UIScreen.main.bounds.width - (self.appCoordinator.safeAreaInsetsTop + 19 + 30 + 12) - 20
+                                    let isNavigationBarColored = -newValue >= UIScreen.main.bounds.width - (self.getSafeAreaInsets().top + 19 + 30 + 12) - 20
                                     
                                     DispatchQueue.main.async {
                                         if self.appCoordinator.isNavigationBarColored != isNavigationBarColored {
@@ -216,7 +216,7 @@ public struct MumoryDetailView: View {
                         .padding(.bottom, 12)
                 })
             }
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             .background(appCoordinator.isNavigationBarColored ? Color(red: 0.09, green: 0.09, blue: 0.09) : .clear)
             
             if appCoordinator.isReactionBarShown {
@@ -283,7 +283,7 @@ public struct MumoryDetailLoadingView: View {
                         SharedAsset.albumFilterMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
-                            .offset(y: -appCoordinator.safeAreaInsetsTop)
+                            .offset(y: -getSafeAreaInsets().top)
                         
                         Rectangle()
                             .fill(SharedAsset.backgroundColor.swiftUIColor)
@@ -409,7 +409,7 @@ public struct SocialLoadingView: View {
                     Rectangle()
                         .fill(SharedAsset.backgroundColor.swiftUIColor)
                         .frame(height: 68)
-                        .padding(.top, appCoordinator.safeAreaInsetsTop)
+                        .padding(.top, getSafeAreaInsets().top)
                     
                     Group {
                         HStack(spacing: 0) {

@@ -79,7 +79,7 @@ struct MumoryMapView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 64)
-            .padding(.top, self.appCoordinator.safeAreaInsetsTop)
+            .padding(.top, self.getSafeAreaInsets().top)
             .padding(.horizontal, 20)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 0.898))
         }
@@ -136,7 +136,7 @@ struct FriendMumoryMapView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 64)
-            .padding(.top, self.appCoordinator.safeAreaInsetsTop)
+            .padding(.top, self.getSafeAreaInsets().top)
             .padding(.horizontal, 20)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09, opacity: 0.898))
         }

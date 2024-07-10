@@ -237,7 +237,7 @@ struct ShazamView: View {
                 
                 
             })
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             
             //하단 편집 바
             VStack(spacing: 0) {

@@ -98,7 +98,7 @@ struct LibraryView: View {
             })
             .frame(width: getUIScreenBounds().width)
             .scrollIndicators(.hidden)
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
 
            
             
@@ -122,7 +122,7 @@ struct LibraryView: View {
                     }
             }
             .frame(height: topBarHeight, alignment: .center)
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             .background(ColorSet.background)
             .offset(x: 0, y: scrollYOffset)
             .onChange(of: scrollDirection) { newValue in
@@ -138,7 +138,7 @@ struct LibraryView: View {
             ColorSet.background
                 .ignoresSafeArea()
                 .frame(maxWidth: .infinity)
-                .frame(height: appCoordinator.safeAreaInsetsTop)
+                .frame(height: getSafeAreaInsets().top)
         }
         .frame(width: getUIScreenBounds().width)
         .onAppear(perform: {

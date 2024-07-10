@@ -25,7 +25,6 @@ struct MumoryApp: App {
             ZStack {
                 if appCoordinator.isHomeViewShown {
                     HomeView()
-                     
                 } else {
                     LoginView()
                 }
@@ -33,6 +32,15 @@ struct MumoryApp: App {
                 if appCoordinator.isSplashViewShown {
                     SplashView()
                 }
+                
+                if appCoordinator.isLoading {
+                    LoadingAnimationView(isLoading: $appCoordinator.isLoading)
+                }
+                
+//                if 뮤모리작성 {
+//                    
+//                }
+
             }
             .preferredColorScheme(.dark)
             .environmentObject(locationManager)
@@ -44,12 +52,7 @@ struct MumoryApp: App {
             .environmentObject(snackBarViewModel)
             .environmentObject(playerViewModel)
             .environmentObject(appCoordinator)
-            .onAppear {
-                Task {
-                    await appCoordinator.setupInitialScreen()
-                    await currentUserViewModel.initializeUserData()
-                }
-            }
+
             
             
         }

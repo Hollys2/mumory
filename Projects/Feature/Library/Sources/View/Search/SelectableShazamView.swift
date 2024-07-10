@@ -207,7 +207,7 @@ struct SelectableShazamView: View {
                 
                 
             })
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             
             //하단 편집 바
             HStack(alignment: .center){

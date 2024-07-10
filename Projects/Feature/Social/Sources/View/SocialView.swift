@@ -115,7 +115,7 @@ extension SocialScrollViewRepresentable {
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             let offsetY = scrollView.contentOffset.y
-            let topAnchor = self.parent.appCoordinator.safeAreaInsetsTop + 68
+            let topAnchor = self.parent.getSafeAreaInsets().top + 68
             
             let deltaY = offsetY - preOffsetY
             
@@ -134,7 +134,7 @@ extension SocialScrollViewRepresentable {
             //            let offsetY = scrollView.contentOffset.y
             let contentHeight = scrollView.contentSize.height
             let scrollViewHeight = scrollView.bounds.height
-            //            let topAnchor = self.parent.appCoordinator.safeAreaInsetsTop + 68
+            //            let topAnchor = self.parent.getSafeAreaInsets().top + 68
             //
             //            print("SSS offsetY: \(offsetY)")
             //            print("SSS preOffsetY: \(preOffsetY)")
@@ -728,7 +728,7 @@ public struct SocialView: View {
             } // HStack
             .frame(height: 68)
             .padding(.horizontal, 20)
-            .padding(.top, appCoordinator.safeAreaInsetsTop)
+            .padding(.top, getSafeAreaInsets().top)
             //            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .background(.brown)
             .offset(y: -self.offsetY)
@@ -777,6 +777,6 @@ public struct SocialView: View {
                 .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                 .fixedSize(horizontal: true, vertical: true)
         }
-        .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height - 89 - appCoordinator.safeAreaInsetsTop - 68)
+        .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height - 89 - getSafeAreaInsets().top - 68)
     }
 }

@@ -104,7 +104,7 @@ public struct MumoryEditView: View {
                         .foregroundColor(.white)
                 } // ZStack
                 .frame(height: 57)
-                .padding(.top, appCoordinator.safeAreaInsetsTop)
+                .padding(.top, getSafeAreaInsets().top)
                 .padding(.horizontal, 20)
                 
                 ScrollViewReader { proxy in
@@ -273,7 +273,7 @@ public struct MumoryEditView: View {
                             
                         } // VStack
                         .padding(.top, 20)
-                        .padding(.bottom, 50 + appCoordinator.safeAreaInsetsBottom)
+                        .padding(.bottom, 50 + getSafeAreaInsets().bottom)
                         .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
                     } // ScrollView
                     .scrollIndicators(.hidden)
@@ -282,7 +282,7 @@ public struct MumoryEditView: View {
                     })
                 }
             } // VStack
-            .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - appCoordinator.safeAreaInsetsTop) {
+            .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - getSafeAreaInsets().top) {
                 DatePicker("", selection: self.$calendarDate, displayedComponents: [.date])
                     .datePickerStyle(.graphical)
                     .labelsHidden()
@@ -398,7 +398,7 @@ public struct MumoryEditView: View {
             .frame(height: 55)
             .padding(.leading, 25)
             .padding(.trailing, 20)
-            .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+            .padding(.bottom, getSafeAreaInsets().bottom)
             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
             .overlay(
                 Rectangle()
@@ -407,7 +407,7 @@ public struct MumoryEditView: View {
                     .frame(height: 0.7)
                 , alignment: .top
             )
-            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + getSafeAreaInsets().bottom : 0)
         }
         .toolbar(.hidden)
         .ignoresSafeArea()

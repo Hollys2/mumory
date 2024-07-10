@@ -43,22 +43,23 @@ extension View {
     }
     
     public func getUIScreenBounds() -> CGRect {
-        //        return UIScreen.main.bounds
         UIScreen.main.bounds
     }
-    
+
     
     public func getSafeAreaInsets() -> UIEdgeInsets {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
-            
             let safeAreaInsets = window.safeAreaInsets
-            
             return safeAreaInsets
         }
-        
         return UIEdgeInsets.zero
     }
+    
+    public func isSmallDevice() -> Bool {
+        return UIScreen.main.bounds.height < 800
+    }
+    
     
     public func calendarPopup<Content: View>(show: Binding<Bool>, yOffset: CGFloat, @ViewBuilder content: @escaping () -> Content) -> some View {
         self

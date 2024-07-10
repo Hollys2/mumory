@@ -100,6 +100,7 @@ public struct HomeView: View {
                 }
             } // ZStack
             .navigationBarBackButtonHidden()
+            .ignoresSafeArea()
             .onAppear {
                 let userDefualt = UserDefaults.standard
                 if !userDefualt.bool(forKey: "firstLogined") {

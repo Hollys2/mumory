@@ -28,7 +28,7 @@ public struct CustomizationCenterView: View {
             ColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-               NavigationBar(leadingItem: BackButton)
+                NavigationBar(leadingItem: BackButton)
                 
                 ProcessIndicator
                 
@@ -41,12 +41,9 @@ public struct CustomizationCenterView: View {
                 
             })
             
-            
             BackgroundGradient
             
             NextButton
-            
-
         }
         .navigationBarBackButtonHidden()
         .onTapGesture {

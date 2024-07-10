@@ -52,7 +52,7 @@ struct HomeMapView: View {
             VStack(spacing: 0) {
                 
                 PlayingMusicBarView()
-                    .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
+                    .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
                 
                 AppleMusicPopUpView()
                     .padding(.top, 15)

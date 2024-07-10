@@ -564,7 +564,7 @@ public struct MumoryCommentSheetView: View {
                                 
                                 Spacer(minLength: 0)
                             }
-                            .frame(minHeight: keyboardResponder.keyboardHeight == .zero ? getUIScreenBounds().height - 72 - appCoordinator.safeAreaInsetsBottom - 72 - (UIScreen.main.bounds.height * 0.16) : getUIScreenBounds().height * 10)
+                            .frame(minHeight: keyboardResponder.keyboardHeight == .zero ? getUIScreenBounds().height - 72 - getSafeAreaInsets().bottom - 72 - (UIScreen.main.bounds.height * 0.16) : getUIScreenBounds().height * 10)
                         }
                     }
                     .refreshable {
@@ -746,8 +746,8 @@ public struct MumoryCommentSheetView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: self.isWritingReply ? 72 + 36 : 72)
                 .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-                .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
-                .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+                .padding(.bottom, getSafeAreaInsets().bottom)
+                .offset(y: self.keyboardResponder.isKeyboardHiddenButtonShown ? -self.keyboardResponder.keyboardHeight + getSafeAreaInsets().bottom : 0)
                 
             } // VStack
             .onAppear {

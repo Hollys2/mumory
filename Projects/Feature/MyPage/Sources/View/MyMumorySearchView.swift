@@ -31,7 +31,7 @@ public struct MyMumorySearchView: View {
     public var body: some View {
         VStack(spacing: 0) {
             
-            Spacer().frame(height: self.appCoordinator.safeAreaInsetsTop + 12)
+            Spacer().frame(height: self.getSafeAreaInsets().top + 12)
             
             HStack(spacing: 8) {
                 

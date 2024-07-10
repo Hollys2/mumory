@@ -79,7 +79,7 @@ struct MumoryDetailScrollContentView: View {
                         GeometryReader { geometry in
                             Color.clear
                                 .onChange(of: geometry.frame(in: .global).minY) { newValue in
-                                    let threshold = 150 + appCoordinator.safeAreaInsetsTop
+                                    let threshold = 150 + getSafeAreaInsets().top
                                     let distance = newValue - threshold
                                     let maxDistance: CGFloat = 90
                                     let opacity = min(max(distance / maxDistance, 0), 1)
