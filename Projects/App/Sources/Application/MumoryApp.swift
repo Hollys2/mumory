@@ -10,6 +10,7 @@ import Combine
 struct MumoryApp: App {
     // MARK: - Propoerties
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     @StateObject var appCoordinator: AppCoordinator = .init()
     @StateObject var locationManager: LocationManager = .init()
     @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
@@ -52,9 +53,6 @@ struct MumoryApp: App {
             .environmentObject(snackBarViewModel)
             .environmentObject(playerViewModel)
             .environmentObject(appCoordinator)
-
-            
-            
         }
     }
 }

@@ -24,13 +24,16 @@ struct RoundedTextField: View {
     // MARK: - View
     var body: some View {
         HStack(spacing: 0){
-            TextField("", text: $text, prompt: prompt)
-                .frame(maxWidth: .infinity)
-                .padding(.leading, 25)
-                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: fontSize))
-                .foregroundColor(.white)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
+            TextField("", text: $text, prompt: Text(placeHolder)
+                .foregroundColor(ColorSet.subGray)
+                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: fontSize)))
+            
+            .frame(maxWidth: .infinity)
+            .padding(.leading, 25)
+            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: fontSize))
+            .foregroundColor(.white)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
             
             
             SharedAsset.xWhiteCircle.swiftUIImage
@@ -49,11 +52,11 @@ struct RoundedTextField: View {
         .background(Color(red: 0.24, green: 0.24, blue: 0.24))
         .clipShape(RoundedRectangle(cornerRadius: 35, style: .circular))
         
-        var prompt: Text {
-            Text(placeHolder)
-                .foregroundColor(ColorSet.subGray)
-                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: fontSize))
-        }
+        //        var prompt: Text {
+        //            Text(placeHolder)
+        //                .foregroundColor(ColorSet.subGray)
+        //                .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: fontSize))
+        //        }
     }
 }
 
