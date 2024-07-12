@@ -557,6 +557,7 @@ public struct MumoryCommentSheetView: View {
                                     CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment) {
                                         withAnimation {
                                             proxy.scrollTo(index, anchor: .top)
+                                            
                                         }
                                     }
                                     .id(index)
@@ -577,20 +578,24 @@ public struct MumoryCommentSheetView: View {
                         self.replies = []
                         
                         Task {
-                            self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
-                            
-                            let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
-                            for i in commentAndReply {
-                                if i.parentId == "" {
-                                    self.comments.append(i)
-                                } else {
-                                    self.replies.append(i)
+                            let result = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
+                            switch result {
+                            case .success(let mumory):
+                                let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
+                                for i in commentAndReply {
+                                    if i.parentId == "" {
+                                        self.comments.append(i)
+                                    } else {
+                                        self.replies.append(i)
+                                    }
+                                    self.comments.sort { $0.date < $1.date }
+                                    self.replies.sort { $0.date < $1.date }
                                 }
-                                self.comments.sort { $0.date < $1.date }
-                                self.replies.sort { $0.date < $1.date }
+                                
+                                mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
+                            case .failure(let error):
+                                print("Failed to fetch Mumory: \(error.localizedDescription)")
                             }
-                            
-                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                         }
                     }
                     .onAppear {
@@ -758,7 +763,13 @@ public struct MumoryCommentSheetView: View {
                 self.replies = []
                 
                 Task {
-                    self.mumory = await mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
+                    let result = await self.mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
+                    switch result {
+                    case .success(let mumory):
+                        self.mumory = mumory
+                    case .failure(let error):
+                        print("fetchMumory failure: \(error)")
+                    }
                     
                     let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
                     for i in commentAndReply {

@@ -605,7 +605,7 @@ struct MumoryItemView: View {
                             
                             Spacer().frame(width: 2)
                             
-                            Text("\(self.mumory.likes.count)")
+                            Text("\((mumory.likes ?? []).count)")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
                                 .foregroundColor(.white)
                             

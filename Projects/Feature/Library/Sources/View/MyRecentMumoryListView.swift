@@ -107,9 +107,9 @@ struct MyRecentMumoryListView: View {
                         
                         var testSongIds: [String] = []
                         for mumory in mumoryDataViewModel.myMumorys {
-                            let songId = mumory.song.songId
+                            let songId = mumory.song.id
                             if !testSongIds.contains(songId) {
-                                testSongIds.append(mumory.song.songId)
+                                testSongIds.append(mumory.song.id)
                             }
                         }
                         self.songIds = testSongIds
@@ -133,9 +133,9 @@ struct MyRecentMumoryListView: View {
                 
                 var testSongIds: [String] = []
                 for mumory in mumoryDataViewModel.myMumorys {
-                    let songId = mumory.song.songId
+                    let songId = mumory.song.id
                     if !testSongIds.contains(songId) {
-                        testSongIds.append(mumory.song.songId)
+                        testSongIds.append(mumory.song.id)
                     }
                 }
                 self.songIds = testSongIds

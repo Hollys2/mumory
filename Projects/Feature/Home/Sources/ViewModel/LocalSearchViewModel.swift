@@ -44,7 +44,6 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
             return []
         }
     }()
-    @Published var popularSearches: [String] = []
     @Published var results: [MKLocalSearchCompletion] = [MKLocalSearchCompletion]()
     @Published var queryFragment: String = "" {
         didSet {
@@ -54,9 +53,7 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
     @Published var isSearching: Bool = false
     
     private let searchCompleter = MKLocalSearchCompleter()
-    
-    var cancellable: AnyCancellable?
-    private var cancellables: Set = [""]
+    private var cancellable: AnyCancellable?
     
     public override init() {
         super.init()
@@ -87,7 +84,6 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
         self.isSearching = false
     }
 
-    
     func getRegion(localSearchCompletion: MKLocalSearchCompletion, completion: @escaping (CLLocationCoordinate2D) -> Void) {
         let request = MKLocalSearch.Request(completion: localSearchCompletion)
         Task {

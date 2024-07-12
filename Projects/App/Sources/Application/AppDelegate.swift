@@ -26,7 +26,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         var window: UIWindow?
         if #available(iOS 13.0, *) {
-            window?.overrideUserInterfaceStyle = .dark
+            window?.overrideUserInterfaceStyle = .light
         }
         
         FirebaseApp.configure()

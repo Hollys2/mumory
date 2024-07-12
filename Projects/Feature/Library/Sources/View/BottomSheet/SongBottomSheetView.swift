@@ -133,7 +133,7 @@ struct SongBottomSheetView: View {
                         .onTapGesture {
                             dismiss()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                let musicModel = SongModel(songId: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                                let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
                                 playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
@@ -335,7 +335,7 @@ struct OptionalSongBottomSheetView: View {
                             appCoordinator.rootPath = NavigationPath()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 guard let unwrappedSong = self.song else {return}
-                                let musicModel = SongModel(songId: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
+                                let musicModel = SongModel(id: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
@@ -504,7 +504,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                             playerViewModel.isPresentNowPlayingView = false
                             playerViewModel.setLibraryPlayerVisibility(isShown: false)
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                let musicModel = SongModel(songId: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                                let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
@@ -695,7 +695,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                             
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 guard let unwrappedSong = self.song else {return}
-                                let musicModel = SongModel(songId: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
+                                let musicModel = SongModel(id: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
@@ -877,7 +877,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                             appCoordinator.isMyPageViewShown = false
                             appCoordinator.rootPath = NavigationPath()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                let musicModel = SongModel(songId: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                                let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 mumoryDataViewModel.choosedMusicModel = musicModel
                                 playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {

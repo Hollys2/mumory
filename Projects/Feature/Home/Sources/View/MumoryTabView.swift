@@ -55,9 +55,8 @@ public struct MumoryTabView: View {
                     .frame(width: geometry.size.width / 5)
                     .onTapGesture {
                         playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
-                        withAnimation(Animation.easeInOut(duration: 0.1)) {
-                            self.appCoordinator.sheet = .createMumory
-                        }
+                        
+                        self.appCoordinator.sheet = .createMumory
                     }
                 
                 Image(asset: self.tabViewModel.tab == .library ? SharedAsset.libraryOnTabbar : SharedAsset.libraryOffTabbar)

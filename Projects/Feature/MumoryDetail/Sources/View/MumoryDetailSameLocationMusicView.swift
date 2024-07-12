@@ -67,7 +67,7 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 Spacer()
                 
-                if playerViewModel.favoriteSongIds.contains(mumory.song.songId) {
+                if playerViewModel.favoriteSongIds.contains(mumory.song.id) {
                     SharedAsset.bookmarkOnMumoryDatail.swiftUIImage
                         .resizable()
                         .frame(width: 20, height: 20)
@@ -102,7 +102,7 @@ struct MumoryDetailSameLocationMusicView: View {
         .background(ColorSet.background)
         .onAppear(perform: {
             Task {
-                song = await fetchSong(songID: mumory.song.songId)
+                song = await fetchSong(songID: mumory.song.id)
             }
         })
         .fullScreenCover(isPresented: $isPresentBottomSheet, content: {

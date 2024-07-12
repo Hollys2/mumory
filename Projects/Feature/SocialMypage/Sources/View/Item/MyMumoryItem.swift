@@ -77,7 +77,7 @@ struct MyMumoryItem: View {
         })
         .onAppear {
             Task {
-                self.song = await fetchSong(songID: mumory.song.songId)
+                self.song = await fetchSong(songID: mumory.song.id)
             }
         }
     }

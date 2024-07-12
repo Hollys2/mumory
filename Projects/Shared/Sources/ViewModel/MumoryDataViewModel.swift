@@ -14,7 +14,7 @@ import FirebaseFirestore
 import Firebase
 
 
-final public class MumoryDataViewModel: ObservableObject {
+final public class MumoryDataViewModel: FirebaseManager, ObservableObject {
     
     @Published public var choosedMusicModel: SongModel?
     @Published public var choosedLocationModel: LocationModel?
@@ -59,29 +59,11 @@ final public class MumoryDataViewModel: ObservableObject {
     private var initialSnapshot: Bool = true
     private var initialMumorySnapshot: Bool = true
     
-    public init() {}
+//    let db = FirebaseManager.shared.db
     
-    func fetchMusic(songId: String) async throws -> SongModel {
-        let musicItemID = MusicItemID(rawValue: songId)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        let response = try await request.response()
-        guard let song = response.items.first else {
-            throw NSError(domain: "GoogleMapSample", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
-        }
-        
-        return SongModel(songId: songId, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
-    }
+    @StateObject var appState: AppCoordinator = .init()
     
-    func fetchSong(songId: String) async throws -> Song {
-        let musicItemID = MusicItemID(rawValue: songId)
-        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        let response = try await request.response()
-        guard let song = response.items.first else {
-            throw NSError(domain: "MUMORY", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song not found"])
-        }
-        
-        return song
-    }
+    public override init() {}
     
     // 위치 > 주소
     public func getChoosedeMumoryModelLocation(location: CLLocation, completion: @escaping (LocationModel) -> Void) {
@@ -93,393 +75,11 @@ final public class MumoryDataViewModel: ObservableObject {
             
             let locationTitle = placemark.name ?? ""
             let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
-//            let coordinate = location.coordinate
             
             let locationModel = LocationModel(geoPoint: GeoPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude), locationTitle: locationTitle, locationSubtitle: locationSubtitle, country: placemark.country ?? "", administrativeArea: placemark.administrativeArea ?? "")
             
             completion(locationModel)
         }
-    }
-    
-    public func fetchMyMumoryListener(uId: String) -> ListenerRegistration {
-        let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("Mumory")
-        
-        let query = collectionReference
-            .whereField("uId", isEqualTo: uId)
-            .order(by: "date", descending: true)
-        
-        let listener = query.addSnapshotListener { snapshot, error in
-            Task {
-                guard let snapshot = snapshot, error == nil else {
-                    print("Error fetchMumoryListener: \(error!)")
-                    return
-                }
-                
-                for documentChange in snapshot.documentChanges {
-                    switch documentChange.type {
-                    case .added:
-                        let documentData = documentChange.document.data()
-                        
-                        let newMumory = try documentChange.document.data(as: Mumory.self)
-                        print("add newMumory: \(newMumory)")
-//                        guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
-                        
-                        
-                        DispatchQueue.main.async {
-                            if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
-                                self.myMumorys.append(newMumory)
-                                self.myMumorys.sort { $0.date > $1.date }
-                                print("fetchMyMumoryListener: \(self.myMumorys)")
-                                
-                                if self.myMumorys.count == 1 {
-                                    let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                    let data = ["type": "record0"]
-                                    collectionReference.addDocument(data: data)
-                                    
-                                } else if self.myMumorys.count == 5 {
-                                    let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                    let data = ["type": "record1"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 10 {
-                                    let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                    let data = ["type": "record2"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 20 {
-                                    let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                    let data = ["type": "record3"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 50 {
-                                    let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                    let data = ["type": "record4"]
-                                    collectionReference.addDocument(data: data)
-                                }
-                                
-                                var country = newMumory.location.country
-                                let administrativeArea = newMumory.location.administrativeArea
-                                if country != "대한민국" {
-                                    if country == "영국" {
-                                        country += " 🇬🇧"
-                                    } else if country == "미 합중국" {
-                                        country = "미국 🇺🇸"
-                                    } else if country == "이탈리아" {
-                                        country += " 🇮🇹"
-                                    } else if country == "프랑스" {
-                                        country += " 🇫🇷"
-                                    } else if country == "독일" {
-                                        country += " 🇩🇪"
-                                    } else if country == "일본" {
-                                        country += " 🇯🇵"
-                                    } else if country == "중국" {
-                                        country += " 🇨🇳"
-                                    } else if country == "캐나다" {
-                                        country += " 🇨🇦"
-                                    } else if country == "오스트레일리아" {
-                                        country += " 🇦🇹"
-                                    } else if country == "브라질" {
-                                        country += " 🇧🇷"
-                                    } else if country == "인도" {
-                                        country += " 🇮🇳"
-                                    } else if country == "러시아" {
-                                        country += " 🇷🇺"
-                                    } else if country == "우크라이나" {
-                                        country += " 🇺🇦"
-                                    } else if country == "호주" {
-                                        country += " 🇦🇺"
-                                    } else if country == "멕시코" {
-                                        country += " 🇲🇽"
-                                    } else if country == "인도네시아" {
-                                        country += " 🇮🇩"
-                                    } else if country == "터키" {
-                                        country += " 🇹🇷"
-                                    } else if country == "사우디아라비아" {
-                                        country += " 🇸🇦"
-                                    } else if country == "스페인" {
-                                        country += " 🇪🇸"
-                                    } else if country == "네덜란드" {
-                                        country += " 🇳🇱"
-                                    } else if country == "스위스" {
-                                        country += " 🇨🇭"
-                                    } else if country == "아르헨티나" {
-                                        country += " 🇦🇷"
-                                    } else if country == "스웨덴" {
-                                        country += " 🇸🇪"
-                                    } else if country == "폴란드" {
-                                        country += " 🇵🇱"
-                                    } else if country == "벨기에" {
-                                        country += " 🇧🇪"
-                                    } else if country == "태국" {
-                                        country += " 🇹🇭"
-                                    } else if country == "이란" {
-                                        country += " 🇮🇷"
-                                    } else if country == "오스트리아" {
-                                        country += " 🇦🇹"
-                                    } else if country == "노르웨이" {
-                                        country += " 🇳🇴"
-                                    } else if country == "아랍에미리트" {
-                                        country += " 🇦🇪"
-                                    } else if country == "나이지리아" {
-                                        country += " 🇳🇬"
-                                    } else if country == "남아프리카공화국" {
-                                        country += " 🇿🇦"
-                                    } else {
-                                        country = "기타 🏁"
-                                    }
-                                    
-                                    // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                                    if var countryMumories = self.locationMumorys[country] {
-                                        // 존재하는 경우 해당 배열에 뮤모리 추가
-                                        countryMumories.append(newMumory)
-                                        // 딕셔너리에 업데이트
-                                        self.locationMumorys[country] = countryMumories
-                                    } else {
-                                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                        self.locationMumorys[country] = [newMumory]
-                                        
-                                        print("fetchMyMumoryListener locationMumorys1: \(self.locationMumorys)")
-                                        
-                                        if self.locationMumorys.count == 2 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location0"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 3 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location1"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 5 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location2"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 10 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location3"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 15 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location4"]
-                                            collectionReference.addDocument(data: data)
-                                        }
-                                    }
-                                } else {
-                                    if var countryMumories = self.locationMumorys[administrativeArea] {
-                                        // 존재하는 경우 해당 배열에 뮤모리 추가
-                                        countryMumories.append(newMumory)
-                                        // 딕셔너리에 업데이트
-                                        self.locationMumorys[administrativeArea] = countryMumories
-                                    } else {
-                                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                        self.locationMumorys[administrativeArea] = [newMumory]
-                                        
-                                        print("fetchMyMumoryListener locationMumorys2: \(self.locationMumorys)")
-                                        
-                                        if self.locationMumorys.count == 2 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location0"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 3 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location1"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 5 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location2"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 10 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location3"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 15 {
-                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location4"]
-                                            collectionReference.addDocument(data: data)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                    case .modified:
-                        let documentData = documentChange.document.data()
-                        let modifiedDocumentID = documentChange.document.documentID
-                        let updatedMumory = try documentChange.document.data(as: Mumory.self)
-                        
-//                        if let index = self.myMumorys.firstIndex(where: { $0.id == modifiedDocumentID }),
-//                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.myMumorys[index].id ?? "") {
-//                            DispatchQueue.main.async {
-//                                self.myMumorys[index] = updatedMumory
-//                            }
-//                        }
-                        
-                        if let index = self.myMumorys.firstIndex(where: { $0.id == modifiedDocumentID }) {
-                            DispatchQueue.main.async {
-                                self.myMumorys[index] = updatedMumory
-                            }
-                        }
-                        
-//                        if let index = self.socialMumorys.firstIndex(where: { $0.id == modifiedDocumentID }),
-//                           let updatedMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: self.socialMumorys[index].id ?? "") {
-//                            DispatchQueue.main.async {
-//                                self.socialMumorys[index] = updatedMumory
-//                            }
-//                        }
-                        print("Document modified: \(modifiedDocumentID)")
-                        
-                    case .removed:
-                        let documentData = documentChange.document.data()
-                        print("Document removed: \(documentChange.document.documentID)")
-                        
-                        let removedDocumentID = documentChange.document.documentID
-                        DispatchQueue.main.async {
-                            self.myMumorys.removeAll { $0.id == removedDocumentID }
-                        }
-                    }
-                }
-            }
-        }
-        
-        return listener
-    }
-    
-    public func fetchRewardListener(user: UserProfile) -> ListenerRegistration {
-        let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
-        
-        let listener = collectionReference.addSnapshotListener { snapshot, error in
-            Task {
-                guard let snapshot = snapshot, error == nil else {
-                    print("Error fetchRewardListener: \(error!)")
-                    return
-                }
-
-                
-                DispatchQueue.main.async {
-                    if !self.myRewards.contains(where: { $0 == "attendance0" }) {
-                        self.myRewards.append("attendance0")
-                        
-                        let db = FirebaseManager.shared.db
-                        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
-                        let data = ["type": "attendance0"]
-                        collectionReference.addDocument(data: data)
-                        
-                        self.reward = .attendance(0)
-                        withAnimation(.spring(response: 0.2)) {
-                            self.isRewardPopUpShown = true
-                        }
-                    }
-                }
-                
-                for documentChange in snapshot.documentChanges {
-                    guard documentChange.type == .added else { continue }
-                    let documentData = documentChange.document.data()
-                    guard let type = documentData["type"] as? String else { continue }
-                    let newReward: String = type
-                    
-                    DispatchQueue.main.async {
-                        
-                        if !self.myRewards.contains(where: { $0 == type }) {
-                            self.myRewards.append(newReward)
-                            switch type {
-                            case "attendance0":
-                                self.reward = .attendance(0)
-                            case "attendance1":
-                                self.reward = .attendance(1)
-                            case "attendance2":
-                                self.reward = .attendance(2)
-                            case "attendance3":
-                                self.reward = .attendance(3)
-                            case "attendance4":
-                                self.reward = .attendance(4)
-                            case "record0":
-                                self.reward = .record(0)
-                            case "record1":
-                                self.reward = .record(1)
-                            case "record2":
-                                self.reward = .record(2)
-                            case "record3":
-                                self.reward = .record(3)
-                            case "record4":
-                                self.reward = .record(4)
-                            case "location0":
-                                self.reward = .location(0)
-                            case "location1":
-                                self.reward = .location(1)
-                            case "location2":
-                                self.reward = .location(2)
-                            case "location3":
-                                self.reward = .location(3)
-                            case "location4":
-                                self.reward = .location(4)
-                            case "like0":
-                                self.reward = .like(0)
-                            case "like1":
-                                self.reward = .like(1)
-                            case "like2":
-                                self.reward = .like(2)
-                            case "like3":
-                                self.reward = .like(3)
-                            case "like4":
-                                self.reward = .like(4)
-                            case "comment0":
-                                self.reward = .comment(0)
-                            case "comment1":
-                                self.reward = .comment(1)
-                            case "comment2":
-                                self.reward = .comment(2)
-                            case "comment3":
-                                self.reward = .comment(3)
-                            case "comment4":
-                                self.reward = .comment(4)
-                            default:
-                                self.reward = .none
-                                break
-                            }
-                            
-                            let pastDate: Date = user.signUpDate
-                            let currentDate = Date()
-                            
-                            let calendar = Calendar.current
-                            let components = calendar.dateComponents([.day], from: pastDate, to: currentDate)
-                            if let dayDifference = components.day {
-                                if dayDifference >= 3 {
-                                    let db = FirebaseManager.shared.db
-                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
-                                    let data = ["type": "attendance1"]
-                                    collectionReference.addDocument(data: data)
-                                }
-                                
-                                if dayDifference >= 7 {
-                                    let db = FirebaseManager.shared.db
-                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
-                                    let data = ["type": "attendance2"]
-                                    collectionReference.addDocument(data: data)
-                                }
-                                
-                                if dayDifference >= 14 {
-                                    let db = FirebaseManager.shared.db
-                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
-                                    let data = ["type": "attendance3"]
-                                    collectionReference.addDocument(data: data)
-                                }
-                                
-                                if dayDifference >= 30 {
-                                    let db = FirebaseManager.shared.db
-                                    let collectionReference = db.collection("User").document(user.uId).collection("Reward")
-                                    let data = ["type": "attendance4"]
-                                    collectionReference.addDocument(data: data)
-                                }
-                            }
-                            
-                            withAnimation(.spring(response: 0.2)) {
-                                self.isRewardPopUpShown = true
-                            }
-                            print("fetchRewardListener added: \(self.reward)")
-                            
-                        }
-                    }
-                }
-            }
-        }
-        return listener
     }
             
     public func fetchActivityListener(uId: String) -> ListenerRegistration {
@@ -598,72 +198,34 @@ final public class MumoryDataViewModel: ObservableObject {
         }
     }
     
-    public func fetchRewards(uId: String) {
-        DispatchQueue.main.async {
-            self.isUpdating = true
-        }
-        
-        let db = FirebaseManager.shared.db
-        let collectionReference = db.collection("User").document(uId).collection("Reward")
-        
-        Task {
-            do {
-                let snapshot = try await collectionReference.getDocuments()
-                
-                for document in snapshot.documents {
-                    let documentData = document.data()
-                    guard let type = documentData["type"] as? String else {
-                        DispatchQueue.main.async {
-                            self.isUpdating = false
-                        }
-                        continue }
-                    
-                    DispatchQueue.main.async {
-                        self.myRewards.append(type)
-                    }
-                }
-                
-                print("fetchRewards successfully: \(myRewards)")
-            } catch {
-                print("Error fetchRewards: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.isUpdating = false
-                }
-            }
-        }
-    }
-    
-    public func fetchMumory(documentID: String) async -> Mumory {
-
-        let db = FirebaseManager.shared.db
+    public func fetchMumory(documentID: String) async -> Result<Mumory, Error> {
+//        let db = FirebaseManager.shared.db
         let docRef = db.collection("Mumory").document(documentID)
         
         do {
             let documentSnapshot = try await docRef.getDocument()
             
             if documentSnapshot.exists {
-//                guard let documentData = documentSnapshot.data(),
-//                      let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentSnapshot.documentID) else { return Mumory() }
+                let mumory = try documentSnapshot.data(as: Mumory.self)
                 
-                let newMumory = try documentSnapshot.data(as: Mumory.self)
-                
-                return newMumory
+                return .success(mumory)
             } else {
                 print("Document does not exist")
+                return .failure(FetchError.documentNotFound)
             }
         } catch {
             print("Error fetching document: \(error.localizedDescription)")
+            return .failure(error)
         }
-        
-        return Mumory()
     }
     
     public func fetchMumorys(uId: String, completion: @escaping (Result<[Mumory], Error>) -> Void) {
         DispatchQueue.main.async {
-            self.isUpdating = true
+//            self.isUpdating = true
+//            self.appState.isLoading = true
         }
         
-        let db = FirebaseManager.shared.db
+//        let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
             .whereField("uId", isEqualTo: uId)
             .order(by: "date", descending: true)
@@ -679,15 +241,7 @@ final public class MumoryDataViewModel: ObservableObject {
                 var result: [Mumory] = []
                 
                 for document in snapshot.documents {
-//                    let documentData = document.data()
-//                    guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {
-//                        DispatchQueue.main.async {
-//                            self.isUpdating = false
-//                        }
-//                        continue
-//                    }
                     let newMumory = try document.data(as: Mumory.self)
-                    print("fetchMumorys: \(newMumory)")
 
                     DispatchQueue.main.async {
                         var country = newMumory.location.country
@@ -787,6 +341,7 @@ final public class MumoryDataViewModel: ObservableObject {
                     
                     result.append(newMumory)
                 }
+                
                 completion(.success(result))
             } catch {
                 print("Error fetchMumorys: \(error.localizedDescription)")
@@ -803,7 +358,7 @@ final public class MumoryDataViewModel: ObservableObject {
             self.isUpdating = true
         }
         
-        let db = FirebaseManager.shared.db
+//        let db = FirebaseManager.shared.db
         var friendsUids: [String] = friends.map {$0.uId}
         friendsUids.append(me.uId)
     
@@ -825,14 +380,6 @@ final public class MumoryDataViewModel: ObservableObject {
             do {
                 let snapshot = try await copiedMumoryCollectionRef.getDocuments()
                 for document in snapshot.documents {
-//                    let documentData = document.data()
-//                    guard let newMumory: Mumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: document.documentID) else {
-//                        DispatchQueue.main.async {
-//                            self.isUpdating = false
-//                        }
-//                        return
-//                    }
-                    
                     let newMumory = try document.data(as: Mumory.self)
                     
                     DispatchQueue.main.async {
@@ -860,12 +407,18 @@ final public class MumoryDataViewModel: ObservableObject {
                 completion(.success(()))
             } catch {
                 print("Error fetchSocialMumory: \(error.localizedDescription)")
+
+                DispatchQueue.main.async {
+                    self.isUpdating = false
+                }
+                
+                completion(.failure(error))
             }
         }
     }
     
-    public static func fetchReward(user: UserProfile) async -> [String] {
-        let db = FirebaseManager.shared.db
+    public func fetchReward(user: MumoriUser) async -> [String] {
+//        let db = FirebaseManager.shared.db
         let collectionReference = db.collection("User").document(user.uId).collection("Reward")
         
         var rewards: [String] = [] // 배열을 초기화
@@ -1000,8 +553,8 @@ final public class MumoryDataViewModel: ObservableObject {
                 
                 DispatchQueue.main.async {
                     if !self.tempMumory.contains(where: { $0.id == document.documentID}) {
-                        if !self.tempMumory.contains(where: { $0.song.songId == newMumory.song.songId}) {
-                            if mumory.song.songId != newMumory.song.songId {
+                        if !self.tempMumory.contains(where: { $0.song.id == newMumory.song.id}) {
+                            if mumory.song.id != newMumory.song.id {
                                 self.tempMumory.append(newMumory)
                             }
                         }
@@ -1107,7 +660,7 @@ final public class MumoryDataViewModel: ObservableObject {
         let updatedData: [String: Any] = [
             "uId": mumory.uId,
             "date": FirebaseManager.Timestamp(date: mumory.date),
-            "songId": mumory.song.songId,
+            "songId": mumory.song.id,
             "locationTitle": mumory.location.locationTitle,
             "latitude": mumory.location.coordinate.latitude,
             "longitude": mumory.location.coordinate.longitude,
@@ -1388,27 +941,6 @@ final public class MumoryDataViewModel: ObservableObject {
             }
         }
         
-    }
-    
-    public func acceptFriendReqeust(ID : String) {
-        
-        let db = FirebaseManager.shared.db
-        
-        let newData: [String: Any] = [
-            "friends": FieldValue.arrayUnion([ID])
-        ]
-        
-        let documentReference = db.collection("User").document("tester")
-        
-        documentReference.setData(newData, merge: true) { error in
-            if let error = error {
-                print("Error acceptFriendReqeust: \(error.localizedDescription)")
-            } else {
-                let new = FriendSearch(nickname: "FUCKK", id: ID)
-                FirebaseManager.shared.friends.append(new)
-                print("acceptFriendReqeust successfully! : \(documentReference.documentID)")
-            }
-        }
     }
     
     public func searchMumoryByContent(_ searchString: String, completion: @escaping ()-> Void) {

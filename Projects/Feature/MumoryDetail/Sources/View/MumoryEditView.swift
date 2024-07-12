@@ -25,7 +25,7 @@ public struct MumoryEditView: View {
     @State private var isTagErrorPopUpShown: Bool = false
     
     @State private var calendarDate: Date
-    @State private var tags: [String]
+    @State private var tags: [String] = []
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
     

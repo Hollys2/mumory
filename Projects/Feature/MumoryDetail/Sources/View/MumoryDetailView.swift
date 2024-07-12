@@ -237,10 +237,19 @@ public struct MumoryDetailView: View {
         .onAppear {
             playerViewModel.setLibraryPlayerVisibility(isShown: false)
             Task {
-//                mumoryDataViewModel.isUpdating = true
-                self.mumory = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
+                
+                let result = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
+                switch result {
+                case .success(let mumory):
+                    self.mumory = mumory
+                case .failure(let error):
+                    print("fetchMumory failure: \(error)")
+                    break
+                }
+                
+                // self.user = await MumoriUser(uId: self.mumory.uId)
                 self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
-                print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
+//                print("mumoryAnnotation in MumoryDetailView: \(mumory.id)")
 //                mumoryDataViewModel.isUpdating = false
             }
         }

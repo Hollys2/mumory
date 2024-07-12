@@ -452,12 +452,18 @@ struct ActivityItem: View {
         .onTapGesture {
             if self.activity.type == "like" || self.activity.type == "comment" || self.activity.type == "reply" {
                 Task{
-                    let mumory = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
-                    if mumory.id == "DELETE" {
-                        UIView.setAnimationsEnabled(false)
-                        isPresentDeletedMumoryPopup.toggle()
-                        return}
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    let result = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
+                    
+                    switch result {
+                    case.success(let mumory):
+                        if mumory.id == "DELETE" {
+                            UIView.setAnimationsEnabled(false)
+                            isPresentDeletedMumoryPopup.toggle()
+                            return}
+                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    case .failure(let error):
+                        print("fetchMumory failure: \(error)")
+                    }
                 }
             }
         }
@@ -528,18 +534,24 @@ struct ActivityBottomSheet: View {
                     dismiss()
                     self.mumoryDataViewModel.deleteComment(comment: Comment(id: self.activity.commentId, uId: "", nickname: "", parentId: "", mumoryId: self.activity.mumoryId, date: Date(), content: "", isPublic: false)) { comments in
                         Task {
-                            let mumory = await mumoryDataViewModel.fetchMumory(documentID: self.activity.mumoryId)
-                            mumory.commentCount -= 1
-                            mumoryDataViewModel.updateMumory(mumory) {
-                                for element in activityList {
-                                    let key = element.key
-                                    guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
-                                        && $0.mumoryId == self.activity.mumoryId
-                                        && $0.songId == self.activity.songId}) else {continue}
-                                    activityList[key]?.remove(at: index)
+                            
+                            let result = await mumoryDataViewModel.fetchMumory(documentID: self.activity.mumoryId)
+                            
+                            switch result {
+                            case.success(let mumory):
+                                mumory.commentCount -= 1
+                                mumoryDataViewModel.updateMumory(mumory) {
+                                    for element in activityList {
+                                        let key = element.key
+                                        guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
+                                            && $0.mumoryId == self.activity.mumoryId
+                                            && $0.songId == self.activity.songId}) else {continue}
+                                        activityList[key]?.remove(at: index)
+                                    }
+                                    self.isLoading = false
                                 }
-                                self.isLoading = false
-               
+                            case .failure(let error):
+                                print("fetchMumory failure: \(error)")
                             }
                         }
                     }

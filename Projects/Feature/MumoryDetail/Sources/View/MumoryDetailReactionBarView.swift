@@ -60,13 +60,13 @@ struct MumoryDetailReactionBarView: View {
                                     print("Error Functions \(error.localizedDescription)")
                                 } else {
 //                                    self.mumory.likes = likes
-                                    print("라이크 성공: \(mumory.likes.count)")
+                                    print("라이크 성공: \((mumory.likes ?? []).count)")
                                 }
                             }
                         }
                     }
                 }, label: {
-                    mumory.likes.contains(currentUserViewModel.user.uId) ?
+                    (mumory.likes ?? []).contains(currentUserData.user.uId) ?
                     Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
@@ -76,10 +76,10 @@ struct MumoryDetailReactionBarView: View {
                 })
                 .disabled(isButtonDisabled)
                 
-                if mumory.likes.count != 0 {
+                if (mumory.likes ?? []).count != 0 {
                     Spacer().frame(width: 4)
                     
-                    Text("\(mumory.likes.count)")
+                    Text("\((mumory.likes ?? []).count)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                         .foregroundColor(.white)
                 }
@@ -109,12 +109,12 @@ struct MumoryDetailReactionBarView: View {
                 
                 Spacer()
                 
-                if playerViewModel.favoriteSongIds.contains(mumory.song.songId) {
+                if playerViewModel.favoriteSongIds.contains(mumory.song.id) {
                     SharedAsset.starOnMumoryDetail.swiftUIImage
                         .resizable()
                         .frame(width: 42, height: 42)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -123,7 +123,7 @@ struct MumoryDetailReactionBarView: View {
                         .frame(width: 42, height: 42)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }

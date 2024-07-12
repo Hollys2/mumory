@@ -46,8 +46,12 @@ public class AppCoordinator: ObservableObject {
     @Published public var isAddFriendViewShown = false
     @Published public var isDeleteMumoryPopUpViewShown = false
     @Published public var isFirstTabSelected: Bool = false
+    @Published public var isRewardPopUpShown: Bool = false
+    
+    @Published public var isLoading: Bool = false
     
     @Published public var choosedMumoryAnnotation: Mumory = Mumory()
+    
     
     @Published public var page: Int = 1
     
