@@ -91,7 +91,7 @@ struct MumoryDetailScrollContentView: View {
                     .opacity(self.playButtonOpacity)
                     .onTapGesture {
                         Task {
-                            guard let song = await fetchSong(songId: self.mumory.song.songId) else {return}
+                            guard let song = await fetchSong(songId: self.mumory.song.id) else {return}
                             playerViewModel.playNewSongShowingPlayingView(song: song)
                             playerViewModel.userWantsShown = true
                             playerViewModel.isShownMiniPlayer = true
@@ -339,12 +339,21 @@ struct MumoryDetailScrollContentView: View {
         .onAppear {
             Task {
                 mumoryDataViewModel.isUpdating = true
-                self.mumory = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
+                
+                let result = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
+                switch result {
+                case .success(let mumory):
+                    self.mumory = mumory
+                case .failure(let error):
+                    print("fetchMumory failure: \(error)")
+                    break
+                }
+
                 self.user = await MumoriUser(uId: self.mumory.uId)
                 print("MumoryDetailScrollContentView onAppear")
                 for friend in self.currentUserData.friends {
                     Task {
-                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.song.songId, mumory: self.mumory)
+                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.song.id, mumory: self.mumory)
                     }
                     Task {
                         await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)

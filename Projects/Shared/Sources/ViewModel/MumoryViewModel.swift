@@ -19,6 +19,8 @@ final public class MumoryViewModel: ObservableObject {
     @Published public var myMumorys: [Mumory] = []
     @Published public var locationMumorys: [String: [Mumory]] = [:]
     
+    public init() {}
+    
     public func fetchMyMumoryListener(uId: String) -> ListenerRegistration {
         let db = FirebaseManager.shared.db
         let collectionReference = db.collection("Mumory")
@@ -37,9 +39,6 @@ final public class MumoryViewModel: ObservableObject {
                 for documentChange in snapshot.documentChanges {
                     switch documentChange.type {
                     case .added:
-                        let documentData = documentChange.document.data()
-                        //                        guard let newMumory = await Mumory.fromDocumentDataToMumory(documentData, mumoryDocumentID: documentChange.document.documentID) else { return }
-                        
                         let newMumory = try documentChange.document.data(as: Mumory.self)
                         
                         DispatchQueue.main.async {
@@ -249,5 +248,6 @@ final public class MumoryViewModel: ObservableObject {
         }
         return listener
     }
+    
 }
 

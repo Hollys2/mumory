@@ -59,9 +59,7 @@ public struct HomeView: View {
             
             switch self.appCoordinator.sheet {
             case .createMumory:
-                Color.black.opacity(0.6)
-                
-                CreateMumoryBottomSheetView()
+                CreateMumorySheetUIViewRepresentable()
                 
             case .comment:
                 Color.black.opacity(0.6)

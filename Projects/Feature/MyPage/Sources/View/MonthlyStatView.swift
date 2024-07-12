@@ -138,7 +138,7 @@ struct ContentView: View {
                         .onAppear {
                             Task {
                                 // 뮤모리 외 MonthlyStat 컬렉션 추후 사용하기
-                                let mumorySongIds: [String] = self.mumoryDataViewModel.monthlyMumorys.map { $0.song.songId }
+                                let mumorySongIds: [String] = self.mumoryDataViewModel.monthlyMumorys.map { $0.song.id }
                                 self.favoriteGenre = await getModeGenre(songIds: mumorySongIds)
                             }
                         }
@@ -477,7 +477,7 @@ struct ContentView: View {
             }
             
             for mumory in self.mumoryDataViewModel.monthlyMumorys {
-                for uId in mumory.likes {
+                for uId in (mumory.likes ?? []) {
                     if uId != currentUserData.user.uId {
                         mumoriesLikeCount += 1
                     }
@@ -636,7 +636,7 @@ struct ContentView: View {
             }
             
             for mumory in self.mumoryDataViewModel.monthlyMumorys {
-                for uId in mumory.likes {
+                for uId in (mumory.likes ?? []) {
                     if uId != currentUserData.user.uId {
                         mumoriesLikeCount += 1
                     }

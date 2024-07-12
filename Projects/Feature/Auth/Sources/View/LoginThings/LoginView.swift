@@ -21,6 +21,7 @@ public struct LoginView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var mumoryViewModel: MumoryViewModel
 
 
 //    @State var isLoginCompleted: Bool = false
@@ -292,7 +293,7 @@ public struct LoginView: View {
             appCoordinator.selectedTab = .home
             appCoordinator.initPage = .home
             
-            self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+            self.currentUserData.fetchRewards(uId: currentUserData.user.uId)
             self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
             self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                 switch result {
@@ -300,8 +301,8 @@ public struct LoginView: View {
                     print("fetchMumorys successfully: \(mumorys)")
                     DispatchQueue.main.async {
                         self.mumoryDataViewModel.myMumorys = mumorys
-                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+                        self.mumoryDataViewModel.listener = self.mumoryViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                        self.mumoryDataViewModel.rewardListener = self.currentUserData.fetchRewardListener(user: self.currentUserData.user)
                         self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
                     }
                 case .failure(let error):

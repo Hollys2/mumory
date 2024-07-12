@@ -67,12 +67,12 @@ struct MumoryDetailSameLocationMusicView: View {
                 
                 Spacer()
                 
-                if playerViewModel.favoriteSongIds.contains(mumory.song.songId) {
+                if playerViewModel.favoriteSongIds.contains(mumory.song.id) {
                     SharedAsset.bookmarkOnMumoryDatail.swiftUIImage
                         .resizable()
                         .frame(width: 20, height: 20)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.song.songId)
+                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -81,7 +81,7 @@ struct MumoryDetailSameLocationMusicView: View {
                         .frame(width: 20, height: 20)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.song.songId)
+                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }
@@ -102,7 +102,7 @@ struct MumoryDetailSameLocationMusicView: View {
         .background(ColorSet.background)
         .onAppear(perform: {
             Task {
-                song = await fetchSong(songID: mumory.song.songId)
+                song = await fetchSong(songID: mumory.song.id)
             }
         })
         .fullScreenCover(isPresented: $isPresentBottomSheet, content: {

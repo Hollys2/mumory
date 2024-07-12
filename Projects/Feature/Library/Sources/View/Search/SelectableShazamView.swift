@@ -114,7 +114,7 @@ struct SelectableShazamView: View {
                                         guard let title = shazamManager.shazamSong?.title else {return}
                                         guard let artist = shazamManager.shazamSong?.artist else {return}
                                         guard let artworkUrl = shazamManager.shazamSong?.artworkURL else {return}
-                                        mumoryDataViewModel.choosedMusicModel = SongModel(songId: appleMusicID, title: title, artist: artist, artworkUrl: artworkUrl)
+                                        mumoryDataViewModel.choosedMusicModel = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: artworkUrl)
                                         appCoordinator.rootPath = NavigationPath()
                                     }
                             })

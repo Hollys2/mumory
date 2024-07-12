@@ -497,7 +497,7 @@ struct PlayingViewBottomSheet: View {
                     guard let song = playerViewModel.currentSong else {return}
                     appCoordinator.selectedTab = .home
                     appCoordinator.rootPath = NavigationPath()
-                    mumoryDataViewModel.choosedMusicModel = SongModel(songId: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    mumoryDataViewModel.choosedMusicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                     appCoordinator.isCreateMumorySheetShown = true
                     dismiss()
                     playerViewModel.isPresentNowPlayingView = false

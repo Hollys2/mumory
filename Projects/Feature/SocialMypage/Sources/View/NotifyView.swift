@@ -224,13 +224,18 @@ struct NotifyLikeItem: View {
             }
         }
         .onTapGesture {
-            Task{
-                let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                if mumory.id == "DELETE" {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentDeleteMumoryPopup.toggle()
-                }else {
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+            Task {
+                let result = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
+                switch result {
+                case .success(let mumory):
+                    if mumory.id == "DELETE" {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentDeleteMumoryPopup.toggle()
+                    } else {
+                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    }
+                case .failure(_):
+                    break
                 }
             }
             if !notification.isRead {
@@ -323,13 +328,18 @@ struct NotifyCommentItem: View {
             }
         }
         .onTapGesture {
-            Task{
-                let mumory = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                if mumory.id == "DELETE" {
-                    UIView.setAnimationsEnabled(false)
-                    isPresentDeleteMumoryPopup.toggle()
-                }else {
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+            Task {                
+                let result = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
+                switch result {
+                case .success(let mumory):
+                    if mumory.id == "DELETE" {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentDeleteMumoryPopup.toggle()
+                    } else {
+                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    }
+                case .failure(_):
+                    break
                 }
             }
             if !notification.isRead {

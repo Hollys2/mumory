@@ -407,7 +407,7 @@ struct SocialItemView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         Task {
-                            guard let song = await fetchSong(songID: mumory.song.songId) else {return}
+                            guard let song = await fetchSong(songID: mumory.song.id) else {return}
                             playerViewModel.playNewSong(song: song, isPlayerShown: false)
                             withAnimation {
                                 playerViewModel.userWantsShown = true
@@ -565,13 +565,13 @@ struct SocialItemView: View {
                                         print("Error Functions \(error.localizedDescription)")
                                     } else {
                                         //                                        self.mumory.likes = likes
-                                        print("라이크 함수 성공: \(mumory.likes.count)")
+                                        print("라이크 함수 성공: \((mumory.likes ?? []).count)")
                                     }
                                 }
                             }
                         }
                     }, label: {
-                        mumory.likes.contains(currentUserData.user.uId) ?
+                        (mumory.likes ?? []).contains(currentUserData.user.uId) ?
                         SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
@@ -588,10 +588,10 @@ struct SocialItemView: View {
                             .mask {Circle()}
                     })
                     .disabled(isButtonDisabled)
-                    .padding(.bottom, mumory.likes.isEmpty ? 12 : 0)
+                    .padding(.bottom, (mumory.likes ?? []).isEmpty ? 12 : 0)
                     
-                    if mumory.likes.count != 0 {
-                        Text("\(mumory.likes.count)")
+                    if (mumory.likes ?? []).count != 0 {
+                        Text("\((mumory.likes ?? []).count)")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                             .multilineTextAlignment(.center)
                             .foregroundColor(.white)
@@ -746,7 +746,7 @@ public struct SocialView: View {
                 self.appCoordinator.isFirstTabSelected = true
             }
             
-            FirebaseManager.shared.observeFriendRequests()
+//            FirebaseManager.shared.observeFriendRequests()
             print("FUCK SocialView onAppear")
         }
         .onDisappear {

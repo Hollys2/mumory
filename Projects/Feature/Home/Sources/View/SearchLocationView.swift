@@ -16,7 +16,7 @@ import Firebase
 
 struct AddressRow: View {
     
-    @State var result: MKLocalSearchCompletion
+    let result: MKLocalSearchCompletion
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
@@ -252,41 +252,41 @@ struct SearchLocationView: View {
                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                         
-                        if !self.localSearchViewModel.popularSearches.isEmpty {
-                            
-                            VStack(alignment: .leading, spacing: 0) {
-                                
-                                HStack {
-                                    
-                                    Text("뮤모리 인기 위치 검색어")
-                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                                        .foregroundColor(.white)
-                                    
-                                    Spacer()
-                                }
-                                .padding(20)
-                                
-                                HStack(spacing: 8) {
-                                    
-                                    ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
-                                        
-                                        Text(searchTerm)
-                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-                                            .frame(height: 33)
-                                            .padding(.horizontal, 16)
-                                            .background(SharedAsset.mainColor.swiftUIColor)
-                                            .cornerRadius(35)
-                                    }
-                                }
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 20)
-                                .background(.pink)
-                                
-                                Spacer().frame(height: 12)
-                            }
-                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-                            .cornerRadius(15)
-                        }
+//                        if !self.localSearchViewModel.popularSearches.isEmpty {
+//                            
+//                            VStack(alignment: .leading, spacing: 0) {
+//                                
+//                                HStack {
+//                                    
+//                                    Text("뮤모리 인기 위치 검색어")
+//                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+//                                        .foregroundColor(.white)
+//                                    
+//                                    Spacer()
+//                                }
+//                                .padding(20)
+//                                
+//                                HStack(spacing: 8) {
+//                                    
+//                                    ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
+//                                        
+//                                        Text(searchTerm)
+//                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+//                                            .frame(height: 33)
+//                                            .padding(.horizontal, 16)
+//                                            .background(SharedAsset.mainColor.swiftUIColor)
+//                                            .cornerRadius(35)
+//                                    }
+//                                }
+//                                .frame(maxWidth: .infinity, alignment: .leading)
+//                                .padding(.horizontal, 20)
+//                                .background(.pink)
+//                                
+//                                Spacer().frame(height: 12)
+//                            }
+//                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+//                            .cornerRadius(15)
+//                        }
                         
                     } // VStack
                     .padding(.bottom, 66)

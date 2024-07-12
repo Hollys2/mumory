@@ -25,7 +25,7 @@ public struct MumoryEditView: View {
     @State private var isTagErrorPopUpShown: Bool = false
     
     @State private var calendarDate: Date
-    @State private var tags: [String]
+    @State private var tags: [String] = []
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
     
@@ -332,7 +332,7 @@ public struct MumoryEditView: View {
                     }
                     
                     group.notify(queue: .main) {
-                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserData.user.uId, date: self.calendarDate, songModel: mumoryDataViewModel.choosedMusicModel ?? self.mumory.song, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
+                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserData.user.uId, date: self.calendarDate, song: mumoryDataViewModel.choosedMusicModel ?? self.mumory.song, location: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, isPublic: self.isPublic, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
                         
                         mumoryDataViewModel.updateMumory(newMumory) {
                             

@@ -25,7 +25,9 @@ public struct SplashView: View {
     @EnvironmentObject var currentUserData: CurrentUserData
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var mumoryViewModel: MumoryViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    
     @StateObject var customizationManageViewModel: CustomizationManageViewModel = CustomizationManageViewModel()
     @StateObject var withdrawViewModel: WithdrawViewModel = WithdrawViewModel()
     @StateObject var settingViewModel: SettingViewModel = SettingViewModel()
@@ -87,9 +89,11 @@ public struct SplashView: View {
                 .navigationDestination(for: SearchFriendType.self, destination: { type in
                     switch type {
                     case .cancelRequestFriend:
-                        FriendMenuView(type: .cancelRequestFriend)
+//                        FriendMenuView(type: .cancelRequestFriend)
+                        Color.pink
                     case .unblockFriend:
-                        FriendMenuView(type: .unblockFriend)
+//                        FriendMenuView(type: .unblockFriend)
+                        Color.pink
                     default:
                         Color.pink
                     }
@@ -372,7 +376,7 @@ public struct SplashView: View {
             currentUserData.favoriteGenres = favoriteGenres
             UserDefaults.standard.setValue(Date(), forKey: "loginHistory")
             
-            self.mumoryDataViewModel.fetchRewards(uId: currentUserData.user.uId)
+            self.currentUserData.fetchRewards(uId: currentUserData.user.uId)
             self.mumoryDataViewModel.fetchActivitys(uId: currentUserData.user.uId)
             self.mumoryDataViewModel.fetchMumorys(uId: currentUserData.user.uId) { result in
                 switch result {
@@ -380,8 +384,8 @@ public struct SplashView: View {
                     print("fetchMumorys successfully: \(mumorys)")
                     DispatchQueue.main.async {
                         self.mumoryDataViewModel.myMumorys = mumorys
-                        self.mumoryDataViewModel.listener = self.mumoryDataViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
-                        self.mumoryDataViewModel.rewardListener = self.mumoryDataViewModel.fetchRewardListener(user: self.currentUserData.user)
+                        self.mumoryDataViewModel.listener = self.mumoryViewModel.fetchMyMumoryListener(uId: self.currentUserData.uId)
+                        self.mumoryDataViewModel.rewardListener = self.currentUserData.fetchRewardListener(user: self.currentUserData.user)
                         self.mumoryDataViewModel.activityListener = self.mumoryDataViewModel.fetchActivityListener(uId: self.currentUserData.uId)
                     }
                 case .failure(let error):

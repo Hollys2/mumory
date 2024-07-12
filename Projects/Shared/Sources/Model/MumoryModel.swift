@@ -15,13 +15,13 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift // @DocumentID
 
 
+// 필수항목을 제외하곤 옵셔널 처리
 public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     
     @DocumentID public var id: String?
 
     public var uId: String
     public var date: Date
-    
     public var song: SongModel
     public var location: LocationModel
     public var coordinate: CLLocationCoordinate2D {
@@ -33,27 +33,31 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     @ExplicitNull public var imageURLs: [String]?
     
     public var isPublic: Bool
-    public var likes: [String]
+    
+    @ExplicitNull public var likes: [String]?
+    
+    // 대안 고민해보기
     public var commentCount: Int
     public var myCommentCount: Int
 
-    public init(id: String, uId: String, date: Date, songModel: SongModel, locationModel: LocationModel, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, isPublic: Bool, likes: [String], commentCount: Int, myCommentCount: Int) {
+    public init(id: String? = nil, uId: String, date: Date, song: SongModel, location: LocationModel, isPublic: Bool, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, likes: [String]? = nil, commentCount: Int, myCommentCount: Int) {
         self.id = id
         self.uId = uId
         self.date = date
-        self.song = songModel
-        self.location = locationModel
+        self.song = song
+        self.location = location
+        self.isPublic = isPublic
+        
         self.tags = tags
         self.content = content
         self.imageURLs = imageURLs
-        self.isPublic = isPublic
         self.likes = likes
         self.commentCount = commentCount
         self.myCommentCount = myCommentCount
     }
     
     public override convenience init() {
-        self.init(id: "", uId: "UNKNOWN", date: Date(), songModel: SongModel(), locationModel: LocationModel(geoPoint: GeoPoint(latitude: .zero, longitude: .zero), locationTitle: "UNKNOWN", locationSubtitle: "", country: "", administrativeArea: ""), isPublic: false, likes: [], commentCount: 0,  myCommentCount: 0)
+        self.init(id: "UNKNOWN", uId: "UNKNOWN", date: Date(), song: SongModel(), location: LocationModel(), isPublic: false, tags: nil, imageURLs: nil, likes: nil, commentCount: 0,  myCommentCount: 0)
     }
     
     func copy(from other: Mumory) {
@@ -68,78 +72,34 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     }
 }
 
-extension Mumory {
-    
-//    static func fromDocumentDataToMumory(_ documentData: [String: Any], mumoryDocumentID: String) async -> Mumory? {
-//        
-//        guard let userDocumentID = documentData["uId"] as? String,
-//              let songID = documentData["songId"] as? String,
-//              let locationTitle = documentData["locationTitle"] as? String,
-//              let latitude = documentData["latitude"] as? CLLocationDegrees,
-//              let longitude = documentData["longitude"] as? CLLocationDegrees,
-//              let coutry = documentData["coutry"] as? String,
-//              let administrativeArea = documentData["administrativeArea"] as? String,
-//              let date = documentData["date"] as? FirebaseManager.Timestamp,
-//              let tags = documentData["tags"] as? [String],
-//              let content = documentData["content"] as? String,
-//              let imageURLs = documentData["imageURLs"] as? [String],
-//              let isPublic = documentData["isPublic"] as? Bool,
-//              let likes = documentData["likes"] as? [String],
-//              let commentCount = documentData["commentCount"] as? Int,
-//              let myCommentCount = documentData["myCommentCount"] as? Int else {
-//            print("something is nil in Mumory")
-//            return nil
-//        }
-//        
-//        let musicItemID = MusicItemID(rawValue: songID)
-//        let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-//        async let musicResponse = request.response()
-//        
-//        do {
-//            let response = await (try musicResponse)
-//            guard let song = response.items.first else {
-//                throw NSError(domain: "MMR", code: 1, userInfo: [NSLocalizedDescriptionKey: "Song or Placemark not found"])
-//            }
-//            let musicModel = SongModel(songId: musicItemID, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
-//            
-//            let location = CLLocation(latitude: latitude, longitude: longitude)
-//            let locationModel = LocationModel(geoPoint: GeoPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude), locationTitle: locationTitle, locationSubtitle: "", country: coutry, administrativeArea: administrativeArea)
-//            
-//            return Mumory(id: mumoryDocumentID, uId: userDocumentID, date: date.dateValue(), songId: songID, musicModel: musicModel, locationModel: locationModel, tags: tags, content: content, imageURLs: imageURLs, isPublic: isPublic, likes: likes, commentCount: commentCount, myCommentCount: myCommentCount)
-//        } catch {
-//            print("Error fetching music or location:", error.localizedDescription)
-//            return nil
-//        }
-//    }
-}
-
 public struct SongModel: Identifiable, Hashable, Codable {
     
-    public var id = UUID()
+//    public var id = UUID()
     
-    public var songId: String
+    public var id: String
     public var title: String
     public var artist: String
     public var artworkUrl: URL?
     
-    
-    public init(songId: String, title: String, artist: String, artworkUrl: URL?) {
-        self.songId = songId
+    public init(id: String, title: String, artist: String, artworkUrl: URL?) {
+        self.id = id
         self.title = title
         self.artist = artist
         self.artworkUrl = artworkUrl
     }
     
     public init() {
-        self.songId = "UNKNOWN"
+        self.id = "UNKNOWN"
         self.title = "UNKNOWN"
         self.artist = "UNKNOWN"
     }
 }
 
-public struct LocationModel: Identifiable, Codable {
+public struct LocationModel: Codable {
     
-    public var id = UUID()
+    public var id: CLLocationCoordinate2D {
+        self.coordinate
+    }
     
     public var geoPoint: GeoPoint
     public var coordinate: CLLocationCoordinate2D {
@@ -152,7 +112,6 @@ public struct LocationModel: Identifiable, Codable {
     public var country: String
     public var administrativeArea: String
     
-    
     public init(geoPoint: GeoPoint, locationTitle: String, locationSubtitle: String, country: String, administrativeArea: String) {
         self.geoPoint = geoPoint
         self.locationTitle = locationTitle
@@ -163,13 +122,27 @@ public struct LocationModel: Identifiable, Codable {
     
     public init() {
         self.geoPoint = GeoPoint(latitude: .zero, longitude: .zero)
-        self.locationTitle = ""
-        self.locationSubtitle = ""
-        self.country = ""
-        self.administrativeArea = ""
+        self.locationTitle = "UNKNOWN"
+        self.locationSubtitle = "UNKNOWN"
+        self.country = "UNKNOWN"
+        self.administrativeArea = "UNKNOWN"
     }
-    
 }
+
+
+
+extension CLLocationCoordinate2D: Hashable {
+    public static func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
+        return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(latitude)
+        hasher.combine(longitude)
+    }
+}
+
+
 // 파이어스토어 문서의 속성 이름과 일치시킬 수 있음
 //    enum CodingKeys: String, CodingKey {
 //        case geoPoint

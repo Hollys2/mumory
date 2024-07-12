@@ -14,6 +14,8 @@ public class KeyboardResponder: ObservableObject {
     @Published public var keyboardHeight: CGFloat = 0
     @Published public var isKeyboardHiddenButtonShown: Bool = false
     
+    static public var height: CGFloat = .zero
+    
     var keyboardShowCancellable: AnyCancellable?
     var keyboardHideCancellable: AnyCancellable?
     
@@ -29,6 +31,7 @@ public class KeyboardResponder: ObservableObject {
 
                 DispatchQueue.main.async {
                     withAnimation(.easeInOut(duration: 0.45)) {
+
                         self.keyboardHeight = keyboardHeight
                         self.isKeyboardHiddenButtonShown = true
                     }
