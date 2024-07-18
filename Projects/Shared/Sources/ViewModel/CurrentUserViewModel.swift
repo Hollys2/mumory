@@ -11,6 +11,7 @@ import Core
 import Firebase
 import Combine
 
+@MainActor
 public class CurrentUserViewModel: ObservableObject {
     // MARK: - Object lifecycle
     public init(){}
