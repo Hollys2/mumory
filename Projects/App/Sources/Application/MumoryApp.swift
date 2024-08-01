@@ -12,48 +12,48 @@ struct MumoryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
     @StateObject var appCoordinator: AppCoordinator = .init()
-    @StateObject var locationManager: LocationManager = .init()
-    @StateObject var localSearchViewModel: LocalSearchViewModel = .init()
-    @StateObject var mumoryDataViewModel: MumoryDataViewModel = .init()
-    @StateObject var mumoryViewModel: MumoryViewModel = .init()
-//    @StateObject var firebaseManager: FirebaseManager = .init()
+    @StateObject var currentUserViewModel: CurrentUserViewModel = .init()
+//    @StateObject var locationManagerViewModel: LocationManagerViewModel = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
-    @StateObject var currentUserViewModel: CurrentUserViewModel = .init()
-
+    
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if appCoordinator.isHomeViewShown {
+                if self.appCoordinator.isHomeViewShown {
                     HomeView()
-                } else {
+                }
+                
+                if self.appCoordinator.isLoginViewShown {
                     LoginView()
                 }
                 
-                if appCoordinator.isSplashViewShown {
+                if self.appCoordinator.isLoading
+                    || self.appCoordinator.localSearchViewModel.isSearching
+                    || self.currentUserViewModel.isLoading {
+                    LoadingAnimationView()
+                }
+
+                if self.appCoordinator.isSplashViewShown {
                     SplashView()
                 }
                 
-                if appCoordinator.isLoading {
-                    LoadingAnimationView(isLoading: $appCoordinator.isLoading)
-                }
-                
-//                if 뮤모리작성 {
-//                    
-//                }
+
+                //                if 뮤모리작성 {
+                //
+                //                }
 
             }
             .preferredColorScheme(.dark)
-            .environmentObject(locationManager)
-            .environmentObject(localSearchViewModel)
-            .environmentObject(mumoryDataViewModel)
-            .environmentObject(firebaseManager)
-            .environmentObject(keyboardResponder)
+            .ignoresSafeArea()
+            .environmentObject(appCoordinator)
+//            .environmentObject(mumoryViewModel)
             .environmentObject(currentUserViewModel)
+//            .environmentObject(locationManagerViewModel)
+            .environmentObject(keyboardResponder)
             .environmentObject(snackBarViewModel)
             .environmentObject(playerViewModel)
-            .environmentObject(appCoordinator)
         }
     }
 }

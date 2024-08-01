@@ -212,9 +212,10 @@ public enum ShazamViewType {
     case createMumory
 }
 
-public enum Tab {
-    case home
+public enum Tab: Int {
+    case home = 0
     case social
+    case createMumroy
     case library
     case notification
 }

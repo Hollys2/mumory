@@ -22,10 +22,18 @@ extension UIImage {
     }
     
     public func resized(to size: CGSize) -> UIImage {
-        return UIGraphicsImageRenderer(size: size).image { _ in
-            draw(in: CGRect(origin: .zero, size: size))
-        }
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()?.withRenderingMode(.alwaysOriginal)
+        UIGraphicsEndImageContext()
+        return resizedImage!
     }
+    
+//    public func resized(to size: CGSize) -> UIImage {
+//        return UIGraphicsImageRenderer(size: size).image { _ in
+//            draw(in: CGRect(origin: .zero, size: size))
+//        }
+//    }
     
     
     public func resizeImage(to size: CGSize) -> UIImage? {

@@ -95,7 +95,7 @@ public struct SongModel: Identifiable, Hashable, Codable {
     }
 }
 
-public struct LocationModel: Codable {
+public struct LocationModel: Codable, Hashable {
     
     public var id: CLLocationCoordinate2D {
         self.coordinate
@@ -127,6 +127,14 @@ public struct LocationModel: Codable {
         self.country = "UNKNOWN"
         self.administrativeArea = "UNKNOWN"
     }
+    
+//    public static func == (lhs: LocationModel, rhs: LocationModel) -> Bool {
+//        return lhs.geoPoint == rhs.geoPoint &&
+//        lhs.locationTitle == rhs.locationTitle &&
+//        lhs.locationSubtitle == rhs.locationSubtitle &&
+//        lhs.country == rhs.country &&
+//        lhs.administrativeArea == rhs.administrativeArea
+//    }
 }
 
 

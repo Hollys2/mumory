@@ -75,8 +75,8 @@ struct AddSongFromSearchView: View {
                     .padding(.top, getUIScreenBounds().height * 0.25)
             }
             
-            LoadingAnimationView(isLoading: $isLoading)
-                .padding(.top, getUIScreenBounds().height * 0.25)
+//            LoadingAnimationView(isLoading: $isLoading)
+//                .padding(.top, getUIScreenBounds().height * 0.25)
         }
         .onAppear(perform: {
             timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true, block: { timer in

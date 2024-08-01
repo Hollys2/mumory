@@ -13,6 +13,8 @@ import Foundation
 public enum Sheet {
     case createMumory
     case comment
+    case reward
+    case socialMenu
     case none
 }
 

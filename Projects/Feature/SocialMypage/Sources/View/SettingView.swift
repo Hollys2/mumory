@@ -24,7 +24,7 @@ struct SettingView: View {
     @EnvironmentObject var withdrawManager: WithdrawViewModel
     @EnvironmentObject var settingViewModel: SettingViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     
     @State var isShowingWithdrawPopup = false
     @State var isLoading: Bool = false
@@ -128,23 +128,21 @@ struct SettingView: View {
                 isLoading = false
             })
             
-            LoadingAnimationView(isLoading: $isLoading)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            
+//            LoadingAnimationView(isLoading: $isLoading)
+//                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .disabled(isLoading)
-        
     }
     
     var LogoutButton: some View {
         Button {
             isLoading = true
-            mumoryDataViewModel.myMumorys.removeAll()
-            mumoryDataViewModel.myActivity.removeAll()
-            mumoryDataViewModel.socialMumorys.removeAll()
-            mumoryDataViewModel.myRewards.removeAll()
-            mumoryDataViewModel.choosedMusicModel = nil
-            mumoryDataViewModel.choosedLocationModel = nil
+            self.currentUserViewModel.mumoryViewModel.myMumorys.removeAll()
+//            self.currentUserViewModel.mumoryViewModel.myActivity.removeAll()
+            self.currentUserViewModel.mumoryViewModel.socialMumorys.removeAll()
+//            self.currentUserViewModel.mumoryViewModel.myRewards.removeAll()
+            appCoordinator.draftMumorySong = nil
+            appCoordinator.draftMumoryLocation = nil
             let Firebase = FirebaseManager.shared
             let auth = Firebase.auth
             guard let signOut = try? auth.signOut() else {return}

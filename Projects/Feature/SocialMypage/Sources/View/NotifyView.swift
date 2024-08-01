@@ -157,7 +157,7 @@ struct UnreadText: View {
 
 struct NotifyLikeItem: View {
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var notificationViewModel: NotificationViewModel
     @Binding var notification: Notification
@@ -225,19 +225,15 @@ struct NotifyLikeItem: View {
         }
         .onTapGesture {
             Task {
-                let result = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                switch result {
-                case .success(let mumory):
-                    if mumory.id == "DELETE" {
-                        UIView.setAnimationsEnabled(false)
-                        isPresentDeleteMumoryPopup.toggle()
-                    } else {
-                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
-                    }
-                case .failure(_):
-                    break
+                let mumory = try await FetchManager.shared.fetchMumory(documentID: notification.mumoriId)
+                if mumory.id == "DELETE" {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeleteMumoryPopup.toggle()
+                } else {
+                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
             }
+            
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserViewModel.user.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
@@ -256,7 +252,7 @@ struct NotifyLikeItem: View {
 }
 
 struct NotifyCommentItem: View {
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var notificationViewModel: NotificationViewModel
@@ -328,20 +324,16 @@ struct NotifyCommentItem: View {
             }
         }
         .onTapGesture {
-            Task {                
-                let result = await mumoryDataViewModel.fetchMumory(documentID: notification.mumoriId)
-                switch result {
-                case .success(let mumory):
-                    if mumory.id == "DELETE" {
-                        UIView.setAnimationsEnabled(false)
-                        isPresentDeleteMumoryPopup.toggle()
-                    } else {
-                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
-                    }
-                case .failure(_):
-                    break
+            Task {
+                let mumory = try await FetchManager.shared.fetchMumory(documentID: notification.mumoriId)
+                if mumory.id == "DELETE" {
+                    UIView.setAnimationsEnabled(false)
+                    isPresentDeleteMumoryPopup.toggle()
+                } else {
+                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
             }
+            
             if !notification.isRead {
                 DispatchQueue.global().async {
                     db.collection("User").document(currentUserViewModel.user.uId).collection("Notification").document(self.notification.id).updateData(["isRead": true])
@@ -411,7 +403,7 @@ struct NotifyFriendItem: View {
         .onTapGesture {
             print("friend")
             Task {
-                let friend = await FetchManager.shared.fetchUser(uId: notification.friendUId)
+                let friend = await FetchManager.shared.fetchUser(uId: notification.friendUId, appCoordinator: self.appCoordinator)
                 appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
             }
             if !notification.isRead {

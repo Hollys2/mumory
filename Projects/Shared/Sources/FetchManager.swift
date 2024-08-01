@@ -12,6 +12,7 @@ import SwiftUI
 
 /// 서버 통신 관련 메서드 관리 객체
 public class FetchManager {
+    
     public static let shared = FetchManager()
     
     public func fetchUsers(uIds: [String]) async -> [UserProfile] {
@@ -19,7 +20,7 @@ public class FetchManager {
             var returnUsers: [UserProfile] = []
             for id in uIds {
                 taskGroup.addTask {
-                    let user = await FetchManager.shared.fetchUser(uId: id)
+                    let user = await FetchManager.shared.fetchUser(uId: id, appCoordinator: AppCoordinator())
                     if user.nickname == "탈퇴계정" {return nil}
                     return user
                 }
@@ -32,7 +33,7 @@ public class FetchManager {
         }
     }
     
-    public func fetchUser(uId: String) async -> UserProfile{
+    public func fetchUser(uId: String, appCoordinator: AppCoordinator? = nil) async -> UserProfile {
         let db = FirebaseManager.shared.db
         
         let query = db.collection("User").whereField("uid", isEqualTo: uId)
@@ -45,24 +46,35 @@ public class FetchManager {
                                    defaultProfileImage: SharedAsset.profileWithdrawed.swiftUIImage,
                                    signUpDate: Date())
             }
-
+            
             guard let data = snapshot.documents.first?.data() else {return UserProfile()}
             let userModel = UserProfile(uId: uId,
-                                      nickname: data["nickname"] as? String ?? "기본닉네임",
-                                      id: data["id"] as? String ?? "",
-                                      profileImageURL: URL(string: data["profileImageURL"] as? String ?? ""),
-                                      backgroundImageURL: URL(string: data["backgroundImageURL"] as? String ?? ""),
-                                      bio: data["bio"] as? String ?? "",
-                                      defaultProfileImage: randomProfiles[data["profileIndex"] as? Int ?? 0],
-                                      signUpDate: (data["signUpDate"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date())
+                                        nickname: data["nickname"] as? String ?? "기본닉네임",
+                                        id: data["id"] as? String ?? "",
+                                        profileImageURL: URL(string: data["profileImageURL"] as? String ?? ""),
+                                        backgroundImageURL: URL(string: data["backgroundImageURL"] as? String ?? ""),
+                                        bio: data["bio"] as? String ?? "",
+                                        defaultProfileImage: randomProfiles[data["profileIndex"] as? Int ?? 0],
+                                        signUpDate: (data["signUpDate"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date())
+            
             return userModel
-
+            
         } catch {
             return UserProfile()
         }
     }
     
-    public func fetchSongs(songIds: [String]) async -> [Song]{
+    public func fetchSong(songId: String) async -> Song? {
+        let musicItemID = MusicItemID(rawValue: songId)
+        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+        request.properties = [.genres, .artists]
+        guard let response = try? await request.response() else { return nil }
+        guard let song = response.items.first else { return nil }
+        
+        return song
+    }
+    
+    public func fetchSongs(songIds: [String]) async -> [Song] {
         var returnValue: [Song] = []
         var songIds: [String] = songIds
         return await withTaskGroup(of: Song?.self) { taskGroup -> [Song] in
@@ -89,7 +101,7 @@ public class FetchManager {
             return songs
         }
     }
-
+    
     public func isNewUser(email: String, method: SignInMethod) async -> Bool {
         let db = FirebaseManager.shared.db
         var methodName: String = ""
@@ -115,6 +127,87 @@ public class FetchManager {
         return snapshot.documents.isEmpty
     }
     
+    
+    public func fetchMumory(documentID: String?) async throws -> Mumory {
+        guard let documentID = documentID else {
+            throw FetchError.documentIdError
+        }
+        
+        let db = FirebaseManager.shared.db
+        let docRef = db.collection("Mumory").document(documentID)
+        
+        guard let documentSnapshot = try? await docRef.getDocument() else {
+            throw FetchError.getDocumentError
+        }
+        
+        guard documentSnapshot.exists else {
+            throw FetchError.documentNotFound
+        }
+        
+        guard let mumory = try? documentSnapshot.data(as: Mumory.self) else {
+            throw FetchError.decodingError
+        }
+        
+        return mumory
+    }
+    //    public func updateMumory(_ mumory: Mumory, completion: @escaping (Result<Void, Error>) -> Void) {
+    public func fetchReward(user: UserProfile, completion: @escaping (Result<[String], Error>) -> Void) async {
+        
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(user.uId).collection("Reward")
+        
+        var rewards: [String] = []
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            
+            for document in querySnapshot.documents {
+                let documentData = document.data()
+                guard let reward: String = documentData["type"] as? String else {
+                    continue
+                }
+                rewards.append(reward)
+            }
+            
+            completion(.success(rewards))
+            
+        } catch {
+            completion(.failure(error))
+        }
+    }
+    
+    public func fetchActivitys(uId: String) {
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("User").document(uId).collection("Activity")
+        
+        Task {
+            do {
+                let snapshot = try await collectionReference.getDocuments()
+                
+                for document in snapshot.documents {
+                    let documentData = document.data()
+                    guard let type = documentData["type"] as? String else {
+                        DispatchQueue.main.async {
+//                            self.isUpdating = false
+                        }
+                        continue }
+                    
+                    let newResult = (document.documentID, type)
+                    DispatchQueue.main.async {
+//                        self.myActivity.append(newResult)
+                    }
+                }
+                
+//                print("fetchActivitys successfully: \(myActivity)")
+            } catch {
+                print("Error fetchActivitys: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+//                    self.isUpdating = false
+                }
+            }
+        }
+    }
+
 }
 
 

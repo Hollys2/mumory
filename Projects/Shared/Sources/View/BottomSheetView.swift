@@ -32,22 +32,24 @@ public enum SearchFriendType {
 
 public struct MumoryBottomSheet {
     
+    @EnvironmentObject public var appState: AppCoordinator
+    
     @ObservedObject var appCoordinator: AppCoordinator
-    @ObservedObject var mumoryDataViewModel: MumoryDataViewModel
+    @ObservedObject var currentUserViewModel: CurrentUserViewModel
     
     public let type: MumoryBottomSheetType
     
     @Binding public var isPublic: Bool
     @Binding var isMapSheetShown: Bool
     
-    @Binding var mumoryAnnotation: Mumory
+    let mumoryAnnotation: Mumory
     
-    public init(appCoordinator: AppCoordinator, mumoryDataViewModel: MumoryDataViewModel, type: MumoryBottomSheetType, mumoryAnnotation: Binding<Mumory>, isPublic: Binding<Bool>? = nil, isMapSheetShown: Binding<Bool>? = nil) {
+    public init(appCoordinator: AppCoordinator, type: MumoryBottomSheetType, mumoryAnnotation: Mumory, isPublic: Binding<Bool>? = nil, isMapSheetShown: Binding<Bool>? = nil) {
         self.appCoordinator = appCoordinator
-        self.mumoryDataViewModel = mumoryDataViewModel
+        self.currentUserViewModel = CurrentUserViewModel() // 수정 요망
         
         self.type = type
-        self._mumoryAnnotation = mumoryAnnotation
+        self.mumoryAnnotation = mumoryAnnotation
         self._isPublic = isPublic ?? Binding.constant(false)
         self._isMapSheetShown = isMapSheetShown ?? Binding.constant(false)
     }
@@ -66,11 +68,15 @@ public struct MumoryBottomSheet {
                     }
                 }),
                 BottemSheetMenuOption(iconImage: mumoryAnnotation.isPublic ? SharedAsset.lockMumoryDetailMenu.swiftUIImage : SharedAsset.unlockMumoryDetailMenu.swiftUIImage, title: mumoryAnnotation.isPublic ? "나만보기" : "전체공개") {
-                    mumoryDataViewModel.isUpdating = true
                     mumoryAnnotation.isPublic.toggle()
-                    mumoryDataViewModel.updateMumory(mumoryAnnotation) {
-                        mumoryDataViewModel.isUpdating = false
-                        mumoryDataViewModel.selectedMumoryAnnotation.isPublic = mumoryAnnotation.isPublic
+
+                    self.currentUserViewModel.mumoryViewModel.updateMumory(mumoryAnnotation) { result in
+                        switch result {
+                        case .success():
+                            self.appCoordinator.selectedMumory.isPublic = mumoryAnnotation.isPublic
+                        case .failure(let error):
+                            print("ERROR updateMumory: \(error.localizedDescription)")
+                        }
                     }
                     
                 },
@@ -100,7 +106,8 @@ public struct MumoryBottomSheet {
         case .mumorySocialView:
             return [
                 BottemSheetMenuOption(iconImage: SharedAsset.mumoryButtonSocial.swiftUIImage, title: "뮤모리 보기", action: {
-                    mumoryDataViewModel.selectedMumoryAnnotation = mumoryAnnotation
+                    self.appCoordinator.selectedMumory = mumoryAnnotation
+                    
                     withAnimation(.easeOut(duration: 0.1)) {
 //                        self.appCoordinator.isSocialMenuSheetViewShown = false
                         self.appCoordinator.bottomSheet = .none
@@ -218,7 +225,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
             }) { (_) in
                 newView.removeFromSuperview()
                 dimmingView.removeFromSuperview()
-                self.appCoordinator.bottomSheet = .none
+                self.appCoordinator.sheet = .none
             }
         }))
         hostingController.view.frame = newView.bounds
@@ -288,7 +295,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
                     }) { value in
                         newView.removeFromSuperview()
                         dimmingView.removeFromSuperview()
-                        self.parent.appCoordinator.bottomSheet = .none
+                        self.parent.appCoordinator.sheet = .none
                         
                     }
                 } else {
@@ -310,7 +317,7 @@ public struct BottomSheetUIViewRepresentable: UIViewRepresentable {
             }) { (_) in
                 newView.removeFromSuperview()
                 dimmingView.removeFromSuperview()
-                self.parent.appCoordinator.bottomSheet = .none
+                self.parent.appCoordinator.sheet = .none
             }
         }
     }
@@ -393,7 +400,7 @@ public struct BottomSheetView: View {
 
 struct BottomSheetViewModifier: ViewModifier {
     
-    @Binding var isShown: Bool
+    @Binding var sheet: Sheet
     let mumoryBottomSheet: MumoryBottomSheet
     
     func body(content: Content) -> some View {
@@ -404,8 +411,11 @@ struct BottomSheetViewModifier: ViewModifier {
             
             content
             
-            if isShown {
+            switch sheet {
+            case .socialMenu:
                 BottomSheetUIViewRepresentable(mumoryBottomSheet: mumoryBottomSheet)
+            default:
+                EmptyView()
             }
         }
         .zIndex(1)
@@ -417,7 +427,6 @@ public struct RewardBottomSheetView: View {
     
     @Binding var isShown: Bool
     
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     
     public var body: some View {
@@ -434,20 +443,20 @@ public struct RewardBottomSheetView: View {
                 
                 Spacer().frame(height: 35)
                 
-                self.mumoryDataViewModel.reward.image
+                self.currentUserViewModel.mumoryViewModel.reward.image
                     .resizable()
                     .frame(width: getUIScreenBounds().width * 0.287, height: getUIScreenBounds().width * 0.287)
                 
                 Spacer().frame(height: 21)
                 
-                Text(self.mumoryDataViewModel.reward.title)
+                Text(self.currentUserViewModel.mumoryViewModel.reward.title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white)
                 
                 Spacer().frame(height: 16)
                 
-                     Text(self.mumoryDataViewModel.reward.subTitle)
+                     Text(self.currentUserViewModel.mumoryViewModel.reward.subTitle)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))

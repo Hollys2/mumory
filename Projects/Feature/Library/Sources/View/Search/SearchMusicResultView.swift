@@ -36,9 +36,9 @@ struct SearchMusicResultView: View {
                 VStack(spacing: 0, content: {
                     
                     if isLoading {
-                        LoadingAnimationView(isLoading: $isLoading)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, getUIScreenBounds().height * 0.25)
+//                        LoadingAnimationView(isLoading: $isLoading)
+//                            .frame(maxWidth: .infinity, alignment: .center)
+//                            .padding(.top, getUIScreenBounds().height * 0.25)
                         
                     } else if term.isEmpty {
                         EmptyView()
@@ -108,8 +108,9 @@ struct SearchMusicResultView: View {
             }
             .ignoresSafeArea()
             .scrollIndicators(.hidden)
-            LoadingAnimationView(isLoading: $isLoading)
-                .padding(.top, getUIScreenBounds().height * 0.25)
+
+            //            LoadingAnimationView(isLoading: $isLoading)
+//                .padding(.top, getUIScreenBounds().height * 0.25)
 
         }
 

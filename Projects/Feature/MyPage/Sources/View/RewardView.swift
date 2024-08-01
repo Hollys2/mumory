@@ -117,7 +117,7 @@ struct RewardContentView: View {
         }
         .onAppear {
             Task {
-                self.count = await MumoryDataViewModel.fetchRewardCount(user: currentUserViewModel.user)
+                self.count = await MumoryViewModel.fetchRewardCount(user: currentUserViewModel.user)
             }
         }
     }
@@ -384,14 +384,16 @@ struct RewardContent3: View {
         }
         .onAppear {
             Task {
-                self.myRewards = await MumoryDataViewModel.fetchReward(user: currentUserViewModel.user)
+//                self.myRewards = await MumoryDataViewModel.fetchReward(user: currentUserViewModel.user)
+                await FetchManager.shared.fetchReward(user: currentUserViewModel.user) { result in
+                    switch result {
+                    case .success(let rewards):
+                        self.myRewards = rewards
+                    case .failure(let error):
+                        print("ERROR fetchReward: \(error.localizedDescription)")
+                    }
+                }
             }
         }
-    }
-}
-
-struct RewardView_Previews: PreviewProvider {
-    static var previews: some View {
-        RewardView()
     }
 }

@@ -9,7 +9,7 @@
 
 import Foundation
 
-public class DateManager: ObservableObject {
+public struct DateManager {
     
     public init () {}
     
@@ -28,7 +28,6 @@ public class DateManager: ObservableObject {
         let targetYear = Calendar.current.component(.year, from: date)
         
         if currentYear > targetYear {
-            
             dateFormatter.dateFormat = isPublic ? "yyyy년 M월 d일" : "yyyy년 M월 d일 ・ "
         } else {
             dateFormatter.dateFormat = isPublic ? "M월 d일" : "M월 d일 ・ "

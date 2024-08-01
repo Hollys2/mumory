@@ -19,10 +19,6 @@ struct FriendMapViewRepresentable: UIViewRepresentable {
     let friendMumorys: [Mumory]
     @State private var isFirst: Bool = false
     
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var locationManager: LocationManager
-    
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
         

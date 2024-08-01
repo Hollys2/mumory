@@ -11,10 +11,10 @@ import Shared
 import MusicKit
 import Core
 public struct MyRecentMumoryView: View {
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var musicList: [Song] = []
     @State var exists: Bool = false
@@ -41,7 +41,7 @@ public struct MyRecentMumoryView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
             
-            if mumoryDataViewModel.myMumorys.isEmpty{
+            if self.currentUserViewModel.mumoryViewModel.myMumorys.isEmpty{
                 InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
                     withAnimation(Animation.easeInOut(duration: 0.1)) {
                         self.appCoordinator.sheet = .createMumory
@@ -64,8 +64,8 @@ public struct MyRecentMumoryView: View {
         })
         .onAppear(perform: {
             spacing = getUIScreenBounds().width <= 375 ? 8 : 12
-            let mumorys = Array(mumoryDataViewModel.myMumorys.prefix(15))
-            for mumory in mumoryDataViewModel.myMumorys {
+            let mumorys = Array(self.currentUserViewModel.mumoryViewModel.myMumorys.prefix(15))
+            for mumory in self.currentUserViewModel.mumoryViewModel.myMumorys {
                 if recentSongIds.contains(where: {$0 == mumory.song.id}) {continue}
                 recentSongIds.append(mumory.song.id)
             }

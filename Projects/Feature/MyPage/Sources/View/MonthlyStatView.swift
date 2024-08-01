@@ -18,7 +18,7 @@ public struct MonthlyStatView: View {
     @State private var isDatePickerShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     public init() {}
@@ -94,7 +94,6 @@ struct ContentView: View {
     @State private var favoriteGenre: String = "-"
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
@@ -138,7 +137,7 @@ struct ContentView: View {
                         .onAppear {
                             Task {
                                 // 뮤모리 외 MonthlyStat 컬렉션 추후 사용하기
-                                let mumorySongIds: [String] = self.mumoryDataViewModel.monthlyMumorys.map { $0.song.id }
+                                let mumorySongIds: [String] = self.currentUserViewModel.mumoryViewModel.monthlyMumorys.map { $0.song.id }
                                 self.favoriteGenre = await getModeGenre(songIds: mumorySongIds)
                             }
                         }
@@ -169,7 +168,7 @@ struct ContentView: View {
                         
                         HStack(spacing: 0) {
                             
-                            Text("\(self.mumoryDataViewModel.monthlyMumorys.count)개")
+                            Text("\(self.currentUserViewModel.mumoryViewModel.monthlyMumorys.count)개")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
                                 .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
                             
@@ -454,9 +453,10 @@ struct ContentView: View {
             }
             let month = calendar.component(.month, from: self.date)
             self.days = daysInMonth[month - 1]
-            mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
             
-            for mumory in self.mumoryDataViewModel.monthlyMumorys {
+            self.currentUserViewModel.mumoryViewModel.monthlyMumorys = self.currentUserViewModel.mumoryViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
+            
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 let day = Calendar.current.component(.day, from: mumory.date)
                 
                 // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
@@ -476,9 +476,9 @@ struct ContentView: View {
                 }
             }
             
-            for mumory in self.mumoryDataViewModel.monthlyMumorys {
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 for uId in (mumory.likes ?? []) {
-                    if uId != currentUserData.user.uId {
+                    if uId != currentUserViewModel.user.uId {
                         mumoriesLikeCount += 1
                     }
                 }
@@ -487,8 +487,8 @@ struct ContentView: View {
                 mumoriesCommentCount -= mumory.myCommentCount
             }
             
-            mumoryDataViewModel.locationMumorys = [:]
-            for mumory in mumoryDataViewModel.monthlyMumorys {
+            self.currentUserViewModel.mumoryViewModel.locationMumorys = [:]
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 var country = mumory.location.country
                 let administrativeArea = mumory.location.administrativeArea
                 
@@ -562,36 +562,36 @@ struct ContentView: View {
                     }
                     
                     // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                    if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
+                    if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[country] {
                         // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
                         // 딕셔너리에 업데이트
-                        mumoryDataViewModel.locationMumorys[country] = countryMumories
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = countryMumories
                     } else {
                         // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                        mumoryDataViewModel.locationMumorys[country] = [mumory]
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = [mumory]
                     }
                 } else {
-                    if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
+                    if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] {
                         // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
                         // 딕셔너리에 업데이트
-                        mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = countryMumories
                     } else {
                         // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                        mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
                 
             }
             
-            self.playListCount = currentUserViewModel.playlistViewModel.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count - 1
+            self.playListCount = self.currentUserViewModel.playlistViewModel.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count - 1
             Task {
-                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserViewModel.user)
-                self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
+                await self.currentUserViewModel.mumoryViewModel.fetchFavoriteDate(user: self.currentUserViewModel.user)
+                self.favoriteCount = self.currentUserViewModel.mumoryViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
             
-            let sortedPrefix = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
+            let sortedPrefix = self.currentUserViewModel.mumoryViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
             // 결과를 순회하며 딕셔너리로 변환
             for element in sortedPrefix {
                 self.sortedLocationsArray[element.key] = element.value
@@ -611,11 +611,10 @@ struct ContentView: View {
             self.days = daysInMonth[month - 1]
             //            self.mumoryMonthly = mumoryDataViewModel.myMumorys.filter { Calendar.current.component(.month, from: $0.date) == month }
             
-            
             mumoryDaily = [:]
             mumoriesLikeCount = 0
             mumoriesCommentCount = 0
-            for mumory in self.mumoryDataViewModel.monthlyMumorys {
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 let day = Calendar.current.component(.day, from: mumory.date)
                 
                 // 해당 "일"을 키로 사용하여 딕셔너리에 추가합니다.
@@ -635,9 +634,9 @@ struct ContentView: View {
                 }
             }
             
-            for mumory in self.mumoryDataViewModel.monthlyMumorys {
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 for uId in (mumory.likes ?? []) {
-                    if uId != currentUserData.user.uId {
+                    if uId != currentUserViewModel.user.uId {
                         mumoriesLikeCount += 1
                     }
                 }
@@ -646,8 +645,8 @@ struct ContentView: View {
                 mumoriesCommentCount -= mumory.myCommentCount
             }
             
-            mumoryDataViewModel.locationMumorys = [:]
-            for mumory in mumoryDataViewModel.monthlyMumorys {
+            self.currentUserViewModel.mumoryViewModel.locationMumorys = [:]
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 var country = mumory.location.country
                 let administrativeArea = mumory.location.administrativeArea
                 
@@ -721,24 +720,24 @@ struct ContentView: View {
                     }
                     
                     // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                    if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
+                    if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[country] {
                         // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
                         // 딕셔너리에 업데이트
-                        mumoryDataViewModel.locationMumorys[country] = countryMumories
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = countryMumories
                     } else {
                         // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                        mumoryDataViewModel.locationMumorys[country] = [mumory]
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = [mumory]
                     }
                 } else {
-                    if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
+                    if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] {
                         // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
                         // 딕셔너리에 업데이트
-                        mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = countryMumories
                     } else {
                         // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                        mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
             }
@@ -746,12 +745,12 @@ struct ContentView: View {
             self.playListCount = currentUserViewModel.playlistViewModel.playlistArray.filter { Calendar.current.component(.month, from: $0.createdDate) == month }.count
             
             Task {
-                await mumoryDataViewModel.fetchFavoriteDate(user: currentUserViewModel.user)
-                self.favoriteCount = mumoryDataViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
+                await self.currentUserViewModel.mumoryViewModel.fetchFavoriteDate(user: currentUserViewModel.user)
+                self.favoriteCount = self.currentUserViewModel.mumoryViewModel.favoriteDate.filter { Calendar.current.component(.month, from: $0) == month }.count
             }
             
             
-            let sortedPrefix = self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
+            let sortedPrefix = self.currentUserViewModel.mumoryViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
             // 결과를 순회하며 딕셔너리로 변환
             self.sortedLocationsArray = [:]
             for element in sortedPrefix {
@@ -760,7 +759,7 @@ struct ContentView: View {
             
             self.sortedByValueCount = []
             self.sortedByValueCount = sortedLocationsArray.sorted(by: { $0.value.count > $1.value.count })
-            print("mumoryDataViewModel.locationMumorys: \(mumoryDataViewModel.locationMumorys)")
+            print("mumoryDataViewModel.locationMumorys: \(self.currentUserViewModel.mumoryViewModel.locationMumorys)")
             print("sortedByValueCount: \(sortedByValueCount)")
         }
     }

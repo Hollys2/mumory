@@ -26,7 +26,6 @@ public struct MyMumoryView: View {
     @State private var bluroffset: CGFloat = 0
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @State private var offset: CGFloat = 0.0
@@ -109,7 +108,7 @@ public struct MyMumoryView: View {
 
                                                             ScrollView(showsIndicators: false) {
                             VStack(spacing: 0) {
-                                if mumoryDataViewModel.monthlyMumorys.isEmpty {
+                                if self.currentUserViewModel.mumoryViewModel.monthlyMumorys.isEmpty {
                                     ZStack(alignment: .top) {
                                         Color.clear
                                         
@@ -121,7 +120,7 @@ public struct MyMumoryView: View {
                                     }
                                 }
                                 
-                                ForEach(Array(mumoryDataViewModel.monthlyMumorys.enumerated()), id: \.element) { index, mumory in
+                                ForEach(Array(self.currentUserViewModel.mumoryViewModel.monthlyMumorys.enumerated()), id: \.element) { index, mumory in
                                     
                                     if index == 0 {
                                         ZStack(alignment: .topLeading) {
@@ -144,7 +143,7 @@ public struct MyMumoryView: View {
                                         }
                                     }
                                     
-                                    if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.monthlyMumorys[index - 1]) {
+                                    if index > 0 && !isSameMonth(mumory, with: self.currentUserViewModel.mumoryViewModel.monthlyMumorys[index - 1]) {
                                         ZStack(alignment: .topLeading) {
                                             Rectangle()
                                                 .foregroundColor(.clear)
@@ -213,7 +212,7 @@ public struct MyMumoryView: View {
 
                                 HStack(spacing: 0) {
 
-                                    Text("지역 \(self.mumoryDataViewModel.locationMumorys.count)곳에서 기록함")
+                                    Text("지역 \(self.currentUserViewModel.mumoryViewModel.locationMumorys.count)곳에서 기록함")
                                         .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
 
@@ -223,7 +222,7 @@ public struct MyMumoryView: View {
                                 .padding(.bottom, 17)
                                 .padding(.horizontal, 20)
                                 
-                                if mumoryDataViewModel.monthlyMumorys.isEmpty {
+                                if self.currentUserViewModel.mumoryViewModel.monthlyMumorys.isEmpty {
                                     ZStack(alignment: .top) {
                                         Color.clear
 
@@ -237,7 +236,7 @@ public struct MyMumoryView: View {
 
                                 LazyVGrid(columns: columns, spacing: 12) {
 
-                                    ForEach(self.mumoryDataViewModel.locationMumorys.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
+                                    ForEach(self.currentUserViewModel.mumoryViewModel.locationMumorys.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
 
                                         RoundedSquareView(regionTitle: region, mumorys: mumories)
                                             .onTapGesture {
@@ -266,17 +265,17 @@ public struct MyMumoryView: View {
         .navigationBarBackButtonHidden(true)
         .onAppear {
             if self.user.uId == self.currentUserViewModel.user.uId {
-                self.selectedDate = self.mumoryDataViewModel.myMumorys.first?.date ?? Date()
-                mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.myMumorys
+                self.selectedDate = self.currentUserViewModel.mumoryViewModel.myMumorys.first?.date ?? Date()
+                self.currentUserViewModel.mumoryViewModel.monthlyMumorys = self.currentUserViewModel.mumoryViewModel.myMumorys
             } else {
-                self.selectedDate = self.mumoryDataViewModel.friendMumorys.first?.date ?? Date()
-                mumoryDataViewModel.monthlyMumorys = mumoryDataViewModel.friendMumorys
+                self.selectedDate = self.currentUserViewModel.mumoryViewModel.friendMumorys.first?.date ?? Date()
+                self.currentUserViewModel.mumoryViewModel.monthlyMumorys = self.currentUserViewModel.mumoryViewModel.friendMumorys
             }
             
-            mumoryDataViewModel.monthlyMumorys.sort { $0.date > $1.date }
-            mumoryDataViewModel.locationMumorys = [:]
+            self.currentUserViewModel.mumoryViewModel.monthlyMumorys.sort { $0.date > $1.date }
+            self.currentUserViewModel.mumoryViewModel.locationMumorys = [:]
             
-            for mumory in mumoryDataViewModel.monthlyMumorys {
+            for mumory in self.currentUserViewModel.mumoryViewModel.monthlyMumorys {
                 var country = mumory.location.country
                 let administrativeArea = mumory.location.administrativeArea
                 
@@ -350,24 +349,24 @@ public struct MyMumoryView: View {
                     }
                     
                     // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                    if var countryMumories = mumoryDataViewModel.locationMumorys[country] {
+                    if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[country] {
                         // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
                         // 딕셔너리에 업데이트
-                        mumoryDataViewModel.locationMumorys[country] = countryMumories
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = countryMumories
                     } else {
                         // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                        mumoryDataViewModel.locationMumorys[country] = [mumory]
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = [mumory]
                     }
                 } else {
-                    if var countryMumories = mumoryDataViewModel.locationMumorys[administrativeArea] {
+                    if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] {
                         // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
                         // 딕셔너리에 업데이트
-                        mumoryDataViewModel.locationMumorys[administrativeArea] = countryMumories
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = countryMumories
                     } else {
                         // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                        mumoryDataViewModel.locationMumorys[administrativeArea] = [mumory]
+                        self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
             }
@@ -379,19 +378,23 @@ public struct MyMumoryView: View {
             }
             .background(TransparentBackground())
         })
-        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
+//        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
-                mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {
-                    print("뮤모리 삭제 성공")
-                    
-                    let calendar = Calendar.current
-                    let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
-                    let range = ...lastDayOfMonth
-                    let newDataBeforeSelectedDate = mumoryDataViewModel.myMumorys.filter { range.contains($0.date) }
-                    mumoryDataViewModel.monthlyMumorys = newDataBeforeSelectedDate
-                    appCoordinator.isDeleteMumoryPopUpViewShown = false
-                    mumoryDataViewModel.isUpdating = false
+                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
+                    switch result {
+                    case .success():
+                        print("SUCCESS deleteMumory!")
+                        
+                        let calendar = Calendar.current
+                        let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
+                        let range = ...lastDayOfMonth
+                        let newDataBeforeSelectedDate = self.currentUserViewModel.mumoryViewModel.myMumorys.filter { range.contains($0.date) }
+                        self.currentUserViewModel.mumoryViewModel.monthlyMumorys = newDataBeforeSelectedDate
+                        appCoordinator.isDeleteMumoryPopUpViewShown = false
+                    case .failure(let error):
+                        print("ERROR deleteMumory: \(error)")
+                    }
                 }
             })
         })
@@ -429,7 +432,7 @@ struct MumoryItemView: View {
     @State private var isTruncated: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     private let mumory: Mumory
     private let isRecent: Bool
@@ -440,13 +443,13 @@ struct MumoryItemView: View {
     }
     
     private var previousDate: Date? {
-        guard let index = mumoryDataViewModel.monthlyMumorys.firstIndex(where: { $0.id == mumory.id }) else {
+        guard let index = currentUserViewModel.mumoryViewModel.monthlyMumorys.firstIndex(where: { $0.id == mumory.id }) else {
             return nil
         }
         guard index > 0 else {
             return nil
         }
-        return mumoryDataViewModel.monthlyMumorys[index - 1].date
+        return currentUserViewModel.mumoryViewModel.monthlyMumorys[index - 1].date
     }
     
     private var isSameDateAsPrevious: Bool {
@@ -528,7 +531,7 @@ struct MumoryItemView: View {
                         .resizable()
                         .frame(width: 22, height: 22)
                         .onTapGesture {
-                            self.appCoordinator.choosedMumoryAnnotation = self.mumory
+                            self.appCoordinator.selectedMumory = self.mumory
                             appCoordinator.isMyMumoryBottomSheetShown = true
                         }
                 } // HStack
@@ -573,7 +576,7 @@ struct MumoryItemView: View {
                         .gesture(
                             TapGesture(count: 1)
                                 .onEnded {
-                                    mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                                    self.appCoordinator.selectedMumory = mumory
                                     self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                                 }
                         )

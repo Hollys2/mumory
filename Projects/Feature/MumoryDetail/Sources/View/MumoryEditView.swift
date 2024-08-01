@@ -43,9 +43,8 @@ public struct MumoryEditView: View {
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject private var dateManager: DateManager
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
 
@@ -75,8 +74,8 @@ public struct MumoryEditView: View {
                             .frame(width: 25, height: 25)
                             .gesture(TapGesture(count: 1).onEnded {
                                 self.appCoordinator.rootPath.removeLast()
-                                self.mumoryDataViewModel.choosedMusicModel = nil
-                                self.mumoryDataViewModel.choosedLocationModel = nil
+                                self.appCoordinator.draftMumorySong = nil
+                                self.appCoordinator.draftMumoryLocation = nil
                             })
                         
                         Spacer()
@@ -291,9 +290,6 @@ public struct MumoryEditView: View {
             }
             .popup(show: self.$isPublishPopUpShown, content: {
                 PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: {
-                    
-                    mumoryDataViewModel.isUpdating = true
-                    
                     let group = DispatchGroup()
                     
                     for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
@@ -332,20 +328,25 @@ public struct MumoryEditView: View {
                     }
                     
                     group.notify(queue: .main) {
-                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserViewModel.user.uId, date: self.calendarDate, songModel: mumoryDataViewModel.choosedMusicModel ?? self.mumory.song, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
+                        let newMumory = Mumory(id: self.mumory.id, uId: self.currentUserViewModel.user.uId, date: self.calendarDate, song: self.appCoordinator.draftMumorySong ?? self.mumory.song, location: self.appCoordinator.draftMumoryLocation ?? self.mumory.location, isPublic: self.isPublic, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
                         
-                        mumoryDataViewModel.updateMumory(newMumory) {
-                            
-                            mumoryDataViewModel.isUpdating = false
-                            
-                            mumoryDataViewModel.choosedMusicModel = nil
-                            mumoryDataViewModel.choosedLocationModel = nil
-                            self.tags.removeAll()
-                            self.contentText.removeAll()
-                            photoPickerViewModel.removeAllSelectedImages()
-                            self.imageURLs.removeAll()
-                            
-                            appCoordinator.rootPath.removeLast()
+//                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserViewModel.user.uId, date: self.calendarDate, songModel: appCoordinator.draftMumory ?? self.mumory.song, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
+//
+                        
+                        self.currentUserViewModel.mumoryViewModel.updateMumory(newMumory) { result in
+                            switch result {
+                            case .success():
+                                self.appCoordinator.draftMumorySong = nil
+                                self.appCoordinator.draftMumoryLocation = nil
+                                self.tags.removeAll()
+                                self.contentText.removeAll()
+                                photoPickerViewModel.removeAllSelectedImages()
+                                self.imageURLs.removeAll()
+                                
+                                appCoordinator.rootPath.removeLast()
+                            case .failure(let error):
+                                print("ERROR updateMumory: \(error.localizedDescription)")
+                            }
                         }
                     }
                 })

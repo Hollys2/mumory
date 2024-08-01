@@ -1,5 +1,6 @@
 import MapKit
 import CoreLocation
+import Firebase
 
 public enum MapConstant {
     // 할리스 강남역2점
@@ -11,6 +12,25 @@ public enum MapConstant {
     
     public static let defaultRegion = MKCoordinateRegion(center: defaultCoordinate2D, span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1))
     public static let defaultDistance: CLLocationDistance = 1000
+}
+
+public struct MapManager {
+    
+    public static func getLocationModel(location: CLLocation, completion: @escaping (LocationModel) -> Void) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            guard let placemark = placemarks?.first, error == nil else {
+                print("Error: ", error?.localizedDescription ?? "Unknown error")
+                return }
+            
+            let locationTitle = placemark.name ?? ""
+            let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
+            
+            let locationModel = LocationModel(geoPoint: GeoPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude), locationTitle: locationTitle, locationSubtitle: locationSubtitle, country: placemark.country ?? "", administrativeArea: placemark.administrativeArea ?? "")
+            
+            completion(locationModel)
+        }
+    }
 }
 
 

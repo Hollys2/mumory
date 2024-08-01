@@ -14,7 +14,7 @@ struct MyRecentMumoryListView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @State var isPresentBottomSheet: Bool = false
     @State var isLoading: Bool = true
     @State var songs: [Song] = []
@@ -106,7 +106,7 @@ struct MyRecentMumoryListView: View {
                         self.isLoading = true
                         
                         var testSongIds: [String] = []
-                        for mumory in mumoryDataViewModel.myMumorys {
+                        for mumory in self.currentUserViewModel.mumoryViewModel.myMumorys {
                             let songId = mumory.song.id
                             if !testSongIds.contains(songId) {
                                 testSongIds.append(mumory.song.id)
@@ -132,7 +132,7 @@ struct MyRecentMumoryListView: View {
                 self.isLoading = true
                 
                 var testSongIds: [String] = []
-                for mumory in mumoryDataViewModel.myMumorys {
+                for mumory in self.currentUserViewModel.mumoryViewModel.myMumorys {
                     let songId = mumory.song.id
                     if !testSongIds.contains(songId) {
                         testSongIds.append(mumory.song.id)

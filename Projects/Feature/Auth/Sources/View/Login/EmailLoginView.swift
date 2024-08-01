@@ -14,7 +14,7 @@ import Lottie
 struct EmailLoginView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
 
     @State var email: String = ""

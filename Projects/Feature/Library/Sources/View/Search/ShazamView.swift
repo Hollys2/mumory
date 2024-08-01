@@ -16,7 +16,7 @@ struct ShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var playerViewModel: PlayerViewModel
 
     @State var startsRecording: Bool = false
@@ -220,7 +220,7 @@ struct ShazamView: View {
                                         guard let title = shazamItem.title else {return}
                                         guard let artist = shazamItem.artist else {return}
                                         let artwork = shazamItem.artworkURL
-                                        mumoryDataViewModel.choosedMusicModel = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: artwork)
+                                        appCoordinator.draftMumorySong = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: artwork)
                                         appCoordinator.rootPath.removeLast(2)
                                     }else {
                                         Task {
@@ -401,7 +401,7 @@ struct ShazamPlayButton: View {
 
 struct ShazamAddButton: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @Binding var item: SHMatchedMediaItem?
     init(shazamItem: Binding<SHMatchedMediaItem?>) {
         self._item = shazamItem
@@ -426,7 +426,7 @@ struct ShazamAddButton: View {
                 guard let appleMusicID = item?.appleMusicID else {return}
                 guard let title = item?.title else {return}
                 guard let artist = item?.artist else {return}
-                mumoryDataViewModel.choosedMusicModel = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: item?.artworkURL)
+                appCoordinator.draftMumorySong = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: item?.artworkURL)
                 appCoordinator.rootPath.removeLast(2)
             }
         }

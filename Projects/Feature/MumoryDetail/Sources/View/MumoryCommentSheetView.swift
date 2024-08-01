@@ -27,7 +27,6 @@ struct CommentView: View {
     @State private var commentUser: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
@@ -150,7 +149,7 @@ struct CommentView: View {
                         
                         Button(action: {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            mumoryDataViewModel.selectedComment = self.comment
+                            self.appCoordinator.selectedComment = self.comment
 //                            appCoordinator.isCommentBottomSheetShown = true
 //                            self.appCoordinator.bottomSheet = .comment
                             self.appCoordinator.bottomSheet = .commentMenu
@@ -244,7 +243,7 @@ struct Reply: View {
     @State private var isMyComment: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
@@ -376,7 +375,7 @@ struct Reply: View {
                     
                     Button(action: {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                        mumoryDataViewModel.selectedComment = self.comment
+                        self.appCoordinator.selectedComment = self.comment
 //                        appCoordinator.isCommentBottomSheetShown = true
 //                        self.appCoordinator.bottomSheet = .comment
                         self.appCoordinator.bottomSheet = .commentMenu
@@ -412,7 +411,7 @@ struct Reply: View {
         .onAppear {
             Task {
                 self.commentUser = await FetchManager.shared.fetchUser(uId: comment.uId)
-                self.isMyComment = await mumoryDataViewModel.checkIsMyComment(mumoryId: mumory.id ?? "", reply: comment, currentUser: currentUserViewModel.user)
+                self.isMyComment = await currentUserViewModel.mumoryViewModel.checkIsMyComment(mumoryId: mumory.id ?? "", reply: comment, currentUser: currentUserViewModel.user)
             }
         }
     }
@@ -444,7 +443,6 @@ public struct MumoryCommentSheetView: View {
     @FocusState private var isTextFieldFocused: Bool
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -578,24 +576,27 @@ public struct MumoryCommentSheetView: View {
                         self.replies = []
                         
                         Task {
-                            let result = await self.mumoryDataViewModel.fetchMumory(documentID: self.mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
-                            switch result {
-                            case .success(let mumory):
-                                let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
-                                for i in commentAndReply {
-                                    if i.parentId == "" {
-                                        self.comments.append(i)
-                                    } else {
-                                        self.replies.append(i)
-                                    }
-                                    self.comments.sort { $0.date < $1.date }
-                                    self.replies.sort { $0.date < $1.date }
+//                            await FetchManager.shared.fetchMumory(documentID: self.appCoordinator.selectedMumory.id ?? "") { result in
+//                                switch result {
+//                                case .success(let mumory):
+//                                    print("SUCCESS fetchMumory")
+//                                case .failure(let error):
+//                                    print("Failed fetch Mumory: \(error.localizedDescription)")
+//                                }
+//                            }
+                            
+                            let commentAndReply = await MumoryViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
+                            for i in commentAndReply {
+                                if i.parentId == "" {
+                                    self.comments.append(i)
+                                } else {
+                                    self.replies.append(i)
                                 }
-                                
-                                mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
-                            case .failure(let error):
-                                print("Failed to fetch Mumory: \(error.localizedDescription)")
+                                self.comments.sort { $0.date < $1.date }
+                                self.replies.sort { $0.date < $1.date }
                             }
+                            
+                            mumory.commentCount = await MumoryViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                         }
                     }
                     .onAppear {
@@ -685,7 +686,7 @@ public struct MumoryCommentSheetView: View {
                                         isButtonDisabled = true
                                         
                                         Task {
-                                            mumoryDataViewModel.createReply(mumoryId: mumory.id  ?? "", reply: Comment(id: "", uId: currentUserViewModel.user.uId, nickname: currentUserViewModel.user.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id ?? "", date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
+                                            self.currentUserViewModel.mumoryViewModel.createReply(mumoryId: mumory.id  ?? "", reply: Comment(id: "", uId: currentUserViewModel.user.uId, nickname: currentUserViewModel.user.nickname, parentId: self.selectedComment.id, mumoryId: mumory.id ?? "", date: Date(), content: self.commentText, isPublic: self.isPublic)) { result in
                                                 self.commentText = ""
                                                 switch result {
                                                 case .success(let replies):
@@ -700,12 +701,12 @@ public struct MumoryCommentSheetView: View {
                                         isButtonDisabled = true
                                         
                                         Task {
-                                            mumoryDataViewModel.createComment(mumory: mumory, comment: Comment(id: "", uId: currentUserViewModel.user.uId, nickname: currentUserViewModel.user.nickname, parentId: "", mumoryId: mumory.id ?? "", date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
+                                            self.currentUserViewModel.mumoryViewModel.createComment(mumory: mumory, comment: Comment(id: "", uId: currentUserViewModel.user.uId, nickname: currentUserViewModel.user.nickname, parentId: "", mumoryId: mumory.id ?? "", date: Date(), content: commentText, isPublic: self.isPublic)) { comments in
                                                 commentText = ""
                                                 self.comments = comments
                                                 isButtonDisabled = false
                                             }
-                                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
+                                            mumory.commentCount = await MumoryViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                                         }
                                     }
                                     
@@ -763,15 +764,9 @@ public struct MumoryCommentSheetView: View {
                 self.replies = []
                 
                 Task {
-                    let result = await self.mumoryDataViewModel.fetchMumory(documentID: mumoryDataViewModel.selectedMumoryAnnotation.id ?? "")
-                    switch result {
-                    case .success(let mumory):
-                        self.mumory = mumory
-                    case .failure(let error):
-                        print("fetchMumory failure: \(error)")
-                    }
+                    self.mumory = try await FetchManager.shared.fetchMumory(documentID: self.appCoordinator.selectedMumory.id ?? "")
                     
-                    let commentAndReply = await MumoryDataViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
+                    let commentAndReply = await MumoryViewModel.fetchComment(mumoryId: self.mumory.id ?? "") ?? []
                     for i in commentAndReply {
                         if i.parentId == "" {
                             self.comments.append(i)
@@ -782,7 +777,7 @@ public struct MumoryCommentSheetView: View {
                         self.replies.sort { $0.date < $1.date }
                     }
                     
-                    mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
+                    mumory.commentCount = await MumoryViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                     //                        mumory.commentCount = comments.count
                 }
             }
@@ -807,9 +802,8 @@ public struct MumoryCommentSheetView: View {
             }
             .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
                 PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-                    mumoryDataViewModel.isUpdating = true
                     
-                    self.mumoryDataViewModel.deleteComment(comment: mumoryDataViewModel.selectedComment) { comments in
+                    self.currentUserViewModel.mumoryViewModel.deleteComment(comment: self.appCoordinator.selectedComment) { comments in
                         Task {
                             self.comments = []
                             self.replies = []
@@ -821,11 +815,15 @@ public struct MumoryCommentSheetView: View {
                                 }
                             }
                             
-                            mumory.commentCount = await MumoryDataViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
+                            mumory.commentCount = await MumoryViewModel.fetchCommentCount(mumoryId: mumory.id ?? "")
                             
-                            mumoryDataViewModel.updateMumory(mumory) {
-                                mumoryDataViewModel.isUpdating = false
-                                appCoordinator.isDeleteCommentPopUpViewShown = false
+                            self.currentUserViewModel.mumoryViewModel.updateMumory(mumory) { result in
+                                switch result {
+                                case .success():
+                                    appCoordinator.isDeleteCommentPopUpViewShown = false
+                                case .failure(let error):
+                                    print("ERROR updateMumory: \(error.localizedDescription)")
+                                }
                             }
                         }
                     }

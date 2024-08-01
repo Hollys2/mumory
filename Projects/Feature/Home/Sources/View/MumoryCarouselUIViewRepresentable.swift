@@ -15,7 +15,7 @@ struct MumoryCardView: View {
     
     @Binding var isAnnotationTapped: Bool
     
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
         ZStack {
@@ -26,7 +26,7 @@ struct MumoryCardView: View {
             
             VStack(spacing: 16) {
                 
-                MumoryCarouselUIViewRepresentable(mumoryAnnotations: $mumoryDataViewModel.mumoryCarouselAnnotations)
+                MumoryCarouselUIViewRepresentable(mumoryAnnotations: $currentUserViewModel.mumoryViewModel.mumoryCarouselAnnotations)
                     .frame(height: 418)
                     .padding(.horizontal, (UIScreen.main.bounds.width - (getUIScreenBounds().width == 375 ? 296 : 310)) / 2 - 10)
                 
@@ -115,10 +115,9 @@ struct MumoryCard: View {
     
     @Binding var mumory: Mumory
     
-    let selectedIndex: Int
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+
+    let selectedIndex: Int
     
     var body: some View {
         ZStack {
@@ -235,7 +234,7 @@ struct MumoryCard: View {
                     Spacer()
                     
                     Button(action: {
-                        mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                        appCoordinator.tappedMumory = mumory
                         appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage

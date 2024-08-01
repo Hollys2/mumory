@@ -27,17 +27,17 @@ import Shared
 //    @State private var isDeletePopUpShown: Bool = false
 //    
 //    @State private var calendarDate: Date = Date()
-//    @State private var tags: [String]? = nil
+//    @State private var tags: [String] = []
 //    @State private var contentText: String = ""
-//    @State private var imageURLs: [String]? = nil
+//    @State private var imageURLs: [String] = []
 //    @State private var isPublic: Bool = true
 //    @State private var calendarYOffset: CGFloat = .zero
 //    
 //    @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
 //    
 //    @EnvironmentObject private var appCoordinator: AppCoordinator
-//    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-//    @EnvironmentObject private var currentUserData: CurrentUserData
+//    
+//    @EnvironmentObject private var currentUserData: CurrentUserViewModel
 //    @EnvironmentObject private var keyboardResponder: KeyboardResponder
 //    @EnvironmentObject private var playerViewModel: PlayerViewModel
 //    
@@ -54,12 +54,12 @@ import Shared
 //            }
 //            .onEnded { value in
 //                if value.translation.height > 100 {
-//                    mumoryDataViewModel.choosedMusicModel = nil
-//                    mumoryDataViewModel.choosedLocationModel = nil
-//                    tags?.removeAll()
+////                    mumoryDataViewModel.choosedMusicModel = nil
+////                    mumoryDataViewModel.choosedLocationModel = nil
+////                    tags?.removeAll()
 //                    contentText.removeAll()
 //                    photoPickerViewModel.removeAllSelectedImages()
-//                    imageURLs?.removeAll()
+////                    imageURLs?.removeAll()
 //                    withAnimation(.spring(response: 0.1)) {
 //                        appCoordinator.sheet = .none
 //                    }
@@ -132,16 +132,16 @@ import Shared
 //                        Button(action: {
 //                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 //                            
-//                            if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
-//                                self.isPublishPopUpShown = true
-//                            } else {
-//                                self.isPublishErrorPopUpShown = true
-//                            }
+////                            if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
+////                                self.isPublishPopUpShown = true
+////                            } else {
+////                                self.isPublishErrorPopUpShown = true
+////                            }
 //                        }) {
 //                            Rectangle()
 //                                .foregroundColor(.clear)
 //                                .frame(width: 46, height: 30)
-//                                .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
+////                                .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
 //                                .cornerRadius(31.5)
 //                                .overlay(
 //                                    Text("게시")
@@ -281,7 +281,7 @@ import Shared
 //                            .padding(.horizontal, 20)
 //                        } // VStack
 //                        .padding(.top, 20)
-//                        .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
+//                        .padding(.bottom, 71 + getSafeAreaInsets().bottom)
 //                        .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
 //                    } // ScrollView
 //                    .scrollIndicators(.hidden)
@@ -292,14 +292,26 @@ import Shared
 //            } // VStack
 //            .background(SharedAsset.backgroundColor.swiftUIColor)
 //            .cornerRadius(23, corners: [.topLeft, .topRight])
-//            .padding(.top, appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16))
+//            .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
 //            .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
-//                DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
-//                    .datePickerStyle(.graphical)
-//                    .labelsHidden()
-//                    .accentColor(SharedAsset.mainColor.swiftUIColor)
-//                    .background(SharedAsset.backgroundColor.swiftUIColor)
-//                    .environment(\.locale, Locale.init(identifier: "ko_KR"))
+////                DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
+////                    .datePickerStyle(.graphical)
+////                    .labelsHidden()
+////                    .accentColor(SharedAsset.mainColor.swiftUIColor)
+////                    .background(SharedAsset.backgroundColor.swiftUIColor)
+////                    .environment(\.locale, Locale.init(identifier: "ko_KR"))
+//                
+//                CustomDatePicker(
+//                    date:self.$calendarDate,
+//                    minimumDate: nil,
+//                    maximumDate: Date(), // 오늘 날짜까지 선택 가능
+//                    mode: .date
+//                )
+//                .frame(width: 300, height: 300)
+//                .labelsHidden()
+//                .accentColor(SharedAsset.mainColor.swiftUIColor)
+//                .background(SharedAsset.backgroundColor.swiftUIColor)
+//                .environment(\.locale, Locale(identifier: "ko_KR"))
 //            }
 //            .popup(show: self.$isPublishPopUpShown, content: {
 //                PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
@@ -310,76 +322,76 @@ import Shared
 //                                                of: calendarDate) ?? Date()
 //                    self.calendarDate = newDate
 //
-//                    if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
-//                       let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-//                        mumoryDataViewModel.isLoading = true
-//
-//                        let dispatchGroup = DispatchGroup()
-//
-//                        for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
-//
-//                            guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
-//                                print("Could not convert image to Data.")
-//                                continue
-//                            }
-//
-//                            dispatchGroup.enter()
-//
-//                            let imageRef = FirebaseManager.shared.storage.reference().child("mumoryImages/\(UUID().uuidString).jpg")
-//                            _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
-//                                guard metadata != nil else {
-//                                    print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
-//                                    dispatchGroup.leave()
-//                                    return
-//                                }
-//
-//                                imageRef.downloadURL { (url, error) in
-//                                    guard let url = url, error == nil else {
-//                                        print("Error getting download URL: \(error?.localizedDescription ?? "")")
-//                                        dispatchGroup.leave()
-//                                        return
-//                                    }
-//
-//                                    print("Download URL for Image \(index + 1)")
-//                                    self.imageURLs?.append(url.absoluteString)
-//                                    dispatchGroup.leave()
-//                                }
-//                            }
-//                        }
-//
-//                        dispatchGroup.notify(queue: .main) {
-//
-//                            let newMumory = Mumory(uId: currentUserData.user.uId, date: self.calendarDate, song: choosedMusicModel, location: choosedLocationModel, isPublic: self.isPublic, tags: self.tags, content: self.contentText.isEmpty ? nil : contentText, imageURLs: self.imageURLs, commentCount: 0, myCommentCount: 0)
-//
-//                            mumoryDataViewModel.createMumory(newMumory) { result in
-//                                switch result {
-//                                case .success:
-//                                    self.generateHapticFeedback(style: .medium)
-//                                    print("뮤모리 만들기 성공")
-//                                    mumoryDataViewModel.isLoading = false
-//                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
-//
-//                                    mumoryDataViewModel.choosedMusicModel = nil
-//                                    mumoryDataViewModel.choosedLocationModel = nil
-//                                    self.tags?.removeAll()
-//                                    self.contentText.removeAll()
-//                                    photoPickerViewModel.removeAllSelectedImages()
-//                                    self.imageURLs?.removeAll()
-//
-//                                case .failure(let error):
-//                                    print("뮤모리 만들기 실패: \(error.localizedDescription)")
-//                                }
-//                            }
-//
-//                            withAnimation(Animation.easeInOut(duration: 0.1)) {
-//                                isPublishPopUpShown = false
-//                                appCoordinator.sheet = .none
-//                                appCoordinator.selectedTab = .home
-//                                appCoordinator.rootPath = NavigationPath()
-//                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
-//                            }
-//                        }
-//                    }
+////                    if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
+////                       let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
+////                        mumoryDataViewModel.isLoading = true
+////
+////                        let dispatchGroup = DispatchGroup()
+////
+////                        for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
+////
+////                            guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
+////                                print("Could not convert image to Data.")
+////                                continue
+////                            }
+////
+////                            dispatchGroup.enter()
+////
+////                            let imageRef = FirebaseManager.shared.storage.reference().child("mumoryImages/\(UUID().uuidString).jpg")
+////                            _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
+////                                guard metadata != nil else {
+////                                    print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
+////                                    dispatchGroup.leave()
+////                                    return
+////                                }
+////
+////                                imageRef.downloadURL { (url, error) in
+////                                    guard let url = url, error == nil else {
+////                                        print("Error getting download URL: \(error?.localizedDescription ?? "")")
+////                                        dispatchGroup.leave()
+////                                        return
+////                                    }
+////
+////                                    print("Download URL for Image \(index + 1)")
+////                                    self.imageURLs?.append(url.absoluteString)
+////                                    dispatchGroup.leave()
+////                                }
+////                            }
+////                        }
+////
+////                        dispatchGroup.notify(queue: .main) {
+////
+////                            let newMumory = Mumory(uId: currentUserData.user.uId, date: self.calendarDate, song: choosedMusicModel, location: choosedLocationModel, isPublic: self.isPublic, tags: self.tags, content: self.contentText.isEmpty ? nil : contentText, imageURLs: self.imageURLs, commentCount: 0, myCommentCount: 0)
+////
+////                            mumoryDataViewModel.createMumory(newMumory) { result in
+////                                switch result {
+////                                case .success:
+////                                    self.generateHapticFeedback(style: .medium)
+////                                    print("뮤모리 만들기 성공")
+////                                    mumoryDataViewModel.isLoading = false
+////                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+////
+////                                    mumoryDataViewModel.choosedMusicModel = nil
+////                                    mumoryDataViewModel.choosedLocationModel = nil
+////                                    self.tags?.removeAll()
+////                                    self.contentText.removeAll()
+////                                    photoPickerViewModel.removeAllSelectedImages()
+////                                    self.imageURLs?.removeAll()
+////
+////                                case .failure(let error):
+////                                    print("뮤모리 만들기 실패: \(error.localizedDescription)")
+////                                }
+////                            }
+////
+////                            withAnimation(Animation.easeInOut(duration: 0.1)) {
+////                                isPublishPopUpShown = false
+////                                appCoordinator.sheet = .none
+////                                appCoordinator.selectedTab = .home
+////                                appCoordinator.rootPath = NavigationPath()
+////                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+////                            }
+////                        }
+////                    }
 //                })
 //            })
 //            .popup(show: self.$isPublishErrorPopUpShown, content: {
@@ -394,13 +406,13 @@ import Shared
 //            })
 //            .popup(show: self.$isDeletePopUpShown, content: {
 //                PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
-//                    mumoryDataViewModel.choosedMusicModel = nil
-//                    mumoryDataViewModel.choosedLocationModel = nil
-//                    self.calendarDate = Date()
-//                    self.tags?.removeAll()
-//                    self.contentText.removeAll()
-//                    photoPickerViewModel.removeAllSelectedImages()
-//                    self.imageURLs?.removeAll()
+////                    mumoryDataViewModel.choosedMusicModel = nil
+////                    mumoryDataViewModel.choosedLocationModel = nil
+////                    self.calendarDate = Date()
+////                    self.tags?.removeAll()
+////                    self.contentText.removeAll()
+////                    photoPickerViewModel.removeAllSelectedImages()
+////                    self.imageURLs?.removeAll()
 //                    
 //                    self.isDeletePopUpShown = false
 //                    withAnimation(.easeInOut(duration: 0.1)) {
@@ -440,7 +452,7 @@ import Shared
 //            .frame(height: 55)
 //            .padding(.leading, 25)
 //            .padding(.trailing, 20)
-//            .padding(.bottom, appCoordinator.safeAreaInsetsBottom)
+//            .padding(.bottom, getSafeAreaInsets().bottom)
 //            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
 //            .overlay(
 //                Rectangle()
@@ -449,7 +461,7 @@ import Shared
 //                    .frame(height: 0.7)
 //                , alignment: .top
 //            )
-//            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + appCoordinator.safeAreaInsetsBottom : 0)
+//            .offset(y: keyboardResponder.isKeyboardHiddenButtonShown ? -keyboardResponder.keyboardHeight + getSafeAreaInsets().bottom : 0)
 //            .opacity(self.isDatePickerShown ? 0 : 1)
 //        }
 //        .offset(y: self.offsetY)
@@ -469,14 +481,10 @@ import Shared
 struct ContainerView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     
     let title: String
     let image: Image
     var mumoryAnnotation: Mumory?
-    
-    @State private var isMusicChoosed: Bool = false
-    @State private var isLocationChoosed: Bool = false
     
     init(title: String, image: Image, mumoryAnnotation: Mumory? = nil) {
         self.title = title
@@ -507,13 +515,12 @@ struct ContainerView: View {
                 
                 if self.title == "음악 추가하기" {
                     if let mumoryAnnotation = self.mumoryAnnotation {
-                        if let choosed = self.mumoryDataViewModel.choosedMusicModel {
-                            
+                        if let song = self.appCoordinator.draftMumorySong {
                             Rectangle()
                                 .foregroundColor(.clear)
                                 .frame(width: 36, height: 36)
                                 .background(
-                                    AsyncImage(url: choosed.artworkUrl) { phase in
+                                    AsyncImage(url: song.artworkUrl) { phase in
                                         switch phase {
                                         case .success(let image):
                                             image
@@ -532,13 +539,13 @@ struct ContainerView: View {
                             
                             VStack(spacing: 5) {
                                 
-                                Text("\(choosed.title)")
+                                Text("\(song.title)")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
                                     .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
                                 
-                                Text("\(choosed.artist)")
+                                Text("\(song.artist)")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                     .lineLimit(1)
@@ -594,12 +601,12 @@ struct ContainerView: View {
                                 .frame(width: 31, height: 31)
                         }
                     } else {
-                        if let choosed = self.mumoryDataViewModel.choosedMusicModel {
+                        if let song = self.appCoordinator.draftMumorySong {
                             Rectangle()
                                 .foregroundColor(.clear)
                                 .frame(width: 36, height: 36)
                                 .background(
-                                    AsyncImage(url: choosed.artworkUrl) { phase in
+                                    AsyncImage(url: song.artworkUrl) { phase in
                                         switch phase {
                                         case .success(let image):
                                             image
@@ -618,13 +625,13 @@ struct ContainerView: View {
                             
                             VStack(spacing: 5) {
                                 
-                                Text("\(choosed.title)")
+                                Text("\(song.title)")
                                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                     .foregroundColor(.white)
                                     .lineLimit(1)
                                     .frame(width: getUIScreenBounds().width * 0.464, alignment: .leading)
                                 
-                                Text("\(choosed.artist)")
+                                Text("\(song.artist)")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 13))
                                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
                                     .lineLimit(1)
@@ -657,8 +664,8 @@ struct ContainerView: View {
                     }
                 } else {
                     if let mumoryAnnotation = self.mumoryAnnotation {
-                        if let choosed = self.mumoryDataViewModel.choosedLocationModel {
-                            Text("\(choosed.locationTitle)")
+                        if let location = self.appCoordinator.draftMumoryLocation {
+                            Text("\(location.locationTitle)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
@@ -683,8 +690,8 @@ struct ContainerView: View {
                                 .frame(width: 31, height: 31)
                         }
                     } else {
-                        if let choosed = self.mumoryDataViewModel.choosedLocationModel {
-                            Text("\(choosed.locationTitle)")
+                        if let location = self.appCoordinator.draftMumoryLocation {
+                            Text("\(location.locationTitle)")
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
                                 .foregroundColor(.white)
                                 .lineLimit(1)
@@ -723,7 +730,6 @@ struct ContainerView: View {
 }
 
 struct CalendarContainerView: View {
-    
     
     @Binding var date: Date
     

@@ -17,8 +17,10 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
     typealias UIViewType = MKMapView
     
     @Binding var locationModel: LocationModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var locationManager: LocationManager
+    
+    @State var userLocation: CLLocation?
+    
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     func makeUIView(context: Context) -> UIViewType {
         let mapView: MKMapView = .init()
@@ -29,24 +31,23 @@ struct SearchLocationMapViewRepresentable: UIViewRepresentable {
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
         
-        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan), animated: true)
-        
-        if let center = locationManager.currentLocation {
-            mapView.setRegion(MKCoordinateRegion(center: center.coordinate, span: MapConstant.defaultSpan), animated: true)
+        if let userLocation = self.currentUserViewModel.locationManagerViewModel.currentLocation {
+            mapView.setRegion(MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
         }
         
+        mapView.delegate = context.coordinator
+        mapView.overrideUserInterfaceStyle = .light
+
         context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
         context.coordinator.setCompassButton()
         context.coordinator.setPin()
-        mapView.overrideUserInterfaceStyle = .light
-        
-        mapView.delegate = context.coordinator
         
         return mapView
     }
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
+        print("FXXK SearchLocationMapView")
     }
     
     func makeCoordinator() -> Coordinator {
@@ -60,6 +61,7 @@ extension SearchLocationMapViewRepresentable {
         
         let parent: SearchLocationMapViewRepresentable
         var mapView: MKMapView?
+        var isFirst: Bool = false
         var isChanging: Bool = false {
             didSet {
                 setPin()
@@ -114,15 +116,13 @@ extension SearchLocationMapViewRepresentable {
         }
         
         @objc private func tappedGPSButton() {
-            if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
-                self.parent.locationManager.promptForLocationSettings()
+            if LocationManagerViewModel.checkLocationAuthorizationStatus() {
+                guard let mapView = mapView, let userLocation = mapView.userLocation.location else { return }
+                let regionRadius: CLLocationDistance = 1000
+                let region = MKCoordinateRegion(center: userLocation.coordinate,
+                                                latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
+                mapView.setRegion(region, animated: true)
             }
-            
-            guard let mapView = mapView, let userLocation = mapView.userLocation.location else { return }
-            let regionRadius: CLLocationDistance = 1000
-            let region = MKCoordinateRegion(center: userLocation.coordinate,
-                                            latitudinalMeters: regionRadius, longitudinalMeters: regionRadius)
-            mapView.setRegion(region, animated: true)
         }
     }
 }
@@ -135,8 +135,7 @@ extension SearchLocationMapViewRepresentable.Coordinator: MKMapViewDelegate {
     }
     
     // 사용자의 현재 위치가 변할 때
-    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-    }
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {}
 
     // 사용자가 지도를 움직이고 난 후
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -145,7 +144,7 @@ extension SearchLocationMapViewRepresentable.Coordinator: MKMapViewDelegate {
         let centerCoordinate = mapView.centerCoordinate
         let location = CLLocation(latitude: centerCoordinate.latitude, longitude: centerCoordinate.longitude)
 
-        parent.mumoryDataViewModel.getChoosedeMumoryModelLocation(location: location) { model in
+        MapManager.getLocationModel(location: location) { model in
             self.parent.locationModel = model
         }
     }

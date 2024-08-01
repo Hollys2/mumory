@@ -8,197 +8,234 @@
 
 
 import SwiftUI
+import Combine
 import FirebaseFunctions
 import Shared
 
+class SocialItemCollectionViewCell: UICollectionViewCell {
+    
+    private var hostingController: UIHostingController<SocialItemView>?
 
-struct SocialScrollViewRepresentable<Content: View>: UIViewRepresentable {
-    
-    var content: () -> Content
-    @State var isFirst: Bool = true
-    //    var onRefresh: () -> Void
-    
-    @Binding var shouldUpdate: Bool
-    @Binding var contentOffsetY: CGFloat
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    
-    init(shouldUpdate: Binding<Bool>, contentOffsetY: Binding<CGFloat>, @ViewBuilder content: @escaping () -> Content) {
-        self._shouldUpdate = shouldUpdate
-        self._contentOffsetY = contentOffsetY
-        //        self.onRefresh = onRefresh
-        self.content = content
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupHostingController()
     }
-    
-    func makeUIView(context: Context) -> UIScrollView {
-        print("FUCK makeUIView")
-        let scrollView = UIScrollView()
-        
-        scrollView.delegate = context.coordinator
-        
-        scrollView.showsVerticalScrollIndicator = true
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.backgroundColor = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
-        scrollView.bounces = true
-        
-        scrollView.contentInset.top = 68
-        scrollView.contentOffset = CGPoint(x: 0, y: -68)
-        
-        return scrollView
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupHostingController()
     }
-    
-    func updateUIView(_ uiView: UIScrollView, context: Context) {
-        print("FUCK updateUIView")
+
+    private func setupHostingController() {
+        hostingController = UIHostingController(rootView: SocialItemView(mumory: Mumory()))
         
-        let hostingController = UIHostingController(rootView: self.content()
-            .environmentObject(self.mumoryDataViewModel)
-            .environmentObject(self.currentUserViewModel))
+        guard let hostingController = hostingController else { return }
         
+        hostingController.view.frame.size = CGSize(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20 + 51)
         hostingController.view.backgroundColor = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
         
-        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+        contentView.addSubview(hostingController.view)
         
-        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: contentHeight)
-        
-        uiView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
-        
-        if context.coordinator.contentHeight != contentHeight {
-            uiView.subviews.forEach { $0.removeFromSuperview() }
-            uiView.addSubview(hostingController.view)
-        }
-        
-        context.coordinator.contentHeight = contentHeight
-        
-        let refreshControl = UIRefreshControl()
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
 
-        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
-        uiView.refreshControl = refreshControl
-        uiView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: contentView.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
     }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self)
+
+    func configure(mumory: Mumory) {
+        hostingController?.rootView = SocialItemView(mumory: mumory)
     }
 }
 
-extension SocialScrollViewRepresentable {
+
+struct CollectionViewRepresentable: UIViewRepresentable {
+
+    private let scrollPublisher = PassthroughSubject<UIScrollView, Never>()
+
+    @Binding var topBarOffsetY: CGFloat
     
-    class Coordinator: NSObject, UIScrollViewDelegate {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    
+    func makeUIView(context: Context) -> UICollectionView {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
         
-        let parent: SocialScrollViewRepresentable
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = UIColor(red: 0.09, green: 0.09, blue: 0.09, alpha: 1)
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.contentInset.top = getSafeAreaInsets().top + 68 + 25
+        collectionView.contentInset.bottom = 89 + 90
+        collectionView.register(SocialItemCollectionViewCell.self, forCellWithReuseIdentifier: "SocialItemCell")
+        collectionView.dataSource = context.coordinator
+        collectionView.delegate = context.coordinator
         
-        var preOffsetY: CGFloat = 0.0
-        var topBarOffsetY: CGFloat = 0.0
-        var contentHeight: CGFloat = .zero
-        var oldMumoryAnnotations: [Mumory] = [] // immutatable if it is declared in SocialScrollViewRepresentable
+        let refreshControl = UIRefreshControl()
+        refreshControl.tintColor = UIColor(white: 0.47, alpha: 1)
+        collectionView.refreshControl = refreshControl
+        collectionView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
         
-        var isRefreshing = false
+        context.coordinator.collectionView = collectionView
+//        context.coordinator.cancellable = self.scrollPublisher
+//            .sink { scrollView in
+//                let contentOffsetY = scrollView.contentOffset.y
+//                let contentHeight = scrollView.contentSize.height
+//                let scrollViewHeight = scrollView.frame.size.height
+//                let limitHeight = self.getSafeAreaInsets().top + 68
+//                let deltaY = contentOffsetY - self.previousOffsetY
+//
+////                self.topBarOffsetY += (contentOffsetY - self.previousOffsetY)
+////                if self.topBarOffsetY < .zero || contentOffsetY <= .zero {
+////                    self.topBarOffsetY = .zero
+////                } else if self.topBarOffsetY > limitHeight || contentOffsetY >= contentHeight - scrollViewHeight {
+////                    self.topBarOffsetY = limitHeight
+////                }
+////
+////                self.previousOffsetY = contentOffsetY
+//            }
+        //            .store(in: &context.coordinator.cancellables)
         
-        init(parent: SocialScrollViewRepresentable) {
+        DispatchQueue.main.async {
+            self.appCoordinator.isSocialLoading = true
+            self.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.currentUserViewModel) { result in
+                switch result {
+                case .success(_):
+                    print("FUCK SUCCESS fetchSocialMumory onAppear")
+                case .failure(let error):
+                    print("FUCK FAILURE fetchSocialMumory onAppear: \(error.localizedDescription)")
+                }
+                collectionView.reloadData()
+                self.appCoordinator.isSocialLoading = false
+            }
+        }
+        
+        return collectionView
+    }
+
+    func updateUIView(_ uiView: UICollectionView, context: Context) {
+        if self.appCoordinator.isScrollToTop {
+            uiView.setContentOffset(CGPoint(x: 0, y: -(getSafeAreaInsets().top + 68 + 25)), animated: true)
+            DispatchQueue.main.async {
+                self.appCoordinator.isScrollToTop = false
+            }
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    class Coordinator: NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+        let parent: CollectionViewRepresentable
+        weak var collectionView: UICollectionView?
+        var previousOffsetY: CGFloat = .zero
+        var isFetched: Bool = false
+        
+        var cancellable: AnyCancellable?
+
+        init(parent: CollectionViewRepresentable) {
             self.parent = parent
-            //            super.init()
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+            return self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count
+        }
+
+        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+            guard indexPath.item < self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count else {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SocialItemCell", for: indexPath)
+                return cell
+            }
+            
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SocialItemCell", for: indexPath) as! SocialItemCollectionViewCell
+            let mumory = self.parent.currentUserViewModel.mumoryViewModel.socialMumorys[indexPath.item]
+            cell.configure(mumory: mumory)
+            return cell
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+            return CGSize(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20 + 51)
+        }
+        
+        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+              return 40 // 세로 셀 간의 간격
+          }
+        
+        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+            return 0 // 가로 셀 간의 간격
+        }
+        
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            self.parent.scrollPublisher.send(scrollView)
+            
+            let contentOffsetY = scrollView.contentOffset.y + self.parent.getSafeAreaInsets().top + 68 + 25
+            let contentHeight = scrollView.contentSize.height
+            let scrollViewHeight = scrollView.frame.size.height
+            let limitHeight = self.parent.getSafeAreaInsets().top + 68
+            let deltaY = contentOffsetY - self.previousOffsetY
+            
+            if !self.isFetched {
+                if deltaY > 0 {
+                    if contentOffsetY >= contentHeight - scrollViewHeight - self.parent.getUIScreenBounds().width - 161 {
+                        self.isFetched = true
+                        
+                        self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel) { result in
+                            switch result {
+                            case .success(let count):
+                                if count != 0 {
+                                    print("FUCK SUCCESS fetchSocialMumory 더 가져오기")
+                                    self.collectionView?.reloadData()
+                                }
+                            case .failure(let error):
+                                print("FUCK FAILURE fetchSocialMumory 더 가져오기 \(error.localizedDescription)")
+                            }
+                            self.isFetched = false
+                        }
+                    }
+                }
+            }
+            
+            self.parent.topBarOffsetY += (contentOffsetY - self.previousOffsetY)
+            
+            if self.parent.topBarOffsetY < .zero || contentOffsetY <= .zero {
+                self.parent.topBarOffsetY = .zero
+            } else if self.parent.topBarOffsetY > limitHeight || contentOffsetY - (self.parent.getSafeAreaInsets().top + 68 + 25) - 89 - 90  >= contentHeight - scrollViewHeight {
+                self.parent.topBarOffsetY = limitHeight
+            }
+            
+            self.previousOffsetY = contentOffsetY
         }
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
+            print("FUCK handleRefreshControl")
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.prepare()
             generator.impactOccurred()
-            
-            self.parent.mumoryDataViewModel.fetchSocialMumory(friends: self.parent.currentUserViewModel.friendViewModel.friends, me: self.parent.currentUserViewModel.user, isRefreshing: true) { _ in
+                        
+            self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel, isRefreshControl: true) { result in
+                switch result {
+                case .success(let count):
+                    print("FUCK SUCCESS fetchSocialMumory handlreRefreshControl!")
+                    if count != 0 {
+                        self.collectionView?.reloadData()
+                    }
+                case .failure(let error):
+                    print("FUCK FAILURE fetchSocialMumory handlreRefreshControl: \(error.localizedDescription)")
+                }
+
                 DispatchQueue.main.async {
                     sender.endRefreshing()
                 }
             }
         }
-        
-        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            let offsetY = scrollView.contentOffset.y
-            let topAnchor = self.parent.getSafeAreaInsets().top + 68
-            
-            let deltaY = offsetY - preOffsetY
-            
-            if deltaY > 0 { // Scrolling down
-                topBarOffsetY = min(topBarOffsetY + deltaY, topAnchor)
-            } else { // Scrolling up
-                topBarOffsetY = max(topBarOffsetY + deltaY, 0)
-            }
-            
-            DispatchQueue.main.async {
-                self.parent.contentOffsetY = self.topBarOffsetY
-            }
-            
-            preOffsetY = offsetY
-            
-            //            let offsetY = scrollView.contentOffset.y
-            let contentHeight = scrollView.contentSize.height
-            let scrollViewHeight = scrollView.bounds.height
-            //            let topAnchor = self.parent.getSafeAreaInsets().top + 68
-            //
-            //            print("SSS offsetY: \(offsetY)")
-            //            print("SSS preOffsetY: \(preOffsetY)")
-            //
-            //            topBarOffsetY += (offsetY - preOffsetY)
-            //
-            //            if topBarOffsetY < .zero || offsetY <= .zero {
-            //                topBarOffsetY = .zero
-            //                print("SSS zero")
-            //            } else if topBarOffsetY > topAnchor || offsetY >= contentHeight - scrollViewHeight {
-            //                topBarOffsetY = topAnchor
-            //                print("SSS limitHeight")
-            //            }
-            //
-            //            DispatchQueue.main.async {
-            //                self.parent.contentOffsetY = self.topBarOffsetY
-            //            }
-            //
-            //            preOffsetY = offsetY
-            
-            
-            if offsetY >=  (contentHeight - scrollViewHeight - 100) {
-                print("SSS onRefresh")
-                
-                if !isRefreshing {
-                    isRefreshing = true
-                    //                    parent.onRefresh()
-                    //                onRefresh: {
-                    //                    self.mumoryDataViewModel.fetchEveryMumory(friends: currentUserViewModel.friendViewModel.friends, me: currentUserViewModel.user) { _ in
-                    
-                    //                    }
-                    //                    self.generateHapticFeedback(style: .medium)
-                    //                }
-                }
-//                else {
-//                    isRefreshing = false
-//                }
-            }
-        }
     }
 }
 
-struct SocialScrollCotentView: View {
-    
-    @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            
-            ForEach(Array(Set(self.mumoryDataViewModel.socialMumorys)).sorted(by: { $0.date > $1.date }), id: \.id) { i in
-                SocialItemView(mumory: i)
-            }
-            
-            Spacer(minLength: 0)
-        }
-        .frame(width: UIScreen.main.bounds.width - 20)
-        .padding(.top, 25)
-        .padding(.bottom, 90)
-    }
-}
-
-struct SocialItemView: View {
+private struct SocialItemView: View {
     
     @State private var isMapViewShown: Bool = false
     @State private var isTruncated: Bool = false
@@ -207,14 +244,12 @@ struct SocialItemView: View {
     @State var user: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     let mumory: Mumory
     
     var body: some View {
-        
         VStack(spacing: 0) {
             
             HStack(spacing: 8) {
@@ -303,8 +338,9 @@ struct SocialItemView: View {
                 .frame(height: 38)
             } // HStack
             .frame(height: 38)
+            .padding(.bottom, 13)
             
-            Spacer().frame(height: 13)
+//            Spacer().frame(height: 13)
             
             ZStack(alignment: .topLeading) {
                 
@@ -331,7 +367,6 @@ struct SocialItemView: View {
                     )
                     .cornerRadius(15)
                 
-                
                 SharedAsset.artworkFilterSocial.swiftUIImage
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
@@ -339,14 +374,14 @@ struct SocialItemView: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
-                                mumoryDataViewModel.selectedMumoryAnnotation = mumory
+//                                mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                                self.appCoordinator.selectedMumory = mumory
                                 self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                             }
                     )
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
-                    
                     //                    Button {
                     //                        Task {
                     //                            guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
@@ -416,16 +451,16 @@ struct SocialItemView: View {
                     }
                     
                     Spacer()
+                  
                     
-                    Button(action: {
-                        self.appCoordinator.choosedMumoryAnnotation = self.mumory
-                        appCoordinator.bottomSheet = .socialMenu
-                    }, label: {
-                        SharedAsset.menuButtonSocial.swiftUIImage
-                            .resizable()
-                            .frame(width: 22, height: 22)
-                            .padding()
-                    })
+                    SharedAsset.menuButtonSocial.swiftUIImage
+                        .resizable()
+                        .frame(width: 22, height: 22)
+                        .padding()
+                        .onTapGesture {
+                            self.appCoordinator.selectedMumory = self.mumory
+                            self.appCoordinator.sheet = .socialMenu
+                        }
                     
                 } // HStack
                 .padding(.top, 1)
@@ -551,25 +586,32 @@ struct SocialItemView: View {
                         _ = self.mumory.likes
                         
                         Task {
-                            await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserViewModel.user.uId) { likes in
-                                print("likeMumory successfully")
-                                self.mumory.likes = likes
-                                isButtonDisabled = false
+                            await self.currentUserViewModel.mumoryViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserViewModel.user.uId) { result in
                                 
-                                lazy var functions = Functions.functions()
-                                functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
-                                    if let error = error {
-                                        //                                        self.mumory.likes = originLikes
-                                        print("Error Functions \(error.localizedDescription)")
-                                    } else {
-                                        //                                        self.mumory.likes = likes
-                                        print("라이크 함수 성공: \((mumory.likes ?? []).count)")
+                                switch result {
+                                case .success(let likes):
+                                    print("likeMumory successfully")
+                                    self.mumory.likes = likes
+                                    isButtonDisabled = false
+                                    
+                                    lazy var functions = Functions.functions()
+                                    functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
+                                        if let error = error {
+                                            //                                        self.mumory.likes = originLikes
+                                            print("Error Functions \(error.localizedDescription)")
+                                        } else {
+                                            //                                        self.mumory.likes = likes
+                                            print("라이크 함수 성공: \((mumory.likes ?? []).count)")
+                                        }
                                     }
+                                    
+                                case .failure(let error):
+                                    print("ERROR likeMumory: \(error)")
                                 }
                             }
                         }
                     }, label: {
-                        (mumory.likes ?? []).contains(currentUserData.user.uId) ?
+                        (mumory.likes ?? []).contains(currentUserViewModel.user.uId) ?
                         SharedAsset.heartOnButtonMumoryDetail.swiftUIImage
                             .resizable()
                             .frame(width: 42, height: 42)
@@ -598,7 +640,9 @@ struct SocialItemView: View {
                     }
                     
                     Button(action: {
-                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
+//                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
+                        self.appCoordinator.selectedMumory = self.mumory
+                        
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             //                            self.appCoordinator.isSocialCommentSheetViewShown = true
                             self.appCoordinator.sheet = .comment
@@ -627,10 +671,8 @@ struct SocialItemView: View {
                     d[.bottom] - (UIScreen.main.bounds.width - 20) + 23
                 }
             } // ZStack
-            
-            Spacer().frame(height: 40)
         } // VStack
-        .frame(height: getUIScreenBounds().width + 71)
+        .frame(width: getUIScreenBounds().width - 20, height: getUIScreenBounds().width - 20 + 51)
         .onAppear {
             Task {
                 self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
@@ -646,46 +688,35 @@ public struct SocialView: View {
     
     @Binding private var isSocialSearchViewShown: Bool
     
-    @State private var shouldUpdate = true
-    
     @State private var offsetY: CGFloat = 0
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
-    public init(isShown: Binding<Bool>) {
+    public init(isSocialSearchViewShown: Binding<Bool>) {
         UIScrollView.appearance().bounces = true
-        self._isSocialSearchViewShown = isShown
+        self._isSocialSearchViewShown = isSocialSearchViewShown
     }
     
     public var body: some View {
-        
         ZStack(alignment: .top) {
-            //            Color(red: 0.09, green: 0.09, blue: 0.09)
-            //                .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            SocialScrollViewRepresentable(shouldUpdate: self.$shouldUpdate, contentOffsetY: self.$offsetY) {
-                if self.mumoryDataViewModel.socialMumorys.isEmpty {
-                    noMumoryView
-                } else {
-                    SocialScrollCotentView()
-                }
-            }
+            Color(red: 0.09, green: 0.09, blue: 0.09)
             
-            if mumoryDataViewModel.isUpdating, !mumoryDataViewModel.isFirstSocialLoad {
+            CollectionViewRepresentable(topBarOffsetY: self.$offsetY)
+
+            if self.appCoordinator.isSocialLoading {
                 SocialLoadingView()
             }
             
             HStack(alignment: .top, spacing: 0) {
-                
                 Text("소셜")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                     .foregroundColor(.white)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     self.isSocialSearchViewShown = true
                 }) {
@@ -693,9 +724,9 @@ public struct SocialView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-                
+
                 Spacer().frame(width: 12)
-                
+
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         self.appCoordinator.isAddFriendViewShown = true
@@ -705,9 +736,9 @@ public struct SocialView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-                
+
                 Spacer().frame(width: 12)
-                
+
                 Button(action: {
                     appCoordinator.isMyPageViewShown = true
                 }) {
@@ -729,22 +760,13 @@ public struct SocialView: View {
             .frame(height: 68)
             .padding(.horizontal, 20)
             .padding(.top, getSafeAreaInsets().top)
-            //            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-            .background(.brown)
+            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
         }
         .onAppear {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             playerViewModel.isShownMiniPlayerInLibrary = false
             
-            if !self.appCoordinator.isFirstTabSelected {
-                self.mumoryDataViewModel.fetchSocialMumory(friends: currentUserViewModel.friendViewModel.friends, me: currentUserViewModel.user, isRefreshing: false) { _ in
-                    print("FUCK fetchSocialMumory")
-                }
-                self.appCoordinator.isFirstTabSelected = true
-            }
-            
-//            FirebaseManager.shared.observeFriendRequests()
             print("FUCK SocialView onAppear")
         }
         .onDisappear {
@@ -754,7 +776,6 @@ public struct SocialView: View {
     
     private var noMumoryView: some View {
         VStack(spacing: 0) {
-            
             SharedAsset.socialInitIcon.swiftUIImage
                 .resizable()
                 .frame(width: 96.74, height: 57)
@@ -777,6 +798,6 @@ public struct SocialView: View {
                 .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
                 .fixedSize(horizontal: true, vertical: true)
         }
-        .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height - 89 - getSafeAreaInsets().top - 68)
+        .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height - 89)
     }
 }

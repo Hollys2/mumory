@@ -213,9 +213,9 @@ struct SocialFriendView: View {
             
             
             if status == .friendProcessLoading || status == .loading {
-                LoadingAnimationView(isLoading: .constant(true))
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, getUIScreenBounds().height * 0.5)
+//                LoadingAnimationView(isLoading: .constant(true))
+//                    .frame(maxWidth: .infinity, alignment: .center)
+//                    .padding(.top, getUIScreenBounds().height * 0.5)
             }
    
 
@@ -263,7 +263,7 @@ struct SocialFriendView: View {
             }else {
                 status = .valid
             }
-            self.friendSearchResult = await FetchManager.shared.fetchUser(uId: friendUID)
+            self.friendSearchResult = await FetchManager.shared.fetchUser(uId: friendUID, appCoordinator: self.appCoordinator)
         }
     }
 }

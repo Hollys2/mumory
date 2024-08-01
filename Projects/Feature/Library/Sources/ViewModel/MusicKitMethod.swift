@@ -21,6 +21,15 @@ public func fetchSong(songID: String) async -> Song? {
     return song
 }
 
+private func fetchSong(songId: String) async -> Song? {
+    let musicItemID = MusicItemID(rawValue: songId)
+    var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+    request.properties = [.genres, .artists]
+    guard let response = try? await request.response() else {return nil}
+    guard let song = response.items.first else {return nil}
+    return song
+}
+
 
 public func fetchDetailSong(songID: String) async -> Song? {
     let musicItemID = MusicItemID(rawValue: songID)

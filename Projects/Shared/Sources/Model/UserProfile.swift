@@ -21,7 +21,7 @@ public struct UserProfile: Hashable {
     
     public init() {
         self.uId = ""
-        self.nickname = "UNKNOWN"
+        self.nickname = ""
         self.id = ""
         self.profileImageURL = URL(string: "")
         self.backgroundImageURL = URL(string: "")

@@ -17,17 +17,13 @@ import Shared
 
 public struct HomeView: View {
     
-    @State private var listener: ListenerRegistration?
+    @State private var mumorylistener: ListenerRegistration?
     @State private var rewardListener: ListenerRegistration?
     @State private var activityListener: ListenerRegistration?
     @State private var isSocialSearchViewShown: Bool = false
-    
     @State private var isAnnotationTapped: Bool = false
     
-    @ObservedObject private var tabViewModel: TabViewModel = TabViewModel.shared
-    
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
@@ -35,35 +31,70 @@ public struct HomeView: View {
     @StateObject private var settingViewModel: SettingViewModel = .init()
     @StateObject private var friendDataViewModel: FriendDataViewModel = .init()
     @StateObject private var withdrawViewModel: WithdrawViewModel = .init()
+
+    @State private var selectedTab: Tab = .home
+    
     public init() {}
     
     public var body: some View {
+        
         NavigationStack(path: $appCoordinator.rootPath) {
+            
             ZStack(alignment: .bottom) {
-                
-                VStack(spacing: 0) {
-                    switch self.appCoordinator.selectedTab {
-                    case .home:
-                        HomeMapView(isAnnotationTapped: self.$isAnnotationTapped)
-                    case .social:
-                        SocialView(isShown: self.$isSocialSearchViewShown)
-                    case .library:
-                        LibraryView()
-                    case .notification:
-                        NotifyView()
-                    }
-                    
-                    MumoryTabView()
-                        .overlay(CreateMumoryPopUpView(), alignment: .top)
-                }
+
+                MumoryTabViewControllerRepresentable(
+                    viewControllers: [
+                        makeViewController(title: "Home",
+                                           image: SharedAsset.homeOffTabbar.image.resized(to: CGSize(width: 25, height: 41)),
+                                           selectedImage: SharedAsset.homeOnTabbar.image.resized(to: CGSize(width: 25, height: 41)),
+                                           content: HomeMapView(isAnnotationTapped: self.$isAnnotationTapped).ignoresSafeArea()),
+                        makeViewController(title: "Social",
+                                           image: SharedAsset.socialOffTabbar.image.resized(to: CGSize(width: 35, height: 45)),
+                                           selectedImage: SharedAsset.socialOnTabbar.image.resized(to: CGSize(width: 35, height: 45)),
+                                           content: SocialView(isSocialSearchViewShown: self.$isSocialSearchViewShown).ignoresSafeArea()),
+                        makeViewController(title: "CreateMumory",
+                                           image: SharedAsset.createMumoryTabbar.image.resized(to: CGSize(width: 51, height: 51)),
+                                           selectedImage: SharedAsset.createMumoryTabbar.image.resized(to: CGSize(width: 51, height: 51)),
+                                           content: EmptyView()),
+                        makeViewController(title: "Library",
+                                           image: SharedAsset.libraryOffTabbar.image.resized(to: CGSize(width: 43, height: 45)),
+                                           selectedImage: SharedAsset.libraryOnTabbar.image.resized(to: CGSize(width: 43, height: 45)),
+                                           content: LibraryView().ignoresSafeArea()),
+                        makeViewController(title: "Notification",
+                                           image: SharedAsset.notificationOffTabbar.image.resized(to: CGSize(width: 31, height: 44)),
+                                           selectedImage: SharedAsset.notificationOnTabbar.image.resized(to: CGSize(width: 31, height: 44)),
+                                           content: NotifyView().ignoresSafeArea())
+                    ],
+//                    selectedIndex: self.$appCoordinator.selectedIndex
+                    selectedTab: self.$appCoordinator.selectedTab
+                )
                 
                 MiniPlayerView()
                 
                 switch self.appCoordinator.sheet {
                 case .createMumory:
-                    Color.black.opacity(0.6)
+                    CreateMumorySheetUIViewRepresentable()
                     
-                    CreateMumoryBottomSheetView()
+                    if self.appCoordinator.isDatePickerShown {
+                        
+                        ZStack {
+                            Color.black
+                                .opacity(0.1)
+                                .onTapGesture {
+                                    self.appCoordinator.isDatePickerShown.toggle()
+                                }
+                            
+                            DatePicker("", selection: self.$appCoordinator.selectedDate, in: ...Date(), displayedComponents: [.date])
+                                .datePickerStyle(.graphical)
+                                .labelsHidden()
+                                .accentColor(SharedAsset.mainColor.swiftUIColor)
+                                .frame(width: 280)
+                                .padding(10)
+                                .background(SharedAsset.backgroundColor.swiftUIColor)
+                                .cornerRadius(15)
+                                .environment(\.locale, Locale.init(identifier: "ko_KR"))
+                        }
+                    }
                     
                 case .comment:
                     Color.black.opacity(0.6)
@@ -75,11 +106,16 @@ public struct HomeView: View {
                     
                     MumoryCommentSheetView()
                     
-                default:
+                case .reward:
                     EmptyView()
+                case .none:
+                    //                default:
+                    //                    EmptyView()
+                    
+                    EmptyView()
+                case .socialMenu:
+                    EmptyView()                    
                 }
-                
-                
                 
                 if self.isAnnotationTapped {
                     MumoryCardView(isAnnotationTapped: self.$isAnnotationTapped)
@@ -99,6 +135,10 @@ public struct HomeView: View {
                     SocialSearchView(isShown: self.$isSocialSearchViewShown)
                 }
             } // ZStack
+            .bottomSheet(
+                sheet: self.$appCoordinator.sheet,
+                mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: .mumorySocialView, mumoryAnnotation: self.appCoordinator.selectedMumory)
+            )
             .navigationBarBackButtonHidden()
             .ignoresSafeArea()
             .onAppear {
@@ -123,8 +163,10 @@ public struct HomeView: View {
                             self.showAlertToRedirectToSettings()
                         }
                     }
+                    
                     currentUserViewModel.playlistViewModel.savePlaylist()
                 }
+                
                 print("HomeView onAppear")
             }
             .onDisappear {
@@ -154,7 +196,7 @@ public struct HomeView: View {
             .navigationDestination(for: MumoryView.self) { view in
                 switch view.type {
                 case .mumoryDetailView:
-                    MumoryDetailView(mumory: view.mumoryAnnotation)
+                    MumoryDetailView()
                 case .editMumoryView:
                     MumoryEditView(mumory: view.mumoryAnnotation)
                 case .myMumoryView(let user):
@@ -316,11 +358,25 @@ public struct HomeView: View {
                     ActivityListView()
                         .navigationBarBackButtonHidden()
                     
-                default: EmptyView()
+                default:
+                    EmptyView()
                 }
             }
         }
+    }
+    
+    func makeViewController<Content: View>(title: String, image: UIImage, selectedImage: UIImage, content: Content) -> UIViewController {
+        let viewController = UIHostingController(rootView: content)
+        let tabBarItem = UITabBarItem(title: nil, image: image.withRenderingMode(.alwaysOriginal), selectedImage: selectedImage.withRenderingMode(.alwaysOriginal))
+        if title == "CreateMumory" {
+            tabBarItem.imageInsets = UIEdgeInsets(top: 5, left: 0, bottom: -5, right: 0)
+        } else {
+            tabBarItem.imageInsets = UIEdgeInsets(top: 10, left: 0, bottom: -10, right: 0)
+        }
         
+        viewController.tabBarItem = tabBarItem
+        
+        return viewController
     }
     
     func showAlertToRedirectToSettings() {
@@ -334,6 +390,7 @@ public struct HomeView: View {
             }
         }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
         alertController.addAction(settingsAction)
         alertController.addAction(cancelAction)
         
@@ -343,9 +400,5 @@ public struct HomeView: View {
         //                window.rootViewController?.present(alertController, animated: true, completion: nil)
         //            }
         //        }
-        
     }
-    
 }
-
-

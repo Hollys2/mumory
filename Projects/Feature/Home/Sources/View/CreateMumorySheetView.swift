@@ -19,8 +19,7 @@ import Shared
 public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
@@ -35,7 +34,7 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
         view.addSubview(dimmingView)
         
         let sheetView = UIView()
-        sheetView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - self.appCoordinator.safeAreaInsetsTop - (getUIScreenBounds().height > 800 ? 8 : 16))
+        sheetView.frame = CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - getSafeAreaInsets().top - (getUIScreenBounds().height > 800 ? 8 : 16))
         
         let corners: UIRectCorner = [.topLeft, .topRight]
         let maskPath = UIBezierPath(roundedRect: sheetView.bounds,
@@ -101,12 +100,12 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
         // 나타날 때
         UIView.animate(withDuration: 0.1, delay: 0, options: [.curveEaseInOut]) {
             dimmingView.alpha = 0.5
-            sheetView.frame.origin.y = self.appCoordinator.safeAreaInsetsTop + (getUIScreenBounds().height > 800 ? 8 : 16)
+            sheetView.frame.origin.y = getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16)
         }
         
         let tapCloseButtonGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapCloseButtonGesture))
         dimmingView.addGestureRecognizer(tapCloseButtonGestureRecognizer)
-
+        
         let tapGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGesture))
         sheetView.addGestureRecognizer(tapGestureRecognizer)
         
@@ -153,7 +152,7 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 
                 if translation.y > Double(0) {
-                    sheetView.frame.origin.y = translation.y + self.parent.appCoordinator.safeAreaInsetsTop + (self.parent.getUIScreenBounds().height > 800 ? 8 : 16)
+                    sheetView.frame.origin.y = translation.y + self.parent.getSafeAreaInsets().top + (self.parent.getUIScreenBounds().height > 800 ? 8 : 16)
                 }
                 
             case .ended, .cancelled:
@@ -166,7 +165,7 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
                     }
                 } else {
                     UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveEaseInOut]) {
-                        sheetView.frame.origin.y = self.parent.appCoordinator.safeAreaInsetsTop + (self.parent.getUIScreenBounds().height > 800 ? 8 : 16)
+                        sheetView.frame.origin.y = self.parent.getSafeAreaInsets().top + (self.parent.getUIScreenBounds().height > 800 ? 8 : 16)
                     }
                 }
             default:
@@ -196,13 +195,11 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
 
 public struct CreateMumorySheetView: View {
     
-    @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
     @State private var isPublishErrorPopUpShown: Bool = false
     @State private var isTagErrorPopUpShown: Bool = false
     @State private var isDeletePopUpShown: Bool = false
     
-    @State private var calendarDate: Date = Date()
     @State private var isPublic: Bool = true
     @State private var tags: [String] = []
     @State private var contentText: String = ""
@@ -212,8 +209,7 @@ public struct CreateMumorySheetView: View {
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
@@ -254,27 +250,28 @@ public struct CreateMumorySheetView: View {
                 ZStack {
                     
                     HStack {
+                        
                         Image(uiImage: SharedAsset.closeCreateMumory.image)
                             .resizable()
                             .frame(width: 25, height: 25)
                             .onTapGesture(perform: {
-                                if let action = self.action {
-                                    action()
-                                }
                                 
-                                if mumoryDataViewModel.choosedMusicModel != nil ||
-                                    mumoryDataViewModel.choosedLocationModel != nil {
+                                if self.appCoordinator.draftMumorySong != nil ||
+                                    self.appCoordinator.draftMumoryLocation != nil {
                                     self.isDeletePopUpShown = true
                                 } else {
-                                    mumoryDataViewModel.choosedMusicModel = nil
-                                    mumoryDataViewModel.choosedLocationModel = nil
-                                    self.calendarDate = Date()
-                                    self.tags.removeAll()
-                                    self.contentText.removeAll()
-                                    photoPickerViewModel.removeAllSelectedImages()
-                                    self.imageURLs.removeAll()
+                                    if let action = self.action {
+                                        self.appCoordinator.draftMumorySong = nil
+                                        self.appCoordinator.draftMumoryLocation = nil
+                                        self.appCoordinator.selectedDate = Date()
+                                        self.tags.removeAll()
+                                        self.contentText.removeAll()
+                                        photoPickerViewModel.removeAllSelectedImages()
+                                        self.imageURLs.removeAll()
+                                        
+                                        action()
+                                    }
                                     
-                                    //                                    appCoordinator.sheet = .none
                                 }
                             })
                         
@@ -283,7 +280,7 @@ public struct CreateMumorySheetView: View {
                         Button(action: {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             
-                            if (self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) {
+                            if (self.appCoordinator.draftMumorySong != nil) && (self.appCoordinator.draftMumoryLocation != nil) {
                                 self.isPublishPopUpShown = true
                             } else {
                                 self.isPublishErrorPopUpShown = true
@@ -292,7 +289,7 @@ public struct CreateMumorySheetView: View {
                             Rectangle()
                                 .foregroundColor(.clear)
                                 .frame(width: 46, height: 30)
-                                .background((self.mumoryDataViewModel.choosedMusicModel != nil) && (self.mumoryDataViewModel.choosedLocationModel != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                .background((self.appCoordinator.draftMumorySong != nil) && (self.appCoordinator.draftMumoryLocation != nil) ? SharedAsset.mainColor.swiftUIColor : Color(red: 0.47, green: 0.47, blue: 0.47))
                                 .cornerRadius(31.5)
                                 .overlay(
                                     Text("게시")
@@ -321,15 +318,19 @@ public struct CreateMumorySheetView: View {
                             
                             VStack(spacing: 16) {
                                 
-                                NavigationLink(value: "music") {
+                                Button {
+                                    self.appCoordinator.rootPath.append("music")
+                                } label: {
                                     ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage)
                                 }
                                 
-                                NavigationLink(value: "location") {
+                                Button {
+                                    self.appCoordinator.rootPath.append("location")
+                                } label: {
                                     ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage)
                                 }
-                                
-                                CalendarContainerView(date: self.$calendarDate)
+                                                                
+                                CalendarContainerView(date: self.$appCoordinator.selectedDate)
                                     .background {
                                         GeometryReader { geometry in
                                             Color.clear
@@ -343,9 +344,8 @@ public struct CreateMumorySheetView: View {
                                     }
                                     .onTapGesture {
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                                        withAnimation(.easeInOut(duration: 0.1)) {
-                                            self.isDatePickerShown.toggle()
-                                        }
+                                        
+                                        self.appCoordinator.isDatePickerShown.toggle()
                                     }
                             }
                             .padding(.horizontal, 20)
@@ -439,7 +439,7 @@ public struct CreateMumorySheetView: View {
                             .padding(.horizontal, 20)
                         } // VStack
                         .padding(.top, 20)
-                        .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
+                        .padding(.bottom, 71 + getSafeAreaInsets().top)
                         .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? keyboardResponder.keyboardHeight + 55 : 0)
                         
                     } // ScrollView
@@ -447,29 +447,21 @@ public struct CreateMumorySheetView: View {
                     .onAppear {
                         UIScrollView.appearance().bounces = false
                     }
+                    
                 }
             } // VStack
             .background(SharedAsset.backgroundColor.swiftUIColor)
-            .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset) {
-                DatePicker("", selection: self.$calendarDate, in: ...Date(), displayedComponents: [.date])
-                    .datePickerStyle(.graphical)
-                    .labelsHidden()
-                    .accentColor(SharedAsset.mainColor.swiftUIColor)
-                    .background(SharedAsset.backgroundColor.swiftUIColor)
-                    .environment(\.locale, Locale.init(identifier: "ko_KR"))
-            }
             .popup(show: self.$isPublishPopUpShown, content: {
                 PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
                     let calendar = Calendar.current
                     let newDate = calendar.date(bySettingHour: calendar.component(.hour, from: Date()),
                                                 minute: calendar.component(.minute, from: Date()),
                                                 second: calendar.component(.second, from: Date()),
-                                                of: calendarDate) ?? Date()
-                    self.calendarDate = newDate
+                                                of: appCoordinator.selectedDate) ?? Date()
+                    self.appCoordinator.selectedDate = newDate
                     
-                    if let choosedMusicModel = mumoryDataViewModel.choosedMusicModel,
-                       let choosedLocationModel = mumoryDataViewModel.choosedLocationModel {
-                        mumoryDataViewModel.isLoading = true
+                    if let song = self.appCoordinator.draftMumorySong,
+                       let location = self.appCoordinator.draftMumoryLocation {
                         
                         let dispatchGroup = DispatchGroup()
                         
@@ -505,19 +497,17 @@ public struct CreateMumorySheetView: View {
                         }
                         
                         dispatchGroup.notify(queue: .main) {
+                            let newMumory = Mumory(uId: self.currentUserViewModel.user.uId, date: self.appCoordinator.selectedDate, song: song, location: location, isPublic: self.isPublic, tags: self.tags.isEmpty ? nil : self.tags, content: self.contentText.isEmpty ? nil : self.contentText, imageURLs: self.imageURLs.isEmpty ? nil : self.imageURLs, commentCount: 0, myCommentCount: 0)
                             
-                            let newMumory = Mumory(uId: currentUserData.user.uId, date: self.calendarDate, song: choosedMusicModel, location: choosedLocationModel, isPublic: self.isPublic, tags: self.tags, content: self.contentText.isEmpty ? nil : contentText, imageURLs: self.imageURLs, commentCount: 0, myCommentCount: 0)
-                            
-                            mumoryDataViewModel.createMumory(newMumory) { result in
+                            self.currentUserViewModel.mumoryViewModel.createMumory(newMumory) { result in
                                 switch result {
                                 case .success:
                                     self.generateHapticFeedback(style: .medium)
                                     print("뮤모리 만들기 성공")
-                                    mumoryDataViewModel.isLoading = false
                                     playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                     
-                                    mumoryDataViewModel.choosedMusicModel = nil
-                                    mumoryDataViewModel.choosedLocationModel = nil
+                                    self.appCoordinator.draftMumorySong = nil
+                                    self.appCoordinator.draftMumoryLocation = nil
                                     self.tags.removeAll()
                                     self.contentText.removeAll()
                                     photoPickerViewModel.removeAllSelectedImages()
@@ -533,7 +523,7 @@ public struct CreateMumorySheetView: View {
                                 appCoordinator.sheet = .none
                                 appCoordinator.selectedTab = .home
                                 appCoordinator.rootPath = NavigationPath()
-                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: choosedLocationModel.coordinate, span: MapConstant.defaultSpan)
+                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: location.coordinate, span: MapConstant.defaultSpan)
                             }
                         }
                     }
@@ -551,9 +541,9 @@ public struct CreateMumorySheetView: View {
             })
             .popup(show: self.$isDeletePopUpShown, content: {
                 PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
-                    mumoryDataViewModel.choosedMusicModel = nil
-                    mumoryDataViewModel.choosedLocationModel = nil
-                    self.calendarDate = Date()
+                    self.appCoordinator.draftMumorySong = nil
+                    self.appCoordinator.draftMumoryLocation = nil
+                    self.appCoordinator.selectedDate = Date()
                     self.tags.removeAll()
                     self.contentText.removeAll()
                     photoPickerViewModel.removeAllSelectedImages()
@@ -605,7 +595,6 @@ public struct CreateMumorySheetView: View {
                     .frame(height: 0.7)
                 , alignment: .top
             )
-            .opacity(self.isDatePickerShown ? 0 : 1)
         }
         .onAppear {
             print("onAppear CreateMumorySheetView")
@@ -632,7 +621,7 @@ public struct CreateMumoryContentView: View {
     
     let scrollView: UIScrollView
     
-    @State private var isDatePickerShown: Bool = false
+    //    @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
     @State private var isPublishErrorPopUpShown: Bool = false
     @State private var isTagErrorPopUpShown: Bool = false
@@ -650,8 +639,7 @@ public struct CreateMumoryContentView: View {
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserData: CurrentUserData
+    @EnvironmentObject private var currentUserData: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
@@ -687,9 +675,10 @@ public struct CreateMumoryContentView: View {
                     }
                     .onTapGesture {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            self.isDatePickerShown.toggle()
-                        }
+                        //                        withAnimation(.easeInOut(duration: 0.1)) {
+                        print("FUCK3")
+                        self.appCoordinator.isDatePickerShown.toggle()
+                        //                        }
                     }
             }
             .padding(.horizontal, 20)
@@ -714,33 +703,33 @@ public struct CreateMumoryContentView: View {
                     .frame(height: 60)
                 
                 ContentTextViewRepresentable(scrollView: self.scrollView, contentHeight: self.$contentHeight)
-//                    .frame(height: self.appCoordinator.contentHeight)
+                //                    .frame(height: self.appCoordinator.contentHeight)
                     .frame(height: self.contentHeight)
                     .background(.pink)
                 
-//                ContentContainerViewRepresentable(content: self.$contentText, scrollView: self.scrollView)
-//                    .overlay(
-//                        GeometryReader { proxy in
-//                            Color.clear
-//                                .onChange(of: proxy.size.height) { newValue in
-//                                    print("newV: \(newValue)")
-//                                }
-//                                .onAppear {
-//                                    // ContentContainerViewRepresentable의 높이가 변할 때마다 호출되는 로직
-//                                    DispatchQueue.main.async {
-//                                        // ContentContainerViewRepresentable의 높이
-//                                        let contentContainerHeight = proxy.size.height
-//
-//                                        // HStack의 Y 위치 조정
-//                                        let offset = contentContainerHeight + 16 // 예시로 상단에 16의 여백 추가
-//
-//                                        // HStack의 위치를 업데이트
-//
-//                                    }
-//                                }
-//                        }
-//
-//                            )
+                //                ContentContainerViewRepresentable(content: self.$contentText, scrollView: self.scrollView)
+                //                    .overlay(
+                //                        GeometryReader { proxy in
+                //                            Color.clear
+                //                                .onChange(of: proxy.size.height) { newValue in
+                //                                    print("newV: \(newValue)")
+                //                                }
+                //                                .onAppear {
+                //                                    // ContentContainerViewRepresentable의 높이가 변할 때마다 호출되는 로직
+                //                                    DispatchQueue.main.async {
+                //                                        // ContentContainerViewRepresentable의 높이
+                //                                        let contentContainerHeight = proxy.size.height
+                //
+                //                                        // HStack의 Y 위치 조정
+                //                                        let offset = contentContainerHeight + 16 // 예시로 상단에 16의 여백 추가
+                //
+                //                                        // HStack의 위치를 업데이트
+                //
+                //                                    }
+                //                                }
+                //                        }
+                //
+                //                            )
                 
                 HStack(spacing: 11) {
                     PhotosPicker(selection: $photoPickerViewModel.imageSelections,
@@ -803,7 +792,7 @@ public struct CreateMumoryContentView: View {
             .padding(.horizontal, 20)
         } // VStack
         .padding(.top, 20)
-        .padding(.bottom, 71 + appCoordinator.safeAreaInsetsBottom)
+        .padding(.bottom, 71 + getSafeAreaInsets().top)
     }
 }
 
@@ -826,7 +815,6 @@ struct TagContainerViewRepresentable: UIViewRepresentable {
         textField.frame = CGRect(x: 17, y: 0, width: 100, height: 60)
         textField.backgroundColor = .purple
         textField.tag = 0
-        
         
         view.addSubview(textField)
         //        NSLayoutConstraint.activate([
@@ -992,7 +980,7 @@ struct TagContainerViewRepresentable: UIViewRepresentable {
         func textFieldDidEndEditing(_ textField: UITextField) {
             guard let scrollView = scrollView else { return }
             
-//            scrollView.setContentOffset(CGPoint(x: 0, y: 300), animated: true)
+            //            scrollView.setContentOffset(CGPoint(x: 0, y: 300), animated: true)
         }
         
         func textViewDidBeginEditing(_ textView: UITextView) {
@@ -1032,12 +1020,12 @@ struct ContentContainerViewRepresentable: UIViewRepresentable {
         textView.isScrollEnabled = false
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
         
-//        textView.translatesAutoresizingMaskIntoConstraints = false
-//
-//        textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 111).isActive = true
-
+        //        textView.translatesAutoresizingMaskIntoConstraints = false
+        //
+        //        textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 111).isActive = true
+        
         view.addSubview(textView)
-
+        
         return view
     }
     
@@ -1060,9 +1048,9 @@ struct ContentContainerViewRepresentable: UIViewRepresentable {
         }
         
         @objc func buttonTapped() {
-              print("Button tapped!")
-              // 원하는 동작 구현
-          }
+            print("Button tapped!")
+            // 원하는 동작 구현
+        }
         
         func textViewDidBeginEditing(_ textView: UITextView) {
             //            guard let scrollView = scrollView else { return }
@@ -1092,7 +1080,7 @@ struct ContentTextViewRepresentable: UIViewRepresentable {
         textView.isScrollEnabled = false
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
         
-//        textView.isUserInteractionEnabled = true
+        //        textView.isUserInteractionEnabled = true
         
         return textView
     }
@@ -1119,7 +1107,7 @@ struct ContentTextViewRepresentable: UIViewRepresentable {
         
         func textViewDidChange(_ textView: UITextView) {
             print("textViewDidChange: \(textView.contentSize.height)")
-            self.parent.appCoordinator.contentHeight = textView.contentSize.height
+            //            self.parent.appCoordinator.contentHeight = textView.contentSize.height
         }
     }
     
@@ -1128,8 +1116,8 @@ struct ContentTextViewRepresentable: UIViewRepresentable {
 struct CreateMumoryScrollViewRepresentable: UIViewRepresentable {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var currentUserData: CurrentUserData
+    
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     
@@ -1148,15 +1136,7 @@ struct CreateMumoryScrollViewRepresentable: UIViewRepresentable {
         
         context.coordinator.scrollView = scrollView
         
-        let hostingController = UIHostingController(rootView:
-                                                        CreateMumoryContentView(scrollView: scrollView)
-            .environmentObject(appCoordinator)
-            .environmentObject(mumoryDataViewModel)
-            .environmentObject(currentUserData)
-            .environmentObject(keyboardResponder)
-            .environmentObject(playerViewModel)
-        )
-        
+        let hostingController = UIHostingController(rootView: CreateMumoryContentView(scrollView: scrollView))
         
         let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
         scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)

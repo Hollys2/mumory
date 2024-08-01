@@ -17,55 +17,44 @@ struct HomeMapView: View {
     
     @Binding var isAnnotationTapped: Bool
     
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var keyboardResponder: KeyboardResponder
-    @EnvironmentObject var settingViewModel: SettingViewModel
-    @EnvironmentObject var withdrawViewModel: WithdrawViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             
             HomeMapViewRepresentable(isAnnotationTapped: self.$isAnnotationTapped)
-            VStack(spacing: 0) {
-                
-                Rectangle()
-                    .foregroundColor(.clear)
-                    .frame(height: 95)
-                    .background(
-                        LinearGradient(
-                            stops: [
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.9), location: 0.08),
-                                Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
-                            ],
-                            startPoint: UnitPoint(x: 0.5, y: 0),
-                            endPoint: UnitPoint(x: 0.5, y: 1)
-                        )
-                    )
-                
-                Spacer()
-            }
-            .allowsHitTesting(false)
+                .frame(height: getUIScreenBounds().height - 89)
             
-            VStack(spacing: 0) {
-                
-                PlayingMusicBarView()
-                    .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
-                
-                AppleMusicPopUpView()
-                    .padding(.top, 15)
-                
-                Spacer()
-            }
+            Rectangle()
+                .foregroundColor(.clear)
+                .frame(height: 95)
+                .background(
+                    LinearGradient(
+                        stops: [
+                            Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0.9), location: 0.08),
+                            Gradient.Stop(color: Color(red: 0.64, green: 0.51, blue: 0.99).opacity(0), location: 1.00),
+                        ],
+                        startPoint: UnitPoint(x: 0.5, y: 0),
+                        endPoint: UnitPoint(x: 0.5, y: 1)
+                    )
+                )
+                .allowsHitTesting(false)
+            
+            PlayingMusicBarView()
+                .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
+            
+            AppleMusicPopUpView()
+                .padding(.top, 15)
+            
         }
         .onAppear {
+            print("HomeMapView onAppear")
             playerViewModel.isPresentNowPlayingView = false
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false, moveToBottom: false)
             playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
         }
         .onDisappear {
+            print("HomeMapView onDisappear")
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
         }
     }

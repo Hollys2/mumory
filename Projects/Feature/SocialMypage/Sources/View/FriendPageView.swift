@@ -82,7 +82,8 @@ struct FriendPageView: View {
 struct KnownFriendPageView: View {
     let friend: UserProfile
     let lineGray = Color(white: 0.37)
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    @EnvironmentObject var mumoryViewModel: MumoryViewModel
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @State private var isMapViewShown: Bool = false
     @State private var mumorys: [Mumory] = []
@@ -148,8 +149,7 @@ struct KnownFriendPageView: View {
             friendDataViewModel.isPlaylistLoading = true
             friendDataViewModel.isMumoryLoading = true
             
-            self.mumoryDataViewModel.fetchMumorys(uId: self.friend.uId) { result in
-                
+            self.mumoryViewModel.fetchMumorys(uId: self.friend.uId) { result in
                 switch result {
                 case .success(let mumorys):
                     let friendMumorys = mumorys.filter { $0.isPublic == true }
@@ -159,8 +159,8 @@ struct KnownFriendPageView: View {
                     self.mumorys = friendMumorys
                     
                     DispatchQueue.main.async {
-                        mumoryDataViewModel.friendMumorys = friendMumorys
-                        mumoryDataViewModel.isUpdating = false
+                        mumoryViewModel.friendMumorys = friendMumorys
+//                        mumoryDataViewModel.isUpdating = false
                         friendDataViewModel.isMumoryLoading = false
                     }
                 case .failure(let err):
@@ -322,9 +322,9 @@ struct UnkownFriendPageView: View {
         })
         .overlay {
             if status == .friendProcessLoading{
-                LoadingAnimationView(isLoading: .constant(true))
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, getUIScreenBounds().height * 0.5)
+//                LoadingAnimationView(isLoading: .constant(true))
+//                    .frame(maxWidth: .infinity, alignment: .center)
+//                    .padding(.top, getUIScreenBounds().height * 0.5)
             }
         }
 

@@ -14,7 +14,7 @@ struct ProfileCardView: View {
     @EnvironmentObject var signUpViewModel: SignUpViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @State var isTitleShown: Bool = false
     @State var isCardShown: Bool = false
     @State var isSubTitleShown: Bool = false

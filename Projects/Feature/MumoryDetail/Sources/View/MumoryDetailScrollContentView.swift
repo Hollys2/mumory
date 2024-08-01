@@ -38,18 +38,17 @@ struct TagView: View {
 struct MumoryDetailScrollContentView: View {
     
     @Binding var mumory: Mumory
+    
     @State var user: UserProfile = UserProfile()
     @State var isMapViewShown: Bool = false
     @State var isPopUpShown: Bool = true
     @State var playButtonOpacity: CGFloat = 1
 
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     var body: some View {
-        
         VStack(spacing: 0) {
             
             ZStack(alignment: .bottomTrailing) {
@@ -91,7 +90,7 @@ struct MumoryDetailScrollContentView: View {
                     .opacity(self.playButtonOpacity)
                     .onTapGesture {
                         Task {
-                            guard let song = await fetchSong(songId: self.mumory.song.id) else {return}
+                            guard let song = await FetchManager.shared.fetchSong(songId: self.mumory.song.id) else { return }
                             playerViewModel.playNewSongShowingPlayingView(song: song)
                             playerViewModel.userWantsShown = true
                             playerViewModel.isShownMiniPlayer = true
@@ -123,7 +122,7 @@ struct MumoryDetailScrollContentView: View {
                                 if self.user.uId == currentUserViewModel.user.uId {
                                     appCoordinator.rootPath.append(MumoryPage.myPage)
                                 } else {
-                                    let friend = await FetchManager.shared.fetchUser(uId: self.user.uId)
+                                    let friend = await FetchManager.shared.fetchUser(uId: self.user.uId, appCoordinator: self.appCoordinator)
                                     appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                                 }
                             }
@@ -258,7 +257,7 @@ struct MumoryDetailScrollContentView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.bottom, 24)
                         
-                        if self.mumoryDataViewModel.sameSongFriendMumorys.count > 0 {
+                        if self.currentUserViewModel.mumoryViewModel.sameSongFriendMumorys.count > 0 {
                             VStack(spacing: 0) {
                                 
                                 MumoryDetailFriendMumoryScrollUIViewRepresentable(mumory: self.mumory)
@@ -268,7 +267,7 @@ struct MumoryDetailScrollContentView: View {
                                 
                                 HStack(spacing: 10) {
                                     
-                                    ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.mumoryDataViewModel.sameSongFriendMumorys.prefix(min(3, self.mumoryDataViewModel.sameSongFriendMumorys.count))).count))
+                                    ProgressView(value: CGFloat(self.appCoordinator.page) / CGFloat(Array(self.currentUserViewModel.mumoryViewModel.sameSongFriendMumorys.prefix(min(3, self.currentUserViewModel.mumoryViewModel.sameSongFriendMumorys.count))).count))
                                         .accentColor(SharedAsset.mainColor.swiftUIColor)
                                         .background(Color(red: 0.165, green: 0.165, blue: 0.165))
                                         .frame(width: getUIScreenBounds().width * 0.44102, height: 3)
@@ -277,12 +276,12 @@ struct MumoryDetailScrollContentView: View {
                                     Text("\(self.appCoordinator.page)")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                         .foregroundColor(SharedAsset.mainColor.swiftUIColor)
-                                    + Text(" / \(Array(self.mumoryDataViewModel.sameSongFriendMumorys.prefix(min(3, self.mumoryDataViewModel.sameSongFriendMumorys.count))).count)")
+                                    + Text(" / \(Array(self.currentUserViewModel.mumoryViewModel.sameSongFriendMumorys.prefix(min(3, self.currentUserViewModel.mumoryViewModel.sameSongFriendMumorys.count))).count)")
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 12))
                                         .foregroundColor(Color(red: 0.475, green: 0.475, blue: 0.475))
                                 }
                                 .padding(.bottom, 65)
-                                .opacity(self.mumoryDataViewModel.sameSongFriendMumorys.count == 1 ? 0 : 1)
+                                .opacity(self.currentUserViewModel.mumoryViewModel.sameSongFriendMumorys.count == 1 ? 0 : 1)
                             }
                         } else {
                             
@@ -308,7 +307,7 @@ struct MumoryDetailScrollContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.bottom, 24)
                     
-                    if self.mumoryDataViewModel.surroundingMumorys.isEmpty {
+                    if self.currentUserViewModel.mumoryViewModel.surroundingMumorys.isEmpty {
                         VStack(spacing: 0) {
                             Text("주변에서 뮤모리된 음악이 없습니다.")
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -319,7 +318,7 @@ struct MumoryDetailScrollContentView: View {
                         .frame(height: 334 - 25)
                         .offset(y: -25)
                     } else {
-                        ForEach(self.mumoryDataViewModel.surroundingMumorys.prefix(3), id: \.self) { mumory in
+                        ForEach(self.currentUserViewModel.mumoryViewModel.surroundingMumorys.prefix(3), id: \.self) { mumory in
                             MumoryDetailSameLocationMusicView(mumory: mumory)
                         }
                     }
@@ -337,40 +336,26 @@ struct MumoryDetailScrollContentView: View {
             FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: [self.mumory], user: self.user)
         }
         .onAppear {
-            Task {
-                mumoryDataViewModel.isUpdating = true
-                
-                let result = await mumoryDataViewModel.fetchMumory(documentID: self.mumory.id ?? "")
-                switch result {
-                case .success(let mumory):
-                    self.mumory = mumory
-                case .failure(let error):
-                    print("fetchMumory failure: \(error)")
-                    break
-                }
+            print("FUCK MumoryDetailScrollContentView onAppear")
 
-                self.user = await MumoriUser(uId: self.mumory.uId)
-                print("MumoryDetailScrollContentView onAppear")
+            Task {
+//                do {
+//                    self.mumory = try await FetchManager.shared.fetchMumory(documentID: self.appCoordinator.selectedMumory.id)
+//                } catch {
+//                    print("FUCK ERROR: \(error)")
+//                }
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId, appCoordinator: self.appCoordinator)
+
                 for friend in self.currentUserViewModel.friendViewModel.friends {
                     Task {
-                        await mumoryDataViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.song.id, mumory: self.mumory)
+                        await self.currentUserViewModel.mumoryViewModel.sameSongFriendMumory(friend: friend, songId: self.mumory.song.id, mumory: self.mumory)
                     }
                     Task {
-                        await mumoryDataViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
+                        await self.currentUserViewModel.mumoryViewModel.surroundingFriendMumory(friend: friend, mumory: self.mumory)
                     }
                 }
-                mumoryDataViewModel.isUpdating = false
             }
         }
     }
     
-    private func fetchSong(songId: String) async -> Song? {
-        let musicItemID = MusicItemID(rawValue: songId)
-        var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-        request.properties = [.genres, .artists]
-        guard let response = try? await request.response() else {return nil}
-        guard let song = response.items.first else {return nil}
-        return song
-    }
-        
 }

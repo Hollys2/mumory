@@ -21,7 +21,7 @@ struct SongBottomSheetView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
         
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -133,8 +133,8 @@ struct SongBottomSheetView: View {
                         .onTapGesture {
                             dismiss()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                                mumoryDataViewModel.choosedMusicModel = musicModel
+                                let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                                appCoordinator.draftMumorySong = song
                                 playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
@@ -197,7 +197,7 @@ struct OptionalSongBottomSheetView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
         
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     @Binding var song: Song?
@@ -335,8 +335,8 @@ struct OptionalSongBottomSheetView: View {
                             appCoordinator.rootPath = NavigationPath()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 guard let unwrappedSong = self.song else {return}
-                                let musicModel = SongModel(id: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
-                                mumoryDataViewModel.choosedMusicModel = musicModel
+                                let song = SongModel(id: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
+                                appCoordinator.draftMumorySong = song
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
@@ -401,7 +401,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
         
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -504,8 +504,8 @@ struct SongBottomSheetViewWithoutPlaying: View {
                             playerViewModel.isPresentNowPlayingView = false
                             playerViewModel.setLibraryPlayerVisibility(isShown: false)
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                                mumoryDataViewModel.choosedMusicModel = musicModel
+                                let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                                appCoordinator.draftMumorySong = song
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
@@ -571,7 +571,7 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
         
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     @Binding var song: Song?
@@ -695,8 +695,8 @@ struct OptionalSongBottomSheetViewWithoutPlaying: View {
                             
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 guard let unwrappedSong = self.song else {return}
-                                let musicModel = SongModel(id: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
-                                mumoryDataViewModel.choosedMusicModel = musicModel
+                                let song = SongModel(id: unwrappedSong.id.rawValue, title: unwrappedSong.title, artist: unwrappedSong.artistName, artworkUrl: unwrappedSong.artwork?.url(width: 300, height: 300))
+                                appCoordinator.draftMumorySong = song
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
@@ -763,7 +763,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
         
     private let lineGray = Color(red: 0.28, green: 0.28, blue: 0.28)
     var song: Song
@@ -877,8 +877,8 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                             appCoordinator.isMyPageViewShown = false
                             appCoordinator.rootPath = NavigationPath()
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
-                                let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                                mumoryDataViewModel.choosedMusicModel = musicModel
+                                let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                                appCoordinator.draftMumorySong = song
                                 playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true

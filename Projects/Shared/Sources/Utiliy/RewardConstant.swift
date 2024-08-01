@@ -10,7 +10,7 @@
 import SwiftUI
 
 
-public enum Reward {
+public enum Reward: Decodable {
     
     case attendance(Int)
     case record(Int)

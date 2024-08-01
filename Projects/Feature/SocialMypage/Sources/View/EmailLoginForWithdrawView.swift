@@ -100,8 +100,8 @@ struct EmailLoginForWithdrawView: View {
             })
             
             
-            LoadingAnimationView(isLoading: $isLoading)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+//            LoadingAnimationView(isLoading: $isLoading)
+//                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .navigationDestination(isPresented: $isWithdrawSuccess, destination: {
             EmptyView()

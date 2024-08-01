@@ -79,7 +79,6 @@ public struct SocialSearchView: View {
     @StateObject var friendManager: FriendManager = .init()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
@@ -107,10 +106,10 @@ public struct SocialSearchView: View {
                         self.isSearching = true
 
                         friendManager.searchedFriends = []
-                        mumoryDataViewModel.searchedMumoryAnnotations = []
+                        self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations = []
                         
                         friendManager.searchFriend(nickname: self.searchText)
-                        mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                        currentUserViewModel.mumoryViewModel.searchMumoryByContent(self.searchText) {
                             self.isSearching = false
                         }
                         
@@ -163,7 +162,7 @@ public struct SocialSearchView: View {
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.white)
                     .onTapGesture {
-                        self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
+                        self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.removeAll()
                         self.isShown = false
                     }
             }
@@ -206,11 +205,11 @@ public struct SocialSearchView: View {
                                 self.isSearching = true
                                 self.searchText = value
                                 
-                                mumoryDataViewModel.searchedMumoryAnnotations = []
+                                self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations = []
                                 friendManager.searchedFriends = []
                                 
                                 friendManager.searchFriend(nickname: self.searchText)
-                                mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                                currentUserViewModel.mumoryViewModel.searchMumoryByContent(self.searchText) {
                                     self.isSearching = false
                                 }
                                 
@@ -304,7 +303,7 @@ public struct SocialSearchView: View {
                                         if friend.uId == currentUserViewModel.user.uId {
                                             appCoordinator.rootPath.append(MumoryPage.myPage)
                                         } else {
-                                            let friend = await FetchManager.shared.fetchUser(uId: friend.uId)
+                                            let friend = await FetchManager.shared.fetchUser(uId: friend.uId, appCoordinator: self.appCoordinator)
                                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                                         }
                                     }
@@ -326,7 +325,7 @@ public struct SocialSearchView: View {
                             
                             HStack(spacing: 0) {
                                 
-                                Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
+                                Text("검색 결과 \(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.count)건")
                                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                     .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
                                 
@@ -349,7 +348,7 @@ public struct SocialSearchView: View {
                                         , alignment: .leading
                                     )
                                     .onTapGesture {
-                                        self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                                        self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
                                             guard let content1 = doc1.content, let content2 = doc2.content  else { return false }
                                             //                                  return content.localizedCaseInsensitiveCompare(searchText) == .orderedSame
                                             return content1.count < content2.count
@@ -376,7 +375,7 @@ public struct SocialSearchView: View {
                                         , alignment: .leading
                                     )
                                     .onTapGesture {
-                                        self.mumoryDataViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
+                                        self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.sort { (doc1, doc2) -> Bool in
                                             return doc1.date > doc2.date
                                         }
                                         
@@ -388,11 +387,11 @@ public struct SocialSearchView: View {
                             
                             VStack(spacing: 0) {
                                 
-                                ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
+                                ForEach(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
                                     SearchedMumoryItemView(mumory: mumory)
                                 }
                             }
-                            .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
+                            .frame(height: 148 * CGFloat(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.count) + 30)
                             .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                             .cornerRadius(15)
                             .padding(.horizontal, 20)
@@ -401,7 +400,7 @@ public struct SocialSearchView: View {
                                     .frame(width: getUIScreenBounds().width - 40, height: 0.3)
                                     .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
                                     .offset(y: -15)
-                                    .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
+                                    .opacity(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
                                 , alignment: .bottom
                             )
                             .padding(.bottom, 100)
@@ -422,7 +421,7 @@ public struct SocialSearchView: View {
         .simultaneousGesture(TapGesture(count: 1).onEnded({
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }))
-        .loadingLottie(self.isSearching)
+//        .loadingLottie(self.isSearching)
     }
 }
 
@@ -433,7 +432,7 @@ struct SearchedMumoryItemView: View {
     @State private var user: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    
     
     var body: some View {
         
@@ -587,12 +586,12 @@ struct SearchedMumoryItemView: View {
         )
         .background(Color(red: 0.165, green: 0.165, blue: 0.165))
         .simultaneousGesture(TapGesture(count: 1).onEnded({
-            self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
+            self.appCoordinator.selectedMumory = self.mumory
             self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
         }))
         .onAppear {
             Task {
-                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId, appCoordinator: self.appCoordinator)
             }
         }
     }

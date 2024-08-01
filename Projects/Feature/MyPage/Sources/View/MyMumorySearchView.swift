@@ -21,7 +21,7 @@ public struct MyMumorySearchView: View {
     @State private var isSearching: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     public init(isShown: Binding<Bool>) {
         self._isShown = isShown
@@ -44,8 +44,8 @@ public struct MyMumorySearchView: View {
                     .onSubmit {
                         self.isSearching = true
                         
-                        mumoryDataViewModel.searchedMumoryAnnotations = []
-                        mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                        self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations = []
+                        currentUserViewModel.mumoryViewModel.searchMumoryByContent(self.searchText) {
                             self.isSearching = false
                         }
                         
@@ -97,7 +97,7 @@ public struct MyMumorySearchView: View {
                     .multilineTextAlignment(.trailing)
                     .foregroundColor(.white)
                     .onTapGesture {
-                        self.mumoryDataViewModel.searchedMumoryAnnotations.removeAll()
+                        self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.removeAll()
                         self.isShown = false
                     }
             }
@@ -140,8 +140,8 @@ public struct MyMumorySearchView: View {
                                 
                                 self.searchText = value
                                 
-                                mumoryDataViewModel.searchedMumoryAnnotations = []
-                                mumoryDataViewModel.searchMumoryByContent(self.searchText) {
+                                self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations = []
+                                self.currentUserViewModel.mumoryViewModel.searchMumoryByContent(self.searchText) {
                                     self.isSearching = false
                                 }
                                 
@@ -169,7 +169,7 @@ public struct MyMumorySearchView: View {
                     VStack(spacing: 0) {
                         
                         HStack(spacing: 0) {
-                            Text("검색 결과 \(mumoryDataViewModel.searchedMumoryAnnotations.count)건")
+                            Text("검색 결과 \(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.count)건")
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                                 .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65))
                             
@@ -181,11 +181,11 @@ public struct MyMumorySearchView: View {
                         
                         VStack(spacing: 0) {
                             
-                            ForEach(mumoryDataViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
+                            ForEach(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
                                 SearchedMumoryItemView(mumory: mumory)
                             }
                         }
-                        .frame(height: 148 * CGFloat(mumoryDataViewModel.searchedMumoryAnnotations.count) + 30)
+                        .frame(height: 148 * CGFloat(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.count) + 30)
                         .background(Color(red: 0.16, green: 0.16, blue: 0.16))
                         .cornerRadius(15)
                         .padding(.horizontal, 20)
@@ -194,7 +194,7 @@ public struct MyMumorySearchView: View {
                                 .frame(width: getUIScreenBounds().width - 40, height: 0.3)
                                 .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
                                 .offset(y: -15)
-                                .opacity(mumoryDataViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
+                                .opacity(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.isEmpty ? 0 : 1)
                             , alignment: .bottom
                         )
                         .padding(.bottom, 100)

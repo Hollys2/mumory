@@ -18,17 +18,17 @@ public struct NowPlayingView: View {
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
     @State var isPresentQueue: Bool = false
     @State var playTogetherSongs: [Song] = []
-    
+
     @State var albumCoverSize: CGFloat = .zero
     @State var horizontalSpacing: CGFloat = .zero
     @State var isSE: Bool = false
     @State var offset: CGPoint = .zero
-    
+
     @State var newOffset: CGPoint = .zero
     public init() {
         UISlider.appearance().setThumbImage(UIImage(asset: SharedAsset.playSphere)?.resized(to: CGSize(width: 10.45, height: 10)), for: .normal)
     }
-    
+
     public var body: some View {
         ZStack(alignment: .top) {
             //재생페이지에서 보여줄 배경 사진(앨범 커버)
@@ -45,7 +45,7 @@ public struct NowPlayingView: View {
                 Color.black.opacity(0.3)
                 ColorSet.background.opacity(isPresentQueue ? 1 : 0)
             }
-            
+
             ScrollViewReader(content: { proxy in
                 ScrollView {
                     VStack(spacing: 0) {
@@ -58,7 +58,7 @@ public struct NowPlayingView: View {
                     }
                     .id("main")
                     .frame(height: getUIScreenBounds().height - getSafeAreaInsets().bottom - (isSE ? 35 : 45))
-                    
+
                     if !isPresentQueue {
                         PlayTogetherView(songs: $playTogetherSongs)
                             .opacity(isPresentQueue ? 0 : 1)
@@ -78,16 +78,16 @@ public struct NowPlayingView: View {
             })
             .preferredColorScheme(.dark)
             .background(.ultraThinMaterial.opacity(isPresentQueue ? 0 : 1))
-            
+
             SnackBarView(additionalAction: {
                 Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { timer in
                     dismiss()
                 }
             })
             .frame(width: getUIScreenBounds().width)
-            
-            
-            
+
+
+
         }
         .ignoresSafeArea()
         .onAppear {
@@ -100,7 +100,7 @@ public struct NowPlayingView: View {
                 self.playTogetherSongs = await requestPlayTogetherSongs(title: song.title, artist: song.artistName)
             }
         }
-        
+
     }
 }
 
@@ -476,7 +476,7 @@ struct PlayingView: View {
 struct PlayingViewBottomSheet: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @Environment(\.dismiss) var dismiss
     
     @State var albumCoverSize: CGFloat = .zero
@@ -497,7 +497,9 @@ struct PlayingViewBottomSheet: View {
                     guard let song = playerViewModel.currentSong else {return}
                     appCoordinator.selectedTab = .home
                     appCoordinator.rootPath = NavigationPath()
-                    mumoryDataViewModel.choosedMusicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    
+                    self.appCoordinator.selectedMumory.song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+//                    self.appCoordinator.choosedSong = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                     appCoordinator.isCreateMumorySheetShown = true
                     dismiss()
                     playerViewModel.isPresentNowPlayingView = false

@@ -163,9 +163,9 @@ struct SearchMusicResultViewInCreateMumory: View {
                 VStack(spacing: 0, content: {
                     
                     if isLoading {
-                        LoadingAnimationView(isLoading: $isLoading)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, getUIScreenBounds().height * 0.25)
+//                        LoadingAnimationView(isLoading: $isLoading)
+//                            .frame(maxWidth: .infinity, alignment: .center)
+//                            .padding(.top, getUIScreenBounds().height * 0.25)
                         
                     } else if term.isEmpty {
                         EmptyView()
@@ -237,8 +237,8 @@ struct SearchMusicResultViewInCreateMumory: View {
             .ignoresSafeArea()
             .scrollIndicators(.hidden)
             
-            LoadingAnimationView(isLoading: $isLoading)
-                .padding(.top, getUIScreenBounds().height * 0.25)
+//            LoadingAnimationView(isLoading: $isLoading)
+//                .padding(.top, getUIScreenBounds().height * 0.25)
 
         }
     }
@@ -246,11 +246,12 @@ struct SearchMusicResultViewInCreateMumory: View {
 
 //선택 가능한 노래 아이템(우측에 하얀 플러스 아이콘)
 struct SearchSelectableSongItem: View {
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     var song: Song
+    
     init(song: Song) {
         self.song = song
     }
@@ -293,8 +294,8 @@ struct SearchSelectableSongItem: View {
                 .scaledToFit()
                 .frame(width: 30, height: 30)
                 .onTapGesture {
-                    let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                    mumoryDataViewModel.choosedMusicModel = musicModel
+                    let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
+                    appCoordinator.draftMumorySong = song
                     appCoordinator.rootPath.removeLast()
                 }
         })

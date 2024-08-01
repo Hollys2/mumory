@@ -15,7 +15,7 @@ import _MapKit_SwiftUI
 
 public struct SearchLocationMapView: View {
     
-    @State var locationModel: LocationModel = .init()
+    @State var location: LocationModel = .init()
     
     @State private var locationTitleText: String = ""
     @State private var translation: CGSize = .zero
@@ -23,7 +23,7 @@ public struct SearchLocationMapView: View {
     @State private var scrollViewOffset: CGFloat = .zero
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    
     
     public init() {}
     
@@ -53,7 +53,7 @@ public struct SearchLocationMapView: View {
                 
                 ZStack(alignment: .topLeading) {
                     
-                    SearchLocationMapViewRepresentable(locationModel: $locationModel)
+                    SearchLocationMapViewRepresentable(locationModel: $location)
                     
                     Button(action: {
                         withAnimation {
@@ -70,14 +70,14 @@ public struct SearchLocationMapView: View {
                 
                 VStack(spacing: 0) {
                     
-                    Text("\(locationModel.locationTitle)")
+                    Text("\(location.locationTitle)")
                         .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 18))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 30)
                         .padding(.top, 30)
                     
-                    Text("\(locationModel.locationSubtitle)")
+                    Text("\(location.locationSubtitle)")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 15))
                         .foregroundColor(.white.opacity(0.7))
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -117,8 +117,8 @@ public struct SearchLocationMapView: View {
                     Spacer()
                     
                     Button(action: {
-                        mumoryDataViewModel.choosedLocationModel = locationModel
-                        appCoordinator.rootPath.removeLast(2)
+                        self.appCoordinator.draftMumoryLocation = location
+                        self.appCoordinator.rootPath.removeLast(2)
                     }) {
                         Rectangle()
                             .foregroundColor(.clear)
@@ -149,7 +149,7 @@ public struct SearchLocationMapView: View {
                             self.isBottomSheetShown = false
                         }}
                 
-                LocationInputBottomSheetView(isShown: self.$isBottomSheetShown, locationTitleText: $locationModel.locationTitle, searchText: locationModel.locationTitle)
+                LocationInputBottomSheetView(isShown: self.$isBottomSheetShown, locationTitleText: $location.locationTitle, searchText: location.locationTitle)
                     .offset(y: self.translation.height)
                     .gesture(dragGesture)
                     .transition(.move(edge: .bottom))

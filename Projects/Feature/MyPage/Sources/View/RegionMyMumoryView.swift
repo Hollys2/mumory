@@ -24,7 +24,7 @@ public struct RegionMyMumoryView: View {
     @State private var isMyMumorySearchViewShown: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     @State private var offset: CGFloat = 0.0
@@ -105,7 +105,7 @@ public struct RegionMyMumoryView: View {
                                             }
                                         }
                                         
-                                        if index > 0 && !isSameMonth(mumory, with: mumoryDataViewModel.monthlyMumorys[index - 1]) {
+                                        if index > 0 && !isSameMonth(mumory, with: self.currentUserViewModel.mumoryViewModel.monthlyMumorys[index - 1]) {
                                             ZStack(alignment: .topLeading) {
                                                 Rectangle()
                                                     .foregroundColor(.clear)
@@ -183,18 +183,23 @@ public struct RegionMyMumoryView: View {
             }
             .background(TransparentBackground())
         })
-        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, mumoryDataViewModel: mumoryDataViewModel, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
+//        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
-                mumoryDataViewModel.deleteMumory(self.appCoordinator.choosedMumoryAnnotation) {
-                    print("뮤모리 삭제 성공")
-                    
-//                    mumoryDataViewModel.locationMumorys.forEach { key, value in
-//                        mumoryDataViewModel.locationMumorys[key]?.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id}
-//                    }
-                    self.mumorys.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id }
-                    
-                    appCoordinator.isDeleteMumoryPopUpViewShown = false
+                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
+                    switch result {
+                    case .success():
+                        print("SUCCESS deleteMumory!")
+                        
+    //                    mumoryDataViewModel.locationMumorys.forEach { key, value in
+    //                        mumoryDataViewModel.locationMumorys[key]?.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id}
+    //                    }
+                        self.mumorys.removeAll { $0.id == self.appCoordinator.selectedMumory.id }
+                        
+                        appCoordinator.isDeleteMumoryPopUpViewShown = false
+                    case .failure(let error):
+                        print("ERROR deleteMumory: \(error)")
+                    }
                 }
             })
         })
@@ -205,8 +210,8 @@ public struct RegionMyMumoryView: View {
         guard index > 0 else {
             return 0
         }
-        let previousDate = mumoryDataViewModel.monthlyMumorys[index - 1].date
-        let currentDate = mumoryDataViewModel.monthlyMumorys[index].date
+        let previousDate = self.currentUserViewModel.mumoryViewModel.monthlyMumorys[index - 1].date
+        let currentDate = self.currentUserViewModel.mumoryViewModel.monthlyMumorys[index].date
         
         print("previousDate: \(previousDate)")
         print("currentDate: \(currentDate)")
@@ -229,7 +234,7 @@ struct MumoryItemView2: View {
     @State private var isTruncated: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     
     
     private var mumory: Mumory
@@ -331,7 +336,7 @@ struct MumoryItemView2: View {
                         .resizable()
                         .frame(width: 22, height: 22)
                         .onTapGesture {
-                            self.appCoordinator.choosedMumoryAnnotation = self.mumory
+                            self.appCoordinator.selectedMumory = self.mumory
                             appCoordinator.isMyMumoryBottomSheetShown = true
                         }
                 } // HStack
@@ -376,7 +381,7 @@ struct MumoryItemView2: View {
                         .gesture(
                             TapGesture(count: 1)
                                 .onEnded {
-                                    mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                                    self.appCoordinator.selectedMumory = mumory
                                     self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
                                 }
                         )

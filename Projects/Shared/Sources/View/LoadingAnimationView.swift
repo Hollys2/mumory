@@ -10,11 +10,8 @@ import SwiftUI
 import Lottie
 
 public struct LoadingAnimationView: View {
-    @Binding var isLoading: Bool
     
-    public init(isLoading: Binding<Bool>) {
-        self._isLoading = isLoading
-    }
+    public init() {}
     
     public var body: some View {
         ZStack(alignment: .center){
@@ -22,7 +19,6 @@ public struct LoadingAnimationView: View {
             
             LottieView(animation: .named("loading", bundle: .module))
                 .looping()
-                .opacity(isLoading ? 1 : 0)
                 .frame(width: getUIScreenBounds().width * 0.16, height: getUIScreenBounds().width * 0.16)
         }
     }

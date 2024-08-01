@@ -13,8 +13,7 @@ import Lottie
 /// 초반 스플래시 뷰
 public struct SplashView: View {
     // MARK: - Object lifecycle
-    public init(){
-    }
+    public init() {}
     
     // MARK: - Propoerties
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -30,19 +29,23 @@ public struct SplashView: View {
                 }
         }
         .onAppear {
-            Timer.scheduledTimer(withTimeInterval: 4.0, repeats: false) { _ in
+            Task {
+                self.appCoordinator.isLoading = true
+                
+                if await currentUserViewModel.initializeUserData() {
+                    self.appCoordinator.isHomeViewShown = true
+                } else {
+                    self.appCoordinator.isLoginViewShown = true
+                }
+                
+                self.appCoordinator.isLoading = false
+            }
+
+            Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
                 self.appCoordinator.isSplashViewShown = false
             }
-            
-            Task {
-                await appCoordinator.setupInitialScreen()
-                await currentUserViewModel.initializeUserData()
-            }
-            
         }
     }
     
     // MARK: - Methods
-    
-    
 }

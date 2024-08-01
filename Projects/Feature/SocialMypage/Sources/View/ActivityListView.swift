@@ -372,7 +372,6 @@ struct DatePickerView: View {
 }
 
 struct ActivityItem: View {
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @State var isPresentBottomSheet: Bool = false
@@ -451,19 +450,15 @@ struct ActivityItem: View {
         })
         .onTapGesture {
             if self.activity.type == "like" || self.activity.type == "comment" || self.activity.type == "reply" {
-                Task{
-                    let result = await mumoryDataViewModel.fetchMumory(documentID: activity.mumoryId)
-                    
-                    switch result {
-                    case.success(let mumory):
-                        if mumory.id == "DELETE" {
-                            UIView.setAnimationsEnabled(false)
-                            isPresentDeletedMumoryPopup.toggle()
-                            return}
-                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
-                    case .failure(let error):
-                        print("fetchMumory failure: \(error)")
+                Task {
+                    let mumory = try await FetchManager.shared.fetchMumory(documentID: activity.mumoryId)
+                    if mumory.id == "DELETE" {
+                        UIView.setAnimationsEnabled(false)
+                        isPresentDeletedMumoryPopup.toggle()
+                        return
                     }
+                    
+                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
                 }
             }
         }
@@ -480,7 +475,7 @@ struct ActivityBottomSheet: View {
     @Binding var activityList: [String: [Activity]]
     @Binding var isLoading: Bool
     @State var isPresentConfimPopup: Bool = false
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @Environment(\.dismiss) var dismiss
     
     init(activity: Activity, activityList: Binding<[String: [Activity]]>, isLoading: Binding<Bool>) {
@@ -511,7 +506,7 @@ struct ActivityBottomSheet: View {
             }
         }
         .overlay(content: {
-            LoadingAnimationView(isLoading: $isLoading)
+//            LoadingAnimationView(isLoading: $isLoading)
         })
         .fullScreenCover(isPresented: $isPresentConfimPopup, content: {
             TwoButtonPopupView(title: "해당 활동 내역을 삭제하시겠습니까?", positiveButtonTitle: "확인") {
@@ -531,16 +526,20 @@ struct ActivityBottomSheet: View {
                     }
                 } else if activity.type == "reply" || activity.type == "comment" {
                     self.isLoading = true
+                    
                     dismiss()
-                    self.mumoryDataViewModel.deleteComment(comment: Comment(id: self.activity.commentId, uId: "", nickname: "", parentId: "", mumoryId: self.activity.mumoryId, date: Date(), content: "", isPublic: false)) { comments in
+                    
+//                    self.currentUserViewModel.mumoryViewModel.deleteMumory(, completion: <#T##() -> Void#>)
+                    
+                    self.currentUserViewModel.mumoryViewModel.deleteComment(comment: Comment(id: self.activity.commentId, uId: "", nickname: "", parentId: "", mumoryId: self.activity.mumoryId, date: Date(), content: "", isPublic: false)) { comments in
+                        
                         Task {
+                            let mumory = try await FetchManager.shared.fetchMumory(documentID: self.activity.mumoryId)
+                            mumory.commentCount -= 1
                             
-                            let result = await mumoryDataViewModel.fetchMumory(documentID: self.activity.mumoryId)
-                            
-                            switch result {
-                            case.success(let mumory):
-                                mumory.commentCount -= 1
-                                mumoryDataViewModel.updateMumory(mumory) {
+                            self.currentUserViewModel.mumoryViewModel.updateMumory(mumory) { result in
+                                switch result {
+                                case .success():
                                     for element in activityList {
                                         let key = element.key
                                         guard let index = element.value.firstIndex(where: {$0.type == self.activity.type
@@ -549,9 +548,10 @@ struct ActivityBottomSheet: View {
                                         activityList[key]?.remove(at: index)
                                     }
                                     self.isLoading = false
+                                    
+                                case .failure(let error):
+                                    print("ERROR updateMumory: \(error.localizedDescription)")
                                 }
-                            case .failure(let error):
-                                print("fetchMumory failure: \(error)")
                             }
                         }
                     }

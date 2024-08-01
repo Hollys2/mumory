@@ -140,7 +140,7 @@ struct SelectableArtistView: View {
 
 struct SelectableMusicListItem: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var playerViewModel: PlayerViewModel
     var song: Song
     init(song: Song) {
@@ -185,10 +185,9 @@ struct SelectableMusicListItem: View {
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .onTapGesture {
-                        let musicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-                        mumoryDataViewModel.choosedMusicModel = musicModel
-                        appCoordinator.rootPath.removeLast()
-                        appCoordinator.rootPath.removeLast()
+                        let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                        appCoordinator.draftMumorySong = song
+                        appCoordinator.rootPath.removeLast(2)
                     }
             })
             .frame(maxWidth: .infinity, alignment: .leading)

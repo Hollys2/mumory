@@ -31,7 +31,7 @@ public struct LoginView: View {
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @State var isLoading: Bool = false
     
     @StateObject var signUpViewModel: SignUpViewModel = .init()
@@ -60,7 +60,8 @@ public struct LoginView: View {
                     
                     signUpButton
                 }
-                LoadingAnimationView(isLoading: $isLoading)
+
+                //                LoadingAnimationView(isLoading: $isLoading)
                 
                 if appCoordinator.isOnboardingShown {
                     OnboardingView()

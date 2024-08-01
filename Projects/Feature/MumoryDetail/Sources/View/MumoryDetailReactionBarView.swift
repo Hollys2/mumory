@@ -20,7 +20,7 @@ struct MumoryDetailReactionBarView: View {
     @State private var isStarButtonTapped = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
     @EnvironmentObject var snackBarViewModel: SnackBarViewModel
@@ -49,24 +49,30 @@ struct MumoryDetailReactionBarView: View {
                     let originLikes = self.mumory.likes
 
                     Task {
-                        await mumoryDataViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserViewModel.user.uId) { likes in
-                            self.mumory.likes = likes
-                            isButtonDisabled = false
-                            
-                            lazy var functions = Functions.functions()
-                            functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
-                                if let error = error {
-//                                    self.mumory.likes = originLikes
-                                    print("Error Functions \(error.localizedDescription)")
-                                } else {
-//                                    self.mumory.likes = likes
-                                    print("라이크 성공: \((mumory.likes ?? []).count)")
+                        await self.currentUserViewModel.mumoryViewModel.likeMumory(mumoryAnnotation: self.mumory, uId: currentUserViewModel.user.uId) { result in
+                            switch result {
+                            case .success(let likes):
+                                
+                                self.mumory.likes = likes
+                                isButtonDisabled = false
+                                
+                                lazy var functions = Functions.functions()
+                                functions.httpsCallable("like").call(["mumoryId": mumory.id]) { result, error in
+                                    if let error = error {
+                                        //                                    self.mumory.likes = originLikes
+                                        print("Error Functions \(error.localizedDescription)")
+                                    } else {
+                                        //                                    self.mumory.likes = likes
+                                        print("라이크 성공: \((mumory.likes ?? []).count)")
+                                    }
                                 }
+                            case .failure(let error):
+                                print("ERROR likeMumory: \(error.localizedDescription)")
                             }
                         }
                     }
                 }, label: {
-                    (mumory.likes ?? []).contains(currentUserData.user.uId) ?
+                    (mumory.likes ?? []).contains(currentUserViewModel.user.uId) ?
                     Image(uiImage: SharedAsset.heartOnButtonMumoryDetail.image)
                         .resizable()
                         .frame(width: 42, height: 42)
@@ -87,7 +93,8 @@ struct MumoryDetailReactionBarView: View {
                 Spacer().frame(width: 13)
                 
                 Button(action: {
-                    mumoryDataViewModel.selectedMumoryAnnotation = mumory
+//                    mumoryDataViewModel.selectedMumoryAnnotation = mumory
+                    self.appCoordinator.selectedMumory = mumory
                     withAnimation(.easeInOut(duration: 0.1)) {
 //                        self.appCoordinator.isMumoryDetailCommentSheetViewShown = true
                         self.appCoordinator.sheet = .comment
@@ -114,7 +121,7 @@ struct MumoryDetailReactionBarView: View {
                         .resizable()
                         .frame(width: 42, height: 42)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserData.uId, songId: mumory.song.id)
+                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -123,7 +130,7 @@ struct MumoryDetailReactionBarView: View {
                         .frame(width: 42, height: 42)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserData.uId, songId: mumory.song.id)
+                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }

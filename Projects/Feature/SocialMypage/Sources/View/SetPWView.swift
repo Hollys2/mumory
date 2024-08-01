@@ -118,8 +118,7 @@ struct SetPWView: View {
                 Spacer()
             })
             
-            LoadingAnimationView(isLoading: $isLoading)
-            
+//            LoadingAnimationView(isLoading: $isLoading)
         }
         .onTapGesture {
             self.hideKeyboard()

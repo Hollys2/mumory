@@ -15,7 +15,6 @@ import Combine
 final class PhotoPickerViewModel: ObservableObject {
     
     @Published var isPhotoErrorPopUpShown: Bool = false
-    
     @Published private(set) var selectedImage: UIImage? = nil
     @Published var imageSelection: PhotosPickerItem? = nil {
         didSet {

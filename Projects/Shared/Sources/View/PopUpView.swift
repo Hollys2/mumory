@@ -34,7 +34,6 @@ public struct PopUpView: View {
     @State private var isButtonEnabled = true
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
-    @EnvironmentObject private var mumoryDataViewModel: MumoryDataViewModel
     
     var type: PopUpType
     var title: String

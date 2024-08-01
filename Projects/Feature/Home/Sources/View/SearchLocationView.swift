@@ -14,25 +14,21 @@ import Shared
 import Firebase
 
 
-struct AddressRow: View {
+private struct AddressRow: View {
     
     let result: MKLocalSearchCompletion
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
     
     var body: some View {
         Button(action: {
-            localSearchViewModel.getRegion(localSearchCompletion: result) { coordintate in
-                mumoryDataViewModel.getChoosedeMumoryModelLocation(location: CLLocation(latitude: coordintate.latitude, longitude: coordintate.longitude)) { locationModel in
-                    DispatchQueue.main.async {
-                        mumoryDataViewModel.choosedLocationModel = locationModel
-                        
-                        self.localSearchViewModel.addRecentSearch(RecentLocationSearch(locationTitle: result.title, locationSubTitle: result.subtitle, latitude: locationModel.coordinate.latitude, longitude: locationModel.coordinate.longitude, country: locationModel.country, administrativeArea: locationModel.administrativeArea))
-                        
-                        appCoordinator.rootPath.removeLast()
-                    }
+            
+            self.appCoordinator.localSearchViewModel.getLocation(localSearchCompletion: self.result) { location in
+                guard let location = location else { return }
+                DispatchQueue.main.async {
+                    self.appCoordinator.draftMumoryLocation = location
+                    self.appCoordinator.localSearchViewModel.addRecentSearch(location)
+                    self.appCoordinator.rootPath.removeLast()
                 }
             }
         }) {
@@ -75,9 +71,7 @@ struct AddressRow: View {
 struct SearchLocationView: View {
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var locationManager: LocationManager
-    @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var currerntUserViewModel: CurrentUserViewModel
     
     var body: some View {
         
@@ -85,41 +79,39 @@ struct SearchLocationView: View {
             
             HStack {
                 
-                ZStack(alignment: .leading) {
-                    TextField("Location", text: $localSearchViewModel.queryFragment,
-                              prompt: Text("위치 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 45)
-                    .padding(.horizontal, 15 + 23 + 7)
-                    .background(
+                TextField("Location", text: self.$appCoordinator.localSearchViewModel.queryFragment,
+                          prompt: Text("위치 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
+                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
+                .foregroundColor(.white)
+                .frame(height: 45)
+                .padding(.horizontal, 15 + 23 + 7)
+                .background(
+                    ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: 22, style: .continuous)
                             .fill(Color(red: 0.24, green: 0.24, blue: 0.24))
-                    )
-                    .foregroundColor(.white)
-                    
-                    SharedAsset.searchIconCreateMumory.swiftUIImage
-                        .resizable()
-                        .frame(width: 23, height: 23)
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                        .padding(.leading, 15)
-                    
-                    if !self.localSearchViewModel.queryFragment.isEmpty {
-                        HStack {
-                            Spacer()
-                            SharedAsset.removeButtonSearch.swiftUIImage
-                                .resizable()
-                                .frame(width: 23, height: 23)
-                                .onTapGesture {
-                                    self.localSearchViewModel.queryFragment = ""
-                                }
+                        
+                        SharedAsset.searchIconCreateMumory.swiftUIImage
+                            .resizable()
+                            .frame(width: 23, height: 23)
+                            .padding(.leading, 15)
+                        
+                        if !self.appCoordinator.localSearchViewModel.queryFragment.isEmpty {
+                            HStack {
+                                Spacer()
+                                SharedAsset.removeButtonSearch.swiftUIImage
+                                    .resizable()
+                                    .frame(width: 23, height: 23)
+                                    .onTapGesture {
+                                        self.appCoordinator.localSearchViewModel.queryFragment = ""
+                                    }
+                            }
+                            .padding(.trailing, 17)
                         }
-                        .padding(.trailing, 17)
                     }
-                }
+                )
                 
                 Button(action: {
-                    appCoordinator.rootPath.removeLast()
+                    self.appCoordinator.rootPath.removeLast()
                 }) {
                     Text("취소")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
@@ -127,10 +119,9 @@ struct SearchLocationView: View {
                         .foregroundColor(.white)
                 }
             } // HStack
-            .frame(maxWidth: .infinity)
             .padding(.bottom, 15)
             
-            if self.localSearchViewModel.results.isEmpty {
+            if self.appCoordinator.localSearchViewModel.results.isEmpty {
                 ScrollView {
                     
                     VStack(spacing: 15) {
@@ -138,17 +129,12 @@ struct SearchLocationView: View {
                         VStack(spacing: 0) {
                             
                             Button(action: {
-                                if CLLocationManager.authorizationStatus() == .restricted || CLLocationManager.authorizationStatus() == .denied {
-                                     self.locationManager.promptForLocationSettings()
-                                 }
-                                
-                                if let currentLocation = locationManager.currentLocation {
-                                    mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
-                                        mumoryDataViewModel.choosedLocationModel = model
+                                if LocationManagerViewModel.checkLocationAuthorizationStatus(),
+                                   let currentLocation = self.currerntUserViewModel.locationManagerViewModel.currentLocation {
+                                    MapManager.getLocationModel(location: currentLocation) { location in
+                                        self.appCoordinator.draftMumoryLocation = location
+                                        self.appCoordinator.rootPath.removeLast()
                                     }
-                                    appCoordinator.rootPath.removeLast()
-                                } else {
-                                    print("ERROR: locationManager.userLocation is nil")
                                 }
                             }) {
                                 ZStack {
@@ -179,7 +165,9 @@ struct SearchLocationView: View {
                                 .foregroundColor(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.698).opacity(0.7))
                             
                             Button(action: {
-                                appCoordinator.rootPath.append("map")
+                                if LocationManagerViewModel.checkLocationAuthorizationStatus() {
+                                    appCoordinator.rootPath.append("map")
+                                }
                             }) {
                                 ZStack {
                                     Rectangle()
@@ -215,9 +203,9 @@ struct SearchLocationView: View {
                                 
                                 Spacer()
                                 
-                                if !self.localSearchViewModel.recentSearches.isEmpty {
+                                if !self.appCoordinator.localSearchViewModel.recentSearches.isEmpty {
                                     Button(action: {
-                                        self.localSearchViewModel.clearRecentSearches()
+                                        self.appCoordinator.localSearchViewModel.clearRecentSearches()
                                     }) {
                                         Text("전체삭제")
                                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
@@ -229,14 +217,13 @@ struct SearchLocationView: View {
                             .padding([.horizontal, .top], 20)
                             .padding(.bottom, 11)
                             
-                            if !self.localSearchViewModel.recentSearches.isEmpty {
-                                ForEach(self.localSearchViewModel.recentSearches, id: \.self) { value in
+                            if !self.appCoordinator.localSearchViewModel.recentSearches.isEmpty {
+                                ForEach(self.appCoordinator.localSearchViewModel.recentSearches, id: \.self) { value in
                                     RecentSearchItem(title: value.locationTitle) {
-                                        self.localSearchViewModel.removeRecentSearch(value)
+                                        self.appCoordinator.localSearchViewModel.removeRecentSearch(value)
                                     }
                                     .onTapGesture {
-                                        mumoryDataViewModel.choosedLocationModel = LocationModel(geoPoint: GeoPoint(latitude: value.latitude, longitude: value.longitude), locationTitle: value.locationTitle, locationSubtitle: value.locationSubTitle, country: value.country, administrativeArea: value.administrativeArea)
-                                        
+                                        self.appCoordinator.draftMumoryLocation = value
                                         appCoordinator.rootPath.removeLast()
                                     }
                                 }
@@ -252,41 +239,41 @@ struct SearchLocationView: View {
                         .background(Color(red: 0.12, green: 0.12, blue: 0.12))
                         .clipShape(RoundedRectangle(cornerRadius: 15, style: .circular))
                         
-//                        if !self.localSearchViewModel.popularSearches.isEmpty {
-//                            
-//                            VStack(alignment: .leading, spacing: 0) {
-//                                
-//                                HStack {
-//                                    
-//                                    Text("뮤모리 인기 위치 검색어")
-//                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-//                                        .foregroundColor(.white)
-//                                    
-//                                    Spacer()
-//                                }
-//                                .padding(20)
-//                                
-//                                HStack(spacing: 8) {
-//                                    
-//                                    ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
-//                                        
-//                                        Text(searchTerm)
-//                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
-//                                            .frame(height: 33)
-//                                            .padding(.horizontal, 16)
-//                                            .background(SharedAsset.mainColor.swiftUIColor)
-//                                            .cornerRadius(35)
-//                                    }
-//                                }
-//                                .frame(maxWidth: .infinity, alignment: .leading)
-//                                .padding(.horizontal, 20)
-//                                .background(.pink)
-//                                
-//                                Spacer().frame(height: 12)
-//                            }
-//                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
-//                            .cornerRadius(15)
-//                        }
+                        //                        if !self.localSearchViewModel.popularSearches.isEmpty {
+                        //
+                        //                            VStack(alignment: .leading, spacing: 0) {
+                        //
+                        //                                HStack {
+                        //
+                        //                                    Text("뮤모리 인기 위치 검색어")
+                        //                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                        //                                        .foregroundColor(.white)
+                        //
+                        //                                    Spacer()
+                        //                                }
+                        //                                .padding(20)
+                        //
+                        //                                HStack(spacing: 8) {
+                        //
+                        //                                    ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
+                        //
+                        //                                        Text(searchTerm)
+                        //                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                        //                                            .frame(height: 33)
+                        //                                            .padding(.horizontal, 16)
+                        //                                            .background(SharedAsset.mainColor.swiftUIColor)
+                        //                                            .cornerRadius(35)
+                        //                                    }
+                        //                                }
+                        //                                .frame(maxWidth: .infinity, alignment: .leading)
+                        //                                .padding(.horizontal, 20)
+                        //                                .background(.pink)
+                        //
+                        //                                Spacer().frame(height: 12)
+                        //                            }
+                        //                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                        //                            .cornerRadius(15)
+                        //                        }
                         
                     } // VStack
                     .padding(.bottom, 66)
@@ -298,22 +285,24 @@ struct SearchLocationView: View {
                     
                     VStack(spacing: 0) {
                         
-                        ForEach(self.localSearchViewModel.results, id: \.self) { result in
+                        ForEach(self.appCoordinator.localSearchViewModel.results, id: \.self) { result in
                             AddressRow(result: result)
                         }
                     } // VStack
                     .padding(.bottom, 66)
                 } // ScrollView
-                .scrollIndicators(.hidden)   
+                .scrollIndicators(.hidden)
             }
+            
+            Spacer(minLength: 0)
         } // VStack
+        .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
         .padding(.top, getSafeAreaInsets().top + 12)
         .padding(.horizontal, 20)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-        .loadingLottie(localSearchViewModel.isSearching)
         .onDisappear {
-            localSearchViewModel.queryFragment = ""
+            self.appCoordinator.localSearchViewModel.queryFragment = ""
         }
     }
 }

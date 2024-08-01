@@ -12,7 +12,7 @@ import Shared
 struct PreviewMiniPlayer: View {
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     var body: some View {
         HStack(spacing: 0, content: {
@@ -85,7 +85,7 @@ struct PreviewMiniPlayer: View {
                 .padding(.trailing, 30)
                 .onTapGesture {
                     guard let song = playerViewModel.currentSong else {return}
-                    mumoryDataViewModel.choosedMusicModel = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    appCoordinator.draftMumorySong = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                     appCoordinator.rootPath = NavigationPath()
                     playerViewModel.pause()
                     playerViewModel.isShownPreview = false

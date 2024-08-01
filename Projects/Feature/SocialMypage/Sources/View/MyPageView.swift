@@ -248,7 +248,7 @@ struct MumorySample: Hashable{
 struct MyMumory: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @EnvironmentObject var playerViewModel: PlayerViewModel
     let Firebase = FirebaseManager.shared
 
@@ -261,7 +261,7 @@ struct MyMumory: View {
                 
                 Spacer()
                 
-                Text("\(mumoryDataViewModel.myMumorys.count)")
+                Text("\(self.currentUserViewModel.mumoryViewModel.myMumorys.count)")
                     .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                     .foregroundStyle(ColorSet.charSubGray)
                     .padding(.trailing, 3)
@@ -278,7 +278,7 @@ struct MyMumory: View {
 
             }
             
-            if mumoryDataViewModel.myMumorys.isEmpty {
+            if self.currentUserViewModel.mumoryViewModel.myMumorys.isEmpty {
                 
                 InitialSettingView(title: "음악과 일상 기록을 통해\n나만의 뮤모리를 채워보세요", buttonTitle: "뮤모리 기록하러 가기") {
                     appCoordinator.isMyPageViewShown = false
@@ -297,7 +297,7 @@ struct MyMumory: View {
             }else {
                 ScrollView(.horizontal) {
                     HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
-                        ForEach(mumoryDataViewModel.myMumorys.prefix(10), id: \.id) { mumory in
+                        ForEach(self.currentUserViewModel.mumoryViewModel.myMumorys.prefix(10), id: \.id) { mumory in
                             MyMumoryItem(mumory: mumory)
                                 .onTapGesture {
                                     appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))

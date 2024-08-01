@@ -8,6 +8,7 @@
 
 
 import SwiftUI
+import Combine
 import MapKit
 import MusicKit
 import Firebase
@@ -17,14 +18,26 @@ public enum AppNavigationType {
     case mumory
 }
 
+
+
 public class AppCoordinator: ObservableObject {
-    public init(){}
     
+    var cancellables = Set<AnyCancellable>()
+    var anyCancellable: AnyCancellable? = nil
+    
+    public init() {
+        anyCancellable = localSearchViewModel.objectWillChange
+            .sink { [weak self] (_) in
+                self?.objectWillChange.send()
+            }
+    }
+    
+    @Published public var localSearchViewModel: LocalSearchViewModel = .init()
+   
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var authPath: [AuthPage] = []
-    @Published public var selectedTab: Tab = .home
+    @Published public var selectedTab: Tab = .social
     
-    @Published public var scrollToTop: Bool = false
     @Published public var createdMumoryRegion: MKCoordinateRegion?
     
     @Published public var offsetY: CGFloat = .zero
@@ -45,26 +58,32 @@ public class AppCoordinator: ObservableObject {
     @Published public var isDeleteCommentPopUpViewShown = false
     @Published public var isAddFriendViewShown = false
     @Published public var isDeleteMumoryPopUpViewShown = false
-    @Published public var isFirstTabSelected: Bool = false
+    @Published public var isFirstSocialTabTapped: Bool = false
     @Published public var isRewardPopUpShown: Bool = false
     
-    @Published public var isLoading: Bool = false
+    @Published public var isDatePickerShown: Bool = false
+    @Published public var selectedDate: Date = Date()
     
-    @Published public var choosedMumoryAnnotation: Mumory = Mumory()
+    @Published public var draftMumorySong: SongModel? = nil
+    @Published public var draftMumoryLocation: LocationModel? = nil
     
+    @Published public var selectedMumory: Mumory = Mumory()
+    @Published public var selectedComment: Comment = Comment()
+    
+    @Published public var tappedMumory: Mumory = Mumory()
     
     @Published public var page: Int = 1
     
-    @Published public var safeAreaInsetsTop: CGFloat = 0.0
-    @Published public var safeAreaInsetsBottom: CGFloat = 0.0
-    
-    @Published public var isMyPageViewShown = false
     @Published public var isSplashViewShown: Bool = true
+    @Published public var isMyPageViewShown = false
     @Published public var isHomeViewShown: Bool = false
-    @Published public var isOnboardingShown: Bool = false
+    @Published public var isLoginViewShown: Bool = false
+    @Published public var isOnboardingShown: Bool = UserDefaults.standard.value(forKey: "SignInHistory") == nil
     @Published public var isLoading: Bool = false
+    @Published public var isSocialLoading: Bool = false
+    @Published public var isScrollToTop: Bool = false
     
-
+    @Published public var isFirstUserLocation: Bool = false
     
     public func push<T>(destination: T) {
         if let dst = destination as? AuthPage {
@@ -75,27 +94,30 @@ public class AppCoordinator: ObservableObject {
     }
     
     public func pop(target: AppNavigationType) {
-        if target == .auth {
+        switch target {
+        case .auth:
             _ = authPath.popLast()
-        } else if target == .mumory {
+        case .mumory:
             rootPath.removeLast()
         }
     }
     
-    private func hasSignInHistory() -> Bool {
-        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
-    }
+//    private func hasSignInHistory() -> Bool {
+//        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
+//    }
     
     private func hasCurrentUser() -> Bool {
         let auth = FirebaseManager.shared.auth
         return auth.currentUser != nil
     }
     
-    public func setupInitialScreen() async {
-        DispatchQueue.main.async {
-            self.isOnboardingShown = self.hasSignInHistory()
-            self.isHomeViewShown = self.hasCurrentUser()
-        }
-    }
+//    public func setupInitialScreen() {
+//        DispatchQueue.main.async {
+//            self.isOnboardingShown = self.hasSignInHistory()
+//            self.isHomeViewShown = self.hasCurrentUser()
+//        }
+//    }
 }
+
+
 

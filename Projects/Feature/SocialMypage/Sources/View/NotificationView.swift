@@ -110,9 +110,6 @@ struct NotificationView: View {
      
                 Spacer()
             })
-            
-            LoadingAnimationView(isLoading: $settingViewModel.isLoading)
-            
         }
         .onAppear {
             if settingViewModel.uid.isEmpty {

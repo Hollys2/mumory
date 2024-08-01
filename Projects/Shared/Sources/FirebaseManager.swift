@@ -16,6 +16,24 @@ import FirebaseDatabase
 import FirebaseMessaging
 import FirebaseFunctions
 
+struct FBManager {
+    public let db: Firestore
+    public let auth: Auth
+    public let storage: Storage
+    public let app: FirebaseApp?
+    public let messaging: Messaging
+    public let functions: Functions
+    
+    public init() {
+        self.db = Firestore.firestore()
+        self.auth = Auth.auth()
+        self.storage = Storage.storage()
+        self.app = FirebaseApp.app()
+        self.messaging = Messaging.messaging()
+        self.functions = Functions.functions()
+    }
+}
+
 public class FirebaseManager {
     
     public static let shared = FirebaseManager()
@@ -38,6 +56,10 @@ public class FirebaseManager {
         self.app = FirebaseApp.app()
         self.messaging = Messaging.messaging()
         self.functions = Functions.functions()
+    }
+    
+    public func getDocumentReference(collection: String, document: String) -> DocumentReference {
+        return db.collection(collection).document(document)
     }
     
     public func getGoogleCredential(idToken: String, accessToken: String) -> AuthCredential {
@@ -72,5 +94,26 @@ public class FirebaseManager {
         let result = "\(year)년 \(month)월 \(day)일 \(dayOfWeek)"
         
         return result
+    }
+}
+
+public struct FriendSearch: Identifiable, Equatable, Hashable {
+    
+    public var uid = UUID()
+    
+    public var nickname: String
+    public var id: String
+    
+    public init(nickname: String, id: String) {
+        self.nickname = nickname
+        self.id = id
+    }
+    
+    public static func == (lhs: FriendSearch, rhs: FriendSearch) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

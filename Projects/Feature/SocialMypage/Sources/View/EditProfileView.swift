@@ -43,8 +43,8 @@ struct EditProfileView: View {
             }
             .scrollIndicators(.hidden)
             
-            LoadingAnimationView(isLoading: $editProfileViewModel.isLoading)
-                .frame(maxHeight: .infinity, alignment: .center)
+//            LoadingAnimationView(isLoading: $editProfileViewModel.isLoading)
+//                .frame(maxHeight: .infinity, alignment: .center)
         }
         .ignoresSafeArea()
         .onAppear(perform: {

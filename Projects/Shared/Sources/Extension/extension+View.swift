@@ -21,8 +21,8 @@ extension View {
 
 extension View {
     
-    public func bottomSheet(isShown: Binding<Bool>, mumoryBottomSheet: MumoryBottomSheet) -> some View {
-        self.modifier(BottomSheetViewModifier(isShown: isShown, mumoryBottomSheet: mumoryBottomSheet))
+    public func bottomSheet(sheet: Binding<Sheet>, mumoryBottomSheet: MumoryBottomSheet) -> some View {
+        self.modifier(BottomSheetViewModifier(sheet: sheet, mumoryBottomSheet: mumoryBottomSheet))
     }
     
     public func rewardBottomSheet(isShown: Binding<Bool>) -> some View {
@@ -55,9 +55,9 @@ private struct LoadingLottie: ViewModifier {
     }
 }
 
-extension View {
-
-    public func loadingLottie(_ isShown: Bool) -> some View {
-        modifier(LoadingLottie(isShown: isShown))
-    }
-}
+//extension View {
+//
+//    public func loadingLottie(_ isShown: Bool) -> some View {
+//        modifier(LoadingLottie(isShown: isShown))
+//    }
+//}

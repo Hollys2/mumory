@@ -16,7 +16,7 @@ struct SelectableShazamView: View {
     @StateObject var shazamManager: ShazamViewModel = ShazamViewModel()
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
     @State var startsRecording: Bool = false
     @State var isPresentBottomSheet: Bool = false
     @State var isListen: Bool = false
@@ -114,7 +114,7 @@ struct SelectableShazamView: View {
                                         guard let title = shazamManager.shazamSong?.title else {return}
                                         guard let artist = shazamManager.shazamSong?.artist else {return}
                                         guard let artworkUrl = shazamManager.shazamSong?.artworkURL else {return}
-                                        mumoryDataViewModel.choosedMusicModel = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: artworkUrl)
+                                        appCoordinator.draftMumorySong = SongModel(id: appleMusicID, title: title, artist: artist, artworkUrl: artworkUrl)
                                         appCoordinator.rootPath = NavigationPath()
                                     }
                             })

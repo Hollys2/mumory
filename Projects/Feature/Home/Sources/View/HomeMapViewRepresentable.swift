@@ -13,39 +13,45 @@ import MusicKit
 import Core
 import Shared
 
+
 struct HomeMapViewRepresentable: UIViewRepresentable {
     
     @Binding var isAnnotationTapped: Bool
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
-    @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    
+    let mapView: MKMapView = .init()
     
     func makeUIView(context: Context) -> MKMapView {
-        let mapView: MKMapView = .init()
-        
         mapView.overrideUserInterfaceStyle = .light
         mapView.mapType = .mutedStandard
         mapView.showsUserLocation = true
         mapView.showsCompass = false
         mapView.isPitchEnabled = false
         mapView.isRotateEnabled = false
-        mapView.setRegion(MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan), animated: true)
         
-        if let encodedCoordinate = UserDefaults.standard.data(forKey: "lastCenterCoordinate"),
-           let decodedCoordinate = try? JSONDecoder().decode(CodableCoordinate.self, from: encodedCoordinate),
-           let encodedSpan = UserDefaults.standard.data(forKey: "lastCenterSpan"),
-           let decodedSpan = try? JSONDecoder().decode(CodableCoordinateSpan.self, from: encodedSpan) {
-            mapView.setRegion(MKCoordinateRegion(center: decodedCoordinate.toCoordinate, span: decodedSpan.toSpan), animated: true)
+//        if let encodedCoordinate = UserDefaults.standard.data(forKey: "lastCenterCoordinate"),
+//           let decodedCoordinate = try? JSONDecoder().decode(CodableCoordinate.self, from: encodedCoordinate),
+//           let encodedSpan = UserDefaults.standard.data(forKey: "lastCenterSpan"),
+//           let decodedSpan = try? JSONDecoder().decode(CodableCoordinateSpan.self, from: encodedSpan) {
+//            mapView.setRegion(MKCoordinateRegion(center: decodedCoordinate.toCoordinate, span: decodedSpan.toSpan), animated: true)
+//        }
+        
+        if let userLocation = self.currentUserViewModel.locationManagerViewModel.currentLocation, !self.appCoordinator.isFirstUserLocation {
+            mapView.setRegion(MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
+            print("FUCK currentLocation")
+            DispatchQueue.main.async {
+                self.appCoordinator.isFirstUserLocation = true
+            }
         }
         
         let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.tappedMap))
-        
         mapView.addGestureRecognizer(tapGesture)
         
         mapView.delegate = context.coordinator
         
-        context.coordinator.mapView = mapView
+//        context.coordinator.mapView = mapView
         context.coordinator.setGPSButton()
         context.coordinator.setCompassButton()
         
@@ -53,13 +59,14 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        let mumoryIds: [String] = self.mumoryDataViewModel.myMumorys.map { $0.id ?? "" }
-        let annotationsToRemove = self.mumoryDataViewModel.myMumorys.filter { !mumoryIds.contains($0.id ?? "") }
+        print("FXXK HomeMapView")
+        let mumoryIds: [String] = self.currentUserViewModel.mumoryViewModel.myMumorys.map { $0.id ?? "" }
+        let annotationsToRemove = self.currentUserViewModel.mumoryViewModel.myMumorys.filter { !mumoryIds.contains($0.id ?? "") }
 //        let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !mumoryIds.contains($0.id) }
         
         uiView.removeAnnotations(annotationsToRemove)
         
-        for annotation in self.mumoryDataViewModel.myMumorys {
+        for annotation in self.currentUserViewModel.mumoryViewModel.myMumorys {
             if let existingAnnotation = uiView.annotations.first(where: { ($0 as? Mumory)?.id == annotation.id }) as? Mumory {
                 if existingAnnotation != annotation {
                     uiView.removeAnnotation(existingAnnotation)
@@ -67,7 +74,7 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
             }
         }
         
-        uiView.addAnnotations(self.mumoryDataViewModel.myMumorys)
+        uiView.addAnnotations(self.currentUserViewModel.mumoryViewModel.myMumorys)
         
         if let newRegion = self.appCoordinator.createdMumoryRegion {
             uiView.setRegion(newRegion, animated: true)
@@ -84,11 +91,11 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
 
 extension HomeMapViewRepresentable {
     
+    @MainActor
     class Coordinator: NSObject {
         
-        let parent: HomeMapViewRepresentable
-        var mapView: MKMapView?
-        var isFirstRegionUpdated: Bool = false
+        var parent: HomeMapViewRepresentable
+        private var isDeselectionPrevented = false
         
         init(parent: HomeMapViewRepresentable) {
             self.parent = parent
@@ -96,55 +103,39 @@ extension HomeMapViewRepresentable {
         }
         
         func setGPSButton() {
-            guard let mapView = self.mapView else { return }
-            
             let button = UIButton(type: .custom)
-            
-            button.frame = CGRect(x: mapView.bounds.width - 48 - 15, y: mapView.bounds.height - 48 - 24, width: 48, height: 48)
+            button.frame = CGRect(x: -48 - 15, y: -48 - 24, width: 48, height: 48)
             button.autoresizingMask = [.flexibleTopMargin, .flexibleLeftMargin]
             button.setImage(SharedAsset.gps.image, for: .normal)
             button.addTarget(self, action:#selector(self.tappedGPSButton), for:.touchUpInside)
             
-            mapView.addSubview(button)
+            self.parent.mapView.addSubview(button)
         }
         
         func setCompassButton() {
-            guard let mapView = self.mapView else { return }
-            
-            let compassButton = MKCompassButton(mapView: mapView)
-            
+            let compassButton = MKCompassButton(mapView: self.parent.mapView)
+
             compassButton.compassVisibility = .adaptive
-            compassButton.frame = CGRect(x: mapView.bounds.width - compassButton.bounds.width - 22, y: mapView.bounds.height - compassButton.bounds.height - 87, width: 48, height: 48)
+            compassButton.frame = CGRect(x: self.parent.mapView.bounds.width - compassButton.bounds.width - 22, y: self.parent.mapView.bounds.height - compassButton.bounds.height - 87, width: 48, height: 48)
             compassButton.autoresizingMask = [.flexibleTopMargin, .flexibleLeftMargin]
-            
-            mapView.addSubview(compassButton)
+
+            self.parent.mapView.addSubview(compassButton)
         }
         
         @objc func tappedMap(sender: UITapGestureRecognizer) {
-            guard let mapView = self.mapView else { return }
-            
-            if !parent.isAnnotationTapped {
-                if let selectedAnnotation = mapView.selectedAnnotations.first {
-                    mapView.deselectAnnotation(selectedAnnotation, animated: false)
+            if !self.parent.isAnnotationTapped {
+                if let selectedAnnotation = self.parent.mapView.selectedAnnotations.first {
+                    self.parent.mapView.deselectAnnotation(selectedAnnotation, animated: false)
                 }
             }
         }
         
         @objc private func tappedGPSButton() {
-            guard let mapView = self.mapView,
-                  let userLocation = mapView.userLocation.location else { return }
-            
-            let region = MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan)
-            
-            mapView.setRegion(region, animated: true)
-            
-            switch CLLocationManager().authorizationStatus {
-            case .notDetermined, .restricted, .denied:
-                self.parent.locationManager.promptForLocationSettings()
-            case .authorizedAlways, .authorizedWhenInUse:
-                break
-            @unknown default:
-                break
+            if LocationManagerViewModel.checkLocationAuthorizationStatus() {
+                guard let userLocation = self.parent.mapView.userLocation.location else { return }
+                
+                let region = MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan)
+                self.parent.mapView.setRegion(region, animated: true)
             }
         }
     }
@@ -152,13 +143,7 @@ extension HomeMapViewRepresentable {
 
 extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
     
-    // 사용자 현재 위치 업데이트 됐을 때
-    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {
-        if !self.isFirstRegionUpdated {
-            mapView.setRegion(MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
-            self.isFirstRegionUpdated = true
-        }
-    }
+    func mapView(_ mapView: MKMapView, didUpdate userLocation: MKUserLocation) {}
     
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let coordinate = CodableCoordinate(coordinate: mapView.centerCoordinate)
@@ -172,14 +157,13 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        
         if annotation is MKUserLocation {
             let annotationView: MKAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "CustomUserLocation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "CustomUserLocation")
-            
+
             annotationView.image = SharedAsset.userLocation.image
             annotationView.frame = CGRect(x: 0, y: 0, width: 47, height: 47)
             annotationView.zPriority = .max
-            
+
             return annotationView
         } else if annotation is Mumory {
             let annotationView: MKAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "MumoryAnnotation") ?? MKAnnotationView(annotation: annotation, reuseIdentifier: "MumoryAnnotation")
@@ -233,28 +217,26 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             }
             
             if cluster.memberAnnotations.count > 1 {
-                //                                let countView = CountView(text: String(cluster.memberAnnotations.count))
-                //                                let hostingController = UIHostingController(rootView: countView)
-                //                                hostingController.view.frame.origin = CGPoint(x: 74 - 5.5, y: 8)
-                //
-                //                                clusterView.addSubview(hostingController.view)
-                
-                let label = CountUILabel(text: "\("99")")
-                label.textInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
-                label.font = SharedFontFamily.Pretendard.bold.font(size: 14)
-                
-                clusterView.addSubview(label)
-                
-                label.translatesAutoresizingMaskIntoConstraints = false
-                let minWidthConstraint = label.widthAnchor.constraint(greaterThanOrEqualToConstant: 25)
-                minWidthConstraint.priority = .required
-                
-                NSLayoutConstraint.activate([
-                    //                    minWidthConstraint,
-                    label.heightAnchor.constraint(equalToConstant: 24),
-                    //                        label.topAnchor.constraint(equalTo: clusterView.topAnchor, constant: 0),
-                    //                        label.leadingAnchor.constraint(equalTo: clusterView.leadingAnchor, constant: 74 - 5.5)
-                ])
+                let formatter = NumberFormatter()
+                formatter.numberStyle = .decimal
+                if let formattedNumber = formatter.string(from: NSNumber(value: cluster.memberAnnotations.count)) {
+                    let label = CountUILabel(text: formattedNumber)
+                    label.textInsets = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+                    label.font = SharedFontFamily.Pretendard.bold.font(size: 14)
+                    
+                    clusterView.addSubview(label)
+                    
+                    label.translatesAutoresizingMaskIntoConstraints = false
+    //                let minWidthConstraint = label.widthAnchor.constraint(greaterThanOrEqualToConstant: 25)
+    //                minWidthConstraint.priority = .required
+                    
+                    NSLayoutConstraint.activate([
+                        label.heightAnchor.constraint(equalToConstant: 24),
+                        label.widthAnchor.constraint(greaterThanOrEqualToConstant: 25),
+                        label.leadingAnchor.constraint(equalTo: clusterView.leadingAnchor, constant: 61),
+                        label.topAnchor.constraint(equalTo: clusterView.topAnchor, constant: 1),
+                    ])
+                }
             }
             return clusterView
         }
@@ -264,30 +246,36 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
         if let mumoryAnnotation = annotation as? Mumory {
             self.parent.isAnnotationTapped = true
-            self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = [mumoryAnnotation]
+            self.parent.currentUserViewModel.mumoryViewModel.mumoryCarouselAnnotations = [mumoryAnnotation]
             
             let region = MKCoordinateRegion(center: annotation.coordinate, span: MapConstant.defaultSpan)
-            
             mapView.setRegion(region, animated: true)
-            
-            print("didSelect MumoryAnnotation: \(mumoryAnnotation)")
+
         } else if let cluster = annotation as? MKClusterAnnotation {
+            self.isDeselectionPrevented = true
             self.parent.isAnnotationTapped = true
             
             let mumoryAnnotations = cluster.memberAnnotations.compactMap { $0 as? Mumory }
-            
             let sortedAnnotations = mumoryAnnotations.sorted { $0.date > $1.date }
-            
-            self.parent.mumoryDataViewModel.mumoryCarouselAnnotations = sortedAnnotations
-            
-            print("didSelect cluster: \(cluster)")
+            self.parent.currentUserViewModel.mumoryViewModel.mumoryCarouselAnnotations = sortedAnnotations
+               
+            if let firstAnnotation = sortedAnnotations.first {
+                let region = MKCoordinateRegion(center: firstAnnotation.coordinate, span: MapConstant.defaultSpan)
+                mapView.setRegion(region, animated: true)
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.isDeselectionPrevented = false
+                }
+            }
         }
     }
     
     func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
         print("didDeselect")
-        DispatchQueue.main.async {
-            self.parent.isAnnotationTapped = false
+        if !self.isDeselectionPrevented {
+            DispatchQueue.main.async {
+                self.parent.isAnnotationTapped = false
+            }
         }
     }
 }
@@ -297,7 +285,6 @@ class CountUILabel: UILabel {
     init(text: String) {
         super.init(frame: .zero)
         self.text = text
-        self.font = UIFont(name: SharedFontFamily.Pretendard.bold.name, size: 14)
         self.textColor = .black
         self.textAlignment = .center
         self.layer.backgroundColor = SharedAsset.mainColor.color.cgColor
@@ -316,14 +303,14 @@ class CountUILabel: UILabel {
     }
     
     override func drawText(in rect: CGRect) {
-        let insetRect = rect.inset(by: textInsets)
+        let insetRect = rect.inset(by: self.textInsets)
         super.drawText(in: insetRect)
     }
     
     override var intrinsicContentSize: CGSize {
         let size = super.intrinsicContentSize
-        return CGSize(width: size.width + textInsets.left + textInsets.right,
-                      height: size.height + textInsets.top + textInsets.bottom)
+        return CGSize(width: size.width + self.textInsets.left + self.textInsets.right,
+                      height: size.height + self.textInsets.top + self.textInsets.bottom)
     }
 }
 

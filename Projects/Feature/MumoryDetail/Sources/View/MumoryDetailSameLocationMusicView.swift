@@ -72,7 +72,7 @@ struct MumoryDetailSameLocationMusicView: View {
                         .resizable()
                         .frame(width: 20, height: 20)
                         .onTapGesture {
-                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
+                            playerViewModel.removeFromFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .delete)
                         }
                 } else {
@@ -81,7 +81,7 @@ struct MumoryDetailSameLocationMusicView: View {
                         .frame(width: 20, height: 20)
                         .onTapGesture {
                             self.generateHapticFeedback(style: .medium)
-                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.songId)
+                            playerViewModel.addToFavorite(uid: currentUserViewModel.user.uId, songId: mumory.song.id)
                             snackBarViewModel.setSnackBar(type: .favorite, status: .success)
                         }
                 }

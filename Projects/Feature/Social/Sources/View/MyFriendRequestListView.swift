@@ -64,16 +64,13 @@ struct MyFriendRequestListView: View {
                 }
             }
             
-            
             if status == .friendProcessLoading || status == .loading {
-                LoadingAnimationView(isLoading: .constant(true))
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top, getUIScreenBounds().height * 0.5)
+//                LoadingAnimationView(isLoading: .constant(true))
+//                    .frame(maxWidth: .infinity, alignment: .center)
+//                    .padding(.top, getUIScreenBounds().height * 0.5)
             }
         }
-
     }
-
 }
 
 
