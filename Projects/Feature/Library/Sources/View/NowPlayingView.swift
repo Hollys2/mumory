@@ -498,8 +498,9 @@ struct PlayingViewBottomSheet: View {
                     appCoordinator.selectedTab = .home
                     appCoordinator.rootPath = NavigationPath()
                     
-                    self.appCoordinator.selectedMumory.song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
-//                    self.appCoordinator.choosedSong = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    self.appCoordinator.draftMumorySong = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
+//                    self.appCoordinator.selectedMumory.song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+                    
                     appCoordinator.isCreateMumorySheetShown = true
                     dismiss()
                     playerViewModel.isPresentNowPlayingView = false

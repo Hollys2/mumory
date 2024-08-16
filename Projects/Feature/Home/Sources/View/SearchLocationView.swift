@@ -74,11 +74,8 @@ struct SearchLocationView: View {
     @EnvironmentObject var currerntUserViewModel: CurrentUserViewModel
     
     var body: some View {
-        
         VStack(spacing: 0) {
-            
             HStack {
-                
                 TextField("Location", text: self.$appCoordinator.localSearchViewModel.queryFragment,
                           prompt: Text("위치 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
@@ -119,6 +116,7 @@ struct SearchLocationView: View {
                         .foregroundColor(.white)
                 }
             } // HStack
+            .padding(.top, getSafeAreaInsets().top + 12)
             .padding(.bottom, 15)
             
             if self.appCoordinator.localSearchViewModel.results.isEmpty {
@@ -298,7 +296,6 @@ struct SearchLocationView: View {
         } // VStack
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
-        .padding(.top, getSafeAreaInsets().top + 12)
         .padding(.horizontal, 20)
         .background(Color(red: 0.09, green: 0.09, blue: 0.09))
         .onDisappear {

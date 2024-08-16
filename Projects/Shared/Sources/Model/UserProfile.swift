@@ -41,7 +41,6 @@ public struct UserProfile: Hashable {
         self.signUpDate = signUpDate
     }
     
-    
     public var uId: String
     public var nickname: String
     public var id: String
@@ -50,7 +49,6 @@ public struct UserProfile: Hashable {
     public var bio: String
     public var defaultProfileImage: Image = SharedAsset.circle.swiftUIImage
     public var signUpDate: Date
-
 }
 
 public let randomProfiles: [Image] = [SharedAsset.profileRed.swiftUIImage, SharedAsset.profilePurple.swiftUIImage, SharedAsset.profileYellow.swiftUIImage, SharedAsset.profileOrange.swiftUIImage]

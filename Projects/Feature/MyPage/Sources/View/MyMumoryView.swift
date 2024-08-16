@@ -43,11 +43,8 @@ public struct MyMumoryView: View {
     
     public var body: some View {
         ZStack {
-            
             VStack(spacing: 0) {
-
                 VStack(spacing: 0) {
-
                     Spacer().frame(height: self.getSafeAreaInsets().top + 19)
 
                     HStack(spacing: 0) {
@@ -235,12 +232,10 @@ public struct MyMumoryView: View {
                                 }
 
                                 LazyVGrid(columns: columns, spacing: 12) {
-
-                                    ForEach(self.currentUserViewModel.mumoryViewModel.locationMumorys.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumories in
-
-                                        RoundedSquareView(regionTitle: region, mumorys: mumories)
+                                    ForEach(self.currentUserViewModel.mumoryViewModel.locationMumorys.sorted(by: { $0.key < $1.key }), id: \.key) { region, mumorys in
+                                        RoundedSquareView(regionTitle: region, mumorys: mumorys)
                                             .onTapGesture {
-                                                self.appCoordinator.rootPath.append(MumoryView(type: .regionMyMumoryView(self.user), mumoryAnnotation: Mumory(), region: region, mumorys: mumories))
+                                                self.appCoordinator.rootPath.append(MumoryPage.regionMyMumoryView(user: self.user, regionTitle: region, mumorys: mumorys))
                                             }
                                     }
                                 }
@@ -381,21 +376,21 @@ public struct MyMumoryView: View {
 //        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
-                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
-                    switch result {
-                    case .success():
-                        print("SUCCESS deleteMumory!")
-                        
-                        let calendar = Calendar.current
-                        let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
-                        let range = ...lastDayOfMonth
-                        let newDataBeforeSelectedDate = self.currentUserViewModel.mumoryViewModel.myMumorys.filter { range.contains($0.date) }
-                        self.currentUserViewModel.mumoryViewModel.monthlyMumorys = newDataBeforeSelectedDate
-                        appCoordinator.isDeleteMumoryPopUpViewShown = false
-                    case .failure(let error):
-                        print("ERROR deleteMumory: \(error)")
-                    }
-                }
+//                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
+//                    switch result {
+//                    case .success():
+//                        print("SUCCESS deleteMumory!")
+//                        
+//                        let calendar = Calendar.current
+//                        let lastDayOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1, hour: 24 + 8, minute: 59, second: 59), to: selectedDate)!
+//                        let range = ...lastDayOfMonth
+//                        let newDataBeforeSelectedDate = self.currentUserViewModel.mumoryViewModel.myMumorys.filter { range.contains($0.date) }
+//                        self.currentUserViewModel.mumoryViewModel.monthlyMumorys = newDataBeforeSelectedDate
+//                        appCoordinator.isDeleteMumoryPopUpViewShown = false
+//                    case .failure(let error):
+//                        print("ERROR deleteMumory: \(error)")
+//                    }
+//                }
             })
         })
         .ignoresSafeArea()
@@ -531,8 +526,9 @@ struct MumoryItemView: View {
                         .resizable()
                         .frame(width: 22, height: 22)
                         .onTapGesture {
-                            self.appCoordinator.selectedMumory = self.mumory
-                            appCoordinator.isMyMumoryBottomSheetShown = true
+//                            self.appCoordinator.selectedMumory = self.mumory
+//                            appCoordinator.isMyMumoryBottomSheetShown = true
+                            self.appCoordinator.sheet = .myMumory(mumory: self.mumory, isOwn: self.mumory.uId == self.currentUserViewModel.user.uId)
                         }
                 } // HStack
                 .padding(.vertical, 6)
@@ -573,13 +569,9 @@ struct MumoryItemView: View {
                             )
                         )
                         .cornerRadius(15)
-                        .gesture(
-                            TapGesture(count: 1)
-                                .onEnded {
-                                    self.appCoordinator.selectedMumory = mumory
-                                    self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
-                                }
-                        )
+                        .onTapGesture {
+                            self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: self.mumory))
+                        }
 
                     HStack(spacing: 0) {
                         SharedAsset.musicIconSocial.swiftUIImage

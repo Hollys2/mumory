@@ -30,7 +30,7 @@ public struct SplashView: View {
         }
         .onAppear {
             Task {
-                self.appCoordinator.isLoading = true
+//                self.appCoordinator.isLoading = true
                 
                 if await currentUserViewModel.initializeUserData() {
                     self.appCoordinator.isHomeViewShown = true
@@ -38,7 +38,7 @@ public struct SplashView: View {
                     self.appCoordinator.isLoginViewShown = true
                 }
                 
-                self.appCoordinator.isLoading = false
+//                self.appCoordinator.isLoading = false
             }
 
             Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in

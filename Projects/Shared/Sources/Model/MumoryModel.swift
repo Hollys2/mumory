@@ -15,7 +15,6 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift // @DocumentID
 
 
-// 필수항목을 제외하곤 옵셔널 처리
 public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     
     @DocumentID public var id: String?
@@ -36,11 +35,9 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     
     @ExplicitNull public var likes: [String]?
     
-    // 대안 고민해보기
     public var commentCount: Int
-    public var myCommentCount: Int
 
-    public init(id: String? = nil, uId: String, date: Date, song: SongModel, location: LocationModel, isPublic: Bool, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, likes: [String]? = nil, commentCount: Int, myCommentCount: Int) {
+    public init(id: String? = nil, uId: String, date: Date, song: SongModel, location: LocationModel, isPublic: Bool, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, likes: [String]? = nil, commentCount: Int) {
         self.id = id
         self.uId = uId
         self.date = date
@@ -53,11 +50,10 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
         self.imageURLs = imageURLs
         self.likes = likes
         self.commentCount = commentCount
-        self.myCommentCount = myCommentCount
     }
     
     public override convenience init() {
-        self.init(id: "UNKNOWN", uId: "UNKNOWN", date: Date(), song: SongModel(), location: LocationModel(), isPublic: false, tags: nil, imageURLs: nil, likes: nil, commentCount: 0,  myCommentCount: 0)
+        self.init(uId: "UNKNOWN", date: Date(), song: SongModel(), location: LocationModel(), isPublic: false, tags: nil, imageURLs: nil, likes: nil, commentCount: 0)
     }
     
     func copy(from other: Mumory) {

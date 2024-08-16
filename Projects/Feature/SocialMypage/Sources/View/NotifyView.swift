@@ -230,7 +230,8 @@ struct NotifyLikeItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentDeleteMumoryPopup.toggle()
                 } else {
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
+                    
                 }
             }
             
@@ -330,7 +331,7 @@ struct NotifyCommentItem: View {
                     UIView.setAnimationsEnabled(false)
                     isPresentDeleteMumoryPopup.toggle()
                 } else {
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
                 }
             }
             
@@ -403,7 +404,7 @@ struct NotifyFriendItem: View {
         .onTapGesture {
             print("friend")
             Task {
-                let friend = await FetchManager.shared.fetchUser(uId: notification.friendUId, appCoordinator: self.appCoordinator)
+                let friend = await FetchManager.shared.fetchUser(uId: notification.friendUId)
                 appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
             }
             if !notification.isRead {

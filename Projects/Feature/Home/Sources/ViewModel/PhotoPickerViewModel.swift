@@ -10,73 +10,37 @@
 import SwiftUI
 import PhotosUI
 import Combine
+import FirebaseStorage
+
+import Shared
 
 
 final class PhotoPickerViewModel: ObservableObject {
     
-    @Published var isPhotoErrorPopUpShown: Bool = false
-    @Published private(set) var selectedImage: UIImage? = nil
-    @Published var imageSelection: PhotosPickerItem? = nil {
-        didSet {
-            setImage(from: imageSelection)
-        }
-    }
+    var photoSelectionCount: Int = 0
     
-    @Published var imageSelectionCount: Int = 0
     @Published private(set) var selectedImages: [UIImage] = [] {
         didSet {
             print("selectedImages didSet")
-            self.imageSelectionCount = selectedImages.count
+            self.photoSelectionCount = selectedImages.count
         }
     }
-    @Published var imageSelections: [PhotosPickerItem] = [] {
+    
+    @Published var photoSelections: [PhotosPickerItem] = [] {
         didSet {
             print("imageSelections didSet")
-            self.imageSelectionCount = imageSelections.count
+            self.photoSelectionCount = photoSelections.count
             //            setImages(from: imageSelections)
         }
     }
     
-    private func setImage(from selection: PhotosPickerItem?) {
-        guard let selection else { return }
-        
-        Task {
-            do {
-                let data = try await selection.loadTransferable(type: Data.self)
-                
-                guard let data, let uiImage = UIImage(data: data) else {
-                    throw URLError(.badServerResponse)
-                }
-                
-                selectedImage = uiImage
-            } catch {
-                print(error)
-            }
-        }
-    }
-    
-    private func setImages(from selections: [PhotosPickerItem]) {
-        selectedImages.removeAll()
-        
-        if !imageSelections.isEmpty {
-            for selection in selections {
-                Task {
-                    if let data = try? await selection.loadTransferable(type: Data.self),
-                       let uiImage = UIImage(data: data) {
-                        DispatchQueue.main.async { [weak self] in
-                            self?.selectedImages.append(uiImage)
-                        }
-                    }
-                }
-            }
-        }
-        imageSelections.removeAll()
-    }
+    @Published var isPhotoErrorPopUpShown: Bool = false
+   
     
     @MainActor
     func convertDataToImage() {
-        if !imageSelections.isEmpty {
-            for eachItem in imageSelections {
+        if !photoSelections.isEmpty {
+            for eachItem in photoSelections {
                 Task {
                     if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
                         if let image = UIImage(data: imageData), !selectedImages.contains(image) {
@@ -87,13 +51,13 @@ final class PhotoPickerViewModel: ObservableObject {
             }
         }
         
-        imageSelections.removeAll()
+        photoSelections.removeAll()
     }
     
     @MainActor
     func convertDataToImage(imageURLsCount: Int) {
-        if !imageSelections.isEmpty {
-            for eachItem in imageSelections {
+        if !photoSelections.isEmpty {
+            for eachItem in photoSelections {
                 Task {
                     if let imageData = try? await eachItem.loadTransferable(type: Data.self) {
                         if let image = UIImage(data: imageData) {
@@ -108,7 +72,7 @@ final class PhotoPickerViewModel: ObservableObject {
                 }
             }
         }
-        imageSelections.removeAll()
+        photoSelections.removeAll()
     }
     
     func removeImage(_ image: UIImage) {
@@ -127,23 +91,79 @@ final class PhotoPickerViewModel: ObservableObject {
     func removeAllSelectedImages() {
         selectedImages.removeAll()
     }
-    
-    func downloadImage(from url: URL) -> AnyPublisher<UIImage?, Never> {
-        return URLSession.shared.dataTaskPublisher(for: url)
-            .map { UIImage(data: $0.data) }
-            .replaceError(with: nil)
-            .receive(on: DispatchQueue.main)
-            .eraseToAnyPublisher()
+}
+
+extension PhotoPickerViewModel {
+    private func uploadImage(_ image: UIImage) async throws -> URL {
+        let storageRef = FirebaseManager.shared.storage.reference()
+        let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpg")
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            throw UploadError.dataConversionFailed
+        }
+        
+        let _ = try await imageRef.putDataAsync(imageData)
+        
+        let url = try await imageRef.downloadURL()
+        
+        return url
     }
     
-    func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let data = data {
-                let image = UIImage(data: data)
-                completion(image)
-            } else {
-                completion(nil)
+    // 모든 이미지를 업로드하고 URL을 가져오는 함수
+    func uploadAllImages() async -> [String] {
+        var uploadedImageURLs: [String] = []
+//        for (index, image) in self.selectedImages.enumerated() {
+//            do {
+//                let url = try await uploadImage(image)
+//                uploadedImageURLs.append(url.absoluteString)
+//                print("Image \(index + 1) uploaded successfully.")
+//            } catch {
+//                print("Failed to upload image \(index + 1): \(error.localizedDescription)")
+//            }
+//        }
+        
+        await withTaskGroup(of: URL?.self) { group in
+            for image in self.selectedImages {
+                group.addTask {
+                    do {
+                        let url = try await self.uploadImage(image)
+                        return url
+                    } catch {
+                        print("Failed to upload image: \(error.localizedDescription)")
+                        return nil
+                    }
+                }
             }
-        }.resume()
+            
+            for await url in group {
+                if let url = url {
+                    uploadedImageURLs.append(url.absoluteString)
+                }
+            }
+        }
+        
+        return uploadedImageURLs
     }
+    
+    enum UploadError: Error {
+        case dataConversionFailed
+    }
+    
+//    public func fetchUsers(uIds: [String]) async -> [UserProfile] {
+//        return await withTaskGroup(of: UserProfile?.self) { taskGroup -> [UserProfile] in
+//            var returnUsers: [UserProfile] = []
+//            for id in uIds {
+//                taskGroup.addTask {
+//                    let user = await FetchManager.shared.fetchUser(uId: id)
+//                    if user.nickname == "탈퇴계정" {return nil}
+//                    return user
+//                }
+//            }
+//            for await value in taskGroup {
+//                guard let user = value else {continue}
+//                returnUsers.append(user)
+//            }
+//            return returnUsers
+//        }
+//    }
 }

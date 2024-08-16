@@ -263,7 +263,7 @@ struct SocialFriendView: View {
             }else {
                 status = .valid
             }
-            self.friendSearchResult = await FetchManager.shared.fetchUser(uId: friendUID, appCoordinator: self.appCoordinator)
+            self.friendSearchResult = await FetchManager.shared.fetchUser(uId: friendUID)
         }
     }
 }

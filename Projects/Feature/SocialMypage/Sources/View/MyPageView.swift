@@ -274,12 +274,10 @@ struct MyMumory: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .onTapGesture {
-                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(currentUserViewModel.user), mumoryAnnotation: Mumory()))
-
+                self.appCoordinator.rootPath.append(MumoryPage.myMumoryView(user: self.currentUserViewModel.user))
             }
             
             if self.currentUserViewModel.mumoryViewModel.myMumorys.isEmpty {
-                
                 InitialSettingView(title: "음악과 일상 기록을 통해\n나만의 뮤모리를 채워보세요", buttonTitle: "뮤모리 기록하러 가기") {
                     appCoordinator.isMyPageViewShown = false
                     Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
@@ -294,13 +292,13 @@ struct MyMumory: View {
                 .padding(.bottom, 40)
 
 
-            }else {
+            } else {
                 ScrollView(.horizontal) {
                     HStack(spacing: getUIScreenBounds().width < 380 ? 8 : 12, content: {
                         ForEach(self.currentUserViewModel.mumoryViewModel.myMumorys.prefix(10), id: \.id) { mumory in
                             MyMumoryItem(mumory: mumory)
                                 .onTapGesture {
-                                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                                    appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
                                 }
                         }
                     })

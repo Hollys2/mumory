@@ -25,8 +25,7 @@ struct MumoryCardView: View {
                 }
             
             VStack(spacing: 16) {
-                
-                MumoryCarouselUIViewRepresentable(mumoryAnnotations: $currentUserViewModel.mumoryViewModel.mumoryCarouselAnnotations)
+                MumoryCarouselUIViewRepresentable(mumoryAnnotations: self.currentUserViewModel.mumoryViewModel.mumoryCarouselAnnotations)
                     .frame(height: 418)
                     .padding(.horizontal, (UIScreen.main.bounds.width - (getUIScreenBounds().width == 375 ? 296 : 310)) / 2 - 10)
                 
@@ -45,9 +44,7 @@ struct MumoryCardView: View {
 
 struct MumoryCarouselUIViewRepresentable: UIViewRepresentable {
     
-    @Binding var mumoryAnnotations: [Mumory]
-    
-//    @EnvironmentObject private var appCoordinator: AppCoordinator
+    var mumoryAnnotations: [Mumory]
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
@@ -64,7 +61,7 @@ struct MumoryCarouselUIViewRepresentable: UIViewRepresentable {
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         
-        let hostingController = UIHostingController(rootView: MumoryList(mumoryAnnotations: $mumoryAnnotations))
+        let hostingController = UIHostingController(rootView: MumoryList(mumoryAnnotations: mumoryAnnotations))
         hostingController.view.frame = CGRect(x: 0, y: 0, width: totalWidth, height: 418)
         
         scrollView.addSubview(hostingController.view)
@@ -98,12 +95,12 @@ extension MumoryCarouselUIViewRepresentable.Coordinator: UIScrollViewDelegate {}
 
 struct MumoryList: View {
     
-    @Binding var mumoryAnnotations: [Mumory]
+    let mumoryAnnotations: [Mumory]
     
     var body: some View {
         HStack(spacing: 0) {
             ForEach(mumoryAnnotations.indices, id: \.self) { index in
-                MumoryCard(mumory: $mumoryAnnotations[index], selectedIndex: index)
+                MumoryCard(mumory: mumoryAnnotations[index], selectedIndex: index)
                     .padding(.horizontal, 10)
             }
         }
@@ -113,7 +110,7 @@ struct MumoryList: View {
 
 struct MumoryCard: View {
     
-    @Binding var mumory: Mumory
+    let mumory: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
 
@@ -234,8 +231,7 @@ struct MumoryCard: View {
                     Spacer()
                     
                     Button(action: {
-                        appCoordinator.tappedMumory = mumory
-                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                        self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: self.mumory))
                     }, label: {
                         SharedAsset.nextButtonMumoryPopup.swiftUIImage
                             .resizable()

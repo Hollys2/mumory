@@ -16,14 +16,12 @@ import _MapKit_SwiftUI
 public struct SearchLocationMapView: View {
     
     @State var location: LocationModel = .init()
-    
     @State private var locationTitleText: String = ""
     @State private var translation: CGSize = .zero
     @State private var isBottomSheetShown: Bool = false
     @State private var scrollViewOffset: CGFloat = .zero
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
     
     public init() {}
     

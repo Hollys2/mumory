@@ -70,7 +70,7 @@ struct MumoryTabViewControllerRepresentable: UIViewControllerRepresentable {
             if let index = tabBarController.viewControllers?.firstIndex(of: viewController) {
                 if let tab = Tab(rawValue: index){
                     if tab == .createMumroy {
-                        self.parent.appCoordinator.sheet = .createMumory
+                        self.parent.appCoordinator.isCreateMumorySheetShown = true
                         self.parent.playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
 //                        tabBarController.selectedIndex = self.parent.selectedTab.rawValue
                     } else {

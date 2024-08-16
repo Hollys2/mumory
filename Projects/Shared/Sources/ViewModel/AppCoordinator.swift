@@ -13,17 +13,24 @@ import MapKit
 import MusicKit
 import Firebase
 
+
 public enum AppNavigationType {
     case auth
     case mumory
 }
 
-
+public enum Tab: Int {
+    case home = 0
+    case social
+    case createMumroy
+    case library
+    case notification
+}
 
 public class AppCoordinator: ObservableObject {
     
-    var cancellables = Set<AnyCancellable>()
     var anyCancellable: AnyCancellable? = nil
+    var cancellables = Set<AnyCancellable>()
     
     public init() {
         anyCancellable = localSearchViewModel.objectWillChange
@@ -32,8 +39,10 @@ public class AppCoordinator: ObservableObject {
             }
     }
     
+    @Published public var test: Int = -1
+    
     @Published public var localSearchViewModel: LocalSearchViewModel = .init()
-   
+    
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var authPath: [AuthPage] = []
     @Published public var selectedTab: Tab = .social
@@ -42,15 +51,28 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var offsetY: CGFloat = .zero
     
-    @Published public var sheet: Sheet = .none
-    @Published public var bottomSheet: BottomSheet = .none
+    @Published public var sheet: Sheet = .none {
+        didSet {
+            print("FUCK Sheet updated to: \(sheet)")
+        }
+    }
     
-    @Published public var isCreateMumorySheetShown: Bool = false
+    @Published public var isCreateMumorySheetShown: Bool = false {
+        didSet {
+            if isCreateMumorySheetShown {
+                self.selectedDate = Date()
+            }
+        }
+    }
+    @Published public var isCommentSheetShown: (Bool, Mumory?) = (false, nil)
+    @Published public var isMumoryMapViewShown: Bool = false
+    
+    
     @Published public var isMumoryDetailShown = false
     @Published public var isNavigationBarColored = false
     @Published public var isReactionBarShown = true
-    @Published public var isMumoryDetailMenuSheetShown = false
-//    @Published public var isSocialMenuSheetViewShown = false
+    //    @Published public var isMumoryDetailMenuSheetShown = false
+    //    @Published public var isSocialMenuSheetViewShown = false
     @Published public var isMumoryDetailCommentSheetViewShown = false
     @Published public var isSocialCommentSheetViewShown: Bool = false
     @Published public var isCommentBottomSheetShown = false
@@ -62,15 +84,17 @@ public class AppCoordinator: ObservableObject {
     @Published public var isRewardPopUpShown: Bool = false
     
     @Published public var isDatePickerShown: Bool = false
-    @Published public var selectedDate: Date = Date()
+    @Published public var selectedDate: Date = Date() {
+        didSet {
+            print("FUCK selectedDate: \(selectedDate)")
+        }
+    }
     
     @Published public var draftMumorySong: SongModel? = nil
     @Published public var draftMumoryLocation: LocationModel? = nil
     
-    @Published public var selectedMumory: Mumory = Mumory()
+    //    @Published public var selectedMumory: Mumory = Mumory()
     @Published public var selectedComment: Comment = Comment()
-    
-    @Published public var tappedMumory: Mumory = Mumory()
     
     @Published public var page: Int = 1
     
@@ -80,6 +104,7 @@ public class AppCoordinator: ObservableObject {
     @Published public var isLoginViewShown: Bool = false
     @Published public var isOnboardingShown: Bool = UserDefaults.standard.value(forKey: "SignInHistory") == nil
     @Published public var isLoading: Bool = false
+    @Published public var isRefreshing: Bool = false
     @Published public var isSocialLoading: Bool = false
     @Published public var isScrollToTop: Bool = false
     
@@ -102,21 +127,21 @@ public class AppCoordinator: ObservableObject {
         }
     }
     
-//    private func hasSignInHistory() -> Bool {
-//        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
-//    }
+    //    private func hasSignInHistory() -> Bool {
+    //        return UserDefaults.standard.value(forKey: "SignInHistory") == nil
+    //    }
     
     private func hasCurrentUser() -> Bool {
         let auth = FirebaseManager.shared.auth
         return auth.currentUser != nil
     }
     
-//    public func setupInitialScreen() {
-//        DispatchQueue.main.async {
-//            self.isOnboardingShown = self.hasSignInHistory()
-//            self.isHomeViewShown = self.hasCurrentUser()
-//        }
-//    }
+    //    public func setupInitialScreen() {
+    //        DispatchQueue.main.async {
+    //            self.isOnboardingShown = self.hasSignInHistory()
+    //            self.isHomeViewShown = self.hasCurrentUser()
+    //        }
+    //    }
 }
 
 

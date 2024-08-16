@@ -19,14 +19,11 @@ public struct SocialLoadingView: View {
     
     public var body: some View {
         ScrollView {
-            
             ZStack(alignment: .top) {
-                
                 SharedAsset.backgroundColor.swiftUIColor
                     .frame(width: getUIScreenBounds().width, height: getUIScreenBounds().height)
                 
                 VStack(spacing: 0) {
-                    
                     Rectangle()
                         .fill(SharedAsset.backgroundColor.swiftUIColor)
                         .frame(height: 68)

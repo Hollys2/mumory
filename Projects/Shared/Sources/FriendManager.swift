@@ -36,7 +36,7 @@ public class FriendManager: ObservableObject {
                         
                         DispatchQueue.main.async {
                             Task {
-                                let user = await FetchManager.shared.fetchUser(uId: document.documentID, appCoordinator: AppCoordinator())
+                                let user = await FetchManager.shared.fetchUser(uId: document.documentID)
                                 self.searchedFriends.append(user)
                             }
                         }

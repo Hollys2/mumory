@@ -303,7 +303,7 @@ public struct SocialSearchView: View {
                                         if friend.uId == currentUserViewModel.user.uId {
                                             appCoordinator.rootPath.append(MumoryPage.myPage)
                                         } else {
-                                            let friend = await FetchManager.shared.fetchUser(uId: friend.uId, appCoordinator: self.appCoordinator)
+                                            let friend = await FetchManager.shared.fetchUser(uId: friend.uId)
                                             appCoordinator.rootPath.append(MumoryPage.friend(friend: friend))
                                         }
                                     }
@@ -585,13 +585,12 @@ struct SearchedMumoryItemView: View {
             , alignment: .top
         )
         .background(Color(red: 0.165, green: 0.165, blue: 0.165))
-        .simultaneousGesture(TapGesture(count: 1).onEnded({
-            self.appCoordinator.selectedMumory = self.mumory
-            self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
+        .simultaneousGesture(TapGesture(count: 1).onEnded({ // 수정
+            self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: self.mumory))
         }))
         .onAppear {
             Task {
-                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId, appCoordinator: self.appCoordinator)
+                self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
             }
         }
     }

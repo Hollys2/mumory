@@ -12,6 +12,7 @@ import Combine
 import FirebaseFunctions
 import Shared
 
+
 class SocialItemCollectionViewCell: UICollectionViewCell {
     
     private var hostingController: UIHostingController<SocialItemView>?
@@ -45,7 +46,7 @@ class SocialItemCollectionViewCell: UICollectionViewCell {
             hostingController.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
     }
-
+    
     func configure(mumory: Mumory) {
         hostingController?.rootView = SocialItemView(mumory: mumory)
     }
@@ -101,22 +102,26 @@ struct CollectionViewRepresentable: UIViewRepresentable {
         
         DispatchQueue.main.async {
             self.appCoordinator.isSocialLoading = true
-            self.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.currentUserViewModel) { result in
-                switch result {
-                case .success(_):
-                    print("FUCK SUCCESS fetchSocialMumory onAppear")
-                case .failure(let error):
-                    print("FUCK FAILURE fetchSocialMumory onAppear: \(error.localizedDescription)")
-                }
-                collectionView.reloadData()
-                self.appCoordinator.isSocialLoading = false
-            }
         }
+        
+        self.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.currentUserViewModel) { result in
+            switch result {
+            case .success(_):
+                print("FUCK SUCCESS fetchSocialMumory onAppear")
+            case .failure(let error):
+                print("FUCK FAILURE fetchSocialMumory onAppear: \(error.localizedDescription)")
+            }
+            collectionView.reloadData()
+            self.appCoordinator.isSocialLoading = false
+        }
+
         
         return collectionView
     }
 
     func updateUIView(_ uiView: UICollectionView, context: Context) {
+        uiView.bounces = true
+        
         if self.appCoordinator.isScrollToTop {
             uiView.setContentOffset(CGPoint(x: 0, y: -(getSafeAreaInsets().top + 68 + 25)), animated: true)
             DispatchQueue.main.async {
@@ -139,6 +144,13 @@ struct CollectionViewRepresentable: UIViewRepresentable {
 
         init(parent: CollectionViewRepresentable) {
             self.parent = parent
+            
+            super.init()
+            
+//            self.cancellable = parent.currentUserViewModel.mumoryViewModel.$socialMumorys
+//                .sink { [weak self] _ in
+//                    self?.collectionView?.reloadData()
+//                }
         }
         
         func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -154,6 +166,7 @@ struct CollectionViewRepresentable: UIViewRepresentable {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SocialItemCell", for: indexPath) as! SocialItemCollectionViewCell
             let mumory = self.parent.currentUserViewModel.mumoryViewModel.socialMumorys[indexPath.item]
             cell.configure(mumory: mumory)
+            
             return cell
         }
         
@@ -162,12 +175,8 @@ struct CollectionViewRepresentable: UIViewRepresentable {
         }
         
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-              return 40 // 세로 셀 간의 간격
+              return 40
           }
-        
-        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-            return 0 // 가로 셀 간의 간격
-        }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             self.parent.scrollPublisher.send(scrollView)
@@ -178,26 +187,26 @@ struct CollectionViewRepresentable: UIViewRepresentable {
             let limitHeight = self.parent.getSafeAreaInsets().top + 68
             let deltaY = contentOffsetY - self.previousOffsetY
             
-            if !self.isFetched {
-                if deltaY > 0 {
-                    if contentOffsetY >= contentHeight - scrollViewHeight - self.parent.getUIScreenBounds().width - 161 {
-                        self.isFetched = true
-                        
-                        self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel) { result in
-                            switch result {
-                            case .success(let count):
-                                if count != 0 {
-                                    print("FUCK SUCCESS fetchSocialMumory 더 가져오기")
-                                    self.collectionView?.reloadData()
+            if !self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.isEmpty, !self.isFetched {
+                    if deltaY > 0, contentHeight != .zero {
+                        if contentOffsetY >= contentHeight - scrollViewHeight - self.parent.getUIScreenBounds().width - 161 {
+                            self.isFetched = true
+                            
+                            self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel) { result in
+                                switch result {
+                                case .success(let count):
+                                    if count != 0 {
+                                        print("FUCK SUCCESS fetchSocialMumory 더 가져오기")
+                                        self.collectionView?.reloadData()
+                                    }
+                                case .failure(let error):
+                                    print("FUCK FAILURE fetchSocialMumory 더 가져오기 \(error.localizedDescription)")
                                 }
-                            case .failure(let error):
-                                print("FUCK FAILURE fetchSocialMumory 더 가져오기 \(error.localizedDescription)")
+                                self.isFetched = false
                             }
-                            self.isFetched = false
                         }
                     }
                 }
-            }
             
             self.parent.topBarOffsetY += (contentOffsetY - self.previousOffsetY)
             
@@ -211,33 +220,34 @@ struct CollectionViewRepresentable: UIViewRepresentable {
         }
         
         @objc func handleRefreshControl(sender: UIRefreshControl) {
-            print("FUCK handleRefreshControl")
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.prepare()
             generator.impactOccurred()
-                        
+            
+            self.parent.appCoordinator.isRefreshing = true
+            self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.removeAll()
+            self.collectionView?.reloadData()
+
             self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel, isRefreshControl: true) { result in
                 switch result {
                 case .success(let count):
-                    print("FUCK SUCCESS fetchSocialMumory handlreRefreshControl!")
                     if count != 0 {
+                        print("FUCK SUCCESS fetchSocialMumory handlreRefreshControl!")
                         self.collectionView?.reloadData()
                     }
                 case .failure(let error):
                     print("FUCK FAILURE fetchSocialMumory handlreRefreshControl: \(error.localizedDescription)")
                 }
-
-                DispatchQueue.main.async {
-                    sender.endRefreshing()
-                }
+                
+                sender.endRefreshing()
+                self.parent.appCoordinator.isRefreshing = false
             }
         }
     }
 }
 
 private struct SocialItemView: View {
-    
-    @State private var isMapViewShown: Bool = false
+//    @State private var isMapViewShown: Bool = false
     @State private var isTruncated: Bool = false
     @State private var isLocationTitleTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
@@ -331,7 +341,7 @@ private struct SocialItemView: View {
                                 .offset(x: self.isLocationTitleTruncated ? -3 : 0)
                         }
                         .onTapGesture {
-                            self.isMapViewShown = true
+                            self.appCoordinator.isMumoryMapViewShown = true
                         }
                     } // HStack
                 } // VStack
@@ -371,14 +381,9 @@ private struct SocialItemView: View {
                     .resizable()
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
                     .cornerRadius(15)
-                    .gesture(
-                        TapGesture(count: 1)
-                            .onEnded {
-//                                mumoryDataViewModel.selectedMumoryAnnotation = mumory
-                                self.appCoordinator.selectedMumory = mumory
-                                self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
-                            }
-                    )
+                    .onTapGesture {
+                        self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: self.mumory))
+                    }
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
@@ -458,8 +463,7 @@ private struct SocialItemView: View {
                         .frame(width: 22, height: 22)
                         .padding()
                         .onTapGesture {
-                            self.appCoordinator.selectedMumory = self.mumory
-                            self.appCoordinator.sheet = .socialMenu
+                            self.appCoordinator.sheet = .socialMenu(mumory: self.mumory)
                         }
                     
                 } // HStack
@@ -640,14 +644,7 @@ private struct SocialItemView: View {
                     }
                     
                     Button(action: {
-//                        self.mumoryDataViewModel.selectedMumoryAnnotation = self.mumory
-                        self.appCoordinator.selectedMumory = self.mumory
-                        
-                        withAnimation(Animation.easeInOut(duration: 0.1)) {
-                            //                            self.appCoordinator.isSocialCommentSheetViewShown = true
-                            self.appCoordinator.sheet = .comment
-                            appCoordinator.offsetY = CGFloat.zero
-                        }
+                        self.appCoordinator.isCommentSheetShown = (true, self.mumory)
                     }, label: {
                         SharedAsset.commentButtonSocial.swiftUIImage
                             .resizable()
@@ -678,8 +675,8 @@ private struct SocialItemView: View {
                 self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
             }
         }
-        .fullScreenCover(isPresented: self.$isMapViewShown) {
-            FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: [self.mumory], user: self.user)
+        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown) {
+            FriendMumoryMapView(mumorys: [self.mumory], user: self.user)
         }
     }
 }
@@ -695,16 +692,18 @@ public struct SocialView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
     public init(isSocialSearchViewShown: Binding<Bool>) {
-        UIScrollView.appearance().bounces = true
         self._isSocialSearchViewShown = isSocialSearchViewShown
     }
     
     public var body: some View {
         ZStack(alignment: .top) {
-            
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
             CollectionViewRepresentable(topBarOffsetY: self.$offsetY)
+            
+            if self.currentUserViewModel.mumoryViewModel.socialMumorys.isEmpty, !self.appCoordinator.isRefreshing {
+                noMumoryView
+            }
 
             if self.appCoordinator.isSocialLoading {
                 SocialLoadingView()
@@ -766,7 +765,7 @@ public struct SocialView: View {
         .onAppear {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             playerViewModel.isShownMiniPlayerInLibrary = false
-            
+    
             print("FUCK SocialView onAppear")
         }
         .onDisappear {

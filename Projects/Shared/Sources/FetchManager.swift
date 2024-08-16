@@ -20,7 +20,7 @@ public class FetchManager {
             var returnUsers: [UserProfile] = []
             for id in uIds {
                 taskGroup.addTask {
-                    let user = await FetchManager.shared.fetchUser(uId: id, appCoordinator: AppCoordinator())
+                    let user = await FetchManager.shared.fetchUser(uId: id)
                     if user.nickname == "탈퇴계정" {return nil}
                     return user
                 }
@@ -33,7 +33,7 @@ public class FetchManager {
         }
     }
     
-    public func fetchUser(uId: String, appCoordinator: AppCoordinator? = nil) async -> UserProfile {
+    public func fetchUser(uId: String) async -> UserProfile {
         let db = FirebaseManager.shared.db
         
         let query = db.collection("User").whereField("uid", isEqualTo: uId)
@@ -149,6 +149,29 @@ public class FetchManager {
         }
         
         return mumory
+    }
+    
+    public func fetchCommentAndReply(DocumentID: String?) async throws -> [Comment] {
+        guard let DocumentID = DocumentID else {
+            throw FetchError.documentIdError
+        }
+        
+        let db = FirebaseManager.shared.db
+        let collectionReference = db.collection("Mumory").document(DocumentID).collection("Comment")
+            .order(by: "date", descending: false)
+        
+        do {
+            let querySnapshot = try await collectionReference.getDocuments()
+            var comments: [Comment] = []
+            for document in querySnapshot.documents {
+                let newComment = try document.data(as: Comment.self)
+                comments.append(newComment)
+            }
+            
+            return comments
+        } catch {
+            throw error
+        }
     }
     //    public func updateMumory(_ mumory: Mumory, completion: @escaping (Result<Void, Error>) -> Void) {
     public func fetchReward(user: UserProfile, completion: @escaping (Result<[String], Error>) -> Void) async {

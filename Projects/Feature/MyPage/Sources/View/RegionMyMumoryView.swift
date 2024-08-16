@@ -33,15 +33,11 @@ public struct RegionMyMumoryView: View {
     
     public var body: some View {
         ZStack {
-            
             VStack(spacing: 0) {
-                
                 VStack(spacing: 0) {
-                    
                     Spacer().frame(height: self.getSafeAreaInsets().top + 19)
                     
                     HStack(spacing: 0) {
-                        
                         Button(action: {
                             self.appCoordinator.rootPath.removeLast()
                         }, label: {
@@ -75,15 +71,10 @@ public struct RegionMyMumoryView: View {
                             , alignment: .bottom)
                     
                     VStack(spacing: 0) {
-                        
                         ZStack(alignment: .top) {
-                            
                             ScrollView(showsIndicators: false) {
-                                
                                 VStack(spacing: 0) {
-                                    
                                     ForEach(Array(self.mumorys.enumerated()), id: \.element) { index, mumory in
-                                        
                                         if index == 0 {
                                             ZStack(alignment: .topLeading) {
                                                 Rectangle()
@@ -105,27 +96,27 @@ public struct RegionMyMumoryView: View {
                                             }
                                         }
                                         
-                                        if index > 0 && !isSameMonth(mumory, with: self.currentUserViewModel.mumoryViewModel.monthlyMumorys[index - 1]) {
-                                            ZStack(alignment: .topLeading) {
-                                                Rectangle()
-                                                    .foregroundColor(.clear)
-                                                    .frame(height: 31)
-                                                    .overlay(
-                                                        Rectangle()
-                                                            .foregroundColor(.clear)
-                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
-                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
-                                                        alignment: .top
-                                                    )
-                                                
-                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
-                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                                                    .foregroundColor(.white)
-                                                    .padding(.leading, 12)
-                                                    .offset(y: 21)
-                                            }
-                                            .padding(.top, 30)
-                                        }
+//                                        if index > 0 && !isSameMonth(mumory, with: self.currentUserViewModel.mumoryViewModel.monthlyMumorys[index - 1]) {
+//                                            ZStack(alignment: .topLeading) {
+//                                                Rectangle()
+//                                                    .foregroundColor(.clear)
+//                                                    .frame(height: 31)
+//                                                    .overlay(
+//                                                        Rectangle()
+//                                                            .foregroundColor(.clear)
+//                                                            .frame(width: getUIScreenBounds().width, height: 0.3)
+//                                                            .background(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.4)),
+//                                                        alignment: .top
+//                                                    )
+//                                                
+//                                                Text("\(DateManager.formattedDate(date: mumory.date, dateFormat: "YYYY년 M월"))")
+//                                                    .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+//                                                    .foregroundColor(.white)
+//                                                    .padding(.leading, 12)
+//                                                    .offset(y: 21)
+//                                            }
+//                                            .padding(.top, 30)
+//                                        }
                                         
                                         MumoryItemView2(mumory: mumory, mumorys: self.mumorys, isRecent: index == 0 ? true : false)
                                     }
@@ -136,7 +127,6 @@ public struct RegionMyMumoryView: View {
                                                                 } // ScrollView
 
                                 ZStack(alignment: .leading) {
-
                                     Rectangle()
                                         .fill(Color(red: 0.09, green: 0.09, blue: 0.09).opacity(0.95))
                                         .frame(width: getUIScreenBounds().width, height: 55)
@@ -186,21 +176,21 @@ public struct RegionMyMumoryView: View {
 //        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
             PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
-                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
-                    switch result {
-                    case .success():
-                        print("SUCCESS deleteMumory!")
-                        
-    //                    mumoryDataViewModel.locationMumorys.forEach { key, value in
-    //                        mumoryDataViewModel.locationMumorys[key]?.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id}
-    //                    }
-                        self.mumorys.removeAll { $0.id == self.appCoordinator.selectedMumory.id }
-                        
-                        appCoordinator.isDeleteMumoryPopUpViewShown = false
-                    case .failure(let error):
-                        print("ERROR deleteMumory: \(error)")
-                    }
-                }
+//                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
+//                    switch result {
+//                    case .success():
+//                        print("SUCCESS deleteMumory!")
+//                        
+//    //                    mumoryDataViewModel.locationMumorys.forEach { key, value in
+//    //                        mumoryDataViewModel.locationMumorys[key]?.removeAll { $0.id == self.appCoordinator.choosedMumoryAnnotation.id}
+//    //                    }
+//                        self.mumorys.removeAll { $0.id == self.appCoordinator.selectedMumory.id }
+//                        
+//                        appCoordinator.isDeleteMumoryPopUpViewShown = false
+//                    case .failure(let error):
+//                        print("ERROR deleteMumory: \(error)")
+//                    }
+//                }
             })
         })
         .ignoresSafeArea()
@@ -234,8 +224,7 @@ struct MumoryItemView2: View {
     @State private var isTruncated: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
-    
+    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     private var mumory: Mumory
     private var mumorys: [Mumory]
@@ -336,8 +325,9 @@ struct MumoryItemView2: View {
                         .resizable()
                         .frame(width: 22, height: 22)
                         .onTapGesture {
-                            self.appCoordinator.selectedMumory = self.mumory
-                            appCoordinator.isMyMumoryBottomSheetShown = true
+//                            self.appCoordinator.selectedMumory = self.mumory
+//                            appCoordinator.isMyMumoryBottomSheetShown = true
+                            self.appCoordinator.sheet = .myMumory(mumory: self.mumory, isOwn: self.mumory.uId == self.currentUserViewModel.user.uId)
                         }
                 } // HStack
                 .padding(.vertical, 6)
@@ -378,14 +368,10 @@ struct MumoryItemView2: View {
                             )
                         )
                         .cornerRadius(15)
-                        .gesture(
-                            TapGesture(count: 1)
-                                .onEnded {
-                                    self.appCoordinator.selectedMumory = mumory
-                                    self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: self.mumory))
-                                }
-                        )
-
+                        .onTapGesture {
+                            self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: self.mumory))
+                        }
+                    
                     // MARK: Title & Menu & Heart & Comment
                     HStack(spacing: 0) {
                         SharedAsset.musicIconSocial.swiftUIImage

@@ -89,7 +89,6 @@ import Shared
 
 struct FriendMumoryMapView: View {
     
-    @Binding private var isShown: Bool
     @State private var region: MKCoordinateRegion = MapConstant.defaultRegion
 
     let mumorys: [Mumory]
@@ -98,13 +97,11 @@ struct FriendMumoryMapView: View {
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     
-    init(isShown: Binding<Bool>, mumorys: [Mumory], user: UserProfile, isFriendPage: Bool? = nil) {
-        self._isShown = isShown
+    init(mumorys: [Mumory], user: UserProfile, isFriendPage: Bool? = nil) {
         self._region = State(initialValue: MKCoordinateRegion(center: MapConstant.defaultSouthKoreaCoordinate2D, span: MapConstant.defaultSouthKoreaSpan))
 
         self.mumorys = mumorys
         self.user = user
-        
         self.isFriendPage = isFriendPage
     }
     
@@ -127,7 +124,7 @@ struct FriendMumoryMapView: View {
                 Spacer()
                 
                 Button {
-                    self.isShown = false
+                    self.appCoordinator.isMumoryMapViewShown = false
                 } label: {
                     SharedAsset.closeButtonMumoryDetailMap.swiftUIImage
                         .resizable()

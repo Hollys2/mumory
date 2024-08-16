@@ -64,20 +64,6 @@ import Firebase
 //   
 //}
 
-//
-//  AnnotationViewModel.swift
-//  Feature
-//
-//  Created by 다솔 on 2023/12/19.
-//  Copyright © 2023 hollys. All rights reserved.
-//
-
-
-import SwiftUI
-import MapKit
-import MusicKit
-import FirebaseFirestore
-import Firebase
 
 
 final public class MumoryDataViewModel: ObservableObject {

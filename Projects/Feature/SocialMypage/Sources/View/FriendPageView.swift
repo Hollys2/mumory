@@ -83,6 +83,7 @@ struct KnownFriendPageView: View {
     let friend: UserProfile
     let lineGray = Color(white: 0.37)
     
+    @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var mumoryViewModel: MumoryViewModel
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @State private var isMapViewShown: Bool = false
@@ -142,29 +143,31 @@ struct KnownFriendPageView: View {
             })
         }
         .scrollIndicators(.hidden)
-        .fullScreenCover(isPresented: $isMapViewShown) {
-            FriendMumoryMapView(isShown: self.$isMapViewShown, mumorys: self.mumorys, user: self.friend, isFriendPage: true)
+        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown) {
+            FriendMumoryMapView(mumorys: self.mumorys, user: self.friend, isFriendPage: true)
         }
         .onAppear {
             friendDataViewModel.isPlaylistLoading = true
             friendDataViewModel.isMumoryLoading = true
             
-            self.mumoryViewModel.fetchMumorys(uId: self.friend.uId) { result in
-                switch result {
-                case .success(let mumorys):
-                    let friendMumorys = mumorys.filter { $0.isPublic == true }
-                    if !friendMumorys.isEmpty, let firstMumory = friendMumorys.first {
-                        self.firstMumory = firstMumory
+            Task {
+                await self.mumoryViewModel.fetchMumorys(uId: self.friend.uId) { result in
+                    switch result {
+                    case .success(let mumorys):
+                        let friendMumorys = mumorys.filter { $0.isPublic == true }
+                        if !friendMumorys.isEmpty, let firstMumory = friendMumorys.first {
+                            self.firstMumory = firstMumory
+                        }
+                        self.mumorys = friendMumorys
+                        
+                        DispatchQueue.main.async {
+                            mumoryViewModel.friendMumorys = friendMumorys
+                            //                        mumoryDataViewModel.isUpdating = false
+                            friendDataViewModel.isMumoryLoading = false
+                        }
+                    case .failure(let err):
+                        print("ERROR: \(err)")
                     }
-                    self.mumorys = friendMumorys
-                    
-                    DispatchQueue.main.async {
-                        mumoryViewModel.friendMumorys = friendMumorys
-//                        mumoryDataViewModel.isUpdating = false
-                        friendDataViewModel.isMumoryLoading = false
-                    }
-                case .failure(let err):
-                    print("ERROR: \(err)")
                 }
             }
             
@@ -940,7 +943,7 @@ struct FriendMumoryView: View {
             .padding(.horizontal, 20)
             .frame(height: 67)
             .onTapGesture {
-                self.appCoordinator.rootPath.append(MumoryView(type: .myMumoryView(friendDataViewModel.friend), mumoryAnnotation: Mumory()))
+                self.appCoordinator.rootPath.append(MumoryPage.myMumoryView(user: friendDataViewModel.friend))
             }
             
             if friendDataViewModel.isMumoryLoading {
@@ -966,7 +969,7 @@ struct FriendMumoryView: View {
                             ForEach(mumorys.prefix(10), id: \.id) { mumory in
                                 MyMumoryItem(mumory: mumory)
                                     .onTapGesture {
-                                        appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                                        self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
                                     }
                             }
                         })

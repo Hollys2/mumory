@@ -13,7 +13,6 @@ struct MumoryApp: App {
     
     @StateObject var appCoordinator: AppCoordinator = .init()
     @StateObject var currentUserViewModel: CurrentUserViewModel = .init()
-//    @StateObject var locationManagerViewModel: LocationManagerViewModel = .init()
     @StateObject var keyboardResponder: KeyboardResponder = .init()
     @StateObject var playerViewModel: PlayerViewModel = .init()
     @StateObject var snackBarViewModel: SnackBarViewModel = .init()
@@ -24,36 +23,82 @@ struct MumoryApp: App {
                 if self.appCoordinator.isHomeViewShown {
                     HomeView()
                 }
-                
+
                 if self.appCoordinator.isLoginViewShown {
                     LoginView()
                 }
-                
+
                 if self.appCoordinator.isLoading
                     || self.appCoordinator.localSearchViewModel.isSearching
-                    || self.currentUserViewModel.isLoading {
+                    || self.currentUserViewModel.isLoading
+                {
                     LoadingAnimationView()
                 }
 
                 if self.appCoordinator.isSplashViewShown {
                     SplashView()
                 }
-                
-
-                //                if 뮤모리작성 {
-                //
-                //                }
-
             }
             .preferredColorScheme(.dark)
             .ignoresSafeArea()
             .environmentObject(appCoordinator)
-//            .environmentObject(mumoryViewModel)
             .environmentObject(currentUserViewModel)
-//            .environmentObject(locationManagerViewModel)
             .environmentObject(keyboardResponder)
             .environmentObject(snackBarViewModel)
             .environmentObject(playerViewModel)
+        }
+    }
+}
+
+struct ContentView: View {
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 10) {
+                NavigationLink {
+                    AView()
+                } label: {
+                    Text("A \(appCoordinator.test)")
+                        .background(.red)
+                }
+                
+                NavigationLink {
+                    Color.blue
+                } label: {
+                    Text("B")
+                        .background(.blue)
+                }
+                
+                NavigationLink {
+                    Color.green
+                } label: {
+                    Text("C")
+                        .background(.green)
+                }
+
+            }
+        }
+    }
+}
+
+struct AView: View {
+//    @StateObject var appCoordinator: AppCoordinator = .init()
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    
+    var body: some View {
+        ZStack {
+            Color.red
+            
+            VStack {
+                Text("\(appCoordinator.test)")
+                
+                Button {
+                    appCoordinator.test += 3
+                } label: {
+                    Text("더하기 3")
+                }
+            }
         }
     }
 }

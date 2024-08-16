@@ -56,16 +56,21 @@ public enum MumoryPage: Hashable {
     case monthlyStat
     case activityList
     
-    public static func == (lhs: MumoryPage, rhs: MumoryPage) -> Bool {
+    case mumoryDetailView(mumory: Mumory)
+    case editMumoryView(mumory: Mumory)
+    case myMumoryView(user: UserProfile)
+    case regionMyMumoryView(user: UserProfile, regionTitle: String, mumorys: [Mumory])
+    
+    public static func == (lhs: Self, rhs: MumoryPage) -> Bool {
         switch (lhs, rhs) {
         case (.customization, .customization),
-             (.startCustomization, .startCustomization),
-             (.signUp, .signUp),
-             (.emailLogin, .emailLogin),
-             (.lastOfCustomization, .lastOfCustomization),
-             (.login, .login),
-             (.requestFriend, .requestFriend),
-             (.blockFriend, .blockFriend),
+            (.startCustomization, .startCustomization),
+            (.signUp, .signUp),
+            (.emailLogin, .emailLogin),
+            (.lastOfCustomization, .lastOfCustomization),
+            (.login, .login),
+            (.requestFriend, .requestFriend),
+            (.blockFriend, .blockFriend),
             (.friendPlaylistManage, .friendPlaylistManage):
             return true
         case let (.friend(friend: friend1), .friend(friend: friend2)):
@@ -94,6 +99,8 @@ public enum MumoryPage: Hashable {
             return lhsArtist == rhsArtist
         case (.favorite, .favorite):
             return true
+        case let (.editMumoryView(mumory: lhsMumory), .editMumoryView(mumory: rhsMumory)):
+            return lhsMumory == rhsMumory
         default:
             return false
         }
@@ -120,10 +127,10 @@ public enum MumoryPage: Hashable {
         case .blockFriend:
             hasher.combine(8)
         case .friend(friend: let friend):
-            hasher.combine(9)
+            //            hasher.combine(9)
             hasher.combine(friend)
         case .friendPlaylist(playlistIndex: let playlistIndex):
-            hasher.combine(10)
+            //            hasher.combine(10)
             hasher.combine(playlistIndex)
         case .friendPlaylistManage:
             hasher.combine(11)
@@ -203,21 +210,23 @@ public enum MumoryPage: Hashable {
             hasher.combine(41)
         case .monthlyStat:
             hasher.combine(42)
-
+        case .mumoryDetailView(mumory: let mumory):
+            hasher.combine(43)
+            hasher.combine(mumory)
+        case .editMumoryView(let mumory):
+            hasher.combine(44)
+            hasher.combine(mumory)
+        case .myMumoryView(_):
+            hasher.combine(45)
+        case .regionMyMumoryView(_):
+            hasher.combine(46)
         }
     }
 }
+
 public enum ShazamViewType {
     case normal
     case createMumory
-}
-
-public enum Tab: Int {
-    case home = 0
-    case social
-    case createMumroy
-    case library
-    case notification
 }
 
 public enum InitPage {

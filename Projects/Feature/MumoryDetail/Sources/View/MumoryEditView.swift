@@ -17,57 +17,38 @@ import Shared
 
 public struct MumoryEditView: View {
     
-    @State var mumory: Mumory
-    
     @State private var isDatePickerShown: Bool = false
     @State private var isPublishPopUpShown: Bool = false
     @State private var isPublishErrorPopUpShown: Bool = false
     @State private var isTagErrorPopUpShown: Bool = false
     
-    @State private var calendarDate: Date
-    @State private var tags: [String] = []
-    @State private var contentText: String = ""
-    @State private var imageURLs: [String] = []
-    
-    @State private var isPublic: Bool = false
-    @State private var isScroll: Bool = false
-    @State private var calendarYOffset: CGFloat = .zero
-    @State private var keyboardHeight: CGFloat = .zero
-    @State private var scrollViewOffset: CGFloat = 0
-    @State private var tagContainerYOffset: CGFloat = .zero
-    @State private var contentContainerYOffset: CGFloat = .zero
-    @State private var xOffset: CGFloat = .zero
-    
-    @FocusState private var isTagTextFieldFocused: Bool
-    @State private var isContentTextFieldFocused = false
+    @State private var selectedDate: Date = .init()
+    @State private var isPublic: Bool
+    @State private var tags: [String]
+    @State private var contentText: String
+    @State private var imageURLs: [String]
     
     @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
-    @EnvironmentObject private var appCoordinator: AppCoordinator
     
+    @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
     @EnvironmentObject private var playerViewModel: PlayerViewModel
+    
+    private var mumory: Mumory
 
     public init(mumory: Mumory) {
-        self._mumory = State(initialValue: mumory)
-        self._calendarDate = State(initialValue: mumory.date)
+        self.mumory = mumory
+        self._tags = State(initialValue: mumory.tags ?? [])
+        self._contentText = State(initialValue: mumory.content ?? "")
         self._imageURLs = State(initialValue: mumory.imageURLs ?? [])
         self._isPublic = State(initialValue: mumory.isPublic)
-        self._tags = State(initialValue: mumory.tags ?? [])
-        self._contentText = State(initialValue: mumory.content ?? "NO CONTENT")
     }
     
     public var body: some View {
-        
         ZStack(alignment: .bottom) {
-            
-            SharedAsset.backgroundColor.swiftUIColor
-            
             VStack(spacing: 0) {
-                
-                // MARK: -Top bar
                 ZStack {
-                    
                     HStack {
                         Image(uiImage: SharedAsset.closeCreateMumory.image)
                             .resizable()
@@ -103,16 +84,12 @@ public struct MumoryEditView: View {
                         .foregroundColor(.white)
                 } // ZStack
                 .frame(height: 57)
-                .padding(.top, getSafeAreaInsets().top)
                 .padding(.horizontal, 20)
                 
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
-                        
                         VStack(spacing: 0) {
-                            
                             VStack(spacing: 16) {
-                                
                                 NavigationLink(value: "music") {
                                     ContainerView(title: "음악 추가하기", image: SharedAsset.musicIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
                                 }
@@ -121,25 +98,11 @@ public struct MumoryEditView: View {
                                     ContainerView(title: "위치 추가하기", image: SharedAsset.locationIconCreateMumory.swiftUIImage, mumoryAnnotation: self.mumory)
                                 }
                                 
-                                CalendarContainerView(date: self.$calendarDate)
+                                CalendarContainerView(date: self.$selectedDate)
                                     .onTapGesture {
                                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                         
-                                        withAnimation(.easeInOut(duration: 0.1)) {
-                                            self.isDatePickerShown.toggle()
-                                        }
-                                    }
-                                    .background {
-                                        GeometryReader { geometry in
-                                            
-                                            Color.clear
-                                                .onAppear {
-                                                    self.calendarYOffset = geometry.frame(in: .global).maxY
-                                                }
-                                                .onChange(of: geometry.frame(in: .global).maxY) { newOffset in
-                                                    self.calendarYOffset = newOffset
-                                                }
-                                        }
+                                        self.appCoordinator.isDatePickerShown.toggle()
                                     }
                             }
                             .padding(.horizontal, 20)
@@ -151,31 +114,28 @@ public struct MumoryEditView: View {
                                 .padding(.vertical, 18)
                             
                             VStack(spacing: 16) {
-                                
                                 TagContainerView(tags: self.$tags)
                                     .id(0)
-                                    .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
+                                    .onTapGesture {
                                         withAnimation {
                                             proxy.scrollTo(0, anchor: .top)
                                         }
-                                    }))
+                                    }
                                 
                                 ContentContainerView(contentText: self.$contentText)
                                     .id(1)
-                                    .simultaneousGesture(TapGesture(count: 1).onEnded({ _ in
+                                    .onTapGesture {
                                         withAnimation {
                                             proxy.scrollTo(0, anchor: .top)
                                         }
-                                    }))
+                                    }
                                 
                                 HStack(spacing: 11) {
-                                    
-                                    PhotosPicker(selection: $photoPickerViewModel.imageSelections,
-                                                 maxSelectionCount: 3 - self.imageURLs.count ,
+                                    PhotosPicker(selection: $photoPickerViewModel.photoSelections,
+                                                 maxSelectionCount: 3 - self.imageURLs.count,
                                                  matching: .images) {
-                                        
                                         VStack(spacing: 0) {
-                                            (photoPickerViewModel.imageSelectionCount + self.imageURLs.count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
+                                            (photoPickerViewModel.photoSelectionCount + self.imageURLs.count == 3 ?  SharedAsset.photoFullIconCreateMumory.swiftUIImage : SharedAsset.photoIconCreateMumory.swiftUIImage)
                                                 .resizable()
                                                 .frame(width: 24, height: 24)
                                                 .offset(y: 1)
@@ -183,9 +143,9 @@ public struct MumoryEditView: View {
                                             Spacer(minLength: 0)
                                             
                                             HStack(spacing: 0) {
-                                                Text("\(photoPickerViewModel.imageSelectionCount + self.imageURLs.count)")
+                                                Text("\(photoPickerViewModel.photoSelectionCount + self.imageURLs.count)")
                                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                                                    .foregroundColor(photoPickerViewModel.imageSelectionCount + self.imageURLs.count >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
+                                                    .foregroundColor(photoPickerViewModel.photoSelectionCount + self.imageURLs.count >= 1 ? Color(red: 0.64, green: 0.51, blue: 0.99) : Color(red: 0.47, green: 0.47, blue: 0.47))
                                                 Text(" / 3")
                                                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                                                     .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
@@ -199,9 +159,7 @@ public struct MumoryEditView: View {
                                         .cornerRadius(10)
                                     }
                                     
-                                    
                                     ForEach(self.imageURLs, id: \.self) { url in
-                                        
                                         ZStack {
                                             AsyncImage(url: URL(string: url)) { phase in
                                                 switch phase {
@@ -224,7 +182,7 @@ public struct MumoryEditView: View {
                                             .cornerRadius(10)
                                             
                                             Button(action: {
-                                                print("self.imageURLs: \(self.imageURLs)")
+                                                print("self.imageURLs: \(String(describing: self.imageURLs))")
                                                 if let indexToRemove = self.imageURLs.firstIndex(of: url) {
                                                     self.imageURLs.remove(at: indexToRemove)
                                                 }
@@ -238,9 +196,7 @@ public struct MumoryEditView: View {
                                     }
                                     
                                     if !photoPickerViewModel.selectedImages.isEmpty {
-                                        
                                         ForEach(photoPickerViewModel.selectedImages.indices, id: \.self) { index in
-                                            
                                             ZStack {
                                                 Image(uiImage: photoPickerViewModel.selectedImages[index])
                                                     .resizable()
@@ -262,9 +218,9 @@ public struct MumoryEditView: View {
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .onChange(of: photoPickerViewModel.imageSelections) { newValue in
+                                .onChange(of: photoPickerViewModel.photoSelections) { newValue in
                                     print("onChange(of: photoPickerViewModel.imageSelections)")
-                                    photoPickerViewModel.convertDataToImage(imageURLsCount: imageURLs.count)
+                                    photoPickerViewModel.convertDataToImage(imageURLsCount: self.imageURLs.count)
                                 }
                             }
                             .padding(.horizontal, 20)
@@ -272,81 +228,39 @@ public struct MumoryEditView: View {
                             
                         } // VStack
                         .padding(.top, 20)
-                        .padding(.bottom, 50 + getSafeAreaInsets().bottom)
-                        .padding(.bottom, keyboardResponder.keyboardHeight != .zero ? 1000 : 0)
+                        .padding(.bottom, 50 + self.getSafeAreaInsets().bottom)
+                        .padding(.bottom, self.keyboardResponder.keyboardHeight != .zero ? self.keyboardResponder.keyboardHeight + 55 : 0)
                     } // ScrollView
                     .scrollIndicators(.hidden)
-                    .simultaneousGesture(DragGesture().onChanged { _ in
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    })
                 }
             } // VStack
-            .calendarPopup(show: self.$isDatePickerShown, yOffset: self.calendarYOffset - getSafeAreaInsets().top) {
-                DatePicker("", selection: self.$calendarDate, displayedComponents: [.date])
-                    .datePickerStyle(.graphical)
-                    .labelsHidden()
-                    .accentColor(SharedAsset.mainColor.swiftUIColor)
-                    .background(SharedAsset.backgroundColor.swiftUIColor)
-            }
+            .background(SharedAsset.backgroundColor.swiftUIColor)
             .popup(show: self.$isPublishPopUpShown, content: {
                 PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: {
-                    let group = DispatchGroup()
+                    self.appCoordinator.isLoading = true
                     
-                    for (index, selectedImage) in self.photoPickerViewModel.selectedImages.enumerated() {
+                    Task {
+                        self.imageURLs += await self.photoPickerViewModel.uploadAllImages()
                         
-                        guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
-                            print("Could not convert image to Data.")
-                            continue
-                        }
-                        
-                        let storageRef = FirebaseManager.shared.storage.reference()
-                        let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpg")
-                        
-                        group.enter()
-                        _ = imageRef.putData(imageData, metadata: nil) { (metadata, error) in
-                            
-                            guard metadata != nil else {
-                                print("Image upload error: \(error?.localizedDescription ?? "Unknown error")")
-                                group.leave()
-                                return
-                            }
-                            
-                            print("Image \(index + 1) uploaded successfully.")
-                            
-                            imageRef.downloadURL { (url, error) in
-                                guard let url = url, error == nil else {
-                                    print("Error getting download URL: \(error?.localizedDescription ?? "")")
-                                    group.leave()
-                                    return
-                                }
-                                
-                                print("Download URL for Image \(index + 1)")
-                                self.imageURLs.append(url.absoluteString)
-                                group.leave()
-                            }
-                        }
-                    }
-                    
-                    group.notify(queue: .main) {
-                        let newMumory = Mumory(id: self.mumory.id, uId: self.currentUserViewModel.user.uId, date: self.calendarDate, song: self.appCoordinator.draftMumorySong ?? self.mumory.song, location: self.appCoordinator.draftMumoryLocation ?? self.mumory.location, isPublic: self.isPublic, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
-                        
-//                        let newMumory = Mumory(id: self.mumory.id ?? "", uId: currentUserViewModel.user.uId, date: self.calendarDate, songModel: appCoordinator.draftMumory ?? self.mumory.song, locationModel: mumoryDataViewModel.choosedLocationModel ?? self.mumory.location, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs , isPublic: self.isPublic, likes: self.mumory.likes, commentCount: self.mumory.commentCount, myCommentCount: self.mumory.myCommentCount)
-//
+                        let newMumory = Mumory(id: self.mumory.id, uId: self.currentUserViewModel.user.uId, date: self.selectedDate, song: self.appCoordinator.draftMumorySong ?? self.mumory.song, location: self.appCoordinator.draftMumoryLocation ?? self.mumory.location, isPublic: self.isPublic, tags: self.tags, content: self.contentText, imageURLs: self.imageURLs, likes: self.mumory.likes, commentCount: self.mumory.commentCount)
                         
                         self.currentUserViewModel.mumoryViewModel.updateMumory(newMumory) { result in
                             switch result {
                             case .success():
                                 self.appCoordinator.draftMumorySong = nil
                                 self.appCoordinator.draftMumoryLocation = nil
-                                self.tags.removeAll()
-                                self.contentText.removeAll()
-                                photoPickerViewModel.removeAllSelectedImages()
-                                self.imageURLs.removeAll()
+                                //                                self.tags.removeAll()
+                                //                                self.contentText.removeAll()
+                                //                                self.photoPickerViewModel.removeAllSelectedImages()
+                                //                                self.imageURLs.removeAll()
                                 
-                                appCoordinator.rootPath.removeLast()
+                                self.appCoordinator.rootPath.removeLast()
+                                print("SUCCESS updateMumory!")
                             case .failure(let error):
                                 print("ERROR updateMumory: \(error.localizedDescription)")
                             }
+                            
+                            self.appCoordinator.isLoading = false
                         }
                     }
                 })
@@ -361,15 +275,13 @@ public struct MumoryEditView: View {
                     self.isTagErrorPopUpShown = false
                 })
             })
-            .popup(show: self.$photoPickerViewModel.isPhotoErrorPopUpShown, content: {
-                PopUpView(isShown: self.$photoPickerViewModel.isPhotoErrorPopUpShown, type: .oneButton, title: "사진은 최대 3개까지 첨부할 수 있습니다.", buttonTitle: "확인", buttonAction: {
-                    self.photoPickerViewModel.isPhotoErrorPopUpShown = false
-                })
-            })
-            
+//            .popup(show: self.$photoPickerViewModel.isPhotoErrorPopUpShown, content: {
+//                PopUpView(isShown: self.$photoPickerViewModel.isPhotoErrorPopUpShown, type: .oneButton, title: "사진은 최대 3개까지 첨부할 수 있습니다.", buttonTitle: "확인", buttonAction: {
+//                    self.photoPickerViewModel.isPhotoErrorPopUpShown = false
+//                })
+//            })
             
             HStack(spacing: 0) {
-                
                 Group {
                     Text("전체공개")
                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 15))
@@ -380,9 +292,9 @@ public struct MumoryEditView: View {
                     Image(uiImage: self.isPublic ? SharedAsset.publicOnCreateMumory.image : SharedAsset.publicOffCreateMumory.image)
                         .frame(width: 17, height: 17)
                 }
-                .gesture(TapGesture(count: 1).onEnded {
+                .onTapGesture {
                     self.isPublic.toggle()
-                })
+                }
                 
                 Spacer()
                 
@@ -399,7 +311,6 @@ public struct MumoryEditView: View {
             .frame(height: 55)
             .padding(.leading, 25)
             .padding(.trailing, 20)
-            .padding(.bottom, getSafeAreaInsets().bottom)
             .background(Color(red: 0.12, green: 0.12, blue: 0.12))
             .overlay(
                 Rectangle()
@@ -408,10 +319,22 @@ public struct MumoryEditView: View {
                     .frame(height: 0.7)
                 , alignment: .top
             )
-            .offset(y: getUIScreenBounds().height - keyboardResponder.keyboardHeight - 55 < contentContainerYOffset + 16 ? -keyboardResponder.keyboardHeight + getSafeAreaInsets().bottom : 0)
         }
         .toolbar(.hidden)
-        .ignoresSafeArea()
-
+        .onAppear {
+            print("FUCK MumoryEditView onAppear")
+        }
+        .simultaneousGesture(
+            DragGesture()
+                .onChanged({ _ in
+                    print("FUCK0")
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }))
+        .gesture(
+            TapGesture()
+                .onEnded({ _ in
+                    print("FUCK1")
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }))
     }
 }

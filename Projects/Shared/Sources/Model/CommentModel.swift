@@ -8,10 +8,11 @@
 
 
 import Foundation
+import FirebaseFirestoreSwift
 
 public struct Comment: Codable, Hashable {
     
-    public var id: String
+    @DocumentID public var id: String?
     
     public let uId: String
     public let nickname: String
@@ -20,9 +21,9 @@ public struct Comment: Codable, Hashable {
     public let date: Date
     public let content: String
     public let isPublic: Bool
-    public var replies: [Comment] = []
+//    public var replies: [Comment] = []
     
-    public init(id: String, uId: String, nickname: String, parentId: String, mumoryId: String, date: Date, content: String, isPublic: Bool) {
+    public init(id: String? = nil, uId: String, nickname: String, parentId: String, mumoryId: String, date: Date, content: String, isPublic: Bool) {
         self.id = id
         self.uId = uId
         self.nickname = nickname
@@ -33,7 +34,7 @@ public struct Comment: Codable, Hashable {
         self.isPublic = isPublic
     }
     
-    public init?(id: String, data: [String: Any]) {
+    public init?(id: String? = nil, data: [String: Any]) {
         guard let uId = data["uId"] as? String,
               let nickname = data["nickname"] as? String,
               let parentId = data["parentId"] as? String,
@@ -57,7 +58,6 @@ public struct Comment: Codable, Hashable {
     }
     
     public init() {
-        self.id = ""
         self.uId = ""
         self.nickname = ""
         self.parentId = ""
@@ -69,29 +69,29 @@ public struct Comment: Codable, Hashable {
 }
 
 extension Comment {
-    public func toDictionary() -> [String: Any] {
-        return [
-            "uId": uId,
-            "nickname": nickname,
-            "parentId": parentId,
-            "mumoryId": mumoryId,
-            "date": FirebaseManager.Timestamp(date: date),
-            "content": content,
-            "isPublic": isPublic
-        ]
-    }
-    
-    static func fromDocumentData(_ documentData: [String: Any], commentDocumentID: String, comments: [Comment]) -> Comment? {
-        guard let uId = documentData["uId"] as? String,
-              let nickname = documentData["nickname"] as? String,
-              let parentId = documentData["parentId"] as? String,
-              let mumoryId = documentData["mumoryId"] as? String,
-              let date = documentData["date"] as? FirebaseManager.Timestamp,
-              let content = documentData["content"] as? String,
-              let isPublic = documentData["isPublic"] as? Bool
-        else {
-            return nil
-        }
-        return Comment(id: commentDocumentID, uId: uId, nickname: nickname, parentId: parentId, mumoryId: mumoryId, date: date.dateValue(), content: content, isPublic: isPublic)
-    }
+//    public func toDictionary() -> [String: Any] {
+//        return [
+//            "uId": uId,
+//            "nickname": nickname,
+//            "parentId": parentId,
+//            "mumoryId": mumoryId,
+//            "date": FirebaseManager.Timestamp(date: date),
+//            "content": content,
+//            "isPublic": isPublic
+//        ]
+//    }
+//    
+//    static func fromDocumentData(_ documentData: [String: Any], commentDocumentID: String, comments: [Comment]) -> Comment? {
+//        guard let uId = documentData["uId"] as? String,
+//              let nickname = documentData["nickname"] as? String,
+//              let parentId = documentData["parentId"] as? String,
+//              let mumoryId = documentData["mumoryId"] as? String,
+//              let date = documentData["date"] as? FirebaseManager.Timestamp,
+//              let content = documentData["content"] as? String,
+//              let isPublic = documentData["isPublic"] as? Bool
+//        else {
+//            return nil
+//        }
+//        return Comment(id: commentDocumentID, uId: uId, nickname: nickname, parentId: parentId, mumoryId: mumoryId, date: date.dateValue(), content: content, isPublic: isPublic)
+//    }
 }

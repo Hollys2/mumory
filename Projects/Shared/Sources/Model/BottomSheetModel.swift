@@ -10,17 +10,34 @@
 import Foundation
 
 
-public enum Sheet {
+public enum Sheet2 {
     case createMumory
-    case comment
     case reward
     case socialMenu
+    case commentMenu
+    case mumoryDetail
+    case friendMumoryDetail
+    case mumorySocialView
+    
+    case comment
+    case mumoryCommentMyView(isMe: Bool)
+    case mumoryCommentFriendView
+    
+    case addFriend
+    case myMumory
+    case friendMumory
     case none
 }
 
-public enum BottomSheet {
-    case commentMenu
-    case socialMenu
-    case mumoryDetail
-    case none
+public enum MumoryBottomSheetType2 {
+    case createMumory
+    case mumoryDetailView
+    case friendMumoryDetailView
+    case mumorySocialView
+    case mumoryCommentView
+    case mumoryCommentMyView(isMe: Bool)
+    case mumoryCommentFriendView
+    case addFriend
+    case myMumory
+    case friendMumory
 }

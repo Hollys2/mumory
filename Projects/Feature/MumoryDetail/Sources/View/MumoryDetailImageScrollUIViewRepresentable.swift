@@ -93,7 +93,7 @@ struct MumoryDetailImageScrollContentView: View {
         }
         .background(.clear)
         .onAppear {
-            print("MumoryDetailImageScrollContentView: \(mumoryAnnotation.imageURLs ?? [])")
+//            print("MumoryDetailImageScrollContentView: \(mumoryAnnotation.imageURLs ?? [])")
         }
     }
 }

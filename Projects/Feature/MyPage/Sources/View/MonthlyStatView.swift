@@ -484,7 +484,6 @@ struct ContentView: View {
                 }
                 
                 self.mumoriesCommentCount += mumory.commentCount
-                mumoriesCommentCount -= mumory.myCommentCount
             }
             
             self.currentUserViewModel.mumoryViewModel.locationMumorys = [:]
@@ -642,7 +641,6 @@ struct ContentView: View {
                 }
                 
                 mumoriesCommentCount += mumory.commentCount
-                mumoriesCommentCount -= mumory.myCommentCount
             }
             
             self.currentUserViewModel.mumoryViewModel.locationMumorys = [:]

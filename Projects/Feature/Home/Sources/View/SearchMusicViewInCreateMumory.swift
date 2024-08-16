@@ -29,7 +29,8 @@ struct SearchMusicViewInCreateMumory: View {
     
     var body: some View {
         ZStack(alignment: .top){
-            ColorSet.background.ignoresSafeArea()
+            ColorSet.background
+                .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 HStack(spacing: 0, content: {
@@ -110,8 +111,7 @@ struct SearchMusicViewInCreateMumory: View {
                     }
                 }
             })
-            
-            
+
             PreviewMiniPlayer()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, getSafeAreaInsets().bottom)
@@ -121,12 +121,7 @@ struct SearchMusicViewInCreateMumory: View {
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
-        .onAppear {
-            
-        }
-        
     }
-    
     
     private func searchPlaceHolder() -> Text {
         return Text("노래 및 아티스트 검색")

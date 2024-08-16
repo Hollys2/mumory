@@ -126,7 +126,6 @@ struct MumoryDetailFriendMumoryView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: UIScreen.main.bounds.width - 40, height: 212)
@@ -319,8 +318,7 @@ struct MumoryDetailFriendMumoryView: View {
             }
         }
         .onTapGesture {
-            self.appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
-            print("앵: \(mumory.isPublic)")
+            self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: self.mumory))
         }
     }
 }

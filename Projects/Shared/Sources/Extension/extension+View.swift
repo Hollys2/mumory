@@ -21,9 +21,9 @@ extension View {
 
 extension View {
     
-    public func bottomSheet(sheet: Binding<Sheet>, mumoryBottomSheet: MumoryBottomSheet) -> some View {
-        self.modifier(BottomSheetViewModifier(sheet: sheet, mumoryBottomSheet: mumoryBottomSheet))
-    }
+//    public func bottomSheet(mumoryBottomSheet: MumoryBottomSheet) -> some View {
+//        self.modifier(BottomSheetViewModifier(mumoryBottomSheet: mumoryBottomSheet))
+//    }
     
     public func rewardBottomSheet(isShown: Binding<Bool>) -> some View {
         self.modifier(RewardBottomSheetViewModifier(isShown: isShown))

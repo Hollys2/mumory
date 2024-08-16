@@ -458,7 +458,7 @@ struct ActivityItem: View {
                         return
                     }
                     
-                    appCoordinator.rootPath.append(MumoryView(type: .mumoryDetailView, mumoryAnnotation: mumory))
+                    self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
                 }
             }
         }
