@@ -93,37 +93,36 @@ final class PhotoPickerViewModel: ObservableObject {
     }
 }
 
-extension PhotoPickerViewModel {
-    private func uploadImage(_ image: UIImage) async throws -> URL {
+struct PhotoPickerManager {
+    
+    static private func uploadImage(_ image: UIImage) async throws -> URL {
         let storageRef = FirebaseManager.shared.storage.reference()
         let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpg")
         
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            throw UploadError.dataConversionFailed
+            throw UploadError.convertError
         }
         
-        let _ = try await imageRef.putDataAsync(imageData)
+        do {
+            _ = try await imageRef.putDataAsync(imageData)
+        } catch {
+            throw UploadError.uploadFailed
+        }
         
-        let url = try await imageRef.downloadURL()
-        
-        return url
+        do {
+            let url = try await imageRef.downloadURL()
+            
+            return url
+        } catch {
+            throw UploadError.urlRetrievalFailed
+        }
     }
     
-    // 모든 이미지를 업로드하고 URL을 가져오는 함수
-    func uploadAllImages() async -> [String] {
+    static func uploadAllImages(selectedImages: [UIImage]) async -> [String] {
         var uploadedImageURLs: [String] = []
-//        for (index, image) in self.selectedImages.enumerated() {
-//            do {
-//                let url = try await uploadImage(image)
-//                uploadedImageURLs.append(url.absoluteString)
-//                print("Image \(index + 1) uploaded successfully.")
-//            } catch {
-//                print("Failed to upload image \(index + 1): \(error.localizedDescription)")
-//            }
-//        }
         
         await withTaskGroup(of: URL?.self) { group in
-            for image in self.selectedImages {
+            for image in selectedImages {
                 group.addTask {
                     do {
                         let url = try await self.uploadImage(image)
@@ -144,26 +143,10 @@ extension PhotoPickerViewModel {
         
         return uploadedImageURLs
     }
-    
-    enum UploadError: Error {
-        case dataConversionFailed
-    }
-    
-//    public func fetchUsers(uIds: [String]) async -> [UserProfile] {
-//        return await withTaskGroup(of: UserProfile?.self) { taskGroup -> [UserProfile] in
-//            var returnUsers: [UserProfile] = []
-//            for id in uIds {
-//                taskGroup.addTask {
-//                    let user = await FetchManager.shared.fetchUser(uId: id)
-//                    if user.nickname == "탈퇴계정" {return nil}
-//                    return user
-//                }
-//            }
-//            for await value in taskGroup {
-//                guard let user = value else {continue}
-//                returnUsers.append(user)
-//            }
-//            return returnUsers
-//        }
-//    }
+}
+
+enum UploadError: Error {
+    case convertError
+    case uploadFailed
+    case urlRetrievalFailed
 }

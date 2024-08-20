@@ -13,7 +13,7 @@ import SwiftUI
 public enum PopUpType {
     case oneButton
     case twoButton
-    case delete
+    case deleteDraft
     
     var height: CGFloat {
         switch self {
@@ -21,15 +21,13 @@ public enum PopUpType {
             return 167
         case .twoButton:
             return 167
-        case .delete:
+        case .deleteDraft:
             return 217
         }
     }
 }
 
 public struct PopUpView: View {
-    
-    @Binding private var isPopUpShown: Bool
     
     @State private var isButtonEnabled = true
     
@@ -41,9 +39,7 @@ public struct PopUpView: View {
     var buttonTitle: String
     var buttonAction: (() -> Void)?
     
-    //    public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: @escaping () -> Void) {
-    public init(isShown: Binding<Bool>, type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: (() -> Void)? = nil) {
-        self._isPopUpShown = isShown
+    public init(type: PopUpType, title: String, subTitle: String? = nil, buttonTitle: String, buttonAction: (() -> Void)? = nil) {
         self.type = type
         self.title = title
         self.subTitle = subTitle
@@ -52,8 +48,13 @@ public struct PopUpView: View {
     }
     
     public var body: some View {
-        
         ZStack {
+            Color.black
+                .opacity(0.5)
+                .onTapGesture {
+                    self.appCoordinator.popUp = .none
+                }
+            
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: 312, height: self.type.height)
@@ -61,7 +62,6 @@ public struct PopUpView: View {
                 .cornerRadius(15)
             
             VStack(spacing: 0) {
-                
                 Text(self.title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .multilineTextAlignment(.center)
@@ -83,7 +83,7 @@ public struct PopUpView: View {
                 case .oneButton:
                     HStack(spacing: 0) {
                         Button(action: {
-                            self.isPopUpShown = false
+                            self.appCoordinator.popUp = .none
                         }) {
                             ZStack {
                                 Rectangle()
@@ -106,7 +106,7 @@ public struct PopUpView: View {
                 case .twoButton:
                     HStack(spacing: 0) {
                         Button(action: {
-                            self.isPopUpShown = false
+                            self.appCoordinator.popUp = .none
                         }) {
                             ZStack {
                                 Rectangle()
@@ -127,9 +127,8 @@ public struct PopUpView: View {
                         }
                         
                         Button(action: {
-                            isButtonEnabled = false
+                            self.isButtonEnabled = false
                             self.buttonAction?()
-                            
                         }) {
                             ZStack {
                                 Rectangle()
@@ -150,18 +149,13 @@ public struct PopUpView: View {
                         }
                         .disabled(!isButtonEnabled)
                     } // HStack
-                case .delete:
+                case .deleteDraft:
                     VStack(spacing: 0) {
-                        
                         HStack(spacing: 0) {
                             Button(action: {
                                 self.buttonAction?()
-                                
-//                                self.isPopUpShown = false
-//                                withAnimation(.easeInOut(duration: 3)) {
-//                                    self.appCoordinator.isCreateMumorySheetShown = false
-//                                }
-                                
+                                self.appCoordinator.popUp = .none
+                                self.appCoordinator.sheet = .none                                
                             }) {
                                 ZStack {
                                     Rectangle()
@@ -184,7 +178,7 @@ public struct PopUpView: View {
                         
                         HStack(spacing: 0) {
                             Button(action: {
-                                self.isPopUpShown = false
+                                self.appCoordinator.popUp = .none
                             }) {
                                 ZStack {
                                     Rectangle()
@@ -212,6 +206,5 @@ public struct PopUpView: View {
 
 //            LoadingAnimationView(isLoading: .constant(self.mumoryDataViewModel.isUpdating || self.mumoryDataViewModel.isLoading))
         }
-
     }
 }

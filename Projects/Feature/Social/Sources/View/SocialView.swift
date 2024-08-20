@@ -139,7 +139,7 @@ struct CollectionViewRepresentable: UIViewRepresentable {
         weak var collectionView: UICollectionView?
         var previousOffsetY: CGFloat = .zero
         var isFetched: Bool = false
-        
+        var isLast: Bool = false
         var cancellable: AnyCancellable?
 
         init(parent: CollectionViewRepresentable) {
@@ -192,16 +192,34 @@ struct CollectionViewRepresentable: UIViewRepresentable {
                         if contentOffsetY >= contentHeight - scrollViewHeight - self.parent.getUIScreenBounds().width - 161 {
                             self.isFetched = true
                             
+                            if !self.isLast {
+                                self.parent.appCoordinator.isLoading = true
+                            }
+                            
+                            let previousCount = self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count
+                            
                             self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel) { result in
                                 switch result {
                                 case .success(let count):
                                     if count != 0 {
-                                        print("FUCK SUCCESS fetchSocialMumory 더 가져오기")
-                                        self.collectionView?.reloadData()
+                                        print("FUCK SUCCESS fetchSocialMumory")
+                                        
+                                        var indexPathsToReload: [IndexPath] = []
+                                        for i in previousCount..<self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count {
+                                            indexPathsToReload.append(IndexPath(item: i, section: 0))
+                                        }
+                                        
+                                        self.collectionView?.performBatchUpdates {
+                                            self.collectionView?.insertItems(at: indexPathsToReload)
+                                        }
+                                    } else {
+                                        self.isLast = true
                                     }
                                 case .failure(let error):
                                     print("FUCK FAILURE fetchSocialMumory 더 가져오기 \(error.localizedDescription)")
                                 }
+
+                                self.parent.appCoordinator.isLoading = false
                                 self.isFetched = false
                             }
                         }

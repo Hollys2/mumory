@@ -60,7 +60,7 @@ public struct MumoryDetailView: View {
                 Spacer()
                 
                 Button(action: {
-                    appCoordinator.sheet = .mumoryDetailMenu(mumory: self.mumory, isOwn: self.mumory.uId == self.currentUserViewModel.user.uId)
+                    appCoordinator.sheet = .mumoryDetailMenu(mumory: self.mumory, isOwn: self.mumory.uId == self.currentUserViewModel.user.uId, action: deleteMumoryAction)
                 }, label: {
                     Image(uiImage: SharedAsset.menuButtonMumoryDatail.image)
                         .resizable()
@@ -108,21 +108,6 @@ public struct MumoryDetailView: View {
         .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown) {
             FriendMumoryMapView(mumorys: [self.mumory], user: self.user)
         }
-        .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
-            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
-                self.currentUserViewModel.mumoryViewModel.deleteMumory(mumory) { result in
-                    switch result {
-                    case .success():
-                        print("SUCCESS deleteMumory!")
-                        appCoordinator.isDeleteMumoryPopUpViewShown = false
-                        appCoordinator.rootPath.removeLast()
-                        appCoordinator.isFirstSocialTabTapped = false
-                    case .failure(let error):
-                        print("ERROR deleteMumory: \(error)")
-                    }
-                }
-            })
-        })
     }
     
     private var artWorkView: some View {
@@ -460,6 +445,21 @@ public struct MumoryDetailView: View {
                         }
                 }
             )
+        }
+    }
+    
+    private func deleteMumoryAction() {
+        self.appCoordinator.isLoading = true
+        self.currentUserViewModel.mumoryViewModel.deleteMumory(mumory) { result in
+            switch result {
+            case .success():
+                print("SUCCESS deleteMumory!")
+                appCoordinator.rootPath.removeLast()
+            case .failure(let error):
+                print("ERROR deleteMumory: \(error)")
+            }
+            appCoordinator.popUp = .none
+            self.appCoordinator.isLoading = false
         }
     }
 }

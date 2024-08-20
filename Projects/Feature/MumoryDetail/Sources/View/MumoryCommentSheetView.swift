@@ -16,11 +16,12 @@ struct CommentView: View {
     let comment: Comment
     let replies: [Comment]
     let mumory: Mumory
-    
     var isFocused: FocusState<Bool>.Binding
     
     @Binding var isWritingReply: Bool
     @Binding var selectedComment: Comment
+    
+    let deleteCommentAction: () -> Void
 
     var scrollToComment: () -> Void
     
@@ -147,7 +148,7 @@ struct CommentView: View {
                         Button(action: {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             self.appCoordinator.selectedComment = self.comment
-                            self.appCoordinator.sheet = .commentMenu(mumory: self.mumory, isOwn: self.appCoordinator.selectedComment.uId == self.currentUserViewModel.user.uId)
+                            self.appCoordinator.sheet = .commentMenu(mumory: self.mumory, isOwn: self.appCoordinator.selectedComment.uId == self.currentUserViewModel.user.uId, action: self.deleteCommentAction)
                         }, label: {
                             SharedAsset.commentMenuMumoryDetail.swiftUIImage
                                 .resizable()
@@ -215,7 +216,7 @@ struct CommentView: View {
         // MARK: Reply
         ForEach(self.replies, id: \.self) { reply in
             if reply.parentId == comment.id {
-                ReplyView(comment: reply, mumory: self.mumory)
+                ReplyView(comment: reply, mumory: self.mumory, deleteCommentAction: self.deleteCommentAction)
                 Spacer().frame(height: 10)
             }
         }
@@ -235,6 +236,7 @@ struct ReplyView: View {
     
     let comment: Comment
     let mumory: Mumory
+    let deleteCommentAction: () -> Void
     
     @State private var commentUser: UserProfile = UserProfile()
     @State private var isMyComment: Bool = false
@@ -372,7 +374,7 @@ struct ReplyView: View {
                     Button(action: {
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         self.appCoordinator.selectedComment = self.comment
-                        self.appCoordinator.sheet = .commentMenu(mumory: self.mumory, isOwn: self.appCoordinator.selectedComment.uId == self.currentUserViewModel.user.uId)
+                        self.appCoordinator.sheet = .commentMenu(mumory: self.mumory, isOwn: self.appCoordinator.selectedComment.uId == self.currentUserViewModel.user.uId, action: self.deleteCommentAction)
                     }, label: {
                         SharedAsset.commentMenuMumoryDetail.swiftUIImage
                             .resizable()
@@ -517,7 +519,7 @@ public struct MumoryCommentSheetView: View {
 
                         VStack(spacing: 0) {
                             ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
-                                CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment) {
+                                CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment, deleteCommentAction: self.deleteCommentAction) {
                                     withAnimation {
                                         proxy.scrollTo(index, anchor: .top)
                                     }
@@ -629,6 +631,7 @@ public struct MumoryCommentSheetView: View {
                                 let isWhitespace = commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                 
                                 if !isWhitespace {
+                                    self.appCoordinator.isLoading = true
                                     self.isButtonDisabled = true
                                     
                                     let comment: Comment = Comment(uId: self.currentUserViewModel.user.uId, nickname: self.currentUserViewModel.user.nickname, parentId: self.isWritingReply ? self.selectedComment.id ?? "" : "", mumoryId: self.mumory.id ?? "", date: Date(), content: self.commentText, isPublic: self.isPublic)
@@ -660,6 +663,7 @@ public struct MumoryCommentSheetView: View {
                                         
                                         commentText = ""
                                         isButtonDisabled = false
+                                        self.appCoordinator.isLoading = false
                                     }
                                 }
                                 
@@ -714,7 +718,6 @@ public struct MumoryCommentSheetView: View {
         .background(Color(red: 0.16, green: 0.16, blue: 0.16))
         .onAppear {
             print("FUCK MumoryCommentSheetView onAppear")
-            
             self.appCoordinator.isLoading = true
             
             Task {
@@ -756,43 +759,42 @@ public struct MumoryCommentSheetView: View {
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
-        .popup(show: $appCoordinator.isDeleteCommentPopUpViewShown) {
-            PopUpView(isShown: $appCoordinator.isDeleteCommentPopUpViewShown, type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: {
-                self.appCoordinator.isLoading = true
-                
-                self.currentUserViewModel.mumoryViewModel.deleteComment(comment: self.appCoordinator.selectedComment) { result in
-                    switch result {
-                    case .success(let comments):
-                        self.comments = []
-                        self.replies = []
-                        for comment in comments {
-                            if comment.parentId == "" {
-                                self.comments.append(comment)
-                            } else {
-                                self.replies.append(comment)
-                            }
-                        }
-                        
-                        Task {
-                            mumory.commentCount = await MumoryViewModel.fetchCommentCount(mumoryId: self.mumoryId)
-                            
-                            self.currentUserViewModel.mumoryViewModel.updateMumory(mumory) { result in
-                                switch result {
-                                case .success():
-                                    print("SUCCESS updateMumory")
-                                case .failure(let error):
-                                    print("ERROR updateMumory: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                    case .failure(let error):
-                        print("ERROR deleteComment: \(error)")
+    }
+    
+    func deleteCommentAction() {
+        self.appCoordinator.isLoading = true
+        
+        self.currentUserViewModel.mumoryViewModel.deleteComment(comment: self.appCoordinator.selectedComment) { result in
+            switch result {
+            case .success(let comments):
+                self.comments = []
+                self.replies = []
+                for comment in comments {
+                    if comment.parentId == "" {
+                        self.comments.append(comment)
+                    } else {
+                        self.replies.append(comment)
                     }
-                    
-                    appCoordinator.isDeleteCommentPopUpViewShown = false
-                    self.appCoordinator.isLoading = false
                 }
-            })
+                
+                Task {
+                    mumory.commentCount = await MumoryViewModel.fetchCommentCount(mumoryId: self.mumoryId)
+                    
+                    self.currentUserViewModel.mumoryViewModel.updateMumory(mumoryId: self.mumoryId, mumory: self.mumory) { result in
+                        switch result {
+                        case .success():
+                            print("SUCCESS updateMumory")
+                        case .failure(let error):
+                            print("ERROR updateMumory: \(error.localizedDescription)")
+                        }
+                    }
+                }
+            case .failure(let error):
+                print("ERROR deleteComment: \(error)")
+            }
+            
+            self.appCoordinator.popUp = .none
+            self.appCoordinator.isLoading = false
         }
     }
 }

@@ -10,10 +10,10 @@
 import Foundation
 
 
-public enum PopUp {
-    case createMumory
-    case social
-    case library
-    case notification
-    case none
-}
+//public enum PopUp {
+//    case createMumory
+//    case social
+//    case library
+//    case notification
+//    case none
+//}

@@ -175,7 +175,7 @@ public struct RegionMyMumoryView: View {
         })
 //        .bottomSheet(isShown: $appCoordinator.isMyMumoryBottomSheetShown, mumoryBottomSheet: MumoryBottomSheet(appCoordinator: appCoordinator, type: self.user.uId == currentUserViewModel.user.uId ? .myMumory : .friendMumory, mumoryAnnotation: .constant(Mumory())))
         .popup(show: $appCoordinator.isDeleteMumoryPopUpViewShown, content: {
-            PopUpView(isShown: $appCoordinator.isDeleteMumoryPopUpViewShown, type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
+            PopUpView(type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: {
 //                currentUserViewModel.mumoryViewModel.deleteMumory(self.appCoordinator.selectedMumory) { result in
 //                    switch result {
 //                    case .success():
@@ -327,14 +327,13 @@ struct MumoryItemView2: View {
                         .onTapGesture {
 //                            self.appCoordinator.selectedMumory = self.mumory
 //                            appCoordinator.isMyMumoryBottomSheetShown = true
-                            self.appCoordinator.sheet = .myMumory(mumory: self.mumory, isOwn: self.mumory.uId == self.currentUserViewModel.user.uId)
+                            self.appCoordinator.sheet = .myMumory(mumory: self.mumory, isOwn: self.mumory.uId == self.currentUserViewModel.user.uId, action: deleteMumoryAction)
                         }
                 } // HStack
                 .padding(.vertical, 6)
                 .padding(.bottom, 2)
                 
                 ZStack(alignment: .topLeading) {
-                    
                     AsyncImage(url: self.mumory.song.artworkUrl, transaction: Transaction(animation: .easeInOut(duration: 0.1))) { phase in
                         switch phase {
                         case .success(let image):
@@ -543,5 +542,19 @@ struct MumoryItemView2: View {
             Spacer().frame(width: 20)
         }
         .padding(.top, !isSameDateAsPrevious ? 30 : 0)
+    }
+    
+    private func deleteMumoryAction() {
+        self.appCoordinator.isLoading = true
+        self.currentUserViewModel.mumoryViewModel.deleteMumory(mumory) { result in
+            switch result {
+            case .success():
+                print("SUCCESS deleteMumory!")
+            case .failure(let error):
+                print("ERROR deleteMumory: \(error)")
+            }
+            appCoordinator.popUp = .none
+            self.appCoordinator.isLoading = false
+        }
     }
 }

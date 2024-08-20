@@ -27,6 +27,34 @@ public enum Tab: Int {
     case notification
 }
 
+public enum PopUp {
+    
+    case publishMumory(action: () -> Void)
+    case editMumory(action: () -> Void)
+    case publishError
+    case deleteDraft(action: () -> Void)
+    case deleteComment(action: () -> Void)
+    case deleteMumory(action: () -> Void)
+    case deleteMyMumory(action: () -> Void)
+    
+    
+    case library
+    case notification
+    case none
+
+//    public static func == (lhs: PopUp, rhs: PopUp) -> Bool {
+//        switch (lhs, rhs) {
+//        case (.social, .social), (.library, .library), (.notification, .notification), (.none, .none):
+//            return true
+//        case (.publish, .publish):
+//            return true
+//        default:
+//            return false
+//        }
+//    }
+}
+
+
 public class AppCoordinator: ObservableObject {
     
     var anyCancellable: AnyCancellable? = nil
@@ -53,9 +81,10 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var sheet: Sheet = .none {
         didSet {
-            print("FUCK Sheet updated to: \(sheet)")
+            print("FUCK sheet: \(sheet)")
         }
     }
+    @Published public var popUp: PopUp = .none
     
     @Published public var isCreateMumorySheetShown: Bool = false {
         didSet {
@@ -80,7 +109,6 @@ public class AppCoordinator: ObservableObject {
     @Published public var isDeleteCommentPopUpViewShown = false
     @Published public var isAddFriendViewShown = false
     @Published public var isDeleteMumoryPopUpViewShown = false
-    @Published public var isFirstSocialTabTapped: Bool = false
     @Published public var isRewardPopUpShown: Bool = false
     
     @Published public var isDatePickerShown: Bool = false

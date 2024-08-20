@@ -390,11 +390,12 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
             self.lastDocument = nil
         }
         
-        var friendsUids: [String] = currentUserViewModel.friendViewModel.friends.map {$0.uId}
+        var friendsUids: [String] = currentUserViewModel.friendViewModel.friends.map { $0.uId }
         friendsUids.append(currentUserViewModel.user.uId)
         
         var mumoryCollectionRef = db.collection("Mumory")
-            .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
+//            .whereField("uId", in: friendsUids.isEmpty ? ["X"] : friendsUids)
+            .whereField("uId", in: friendsUids)
             .whereField("isPublic", isEqualTo: true)
             .order(by: "date", descending: true)
             .limit(to: 7)
@@ -408,7 +409,6 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
         Task {
             do {
                 let snapshot = try await copiedMumoryCollectionRef.getDocuments()
-                print("fetchSocialMumory snapshot.documents.count: \(snapshot.documents.count)")
                 
                 if snapshot.documents.isEmpty {
                     completion(.success(snapshot.documents.count))
@@ -456,8 +456,8 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
         }
     }
     
-    public func updateMumory(_ mumory: Mumory, completion: @escaping (Result<Void, Error>) -> Void) {
-        let documentReference = FirebaseManager.shared.getDocumentReference(collection: "Mumory", document: mumory.id ?? "")
+    public func updateMumory(mumoryId: String, mumory: Mumory, completion: @escaping (Result<Void, Error>) -> Void) {
+        let documentReference = db.collection("Mumory").document(mumoryId)
         
         do {
             let updatedData: [String: Any] = try Firestore.Encoder().encode(mumory)

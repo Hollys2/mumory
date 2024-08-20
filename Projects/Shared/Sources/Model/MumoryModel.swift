@@ -37,8 +37,7 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     
     public var commentCount: Int
 
-    public init(id: String? = nil, uId: String, date: Date, song: SongModel, location: LocationModel, isPublic: Bool, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, likes: [String]? = nil, commentCount: Int) {
-        self.id = id
+    public init(uId: String, date: Date, song: SongModel, location: LocationModel, isPublic: Bool, tags: [String]? = nil, content: String? = nil, imageURLs: [String]? = nil, likes: [String]? = nil, commentCount: Int) {
         self.uId = uId
         self.date = date
         self.song = song
@@ -54,17 +53,6 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     
     public override convenience init() {
         self.init(uId: "UNKNOWN", date: Date(), song: SongModel(), location: LocationModel(), isPublic: false, tags: nil, imageURLs: nil, likes: nil, commentCount: 0)
-    }
-    
-    func copy(from other: Mumory) {
-        self.date = other.date
-        self.song = other.song
-        self.location = other.location
-        self.tags = other.tags
-        self.content = other.content
-        self.imageURLs = other.imageURLs
-        self.isPublic = other.isPublic
-        self.likes = other.likes
     }
 }
 

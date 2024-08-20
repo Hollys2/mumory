@@ -329,6 +329,32 @@ public struct HomeView: View {
             if self.appCoordinator.sheet != .none {
                 BottomSheetUIViewRepresentable(bottomSheetOptions: self.getBottomSheetOptions())
             }
+            
+            switch self.appCoordinator.popUp {
+            case .publishMumory(let action):
+                PopUpView(type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: action)
+
+            case .publishError:
+                PopUpView(type: .oneButton, title: "음악, 위치, 날짜를 입력해주세요.", subTitle: "뮤모리를 남기시려면\n해당 조건을 필수로 입력해주세요!", buttonTitle: "확인")
+                
+            case .editMumory(action: let action):
+                PopUpView(type: .twoButton, title: "수정하시겠습니까?", buttonTitle: "수정", buttonAction: action)
+
+            case .deleteDraft(let action):
+                PopUpView(type: .deleteDraft, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: action)
+
+            case .deleteComment(action: let action):
+                PopUpView(type: .twoButton, title: "나의 댓글을 삭제하시겠습니까?", buttonTitle: "댓글 삭제", buttonAction: action)
+                
+            case .deleteMumory(action: let action):
+                PopUpView(type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: action)
+            
+            case .deleteMyMumory(action: let action):
+                PopUpView(type: .twoButton, title: "해당 뮤모리를 삭제하시겠습니까?", buttonTitle: "뮤모리 삭제", buttonAction: action)
+                
+            default:
+                EmptyView()
+            }
         }
         .onAppear {
             let userDefualt = UserDefaults.standard
@@ -412,7 +438,7 @@ extension HomeView {
                 }
             ]
             
-        case .mumoryDetailMenu(let mumory, let isOwn):
+        case .mumoryDetailMenu(let mumory, let isOwn, let action):
             if isOwn {
                 return [
                     BottomSheetOption(iconImage: SharedAsset.editMumoryDetailMenu.swiftUIImage, title: "뮤모리 수정", action: {
@@ -420,7 +446,7 @@ extension HomeView {
                     }),
                     BottomSheetOption(iconImage: mumory.isPublic ? SharedAsset.lockMumoryDetailMenu.swiftUIImage : SharedAsset.unlockMumoryDetailMenu.swiftUIImage, title: mumory.isPublic ? "나만보기" : "전체공개") {
                         mumory.isPublic.toggle()
-                        self.currentUserViewModel.mumoryViewModel.updateMumory(mumory) { result in
+                        self.currentUserViewModel.mumoryViewModel.updateMumory(mumoryId: mumory.id ?? "", mumory: mumory) { result in
                             switch result {
                             case .success():
                                 print("SUCCESS updateMumory!")
@@ -434,8 +460,10 @@ extension HomeView {
                         self.appCoordinator.isMumoryMapViewShown = true
                     },
                     BottomSheetOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
-                        self.appCoordinator.isDeleteMumoryPopUpViewShown = true
+//                        self.appCoordinator.isDeleteMumoryPopUpViewShown = true
                         //                    self.mumoryDataViewModel.deleteMumory(mumoryAnnotation)
+                        
+                        self.appCoordinator.popUp = .deleteMumory(action: action)
                     },
                     BottomSheetOption(iconImage: SharedAsset.complainMumoryDetailMenu.swiftUIImage, title: "신고") {
                         self.appCoordinator.rootPath.append(MumoryPage.report)
@@ -450,11 +478,11 @@ extension HomeView {
                 ]
             }
             
-        case .commentMenu(let mumory, let isOwn):
+        case .commentMenu(let mumory, let isOwn, let action):
             if isOwn {
                 return [
                     BottomSheetOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "댓글 삭제", action: {
-                        self.appCoordinator.isDeleteCommentPopUpViewShown = true
+                        self.appCoordinator.popUp = .deleteComment(action: action)
                     })
                 ]
             } else {
@@ -475,11 +503,11 @@ extension HomeView {
                     self.appCoordinator.rootPath.append(SearchFriendType.unblockFriend)
                 })]
             
-        case .myMumory(let mumory, let isOwn):
+        case .myMumory(let mumory, let isOwn, let action):
             if isOwn {
                 return [
                     BottomSheetOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
-                        self.appCoordinator.isDeleteMumoryPopUpViewShown = true
+                        self.appCoordinator.popUp = .deleteMyMumory(action: action)
                     }]
             } else {
                 return [
@@ -490,9 +518,9 @@ extension HomeView {
             
         case .none:
             return []
-            
-            //        default:
-            //            return []
+        
+        default:
+            return []
         }
     }
 }

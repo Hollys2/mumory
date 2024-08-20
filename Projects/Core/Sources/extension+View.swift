@@ -13,11 +13,10 @@ import SwiftUI
 extension View {
     
     public func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape( RoundedCorner(radius: radius, corners: corners) )
+        self.clipShape(RoundedCorner(radius: radius, corners: corners))
     }
 }
 
-// View.clipShape(RoundedCorner(radius: , corners: ))
 struct RoundedCorner: Shape {
     
     var radius: CGFloat = .infinity
@@ -30,6 +29,7 @@ struct RoundedCorner: Shape {
         return Path(path.cgPath)
     }
 }
+
 
 extension View {
     
@@ -63,12 +63,10 @@ extension View {
     
     public func calendarPopup<Content: View>(show: Binding<Bool>, yOffset: CGFloat, @ViewBuilder content: @escaping () -> Content) -> some View {
         self
-//            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay(
                 ZStack(alignment: .topLeading) {
-                    
                     if show.wrappedValue {
-                        
                         Color.black.opacity(0.01)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .ignoresSafeArea()
@@ -87,25 +85,36 @@ extension View {
     }
     
     public func popup<Content: View>(show: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
-        self
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .overlay(
-                ZStack {
-                    
-                    if show.wrappedValue {
-                        
-                        Color.black.opacity(0.5)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .ignoresSafeArea()
-                            .onTapGesture {
-                                show.wrappedValue = false
-                            }
-                        
-                        content()
+        self.modifier(PopupModifier(show: show, content: content))
+    }
+}
+
+struct PopupModifier<PopupContent: View>: ViewModifier {
+    @Binding var show: Bool
+    let content: () -> PopupContent
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            content // Original content
+            
+            if show {
+                Color.red.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        withAnimation {
+                            show = false
+                        }
                     }
-                }
                 
-                , alignment: .topLeading
-            )
+                self.content()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(radius: 20)
+                    .padding(40)
+                    .transition(.scale)
+                    .zIndex(1)
+            }
+        }
     }
 }

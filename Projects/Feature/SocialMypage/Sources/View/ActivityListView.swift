@@ -537,7 +537,7 @@ struct ActivityBottomSheet: View {
                             let mumory = try await FetchManager.shared.fetchMumory(documentID: self.activity.mumoryId)
                             mumory.commentCount -= 1
                             
-                            self.currentUserViewModel.mumoryViewModel.updateMumory(mumory) { result in
+                            self.currentUserViewModel.mumoryViewModel.updateMumory(mumoryId: self.activity.mumoryId, mumory: mumory) { result in
                                 switch result {
                                 case .success():
                                     for element in activityList {

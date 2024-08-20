@@ -93,8 +93,7 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
             dimmingView.alpha = 0.5
             sheetView.frame.origin.y = getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16)
         }
-        
-//        let tapCloseButtonGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTapGestureDimmingView))
+
         let tapCloseButtonGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDismiss))
         dimmingView.addGestureRecognizer(tapCloseButtonGestureRecognizer)
         
@@ -179,9 +178,6 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
 
 public struct CreateMumorySheetView: View {
     
-    @State private var isPublishPopUpShown: Bool = false
-    @State private var isPublishErrorPopUpShown: Bool = false
-    @State private var isTagErrorPopUpShown: Bool = false
     @State private var isDeletePopUpShown: Bool = false
     
     @State private var isPublic: Bool = true
@@ -192,8 +188,6 @@ public struct CreateMumorySheetView: View {
         
     @State var photoSelections: [PhotosPickerItem] = []
     @State var selectedImages: [UIImage] = []
-    
-    @StateObject private var photoPickerViewModel: PhotoPickerViewModel = .init()
     
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
@@ -215,9 +209,11 @@ public struct CreateMumorySheetView: View {
                             .resizable()
                             .frame(width: 25, height: 25)
                             .onTapGesture(perform: {
-                                if self.appCoordinator.draftMumorySong != nil ||
-                                    self.appCoordinator.draftMumoryLocation != nil {
-                                    self.isDeletePopUpShown = true
+                                if self.appCoordinator.draftMumorySong != nil || self.appCoordinator.draftMumoryLocation != nil {
+                                    self.appCoordinator.popUp = .deleteDraft(action: {
+                                        self.appCoordinator.popUp = .none
+                                        self.dismiss()
+                                    })
                                 } else {
                                     self.dismiss()
                                 }
@@ -229,9 +225,39 @@ public struct CreateMumorySheetView: View {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             
                             if (self.appCoordinator.draftMumorySong != nil) && (self.appCoordinator.draftMumoryLocation != nil) {
-                                self.isPublishPopUpShown = true
+                                self.appCoordinator.popUp = .publishMumory(action: {
+                                    self.appCoordinator.isLoading = true
+                                    
+                                    if let song = self.appCoordinator.draftMumorySong, let location = self.appCoordinator.draftMumoryLocation {
+                                        Task {
+                                            self.imageURLs = await PhotoPickerManager.uploadAllImages(selectedImages: self.selectedImages)
+                                            
+                                            let newMumory = Mumory(uId: self.currentUserViewModel.user.uId, date: self.appCoordinator.selectedDate, song: song, location: location, isPublic: self.isPublic, tags: self.tags.isEmpty ? nil : self.tags, content: self.contentText.isEmpty ? nil : self.contentText, imageURLs: self.imageURLs.isEmpty ? nil : self.imageURLs, commentCount: 0)
+                                            
+                                            self.currentUserViewModel.mumoryViewModel.createMumory(newMumory) { result in
+                                                switch result {
+                                                case .success:
+                                                    print("SUCCESS createMumory")
+                                                    
+                                                    self.generateHapticFeedback(style: .medium)
+                                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+                                                    
+                                                case .failure(let error):
+                                                    print("FAILURE createMumory: \(error.localizedDescription)")
+                                                }
+                                                
+                                                self.appCoordinator.isLoading = false
+                                                self.appCoordinator.popUp = .none
+                                                self.dismiss()
+                                                self.appCoordinator.selectedTab = .home
+                                                self.appCoordinator.rootPath = NavigationPath()
+                                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: location.coordinate, span: MapConstant.defaultSpan)
+                                            }
+                                        }
+                                    }
+                                } )
                             } else {
-                                self.isPublishErrorPopUpShown = true
+                                self.appCoordinator.popUp = .publishError
                             }
                         }) {
                             Rectangle()
@@ -255,8 +281,6 @@ public struct CreateMumorySheetView: View {
                 .padding(.top, 26)
                 .padding(.bottom, 11)
                 .padding(.horizontal, 20)
-                
-                //                CreateMumoryScrollViewRepresentable(tags: self.$tags)
                 
                 ScrollViewReader { proxy in
                     ScrollView(showsIndicators: false) {
@@ -358,10 +382,8 @@ public struct CreateMumorySheetView: View {
                                                     .cornerRadius(10)
                                                 
                                                 Button(action: {
-                                                    //                                                    photoPickerViewModel.removeImage(image)
                                                     if let index = self.selectedImages.firstIndex(of: image) {
                                                         self.selectedImages.remove(at: index)
-                                                        //                self.imageSelections.remove(at: index)
                                                     }
                                                 }) {
                                                     SharedAsset.closeButtonCreateMumory.swiftUIImage
@@ -406,71 +428,6 @@ public struct CreateMumorySheetView: View {
                 }
             } // VStack
             .background(SharedAsset.backgroundColor.swiftUIColor)
-            .popup(show: self.$isPublishPopUpShown, content: {
-                PopUpView(isShown: self.$isPublishPopUpShown, type: .twoButton, title: "게시하시겠습니까?", buttonTitle: "게시", buttonAction: {
-                    self.appCoordinator.isLoading = true
-                    
-                    if let song = self.appCoordinator.draftMumorySong,
-                       let location = self.appCoordinator.draftMumoryLocation {
-                        Task {
-                            self.imageURLs += await self.photoPickerViewModel.uploadAllImages()
-                            
-                            let newMumory = Mumory(uId: self.currentUserViewModel.user.uId, date: self.appCoordinator.selectedDate, song: song, location: location, isPublic: self.isPublic, tags: self.tags.isEmpty ? nil : self.tags, content: self.contentText.isEmpty ? nil : self.contentText, imageURLs: self.imageURLs.isEmpty ? nil : self.imageURLs, commentCount: 0)
-                            
-                            self.currentUserViewModel.mumoryViewModel.createMumory(newMumory) { result in
-                                switch result {
-                                case .success:
-                                    print("SUCCESS createMumory")
-                                    
-                                    self.generateHapticFeedback(style: .medium)
-                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
-                                    
-                                    self.appCoordinator.draftMumorySong = nil
-                                    self.appCoordinator.draftMumoryLocation = nil
-                                    self.tags.removeAll()
-                                    self.contentText.removeAll()
-                                    self.photoPickerViewModel.removeAllSelectedImages()
-                                    self.imageURLs.removeAll()
-                                    
-                                case .failure(let error):
-                                    print("FAILURE createMumory: \(error.localizedDescription)")
-                                }
-                                
-                                self.appCoordinator.isLoading = false
-                                self.isPublishPopUpShown = false
-                                self.dismiss()
-                                self.appCoordinator.selectedTab = .home
-                                self.appCoordinator.rootPath = NavigationPath()
-                                self.appCoordinator.createdMumoryRegion = MKCoordinateRegion(center: location.coordinate, span: MapConstant.defaultSpan)
-                            }
-                        }
-                    }
-                })
-            })
-            .popup(show: self.$isPublishErrorPopUpShown, content: {
-                PopUpView(isShown: self.$isPublishErrorPopUpShown, type: .oneButton, title: "음악, 위치, 날짜를 입력해주세요.", subTitle: "뮤모리를 남기시려면\n해당 조건을 필수로 입력해주세요!", buttonTitle: "확인", buttonAction: {
-                    self.isPublishErrorPopUpShown = false
-                })
-            })
-            .popup(show: self.$isTagErrorPopUpShown, content: {
-                PopUpView(isShown: self.$isTagErrorPopUpShown, type: .oneButton, title: "태그는 최대 3개까지 입력할 수 있습니다.", buttonTitle: "확인", buttonAction: {
-                    self.isTagErrorPopUpShown = false
-                })
-            })
-            .popup(show: self.$isDeletePopUpShown, content: {
-                PopUpView(isShown: self.$isDeletePopUpShown, type: .delete, title: "해당 기록을 삭제하시겠습니까?", subTitle: "지금 이 페이지를 나가면 작성하던\n기록이 삭제됩니다.", buttonTitle: "계속 작성하기", buttonAction: {
-                    //                    self.appCoordinator.draftMumorySong = nil
-                    //                    self.appCoordinator.draftMumoryLocation = nil
-                    //                    self.appCoordinator.selectedDate = Date()
-                    //                    self.tags.removeAll()
-                    //                    self.contentText.removeAll()
-                    //                    self.photoPickerViewModel.removeAllSelectedImages()
-                    //                    self.imageURLs.removeAll()
-                    
-                    self.isDeletePopUpShown = false
-                    self.dismiss()
-                })
-            })
             
             HStack(spacing: 0) {
                 Group {

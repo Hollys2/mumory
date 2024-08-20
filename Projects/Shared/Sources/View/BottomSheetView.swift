@@ -19,14 +19,40 @@ public enum SearchFriendType {
 }
 
 public enum Sheet: Equatable {
+    
     case socialMenu(mumory: Mumory)
-    case mumoryDetailMenu(mumory: Mumory, isOwn: Bool)
-    case commentMenu(mumory: Mumory, isOwn: Bool)
+    case mumoryDetailMenu(mumory: Mumory, isOwn: Bool, action: () -> Void)
+    case commentMenu(mumory: Mumory, isOwn: Bool, action: () -> Void)
     
     case addFriend
-    case myMumory(mumory: Mumory, isOwn: Bool)
+    case myMumory(mumory: Mumory, isOwn: Bool, action: () -> Void)
     
     case none
+    
+    public static func == (lhs: Sheet, rhs: Sheet) -> Bool {
+        switch (lhs, rhs) {
+        case let (.socialMenu(mumory: m1), .socialMenu(mumory: m2)):
+            return m1 == m2
+            
+        case (.mumoryDetailMenu(mumory: let lhsMumory, isOwn: let lhsIsOwn, action: let lhsAction), .mumoryDetailMenu(mumory: let rhsMumory, isOwn: let rhsIsOwn, action: let rhsAction)):
+            return (lhsMumory == rhsMumory) && (lhsIsOwn == rhsIsOwn) && (lhsAction() == rhsAction())
+            
+        case (.commentMenu(mumory: let lhsMumory, isOwn: let lhsIsOwn, action: let lhsAction), .commentMenu(mumory: let rhsMumory, isOwn: let rhsIsOwn, action: let rhsAction)):
+            return (lhsMumory == rhsMumory) && (lhsIsOwn == rhsIsOwn) && (lhsAction() == rhsAction())
+        
+        case (.addFriend, .addFriend):
+            return true
+            
+        case (.myMumory(mumory: let lhsMumory, isOwn: let lhsIsOwn, action: let lhsAction), .myMumory(mumory: let rhsMumory, isOwn: let rhsIsOwn, action: let rhsAction)):
+            return (lhsMumory == rhsMumory) && (lhsIsOwn == rhsIsOwn) && (lhsAction() == rhsAction())
+            
+        case (.none, .none):
+            return true
+        
+        default:
+            return false
+        }
+    }
 }
 
 public struct BottomSheetOption: Identifiable {
@@ -281,6 +307,7 @@ public struct RewardBottomSheetView: View {
         .frame(height: 349)
     }
 }
+
 
 struct RewardBottomSheetViewModifier: ViewModifier {
     
