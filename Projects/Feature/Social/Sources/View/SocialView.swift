@@ -53,7 +53,7 @@ class SocialItemCollectionViewCell: UICollectionViewCell {
 }
 
 
-struct CollectionViewRepresentable: UIViewRepresentable {
+struct SocialCollectionViewRepresentable: UIViewRepresentable {
 
     private let scrollPublisher = PassthroughSubject<UIScrollView, Never>()
 
@@ -135,14 +135,14 @@ struct CollectionViewRepresentable: UIViewRepresentable {
     }
 
     class Coordinator: NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-        let parent: CollectionViewRepresentable
+        let parent: SocialCollectionViewRepresentable
         weak var collectionView: UICollectionView?
         var previousOffsetY: CGFloat = .zero
         var isFetched: Bool = false
         var isLast: Bool = false
         var cancellable: AnyCancellable?
 
-        init(parent: CollectionViewRepresentable) {
+        init(parent: SocialCollectionViewRepresentable) {
             self.parent = parent
             
             super.init()
@@ -265,7 +265,7 @@ struct CollectionViewRepresentable: UIViewRepresentable {
 }
 
 private struct SocialItemView: View {
-//    @State private var isMapViewShown: Bool = false
+
     @State private var isTruncated: Bool = false
     @State private var isLocationTitleTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
@@ -279,9 +279,7 @@ private struct SocialItemView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            
             HStack(spacing: 8) {
-                
                 AsyncImage(url: self.user.profileImageURL) { phase in
                     switch phase {
                     case .success(let image):
@@ -371,7 +369,6 @@ private struct SocialItemView: View {
 //            Spacer().frame(height: 13)
             
             ZStack(alignment: .topLeading) {
-                
                 Rectangle()
                     .foregroundColor(.clear)
                     .frame(width: UIScreen.main.bounds.width - 20, height: UIScreen.main.bounds.width - 20)
@@ -405,40 +402,6 @@ private struct SocialItemView: View {
                 
                 // MARK: Title & Menu
                 HStack(spacing: 0) {
-                    //                    Button {
-                    //                        Task {
-                    //                            guard let song = await fetchSong(songID: mumory.musicModel.songID.rawValue) else {return}
-                    //                            playerViewModel.playNewSong(song: song, isPlayerShown: false)
-                    //                            withAnimation {
-                    //                                playerViewModel.userWantsShown = true
-                    //                                playerViewModel.isShownMiniPlayer = true
-                    //                                playerViewModel.miniPlayerMoveToBottom = false
-                    //                            }
-                    //                        }
-                    //                    } label: {
-                    //                        HStack(spacing: 0) {
-                    //                            SharedAsset.musicIconSocial.swiftUIImage
-                    //                                .resizable()
-                    //                                .frame(width: 14, height: 14)
-                    //
-                    //                            Spacer().frame(width: 6)
-                    //
-                    //                            Text(self.mumory.musicModel.title)
-                    //                                .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 14))
-                    //                                .multilineTextAlignment(.trailing)
-                    //                                .foregroundColor(.white)
-                    //                                .lineLimit(1)
-                    //
-                    //                            Spacer().frame(width: 8)
-                    //
-                    //                            Text(self.mumory.musicModel.artist)
-                    //                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
-                    //                                .foregroundColor(.white)
-                    //                                .lineLimit(1)
-                    //                        }
-                    //                        .padding(.vertical, 10)
-                    //                    }
-                    
                     HStack(spacing: 0) {
                         SharedAsset.musicIconSocial.swiftUIImage
                             .resizable()
@@ -474,7 +437,6 @@ private struct SocialItemView: View {
                     }
                     
                     Spacer()
-                  
                     
                     SharedAsset.menuButtonSocial.swiftUIImage
                         .resizable()
@@ -717,7 +679,7 @@ public struct SocialView: View {
         ZStack(alignment: .top) {
             Color(red: 0.09, green: 0.09, blue: 0.09)
             
-            CollectionViewRepresentable(topBarOffsetY: self.$offsetY)
+            SocialCollectionViewRepresentable(topBarOffsetY: self.$offsetY)
             
             if self.currentUserViewModel.mumoryViewModel.socialMumorys.isEmpty, !self.appCoordinator.isRefreshing {
                 noMumoryView
@@ -757,7 +719,9 @@ public struct SocialView: View {
                 Spacer().frame(width: 12)
 
                 Button(action: {
-                    appCoordinator.isMyPageViewShown = true
+                    withAnimation {
+                        appCoordinator.isMyPageViewShown = true
+                    }
                 }) {
                     AsyncImage(url: currentUserViewModel.user.profileImageURL) { phase in
                         switch phase {

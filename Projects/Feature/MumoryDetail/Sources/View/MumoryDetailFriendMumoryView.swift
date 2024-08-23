@@ -12,20 +12,17 @@ import Shared
 
 
 struct MumoryDetailFriendMumoryScrollUIViewRepresentable: UIViewRepresentable {
-
-    let mumory: Mumory
     
     @State var oldFriendMumorys: [Mumory] = []
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
+    let mumory: Mumory
     
     func makeUIView(context: Context) -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.delegate = context.coordinator
-
-//        let totalWidth = (UIScreen.main.bounds.width - 40 + 10) * CGFloat(mumoryDataViewModel.friendMumorys.count)
 
         scrollView.isPagingEnabled = true
         scrollView.contentMode = .scaleToFill
@@ -89,10 +86,7 @@ extension MumoryDetailFriendMumoryScrollUIViewRepresentable.Coordinator: UIScrol
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let page = Int(scrollView.contentOffset.x / (UIScreen.main.bounds.width - 30))
-
-//        withAnimation(.easeInOut(duration: 0.1)) {
-            self.parent.appCoordinator.page = page + 1
-//        }
+        self.parent.appCoordinator.page = page + 1
     }
 }
 
@@ -346,16 +340,3 @@ struct PageControl: UIViewRepresentable {
         }
     }
 }
-
-//struct MumoryDetailMenuSheetView_Previews: PreviewProvider {
-//
-//    static var previews: some View {
-//        let appCoordinator = AppCoordinator() // 또는 실제 AppCoordinator 인스턴스 생성
-//        ZStack {
-//            Color.black
-//            MumoryDetailFriendMumoryView()
-//            .environmentObject(appCoordinator)
-//
-//        }
-//    }
-//}

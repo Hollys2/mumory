@@ -304,6 +304,8 @@ public struct MumoryEditView: View {
     }
     
     private func editMumoryAction() {
+        self.appCoordinator.popUp = .none
+        
         guard let mumoryId = self.mumory.id else { return }
         
         self.appCoordinator.isLoading = true
@@ -323,9 +325,11 @@ public struct MumoryEditView: View {
                 
                 self.appCoordinator.draftMumorySong = nil
                 self.appCoordinator.draftMumoryLocation = nil
-                self.appCoordinator.popUp = .none
-                self.appCoordinator.rootPath.removeLast()
-                self.appCoordinator.isLoading = false
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                    self.appCoordinator.rootPath.removeLast()
+                    self.appCoordinator.isLoading = false
+                })
             }
         }
     }

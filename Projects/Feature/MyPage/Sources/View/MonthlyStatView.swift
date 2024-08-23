@@ -717,24 +717,17 @@ struct ContentView: View {
                         country = "기타 🏁"
                     }
                     
-                    // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
                     if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[country] {
-                        // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
-                        // 딕셔너리에 업데이트
                         self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = countryMumories
                     } else {
-                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
                         self.currentUserViewModel.mumoryViewModel.locationMumorys[country] = [mumory]
                     }
                 } else {
                     if var countryMumories = self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] {
-                        // 존재하는 경우 해당 배열에 뮤모리 추가
                         countryMumories.append(mumory)
-                        // 딕셔너리에 업데이트
                         self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = countryMumories
                     } else {
-                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
                         self.currentUserViewModel.mumoryViewModel.locationMumorys[administrativeArea] = [mumory]
                     }
                 }
@@ -749,7 +742,6 @@ struct ContentView: View {
             
             
             let sortedPrefix = self.currentUserViewModel.mumoryViewModel.locationMumorys.sorted(by: { $0.value.count > $1.value.count }).prefix(3)
-            // 결과를 순회하며 딕셔너리로 변환
             self.sortedLocationsArray = [:]
             for element in sortedPrefix {
                 self.sortedLocationsArray[element.key] = element.value

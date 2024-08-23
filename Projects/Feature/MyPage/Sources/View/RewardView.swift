@@ -57,15 +57,11 @@ public struct RewardView: View {
     public init() {}
     
     public var body: some View {
-        
         VStack(spacing: 0) {
-            
             TopBarView(title: "리워드", rightBarButtonNavigationPath: nil, paddingBottom: 16)
             
             ZStack(alignment: .top) {
-                
                 ScrollView(showsIndicators: false) {
-                    
                     RewardContentView()
                 }
             }
@@ -75,17 +71,15 @@ public struct RewardView: View {
 }
 
 struct RewardContentView: View {
-    
-    var rewards: [Reward] = [.attendance(0), .record(0), .location(0), .like(0), .comment(0)]
-    
+        
     @State var count: Int = 0
     
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
+    var rewards: [Reward] = [.attendance(0), .record(0), .location(0), .like(0), .comment(0)]
+    
     var body: some View {
-        
         VStack(spacing: 15) {
-            
             Rectangle()
               .foregroundColor(.clear)
               .frame(width: getUIScreenBounds().width - 40, height: 60)
@@ -133,21 +127,17 @@ struct RewardRowContent: View {
     }
 
     var body: some View {
-
         VStack(spacing: 0) {
             RewardContent2(index: i)
 
             ScrollView(.horizontal, showsIndicators: false) {
-
                 HStack(spacing: getUIScreenBounds().width * 0.025) {
-
                     ForEach(0..<5) { index in
                         RewardContent3(index: i, index2: index)
                     }
                 }
                 .padding(.horizontal, 20)
             }
-
         }
     }
 }

@@ -81,6 +81,7 @@ public struct HomeView: View {
                     if self.appCoordinator.isMyPageViewShown {
                         MyPageView()
                             .animation(.default, value: appCoordinator.isMyPageViewShown)
+                            .transition(.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)))
                             .environmentObject(settingViewModel)
                     }
                     

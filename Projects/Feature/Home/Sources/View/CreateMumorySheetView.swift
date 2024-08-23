@@ -226,6 +226,7 @@ public struct CreateMumorySheetView: View {
                             
                             if (self.appCoordinator.draftMumorySong != nil) && (self.appCoordinator.draftMumoryLocation != nil) {
                                 self.appCoordinator.popUp = .publishMumory(action: {
+                                    self.appCoordinator.popUp = .none
                                     self.appCoordinator.isLoading = true
                                     
                                     if let song = self.appCoordinator.draftMumorySong, let location = self.appCoordinator.draftMumoryLocation {
@@ -240,14 +241,13 @@ public struct CreateMumorySheetView: View {
                                                     print("SUCCESS createMumory")
                                                     
                                                     self.generateHapticFeedback(style: .medium)
-                                                    playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+                                                    self.playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                                     
                                                 case .failure(let error):
                                                     print("FAILURE createMumory: \(error.localizedDescription)")
                                                 }
                                                 
                                                 self.appCoordinator.isLoading = false
-                                                self.appCoordinator.popUp = .none
                                                 self.dismiss()
                                                 self.appCoordinator.selectedTab = .home
                                                 self.appCoordinator.rootPath = NavigationPath()

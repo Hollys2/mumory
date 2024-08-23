@@ -10,11 +10,13 @@ import SwiftUI
 import Shared
 
 struct TopBar: View {
+    
     let leftButton: Image?
     let title: String
     let rightButton: Image?
     let leftButtonAction: (() -> Void)?
     let rightButtonAction: (() -> Void)?
+    
     var body: some View {
         HStack(){
             if leftButton != nil {
@@ -22,7 +24,7 @@ struct TopBar: View {
                     .onTapGesture {
                         leftButtonAction!()
                     }
-            }else {
+            } else {
                 Rectangle()
                     .frame(width: 30, height: 30)
                     .foregroundStyle(.clear)
@@ -41,7 +43,7 @@ struct TopBar: View {
                     .onTapGesture {
                         rightButtonAction!()
                     }
-            }else {
+            } else {
                 Rectangle()
                     .frame(width: 30, height: 30)
                     .foregroundStyle(.clear)

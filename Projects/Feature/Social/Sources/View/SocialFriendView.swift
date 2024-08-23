@@ -587,8 +587,10 @@ struct RecievedRequestItem: View {
 }
 
 struct SocialFriendBottomSheet: View {
-    @Environment(\.dismiss) var dismiss
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
+
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack(spacing: 0) {

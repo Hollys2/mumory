@@ -449,7 +449,9 @@ public struct MumoryDetailView: View {
     }
     
     private func deleteMumoryAction() {
+        self.appCoordinator.popUp = .none
         self.appCoordinator.isLoading = true
+        
         self.currentUserViewModel.mumoryViewModel.deleteMumory(mumory) { result in
             switch result {
             case .success():
@@ -458,7 +460,6 @@ public struct MumoryDetailView: View {
             case .failure(let error):
                 print("ERROR deleteMumory: \(error)")
             }
-            appCoordinator.popUp = .none
             self.appCoordinator.isLoading = false
         }
     }

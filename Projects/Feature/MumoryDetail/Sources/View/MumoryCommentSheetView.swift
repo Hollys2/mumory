@@ -13,22 +13,21 @@ import Shared
 
 struct CommentView: View {
     
-    let comment: Comment
-    let replies: [Comment]
-    let mumory: Mumory
-    var isFocused: FocusState<Bool>.Binding
-    
     @Binding var isWritingReply: Bool
     @Binding var selectedComment: Comment
-    
-    let deleteCommentAction: () -> Void
-
-    var scrollToComment: () -> Void
     
     @State private var commentUser: UserProfile = UserProfile()
     
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    
+    let comment: Comment
+    let replies: [Comment]
+    let mumory: Mumory
+    var isFocused: FocusState<Bool>.Binding
+    let deleteCommentAction: () -> Void
+    var scrollToComment: () -> Void
+
     
     var body: some View {
         HStack(alignment: .top,  spacing: 13) {
@@ -242,7 +241,6 @@ struct ReplyView: View {
     @State private var isMyComment: Bool = false
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     
     var body: some View {
@@ -422,29 +420,25 @@ struct ReplyView: View {
 
 public struct MumoryCommentSheetView: View {
     
-    @State var mumory: Mumory = .init()
-    @State var comments: [Comment] = []
-    @State var replies: [Comment] = []
-    @State var selectedCommentUser: UserProfile = UserProfile()
-    
+    @State private var mumory: Mumory = .init()
+    @State private var comments: [Comment] = []
+    @State private var replies: [Comment] = []
+    @State private var selectedCommentUser: UserProfile = UserProfile()
     @State private var commentText: String = ""
-    //    @State private var replyText: String = ""
     @State private var isWritingReply: Bool = false
     @State private var selectedIndex: Int = -1
     @State private var selectedComment: Comment = Comment()
     @State private var isButtonDisabled: Bool = false
-    
     @State private var isPublic: Bool = false
-    
     @State private var commentYOffset: CGFloat = .zero
     @State private var isPopUpShown: Bool = true
     
     @FocusState private var isTextFieldFocused: Bool
     
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    @EnvironmentObject private var appCoordinator: AppCoordinator
+    @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var keyboardResponder: KeyboardResponder
-    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @EnvironmentObject private var playerViewModel: PlayerViewModel
     
     let mumoryId: String
     
@@ -474,7 +468,7 @@ public struct MumoryCommentSheetView: View {
                     
                     if self.mumory.commentCount > 0 {
                         Spacer().frame(width: 5)
-
+                        
                         Text("\(self.mumory.commentCount)")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 18))
                             .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
@@ -498,7 +492,7 @@ public struct MumoryCommentSheetView: View {
                 ScrollView(showsIndicators: false) {
                     ZStack(alignment: .top) {
                         Color.clear
-
+                        
                         if self.comments.isEmpty {
                             if !self.appCoordinator.isRefreshing && !self.appCoordinator.isLoading {
                                 VStack(spacing: 21) {
@@ -506,7 +500,7 @@ public struct MumoryCommentSheetView: View {
                                         .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 20))
                                         .foregroundColor(.white)
                                         .frame(maxWidth: .infinity, alignment: .center)
-
+                                    
                                     Text("가장 먼저 댓글을 달아 친구들과 소통해보세요 !")
                                         .font(SharedFontFamily.Pretendard.light.swiftUIFont(size: 14))
                                         .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
@@ -516,17 +510,17 @@ public struct MumoryCommentSheetView: View {
                                 .offset(y: 130)
                             }
                         }
-
+                        
                         VStack(spacing: 0) {
                             ForEach(Array(self.comments.enumerated()), id: \.element) { index, comment in
-                                CommentView(comment: comment, replies: self.replies, mumory: self.mumory, isFocused: $isTextFieldFocused, isWritingReply: $isWritingReply, selectedComment: self.$selectedComment, deleteCommentAction: self.deleteCommentAction) {
+                                CommentView(isWritingReply: self.$isWritingReply, selectedComment: self.$selectedComment, comment: comment, replies: self.replies, mumory: self.mumory, isFocused: self.$isTextFieldFocused, deleteCommentAction: self.deleteCommentAction) {
                                     withAnimation {
                                         proxy.scrollTo(index, anchor: .top)
                                     }
                                 }
                                 .id(index)
                             }
-
+                            
                             Spacer(minLength: 0)
                         }
                         .frame(minHeight: keyboardResponder.keyboardHeight == .zero ? getUIScreenBounds().height - 72 - getSafeAreaInsets().bottom - 72 - (UIScreen.main.bounds.height * 0.16) : getUIScreenBounds().height * 10)
@@ -539,7 +533,7 @@ public struct MumoryCommentSheetView: View {
                     self.selectedComment = Comment()
                     self.comments = []
                     self.replies = []
-
+                    
                     Task {
                         self.mumory = try await FetchManager.shared.fetchMumory(documentID: self.mumory.id)
                     }
@@ -552,10 +546,7 @@ public struct MumoryCommentSheetView: View {
                             } else {
                                 self.replies.append(i)
                             }
-//                            self.comments.sort { $0.date < $1.date }
-//                            self.replies.sort { $0.date < $1.date }
                         }
-
                         self.appCoordinator.isRefreshing = false
                     }
                 }

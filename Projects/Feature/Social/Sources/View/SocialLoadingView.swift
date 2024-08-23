@@ -15,6 +15,7 @@ import Shared
 public struct SocialLoadingView: View {
     
     @State var startAnimation: Bool = true
+    
     @EnvironmentObject var appCoordinator: AppCoordinator
     
     public var body: some View {

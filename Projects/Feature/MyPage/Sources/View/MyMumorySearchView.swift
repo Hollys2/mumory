@@ -34,9 +34,7 @@ public struct MyMumorySearchView: View {
             Spacer().frame(height: self.getSafeAreaInsets().top + 12)
             
             HStack(spacing: 8) {
-                
                 ZStack(alignment: .leading) {
-                    
                     TextField("", text: $searchText,
                               prompt: Text("나의 뮤모리 검색").font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 16))
                         .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
@@ -165,9 +163,7 @@ public struct MyMumorySearchView: View {
                 .padding(.top, 6)
             } else {
                 ScrollView(showsIndicators: false) {
-                    
                     VStack(spacing: 0) {
-                        
                         HStack(spacing: 0) {
                             Text("검색 결과 \(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations.count)건")
                                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
@@ -180,7 +176,6 @@ public struct MyMumorySearchView: View {
                         .padding(.horizontal, 20)
                         
                         VStack(spacing: 0) {
-                            
                             ForEach(self.currentUserViewModel.mumoryViewModel.searchedMumoryAnnotations, id: \.self) { mumory in
                                 SearchedMumoryItemView(mumory: mumory)
                             }

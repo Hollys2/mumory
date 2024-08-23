@@ -59,7 +59,7 @@ public struct PlayingMusicBarView: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
-                }else {
+                } else {
                     Text("재생 중인 음악이 없습니다.")
                         .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                         .foregroundColor(.white)
@@ -120,7 +120,9 @@ public struct PlayingMusicBarView: View {
             .clipShape(Circle())
             .padding(.trailing, 14)
             .onTapGesture {
-                appCoordinator.isMyPageViewShown = true
+                withAnimation(.easeOut(duration: 0.2)) {
+                    appCoordinator.isMyPageViewShown = true
+                }
             }
      
                         
