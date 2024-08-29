@@ -32,22 +32,17 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
     
     @Published public var favoriteDate: [Date] = []
     
-    @Published public var reward: Reward = .none
-    
     //    @Published public var myActivity: [(String, String)] = []
     //    @Published public var myRewards: [String] = []
     
-//    private var tempSocialMumory: Set<Mumory> = []
-//    private var tempSocialMumory: [Mumory] = []
     private var tempMumory: [Mumory] = []
-    
     private var lastDocument: DocumentSnapshot?
     
     public override init() {
         super.init()
     }
     
-    public func fetchMyMumoryListener(uId: String) -> ListenerRegistration {
+    public func fetchMyMumoryListener(uId: String, rewards: [Reward]) -> ListenerRegistration {
         let collectionReference = self.db.collection("Mumory")
         
         let query = collectionReference
@@ -66,162 +61,192 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
                     do {
                         let newMumory = try documentChange.document.data(as: Mumory.self)
                         
-                        if !self.myMumorys.contains(where: { $0.id == newMumory.id }) {
-                                self.myMumorys.append(newMumory)
-                                self.myMumorys.sort { $0.date > $1.date }
-                                print("add fetchMyMumoryListener: \(self.myMumorys)")
+                        self.myMumorys.append(newMumory)
+                        self.myMumorys.sort { $0.date > $1.date }
+                        
+                        let collectionReference = self.db.collection("User").document(uId).collection("Reward")
+                        
+                        if self.myMumorys.count == 1, !rewards.contains(where: { $0 == Reward(type: .record(0))}) {
+                            do {
+                                try collectionReference.addDocument(from: Reward(type: .record(0)))
+                            } catch {
+                                print("ERROR fetchMyMumoryListener: \(error)")
+                            }
+                        } else if self.myMumorys.count == 5, !rewards.contains(where: { $0 == Reward(type: .record(1))}) {
+                            do {
+                                try collectionReference.addDocument(from: Reward(type: .record(1)))
+                            } catch {
+                                print("ERROR fetchMyMumoryListener: \(error)")
+                            }
+                        } else if self.myMumorys.count == 10, !rewards.contains(where: { $0 == Reward(type: .record(2))}) {
+                            do {
+                                try collectionReference.addDocument(from: Reward(type: .record(2)))
+                            } catch {
+                                print("ERROR fetchMyMumoryListener: \(error)")
+                            }
+                        } else if self.myMumorys.count == 20, !rewards.contains(where: { $0 == Reward(type: .record(3))}) {
+                            do {
+                                try collectionReference.addDocument(from: Reward(type: .record(3)))
+                            } catch {
+                                print("ERROR fetchMyMumoryListener: \(error)")
+                            }
+                        } else if self.myMumorys.count == 50, !rewards.contains(where: { $0 == Reward(type: .record(4))}) {
+                            do {
+                                try collectionReference.addDocument(from: Reward(type: .record(4)))
+                            } catch {
+                                print("ERROR fetchMyMumoryListener: \(error)")
+                            }
+                        }
+                        
+                        var country = newMumory.location.country
+                        let administrativeArea = newMumory.location.administrativeArea
+                        if country != "대한민국" {
+                            if country == "영국" {
+                                country += " 🇬🇧"
+                            } else if country == "미 합중국" {
+                                country = "미국 🇺🇸"
+                            } else if country == "이탈리아" {
+                                country += " 🇮🇹"
+                            } else if country == "프랑스" {
+                                country += " 🇫🇷"
+                            } else if country == "독일" {
+                                country += " 🇩🇪"
+                            } else if country == "일본" {
+                                country += " 🇯🇵"
+                            } else if country == "중국" {
+                                country += " 🇨🇳"
+                            } else if country == "캐나다" {
+                                country += " 🇨🇦"
+                            } else if country == "오스트레일리아" {
+                                country += " 🇦🇹"
+                            } else if country == "브라질" {
+                                country += " 🇧🇷"
+                            } else if country == "인도" {
+                                country += " 🇮🇳"
+                            } else if country == "러시아" {
+                                country += " 🇷🇺"
+                            } else if country == "우크라이나" {
+                                country += " 🇺🇦"
+                            } else if country == "호주" {
+                                country += " 🇦🇺"
+                            } else if country == "멕시코" {
+                                country += " 🇲🇽"
+                            } else if country == "인도네시아" {
+                                country += " 🇮🇩"
+                            } else if country == "터키" {
+                                country += " 🇹🇷"
+                            } else if country == "사우디아라비아" {
+                                country += " 🇸🇦"
+                            } else if country == "스페인" {
+                                country += " 🇪🇸"
+                            } else if country == "네덜란드" {
+                                country += " 🇳🇱"
+                            } else if country == "스위스" {
+                                country += " 🇨🇭"
+                            } else if country == "아르헨티나" {
+                                country += " 🇦🇷"
+                            } else if country == "스웨덴" {
+                                country += " 🇸🇪"
+                            } else if country == "폴란드" {
+                                country += " 🇵🇱"
+                            } else if country == "벨기에" {
+                                country += " 🇧🇪"
+                            } else if country == "태국" {
+                                country += " 🇹🇭"
+                            } else if country == "이란" {
+                                country += " 🇮🇷"
+                            } else if country == "오스트리아" {
+                                country += " 🇦🇹"
+                            } else if country == "노르웨이" {
+                                country += " 🇳🇴"
+                            } else if country == "아랍에미리트" {
+                                country += " 🇦🇪"
+                            } else if country == "나이지리아" {
+                                country += " 🇳🇬"
+                            } else if country == "남아프리카공화국" {
+                                country += " 🇿🇦"
+                            } else {
+                                country = "기타 🏁"
+                            }
+                            
+                            if var countryMumories = self.locationMumorys[country] {
+                                countryMumories.append(newMumory)
+                                self.locationMumorys[country] = countryMumories
+                            } else {
+                                self.locationMumorys[country] = [newMumory]
                                 
-                                let collectionReference = self.db.collection("User").document(uId).collection("Reward")
-                                
-                                if self.myMumorys.count == 1 {
-                                    let data = ["type": "record0"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 5 {
-                                    let data = ["type": "record1"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 10 {
-                                    let data = ["type": "record2"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 20 {
-                                    let data = ["type": "record3"]
-                                    collectionReference.addDocument(data: data)
-                                } else if self.myMumorys.count == 50 {
-                                    let data = ["type": "record4"]
-                                    collectionReference.addDocument(data: data)
-                                }
-                                
-                                var country = newMumory.location.country
-                                let administrativeArea = newMumory.location.administrativeArea
-                                if country != "대한민국" {
-                                    if country == "영국" {
-                                        country += " 🇬🇧"
-                                    } else if country == "미 합중국" {
-                                        country = "미국 🇺🇸"
-                                    } else if country == "이탈리아" {
-                                        country += " 🇮🇹"
-                                    } else if country == "프랑스" {
-                                        country += " 🇫🇷"
-                                    } else if country == "독일" {
-                                        country += " 🇩🇪"
-                                    } else if country == "일본" {
-                                        country += " 🇯🇵"
-                                    } else if country == "중국" {
-                                        country += " 🇨🇳"
-                                    } else if country == "캐나다" {
-                                        country += " 🇨🇦"
-                                    } else if country == "오스트레일리아" {
-                                        country += " 🇦🇹"
-                                    } else if country == "브라질" {
-                                        country += " 🇧🇷"
-                                    } else if country == "인도" {
-                                        country += " 🇮🇳"
-                                    } else if country == "러시아" {
-                                        country += " 🇷🇺"
-                                    } else if country == "우크라이나" {
-                                        country += " 🇺🇦"
-                                    } else if country == "호주" {
-                                        country += " 🇦🇺"
-                                    } else if country == "멕시코" {
-                                        country += " 🇲🇽"
-                                    } else if country == "인도네시아" {
-                                        country += " 🇮🇩"
-                                    } else if country == "터키" {
-                                        country += " 🇹🇷"
-                                    } else if country == "사우디아라비아" {
-                                        country += " 🇸🇦"
-                                    } else if country == "스페인" {
-                                        country += " 🇪🇸"
-                                    } else if country == "네덜란드" {
-                                        country += " 🇳🇱"
-                                    } else if country == "스위스" {
-                                        country += " 🇨🇭"
-                                    } else if country == "아르헨티나" {
-                                        country += " 🇦🇷"
-                                    } else if country == "스웨덴" {
-                                        country += " 🇸🇪"
-                                    } else if country == "폴란드" {
-                                        country += " 🇵🇱"
-                                    } else if country == "벨기에" {
-                                        country += " 🇧🇪"
-                                    } else if country == "태국" {
-                                        country += " 🇹🇭"
-                                    } else if country == "이란" {
-                                        country += " 🇮🇷"
-                                    } else if country == "오스트리아" {
-                                        country += " 🇦🇹"
-                                    } else if country == "노르웨이" {
-                                        country += " 🇳🇴"
-                                    } else if country == "아랍에미리트" {
-                                        country += " 🇦🇪"
-                                    } else if country == "나이지리아" {
-                                        country += " 🇳🇬"
-                                    } else if country == "남아프리카공화국" {
-                                        country += " 🇿🇦"
-                                    } else {
-                                        country = "기타 🏁"
+                                if self.locationMumorys.count == 2, !rewards.contains(where: { $0 == Reward(type: .location(0))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(0)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
                                     }
-                                    
-                                    // 해당 국가를 키로 가지는 배열이 이미 딕셔너리에 존재하는지 확인
-                                    if var countryMumories = self.locationMumorys[country] {
-                                        // 존재하는 경우 해당 배열에 뮤모리 추가
-                                        countryMumories.append(newMumory)
-                                        // 딕셔너리에 업데이트
-                                        self.locationMumorys[country] = countryMumories
-                                    } else {
-                                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                        self.locationMumorys[country] = [newMumory]
-                                        
-                                        print("fetchMyMumoryListener locationMumorys1: \(self.locationMumorys)")
-                                        
-                                        if self.locationMumorys.count == 2 {
-                                            //                                            let collectionReference = db.collection("User").document(uId).collection("Reward")
-                                            let data = ["type": "location0"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 3 {
-                                            let data = ["type": "location1"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 5 {
-                                            let data = ["type": "location2"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 10 {
-                                            let data = ["type": "location3"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 15 {
-                                            let data = ["type": "location4"]
-                                            collectionReference.addDocument(data: data)
-                                        }
+                                } else if self.locationMumorys.count == 3, !rewards.contains(where: { $0 == Reward(type: .location(1))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(1)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
                                     }
-                                } else {
-                                    if var countryMumories = self.locationMumorys[administrativeArea] {
-                                        // 존재하는 경우 해당 배열에 뮤모리 추가
-                                        countryMumories.append(newMumory)
-                                        // 딕셔너리에 업데이트
-                                        self.locationMumorys[administrativeArea] = countryMumories
-                                    } else {
-                                        // 존재하지 않는 경우 새로운 배열 생성 후 뮤모리 추가
-                                        self.locationMumorys[administrativeArea] = [newMumory]
-                                        
-                                        print("fetchMyMumoryListener locationMumorys2: \(self.locationMumorys)")
-                                        
-                                        if self.locationMumorys.count == 2 {
-                                            let data = ["type": "location0"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 3 {
-                                            let data = ["type": "location1"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 5 {
-                                            let data = ["type": "location2"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 10 {
-                                            let data = ["type": "location3"]
-                                            collectionReference.addDocument(data: data)
-                                        } else if self.locationMumorys.count == 15 {
-                                            let data = ["type": "location4"]
-                                            collectionReference.addDocument(data: data)
-                                        }
+                                } else if self.locationMumorys.count == 5, !rewards.contains(where: { $0 == Reward(type: .location(2))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(2)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                } else if self.locationMumorys.count == 10, !rewards.contains(where: { $0 == Reward(type: .location(3))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(3)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                } else if self.locationMumorys.count == 15, !rewards.contains(where: { $0 == Reward(type: .location(4))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(4)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
                                     }
                                 }
                             }
+                        } else {
+                            if var countryMumories = self.locationMumorys[administrativeArea] {
+                                countryMumories.append(newMumory)
+                                self.locationMumorys[administrativeArea] = countryMumories
+                            } else {
+                                self.locationMumorys[administrativeArea] = [newMumory]
+                                
+                                if self.locationMumorys.count == 2, !rewards.contains(where: { $0 == Reward(type: .location(0))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(0)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                } else if self.locationMumorys.count == 3, !rewards.contains(where: { $0 == Reward(type: .location(1))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(1)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                } else if self.locationMumorys.count == 5, !rewards.contains(where: { $0 == Reward(type: .location(2))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(2)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                } else if self.locationMumorys.count == 10, !rewards.contains(where: { $0 == Reward(type: .location(3))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(3)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                } else if self.locationMumorys.count == 15, !rewards.contains(where: { $0 == Reward(type: .location(4))}) {
+                                    do {
+                                        try collectionReference.addDocument(from: Reward(type: .location(4)))
+                                    } catch {
+                                        print("ERROR fetchMyMumoryListener: \(error)")
+                                    }
+                                }
+                            }
+                        }
                     } catch {
                         print("ERROR")
                     }
@@ -232,9 +257,9 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
                         do {
                             let updatedMumory = try documentChange.document.data(as: Mumory.self)
                             
-//                            DispatchQueue.main.async {
-                                self.myMumorys[index] = updatedMumory
-//                            }
+                            //                            DispatchQueue.main.async {
+                            self.myMumorys[index] = updatedMumory
+                            //                            }
                         } catch {
                             print("ERROR")
                         }
@@ -252,11 +277,13 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
                     print("Document removed: \(documentChange.document.documentID)")
                     
                     let removedDocumentID = documentChange.document.documentID
-//                    DispatchQueue.main.async {
-                        self.myMumorys.removeAll { $0.id == removedDocumentID }
-//                    }
+                    //                    DispatchQueue.main.async {
+                    self.myMumorys.removeAll { $0.id == removedDocumentID }
+                    //                    }
                 }
             }
+            
+            print("self.myMumorys.count: \(self.myMumorys.count)")
         }
         return listener
     }
@@ -269,10 +296,6 @@ final public class MumoryViewModel: FirebaseManager, ObservableObject {
         
         do {
             let snapshot = try await collectionReference.getDocuments()
-            
-            DispatchQueue.main.async {
-                //                    self.sameSongFriendMumorys = []
-            }
             
             var mumorys: [Mumory] = []
             for document in snapshot.documents {

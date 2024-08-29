@@ -217,7 +217,6 @@ public struct MumoryEditView: View {
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .onChange(of: self.photoSelections) { newValue in
-                                    //                                    photoPickerViewModel.convertDataToImage(imageURLsCount: self.imageURLs.count)
                                     if !self.photoSelections.isEmpty {
                                         for photoItem in self.photoSelections {
                                             Task {
@@ -326,7 +325,7 @@ public struct MumoryEditView: View {
                 self.appCoordinator.draftMumorySong = nil
                 self.appCoordinator.draftMumoryLocation = nil
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75, execute: {
                     self.appCoordinator.rootPath.removeLast()
                     self.appCoordinator.isLoading = false
                 })

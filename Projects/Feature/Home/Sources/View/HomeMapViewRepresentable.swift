@@ -217,6 +217,12 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
             }
             
             if cluster.memberAnnotations.count > 1 {
+                clusterView.subviews.forEach { subview in
+                    if let label = subview as? CountUILabel {
+                        label.removeFromSuperview()
+                    }
+                }
+                
                 let formatter = NumberFormatter()
                 formatter.numberStyle = .decimal
                 if let formattedNumber = formatter.string(from: NSNumber(value: cluster.memberAnnotations.count)) {
@@ -227,8 +233,6 @@ extension HomeMapViewRepresentable.Coordinator: MKMapViewDelegate {
                     clusterView.addSubview(label)
                     
                     label.translatesAutoresizingMaskIntoConstraints = false
-    //                let minWidthConstraint = label.widthAnchor.constraint(greaterThanOrEqualToConstant: 25)
-    //                minWidthConstraint.priority = .required
                     
                     NSLayoutConstraint.activate([
                         label.heightAnchor.constraint(equalToConstant: 24),
@@ -290,8 +294,10 @@ class CountUILabel: UILabel {
         self.layer.backgroundColor = SharedAsset.mainColor.color.cgColor
         self.layer.cornerRadius = 12
         self.clipsToBounds = true
-        self.setContentCompressionResistancePriority(.required, for: .horizontal)
-        self.setContentCompressionResistancePriority(.required, for: .vertical)
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+//        self.setContentCompressionResistancePriority(.required, for: .horizontal)
+//        self.setContentCompressionResistancePriority(.required, for: .vertical)
     }
     
     required init?(coder: NSCoder) {
@@ -339,19 +345,5 @@ struct CodableCoordinateSpan: Codable {
 
     var toSpan: MKCoordinateSpan {
         return MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
-    }
-}
-
-class AsyncImageView: UIImageView {
-    
-    func loadImage(from url: URL) {
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            if let data = data {
-                DispatchQueue.main.async {
-                    self.image = UIImage(data: data)
-                }
-            }
-        }
-        .resume()
     }
 }

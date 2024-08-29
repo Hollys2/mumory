@@ -112,7 +112,9 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
                 print("FUCK FAILURE fetchSocialMumory onAppear: \(error.localizedDescription)")
             }
             collectionView.reloadData()
-            self.appCoordinator.isSocialLoading = false
+            DispatchQueue.main.async {
+                self.appCoordinator.isSocialLoading = false
+            }
         }
 
         
@@ -747,11 +749,8 @@ public struct SocialView: View {
         .onAppear {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             playerViewModel.isShownMiniPlayerInLibrary = false
-    
-            print("FUCK SocialView onAppear")
         }
         .onDisappear {
-            print("FUCK SocialView onDisappear")
         }
     }
     

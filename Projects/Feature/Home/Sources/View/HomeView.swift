@@ -357,6 +357,7 @@ public struct HomeView: View {
                 EmptyView()
             }
         }
+        .rewardBottomSheet(isShown: self.$currentUserViewModel.rewardViewModel.isRewardViewShown.0)
         .onAppear {
             let userDefualt = UserDefaults.standard
             if !userDefualt.bool(forKey: "firstLogined") {

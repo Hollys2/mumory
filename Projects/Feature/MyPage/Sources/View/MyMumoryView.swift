@@ -323,6 +323,14 @@ public struct MyMumoryView: View {
                 }
             }
         }
+        .onChange(of: self.currentUserViewModel.mumoryViewModel.myMumorys, perform: { newValue in
+            self.currentUserViewModel.mumoryViewModel.monthlyMumorys = newValue.filter({ mumory in
+                let calendar = Calendar.current
+                let components = calendar.dateComponents([.year, .month], from: mumory.date)
+                let targetComponents = calendar.dateComponents([.year, .month], from: selectedDate)
+                return components.year == targetComponents.year && components.month == targetComponents.month
+            })
+        })
         .fullScreenCover(isPresented: $isDatePickerShown, content: {
             BottomSheetWrapper(isPresent: $isDatePickerShown) {
                 MyMumoryDatePicker(selectedDate: self.$selectedDate, user: self.user)

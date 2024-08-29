@@ -249,9 +249,7 @@ public struct RewardBottomSheetView: View {
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     
     public var body: some View {
-        
         ZStack {
-            
             Rectangle()
                 .foregroundColor(.clear)
                 .frame(width: getUIScreenBounds().width * 0.964, height: 349)
@@ -259,23 +257,22 @@ public struct RewardBottomSheetView: View {
                 .cornerRadius(15)
             
             VStack(spacing: 0) {
-                
                 Spacer().frame(height: 35)
                 
-                self.currentUserViewModel.mumoryViewModel.reward.image
+                self.currentUserViewModel.rewardViewModel.isRewardViewShown.1.image
                     .resizable()
                     .frame(width: getUIScreenBounds().width * 0.287, height: getUIScreenBounds().width * 0.287)
                 
                 Spacer().frame(height: 21)
                 
-                Text(self.currentUserViewModel.mumoryViewModel.reward.title)
+                Text(self.currentUserViewModel.rewardViewModel.isRewardViewShown.1.title)
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 16))
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white)
                 
                 Spacer().frame(height: 16)
                 
-                Text(self.currentUserViewModel.mumoryViewModel.reward.subTitle)
+                Text(self.currentUserViewModel.rewardViewModel.isRewardViewShown.1.content)
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14))
                     .multilineTextAlignment(.center)
                     .foregroundColor(Color(red: 0.76, green: 0.76, blue: 0.76))
@@ -346,14 +343,14 @@ struct RewardBottomSheetViewModifier: ViewModifier {
                 Color.black.opacity(0.5)
                     .onTapGesture {
                         withAnimation(.spring(response: 0.2)) {
-                            //                            self.isShown = false
+                            self.isShown = false
                         }
                     }
                 
                 RewardBottomSheetView(isShown: self.$isShown)
-                    .offset(y: self.translation.height)
-                //                    .gesture(dragGesture)
-                    .transition(.move(edge: .bottom))
+//                    .offset(y: self.translation.height)
+//                    .gesture(dragGesture)
+//                    .transition(.move(edge: .bottom))
                     .zIndex(1)
                     .padding(.bottom, 27)
             }

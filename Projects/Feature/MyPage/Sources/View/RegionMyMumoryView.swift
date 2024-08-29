@@ -21,7 +21,7 @@ public struct RegionMyMumoryView: View {
     
     let user: UserProfile
     let region: String
-    let mumorys: [Mumory]
+    @State var mumorys: [Mumory]
     
     public var body: some View {
         ZStack {
@@ -107,6 +107,9 @@ public struct RegionMyMumoryView: View {
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
+        .onChange(of: self.currentUserViewModel.mumoryViewModel.myMumorys) { newValue in
+            self.mumorys = newValue
+        }
     }
     
     func isSameMonth(_ mumory1: Mumory, with mumory2: Mumory) -> Bool {

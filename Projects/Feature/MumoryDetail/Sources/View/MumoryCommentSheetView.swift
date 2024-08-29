@@ -27,7 +27,6 @@ struct CommentView: View {
     var isFocused: FocusState<Bool>.Binding
     let deleteCommentAction: () -> Void
     var scrollToComment: () -> Void
-
     
     var body: some View {
         HStack(alignment: .top,  spacing: 13) {
@@ -410,7 +409,7 @@ struct ReplyView: View {
             } else {
                 self.commentUser = self.currentUserViewModel.user
             }
-            
+
             Task {
                 self.isMyComment = await currentUserViewModel.mumoryViewModel.checkIsMyComment(mumoryId: mumory.id ?? "", reply: comment, currentUser: currentUserViewModel.user)
             }
@@ -620,7 +619,7 @@ public struct MumoryCommentSheetView: View {
                             
                             Button(action: {
                                 let isWhitespace = commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                
+
                                 if !isWhitespace {
                                     self.appCoordinator.isLoading = true
                                     self.isButtonDisabled = true
@@ -681,7 +680,7 @@ public struct MumoryCommentSheetView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 72)
                 .overlay(
-                    ZStack {
+                    Group {
                         SharedAsset.commentInitialPopup.swiftUIImage
                             .resizable()
                             .frame(width: 246, height: 42)
@@ -693,7 +692,6 @@ public struct MumoryCommentSheetView: View {
                             }
                     }
                         .opacity(self.isPopUpShown ? 1: 0)
-                    
                     , alignment: .topLeading
                 )
                 .overlay(
@@ -708,7 +706,8 @@ public struct MumoryCommentSheetView: View {
         } // VStack
         .background(Color(red: 0.16, green: 0.16, blue: 0.16))
         .onAppear {
-            print("FUCK MumoryCommentSheetView onAppear")
+            self.mumory.id = self.mumoryId
+            
             self.appCoordinator.isLoading = true
             
             Task {
