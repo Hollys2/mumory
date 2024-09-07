@@ -16,23 +16,6 @@ import FirebaseDatabase
 import FirebaseMessaging
 import FirebaseFunctions
 
-struct FBManager {
-    public let db: Firestore
-    public let auth: Auth
-    public let storage: Storage
-    public let app: FirebaseApp?
-    public let messaging: Messaging
-    public let functions: Functions
-    
-    public init() {
-        self.db = Firestore.firestore()
-        self.auth = Auth.auth()
-        self.storage = Storage.storage()
-        self.app = FirebaseApp.app()
-        self.messaging = Messaging.messaging()
-        self.functions = Functions.functions()
-    }
-}
 
 public class FirebaseManager {
     
@@ -52,7 +35,7 @@ public class FirebaseManager {
     public init() {
         self.db = Firestore.firestore()
         self.auth = Auth.auth()
-        self.storage = Storage.storage()
+        self.storage = Storage.storage(url: "gs://music-app-62ca9.appspot.com")
         self.app = FirebaseApp.app()
         self.messaging = Messaging.messaging()
         self.functions = Functions.functions()

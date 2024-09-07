@@ -20,4 +20,3 @@ let project = Project(name: "App",
                                        ]
                                       )
                       ])
-

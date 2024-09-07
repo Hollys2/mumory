@@ -19,25 +19,29 @@ struct PhotoPickerManager {
     
     static private func uploadImage(_ image: UIImage) async throws -> URL {
         let storageRef = FirebaseManager.shared.storage.reference()
-        let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpg")
-        
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        let imageRef = storageRef.child("mumoryImages/\(UUID().uuidString).jpeg")
+        let resizedImage = image.resized(to: CGSize(width: 300, height: 300))
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.5) else {
             throw UploadError.convertError
         }
         
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
         do {
-            _ = try await imageRef.putDataAsync(imageData)
+            _ = try await imageRef.putDataAsync(imageData, metadata: metadata)
         } catch {
             throw UploadError.uploadFailed
         }
         
         do {
             let url = try await imageRef.downloadURL()
-            
+            print("URL: \(url)")
             return url
         } catch {
             throw UploadError.urlRetrievalFailed
         }
+        
     }
     
     static func uploadAllImages(selectedImages: [UIImage]) async -> [String] {

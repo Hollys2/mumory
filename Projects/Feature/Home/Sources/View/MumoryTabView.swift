@@ -8,7 +8,9 @@
 
 
 import SwiftUI
+
 import Shared
+
 
 final private class CustomTabBarController: UITabBarController {
     private class CustomHeightTabBar: UITabBar {
@@ -30,11 +32,9 @@ final private class CustomTabBarController: UITabBarController {
 }
 
 struct MumoryTabViewControllerRepresentable: UIViewControllerRepresentable {
+    
     var viewControllers: [UIViewController]
-    
-//    @Binding var selectedIndex: Int
-    @Binding var selectedTab: Tab
-    
+    @Binding var selectedTab: Tab    
     @EnvironmentObject private var appCoordinator: AppCoordinator
     @EnvironmentObject private var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject private var playerViewModel: PlayerViewModel
@@ -60,7 +60,6 @@ struct MumoryTabViewControllerRepresentable: UIViewControllerRepresentable {
     
     class Coordinator: NSObject, UITabBarControllerDelegate {
         var parent: MumoryTabViewControllerRepresentable
-        var isFirstTapped: Bool = false
         
         init(_ parent: MumoryTabViewControllerRepresentable) {
             self.parent = parent
@@ -72,13 +71,13 @@ struct MumoryTabViewControllerRepresentable: UIViewControllerRepresentable {
                     if tab == .createMumroy {
                         self.parent.appCoordinator.isCreateMumorySheetShown = true
                         self.parent.playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
-//                        tabBarController.selectedIndex = self.parent.selectedTab.rawValue
                     } else {
                         if tab == .social {
                             if self.parent.selectedTab == .social {
                                 self.parent.appCoordinator.isScrollToTop = true
                             }
                         }
+                        
                         self.parent.selectedTab = tab
                     }
                 }

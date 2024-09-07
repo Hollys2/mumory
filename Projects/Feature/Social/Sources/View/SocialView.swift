@@ -16,17 +16,17 @@ import Shared
 class SocialItemCollectionViewCell: UICollectionViewCell {
     
     private var hostingController: UIHostingController<SocialItemView>?
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupHostingController()
     }
-
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupHostingController()
     }
-
+    
     private func setupHostingController() {
         hostingController = UIHostingController(rootView: SocialItemView(mumory: Mumory()))
         
@@ -38,7 +38,7 @@ class SocialItemCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(hostingController.view)
         
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
@@ -54,9 +54,9 @@ class SocialItemCollectionViewCell: UICollectionViewCell {
 
 
 struct SocialCollectionViewRepresentable: UIViewRepresentable {
-
+    
     private let scrollPublisher = PassthroughSubject<UIScrollView, Never>()
-
+    
     @Binding var topBarOffsetY: CGFloat
     
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -81,24 +81,10 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
         collectionView.refreshControl?.addTarget(context.coordinator, action: #selector(Coordinator.handleRefreshControl), for: .valueChanged)
         
         context.coordinator.collectionView = collectionView
-//        context.coordinator.cancellable = self.scrollPublisher
-//            .sink { scrollView in
-//                let contentOffsetY = scrollView.contentOffset.y
-//                let contentHeight = scrollView.contentSize.height
-//                let scrollViewHeight = scrollView.frame.size.height
-//                let limitHeight = self.getSafeAreaInsets().top + 68
-//                let deltaY = contentOffsetY - self.previousOffsetY
-//
-////                self.topBarOffsetY += (contentOffsetY - self.previousOffsetY)
-////                if self.topBarOffsetY < .zero || contentOffsetY <= .zero {
-////                    self.topBarOffsetY = .zero
-////                } else if self.topBarOffsetY > limitHeight || contentOffsetY >= contentHeight - scrollViewHeight {
-////                    self.topBarOffsetY = limitHeight
-////                }
-////
-////                self.previousOffsetY = contentOffsetY
-//            }
-        //            .store(in: &context.coordinator.cancellables)
+        //        context.coordinator.cancellable = self.scrollPublisher
+        //            .sink { scrollView in
+        //            }
+        //                    .store(in: &context.coordinator.cancellables)
         
         DispatchQueue.main.async {
             self.appCoordinator.isSocialLoading = true
@@ -116,11 +102,10 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
                 self.appCoordinator.isSocialLoading = false
             }
         }
-
         
         return collectionView
     }
-
+    
     func updateUIView(_ uiView: UICollectionView, context: Context) {
         uiView.bounces = true
         
@@ -131,11 +116,11 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
             }
         }
     }
-
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
-
+    
     class Coordinator: NSObject, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
         let parent: SocialCollectionViewRepresentable
         weak var collectionView: UICollectionView?
@@ -143,22 +128,23 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
         var isFetched: Bool = false
         var isLast: Bool = false
         var cancellable: AnyCancellable?
-
+        var cancellables = Set<AnyCancellable>()
+        
         init(parent: SocialCollectionViewRepresentable) {
             self.parent = parent
             
             super.init()
             
-//            self.cancellable = parent.currentUserViewModel.mumoryViewModel.$socialMumorys
-//                .sink { [weak self] _ in
-//                    self?.collectionView?.reloadData()
-//                }
+            //            self.cancellable = parent.currentUserViewModel.mumoryViewModel.$socialMumorys
+            //                .sink { [weak self] _ in
+            //                    self?.collectionView?.reloadData()
+            //                }
         }
         
         func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
             return self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count
         }
-
+        
         func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
             guard indexPath.item < self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count else {
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SocialItemCell", for: indexPath)
@@ -177,8 +163,8 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
         }
         
         func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-              return 40
-          }
+            return 40
+        }
         
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             self.parent.scrollPublisher.send(scrollView)
@@ -190,43 +176,43 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
             let deltaY = contentOffsetY - self.previousOffsetY
             
             if !self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.isEmpty, !self.isFetched {
-                    if deltaY > 0, contentHeight != .zero {
-                        if contentOffsetY >= contentHeight - scrollViewHeight - self.parent.getUIScreenBounds().width - 161 {
-                            self.isFetched = true
-                            
-                            if !self.isLast {
-                                self.parent.appCoordinator.isLoading = true
-                            }
-                            
-                            let previousCount = self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count
-                            
-                            self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel) { result in
-                                switch result {
-                                case .success(let count):
-                                    if count != 0 {
-                                        print("FUCK SUCCESS fetchSocialMumory")
-                                        
-                                        var indexPathsToReload: [IndexPath] = []
-                                        for i in previousCount..<self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count {
-                                            indexPathsToReload.append(IndexPath(item: i, section: 0))
-                                        }
-                                        
-                                        self.collectionView?.performBatchUpdates {
-                                            self.collectionView?.insertItems(at: indexPathsToReload)
-                                        }
-                                    } else {
-                                        self.isLast = true
+                if deltaY > 0, contentHeight != .zero {
+                    if contentOffsetY >= contentHeight - scrollViewHeight - self.parent.getUIScreenBounds().width - 161 {
+                        self.isFetched = true
+                        
+                        if !self.isLast {
+                            self.parent.appCoordinator.isLoading = true
+                        }
+                        
+                        let previousCount = self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count
+                        
+                        self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel) { result in
+                            switch result {
+                            case .success(let count):
+                                if count != 0 {
+                                    print("FUCK SUCCESS fetchSocialMumory")
+                                    
+                                    var indexPathsToReload: [IndexPath] = []
+                                    for i in previousCount..<self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.count {
+                                        indexPathsToReload.append(IndexPath(item: i, section: 0))
                                     }
-                                case .failure(let error):
-                                    print("FUCK FAILURE fetchSocialMumory 더 가져오기 \(error.localizedDescription)")
+                                    
+                                    self.collectionView?.performBatchUpdates {
+                                        self.collectionView?.insertItems(at: indexPathsToReload)
+                                    }
+                                } else {
+                                    self.isLast = true
                                 }
-
-                                self.parent.appCoordinator.isLoading = false
-                                self.isFetched = false
+                            case .failure(let error):
+                                print("FUCK FAILURE fetchSocialMumory 더 가져오기 \(error.localizedDescription)")
                             }
+                            
+                            self.parent.appCoordinator.isLoading = false
+                            self.isFetched = false
                         }
                     }
                 }
+            }
             
             self.parent.topBarOffsetY += (contentOffsetY - self.previousOffsetY)
             
@@ -247,7 +233,7 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
             self.parent.appCoordinator.isRefreshing = true
             self.parent.currentUserViewModel.mumoryViewModel.socialMumorys.removeAll()
             self.collectionView?.reloadData()
-
+            
             self.parent.currentUserViewModel.mumoryViewModel.fetchSocialMumory(currentUserViewModel: self.parent.currentUserViewModel, isRefreshControl: true) { result in
                 switch result {
                 case .success(let count):
@@ -267,7 +253,7 @@ struct SocialCollectionViewRepresentable: UIViewRepresentable {
 }
 
 private struct SocialItemView: View {
-
+    
     @State private var isTruncated: Bool = false
     @State private var isLocationTitleTruncated: Bool = false
     @State private var isButtonDisabled: Bool = false
@@ -307,7 +293,6 @@ private struct SocialItemView: View {
                 }
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    
                     Text("\(self.user.nickname)")
                         .font((SharedFontFamily.Pretendard.medium.swiftUIFont(size: 14)))
                         .foregroundColor(.white)
@@ -359,7 +344,9 @@ private struct SocialItemView: View {
                                 .offset(x: self.isLocationTitleTruncated ? -3 : 0)
                         }
                         .onTapGesture {
-                            self.appCoordinator.isMumoryMapViewShown = true
+                            self.appCoordinator.isMumoryMapViewShown.0 = true
+                            self.appCoordinator.isMumoryMapViewShown.1 = self.mumory
+                            self.appCoordinator.isMumoryMapViewShown.2 = self.user
                         }
                     } // HStack
                 } // VStack
@@ -367,8 +354,6 @@ private struct SocialItemView: View {
             } // HStack
             .frame(height: 38)
             .padding(.bottom, 13)
-            
-//            Spacer().frame(height: 13)
             
             ZStack(alignment: .topLeading) {
                 Rectangle()
@@ -520,9 +505,7 @@ private struct SocialItemView: View {
                     
                     // MARK: Content
                     if let content = self.mumory.content, !content.isEmpty {
-                        
                         HStack(spacing: 0) {
-                            
                             Text(content.replacingOccurrences(of: "\n", with: " "))
                                 .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
                                 .foregroundColor(.white)
@@ -565,7 +548,6 @@ private struct SocialItemView: View {
                 
                 // MARK: Heart & Comment
                 VStack(spacing: 0) {
-                    
                     Button(action: {
                         self.generateHapticFeedback(style: .medium)
                         isButtonDisabled = true
@@ -657,18 +639,13 @@ private struct SocialItemView: View {
                 self.user = await FetchManager.shared.fetchUser(uId: self.mumory.uId)
             }
         }
-        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown) {
-            FriendMumoryMapView(mumorys: [self.mumory], user: self.user)
-        }
     }
 }
 
 public struct SocialView: View {
     
     @Binding private var isSocialSearchViewShown: Bool
-    
     @State private var offsetY: CGFloat = 0
-    
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -686,7 +663,7 @@ public struct SocialView: View {
             if self.currentUserViewModel.mumoryViewModel.socialMumorys.isEmpty, !self.appCoordinator.isRefreshing {
                 noMumoryView
             }
-
+            
             if self.appCoordinator.isSocialLoading {
                 SocialLoadingView()
             }
@@ -695,9 +672,9 @@ public struct SocialView: View {
                 Text("소셜")
                     .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 24))
                     .foregroundColor(.white)
-
+                
                 Spacer()
-
+                
                 Button(action: {
                     self.isSocialSearchViewShown = true
                 }) {
@@ -705,9 +682,9 @@ public struct SocialView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-
+                
                 Spacer().frame(width: 12)
-
+                
                 Button(action: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         self.appCoordinator.isAddFriendViewShown = true
@@ -717,9 +694,9 @@ public struct SocialView: View {
                         .resizable()
                         .frame(width: 30, height: 30)
                 }
-
+                
                 Spacer().frame(width: 12)
-
+                
                 Button(action: {
                     withAnimation {
                         appCoordinator.isMyPageViewShown = true
@@ -745,6 +722,13 @@ public struct SocialView: View {
             .padding(.top, getSafeAreaInsets().top)
             .background(Color(red: 0.09, green: 0.09, blue: 0.09))
             .offset(y: -self.offsetY)
+        }
+        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown.0) {
+            FriendMumoryMapView(mumorys: [self.appCoordinator.isMumoryMapViewShown.1], user: self.appCoordinator.isMumoryMapViewShown.2)
+                .onAppear {
+                    print("FXXK songTitle: \(self.appCoordinator.isMumoryMapViewShown.1.song.title)")
+                    print("FXXK locationTitle: \(self.appCoordinator.isMumoryMapViewShown.1.location.locationTitle)")
+                }
         }
         .onAppear {
             playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)

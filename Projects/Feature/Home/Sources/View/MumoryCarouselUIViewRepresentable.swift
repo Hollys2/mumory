@@ -80,7 +80,7 @@ struct MumoryCarouselUIViewRepresentable: UIViewRepresentable {
 extension MumoryCarouselUIViewRepresentable {
     
     class Coordinator: NSObject {
-        
+
         let parent: MumoryCarouselUIViewRepresentable
         
         init(parent: MumoryCarouselUIViewRepresentable) {
@@ -100,7 +100,7 @@ struct MumoryList: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(mumoryAnnotations.indices, id: \.self) { index in
-                MumoryCard(mumory: mumoryAnnotations[index], selectedIndex: index)
+                MumoryCard(mumory: mumoryAnnotations[index])
                     .padding(.horizontal, 10)
             }
         }
@@ -113,12 +113,9 @@ struct MumoryCard: View {
     let mumory: Mumory
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-
-    let selectedIndex: Int
     
     var body: some View {
         ZStack {
-            
             VStack {
                 Rectangle()
                     .foregroundColor(.clear)
@@ -156,7 +153,6 @@ struct MumoryCard: View {
             }
             
             ZStack(alignment: .topLeading) {
-                
                 VStack {
                     Rectangle()
                         .foregroundColor(.clear)

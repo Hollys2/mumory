@@ -166,6 +166,5 @@ extension Project {
                                     .release(name: .release)
                                  ],
                                  defaultSettings: .recommended)
-        
     }
 }

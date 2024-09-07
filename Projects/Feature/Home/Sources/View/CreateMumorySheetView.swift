@@ -93,7 +93,7 @@ public struct CreateMumorySheetUIViewRepresentable: UIViewRepresentable {
             dimmingView.alpha = 0.5
             sheetView.frame.origin.y = getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16)
         }
-
+        
         let tapCloseButtonGestureRecognizer = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDismiss))
         dimmingView.addGestureRecognizer(tapCloseButtonGestureRecognizer)
         
@@ -185,7 +185,7 @@ public struct CreateMumorySheetView: View {
     @State private var contentText: String = ""
     @State private var imageURLs: [String] = []
     @State private var calendarYOffset: CGFloat = .zero
-        
+    
     @State var photoSelections: [PhotosPickerItem] = []
     @State var selectedImages: [UIImage] = []
     
@@ -712,19 +712,14 @@ struct CalendarContainerView: View {
 struct TagContainerView: View {
     
     @Binding private var tags: [String]
-    @FocusState private var isFocused: Bool
-    
     @State private var tagText: String = ""
-    
     @State private var isEditing = false
-    @State private var isTagEditing = false
     
     init(tags: Binding<[String]>) {
         self._tags = tags
     }
     
     var body: some View {
-        
         ZStack {
             Rectangle()
                 .foregroundColor(.clear)
@@ -734,35 +729,31 @@ struct TagContainerView: View {
             
             
             HStack(spacing: 0) {
-                
                 SharedAsset.tagIconCreateMumory.swiftUIImage
                     .resizable()
                     .frame(width: 26, height: 26)
                 
                 Spacer().frame(width: 17)
                 
-                ForEach(tags.indices, id: \.self) { index in
-                    
+                ForEach(self.tags.indices, id: \.self) { index in
                     TextField("", text: Binding(
-                        get: { "#\(tags[index])" },
-                        set: { tags[index] = $0.replacingOccurrences(of: "#", with: "") }
+                        get: { "#\(self.tags[index])" },
+                        set: { self.tags[index] = $0.replacingOccurrences(of: "#", with: "") }
                     ), onEditingChanged: { isEditing in
-                        self.isTagEditing = isEditing
+                        self.isEditing = isEditing
                     })
                     .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
                     .foregroundColor(Color(red: 0.64, green: 0.51, blue: 0.99))
-                    .focused(self.$isFocused)
-                    .onChange(of: tags[index], perform: { newValue in
+                    .onChange(of: self.tags[index], perform: { newValue in
                         if newValue.count > 5 {
-                            tags[index] = String(newValue.prefix(5))
+                            self.tags[index] = String(newValue.prefix(5))
                         }
-                        
                         
                         if newValue.contains(" ") {
                             let beforeSpace = newValue.components(separatedBy: " ").first ?? ""
-                            tags[index] = beforeSpace
+                            self.tags[index] = beforeSpace
                         } else if newValue == "" {
-                            tags.remove(at: index)
+                            self.tags.remove(at: index)
                         }
                     })
                     .fixedSize(horizontal: true, vertical: false)
@@ -771,7 +762,7 @@ struct TagContainerView: View {
                 }
                 
                 
-                if tags.count < 3 {
+                if self.tags.count < 3 {
                     TextField("", text: self.$tagText)
                         .foregroundColor(.white)
                         .onChange(of: self.tagText, perform: { newValue in
@@ -780,14 +771,15 @@ struct TagContainerView: View {
                             }
                             
                             if newValue.contains(" ") {
-                                tags.append(String(newValue.dropLast()))
-                                tagText = ""
+                                self.tags.append(String(newValue.dropLast()))
+                                self.tagText = ""
                             }
                         })
                         .onSubmit {
-                            if !tagText.isEmpty {
-                                tags.append(tagText)
-                                tagText = ""
+                            print("FXXK onSubmit")
+                            if !self.tagText.isEmpty {
+                                self.tags.append(tagText)
+                                self.tagText = ""
                             }
                         }
                 }
@@ -795,7 +787,6 @@ struct TagContainerView: View {
                 Spacer(minLength: 0)
             } // HStack
             .padding(.horizontal, 17)
-            
             
             if self.tags.count == 0 && self.tagText.isEmpty {
                 Text(self.isEditing ? "" : "태그를 입력하세요. (5글자 이내, 최대 3개)")
@@ -859,393 +850,3 @@ struct ContentContainerView: View {
         .frame(width: getUIScreenBounds().width - 40, height: 111)
     }
 }
-
-
-
-struct TagContainerViewRepresentable: UIViewRepresentable {
-    
-    @Binding var tags: [String]
-    
-    @EnvironmentObject private var keyboardResponder: KeyboardResponder
-    
-    var scrollView: UIScrollView
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        view.backgroundColor = UIColor(red: 0.12, green: 0.12, blue: 0.12, alpha: 1)
-        view.layer.cornerRadius = 15
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        let textField = UITextField()
-        textField.delegate = context.coordinator
-        textField.frame = CGRect(x: 17, y: 0, width: 100, height: 60)
-        textField.backgroundColor = .purple
-        textField.tag = 0
-        
-        view.addSubview(textField)
-        //        NSLayoutConstraint.activate([
-        //            view.heightAnchor.constraint(equalToConstant: 60)
-        //        ])
-        
-        //        for index in 0..<3 {
-        //            let textField = UITextField()
-        //            textField.delegate = context.coordinator
-        //            textField.borderStyle = .roundedRect
-        //            textField.backgroundColor = .purple
-        //            textField.textColor = .white
-        //            textField.addTarget(context.coordinator, action: #selector(Coordinator.textFieldDidChange(_:)), for: .editingChanged)
-        //            textField.placeholder = index == 0 ? "태그를 입력하세요. (5글자 이내, 최대 3개)" : nil
-        //            textField.tag = index
-        //
-        //            context.coordinator.textFields.append(textField)
-        //        }
-        
-        return view
-    }
-    
-    //    NotificationCenter.default.addObserver(context.coordinator, selector: #selector(context.coordinator.keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-    //    NotificationCenter.default.addObserver(context.coordinator, selector: #selector(context.coordinator.keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-    //        let textEditor = UITextView()
-    //        textEditor.delegate = context.coordinator
-    //        textEditor.frame = CGRect(origin: CGPoint(x: 17, y: 76), size: CGSize(width: 300, height: 200))
-    //        textEditor.backgroundColor = .green
-    //        view.addSubview(textEditor)
-    
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-        //        for (index, textField) in context.coordinator.textFields.enumerated() {
-        //            if index < tags.count {
-        //                textField.text = tags[index]
-        //            } else {
-        //                textField.text = ""
-        //            }
-        //
-        //            textField.frame = CGRect(x: 17 + (index * 100), y: 0, width: 100, height: 60)
-        //        }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self, scrollView: self.scrollView)
-    }
-    
-    class Coordinator: NSObject, UITextFieldDelegate, UITextViewDelegate {
-        var parent: TagContainerViewRepresentable
-        var textFields: [UITextField] = []
-        weak var scrollView: UIScrollView?
-        var keyboardHeight: CGFloat = .zero
-        
-        init(parent: TagContainerViewRepresentable, scrollView: UIScrollView) {
-            self.parent = parent
-            self.scrollView = scrollView
-        }
-        
-        deinit {
-            NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-            NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
-        }
-        
-        @objc func keyboardWillShow(notification: NSNotification) {
-            guard let userInfo = notification.userInfo,
-                  let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-                  let scrollView = scrollView
-            else { return }
-            
-            self.keyboardHeight = keyboardFrame.height
-        }
-        
-        @objc func keyboardWillHide(notification: NSNotification) {
-            guard let scrollView = scrollView else { return }
-            
-            //            let contentInset = UIEdgeInsets.zero
-            //            scrollView.contentInset = contentInset
-            //            scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        }
-        
-        @objc func textFieldDidChange(_ textField: UITextField) {
-            guard let index = textFields.firstIndex(of: textField) else { return }
-            
-            if index < parent.tags.count {
-                parent.tags[index] = textField.text ?? ""
-                if parent.tags[index].count > 5 {
-                    parent.tags[index] = String(parent.tags[index].prefix(5))
-                    textField.text = parent.tags[index]
-                }
-                
-                if parent.tags[index].contains(" ") {
-                    parent.tags[index] = parent.tags[index].replacingOccurrences(of: " ", with: "")
-                    textField.text = parent.tags[index]
-                }
-            } else if !textField.text!.isEmpty {
-                let newTag = textField.text!.replacingOccurrences(of: " ", with: "")
-                if newTag.count <= 5 && !parent.tags.contains(newTag) {
-                    parent.tags.append(newTag)
-                    textField.text = ""
-                    parent.tags = Array(parent.tags.prefix(3))
-                }
-            }
-        }
-        
-        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-            
-            switch textField.tag {
-            case 0:
-                guard let nextTextField = textField.superview?.viewWithTag(textField.tag + 1) as? UITextField else {
-                    print("guard else")
-                    textField.resignFirstResponder()
-                    return true
-                }
-                nextTextField.becomeFirstResponder()
-            default:
-                break
-            }
-            
-            return true
-        }
-        
-        
-        func textFieldDidBeginEditing(_ textField: UITextField) {
-            print("textFieldDidBeginEditing")
-            guard let scrollView = scrollView
-            else { return }
-            
-            switch textField.tag {
-            case 0:
-                print("case0")
-                scrollView.setContentOffset(CGPoint(x: 0, y: 255), animated: true)
-                //                let textFieldFrameInContainer = textField.convert(textField.bounds, to: containerView)
-                //                var textFieldFrameInScrollView = containerView.convert(textFieldFrameInContainer, to: scrollView)
-                //                textFieldFrameInScrollView.origin.y -= scrollView.contentOffset.y
-                //                print("TextField Frame in ScrollView0: \(textFieldFrameInContainer)")
-                //                print("TextField Frame in ScrollView1: \(textFieldFrameInScrollView)")
-                //
-                //                let containerViewFrameInWindow = containerView.convert(containerView.bounds, to: nil)
-                //                print("TextField Frame in ScrollView2: \(containerViewFrameInWindow)")
-                //
-                //                print("TextField Frame in ScrollView3: \(self.keyboardHeight)")
-                
-                //                scrollView.setContentOffset(CGPoint(x: 0, y: 160), animated: true)
-                //                scrollView.scrollRectToVisible(containerView.frame, animated: true)
-                
-                // 현재 스크롤뷰의 contentOffset을 가져옴
-                //                 var contentOffset = scrollView.contentOffset
-                //
-                //                 // 키보드보다 100포인트 위에 위치하도록 contentOffset을 조정
-                //                let desiredOffsetY = textFieldFrameInScrollView.origin.y - 0
-                //                 if desiredOffsetY < 0 {
-                //                     contentOffset.y = max(contentOffset.y + desiredOffsetY, -scrollView.contentInset.top)
-                //                 } else {
-                //                     contentOffset.y = min(contentOffset.y + desiredOffsetY, scrollView.contentSize.height - scrollView.bounds.size.height + scrollView.contentInset.bottom)
-                //                 }
-                //
-                //                 // contentOffset을 설정하여 스크롤뷰를 애니메이션과 함께 스크롤
-            default:
-                break
-            }
-        }
-        
-        func textFieldDidEndEditing(_ textField: UITextField) {
-            guard let scrollView = scrollView else { return }
-            
-            //            scrollView.setContentOffset(CGPoint(x: 0, y: 300), animated: true)
-        }
-        
-        func textViewDidBeginEditing(_ textView: UITextView) {
-            guard let scrollView = scrollView else { return }
-            
-            print("textView.frame.origin.y: \(textView.frame.origin.y)")
-            let textViewBottomY = textView.frame.origin.y + textView.frame.size.height
-            let scrollOffset = textViewBottomY - 336
-            scrollView.setContentOffset(CGPoint(x: 0, y: 55), animated: true)
-        }
-        
-        //        func textViewDidEndEditing(_ textView: UITextView) {
-        //            guard let scrollView = scrollView else { return }
-        //
-        //            let textViewBottomY = textView.frame.origin.y + textView.frame.size.height
-        //            let scrollOffset = textViewBottomY - 336
-        //            scrollView.setContentOffset(CGPoint(x: 0, y: -scrollOffset), animated: true)
-        //        }
-    }
-}
-
-struct ContentContainerViewRepresentable: UIViewRepresentable {
-    
-    @Binding var content: String
-    
-    var scrollView: UIScrollView
-    
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView()
-        view.backgroundColor = .brown
-        
-        let textView = UITextView()
-        textView.delegate = context.coordinator
-        textView.font = SharedFontFamily.Pretendard.medium.font(size: 16)
-        textView.backgroundColor = UIColor(red: 0.12, green: 0.12, blue: 0.12, alpha: 1)
-        textView.layer.cornerRadius = 15
-        textView.isScrollEnabled = false
-        textView.textContainerInset = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
-        
-        //        textView.translatesAutoresizingMaskIntoConstraints = false
-        //
-        //        textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 111).isActive = true
-        
-        view.addSubview(textView)
-        
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIView, context: Context) {
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(parent: self, scrollView: self.scrollView)
-    }
-    
-    class Coordinator: NSObject, UITextViewDelegate {
-        var parent: ContentContainerViewRepresentable
-        var textFields: [UITextField] = []
-        weak var scrollView: UIScrollView?
-        var keyboardHeight: CGFloat = .zero
-        
-        init(parent: ContentContainerViewRepresentable, scrollView: UIScrollView) {
-            self.parent = parent
-            self.scrollView = scrollView
-        }
-        
-        @objc func buttonTapped() {
-            print("Button tapped!")
-            // 원하는 동작 구현
-        }
-        
-        func textViewDidBeginEditing(_ textView: UITextView) {
-            //            guard let scrollView = scrollView else { return }
-            //
-            //            print("textView.frame.origin.y: \(textView.frame.origin.y)")
-            //            let textViewBottomY = textView.frame.origin.y + textView.frame.size.height
-            //            let scrollOffset = textViewBottomY - 336
-            //            scrollView.setContentOffset(CGPoint(x: 0, y: 55), animated: true)
-        }
-    }
-}
-
-struct ContentTextViewRepresentable: UIViewRepresentable {
-    
-    var scrollView: UIScrollView
-    
-    @Binding var contentHeight: CGFloat
-    
-    @EnvironmentObject var appCoordinator: AppCoordinator
-    
-    func makeUIView(context: UIViewRepresentableContext<ContentTextViewRepresentable>) -> UITextView {
-        let textView = UITextView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width - 40, height: 111))
-        textView.delegate = context.coordinator
-        textView.font = SharedFontFamily.Pretendard.medium.font(size: 16)
-        textView.backgroundColor = UIColor(red: 0.12, green: 0.12, blue: 0.12, alpha: 1)
-        textView.layer.cornerRadius = 15
-        textView.isScrollEnabled = false
-        textView.textContainerInset = UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20)
-        
-        //        textView.isUserInteractionEnabled = true
-        
-        return textView
-    }
-    
-    func updateUIView(_ uiView: UITextView, context: Context) {
-        DispatchQueue.main.async {
-            self.contentHeight = uiView.contentSize.height
-        }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        ContentTextViewRepresentable.Coordinator(parent: self, scrollView: self.scrollView)
-    }
-    
-    
-    class Coordinator: NSObject, UITextViewDelegate {
-        var parent: ContentTextViewRepresentable
-        weak var scrollView: UIScrollView?
-        
-        init(parent: ContentTextViewRepresentable, scrollView: UIScrollView) {
-            self.parent = parent
-            self.scrollView = scrollView
-        }
-        
-        func textViewDidChange(_ textView: UITextView) {
-            print("textViewDidChange: \(textView.contentSize.height)")
-            //            self.parent.appCoordinator.contentHeight = textView.contentSize.height
-        }
-    }
-    
-}
-
-//struct CreateMumoryScrollViewRepresentable: UIViewRepresentable {
-//
-//    @EnvironmentObject var appCoordinator: AppCoordinator
-//
-//    @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
-//    @EnvironmentObject private var keyboardResponder: KeyboardResponder
-//    @EnvironmentObject private var playerViewModel: PlayerViewModel
-//
-//    @Binding var tags: [String]
-//
-//    func makeUIView(context: Context) -> UIScrollView {
-//        let scrollView = UIScrollView()
-//        scrollView.backgroundColor = .brown
-//        scrollView.delegate = context.coordinator
-//
-//        scrollView.isScrollEnabled = true
-////        scrollView.bounces = false
-//        scrollView.showsVerticalScrollIndicator = false
-//        scrollView.showsHorizontalScrollIndicator = false
-//
-//        let hostingController = UIHostingController(rootView: CreateMumoryContentView(scrollView: scrollView))
-//
-//        let contentHeight = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
-//        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: contentHeight)
-//        hostingController.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: contentHeight)
-//
-//        scrollView.addSubview(hostingController.view)
-//
-//        context.coordinator.scrollView = scrollView
-//
-//        return scrollView
-//    }
-//
-//
-//    func updateUIView(_ uiView: UIScrollView, context: Context) {
-//    }
-//
-//    func makeCoordinator() -> Coordinator {
-//        Coordinator(parent: self)
-//    }
-//}
-//
-//extension CreateMumoryScrollViewRepresentable {
-//
-//    class Coordinator: NSObject, UITextFieldDelegate {
-//
-//        let parent: CreateMumoryScrollViewRepresentable
-//        var scrollView: UIScrollView?
-//        var contentHeight: CGFloat = .zero
-//        var hostingController: UIHostingController<CreateMumoryScrollViewRepresentable>?
-//        var tagContainerCoordinator: TagContainerViewRepresentable.Coordinator?
-//
-//        init(parent: CreateMumoryScrollViewRepresentable) {
-//            self.parent = parent
-//            super.init()
-//        }
-//    }
-//}
-//
-//extension CreateMumoryScrollViewRepresentable.Coordinator: UIScrollViewDelegate {
-//
-//    //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//    //        let offsetY = scrollView.contentOffset.y
-//    //
-//    //        if self.parent.keyboardResponder.isKeyboardHiddenButtonShown {
-//    ////            scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
-//    //        }
-//    //        print("offsetY: \(offsetY)")
-//    //    }
-//}

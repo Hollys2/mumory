@@ -31,11 +31,9 @@ public struct FriendMumoryMapView: View {
     
     public var body: some View {
         ZStack(alignment: .top) {
-            
             FriendMapViewRepresentable(friendMumorys: self.mumorys)
             
             HStack {
-                
                 Color.clear
                     .frame(width: 30, height: 30)
                 
@@ -48,7 +46,7 @@ public struct FriendMumoryMapView: View {
                 Spacer()
                 
                 Button {
-                    self.appCoordinator.isMumoryMapViewShown = false
+                    self.appCoordinator.isMumoryMapViewShown.0 = false
                 } label: {
                     SharedAsset.closeButtonMumoryDetailMap.swiftUIImage
                         .resizable()

@@ -98,8 +98,6 @@ public struct HomeView: View {
                         SearchLocationView()
                     } else if i == "map" {
                         SearchLocationMapView()
-                    } else {
-                        Color.gray
                     }
                 })
                 .navigationDestination(for: SearchFriendType.self, destination: { type in
@@ -459,7 +457,7 @@ extension HomeView {
                         
                     },
                     BottomSheetOption(iconImage: SharedAsset.mapMumoryDetailMenu.swiftUIImage, title: "지도에서 보기") {
-                        self.appCoordinator.isMumoryMapViewShown = true
+                        self.appCoordinator.isMumoryMapViewShown.0 = true
                     },
                     BottomSheetOption(iconImage: SharedAsset.deleteMumoryDetailMenu.swiftUIImage, title: "뮤모리 삭제") {
 //                        self.appCoordinator.isDeleteMumoryPopUpViewShown = true

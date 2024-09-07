@@ -94,7 +94,7 @@ public class AppCoordinator: ObservableObject {
         }
     }
     @Published public var isCommentSheetShown: (Bool, Mumory?) = (false, nil)
-    @Published public var isMumoryMapViewShown: Bool = false
+    @Published public var isMumoryMapViewShown: (Bool, Mumory, UserProfile) = (false, Mumory(), UserProfile())
     
     
     @Published public var isMumoryDetailShown = false

@@ -21,7 +21,6 @@ struct HomeMapView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            
             HomeMapViewRepresentable(isAnnotationTapped: self.$isAnnotationTapped)
                 .frame(height: getUIScreenBounds().height - 89)
             

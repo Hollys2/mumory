@@ -105,7 +105,7 @@ public struct MumoryDetailView: View {
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
-        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown) {
+        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown.0) {
             FriendMumoryMapView(mumorys: [self.mumory], user: self.user)
         }
     }
@@ -266,7 +266,7 @@ public struct MumoryDetailView: View {
                                             .fixedSize(horizontal: true, vertical: false)
                                     }
                                     .onTapGesture {
-                                        self.appCoordinator.isMumoryMapViewShown = true
+                                        self.appCoordinator.isMumoryMapViewShown.0 = true
                                     }
                                 } // HStack
                             } // VStack

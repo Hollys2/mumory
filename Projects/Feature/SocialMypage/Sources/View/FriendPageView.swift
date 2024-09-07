@@ -143,7 +143,7 @@ struct KnownFriendPageView: View {
             })
         }
         .scrollIndicators(.hidden)
-        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown) {
+        .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown.0) {
             FriendMumoryMapView(mumorys: self.mumorys, user: self.friend, isFriendPage: true)
         }
         .onAppear {
