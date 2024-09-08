@@ -262,20 +262,6 @@ public struct HomeView: View {
                     case .activityList:
                         ActivityListView()
                             .navigationBarBackButtonHidden()
-                        
-                        //                    case .customization:
-                        //                        <#code#>
-                        //                    case .startCustomization:
-                        //                        <#code#>
-                        //                    case .signUp:
-                        //                        <#code#>
-                        //                    case .home:
-                        //                        <#code#>
-                        //                    case .emailLogin:
-                        //                        <#code#>
-                        //                    case .lastOfCustomization:
-                        //                        <#code#>
-                        
             
                     case .mumoryDetailView(mumory: let mumory):
                         MumoryDetailView(mumory: mumory)

@@ -11,7 +11,6 @@ import Shared
 import MusicKit
 
 public struct NowPlayingView: View {
-    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
@@ -81,7 +80,7 @@ public struct NowPlayingView: View {
 
             SnackBarView(additionalAction: {
                 Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { timer in
-                    dismiss()
+                    playerViewModel.isPresentNowPlayingView = false
                 }
             })
             .frame(width: getUIScreenBounds().width)

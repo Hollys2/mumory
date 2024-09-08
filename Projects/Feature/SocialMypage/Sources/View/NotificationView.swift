@@ -15,6 +15,7 @@ enum notificationCategory {
     case service
 }
 
+/// 설정 하위의 알림 설정 화면
 struct NotificationView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var appCoordinator: AppCoordinator

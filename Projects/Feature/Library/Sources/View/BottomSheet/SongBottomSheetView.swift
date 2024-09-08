@@ -256,18 +256,19 @@ struct OptionalSongBottomSheetView: View {
                         .scaledToFit()
                         .frame(width: 26, height: 26)
                         .padding(.leading, 20)
+                        .onTapGesture {
+                            dismiss()
+                            guard let song = self.song else {return}
+                            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
+                                playerViewModel.playNewSong(song: song)
+                                playerViewModel.isPresentNowPlayingView = true
+                            }
+                        }
                     
                 })
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(20)
-                .onTapGesture {
-                    dismiss()
-                    guard let song = self.song else {return}
-                    Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                        playerViewModel.playNewSong(song: song)
-                        playerViewModel.isPresentNowPlayingView = true
-                    }
-                }
+          
                 
                 Divider05()
                     .padding(.horizontal, 4)

@@ -10,14 +10,13 @@ import SwiftUI
 import MusicKit
 import Shared
 
+/// 알림 리스트 화면
 struct NotifyView: View {
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject var notificationViewModel: NotificationViewModel = NotificationViewModel()
     private let notificationQueue = DispatchQueue(label: "notificationQueue")
-    //observableobject를 만들면 너무 불필요한 게 되는데....음음음음음음
-    //binding으로 2단계 아래로 넘기자니 오히려 더 지저분함
     let db = FirebaseManager.shared.db
 
 
@@ -85,7 +84,7 @@ struct NotifyView: View {
                                 .frame(height: 90)
                         }
                         .refreshable {
-                            await getNotification()
+                            getNotification()
                         }
                         .scrollIndicators(.hidden)
                     }
@@ -97,7 +96,7 @@ struct NotifyView: View {
                 playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
                 playerViewModel.isShownMiniPlayerInLibrary = false
                 Task{
-                    await getNotification()
+                    getNotification()
                 }
                 AnalyticsManager.shared.setScreenLog(screenTitle: "NotifyView")
                 UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
@@ -225,14 +224,11 @@ struct NotifyLikeItem: View {
         }
         .onTapGesture {
             Task {
-                let mumory = try await FetchManager.shared.fetchMumory(documentID: notification.mumoriId)
-                if mumory.id == "DELETE" {
-                    UIView.setAnimationsEnabled(false)
+                guard let mumory = try? await FetchManager.shared.fetchMumory(documentID: notification.mumoriId) else {
                     isPresentDeleteMumoryPopup.toggle()
-                } else {
-                    self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
-                    
+                    return
                 }
+                self.appCoordinator.rootPath.append(MumoryPage.mumoryDetailView(mumory: mumory))
             }
             
             if !notification.isRead {
@@ -243,10 +239,13 @@ struct NotifyLikeItem: View {
                 self.notification.isRead = true
             }
         }
-        .fullScreenCover(isPresented: $isPresentDeleteMumoryPopup, content: {
+        .popupAlert(isPresent: $isPresentDeleteMumoryPopup, content: {
             OneButtonOnlyConfirmPopupView(title: "삭제된 게시물입니다")
-                .background(TransparentBackground())
         })
+//        .fullScreenCover(isPresented: $isPresentDeleteMumoryPopup, content: {
+//            OneButtonOnlyConfirmPopupView(title: "삭제된 게시물입니다")
+//                .background(TransparentBackground())
+//        })
     }
     
 

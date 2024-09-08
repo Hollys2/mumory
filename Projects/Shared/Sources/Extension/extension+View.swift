@@ -28,6 +28,10 @@ extension View {
     public func rewardBottomSheet(isShown: Binding<Bool>) -> some View {
         self.modifier(RewardBottomSheetViewModifier(isShown: isShown))
     }
+    
+    public func popupAlert(isPresent: Binding<Bool>, content: @escaping () -> any View) -> some View {
+        return modifier(PopupAlertModifier(isPresent: isPresent, alertView: content()))
+    }
 }
 
 extension View {

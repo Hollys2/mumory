@@ -38,7 +38,14 @@ struct MumoryApp: App {
                 if self.appCoordinator.isSplashViewShown {
                     SplashView()
                 }
+                
+                if playerViewModel.isPresentNowPlayingView {
+                    NowPlayingView()
+                }
+                
+                SnackBarView()
             }
+            .animation(.default, value: playerViewModel.isPresentNowPlayingView)
             .preferredColorScheme(.dark)
             .ignoresSafeArea()
             .environmentObject(appCoordinator)
@@ -46,6 +53,7 @@ struct MumoryApp: App {
             .environmentObject(keyboardResponder)
             .environmentObject(snackBarViewModel)
             .environmentObject(playerViewModel)
+           
         }
     }
 }

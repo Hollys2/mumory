@@ -149,7 +149,7 @@ public struct LoginView: View {
             let accessToken = gidResult.user.accessToken.tokenString
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
             guard let email = gidResult.user.profile?.email else {return}
-
+        
             if await FetchManager.shared.isNewUser(email: email, method: .google) {
                 signUpViewModel.setSignUpData(method: .google, email: email, googleCredential: credential)
                 appCoordinator.push(destination: AuthPage.signUpCenter)
