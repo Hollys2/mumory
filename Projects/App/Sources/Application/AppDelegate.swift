@@ -41,6 +41,7 @@ class AppDelegate: NSObject, UIApplicationDelegate{
         }
         application.registerForRemoteNotifications()
         
+        Bundle
         //테스트용 키. 추후에 원본 키로 수정하기
         KakaoSDK.initSDK(appKey: "ac7735b6f63e81d971e4a58a05994260")
         

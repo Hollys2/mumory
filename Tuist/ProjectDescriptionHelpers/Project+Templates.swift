@@ -89,6 +89,18 @@ extension Project {
         return [debug, release]
     }
     
+    public static func makeSharedInfoPlist(merging other: [String: InfoPlist.Value] = [:]) -> InfoPlist {
+        var extendedPlist: [String: InfoPlist.Value] = [
+            "KakaoAppKey": "$(KAKAO_APP_KEY)"
+        ]
+        
+        other.forEach { (key: String, value: InfoPlist.Value) in
+            extendedPlist[key] = value
+        }
+        
+        return InfoPlist.extendingDefault(with: extendedPlist)
+    }
+
     public static func makeInfoPlist(merging other: [String: InfoPlist.Value] = [:]) -> InfoPlist {
         var extendedPlist: [String: InfoPlist.Value] = [
             //        "UIApplicationSceneManifest": ["UIApplicationSupportMultipleScenes": true],

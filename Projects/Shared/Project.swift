@@ -10,7 +10,7 @@ let project = Project(name: "Shared",
                                        product: .framework,
                                        bundleId: Project.bundleId + ".shared",
                                        deploymentTarget: .iOS(targetVersion: Project.iOSTargetVersion, devices: .iphone),
-                                       infoPlist: .default,
+                                       infoPlist: Project.makeSharedInfoPlist(),
                                        sources: ["Sources/**"],
                                        resources: ["Resources/**"],
 

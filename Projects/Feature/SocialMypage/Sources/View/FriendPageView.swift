@@ -170,7 +170,7 @@ struct KnownFriendPageView: View {
             
             Task {
                 friendDataViewModel.friend = await FetchManager.shared.fetchUser(uId: friend.uId)
-                friendDataViewModel.playlistArray = await friendDataViewModel.savePlaylist(uId: friend.uId)
+                await friendDataViewModel.savePlaylist()
                 friendDataViewModel.isPlaylistLoading = false
             }
         }
@@ -759,7 +759,7 @@ struct PlaylistItemTest: View {
                             .fill(emptyGray)
                             .frame(width: itemSize, height: itemSize)
                     }else{
-                        AsyncImage(url: playlist.songs[0].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                        AsyncImage(url: playlist.songs[0].artworkUrl) { image in
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -783,7 +783,7 @@ struct PlaylistItemTest: View {
                             .fill(emptyGray)
                             .frame(width: itemSize, height: itemSize)
                     }else{
-                        AsyncImage(url: playlist.songs[1].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                        AsyncImage(url: playlist.songs[1].artworkUrl) { image in
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -811,7 +811,7 @@ struct PlaylistItemTest: View {
                             .fill(emptyGray)
                             .frame(width: itemSize, height: itemSize)
                     }else{
-                        AsyncImage(url: playlist.songs[2].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                        AsyncImage(url: playlist.songs[2].artworkUrl) { image in
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -835,7 +835,7 @@ struct PlaylistItemTest: View {
                             .fill(emptyGray)
                             .frame(width: itemSize, height: itemSize)
                     }else{
-                        AsyncImage(url: playlist.songs[3].artwork?.url(width: 300, height: 300) ?? URL(string: "")) { image in
+                        AsyncImage(url: playlist.songs[3].artworkUrl) { image in
                             image
                                 .resizable()
                                 .scaledToFill()
@@ -878,7 +878,7 @@ struct PlaylistItemTest: View {
                 .foregroundStyle(.white)
                 .frame(width: itemSize * 2)
             
-            Text("\(playlist.songIDs.count)곡")
+            Text("\(playlist.songs.count)곡")
                 .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 14))
                 .foregroundStyle(LibraryColorSet.lightGrayTitle)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -983,24 +983,5 @@ struct FriendMumoryView: View {
     }
 }
 
-
-public func fetchSongToPlaylist(playlistArray: Binding<[SongPlaylist]>) {
-    for i in 0 ..< playlistArray.count {
-        let songIDs = playlistArray.wrappedValue[i].songIDs
-        for id in songIDs {
-            Task {
-                let musicItemID = MusicItemID(rawValue: id)
-                let request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
-                let response = try? await request.response()
-                guard let song = response?.items.first else {
-                    return
-                }
-                DispatchQueue.main.async {
-                    playlistArray.wrappedValue[i].songs.append(song)
-                }
-            }
-        }
-    }
-}
 
 

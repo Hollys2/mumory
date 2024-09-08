@@ -80,25 +80,8 @@ public class PlaylistViewModel: ObservableObject {
                 
                 snapshot.documents.forEach { document in
                     taskGroup.addTask {
-                        let data = document.data()
-                        let title = data["title"] as? String ?? ""
-                        let isPublic = data["isPublic"] as? Bool ?? false
-                        let songs = data["songs"] as? [[String: String]] ?? [[:]]
-                        let artistName = data["artistName"] as? String ?? ""
-                        let imageURL = data["image"] as? String ?? ""
-                        let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
-                        let id = document.reference.documentID
-                        
-                        var songModelList: [SongModel] = []
-                        for song in songs {
-                            let id: String = song["id"] ?? ""
-                            let artistName: String = song["artistName"] ?? ""
-                            let imageURL: String = song["image"] ?? ""
-                            let title: String = song["image"] ?? ""
-                            let songModel = SongModel(id: id, title: title, artistName: artistName, artworkUrl: URL(string: imageURL))
-                            songModelList.append(songModel)
-                        }
-                        return SongPlaylist(id: id, title: title, songs: songModelList, isPublic: isPublic, createdDate: date)
+                        let playlist = SongPlaylist(id: document.reference.documentID, data: document.data())
+                        return playlist
                     }
                     
                 }
@@ -138,11 +121,7 @@ public class PlaylistViewModel: ObservableObject {
         
         let songs = data["songs"] as? [[String: String]] ?? [[:]]
         for song in songs {
-            let id: String = song["id"] ?? ""
-            let artistName: String = song["artistName"] ?? ""
-            let imageURL: String = song["image"] ?? ""
-            let title: String = song["image"] ?? ""
-            let songModel = SongModel(id: id, title: title, artistName: artistName, artworkUrl: URL(string: imageURL))
+            let songModel = SongModel(song)
             songModels.append(songModel)
         }
         
@@ -157,11 +136,11 @@ public class PlaylistViewModel: ObservableObject {
     
     public func saveToFavorites(song: Song) {
         let songModel = SongModel(id: song.id.rawValue, title: song.title, artistName: song.artistName, artworkUrl: song.artwork?.url(width: 500, height: 500))
-        let songData: [String: Any] = [
+        let songData: [String: String] = [
             "id": song.id.rawValue,
             "title": song.title,
             "artistName": song.artistName,
-            "image": song.artwork?.url(width: 500, height: 500)?.absoluteString
+            "image": song.artwork?.url(width: 500, height: 500)?.absoluteString ?? ""
         ]
         let query = FirebaseManager.shared.db.collection("User").document(uId).collection("Playlist").document("favorite")
         query.updateData(["songs": FirebaseManager.Fieldvalue.arrayUnion([songData])])
