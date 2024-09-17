@@ -1,0 +1,319 @@
+//
+//  SearchLocationView.swift
+//  Feature
+//
+//  Created by 다솔 on 2023/11/26.
+//  Copyright © 2023 hollys. All rights reserved.
+//
+
+
+import MapKit
+import SwiftUI
+import Core
+import Shared
+
+
+struct AddressRow: View {
+    
+    @State var result: MKLocalSearchCompletion
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
+    
+    var body: some View {
+        Button(action: {
+            localSearchViewModel.getRegion(localSearchCompletion: result) { region in
+                if let region = region {
+                    DispatchQueue.main.async {
+                        let coordinate = CLLocationCoordinate2D(latitude: region.center.latitude, longitude: region.center.longitude)
+                        mumoryDataViewModel.choosedLocationModel = LocationModel(locationTitle: result.title, locationSubtitle: result.subtitle, coordinate: coordinate)
+                        
+                        self.localSearchViewModel.addRecentSearch(result.title)
+                    }
+                } else {
+                    print("ERROR: 해당하는 주소가 없습니다.")
+                }
+            }
+            
+            appCoordinator.rootPath.removeLast()
+        }) {
+            HStack(alignment: .center, spacing: 13) {
+                Image(uiImage: SharedAsset.addressSearchLocation.image)
+                    .resizable()
+                    .frame(width: 20, height: 23)
+                
+                VStack(spacing: 6) {
+                    Text(result.title)
+                        .lineLimit(1)
+                        .font(Font.custom("Pretendard", size: 15).weight(.semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text(result.subtitle)
+                        .lineLimit(1)
+                        .font(Font.custom("Pretendard", size: 13))
+                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } // HStack
+            .frame(maxWidth: .infinity)
+            .frame(height: 70)
+            .padding(.horizontal, 5)
+        }
+    }
+}
+
+struct SearchLocationView: View {
+    
+    @EnvironmentObject var appCoordinator: AppCoordinator
+    @EnvironmentObject var locationManager: LocationManager
+    @EnvironmentObject var localSearchViewModel: LocalSearchViewModel
+    @EnvironmentObject var mumoryDataViewModel: MumoryDataViewModel
+    
+    var body: some View {
+        
+        VStack(spacing: 0) {
+            
+            HStack {
+                ZStack(alignment: .leading) {
+                    TextField("", text: $localSearchViewModel.queryFragment,
+                              prompt: Text("위치 검색").font(Font.custom("Pretendard", size: 16))
+                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47)))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 45)
+                    .padding(.horizontal, 15 + 23 + 7)
+                    .background(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .fill(Color(red: 0.24, green: 0.24, blue: 0.24))
+                    )
+                    .foregroundColor(.white)
+                    
+                    Image(systemName: "magnifyingglass")
+                        .frame(width: 23, height: 23)
+                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                        .padding(.leading, 15)
+                    
+                    if !self.localSearchViewModel.queryFragment.isEmpty {
+                        Button(action: {
+                            self.localSearchViewModel.queryFragment = ""
+                        }) {
+                            HStack {
+                                Spacer()
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.white)
+                            }
+                            .padding(.trailing, 17)
+                        }
+                    }
+                }
+                
+                Button(action: {
+                    appCoordinator.rootPath.removeLast()
+                }) {
+                    Text("취소")
+                        .font(
+                            Font.custom("Pretendard", size: 16)
+                                .weight(.medium)
+                        )
+                        .multilineTextAlignment(.trailing)
+                        .foregroundColor(.white)
+                }
+            } // HStack
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 15)
+            
+            if self.localSearchViewModel.results.isEmpty {
+                ScrollView {
+                    VStack(spacing: 15) {
+                        VStack(spacing: 0) {
+                            Button(action: {
+                                if let currentLocation = locationManager.currentLocation {
+                                    mumoryDataViewModel.getChoosedeMumoryModelLocation(location: currentLocation) { model in
+                                        mumoryDataViewModel.choosedLocationModel = model
+                                    }
+                                    appCoordinator.rootPath.removeLast()
+                                } else {
+                                    print("ERROR: locationManager.userLocation is nil")
+                                }
+                            }) {
+                                ZStack {
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 55)
+                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                    
+                                    HStack(spacing: 10) {
+                                        Image(uiImage: SharedAsset.userSearchLocation.image)
+                                            .resizable()
+                                            .frame(width: 29, height: 29)
+                                        
+                                        Text("현재 위치")
+                                            .font(
+                                                Font.custom("Apple SD Gothic Neo", size: 14)
+                                                    .weight(.medium)
+                                            )
+                                            .foregroundColor(.white)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.leading, 20)
+                                }
+                            }
+                            
+                            Rectangle()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 0.3)
+                                .foregroundColor(Color(red: 0.65, green: 0.65, blue: 0.65).opacity(0.7))
+                            
+                            Button(action: {
+                                appCoordinator.rootPath.append("map")
+                            }) {
+                                ZStack {
+                                    Rectangle()
+                                        .foregroundColor(.clear)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 55)
+                                        .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                                    
+                                    HStack(spacing: 12) {
+                                        Image(uiImage: SharedAsset.mapSearchLocation.image)
+                                            .resizable()
+                                            .frame(width: 24, height: 22)
+                                        
+                                        Text("지도에서 직접 선택")
+                                            .font(
+                                                Font.custom("Apple SD Gothic Neo", size: 14)
+                                                    .weight(.medium)
+                                            )
+                                            .foregroundColor(.white)
+                                        
+                                        Spacer()
+                                    }
+                                    .padding(.leading, 23)
+                                }
+                            }
+                        }
+                        .cornerRadius(15)
+                        .background(SharedAsset.backgroundColor.swiftUIColor)
+                        
+                        if !self.localSearchViewModel.recentSearches.isEmpty {
+                            VStack(spacing: 0) {
+                                HStack {
+                                    Text("최근 검색")
+                                        .font(
+                                            Font.custom("Pretendard", size: 13)
+                                                .weight(.medium)
+                                        )
+                                        .foregroundColor(.white)
+                                    
+                                    Spacer()
+                                    
+                                    Button(action: {
+                                        self.localSearchViewModel.clearRecentSearches()
+                                    }) {
+                                        Text("전체삭제")
+                                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                                            .multilineTextAlignment(.trailing)
+                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                    }
+                                }
+                                .padding([.horizontal, .top], 20)
+                                .padding(.bottom, 11)
+                                
+                                ForEach(self.localSearchViewModel.recentSearches, id: \.self) { value in
+                                    HStack {
+                                        Image(systemName: "magnifyingglass")
+                                            .frame(width: 23, height: 23)
+                                            .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                        
+                                        Text("\(value)")
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                            .foregroundColor(.white)
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            self.localSearchViewModel.removeRecentSearch("\(value)")
+                                        }) {
+                                            Image(systemName: "xmark")
+                                                .frame(width: 19, height: 19)
+                                                .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .padding(.leading, 15)
+                                    .padding(.trailing, 20)
+                                }
+                            }
+                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                            .cornerRadius(15)
+                        }
+                        
+                        if !self.localSearchViewModel.popularSearches.isEmpty {
+                            
+                            VStack(alignment: .leading, spacing: 0) {
+                                
+                                HStack {
+                                    
+                                    Text("뮤모리 인기 위치 검색어")
+                                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                                        .foregroundColor(.white)
+                                    
+                                    Spacer()
+                                }
+                                .padding(20)
+                                
+                                HStack(spacing: 8) {
+                                    ForEach(self.localSearchViewModel.popularSearches, id: \.self) { searchTerm in
+                                        Text(searchTerm)
+                                            .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
+                                            .frame(height: 33)
+                                            .padding(.horizontal, 16)
+                                            .background(SharedAsset.mainColor.swiftUIColor)
+                                            .cornerRadius(35)
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 20)
+                                .background(.pink)
+                                
+                                Spacer().frame(height: 12)
+                            }
+                            .background(Color(red: 0.12, green: 0.12, blue: 0.12))
+                            .cornerRadius(15)
+                            
+                        }
+                        
+                    } // VStack
+                    .padding(.bottom, 66)
+                } // ScrollView
+                .scrollIndicators(.hidden)
+                .cornerRadius(15)
+            } else {
+                ScrollView {
+                    
+                    VStack(spacing: 0) {
+                        
+                        ForEach(self.localSearchViewModel.results, id: \.self) { result in
+                            AddressRow(result: result)
+                        }
+                    } // VStack
+                    .padding(.bottom, 66)
+                } // ScrollView
+                .scrollIndicators(.hidden)   
+            }
+        } // VStack
+        .navigationBarBackButtonHidden(true)
+        .padding(.horizontal, 21)
+        .frame(width: UIScreen.main.bounds.width + 1)
+        .padding(.top, 12)
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+        .onDisappear {
+            appCoordinator.isSearchLocationViewShown = false
+            localSearchViewModel.queryFragment = ""
+        }
+    }
+}

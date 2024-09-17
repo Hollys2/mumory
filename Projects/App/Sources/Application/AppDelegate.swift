@@ -8,15 +8,20 @@
 
 
 import SwiftUI
-import Firebase
+import FirebaseCore
+import FirebaseAuth
 
 class AppDelegate: NSObject, UIApplicationDelegate{
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        print("didFinishLaunchingWithOptions!!!")
+        
+        print("AppDelegate Start")
+
         FirebaseApp.configure()
         
+        print("AppDelegate End")
         return true
     }
 }
+

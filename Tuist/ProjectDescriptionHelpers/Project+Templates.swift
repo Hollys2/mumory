@@ -79,7 +79,7 @@ extension Project {
     public static let bundleId: String = "com.hollys.mumory"
     public static let appStoreVersion: String = "1.0"
     public static let bundleVersion: String = "1.0.0"
-    public static let iOSTargetVersion: String = "15.0"
+    public static let iOSTargetVersion: String = "16.0"
     
     
     public static func makeConfiguration() -> [Configuration] {
@@ -97,9 +97,11 @@ extension Project {
                 [
                     "UIInterfaceOrientationPortrait", // 인터페이스 방향을 세로만 지원.
                 ],
+            "UIUserInterfaceStyle": "Light",
             "CFBundleVersion": "\(bundleVersion)",
             "CFBundleShortVersionString": "\(appStoreVersion)",
             "CFBundleDisplayName": "$(APP_DISPLAY_NAME)", // 앱 이름
+            "NSLocationWhenInUseUsageDescription": "지도를 주세요."
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in

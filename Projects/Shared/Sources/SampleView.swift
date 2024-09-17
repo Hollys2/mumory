@@ -1,14 +1,23 @@
 import SwiftUI
 
-public struct SampleView: View {
+public struct BlurView: UIViewRepresentable {
+    
+    public typealias UIViewType = UIVisualEffectView
+    
+    var style: UIBlurEffect.Style
+
+    public func makeUIView(context: Context) -> UIVisualEffectView {
+        let view = UIVisualEffectView(effect: UIBlurEffect(style: style))
         
-    public init() {
-        
+        return view
     }
     
-    public var body: some View {
-        HStack{
-            Text("This is SampleView!")
-        }
-    }
+    public func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
 }
+//
+//
+//struct MumoryDetailCommentSheetView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        SampleView()
+//    }
+//}

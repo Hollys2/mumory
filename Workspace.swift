@@ -3,10 +3,7 @@ import ProjectDescription
 let workspace = Workspace(
   name: "MUMORY",
   projects: [
-    "Projects/App",
-    "Projects/Core",
-    "Projects/Feature",
-    "Projects/Shared",
+    "Projects/**"
   ]
 )
 

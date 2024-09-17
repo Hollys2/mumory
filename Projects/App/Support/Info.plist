@@ -22,8 +22,16 @@
 	<string>1.0.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>뮤직킷?</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>항상 그리고 사용할 때만 사용하고싶다구?</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>항상 이용??</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>지도 사용하고싶죠?</string>
+	<string>지도 사용할 때만 사용하고싶죠?</string>
+	<key>LSApplicationCategoryType</key>
+	<string></string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -41,5 +49,9 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 </dict>
 </plist>

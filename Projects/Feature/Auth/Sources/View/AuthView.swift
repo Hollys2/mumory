@@ -8,7 +8,7 @@
 
 
 import SwiftUI
-import Core
+import Shared
 
 public struct AuthView: View {
     
