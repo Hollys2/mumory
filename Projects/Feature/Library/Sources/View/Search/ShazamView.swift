@@ -304,6 +304,7 @@ struct ShazamView: View {
 
 
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onChange(of: shazamManager.isRecording, perform: { newValue in
             if newValue {

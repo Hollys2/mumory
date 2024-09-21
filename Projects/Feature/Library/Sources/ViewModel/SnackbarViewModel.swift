@@ -77,8 +77,10 @@ public class SnackBarViewModel: ObservableObject {
         let db = FirebaseManager.shared.db
         db.collection("User").document(uId).collection("Playlist").document(self.recentSaveData.playlistId)
             .updateData(["songIds": FirebaseManager.Fieldvalue.arrayRemove(self.recentSaveData.songIds)])
+        
         setSnackBar(type: .playlist, status: .delete)
     }
+    
     public func setPresentValue(isPresent: Bool) {
         DispatchQueue.main.async {
             withAnimation(.linear(duration: 0.25)){

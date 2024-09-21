@@ -15,7 +15,6 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
 
     @Binding var contentOffset: CGPoint
-    @Binding var changeDetectValue: Bool
     @Binding var viewWidth: CGFloat
     @Binding var scrollDirection: ScrollDirection
     @Binding var topbarYoffset: CGFloat
@@ -23,8 +22,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
     var content: () -> Content
 
     
-    init(changeDetectValue: Binding<Bool>,contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, refreshAction: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
-        self._changeDetectValue = changeDetectValue
+    init(contentOffset: Binding<CGPoint>,viewWidth: Binding<CGFloat>, scrollDirection: Binding<ScrollDirection>, topbarYoffset: Binding<CGFloat>, refreshAction: @escaping () -> Void, @ViewBuilder content: @escaping () -> Content) {
         self._contentOffset = contentOffset
         self._viewWidth = viewWidth
         self._scrollDirection = scrollDirection
@@ -72,8 +70,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
 
         public func scrollViewDidScroll(_ scrollView: UIScrollView) {
             var diff = scrollView.contentOffset.y - contentOffset.wrappedValue.y
-//            print(scrollView.contentOffset.y)
-//            print("offset.y :\(scrollView.contentOffset.y), diff: \(diff)")
+            
             if diff > 0{
                 //down
                 scrollDirection.wrappedValue = .down
@@ -108,7 +105,7 @@ struct StickyHeaderScrollView<Content: View>: UIViewControllerRepresentable {
        
             }
             contentOffset.wrappedValue = scrollView.contentOffset
-            scrollView.refreshControl?.bounds = CGRect(x: 0, y: -68, width: 50, height: 50)
+            scrollView.refreshControl?.bounds = CGRect(x: 0, y: -65, width: 50, height: 50)
         }
     }
 }

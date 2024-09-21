@@ -7,9 +7,23 @@
 //
 
 import Foundation
-class DeviceDimension {
+import UIKit
 
-}
-struct a {
-    let a: String
+class DeviceDimension {
+    static public func bounds() -> CGRect {
+        UIScreen.main.bounds
+    }
+    
+    static public func safeAreaInsets() -> UIEdgeInsets {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            let safeAreaInsets = window.safeAreaInsets
+            return safeAreaInsets
+        }
+        return UIEdgeInsets.zero
+    }
+    
+    public func isSmallDevice() -> Bool {
+        return UIScreen.main.bounds.height < 800
+    }
 }

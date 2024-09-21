@@ -146,6 +146,7 @@ struct RecommendationListView: View {
 
   
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
@@ -167,7 +168,7 @@ struct RecommendationListView: View {
         appleMusicService.getRecommendationMusicIDList(genre: genreID, limit: 50, offset: 0) { result in
             switch(result){
             case .success(let data):
-                if let songs = data as? [song]{
+                if let songs = data as? [AppleMusicData]{
                     let songIDs = songs.map({$0.id})
                     self.songIDs = songIDs
                     Task{

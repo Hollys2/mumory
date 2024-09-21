@@ -27,6 +27,7 @@ public struct RewardView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden()
         .background(SharedAsset.backgroundColor.swiftUIColor)
     }
 }

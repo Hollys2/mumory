@@ -8,16 +8,16 @@
 
 import Foundation
 
-struct SongResponseModel: Decodable{
-    let results: results
+struct AppleMusicSongResponseModel: Decodable{
+    let results: AppleMusicResults
 }
-struct results: Decodable{
-    let songs: [data]
+struct AppleMusicResults: Decodable{
+    let songs: [AppleMusicSongs]
 }
-struct data: Decodable{
-    let data: [song]
+struct AppleMusicSongs: Decodable{
+    let data: [AppleMusicData]
 }
-struct song: Decodable{
+struct AppleMusicData: Decodable{
     let id: String
 }
 

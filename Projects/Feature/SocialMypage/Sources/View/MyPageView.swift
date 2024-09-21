@@ -54,6 +54,7 @@ public struct MyPageView: View {
                 .padding(.top, getSafeAreaInsets().top)
 
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear {
             settingViewModel.uid = currentUserViewModel.user.uId

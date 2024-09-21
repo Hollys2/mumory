@@ -31,8 +31,8 @@ struct AddSongFromFavoriteView: View {
                 LazyVStack(spacing: 0, content: {
                     if currentUserViewModel.playlistViewModel.playlistArray[0].songs.isEmpty {
                         InitialSettingView(title: "즐겨찾기한 곡이 없습니다\n좋아하는 음악을 즐겨찾기 목록에 추가해보세요", buttonTitle: "추천 음악 보러가기") {
-                            let myRandomGenre = currentUserViewModel.playlistViewModel.favoriteGenres[Int.random(in: currentUserViewModel.playlistViewModel.favoriteGenres.indices)]
-                            appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: myRandomGenre))
+//                            let myRandomGenre = currentUserViewModel.playlistViewModel.favoriteGenres[Int.random(in: currentUserViewModel.playlistViewModel.favoriteGenres.indices)]
+//                            appCoordinator.rootPath.append(MumoryPage.recommendation(genreID: myRandomGenre))
                         }
                         .padding(.top, getUIScreenBounds().height * 0.25)
                     }else {

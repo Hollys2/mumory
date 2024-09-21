@@ -70,6 +70,8 @@ struct MyFriendRequestListView: View {
 //                    .padding(.top, getUIScreenBounds().height * 0.5)
             }
         }
+        .navigationBarBackButtonHidden()
+
     }
 }
 

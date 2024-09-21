@@ -129,6 +129,7 @@ struct PlaylistManageView: View {
             }
 
         }
+        .navigationBarBackButtonHidden()
         .onAppear {
             itemSize = getUIScreenBounds().width * 0.21
             playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)

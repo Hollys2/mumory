@@ -67,6 +67,8 @@ struct SelectNotificationTimeView: View {
             .padding(.top, 12)
 
         }
+        .navigationBarBackButtonHidden()
+
     }
 }
 

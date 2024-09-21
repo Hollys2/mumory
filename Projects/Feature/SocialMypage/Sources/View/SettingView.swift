@@ -131,6 +131,7 @@ struct SettingView: View {
 //            LoadingAnimationView(isLoading: $isLoading)
 //                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
+        .navigationBarBackButtonHidden()
         .disabled(isLoading)
     }
     

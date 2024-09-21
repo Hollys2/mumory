@@ -19,8 +19,8 @@ struct FavoriteGenreRecommendationView: View {
     var body: some View {
         ZStack{
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(currentUserViewModel.playlistViewModel.favoriteGenres, id: \.self){genreID in
-                    RecommendationScrollView(genreID: genreID)
+                ForEach(currentUserViewModel.playlistViewModel.favoriteGenres, id: \.self) { genreId in
+                    RecommendationScrollView(genreID: genreId)
                         .frame(height: 210)
                         .padding(.top, 35)
                 }
@@ -31,17 +31,14 @@ struct FavoriteGenreRecommendationView: View {
                     LazyHStack(alignment: .bottom, spacing: 8) {
                         Text("장르")
                             .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .padding(.leading, 14)
-                            .padding(.trailing, 14)
+                            .padding(.horizontal, 14)
                             .frame(height: 30)
                             .foregroundStyle(Color.white)
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 30, style: .circular)
-                                    .stroke(Color.white, lineWidth: 1)
-                            }
+                            .background(RoundedRectangle(cornerRadius: 30, style: .circular).stroke(Color.white, lineWidth: 1))
+            
                         
-                        ForEach(currentUserViewModel.playlistViewModel.favoriteGenres, id: \.self){ genreID in
-                            GenreItem(genreID: genreID)
+                        ForEach(currentUserViewModel.playlistViewModel.favoriteGenres, id: \.self) { genreId in
+                            GenreItem(genreId: genreId)
                         }
                         
                         Circle()
@@ -163,11 +160,10 @@ private struct RecommendationScrollView: View {
         appleMusicService.getRecommendationMusicIDList(genre: genreID, limit: 10, offset: 0) { result in
             switch(result){
             case .success(let data):
-                if let songs = data as? [song]{
-                    let songIDs = songs.map({$0.id})
-                    self.songIDs = songIDs
+                if let songs = data as? [AppleMusicData]{
+                    self.songIDs = songs.map({$0.id})
                     Task{
-                        await fetchSongInfo(songIDs: songIDs)
+                        self.songs = await FetchManager.shared.fetchSongs(songIds: self.songIDs)
                     }
                 }
             case .failure(_):
@@ -212,39 +208,17 @@ struct GenreTitle: View {
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
     }
-    
-  
 }
 
-private struct GenreItem: View {
-    let genreID: Int
+struct GenreItem: View {
+    let genreId: Int
     var body: some View {
-        Text(MusicGenreHelper().genreName(id: genreID))
+        Text(MusicGenreHelper().genreName(id: genreId))
             .font(SharedFontFamily.Pretendard.bold.swiftUIFont(size: 13))
-            .padding(.leading, 14)
-            .padding(.trailing, 14)
+            .padding(.horizontal, 14)
             .frame(height: 30)
-            .overlay {
-                RoundedRectangle(cornerRadius: 30, style: .circular)
-                    .stroke(Color.white, lineWidth: 1)
-            }
             .foregroundStyle(Color.black)
             .background(Color.white)
-            .cornerRadius(30, corners: .allCorners)
+            .clipShape(RoundedRectangle(cornerRadius: 30, style: .circular))
     }
 }
-
-private struct test: View {
-    var body: some View {
-        
-        Circle()
-            .frame(width: 30, height: 30)
-            .foregroundStyle(ColorSet.mainPurpleColor)
-            .overlay {
-                SharedAsset.addBlack.swiftUIImage
-                    .resizable()
-                    .frame(width: 20, height: 20)
-            }
-    }
-}
-

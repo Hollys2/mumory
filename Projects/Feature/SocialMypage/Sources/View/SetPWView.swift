@@ -120,6 +120,7 @@ struct SetPWView: View {
             
 //            LoadingAnimationView(isLoading: $isLoading)
         }
+        .navigationBarBackButtonHidden()
         .onTapGesture {
             self.hideKeyboard()
         }

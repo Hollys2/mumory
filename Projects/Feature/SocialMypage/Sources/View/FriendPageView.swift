@@ -64,6 +64,7 @@ struct FriendPageView: View {
             .frame(height: 65)
             .padding(.top, getSafeAreaInsets().top)
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .fullScreenCover(isPresented: $isPresentFriendBottomSheet, content: {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentFriendBottomSheet) {
@@ -84,14 +85,15 @@ struct KnownFriendPageView: View {
     let lineGray = Color(white: 0.37)
     
     @EnvironmentObject var appCoordinator: AppCoordinator
-    @EnvironmentObject var mumoryViewModel: MumoryViewModel
+//    @StateObject var mumoryViewModel: MumoryViewModel = .init()
     @EnvironmentObject var friendDataViewModel: FriendDataViewModel
     @State private var isMapViewShown: Bool = false
-    @State private var mumorys: [Mumory] = []
+//    @State private var mumorys: [Mumory] = []
     @State private var firstMumory: Mumory = Mumory()
     @State private var isLoading: Bool = true
     @State private var playlists: [MusicPlaylist] = []
     @State private var isPlaylistLoading: Bool = true
+    
     init(friend: UserProfile) {
         self.friend = friend
     }
@@ -114,7 +116,7 @@ struct KnownFriendPageView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 195)
        
-                    FriendMapViewRepresentable(friendMumorys: self.mumorys)
+                    FriendMapViewRepresentable(friendMumorys: friendDataViewModel.mumoryViewModel.myMumorys)
                         .frame(width: getUIScreenBounds().width - 40, height: 129)
                         .cornerRadius(10)
                     
@@ -129,7 +131,7 @@ struct KnownFriendPageView: View {
                 
                 Divider05()
                 
-                FriendMumoryView(mumorys: $mumorys)
+                FriendMumoryView(mumorys: $friendDataViewModel.mumoryViewModel.myMumorys)
                     .environmentObject(friendDataViewModel)
                 
                 Divider05()
@@ -144,27 +146,28 @@ struct KnownFriendPageView: View {
         }
         .scrollIndicators(.hidden)
         .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown.0) {
-            FriendMumoryMapView(mumorys: self.mumorys, user: self.friend, isFriendPage: true)
+            FriendMumoryMapView(mumorys: friendDataViewModel.mumoryViewModel.myMumorys, user: self.friend, isFriendPage: true)
         }
         .onAppear {
             friendDataViewModel.isPlaylistLoading = true
             friendDataViewModel.isMumoryLoading = true
             
             Task {
-                await self.mumoryViewModel.fetchMumorys(uId: self.friend.uId) { result in
+                await friendDataViewModel.mumoryViewModel.fetchMumorys(uId: friend.uId) { result in
                     switch result {
                     case .success(let mumorys):
                         let friendMumorys = mumorys.filter { $0.isPublic == true }
-                        if !friendMumorys.isEmpty, let firstMumory = friendMumorys.first {
-                            self.firstMumory = firstMumory
+                        guard let firstMumory = friendMumorys.first else {
+                            print("no mumory")
+                            return
                         }
-                        self.mumorys = friendMumorys
+                        self.firstMumory = firstMumory
                         
                         DispatchQueue.main.async {
-                            mumoryViewModel.friendMumorys = friendMumorys
-                            //                        mumoryDataViewModel.isUpdating = false
+                            friendDataViewModel.mumoryViewModel.myMumorys = friendMumorys
                             friendDataViewModel.isMumoryLoading = false
                         }
+                        
                     case .failure(let err):
                         print("ERROR: \(err)")
                     }

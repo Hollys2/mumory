@@ -23,7 +23,7 @@ struct AddSongView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top){
+        ZStack(alignment: .top) {
             ColorSet.background.ignoresSafeArea()
             VStack(spacing: 0, content: {
                 //상단바
@@ -98,6 +98,7 @@ struct AddSongView: View {
             .padding(.top, getSafeAreaInsets().top)
             
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
             playerViewModel.setLibraryPlayerVisibility(isShown: false)

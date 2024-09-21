@@ -95,6 +95,7 @@ struct EditFavoriteGenreView: View {
                   
             VStack{
                 Spacer()
+                
                 Button {
                     saveGenre()
                 } label: {
@@ -121,14 +122,13 @@ struct EditFavoriteGenreView: View {
         ]
         
         db.collection("User").document(currentUserViewModel.user.uId).setData(data, merge: true) { error in
-            if error == nil {
-                currentUserViewModel.playlistViewModel.favoriteGenres = selectedGenres
-                isLoading
-                dismiss()
-            }else {
-                isLoading
-                print(error!)
+            isLoading = false
+            if let error = error {
+                print(error)
+                return
             }
+            currentUserViewModel.playlistViewModel.favoriteGenres = selectedGenres
+            dismiss()
         }
     }
     

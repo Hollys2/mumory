@@ -67,6 +67,7 @@ public struct LoginView: View {
                     OnboardingView()
                 }
             }            
+            .navigationBarBackButtonHidden()
             .onOpenURL(perform: { url in
                 if (AuthApi.isKakaoTalkLoginUrl(url)) {
                     AuthController.handleOpenUrl(url: url)

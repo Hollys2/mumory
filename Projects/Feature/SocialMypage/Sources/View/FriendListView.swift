@@ -107,6 +107,7 @@ struct FriendListView: View {
                 .scrollIndicators(.hidden)
             })
         })
+        .navigationBarBackButtonHidden()
         .onAppear(perform: {
             results = currentUserViewModel.friendViewModel.friends
         })

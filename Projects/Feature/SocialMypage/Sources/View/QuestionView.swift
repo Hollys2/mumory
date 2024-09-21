@@ -154,6 +154,7 @@ struct QuestionView: View {
                 }
                 
             }
+            .navigationBarBackButtonHidden()
             .onTapGesture {
                 hideKeyboard()
             }

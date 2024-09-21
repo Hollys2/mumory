@@ -114,15 +114,12 @@ public struct HomeView: View {
                     switch(page) {
                     case .requestFriend:
                         MyFriendRequestListView()
-                            .navigationBarBackButtonHidden()
                         
                     case .blockFriend:
                         BlockFriendListView()
-                            .navigationBarBackButtonHidden()
                         
                     case .friend(friend: let friend):
                         FriendPageView(friend: friend)
-                            .navigationBarBackButtonHidden()
                             .environmentObject(friendDataViewModel)
                         
                     case .friendPlaylist(playlistIndex: let playlistIndex):
@@ -148,120 +145,100 @@ public struct HomeView: View {
                     case .report:
                         ReportView()
                             .environmentObject(settingViewModel)
+                        
                     case .mumoryReport(mumoryId: let mumoryId):
                         ReportView(mumoryId: mumoryId)
+                        
                     case .search(term: let term):
                         SearchMusicView(term: term)
                         
                     case .artist(artist: let artist):
                         ArtistView(artist: artist)
-                            .navigationBarBackButtonHidden()
                         
                     case .playlistManage:
                         PlaylistManageView()
-                            .navigationBarBackButtonHidden()
+                        
                     case .chart:
                         ChartListView()
                         
                     case .playlist(playlist: let playlist):
                         PlaylistView(playlist: playlist)
-                            .navigationBarBackButtonHidden()
                         
                     case .shazam(type: let type):
                         ShazamView(type: type)
-                            .navigationBarBackButtonHidden()
                         
                     case .addSong(originPlaylist: let originPlaylist):
                         AddSongView(originPlaylist: originPlaylist)
-                            .navigationBarBackButtonHidden()
                         
                     case .saveToPlaylist(songs: let songs):
                         SaveToPlaylistView(songs: songs)
-                            .navigationBarBackButtonHidden()
                         
                     case .recommendation(genreID: let genreID):
                         RecommendationListView(genreID: genreID)
-                            .navigationBarBackButtonHidden()
                         
                     case .selectableArtist(artist: let artist):
                         SelectableArtistView(artist: artist)
-                            .navigationBarBackButtonHidden()
                         
                     case .favorite:
                         FavoriteListView()
-                            .navigationBarBackButtonHidden()
                         
                     case .playlistWithIndex(index: let index):
                         PlaylistView(playlist: $currentUserViewModel.playlistViewModel.playlistArray[index])
                         
                     case .myPage:
                         MyPageView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(withdrawViewModel)
                             .environmentObject(settingViewModel)
                         
                     case .setting:
                         SettingView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
                         
                     case .account:
                         AccountManageView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
                     case .notification(iconHidden: let hidden):
                         NotificationView(homeIconHidden: hidden)
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
                     case .setPW:
                         SetPWView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
                     case .question:
                         QuestionView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
                     case .emailVerification:
                         EmailLoginForWithdrawView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                             .environmentObject(withdrawViewModel)
                         
                     case .selectNotificationTime:
                         SelectNotificationTimeView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
                     case .login:
                         LoginView()
-                            .navigationBarBackButtonHidden()
                             .environmentObject(settingViewModel)
                         
                     case .friendList:
                         FriendListView()
-                            .navigationBarBackButtonHidden()
                         
                     case .friendPage(friend: let friend):
                         FriendPageView(friend: friend)
-                            .navigationBarBackButtonHidden()
                             .environmentObject(friendDataViewModel)
                         
                     case .reward:
                         RewardView()
-                            .navigationBarBackButtonHidden()
                         
                     case .monthlyStat:
                         MonthlyStatView()
-                            .navigationBarBackButtonHidden()
                         
                     case .activityList:
                         ActivityListView()
-                            .navigationBarBackButtonHidden()
             
                     case .mumoryDetailView(mumory: let mumory):
                         MumoryDetailView(mumory: mumory)

@@ -77,14 +77,30 @@ struct NotificationView: View {
                 NotificationItem(title: "소셜 알림", isOn: $settingViewModel.isSubscribedToSocial)
                     .onChange(of: settingViewModel.isSubscribedToSocial, perform: { value in
                         withAnimation {
-                            isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
+                            if settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService {
+                                isEntireOn = true
+                            } else {
+                                let social = settingViewModel.isSubscribedToSocial
+                                let service = settingViewModel.isSubscribedToService
+                                isEntireOn = false
+                                settingViewModel.isSubscribedToSocial = social
+                                settingViewModel.isSubscribedToService = service
+                            }
                         }
                     })
                 
                 NotificationItem(title: "서비스 소식 알림", isOn: $settingViewModel.isSubscribedToService)
                     .onChange(of: settingViewModel.isSubscribedToService, perform: { value in
                         withAnimation {
-                            isEntireOn = settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService
+                            if settingViewModel.isSubscribedToSocial && settingViewModel.isSubscribedToService {
+                                isEntireOn = true
+                            } else {
+                                let social = settingViewModel.isSubscribedToSocial
+                                let service = settingViewModel.isSubscribedToService
+                                isEntireOn = false
+                                settingViewModel.isSubscribedToSocial = social
+                                settingViewModel.isSubscribedToService = service
+                            }
                         }
                     })
                 
@@ -112,6 +128,7 @@ struct NotificationView: View {
                 Spacer()
             })
         }
+        .navigationBarBackButtonHidden()
         .onAppear {
             if settingViewModel.uid.isEmpty {
                 settingViewModel.uid = currentUserViewModel.user.uId

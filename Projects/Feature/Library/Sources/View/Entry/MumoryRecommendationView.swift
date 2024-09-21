@@ -33,8 +33,6 @@ public struct MumoryRecommendationView: View {
     
     @State var musicChart: MusicItemCollection<Song> = []
     @State var chartChangeDetectValue: Bool = false
-    @State var testValue: CGFloat = 200
-    
     @State var mostPostedSongs: [Song] = []
     @State var similarTasteSongs: [Song] = []
     @State var selection: Int = 0
@@ -48,13 +46,11 @@ public struct MumoryRecommendationView: View {
             LibraryColorSet.background.ignoresSafeArea()
             
             VStack(spacing: 0, content: {
-                //최신 인기곡 타이틀
-                SubTitle()
+                ChartTitleView
                     .onTapGesture {
                         appCoordinator.rootPath.append(MumoryPage.chart)
                     }
                 
-                //차트 - 가로 페이징
                 ChartPagingScrollView(musicChart: $musicChart, scrollViewHeight: $scrollViewHeight) {
                     LazyHGrid(rows: rows, spacing: 0,content: {
                         ForEach(0 ..< musicChart.count, id: \.self) { index in
@@ -67,16 +63,9 @@ public struct MumoryRecommendationView: View {
                         }
                         
                         if musicChart.isEmpty {
-                            MusicChartSkeletonShortView()
-                            MusicChartSkeletonShortView()
-                            MusicChartSkeletonShortView()
-                            MusicChartSkeletonShortView(lineVisible: false)
-                            MusicChartSkeletonShortView()
-                            MusicChartSkeletonShortView()
-                            MusicChartSkeletonShortView()
-                            MusicChartSkeletonShortView(lineVisible: false)
-
+                            ChartSkeletonView
                         }
+                        
                     })
                     .padding(.trailing, 33)
                 }
@@ -94,27 +83,16 @@ public struct MumoryRecommendationView: View {
 
 
                 TabView(selection: $selection){
-                    ExtraRecommendationView(type: .mostPosted, songs: $mostPostedSongs).tag(0)
-                    ExtraRecommendationView(type: .similiarTaste, songs: $similarTasteSongs).tag(1)
+                    ExtraRecommendationView(type: .mostPosted, songs: $mostPostedSongs)
+                        .tag(0)
+                    ExtraRecommendationView(type: .similiarTaste, songs: $similarTasteSongs)
+                        .tag(1)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .frame(height: 420)
                 
-                HStack(spacing: 8, content: {
-                    Circle()
-                        .fill(selection == 0 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
-                        .frame(width: 6, height: 6)
-                    
-                    Circle()
-                        .fill(selection == 1 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
-                        .frame(width: 6, height: 6)
-                })
-                .padding(.top, 25)
-                
-                Rectangle()
-                    .foregroundStyle(Color.clear)
-                    .frame(height: 90)
-                
+    
+                SpacerView(height: 90)
                 
             })
             
@@ -133,8 +111,50 @@ public struct MumoryRecommendationView: View {
         
     }
     
+    var TabViewIndexView: some View {
+        HStack(spacing: 8, content: {
+            Circle()
+                .fill(selection == 0 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+                .frame(width: 6, height: 6)
+            
+            Circle()
+                .fill(selection == 1 ? ColorSet.mainPurpleColor : ColorSet.darkGray)
+                .frame(width: 6, height: 6)
+        })
+        .padding(.top, 25)
+    }
+    
+    var ChartSkeletonView: some View {
+        Group {
+            MusicChartSkeletonShortView()
+            MusicChartSkeletonShortView()
+            MusicChartSkeletonShortView()
+            MusicChartSkeletonShortView(lineVisible: false)
+            MusicChartSkeletonShortView()
+            MusicChartSkeletonShortView()
+            MusicChartSkeletonShortView()
+            MusicChartSkeletonShortView(lineVisible: false)
+        }
+    }
+    
+    var ChartTitleView: some View {
+        HStack(spacing: 0, content: {
+            Text("최신 인기곡")
+                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
+                .foregroundStyle(.white)
+            Spacer()
+            SharedAsset.next.swiftUIImage
+                .resizable()
+                .scaledToFit()
+                .frame(width: 17, height: 17)
+        })
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
+    }
+    
+    // MARK: - Methods
+    
     private func searchChart(offset: Int){
-        
     Task {
             var request = MusicCatalogChartsRequest(kinds: [.dailyGlobalTop], types: [Song.self])
             request.offset = offset
@@ -230,25 +250,3 @@ public struct MumoryRecommendationView: View {
 
     }
 }
-
-private struct SubTitle: View {
-    var body: some View {
-        HStack(spacing: 0, content: {
-            Text("최신 인기곡")
-                .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                .foregroundStyle(.white)
-            Spacer()
-            SharedAsset.next.swiftUIImage
-                .resizable()
-                .scaledToFit()
-                .frame(width: 17, height: 17)
-        })
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
-    }
-}
-
-
-
-
-  

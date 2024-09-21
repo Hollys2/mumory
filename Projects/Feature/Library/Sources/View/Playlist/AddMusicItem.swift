@@ -88,8 +88,8 @@ struct AddMusicItem: View {
             db.collection("User").document(currentUserViewModel.user.uId).collection("Playlist").document(originPlaylist.id)
                 .updateData(["songIds": FirebaseManager.Fieldvalue.arrayUnion([songID])])
             db.collection("User").document(currentUserViewModel.user.uId).collection("MonthlyStat").addDocument(data: monthlyStatData)
-            snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
             snackBarViewModel.setRecentSaveData(playlist: originPlaylist, songIds: [songID])
+            snackBarViewModel.setSnackBarAboutPlaylist(status: .success, playlistTitle: originPlaylist.title)
             guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == originPlaylist.id}) else {return}
             currentUserViewModel.playlistViewModel.playlistArray[index].songIDs.append(songID)
             currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(song)

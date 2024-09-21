@@ -16,68 +16,36 @@ struct UneditablePlaylistManageView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @State var itemSize: CGFloat = .zero
     @State var isPresentBottomSheet: Bool = false
+    
+    let col: [GridItem] = [
+    ]
 
     var body: some View {
         ZStack(alignment: .top){
             LibraryColorSet.background.ignoresSafeArea()
             
             VStack(alignment: .center){
-                //상단바
-                HStack(){
-                    SharedAsset.back.swiftUIImage
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            appCoordinator.rootPath.removeLast()
-                        }
-                    
-                    Spacer()
-                    
-                    Text("\(friendDataViewModel.friend.nickname) 플레이리스트")
-                        .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 18))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    SharedAsset.menuWhite.swiftUIImage
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .onTapGesture {
-                            UIView.setAnimationsEnabled(false)
-                            isPresentBottomSheet = true
-                        }
-                    
-                }
-                .padding(.horizontal, 20)
-                .frame(height: 65)
-
-            
-     
-                
+                NavigationBar(leadingItem: BackButton(), centerItem: NavigationTitle(title: "\(friendDataViewModel.friend.nickname) 플레이리스트"), trailingItem: MenuButton)
+                     
                 //플레이리스트 스크롤뷰
                 ScrollView(.vertical) {
-                    LazyVGrid(columns: [
+                    let col = [
                         GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12),
                         GridItem(.flexible(minimum: itemSize * 2, maximum: itemSize * 2 + 10), spacing: 12)
-                    ] , spacing: 30, content: {
+                    ]
+                    LazyVGrid(columns: col, spacing: 30, content: {
                         ForEach(friendDataViewModel.playlistArray.indices, id: \.self) { index in
                             UneditablePlaylistBigItem(playlist: $friendDataViewModel.playlistArray[index])
                                 .onTapGesture {
                                     appCoordinator.rootPath.append(MumoryPage.friendPlaylist(playlistIndex: index))
                                 }
-                            
                         }
                     })
                     
-                    Rectangle()
-                        .foregroundStyle(Color.clear)
-                        .frame(height: 90)
+                   BottomSpacerView
                 }
                 .padding(.top, 10)
                 .scrollIndicators(.hidden)
- 
-                
-             
             }
 
         }
@@ -97,6 +65,23 @@ struct UneditablePlaylistManageView: View {
             .background(TransparentBackground())
         }
   
+    }
+    
+    /// 상단바 메뉴 버튼
+    var MenuButton: some View {
+        SharedAsset.menuWhite.swiftUIImage
+            .resizable()
+            .frame(width: 30, height: 30)
+            .onTapGesture {
+                UIView.setAnimationsEnabled(false)
+                isPresentBottomSheet = true
+            }
+    }
+    
+    var BottomSpacerView: some View {
+        Rectangle()
+            .foregroundStyle(Color.clear)
+            .frame(height: 90)
     }
 }
 

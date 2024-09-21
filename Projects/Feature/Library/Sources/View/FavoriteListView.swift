@@ -137,6 +137,7 @@ struct FavoriteListView: View {
 //            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
 //                .ignoresSafeArea()
         }
+        .navigationBarBackButtonHidden()
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)

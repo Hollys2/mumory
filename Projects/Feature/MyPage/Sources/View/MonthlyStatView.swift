@@ -61,6 +61,7 @@ public struct MonthlyStatView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden()
         .background(SharedAsset.backgroundColor.swiftUIColor)
         .fullScreenCover(isPresented: $isDatePickerShown, content: {
             BottomSheetWrapper(isPresent: $isDatePickerShown) {

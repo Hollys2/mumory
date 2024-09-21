@@ -9,18 +9,20 @@
 import Foundation
 import SwiftUI
 
-struct TransparentBackground: UIViewRepresentable {
-    private class BackgroundRemovalView: UIView {
-           override func didMoveToWindow() {
-               super.didMoveToWindow()
-               superview?.superview?.backgroundColor = .clear
-           }
-       }
-       
-       func makeUIView(context: Context) -> UIView {
-           return BackgroundRemovalView()
-       }
-
+public struct TransparentBackground: UIViewRepresentable {
+    public init(){}
     
-    func updateUIView(_ uiView: UIView, context: Context) {}
+    public class BackgroundRemovalView: UIView {
+        public override func didMoveToWindow() {
+            super.didMoveToWindow()
+            superview?.superview?.backgroundColor = .clear
+        }
+    }
+    
+    public func makeUIView(context: Context) -> UIView {
+        return BackgroundRemovalView()
+    }
+    
+    
+    public func updateUIView(_ uiView: UIView, context: Context) {}
 }

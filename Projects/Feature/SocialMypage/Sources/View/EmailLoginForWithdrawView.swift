@@ -103,11 +103,11 @@ struct EmailLoginForWithdrawView: View {
 //            LoadingAnimationView(isLoading: $isLoading)
 //                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
+        .navigationBarBackButtonHidden()
         .navigationDestination(isPresented: $isWithdrawSuccess, destination: {
             EmptyView()
         })
         .background(LibraryColorSet.background)
-        .navigationBarBackButtonHidden()
         .onTapGesture {
             self.hideKeyboard()
         }

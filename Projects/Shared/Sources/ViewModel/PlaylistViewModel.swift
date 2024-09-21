@@ -22,50 +22,6 @@ public class PlaylistViewModel: ObservableObject {
     @Published public var playlistArray: [MusicPlaylist] = []
 
     // MARK: - Methods
-//    public func savePlaylist() async -> [MusicPlaylist]{
-//        if self.uId.isEmpty {return []}
-//        let Firebase = FirebaseManager.shared
-//        let db = Firebase.db
-//        return await withTaskGroup(of: MusicPlaylist.self, body: { taskGroup -> [MusicPlaylist] in
-//            var playlists: [MusicPlaylist] = []
-//            
-//            let query = db.collection("User").document(uId).collection("Playlist")
-//                .order(by: "date", descending: false)
-//            
-//            do {
-//                let snapshot = try await query.getDocuments()
-//                
-//                snapshot.documents.forEach { document in
-//                    
-//                    taskGroup.addTask {
-//                        let data = document.data()
-//                        let title = data["title"] as? String ?? ""
-//                        let isPublic = data["isPublic"] as? Bool ?? false
-//                        let songIDs = data["songIds"] as? [String] ?? []
-//                        let date = (data["date"] as? FirebaseManager.Timestamp)?.dateValue() ?? Date()
-//                        let id = document.reference.documentID
-//                        var playlist = MusicPlaylist(id: id, title: title, songIDs: songIDs, isPublic: isPublic, createdDate: date)
-//                        let startIndex = 0
-//                        var endIndex = playlist.songIDs.endIndex < 4 ? playlist.songIDs.endIndex : 4
-//                        let requestSongIds = Array(songIDs[startIndex..<endIndex])
-//                        playlist.songs = await FetchManager.shared.fetchSongs(songIds: requestSongIds)
-//                        return playlist
-//                    }
-//                    
-//                }
-//            } catch {
-//                print(error)
-//            }
-//            
-//            for await value in taskGroup {
-//                playlists.append(value)
-//            }
-//            
-//            return playlists.sorted(by: {$0.createdDate < $1.createdDate})
-//        })
-//        
-//    }
-    
     public func savePlaylist() {
         if self.uId.isEmpty {return}
         let Firebase = FirebaseManager.shared
@@ -167,5 +123,43 @@ public class PlaylistViewModel: ObservableObject {
     public func isFavoriteEmpty() -> Bool {
         guard let favorite = self.playlistArray.first(where: {$0.id == "favorite"}) else {return false}
         return favorite.songs.isEmpty
+    }
+    
+    public func fetchFavoriteGenres() {
+        if self.uId.isEmpty {return}
+        let Firebase = FirebaseManager.shared
+        let db = Firebase.db
+        let query = db.collection("User").document(self.uId)
+        
+        query.getDocument { snapshot, error in
+            guard let data = snapshot?.data() else {return}
+            guard let favoriteGenres = data["favoriteGenres"] as? [Int] else {return}
+            DispatchQueue.main.async {
+                self.favoriteGenres = favoriteGenres
+            }
+        }
+    }
+    
+    public func fetchSongIds(playlistId: String) async {
+        let db = FirebaseManager.shared.db
+        guard let uId = FirebaseManager.shared.auth.currentUser?.uid else {
+            return
+        }
+        let query = db.collection("User").document(uId).collection("Playlist").document(playlistId)
+        guard let document = try? await query.getDocument() else {
+            return
+        }
+        guard let data = document.data() else {
+            return
+        }
+        guard let songIds = data["songIds"] as? [String] else {
+            return
+        }
+        
+        guard let index = self.playlistArray.firstIndex(where: {$0.id == playlistId}) else {
+            return
+        }
+        
+        self.playlistArray[index].songIDs = songIds
     }
 }

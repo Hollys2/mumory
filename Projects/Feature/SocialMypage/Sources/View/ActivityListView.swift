@@ -182,6 +182,7 @@ struct ActivityListView: View {
             
             })
         }
+        .navigationBarBackButtonHidden()
         .preferredColorScheme(.dark)
         .onAppear{
             let calendar = Calendar.current

@@ -126,6 +126,7 @@ struct SelectableArtistView: View {
                 .offset(y: playerViewModel.isShownPreview ? 0 : 120)
                 .animation(.spring(), value: playerViewModel.isShownPreview)
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
             Task {

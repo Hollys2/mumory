@@ -17,6 +17,7 @@ struct PlaylistView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
     
+    @Binding var playlist: MusicPlaylist
     @State var offset: CGPoint = .zero
     @State var isBottomSheetPresent: Bool = false
     @State var isEditing: Bool = false
@@ -26,7 +27,6 @@ struct PlaylistView: View {
     @State var selectedTab: Tab = .library
     @State private var isLoading: Bool = false
     @State var searchIndex: Int = 0
-    @Binding var playlist: MusicPlaylist
     let itemHeight: CGFloat = 70
     init(playlist: Binding<MusicPlaylist>){
         self._playlist = playlist
@@ -226,8 +226,7 @@ struct PlaylistView: View {
                             var endIndex = startIndex + 20
                             endIndex = playlist.songIDs.endIndex < endIndex ? playlist.songIDs.endIndex : endIndex
                             let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
-                            guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                            currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
+                            playlist.songs.append(contentsOf: await fetchSongs(songIDs: requestSongIds))
                         }
                     }
                 }
@@ -296,20 +295,19 @@ struct PlaylistView: View {
 //                .ignoresSafeArea()
 
         }
-        .ignoresSafeArea()
         .navigationBarBackButtonHidden()
+        .ignoresSafeArea()
         .onAppear(perform: {
             UIView.setAnimationsEnabled(true)
             playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 isLoading = true
+                await currentUserViewModel.playlistViewModel.fetchSongIds(playlistId: playlist.id)
                 let startIndex = 0
                 var endIndex = playlist.songIDs.endIndex < 20 ? playlist.songIDs.endIndex : 20
                 let requestSongIds = Array(playlist.songIDs[startIndex..<endIndex])
-
-                let songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: playlist.id)
-                guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
-                currentUserViewModel.playlistViewModel.playlistArray[index].songs = await fetchSongs(songIDs: requestSongIds)
+                playlist.songs = await fetchSongs(songIDs: requestSongIds)
+                print("song count: \(playlist.songs.count)")
                 isLoading = false
             }
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistView")

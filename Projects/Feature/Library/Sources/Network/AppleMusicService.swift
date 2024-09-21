@@ -70,7 +70,7 @@ public class AppleMusicService {
                 
                 AF.request(url, method: .get, parameters: parameter, headers: header)
                     .validate(statusCode: 200..<300)
-                    .responseDecodable(of: SongResponseModel.self) { response in
+                    .responseDecodable(of: AppleMusicSongResponseModel.self) { response in
                         switch(response.result){
                         case .success(let result):
                             guard let songs = result.results.songs.first?.data else {

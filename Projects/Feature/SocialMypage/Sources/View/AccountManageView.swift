@@ -93,6 +93,7 @@ struct AccountManageView: View {
 
             })
         }
+        .navigationBarBackButtonHidden()
 
     }
     

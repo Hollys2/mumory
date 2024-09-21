@@ -15,6 +15,7 @@ class FriendDataViewModel: ObservableObject {
     @Published var playlistArray: [MusicPlaylist] = []
     @Published var isPlaylistLoading: Bool = false
     @Published var isMumoryLoading: Bool = false
+    @Published var mumoryViewModel: MumoryViewModel = .init()
     
     init() {
         self.friend = UserProfile()

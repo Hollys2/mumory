@@ -146,6 +146,11 @@ extension Project {
                     "CFBundleTypeRole" : "Editor",
                     "CFBundleURLName" : "fireBase-google",
                     "CFBundleURLSchemes" : ["com.googleusercontent.apps.108840634909-mcjqomjccpsc14ubnhor8uet1shj0bcq"]
+                ],
+                [
+                    "CFBundleTypeRole" : "Editor",
+                    "CFBundleURLName" : "google",
+                    "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
                 ]
             ]
         ]

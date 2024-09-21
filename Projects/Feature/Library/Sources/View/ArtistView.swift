@@ -145,6 +145,7 @@ struct ArtistView: View {
 //                .ignoresSafeArea()
 
         }
+        .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
             playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)

@@ -18,6 +18,7 @@ public struct SplashView: View {
     // MARK: - Propoerties
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     
     // MARK: - View
     public var body: some View {
@@ -30,15 +31,12 @@ public struct SplashView: View {
         }
         .onAppear {
             Task {
-//                self.appCoordinator.isLoading = true
-                
                 if await currentUserViewModel.initializeUserData() {
+                    playerViewModel.fetchFavoriteSongId()
                     self.appCoordinator.isHomeViewShown = true
                 } else {
                     self.appCoordinator.isLoginViewShown = true
                 }
-                
-//                self.appCoordinator.isLoading = false
             }
 
             Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in

@@ -64,6 +64,8 @@ struct BlockFriendListView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden()
+
 
     }
 }

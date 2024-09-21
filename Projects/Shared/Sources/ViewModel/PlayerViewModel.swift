@@ -44,6 +44,7 @@ public class PlayerViewModel: ObservableObject {
     @Published public var shuffleState: ShuffleState = .off
     @Published public var repeatState: RepeatState = .off
     @Published public var isPlaying: Bool = false
+    
     private var player = ApplicationMusicPlayer.shared
     var originQueue: [Song] = []
     
@@ -427,5 +428,29 @@ public class PlayerViewModel: ObservableObject {
     public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
         self.miniPlayerMoveToBottom = moveToBottom
         isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+    }
+    
+    public func fetchFavoriteSongId() {
+        Task {
+            let db = FirebaseManager.shared.db
+            let auth = FirebaseManager.shared.auth
+            guard let currentUser = auth.currentUser else {
+                return
+            }
+            let query = db.collection("User").document(currentUser.uid).collection("Playlist").document("favorite")
+            guard let document = try? await query.getDocument() else {
+                print("no document")
+                return
+            }
+            guard let data = document.data(),
+                  let songIds = data["songIds"] as? [String] else {
+                print("no songIds")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                self.favoriteSongIds = songIds
+            }
+        }
     }
 }
