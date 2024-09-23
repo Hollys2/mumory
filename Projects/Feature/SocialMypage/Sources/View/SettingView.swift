@@ -151,13 +151,14 @@ struct SettingView: View {
             currentUserViewModel.removeAllData()
             appCoordinator.isMyPageViewShown = false
             appCoordinator.isCreateMumorySheetShown = false
-            appCoordinator.isHomeViewShown = false
             appCoordinator.selectedTab = .home
             for key in UserDefaults.standard.dictionaryRepresentation().keys {
                 UserDefaults.standard.removeObject(forKey: key.description)
             }
+            appCoordinator.isLoginViewShown = true
+            appCoordinator.isHomeViewShown = false
             appCoordinator.rootPath = NavigationPath()
-            
+            appCoordinator.authPath = []
             isLoading = false
         } label: {
             Text("로그아웃")
@@ -216,6 +217,7 @@ struct SettingView: View {
                         print("delete docs successful")
                         appCoordinator.isMyPageViewShown = false
                         appCoordinator.isHomeViewShown = false
+                        appCoordinator.isLoginViewShown = true
                         appCoordinator.rootPath = NavigationPath()
                     }
                 }
@@ -265,6 +267,7 @@ struct SettingView: View {
                             appCoordinator.isMyPageViewShown = false
                             currentUserViewModel.removeAllData()
                             appCoordinator.isHomeViewShown = false
+                            appCoordinator.isLoginViewShown = true
                             appCoordinator.rootPath = NavigationPath()
                         }
                     }

@@ -22,6 +22,9 @@ struct MumoryApp: App {
             ZStack {
                 if self.appCoordinator.isHomeViewShown {
                     HomeView()
+                        .fullScreenCover(isPresented: $playerViewModel.isPresentNowPlayingView) {
+                            NowPlayingView()
+                        }
                 }
 
                 if self.appCoordinator.isLoginViewShown {
@@ -38,14 +41,9 @@ struct MumoryApp: App {
                 if self.appCoordinator.isSplashViewShown {
                     SplashView()
                 }
-                
-                if playerViewModel.isPresentNowPlayingView {
-                    NowPlayingView()
-                }
-                
+
                 SnackBarView()
             }
-            .animation(.default, value: playerViewModel.isPresentNowPlayingView)
             .preferredColorScheme(.dark)
             .ignoresSafeArea()
             .environmentObject(appCoordinator)

@@ -118,7 +118,7 @@ public class FetchManager {
         case .apple:
             methodName = "Apple"
         }
-        
+        print(email)
         let query = db.collection("User")
             .whereField("email", isEqualTo: email)
             .whereField("signInMethod", isEqualTo: methodName)

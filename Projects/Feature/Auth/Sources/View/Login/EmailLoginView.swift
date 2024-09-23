@@ -129,6 +129,7 @@ struct EmailLoginView: View {
         Task {
             await currentUserViewModel.initializeUserData()
             appCoordinator.isHomeViewShown = true
+            appCoordinator.isLoginViewShown = false
         }
     }
 }

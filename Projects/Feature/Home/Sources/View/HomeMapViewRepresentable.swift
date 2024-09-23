@@ -40,7 +40,6 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
         
         if let userLocation = self.currentUserViewModel.locationManagerViewModel.currentLocation, !self.appCoordinator.isFirstUserLocation {
             mapView.setRegion(MKCoordinateRegion(center: userLocation.coordinate, span: MapConstant.defaultSpan), animated: true)
-            print("FUCK currentLocation")
             DispatchQueue.main.async {
                 self.appCoordinator.isFirstUserLocation = true
             }
@@ -59,7 +58,6 @@ struct HomeMapViewRepresentable: UIViewRepresentable {
     }
     
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        print("FXXK HomeMapView")
         let mumoryIds: [String] = self.currentUserViewModel.mumoryViewModel.myMumorys.map { $0.id ?? "" }
         let annotationsToRemove = self.currentUserViewModel.mumoryViewModel.myMumorys.filter { !mumoryIds.contains($0.id ?? "") }
 //        let annotationsToRemove = uiView.annotations.compactMap { $0 as? Mumory }.filter { !mumoryIds.contains($0.id) }

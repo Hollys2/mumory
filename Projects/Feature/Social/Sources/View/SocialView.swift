@@ -549,6 +549,8 @@ private struct SocialItemView: View {
                 // MARK: Heart & Comment
                 VStack(spacing: 0) {
                     Button(action: {
+                        print("tap like1")
+
                         self.generateHapticFeedback(style: .medium)
                         isButtonDisabled = true
                         _ = self.mumory.likes

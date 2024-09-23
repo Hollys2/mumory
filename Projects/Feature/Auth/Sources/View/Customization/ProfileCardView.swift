@@ -58,6 +58,7 @@ struct ProfileCardView: View {
             Spacer()
             Button {
                 appCoordinator.isHomeViewShown = true
+                appCoordinator.isLoginViewShown = false
             } label: {
                 CommonButton(title: "시작하기", isEnabled: true)
                     .padding(.bottom, 20)

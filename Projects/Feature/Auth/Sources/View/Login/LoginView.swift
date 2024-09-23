@@ -158,6 +158,7 @@ public struct LoginView: View {
                 guard let result = try? await FirebaseManager.shared.auth.signIn(with: credential) else {return}
                 await currentUserViewModel.initializeUserData()
                 appCoordinator.isHomeViewShown = true
+                appCoordinator.isLoginViewShown = false
             }
 
         }
@@ -204,6 +205,7 @@ public struct LoginView: View {
                     guard let result = try? await FirebaseManager.shared.auth.signIn(withEmail: firebaseEmail, password: firebasePassword) else {return}
                     await currentUserViewModel.initializeUserData()
                     appCoordinator.isHomeViewShown = true
+                    appCoordinator.isLoginViewShown = false
                 }
             }
         }

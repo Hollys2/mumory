@@ -134,6 +134,7 @@ struct PlaylistView: View {
                                 PlayAllButton()
                                     .onTapGesture {
                                         playerViewModel.playAll(title: playlist.title, songs: playlist.songs)
+                                        playerViewModel.isPresentNowPlayingView.toggle()
                                     }
                             })
                             .frame(maxHeight: .infinity, alignment: .bottom)
@@ -175,6 +176,7 @@ struct PlaylistView: View {
                                             guard let index = currentUserViewModel.playlistViewModel.playlistArray.firstIndex(where: {$0.id == playlist.id}) else {return}
                                             currentUserViewModel.playlistViewModel.playlistArray[index].songs.append(contentsOf: songs)
                                             playerViewModel.setQueue(songs: playlist.songs, startSong: nowTappedSong)
+                                            playerViewModel.isPresentNowPlayingView.toggle()
                                         }
                                     }
                                 }

@@ -100,21 +100,21 @@ struct AppleSignInButton: UIViewControllerRepresentable {
                     print("DEBUG: Unable to serialize token string from data \(appleIDToken.debugDescription)")
                     return
                 }
-                //애플은 초기에만 이메일을 반환해서 일단 초기값으로 설정 후 회원가입 단계에서 이메일 값을 얻어 저장함
-                let email = "apple@apple.com"
+                
                 Task {
-                    let credential = OAuthProvider.credential(withProviderID: "apple.com", idToken: idTokenString, rawNonce: nonce)
-                    if await FetchManager.shared.isNewUser(email: email, method: .email) {
+                    let credential = OAuthProvider.appleCredential(withIDToken: idTokenString, rawNonce: nonce, fullName: appleIDCredential.fullName)
+                    if let email = appleIDCredential.email {
                         signUpViewModel.setSignUpData(method: .apple, email: email, appleCredential: credential)
                         appCoordinator.push(destination: AuthPage.signUpCenter)
-
                     } else {
                         guard let result = try? await FirebaseManager.shared.auth.signIn(with: credential) else {return}
-                        await currentUserViewModel.initializeUserData()
-                        appCoordinator.isHomeViewShown = true
+                        if await currentUserViewModel.initializeUserData() {
+                            appCoordinator.isHomeViewShown = true
+                            appCoordinator.isLoginViewShown = false
+                        }
                     }
                 }
-
+                
             }
         }
 
@@ -124,7 +124,6 @@ struct AppleSignInButton: UIViewControllerRepresentable {
 
             authorizationController.delegate = self
             authorizationController.presentationContextProvider = self
-
             authorizationController.performRequests()
         }
 

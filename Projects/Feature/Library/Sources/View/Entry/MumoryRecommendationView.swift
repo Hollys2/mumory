@@ -59,6 +59,7 @@ public struct MumoryRecommendationView: View {
                                     let tappedSong = musicChart[index]
                                     playerViewModel.playAll(title: "최신 인기곡", songs: Array(musicChart), startingItem: tappedSong)
                                     playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+                                    playerViewModel.isPresentNowPlayingView.toggle()
                                 }
                         }
                         

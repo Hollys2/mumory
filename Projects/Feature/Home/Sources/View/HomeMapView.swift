@@ -39,11 +39,14 @@ struct HomeMapView: View {
                 )
                 .allowsHitTesting(false)
             
-            PlayingMusicBarView()
-                .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
-            
-            AppleMusicPopUpView()
-                .padding(.top, 15)
+            VStack(spacing: 0) {
+                PlayingMusicBarView()
+                    .padding(.top, getSafeAreaInsets().top + (getUIScreenBounds().height > 800 ? 8 : 16))
+                
+                AppleMusicPopUpView()
+                    .padding(.top, 15)
+            }
+
             
         }
         .onAppear {

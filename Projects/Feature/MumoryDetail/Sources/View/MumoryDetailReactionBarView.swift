@@ -44,6 +44,7 @@ struct MumoryDetailReactionBarView: View {
             HStack(alignment: .center) {
                 
                 Button(action: {
+                    print("tap like2")
                     self.generateHapticFeedback(style: .medium)
                     isButtonDisabled = true
                     let originLikes = self.mumory.likes

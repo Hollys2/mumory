@@ -254,7 +254,9 @@ struct PlayingView: View {
             //상단바
             HStack(alignment: .bottom, content: {
                 Button(action: {
-                    playerViewModel.isPresentNowPlayingView = false
+                    withAnimation {
+                        playerViewModel.isPresentNowPlayingView = false
+                    }
                 }, label: {
                     SharedAsset.downArrow.swiftUIImage
                         .resizable()

@@ -87,6 +87,7 @@ struct ChartListView: View {
                                 .onTapGesture {
                                     let tappedSong = songs[index]
                                     playerViewModel.playAll(title: "최신 인기곡", songs: songs, startingItem: tappedSong)
+                                    playerViewModel.isPresentNowPlayingView.toggle()
                                     Task {
                                         if searchIndex < 5 {
                                             let startSong = songs[index]

@@ -53,7 +53,7 @@ public class FriendViewModel: ObservableObject {
                         if type == "recieve" {
                             guard let friendUId = data["uId"] as? String else {return}
                             Task {
-                                let user = await UserProfile()
+                                let user = await FetchManager.shared.fetchUser(uId: friendUId)
                                 DispatchQueue.main.async {
                                     self.recievedNewFriends = true
                                     self.recievedRequests.append(user)
@@ -62,7 +62,7 @@ public class FriendViewModel: ObservableObject {
                         } else if type == "request" {
                             guard let friendUId = data["uId"] as? String else {return}
                             Task {
-                                let user = await UserProfile()
+                                let user = await FetchManager.shared.fetchUser(uId: friendUId)
                                 DispatchQueue.main.async {
                                     self.friendRequests.append(user)
                                 }

@@ -75,6 +75,7 @@ struct ArtistOfSongView: View {
                                 .onTapGesture {
                                     playerViewModel.playAll(title: artist?.name ?? "재생 중", songs: songs)
                                     AnalyticsManager.shared.setSelectContentLog(title: "ArtistViewPlayAllButton")
+                                    playerViewModel.isPresentNowPlayingView.toggle()
                                 }
                         })
                         .padding(.horizontal, 20)

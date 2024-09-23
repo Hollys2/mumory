@@ -139,6 +139,7 @@ private struct RecommendationScrollView: View {
                                 .onTapGesture {
                                     playerViewModel.playAll(title: "\(MusicGenreHelper().genreName(id: genreID)) 추천곡 리스트", songs: songs, startingItem: song)
                                     playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+                                    playerViewModel.isPresentNowPlayingView.toggle()
                                 }
                         }
                         

@@ -196,6 +196,9 @@ struct SocialFriendView: View {
                             LazyVStack(spacing: 0, content: {
                                 ForEach(currentUserViewModel.friendViewModel.recievedRequests, id: \.self) { friend in
                                     RecievedRequestItem(friend: friend, status: $status)
+                                        .onAppear {
+                                            print("friend: \(friend)")
+                                        }
                                 }
                             })
                         }
