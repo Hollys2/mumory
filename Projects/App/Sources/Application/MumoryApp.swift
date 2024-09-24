@@ -43,6 +43,8 @@ struct MumoryApp: App {
                 }
 
                 SnackBarView()
+                
+                MiniPlayerView()
             }
             .preferredColorScheme(.dark)
             .ignoresSafeArea()

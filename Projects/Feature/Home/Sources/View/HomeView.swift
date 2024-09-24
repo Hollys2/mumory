@@ -64,7 +64,6 @@ public struct HomeView: View {
                         selectedTab: self.$appCoordinator.selectedTab
                     )
                     
-                    MiniPlayerView()
                     
                     if self.appCoordinator.isCreateMumorySheetShown {
                         CreateMumorySheetUIViewRepresentable()
