@@ -554,157 +554,11 @@ public struct MumoryCommentSheetView: View {
                 }
             }
             
-            VStack(spacing: 0) {
-                if self.isWritingReply {
-                    HStack(spacing: 5) {
-                        Text(selectedComment.uId != currentUserViewModel.user.uId && !currentUserViewModel.friendViewModel.friends.contains(where: { $0.uId == selectedComment.uId }) ? StringManager.maskString(self.selectedCommentUser.nickname) : "\(self.selectedCommentUser.nickname)")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                            .foregroundColor(.white) +
-                        Text("님에게 답글 남기는 중")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-                        
-                        Text("・")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-                            .frame(width: 4, alignment: .bottom)
-                        
-                        Button(action: {
-                            self.isWritingReply = false
-                            self.selectedComment = Comment()
-                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                        }, label: {
-                            Text("취소")
-                                .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
-                                .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
-                        })
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 36)
-                    .background(Color(red: 0.09, green: 0.09, blue: 0.09))
-                    .onAppear {
-                        Task {
-                            self.selectedCommentUser = await FetchManager.shared.fetchUser(uId: self.selectedComment.uId)
-                        }
-                    }
-                }
-                
-                HStack(spacing: 0) {
-                    Spacer().frame(width: 16)
-                    
-                    Image(uiImage: self.isPublic ? SharedAsset.commentUnlockButtonMumoryDetail.image : SharedAsset.commentLockButtonMumoryDetail.image)
-                        .resizable()
-                        .frame(width: 35, height: 39)
-                        .onTapGesture {
-                            self.isPublic.toggle()
-                        }
-                    
-                    Spacer().frame(width: 12)
-                    
-                    TextField("", text: $commentText,
-                              prompt: Text("댓글을 입력하세요.")
-                        .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
-                        .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
-                    )
-                    .padding(.leading, 25)
-                    .padding(.trailing, 50)
-                    .background(
-                        ZStack(alignment: .trailing) {
-                            Rectangle()
-                                .foregroundColor(.clear)
-                                .frame(width: UIScreen.main.bounds.width * 0.78, height: 44.99997)
-                                .background(Color(red: 0.24, green: 0.24, blue: 0.24))
-                                .cornerRadius(22.99999)
-                            
-                            Button(action: {
-                                let isWhitespace = commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-
-                                if !isWhitespace {
-                                    self.appCoordinator.isLoading = true
-                                    self.isButtonDisabled = true
-                                    
-                                    let comment: Comment = Comment(uId: self.currentUserViewModel.user.uId, nickname: self.currentUserViewModel.user.nickname, parentId: self.isWritingReply ? self.selectedComment.id ?? "" : "", mumoryId: self.mumory.id ?? "", date: Date(), content: self.commentText, isPublic: self.isPublic)
-                                    
-                                    self.currentUserViewModel.mumoryViewModel.createComment(documentId: self.mumory.id, comment: comment) { result in
-                                        switch result {
-                                        case .success(_):
-                                            print("SUCCESS createComment")
-                                            
-                                            Task {
-                                                if let comments = try? await FetchManager.shared.fetchCommentAndReply(DocumentID: mumory.id) {
-                                                    var tempComments: [Comment] = []
-                                                    var tempReplies: [Comment] = []
-                                                    for comment in comments {
-                                                        if comment.parentId.isEmpty {
-                                                            tempComments.append(comment)
-                                                        } else {
-                                                            tempReplies.append(comment)
-                                                        }
-                                                    }
-                                                    self.comments = tempComments
-                                                    self.replies = tempReplies
-                                                    self.mumory.commentCount = comments.count
-                                                }
-                                            }
-                                        case .failure(let error):
-                                            print("ERROR createComment: \(error)")
-                                        }
-                                        
-                                        commentText = ""
-                                        isButtonDisabled = false
-                                        self.appCoordinator.isLoading = false
-                                    }
-                                }
-                                
-                                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                            }, label: {
-                                commentText.isEmpty ?
-                                SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                : SharedAsset.commentWriteOnButtonMumoryDetail.swiftUIImage
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                            })
-                            .disabled(isButtonDisabled || commentText.isEmpty)
-                            .padding(.trailing, 10)
-                        }
-                    )
-                    .foregroundColor(.white)
-                    .frame(width: UIScreen.main.bounds.width * 0.78)
-                    .focused($isTextFieldFocused)
-                    
-                    Spacer().frame(width: 20)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 72)
-                .overlay(
-                    Group {
-                        SharedAsset.commentInitialPopup.swiftUIImage
-                            .resizable()
-                            .frame(width: 246, height: 42)
-                            .offset(x: 10, y: -49)
-                            .opacity(UserDefaults.standard.value(forKey: "commentPopUp2") == nil ? 1 : 0)
-                            .onTapGesture {
-                                self.isPopUpShown = false
-                                UserDefaults.standard.set(Date(), forKey: "commentPopUp2")
-                            }
-                    }
-                        .opacity(self.isPopUpShown ? 1: 0)
-                    , alignment: .topLeading
-                )
-                .overlay(
-                    Rectangle()
-                        .fill(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.698))
-                        .frame(height: 1)
-                    , alignment: .top
-                )
-            }
-            .frame(height: self.isWritingReply ? 72 + 36 : 72)
-            .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+            BottomBar
+                .padding(.bottom, keyboardResponder.keyboardHeight == .zero ? .zero : keyboardResponder.keyboardHeight - self.getSafeAreaInsets().bottom)
+                .animation(Animation.easeInOut(duration: 0.2), value: keyboardResponder.keyboardHeight)
         } // VStack
-        .background(Color(red: 0.16, green: 0.16, blue: 0.16))
+        .background(ColorSet.darkGray)
         .onAppear {
             self.mumory.id = self.mumoryId
             
@@ -749,6 +603,158 @@ public struct MumoryCommentSheetView: View {
         .onTapGesture {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
+    }
+    
+    var BottomBar: some View {
+        VStack(spacing: 0) {
+            if self.isWritingReply {
+                HStack(spacing: 5) {
+                    Text(selectedComment.uId != currentUserViewModel.user.uId && !currentUserViewModel.friendViewModel.friends.contains(where: { $0.uId == selectedComment.uId }) ? StringManager.maskString(self.selectedCommentUser.nickname) : "\(self.selectedCommentUser.nickname)")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                        .foregroundColor(.white) +
+                    Text("님에게 답글 남기는 중")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                    
+                    Text("・")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 13))
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                        .frame(width: 4, alignment: .bottom)
+                    
+                    Button(action: {
+                        self.isWritingReply = false
+                        self.selectedComment = Comment()
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }, label: {
+                        Text("취소")
+                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 12))
+                            .foregroundColor(Color(red: 0.761, green: 0.761, blue: 0.761))
+                    })
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 36)
+                .background(Color(red: 0.09, green: 0.09, blue: 0.09))
+                .onAppear {
+                    Task {
+                        self.selectedCommentUser = await FetchManager.shared.fetchUser(uId: self.selectedComment.uId)
+                    }
+                }
+            }
+            
+            HStack(spacing: 0) {
+                Spacer().frame(width: 16)
+                
+                Image(uiImage: self.isPublic ? SharedAsset.commentUnlockButtonMumoryDetail.image : SharedAsset.commentLockButtonMumoryDetail.image)
+                    .resizable()
+                    .frame(width: 35, height: 39)
+                    .onTapGesture {
+                        self.isPublic.toggle()
+                    }
+                
+                Spacer().frame(width: 12)
+                
+                TextField("", text: $commentText,
+                          prompt: Text("댓글을 입력하세요.")
+                    .font(SharedFontFamily.Pretendard.regular.swiftUIFont(size: 15))
+                    .foregroundColor(Color(red: 0.47, green: 0.47, blue: 0.47))
+                )
+                .padding(.leading, 25)
+                .padding(.trailing, 50)
+                .background(
+                    ZStack(alignment: .trailing) {
+                        Rectangle()
+                            .foregroundColor(.clear)
+                            .frame(width: UIScreen.main.bounds.width * 0.78, height: 44.99997)
+                            .background(Color(red: 0.24, green: 0.24, blue: 0.24))
+                            .cornerRadius(22.99999)
+                        
+                        Button(action: {
+                            let isWhitespace = commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+                            if !isWhitespace {
+                                self.appCoordinator.isLoading = true
+                                self.isButtonDisabled = true
+                                
+                                let comment: Comment = Comment(uId: self.currentUserViewModel.user.uId, nickname: self.currentUserViewModel.user.nickname, parentId: self.isWritingReply ? self.selectedComment.id ?? "" : "", mumoryId: self.mumory.id ?? "", date: Date(), content: self.commentText, isPublic: self.isPublic)
+                                
+                                self.currentUserViewModel.mumoryViewModel.createComment(documentId: self.mumory.id, comment: comment) { result in
+                                    switch result {
+                                    case .success(_):
+                                        print("SUCCESS createComment")
+                                        
+                                        Task {
+                                            if let comments = try? await FetchManager.shared.fetchCommentAndReply(DocumentID: mumory.id) {
+                                                var tempComments: [Comment] = []
+                                                var tempReplies: [Comment] = []
+                                                for comment in comments {
+                                                    if comment.parentId.isEmpty {
+                                                        tempComments.append(comment)
+                                                    } else {
+                                                        tempReplies.append(comment)
+                                                    }
+                                                }
+                                                self.comments = tempComments
+                                                self.replies = tempReplies
+                                                self.mumory.commentCount = comments.count
+                                            }
+                                        }
+                                    case .failure(let error):
+                                        print("ERROR createComment: \(error)")
+                                    }
+                                    
+                                    commentText = ""
+                                    isButtonDisabled = false
+                                    self.appCoordinator.isLoading = false
+                                }
+                            }
+                            
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }, label: {
+                            commentText.isEmpty ?
+                            SharedAsset.commentWriteOffButtonMumoryDetail.swiftUIImage
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                            : SharedAsset.commentWriteOnButtonMumoryDetail.swiftUIImage
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                        })
+                        .disabled(isButtonDisabled || commentText.isEmpty)
+                        .padding(.trailing, 10)
+                    }
+                )
+                .foregroundColor(.white)
+                .frame(width: UIScreen.main.bounds.width * 0.78)
+                .focused($isTextFieldFocused)
+                
+                Spacer().frame(width: 20)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 72)
+            .overlay(
+                Group {
+                    SharedAsset.commentInitialPopup.swiftUIImage
+                        .resizable()
+                        .frame(width: 246, height: 42)
+                        .offset(x: 10, y: -49)
+                        .opacity(UserDefaults.standard.value(forKey: "commentPopUp2") == nil ? 1 : 0)
+                        .onTapGesture {
+                            self.isPopUpShown = false
+                            UserDefaults.standard.set(Date(), forKey: "commentPopUp2")
+                        }
+                }
+                    .opacity(self.isPopUpShown ? 1: 0)
+                , alignment: .topLeading
+            )
+            .overlay(
+                Rectangle()
+                    .fill(Color(red: 0.651, green: 0.651, blue: 0.651, opacity: 0.698))
+                    .frame(height: 1)
+                , alignment: .top
+            )
+        }
+        .frame(height: self.isWritingReply ? 72 + 36 : 72)
+        .background(Color(red: 0.09, green: 0.09, blue: 0.09))
     }
     
     func deleteCommentAction() {
@@ -823,8 +829,8 @@ public struct CommentSheetUIViewRepresentable: UIViewRepresentable {
         let hostingController = UIHostingController(rootView: MumoryCommentSheetView(mumoryId: self.mumoryId))
         hostingController.view.frame = newView.bounds
         hostingController.view.backgroundColor = .clear
-        
         newView.addSubview(hostingController.view)
+
         view.addSubview(newView)
         
         dimmingView.alpha = 0.5

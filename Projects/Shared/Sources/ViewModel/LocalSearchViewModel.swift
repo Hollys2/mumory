@@ -62,13 +62,13 @@ public class LocalSearchViewModel: NSObject, ObservableObject {
 
                 if let placemark = response.mapItems.first?.placemark {
 
-                    let coutry = placemark.country ?? ""
+                    let country = placemark.country ?? ""
                     let administrativeArea = placemark.administrativeArea ?? ""
                     let locationTitle = placemark.name ?? ""
                     let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
                     let coordinate = placemark.coordinate
                     
-                    completion(LocationModel(geoPoint: GeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude), locationTitle: locationTitle, locationSubtitle: locationSubtitle, country: coutry, administrativeArea: administrativeArea))
+                    completion(LocationModel(geoPoint: GeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude), locationTitle: locationTitle, locationSubtitle: locationSubtitle, country: country, administrativeArea: administrativeArea))
                 }
             } catch {
                 print("Error getting region:", error.localizedDescription)

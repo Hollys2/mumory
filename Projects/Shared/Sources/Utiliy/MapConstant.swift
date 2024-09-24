@@ -31,6 +31,33 @@ public struct MapManager {
             completion(locationModel)
         }
     }
+    
+    public static func getLocationModel2(location: CLLocation) async -> LocationModel? {
+        return await withCheckedContinuation { continuation in
+            let geocoder = CLGeocoder()
+            geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                guard let placemark = placemarks?.first, error == nil else {
+                    print("Error: ", error?.localizedDescription ?? "Unknown error")
+                    continuation.resume(returning: nil)  // 오류 발생 시 nil 반환
+                    return
+                }
+                
+                let locationTitle = placemark.name ?? ""
+                let locationSubtitle = (placemark.locality ?? "") + " " + (placemark.thoroughfare ?? "") + " " + (placemark.subThoroughfare ?? "")
+                
+                let locationModel = LocationModel(
+                    geoPoint: GeoPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude),
+                    locationTitle: locationTitle,
+                    locationSubtitle: locationSubtitle,
+                    country: placemark.country ?? "",
+                    administrativeArea: placemark.administrativeArea ?? ""
+                )
+                
+                continuation.resume(returning: locationModel)
+            }
+        }
+    }
+
 }
 
 

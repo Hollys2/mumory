@@ -15,6 +15,32 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift // @DocumentID
 
 
+public class OldMumory: NSObject, MKAnnotation, Identifiable, Codable {
+    
+    @DocumentID public var id: String?
+
+    public var uId: String
+    public var date: Date
+    public var songId: String
+    public var locationTitle: String
+    public var latitude: Double
+    public var longitude: Double
+    public var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: self.latitude, longitude: self.longitude)
+    }
+
+    @ExplicitNull public var tags: [String]?
+    @ExplicitNull public var content: String?
+    @ExplicitNull public var imageURLs: [String]?
+    
+    public var isPublic: Bool
+    
+    @ExplicitNull public var likes: [String]?
+    
+    public var commentCount: Int
+    public var myCommentCount: Int
+}
+
 public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     
     @DocumentID public var id: String?
@@ -54,6 +80,48 @@ public class Mumory: NSObject, MKAnnotation, Identifiable, Codable {
     public override convenience init() {
         self.init(uId: "UNKNOWN", date: Date(), song: SongModel(), location: LocationModel(), isPublic: false, tags: nil, imageURLs: nil, likes: nil, commentCount: 0)
     }
+    
+    public static func create(oldMumory: OldMumory) async -> Mumory? {
+        guard let song = await fetchSong(songID: oldMumory.songId) else {
+            print("Error fetching song")
+            return nil
+        }
+        
+        let songModel = SongModel(id: oldMumory.songId, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
+        
+        let location = CLLocation(latitude: oldMumory.latitude, longitude: oldMumory.longitude)
+        
+        if let locationModel = await MapManager.getLocationModel2(location: location) {
+            let newMumory = Mumory(
+                uId: oldMumory.uId,
+                date: oldMumory.date,
+                song: songModel,
+                location: locationModel,
+                isPublic: oldMumory.isPublic,
+                tags: oldMumory.tags,
+                content: oldMumory.content,
+                imageURLs: oldMumory.imageURLs,
+                likes: oldMumory.likes,
+                commentCount: oldMumory.commentCount
+            )
+            
+            return newMumory
+        }
+        
+        return nil
+    }
+}
+
+public func fetchSong(songID: String) async -> Song? {
+    let musicItemID = MusicItemID(rawValue: songID)
+    var request = MusicCatalogResourceRequest<Song>(matching: \.id, equalTo: musicItemID)
+    guard let response = try? await request.response() else {
+        return nil
+    }
+    guard let song = response.items.first else {
+        return nil
+    }
+    return song
 }
 
 public struct SongModel: Identifiable, Hashable, Codable {

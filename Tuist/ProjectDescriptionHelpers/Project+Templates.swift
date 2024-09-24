@@ -117,7 +117,8 @@ extension Project {
                     "CFBundleURLName" : "google",
                     "CFBundleURLSchemes" : ["com.googleusercontent.apps.1070391821667-amji34rll9iodc75j6adq918p50nkf6u"]
                 ]
-            ]
+            ],
+            "NSAppleMusicUsageDescription": "This app requires access to your Apple Music library to recommend songs."
         ]
         
         other.forEach { (key: String, value: InfoPlist.Value) in
