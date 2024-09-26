@@ -107,15 +107,16 @@ struct SearchMusicView: View {
             }
             .padding(.top, getSafeAreaInsets().top)
             
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
 
         }
         .ignoresSafeArea()
         .navigationBarBackButtonHidden()
         .background(.black)
         .onAppear(perform: {
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
         })
     }
 

@@ -125,7 +125,7 @@ struct KnownFriendPageView: View {
                         .frame(width: 30, height: 30)
                         .offset(x: (getUIScreenBounds().width - 40) / 2 - 14 - 12, y: -(129 / 2) + 14 + 12 )
                         .onTapGesture {
-                            self.isMapViewShown = true
+                            appCoordinator.isMumoryMapViewShown.0.toggle()
                         }
                 }
                 
@@ -133,7 +133,7 @@ struct KnownFriendPageView: View {
                 
                 FriendMumoryView(mumorys: $friendDataViewModel.mumoryViewModel.myMumorys)
                     .environmentObject(friendDataViewModel)
-                
+                                
                 Divider05()
                 
                 FriendPlaylistView()
@@ -146,7 +146,8 @@ struct KnownFriendPageView: View {
         }
         .scrollIndicators(.hidden)
         .fullScreenCover(isPresented: self.$appCoordinator.isMumoryMapViewShown.0) {
-            FriendMumoryMapView(mumorys: friendDataViewModel.mumoryViewModel.myMumorys, user: self.friend, isFriendPage: true)
+            FriendMumoryMapView(mumorys: [self.appCoordinator.isMumoryMapViewShown.1], user: self.appCoordinator.isMumoryMapViewShown.2, isFriendPage: true)
+
         }
         .onAppear {
             friendDataViewModel.isPlaylistLoading = true
@@ -162,6 +163,8 @@ struct KnownFriendPageView: View {
                             return
                         }
                         self.firstMumory = firstMumory
+                        appCoordinator.isMumoryMapViewShown.1 = firstMumory
+                        appCoordinator.isMumoryMapViewShown.2 = self.friend
                         
                         DispatchQueue.main.async {
                             friendDataViewModel.mumoryViewModel.myMumorys = friendMumorys

@@ -13,6 +13,7 @@ import Core
 import MapKit
 
 struct PlaylistView: View {
+    // MARK: - Propoerties
     @EnvironmentObject var currentUserViewModel: CurrentUserViewModel
     @EnvironmentObject var appCoordinator: AppCoordinator
     @EnvironmentObject var playerViewModel: PlayerViewModel
@@ -32,6 +33,7 @@ struct PlaylistView: View {
         self._playlist = playlist
     }
     
+    // MARK: - View
     var body: some View {
         ZStack(alignment: .top){
             ColorSet.background.ignoresSafeArea()
@@ -125,7 +127,7 @@ struct PlaylistView: View {
                                 
                                 EditButton()
                                     .onTapGesture {
-                                        playerViewModel.setLibraryPlayerVisibility(isShown: false)
+//                                        playerViewModel.setLibraryPlayerVisibility(isShown: false)
                                         self.selectedSongsForDelete.removeAll()
                                         setEditMode(isEditing: true)
                                         AnalyticsManager.shared.setSelectContentLog(title: "PlaylistViewEditButton")
@@ -247,29 +249,7 @@ struct PlaylistView: View {
                 
                 Spacer()
                 
-                if isEditing {
-                    Button(action: {
-                        setEditMode(isEditing: false)
-                        playerViewModel.setLibraryPlayerVisibility(isShown: true)
-                    }, label: {
-                        Text("완료")
-                            .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
-                            .foregroundStyle(Color.white)
-                            .frame(width: 45, height: 45)
-                            .shadow(color: Color.black.opacity(0.5), radius: 5)
-                            .padding(.trailing, 20)
-                    })
-                    
-                }else {
-                    SharedAsset.menuGradient.swiftUIImage
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .padding(.trailing, 20)
-                        .onTapGesture {
-                            UIView.setAnimationsEnabled(false)
-                            isBottomSheetPresent = true
-                        }
-                }
+   
                 
                 
             })
@@ -283,25 +263,18 @@ struct PlaylistView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 .opacity(isEditing ? 1 : 0)
             
-            //삭제버튼
-            DeleteSongButton(title: "삭제", isEnabled: selectedSongsForDelete.count > 0, deleteSongCount: selectedSongsForDelete.count) {
-                UIView.setAnimationsEnabled(false)
-                isSongDeletePopupPresent = true
-            }
-            .shadow(color: Color.black.opacity(0.25), radius: 10, y: 6)
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, getSafeAreaInsets().bottom - 10)
-            .opacity(isEditing ? 1 : 0)
+            DeleteButton
 
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
 
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
             UIView.setAnimationsEnabled(true)
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+            //playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 isLoading = true
                 await currentUserViewModel.playlistViewModel.fetchSongIds(playlistId: playlist.id)
@@ -342,6 +315,58 @@ struct PlaylistView: View {
         })
     }
 
+    var BackButton: some View {
+        SharedAsset.backGradient.swiftUIImage
+            .resizable()
+            .frame(width: 30, height: 30)
+            .padding(.leading, 20)
+            .opacity(isEditing ? 0 : 1)
+            .onTapGesture {
+                appCoordinator.rootPath.removeLast()
+            }
+    }
+    
+    var TrailingButton: some View {
+        Group {
+            if isEditing {
+                Button(action: {
+                    setEditMode(isEditing: false)
+                    //playerViewModel.setLibraryPlayerVisibility(isShown: true)
+                }, label: {
+                    Text("완료")
+                        .font(SharedFontFamily.Pretendard.medium.swiftUIFont(size: 16))
+                        .foregroundStyle(Color.white)
+                        .frame(width: 45, height: 45)
+                        .shadow(color: Color.black.opacity(0.5), radius: 5)
+                        .padding(.trailing, 20)
+                })
+                
+            }else {
+                SharedAsset.menuGradient.swiftUIImage
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .padding(.trailing, 20)
+                    .onTapGesture {
+                        UIView.setAnimationsEnabled(false)
+                        isBottomSheetPresent = true
+                    }
+            }
+        }
+    }
+    
+    /// 삭제 버튼(플레이리스트 편집 기능 - 노래 선택 후 삭제)
+    var DeleteButton: some View {
+        DeleteSongButton(title: "삭제", isEnabled: selectedSongsForDelete.count > 0, deleteSongCount: selectedSongsForDelete.count) {
+            UIView.setAnimationsEnabled(false)
+            isSongDeletePopupPresent = true
+        }
+        .shadow(color: Color.black.opacity(0.25), radius: 10, y: 6)
+        .frame(maxHeight: .infinity, alignment: .bottom)
+        .padding(.bottom, getSafeAreaInsets().bottom - 10)
+        .opacity(isEditing ? 1 : 0)
+    }
+    
+    // MARK: - Methods
     
     private func setEditMode(isEditing: Bool) {
         withAnimation {

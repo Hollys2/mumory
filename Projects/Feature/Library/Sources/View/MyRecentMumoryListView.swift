@@ -71,7 +71,7 @@ struct MyRecentMumoryListView: View {
                 
                 if songs.isEmpty && !isLoading {
                     InitialSettingView(title: "나의 뮤모리를 기록하고\n음악 리스트를 채워보세요!", buttonTitle: "뮤모리 기록하러 가기") {
-                        playerViewModel.setLibraryPlayerVisibility(isShown: false, moveToBottom: true)
+//                        playerViewModel.setLibraryPlayerVisibility(isShown: false, moveToBottom: true)
                         withAnimation(Animation.easeInOut(duration: 3)) {
                             appCoordinator.isCreateMumorySheetShown = true
                             appCoordinator.offsetY = CGFloat.zero
@@ -121,13 +121,14 @@ struct MyRecentMumoryListView: View {
                 .scrollIndicators(.hidden)
             })
             
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
         }
         .navigationBarBackButtonHidden()
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 self.isLoading = true
                 

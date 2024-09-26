@@ -141,8 +141,9 @@ struct RecommendationListView: View {
             .frame(height: 65)
             .padding(.top, getSafeAreaInsets().top)
             
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
 
   
         }
@@ -150,7 +151,7 @@ struct RecommendationListView: View {
         .ignoresSafeArea()
         .onAppear(perform: {
             getRecommendationSongIDs(genreID: self.genreID)
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
         .fullScreenCover(isPresented: $isBottomSheetPresent, content: {

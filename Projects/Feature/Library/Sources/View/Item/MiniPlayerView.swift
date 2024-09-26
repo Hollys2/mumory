@@ -109,7 +109,7 @@ public struct MiniPlayerView: View {
                 .frame(width: 20, height: 20)
                 .padding(.trailing, 20)
                 .onTapGesture {
-                    playerViewModel.setPlayerVisibilityByUser(isShown: false)
+//                    playerViewModel.setPlayerVisibilityByUser(isShown: false)
                 }
         })
         .frame(maxWidth: .infinity)
@@ -231,7 +231,7 @@ public struct MiniPlayerViewInLibrary: View {
                 .frame(width: 20, height: 20)
                 .padding(.trailing, 20)
                 .onTapGesture {
-                    playerViewModel.setPlayerVisibilityByUserWithoutAnimation(isShown: false)
+//                    playerViewModel.setPlayerVisibilityByUserWithoutAnimation(isShown: false)
                 }
         })
         .frame(maxWidth: .infinity)

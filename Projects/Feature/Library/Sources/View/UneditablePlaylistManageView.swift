@@ -52,7 +52,7 @@ struct UneditablePlaylistManageView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             itemSize = getUIScreenBounds().width * 0.21
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
         }
         .fullScreenCover(isPresented: $isPresentBottomSheet) {
             BottomSheetDarkGrayWrapper(isPresent: $isPresentBottomSheet) {

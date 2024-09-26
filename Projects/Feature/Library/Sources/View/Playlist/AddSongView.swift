@@ -101,7 +101,7 @@ struct AddSongView: View {
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
-            playerViewModel.setLibraryPlayerVisibility(isShown: false)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: false)
         })
 
 

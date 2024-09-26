@@ -25,8 +25,6 @@ public enum RepeatState {
     case one
 }
 public class PlayerViewModel: ObservableObject {
-
-    
     @Published public var isShownMiniPlayer: Bool = false
     @Published public var isShownMiniPlayerInLibrary: Bool = false
     @Published public var miniPlayerMoveToBottom: Bool = false
@@ -67,13 +65,14 @@ public class PlayerViewModel: ObservableObject {
         player.queue = [song]
         self.queue = [song]
         self.originQueue = [song]
-        if isPlayerShown {
-            self.setPlayerVisibilityByUser(isShown: isPlayerShown)
-        }
+//        if isPlayerShown {
+//            self.setPlayerVisibilityByUser(isShown: isPlayerShown)
+//        }
         self.shuffleState = .off
         self.setRepeatMode(mode: .off)
         self.setShuffleMode(mode: .off)
         self.queueTitle = ""
+        self.isPresentNowPlayingView = isPlayerShown
         Task {
             do {
                 try await player.play()
@@ -120,7 +119,7 @@ public class PlayerViewModel: ObservableObject {
         self.queue = songs
         self.originQueue = songs
         self.queueTitle = title
-        self.setPlayerVisibilityByUser(isShown: true)
+//        self.setPlayerVisibilityByUser(isShown: true)
         self.setRepeatMode(mode: .off)
         self.setShuffleMode(mode: .off)
         Task {
@@ -364,71 +363,71 @@ public class PlayerViewModel: ObservableObject {
         }
     }
 
-    public func setPlayerVisibilityByUser(isShown: Bool) {
-        withAnimation(.linear(duration: 0.2)) {
-            self.userWantsShown = isShown
-            self.isShownMiniPlayer = isShown
-            self.isShownMiniPlayerInLibrary = isShown
-        }
-    }
-    
-    public func setPlayerVisibilityByUser(isShown: Bool, moveToBottom: Bool) {
-        withAnimation(.linear(duration: 0.2)) {
-            self.miniPlayerMoveToBottom = moveToBottom
-            self.userWantsShown = isShown
-            self.isShownMiniPlayer = isShown
-            self.isShownMiniPlayerInLibrary = isShown
-        }
-    }
-    
-    public func setPlayerVisibilityByUserWithoutAnimation(isShown: Bool) {
-        self.userWantsShown = isShown
-        self.isShownMiniPlayer = isShown
-        self.isShownMiniPlayerInLibrary = isShown
-    }
-    
-    public func setPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
-        withAnimation(.linear(duration: 0.2)) {
-            self.miniPlayerMoveToBottom = moveToBottom
-            isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
-        }
-    }
-    
-    public func setPlayerVisibility(isShown: Bool) {
-        withAnimation(.linear(duration: 0.2)) {
-            isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
-        }
-    }
-    public func setPlayerVisibilityWithoutAnimation(isShown: Bool){
-        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
-    }
-    
-    public func setPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
-        self.miniPlayerMoveToBottom = moveToBottom
-        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
-    }
-    
-    public func setLibraryPlayerVisibility(isShown: Bool) {
-        withAnimation(.linear(duration: 0.2)) {
-            isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
-        }
-    }
-    
-    public func setLibraryPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
-        withAnimation(.linear(duration: 0.2)) {
-            self.miniPlayerMoveToBottom = moveToBottom
-            isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
-        }
-    }
-    
-    public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool){
-        isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
-    }
-    
-    public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
-        self.miniPlayerMoveToBottom = moveToBottom
-        isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
-    }
+//    public func setPlayerVisibilityByUser(isShown: Bool) {
+//        withAnimation(.linear(duration: 0.2)) {
+//            self.userWantsShown = isShown
+//            self.isShownMiniPlayer = isShown
+//            self.isShownMiniPlayerInLibrary = isShown
+//        }
+//    }
+//    
+//    public func setPlayerVisibilityByUser(isShown: Bool, moveToBottom: Bool) {
+//        withAnimation(.linear(duration: 0.2)) {
+//            self.miniPlayerMoveToBottom = moveToBottom
+//            self.userWantsShown = isShown
+//            self.isShownMiniPlayer = isShown
+//            self.isShownMiniPlayerInLibrary = isShown
+//        }
+//    }
+//    
+//    public func setPlayerVisibilityByUserWithoutAnimation(isShown: Bool) {
+//        self.userWantsShown = isShown
+//        self.isShownMiniPlayer = isShown
+//        self.isShownMiniPlayerInLibrary = isShown
+//    }
+//    
+//    public func setPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
+//        withAnimation(.linear(duration: 0.2)) {
+//            self.miniPlayerMoveToBottom = moveToBottom
+//            isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+//        }
+//    }
+//    
+//    public func setPlayerVisibility(isShown: Bool) {
+//        withAnimation(.linear(duration: 0.2)) {
+//            isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+//        }
+//    }
+//    public func setPlayerVisibilityWithoutAnimation(isShown: Bool){
+//        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+//    }
+//    
+//    public func setPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
+//        self.miniPlayerMoveToBottom = moveToBottom
+//        isShownMiniPlayer = isShown ? self.userWantsShown ? true : false : false
+//    }
+//    
+//    public func setLibraryPlayerVisibility(isShown: Bool) {
+//        withAnimation(.linear(duration: 0.2)) {
+//            isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+//        }
+//    }
+//    
+//    public func setLibraryPlayerVisibility(isShown: Bool, moveToBottom: Bool) {
+//        withAnimation(.linear(duration: 0.2)) {
+//            self.miniPlayerMoveToBottom = moveToBottom
+//            isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+//        }
+//    }
+//    
+//    public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool){
+//        isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+//    }
+//    
+//    public func setLibraryPlayerVisibilityWithoutAnimation(isShown: Bool, moveToBottom: Bool){
+//        self.miniPlayerMoveToBottom = moveToBottom
+//        isShownMiniPlayerInLibrary = isShown ? self.userWantsShown ? true : false : false
+//    }
     
     public func fetchFavoriteSongId() {
         Task {

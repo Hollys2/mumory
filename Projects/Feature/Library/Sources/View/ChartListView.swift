@@ -113,8 +113,9 @@ struct ChartListView: View {
                 })
             })
             
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
 
             
         }
@@ -122,7 +123,7 @@ struct ChartListView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             requestChart(index: 0)
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             AnalyticsManager.shared.setScreenLog(screenTitle: "RecommendationListView")
         })
     }

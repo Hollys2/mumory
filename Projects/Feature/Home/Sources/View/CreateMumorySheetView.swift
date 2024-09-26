@@ -241,7 +241,7 @@ public struct CreateMumorySheetView: View {
                                                     print("SUCCESS createMumory")
                                                     
                                                     self.generateHapticFeedback(style: .medium)
-                                                    self.playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+//                                                    self.playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                                     
                                                 case .failure(let error):
                                                     print("FAILURE createMumory: \(error.localizedDescription)")

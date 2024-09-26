@@ -135,7 +135,7 @@ struct SongBottomSheetView: View {
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 appCoordinator.draftMumorySong = song
-                                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+//                                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero
@@ -503,7 +503,7 @@ struct SongBottomSheetViewWithoutPlaying: View {
                         .onTapGesture {
                             dismiss()
                             playerViewModel.isPresentNowPlayingView = false
-                            playerViewModel.setLibraryPlayerVisibility(isShown: false)
+//                            playerViewModel.setLibraryPlayerVisibility(isShown: false)
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 appCoordinator.draftMumorySong = song
@@ -880,7 +880,7 @@ struct SongBottomSheetViewInUneditablePlaylist: View {
                             Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { timer in
                                 let song = SongModel(id: song.id.rawValue, title: song.title, artist: song.artistName, artworkUrl: song.artwork?.url(width: 300, height: 300))
                                 appCoordinator.draftMumorySong = song
-                                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+//                                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
                                 withAnimation(Animation.easeInOut(duration: 0.1)) {
                                     appCoordinator.isCreateMumorySheetShown = true
                                     appCoordinator.offsetY = CGFloat.zero

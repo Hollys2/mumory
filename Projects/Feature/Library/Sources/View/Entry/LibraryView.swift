@@ -174,12 +174,12 @@ struct LibraryView: View {
                     self.showAlertToRedirectToSettings()
                 }
             } else {
-                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
+//                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false)
                 if !appCoordinator.isCreateMumorySheetShown {
                     if playerViewModel.isShownMiniPlayerInLibrary {
-                        playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
+//                        playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: false)
                     } else {
-                        playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+//                        playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
                     }
                 }
                 currentUserViewModel.playlistViewModel.savePlaylist()

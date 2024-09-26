@@ -148,15 +148,15 @@ struct SettingView: View {
             let auth = Firebase.auth
             guard let signOut = try? auth.signOut() else {return}
             Firebase.db.collection("User").document(currentUserViewModel.user.uId).updateData(["fcmToken": ""])
-            currentUserViewModel.removeAllData()
+            currentUserViewModel.removeAllData()            
+            appCoordinator.isLoginViewShown = true
+            appCoordinator.isHomeViewShown = false
             appCoordinator.isMyPageViewShown = false
             appCoordinator.isCreateMumorySheetShown = false
             appCoordinator.selectedTab = .home
             for key in UserDefaults.standard.dictionaryRepresentation().keys {
                 UserDefaults.standard.removeObject(forKey: key.description)
             }
-            appCoordinator.isLoginViewShown = true
-            appCoordinator.isHomeViewShown = false
             appCoordinator.rootPath = NavigationPath()
             appCoordinator.authPath = []
             isLoading = false

@@ -52,12 +52,12 @@ struct HomeMapView: View {
         .onAppear {
             print("HomeMapView onAppear")
             playerViewModel.isPresentNowPlayingView = false
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false, moveToBottom: false)
-            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+//            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: false, moveToBottom: false)
+//            playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
         }
         .onDisappear {
             print("HomeMapView onDisappear")
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
+//            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
         }
     }
 }

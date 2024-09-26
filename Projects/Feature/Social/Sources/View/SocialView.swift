@@ -734,7 +734,7 @@ public struct SocialView: View {
         }
         .onAppear {
             print("FUCK SocialView")
-            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+//            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
             playerViewModel.isShownMiniPlayerInLibrary = false
         }
         .onDisappear {

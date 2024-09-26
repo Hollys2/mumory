@@ -73,7 +73,7 @@ public class AppCoordinator: ObservableObject {
     
     @Published public var rootPath: NavigationPath = NavigationPath()
     @Published public var authPath: [AuthPage] = []
-    @Published public var selectedTab: Tab = .social
+    @Published public var selectedTab: Tab = .home
     
     @Published public var createdMumoryRegion: MKCoordinateRegion?
     

@@ -105,7 +105,7 @@ struct SaveToPlaylistView: View {
         .navigationBarBackButtonHidden()
         .onAppear(perform: {
             getUserPlaylist()
-            playerViewModel.setLibraryPlayerVisibility(isShown: false)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: false)
         })
 
     }

@@ -184,7 +184,7 @@ struct ShazamView: View {
                                 .font(SharedFontFamily.Pretendard.semiBold.swiftUIFont(size: 14))
                                 .foregroundStyle(Color.white)
                                 .onTapGesture {
-                                    playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown)
+//                                    playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown)
                                     isEditing = false
                                 }
                             
@@ -194,7 +194,7 @@ struct ShazamView: View {
                                 .foregroundStyle(ColorSet.subGray)
                                 .onTapGesture {
                                     selectedShazamHistory.removeAll()
-                                    playerViewModel.setLibraryPlayerVisibility(isShown: false)
+//                                    playerViewModel.setLibraryPlayerVisibility(isShown: false)
                                     isEditing = true
                                 }
                         }

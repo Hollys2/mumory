@@ -182,7 +182,7 @@ struct UneditablePlaylistView: View {
             .background(TransparentBackground())
         })
         .onAppear {
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             if playlist.songs.count < playlist.songIDs.count {
                 Task {
                     friendDataViewModel.isPlaylistLoading = true

@@ -141,14 +141,15 @@ struct ArtistView: View {
                 .background(TransparentBackground())
             })
             
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
 
         }
         .navigationBarBackButtonHidden()
         .ignoresSafeArea()
         .onAppear(perform: {
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             if songs.isEmpty {
                 Task {
                     self.isLoading = true

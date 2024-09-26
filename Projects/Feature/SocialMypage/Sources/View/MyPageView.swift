@@ -75,7 +75,7 @@ public struct MyPageView: View {
                     appCoordinator.isMyPageViewShown.toggle()
                     if appCoordinator.selectedTab == .social {
                         Timer.scheduledTimer(withTimeInterval: 0.15, repeats: false) { timer in
-                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
+//                            playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true)
                         }
                     }
                 }else {
@@ -285,7 +285,7 @@ struct MyMumory: View {
                         withAnimation(Animation.easeInOut(duration: 0.1)) {
                             appCoordinator.isCreateMumorySheetShown = true
                             appCoordinator.offsetY = CGFloat.zero
-                            playerViewModel.setPlayerVisibility(isShown: false)
+//                            playerViewModel.setPlayerVisibility(isShown: false)
                         }
                     }
                 }

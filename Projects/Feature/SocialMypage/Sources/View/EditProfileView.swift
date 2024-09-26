@@ -42,9 +42,12 @@ struct EditProfileView: View {
                 })
             }
             .scrollIndicators(.hidden)
+        
+            if editProfileViewModel.isLoading {
+                LoadingAnimationView()
+            }
             
-//            LoadingAnimationView(isLoading: $editProfileViewModel.isLoading)
-//                .frame(maxHeight: .infinity, alignment: .center)
+  
         }
         .ignoresSafeArea()
         .onAppear(perform: {
@@ -505,6 +508,7 @@ enum ErrorStatus {
 }
 
 class EditProfileViewModel: ObservableObject {
+    // MARK: - Propoerties
     @Published var isLoading: Bool = false
     @Published var id: String = ""
     @Published var idStatus: ErrorStatus = .normal
@@ -540,6 +544,7 @@ class EditProfileViewModel: ObservableObject {
             }
         }
     }
+    
     @Published var profileURL: URL? {
         didSet {
             Task {
@@ -568,6 +573,7 @@ class EditProfileViewModel: ObservableObject {
     let db = FirebaseManager.shared.db
     let storage = FirebaseManager.shared.storage
     
+    // MARK: - Methods
     func isValid() -> Bool {
         if idStatus == .normal && nicknameStatus == .normal && bioStatus == .normal && backgroundStatus == .normal && profileStatus == .normal {
             return false

@@ -79,7 +79,7 @@ public struct MumoryDetailView: View {
         } // ZStack
         .onAppear {
             print("FUCK MumoryDetailView onAppear")
-            playerViewModel.setLibraryPlayerVisibility(isShown: false)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: false)
 
             Task {
                 self.isLoading = true

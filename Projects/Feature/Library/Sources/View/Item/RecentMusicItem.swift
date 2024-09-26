@@ -13,6 +13,7 @@ import MusicKit
 public struct RecentMusicItem: View {
     let songId: String
     @State var song: Song?
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     init(songId: String) {
         self.songId = songId
     }
@@ -54,6 +55,11 @@ public struct RecentMusicItem: View {
         .onAppear {
             Task {
                 self.song = await fetchSong(songID: self.songId)
+            }
+        }
+        .onTapGesture {
+            if let song = song {
+                playerViewModel.playNewSong(song: song)
             }
         }
         

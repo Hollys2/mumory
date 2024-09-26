@@ -197,7 +197,7 @@ struct ReportView: View {
         .onAppear(perform: {
             settingViewModel.uid = currentUserViewModel.user.uId
             Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { timer in
-                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
+//                playerViewModel.setLibraryPlayerVisibilityWithoutAnimation(isShown: false)
             }
         })
         .onTapGesture {

@@ -134,13 +134,14 @@ struct FavoriteListView: View {
                 }
         
             })
-//            CreateMumoryBottomSheetView(isSheetShown: $appCoordinator.isCreateMumorySheetShown)
-//                .ignoresSafeArea()
+            if self.appCoordinator.isCreateMumorySheetShown {
+                CreateMumorySheetUIViewRepresentable()
+            }
         }
         .navigationBarBackButtonHidden()
         .onAppear {
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
-            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: !appCoordinator.isCreateMumorySheetShown, moveToBottom: true)
             Task {
                 currentUserViewModel.playlistViewModel.playlistArray[0].songs = await currentUserViewModel.playlistViewModel.fetchPlaylistSongs(playlistId: "favorite")
                 self.isLoading = false

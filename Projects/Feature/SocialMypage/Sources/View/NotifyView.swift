@@ -93,7 +93,7 @@ struct NotifyView: View {
                 .padding(.top, getSafeAreaInsets().top)
             }
             .onAppear{
-                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
+//                playerViewModel.setPlayerVisibilityWithoutAnimation(isShown: true, moveToBottom: false)
                 playerViewModel.isShownMiniPlayerInLibrary = false
                 Task{
                     getNotification()

@@ -132,7 +132,7 @@ struct PlaylistManageView: View {
         .navigationBarBackButtonHidden()
         .onAppear {
             itemSize = getUIScreenBounds().width * 0.21
-            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
+//            playerViewModel.setLibraryPlayerVisibility(isShown: true, moveToBottom: true)
             UIRefreshControl.appearance().tintColor = UIColor(white: 0.47, alpha: 1)
             AnalyticsManager.shared.setScreenLog(screenTitle: "PlaylistManageView")
         }

@@ -74,6 +74,7 @@ struct CommentView: View {
                 .frame(width: 28, height: 28)
                 .mask { Circle() }
                 .onTapGesture {
+                    appCoordinator.isCommentSheetShown = (false, nil)
                     if commentUser.uId == currentUserViewModel.user.uId {
                         appCoordinator.rootPath.append(MumoryPage.myPage)
                     } else {
